@@ -20,11 +20,15 @@ const photos = (await getCollection('photos')).sort(
     <div class="gallery-grid">
       {photos.map((photo) => (
         <figure class="photo-item">
-          <div class="image-wrapper">
-            <img src={photo.data.image} alt={photo.data.alt} loading="lazy" />
-          </div>
+          <a href={`/photos/${photo.id}`} class="image-link">
+            <div class="image-wrapper">
+              <img src={photo.data.image} alt={photo.data.alt} loading="lazy" />
+            </div>
+          </a>
           <figcaption class="photo-caption">
-            <span class="photo-title">{photo.data.title}</span>
+            <a href={`/photos/${photo.id}`} class="photo-title-link">
+              <span class="photo-title">{photo.data.title}</span>
+            </a>
             {photo.data.description && (
               <p class="photo-note">{photo.data.description}</p>
             )}
@@ -59,6 +63,11 @@ const photos = (await getCollection('photos')).sort(
     padding: 0.75rem;
   }
 
+  .image-link {
+    display: block;
+    text-decoration: none;
+  }
+
   .image-wrapper {
     overflow: hidden;
     background-color: var(--bg-main);
@@ -68,10 +77,24 @@ const photos = (await getCollection('photos')).sort(
     width: 100%;
     height: auto;
     object-fit: cover;
+    transition: opacity 0.2s ease;
+  }
+
+  .image-wrapper img:hover {
+    opacity: 0.92;
   }
 
   .photo-caption {
     padding: 0.75rem 0.25rem 0.25rem 0.25rem;
+  }
+
+  .photo-title-link {
+    text-decoration: none;
+  }
+
+  .photo-title-link:hover .photo-title {
+    color: var(--yellow-warmer);
+    text-decoration: underline;
   }
 
   .photo-title {
