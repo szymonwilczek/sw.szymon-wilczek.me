@@ -419,118 +419,124 @@
   })();
 </script>
 
-<style>
-  .emacs-dialog {
-    position: fixed;
+<style is:global>
+  dialog.emacs-dialog {
+    position: fixed !important;
     top: 50% !important;
     left: 50% !important;
     transform: translate(-50%, -50%) !important;
     margin: 0 !important;
-    border: 1px solid var(--border);
-    background-color: var(--bg-dim);
-    color: var(--fg-main);
-    padding: 0;
-    border-radius: 2px;
-    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.85);
-    z-index: 3000;
+    border: 1px solid var(--border) !important;
+    background-color: var(--bg-dim) !important;
+    color: var(--fg-main) !important;
+    padding: 0 !important;
+    border-radius: 2px !important;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.85) !important;
+    z-index: 3000 !important;
     font-family: "Typus Mono 95", "Typus Mono", monospace !important;
   }
 
-  .emacs-dialog::backdrop {
-    background: rgba(15, 14, 6, 0.8);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
+  dialog.emacs-dialog::backdrop {
+    background: rgba(15, 14, 6, 0.8) !important;
+    backdrop-filter: blur(4px) !important;
+    -webkit-backdrop-filter: blur(4px) !important;
   }
 
   .minibuffer-dialog {
-    max-width: 680px;
-    width: calc(100vw - 2rem);
+    max-width: 680px !important;
+    width: calc(100vw - 2rem) !important;
   }
 
   .minibuffer-container {
-    display: flex;
-    flex-direction: column;
-    max-height: 80vh;
+    display: flex !important;
+    flex-direction: column !important;
+    max-height: 80vh !important;
     font-family: "Typus Mono 95", "Typus Mono", monospace !important;
   }
 
   .minibuffer-prompt-row {
-    display: flex;
-    align-items: center;
-    padding: 0.85rem 1.15rem;
-    border-bottom: 1px solid var(--border);
-    background-color: var(--bg-main);
-    gap: 0.75rem;
+    display: flex !important;
+    align-items: center !important;
+    padding: 0.85rem 1.15rem !important;
+    border-bottom: 1px solid var(--border) !important;
+    background-color: var(--bg-main) !important;
+    gap: 0.75rem !important;
   }
 
   .minibuffer-prompt {
     font-family: "Typus Mono 95", "Typus Mono", monospace !important;
-    font-weight: 700;
-    font-size: 1.1rem;
-    color: var(--fg-link);
-    user-select: none;
+    font-weight: 700 !important;
+    font-size: 1.1rem !important;
+    color: var(--fg-link) !important;
+    user-select: none !important;
   }
 
   .minibuffer-input {
-    flex: 1;
-    background: transparent;
-    border: none;
-    outline: none;
-    color: var(--fg-main);
+    flex: 1 !important;
+    background: transparent !important;
+    border: none !important;
+    outline: none !important;
+    color: var(--fg-main) !important;
     font-family: "Typus Mono 95", "Typus Mono", monospace !important;
-    font-size: 1rem;
+    font-size: 1rem !important;
   }
 
   .minibuffer-count {
     font-family: "Typus Mono 95", "Typus Mono", monospace !important;
-    font-size: 0.82rem;
-    color: var(--fg-dim);
-    user-select: none;
+    font-size: 0.82rem !important;
+    color: var(--fg-dim) !important;
+    user-select: none !important;
   }
 
-  .minibuffer-candidates {
-    list-style: none;
-    padding: 0.35rem 0;
-    margin: 0;
-    overflow-y: auto;
-    max-height: 380px;
+  ul.minibuffer-candidates {
+    list-style: none !important;
+    padding: 0.35rem 0 !important;
+    margin: 0 !important;
+    overflow-y: auto !important;
+    max-height: 380px !important;
     font-family: "Typus Mono 95", "Typus Mono", monospace !important;
   }
 
-  .minibuffer-candidates :global(.candidate-row) {
+  .minibuffer-candidates li.candidate-row {
     display: flex !important;
+    flex-direction: row !important;
     justify-content: space-between !important;
     align-items: center !important;
-    padding: 0.55rem 1.15rem !important;
+    padding: 0.6rem 1.15rem !important;
     font-family: "Typus Mono 95", "Typus Mono", monospace !important;
     font-size: 0.92rem !important;
     cursor: pointer !important;
     gap: 1.5rem !important;
     border-bottom: 1px solid rgba(120, 110, 100, 0.12) !important;
     transition: background-color 0.12s ease !important;
+    list-style: none !important;
+    margin: 0 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
 
-  .minibuffer-candidates :global(.candidate-row:hover),
-  .minibuffer-candidates :global(.candidate-row.is-selected) {
+  .minibuffer-candidates li.candidate-row:hover,
+  .minibuffer-candidates li.candidate-row.is-selected {
     background-color: var(--bg-active) !important;
   }
 
-  .minibuffer-candidates :global(.candidate-name) {
+  .minibuffer-candidates .candidate-name {
     color: var(--fg-link) !important;
     font-family: "Typus Mono 95", "Typus Mono", monospace !important;
     font-weight: 700 !important;
     white-space: nowrap !important;
     flex-shrink: 0 !important;
     min-width: 175px !important;
+    display: inline-block !important;
   }
 
-  .minibuffer-candidates :global(.candidate-row.is-selected .candidate-name) {
+  .minibuffer-candidates li.candidate-row.is-selected .candidate-name {
     color: var(--fg-link-hover) !important;
     text-decoration: underline !important;
     text-underline-offset: 3px !important;
   }
 
-  .minibuffer-candidates :global(.candidate-desc) {
+  .minibuffer-candidates .candidate-desc {
     color: var(--fg-dim) !important;
     font-family: "Typus Mono 95", "Typus Mono", monospace !important;
     font-size: 0.84rem !important;
@@ -540,109 +546,112 @@
     text-overflow: ellipsis !important;
     text-align: right !important;
     flex: 1 !important;
+    display: inline-block !important;
   }
 
-  .minibuffer-candidates :global(.candidate-empty) {
+  .minibuffer-candidates li.candidate-empty {
     padding: 1.5rem !important;
     font-family: "Typus Mono 95", "Typus Mono", monospace !important;
     font-size: 0.9rem !important;
     color: var(--fg-dim) !important;
     text-align: center !important;
     font-style: italic !important;
+    list-style: none !important;
+    margin: 0 !important;
   }
 
   .minibuffer-hints {
-    display: flex;
-    justify-content: space-between;
-    padding: 0.5rem 1.15rem;
-    border-top: 1px dashed var(--border);
+    display: flex !important;
+    justify-content: space-between !important;
+    padding: 0.5rem 1.15rem !important;
+    border-top: 1px dashed var(--border) !important;
     font-family: "Typus Mono 95", "Typus Mono", monospace !important;
-    font-size: 0.78rem;
-    color: var(--fg-dim);
-    background-color: var(--bg-main);
-    flex-wrap: wrap;
-    gap: 0.5rem;
+    font-size: 0.78rem !important;
+    color: var(--fg-dim) !important;
+    background-color: var(--bg-main) !important;
+    flex-wrap: wrap !important;
+    gap: 0.5rem !important;
   }
 
   .keybindings-dialog {
-    max-width: 600px;
-    width: calc(100vw - 2rem);
+    max-width: 600px !important;
+    width: calc(100vw - 2rem) !important;
     font-family: "Typus Mono 95", "Typus Mono", monospace !important;
   }
 
   .keybindings-card {
-    padding: 1.5rem;
+    padding: 1.5rem !important;
   }
 
   .keybindings-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.25rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid var(--border);
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    margin-bottom: 1.25rem !important;
+    padding-bottom: 0.5rem !important;
+    border-bottom: 1px solid var(--border) !important;
   }
 
   .keybindings-title {
-    margin: 0;
+    margin: 0 !important;
     font-family: "Typus Mono 95", "Typus Mono", monospace !important;
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--fg-link);
+    font-size: 1.1rem !important;
+    font-weight: 700 !important;
+    color: var(--fg-link) !important;
   }
 
   .keybindings-close-btn {
-    background: transparent;
-    border: none;
-    color: var(--fg-dim);
+    background: transparent !important;
+    border: none !important;
+    color: var(--fg-dim) !important;
     font-family: "Typus Mono 95", "Typus Mono", monospace !important;
-    font-size: 1.4rem;
-    cursor: pointer;
-    line-height: 1;
-    padding: 0 0.25rem;
+    font-size: 1.4rem !important;
+    cursor: pointer !important;
+    line-height: 1 !important;
+    padding: 0 0.25rem !important;
   }
 
   .keybindings-close-btn:hover {
-    color: var(--red-warmer);
+    color: var(--red-warmer) !important;
   }
 
   .keybindings-table-wrapper {
-    overflow-x: auto;
+    overflow-x: auto !important;
   }
 
   .keybindings-table {
-    width: 100%;
-    border-collapse: collapse;
+    width: 100% !important;
+    border-collapse: collapse !important;
     font-family: "Typus Mono 95", "Typus Mono", monospace !important;
-    font-size: 0.88rem;
+    font-size: 0.88rem !important;
   }
 
   .keybindings-table td {
-    padding: 0.5rem 0.6rem;
-    border-bottom: 1px solid var(--border);
-    vertical-align: middle;
+    padding: 0.5rem 0.6rem !important;
+    border-bottom: 1px solid var(--border) !important;
+    vertical-align: middle !important;
     font-family: "Typus Mono 95", "Typus Mono", monospace !important;
   }
 
   .keybindings-table td:first-child {
-    white-space: nowrap;
-    width: 140px;
+    white-space: nowrap !important;
+    width: 140px !important;
   }
 
   .keybindings-table td:last-child {
-    color: var(--fg-alt);
+    color: var(--fg-alt) !important;
   }
 
   kbd {
-    background-color: var(--bg-main);
-    border: 1px solid var(--border);
-    color: var(--fg-link);
+    background-color: var(--bg-main) !important;
+    border: 1px solid var(--border) !important;
+    color: var(--fg-link) !important;
     font-family: "Typus Mono 95", "Typus Mono", monospace !important;
-    font-size: 0.82em;
-    padding: 0.15em 0.45em;
-    border-radius: 2px;
-    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
-    display: inline-block;
-    margin-right: 0.2em;
+    font-size: 0.82em !important;
+    padding: 0.15em 0.45em !important;
+    border-radius: 2px !important;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2) !important;
+    display: inline-block !important;
+    margin-right: 0.2em !important;
   }
 </style>
