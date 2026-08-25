@@ -3,6 +3,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
 import FormattedDate from '../../components/FormattedDate.astro';
 import { renderContentEntry } from '../../utils/org';
+import { calculateReadingStats } from '../../utils/reading-time';
 
 export async function getStaticPaths() {
   const writings = await getCollection('writings');
@@ -15,6 +16,7 @@ export async function getStaticPaths() {
 const { post } = Astro.props;
 const { slug } = Astro.params;
 const { html, Content } = await renderContentEntry(post);
+const stats = calculateReadingStats(post.body);
 const rawLines = post.body ? post.body.split('\n').length : 0;
 ---
 
@@ -27,6 +29,7 @@ const rawLines = post.body ? post.body.split('\n').length : 0;
       <h1>{post.data.title}</h1>
       <div class="writing-meta">
         <span>Published: <FormattedDate date={post.data.pubDate} /></span>
+        <span>Reading Time: <code>{stats.text}</code></span>
         <span>Category: <code>{post.data.category}</code></span>
         {post.data.tags.length > 0 && (
           <span>Tags: <code class="tag-list">{post.data.tags.join(', ')}</code></span>
@@ -60,7 +63,7 @@ const rawLines = post.body ? post.body.split('\n').length : 0;
 
       <div id="raw-code-drawer" class="raw-code-drawer" style="display: none;">
         <div class="raw-drawer-header">
-          <span>Buffer: <code>{post.id}</code> ({rawLines} lines)</span>
+          <span>Buffer: <code>{post.id}</code> ({rawLines} lines &middot; {stats.words} words)</span>
           <button type="button" id="copy-raw-btn" class="raw-copy-btn">[ Copy buffer ]</button>
         </div>
         <pre class="raw-code-pre"><code>{post.body}</code></pre>
