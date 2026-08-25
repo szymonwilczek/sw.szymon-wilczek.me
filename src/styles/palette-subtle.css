@@ -1,0 +1,11 @@
+:root {
+  /* ef-autumn subtle tone backgrounds for diffs, quotes, and badges */
+  --bg-red-subtle: #651f2a;
+  --bg-green-subtle: #11422f;
+  --bg-yellow-subtle: #583020;
+  --bg-blue-subtle: #2f3069;
+  --bg-magenta-subtle: #542657;
+  --bg-cyan-subtle: #123e55;
+  --bg-added: #17360f;
+  --bg-removed: #4b120a;
+}
