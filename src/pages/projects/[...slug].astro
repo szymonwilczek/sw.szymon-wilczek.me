@@ -1,0 +1,72 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection, render } from 'astro:content';
+import FormattedDate from '../../components/FormattedDate.astro';
+
+export async function getStaticPaths() {
+  const projects = await getCollection('projects');
+  return projects.map((project) => ({
+    params: { slug: project.id },
+    props: { project },
+  }));
+}
+
+const { project } = Astro.props;
+const { Content } = await render(project);
+---
+
+<BaseLayout title={project.data.title} description={project.data.description}>
+  <article class="project-article">
+    <header class="project-header">
+      <div class="back-link">
+        <a href="/projects">&larr; All projects</a>
+      </div>
+      <h1>{project.data.title}</h1>
+      <div class="project-meta">
+        <span>Published: <FormattedDate date={project.data.pubDate} /></span>
+        {project.data.repo && (
+          <span>
+            Source Repository: <a href={project.data.repo} target="_blank" rel="noopener">{project.data.repo.replace(/^https?:\/\//, '')}</a>
+          </span>
+        )}
+        <span>Status: <code>{project.data.status}</code></span>
+      </div>
+    </header>
+
+    <div class="project-content">
+      <Content />
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .project-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .back-link {
+    font-family: "Typus Mono", "JetBrains Mono", monospace;
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+  }
+
+  .project-header h1 {
+    margin-top: 0.25rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .project-meta {
+    font-family: "Typus Mono", "JetBrains Mono", monospace;
+    font-size: 0.85rem;
+    color: var(--fg-dim);
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .project-content {
+    margin-top: 2rem;
+  }
+</style>
