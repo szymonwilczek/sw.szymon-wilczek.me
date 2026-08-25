@@ -1,0 +1,215 @@
+---
+interface Props {
+  ciphertext: string; // Base64 encoded AES-GCM ciphertext + tag
+  iv: string;         // Base64 encoded 12-byte IV
+  salt: string;       // Base64 encoded salt for PBKDF2
+  hint?: string;
+}
+
+const { ciphertext, iv, salt, hint } = Astro.props;
+---
+
+<div class="vault-container" data-ciphertext={ciphertext} data-iv={iv} data-salt={salt}>
+  <div class="vault-prompt">
+    <div class="vault-header">
+      <span class="vault-lock-symbol">&#x1F512;</span>
+      <span class="vault-title">ENCRYPTED DOCUMENT</span>
+    </div>
+    <p class="vault-message">
+      This resource is protected by client-side AES-256-GCM encryption.
+      {hint && <span class="vault-hint">Hint: {hint}</span>}
+    </p>
+
+    <form class="vault-form" onsubmit="return false;">
+      <div class="input-group">
+        <input 
+          type="password" 
+          class="vault-input" 
+          placeholder="Enter Passphrase..." 
+          autocomplete="off" 
+          required 
+        />
+        <button type="submit" class="vault-btn">[ Unlock ]</button>
+      </div>
+      <div class="vault-error" style="display: none;"></div>
+    </form>
+  </div>
+
+  <div class="vault-content" style="display: none;"></div>
+</div>
+
+<script>
+  function base64ToBuffer(b64: string): Uint8Array {
+    const bin = atob(b64);
+    const buf = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
+    return buf;
+  }
+
+  async function unlockVault(container: HTMLElement) {
+    const form = container.querySelector<HTMLFormElement>('.vault-form');
+    const input = container.querySelector<HTMLInputElement>('.vault-input');
+    const errorEl = container.querySelector<HTMLElement>('.vault-error');
+    const promptEl = container.querySelector<HTMLElement>('.vault-prompt');
+    const contentEl = container.querySelector<HTMLElement>('.vault-content');
+    const btn = container.querySelector<HTMLButtonElement>('.vault-btn');
+
+    if (!form || !input || !errorEl || !promptEl || !contentEl || !btn) return;
+
+    const passphrase = input.value;
+    if (!passphrase) return;
+
+    btn.disabled = true;
+    errorEl.style.display = 'none';
+
+    try {
+      const ciphertext = base64ToBuffer(container.dataset.ciphertext || '');
+      const iv = base64ToBuffer(container.dataset.iv || '');
+      const salt = base64ToBuffer(container.dataset.salt || '');
+
+      const enc = new TextEncoder();
+      const keyMaterial = await window.crypto.subtle.importKey(
+        'raw',
+        enc.encode(passphrase),
+        'PBKDF2',
+        false,
+        ['deriveKey']
+      );
+
+      const key = await window.crypto.subtle.deriveKey(
+        {
+          name: 'PBKDF2',
+          salt: salt,
+          iterations: 100000,
+          hash: 'SHA-256',
+        },
+        keyMaterial,
+        { name: 'AES-GCM', length: 256 },
+        false,
+        ['decrypt']
+      );
+
+      const decrypted = await window.crypto.subtle.decrypt(
+        { name: 'AES-GCM', iv: iv },
+        key,
+        ciphertext
+      );
+
+      const dec = new TextDecoder();
+      contentEl.innerHTML = dec.decode(decrypted);
+      promptEl.style.display = 'none';
+      contentEl.style.display = 'block';
+    } catch (e) {
+      errorEl.textContent = 'Decryption failed: Invalid passphrase.';
+      errorEl.style.display = 'block';
+      btn.disabled = false;
+      input.focus();
+    }
+  }
+
+  document.querySelectorAll<HTMLElement>('.vault-container').forEach((container) => {
+    const form = container.querySelector<HTMLFormElement>('.vault-form');
+    if (form) {
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        unlockVault(container);
+      });
+    }
+  });
+</script>
+
+<style>
+  .vault-container {
+    margin: 2rem 0;
+  }
+
+  .vault-prompt {
+    background-color: var(--bg-dim);
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+    max-width: 540px;
+  }
+
+  .vault-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: "Typus Mono", "JetBrains Mono", monospace;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--yellow-warmer);
+    margin-bottom: 0.5rem;
+  }
+
+  .vault-message {
+    font-size: 0.9rem;
+    color: var(--fg-main);
+    margin-bottom: 1.25rem;
+  }
+
+  .vault-hint {
+    display: block;
+    font-family: "Typus Mono", "JetBrains Mono", monospace;
+    font-size: 0.8rem;
+    color: var(--fg-dim);
+    margin-top: 0.35rem;
+  }
+
+  .input-group {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .vault-input {
+    flex: 1;
+    background-color: var(--bg-main);
+    border: 1px solid var(--border);
+    color: var(--fg-main);
+    padding: 0.5rem 0.75rem;
+    font-family: "Typus Mono", "JetBrains Mono", monospace;
+    font-size: 0.85rem;
+    border-radius: 2px;
+  }
+
+  .vault-input:focus {
+    outline: 1px solid var(--yellow-warmer);
+    border-color: var(--yellow-warmer);
+  }
+
+  .vault-btn {
+    background-color: var(--bg-alt);
+    border: 1px solid var(--border);
+    color: var(--yellow-warmer);
+    padding: 0.5rem 1rem;
+    font-family: "Typus Mono", "JetBrains Mono", monospace;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+  .vault-btn:hover:not(:disabled) {
+    background-color: var(--bg-active);
+    color: var(--cyan-cooler);
+  }
+
+  .vault-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .vault-error {
+    font-family: "Typus Mono", "JetBrains Mono", monospace;
+    font-size: 0.8rem;
+    color: var(--red-warmer);
+    margin-top: 0.75rem;
+  }
+
+  .vault-content {
+    background-color: var(--bg-dim);
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+    border-radius: 2px;
+  }
+</style>
