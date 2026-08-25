@@ -1,0 +1,142 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import FormattedDate from '../../components/FormattedDate.astro';
+
+const files = (await getCollection('files')).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
+);
+---
+
+<BaseLayout title="Files" description="Software distributions, tool packages, scripts, and documents with SHA-256 cryptographic verification.">
+  <article>
+    <h1>Files &amp; Archives</h1>
+
+    <p>
+      An open archive of standalone utilities, lab software packages, scripts,
+      and documentation. Each entry provides a cryptographic SHA-256 checksum
+      for provenance verification.
+    </p>
+
+    <div class="files-container">
+      {files.map((file) => (
+        <section class="file-card">
+          <header class="file-header">
+            <h2>{file.data.title}</h2>
+            <span class="file-date">
+              <FormattedDate date={file.data.date} />
+            </span>
+          </header>
+
+          <p class="file-desc">{file.data.description}</p>
+
+          <div class="file-details">
+            <div class="detail-row">
+              <span class="label">Filename:</span>
+              <code>{file.data.filename}</code>
+            </div>
+            <div class="detail-row">
+              <span class="label">Filesize:</span>
+              <span>{file.data.filesize}</span>
+            </div>
+            <div class="detail-row">
+              <span class="label">Category:</span>
+              <span>{file.data.category}</span>
+            </div>
+            <div class="detail-row sha-row">
+              <span class="label">SHA-256:</span>
+              <code class="sha-code">{file.data.sha256}</code>
+            </div>
+          </div>
+
+          {file.data.downloadUrl && (
+            <div class="download-action">
+              <a href={file.data.downloadUrl} download>&darr; Download Archive</a>
+            </div>
+          )}
+        </section>
+      ))}
+
+      {files.length === 0 && (
+        <p>No downloadable files indexed at this moment.</p>
+      )}
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .files-container {
+    margin-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+  }
+
+  .file-card {
+    border-left: 2px solid var(--border);
+    padding-left: 1.25rem;
+    transition: border-color 0.2s ease;
+  }
+
+  .file-card:hover {
+    border-left-color: var(--yellow-warmer);
+  }
+
+  .file-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .file-header h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .file-date {
+    font-family: "Typus Mono", "JetBrains Mono", monospace;
+    font-size: 0.85rem;
+    color: var(--fg-dim);
+  }
+
+  .file-desc {
+    margin: 0.5rem 0 1rem 0;
+  }
+
+  .file-details {
+    font-family: "Typus Mono", "JetBrains Mono", monospace;
+    font-size: 0.85rem;
+    background-color: var(--bg-dim);
+    border: 1px solid var(--border);
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .detail-row {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .label {
+    color: var(--fg-dim);
+    min-width: 80px;
+  }
+
+  .sha-code {
+    word-break: break-all;
+    font-size: 0.8em;
+  }
+
+  .download-action {
+    font-family: "Typus Mono", "JetBrains Mono", monospace;
+    font-size: 0.9rem;
+  }
+</style>
