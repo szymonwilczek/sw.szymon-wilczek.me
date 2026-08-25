@@ -401,6 +401,11 @@ const files = (await getCollection('files')).sort(
   }
 
   .unlock-dialog {
+    position: fixed;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    margin: 0 !important;
     border: 1px solid var(--border);
     background-color: var(--bg-dim);
     color: var(--fg-main);
@@ -408,12 +413,12 @@ const files = (await getCollection('files')).sort(
     max-width: 540px;
     width: calc(100vw - 2.5rem);
     border-radius: 2px;
-    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.75);
-    margin: auto;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.75);
+    z-index: 2000;
   }
 
   .unlock-dialog::backdrop {
-    background: rgba(15, 14, 6, 0.75);
+    background: rgba(15, 14, 6, 0.78);
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
   }
@@ -476,12 +481,10 @@ const files = (await getCollection('files')).sort(
   .modal-input-group {
     display: flex;
     gap: 0.6rem;
-    flex-wrap: wrap;
+    width: 100%;
   }
 
   .modal-input {
-    flex: 1;
-    min-width: 180px;
     background-color: var(--bg-main);
     border: 1px solid var(--border);
     color: var(--fg-main);
@@ -509,6 +512,9 @@ const files = (await getCollection('files')).sort(
     border-radius: 2px;
     transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
     white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .modal-submit-btn:hover:not(:disabled) {
@@ -520,6 +526,37 @@ const files = (await getCollection('files')).sort(
   .modal-submit-btn:disabled {
     opacity: 0.6;
     cursor: not-allowed;
+  }
+
+  /* Desktop layout */
+  @media (min-width: 40em) {
+    .modal-input-group {
+      flex-direction: row;
+      align-items: stretch;
+    }
+    .modal-input {
+      flex: 1;
+      min-width: 180px;
+    }
+    .modal-submit-btn {
+      flex-shrink: 0;
+    }
+  }
+
+  /* Mobile layout */
+  @media (max-width: 39.99em) {
+    .modal-input-group {
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .modal-input {
+      width: 100%;
+      min-width: 0;
+    }
+    .modal-submit-btn {
+      width: 100%;
+      padding: 0.6rem 1rem;
+    }
   }
 
   .modal-status-box {
