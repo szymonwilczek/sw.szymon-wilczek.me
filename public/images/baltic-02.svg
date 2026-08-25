@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800">
+  <defs>
+    <linearGradient id="bg2" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#111822"/>
+      <stop offset="70%" stop-color="#2a323d"/>
+      <stop offset="100%" stop-color="#1c1810"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="800" fill="url(#bg2)"/>
+  <!-- Lighthouse Tower Silhouette -->
+  <polygon points="560,700 580,260 620,260 640,700" fill="#0f0e06"/>
+  <rect x="575" y="220" width="50" height="40" fill="#cfbcad"/>
+  <polygon points="565,220 600,160 635,220" fill="#ef656a"/>
+  <!-- Light Beam -->
+  <polygon points="600,240 1200,120 1200,320" fill="#fff5ea" opacity="0.15"/>
+  <polygon points="600,240 0,160 0,360" fill="#fff5ea" opacity="0.12"/>
+  <text x="600" y="760" font-family="monospace" font-size="20" fill="#cfbcad" text-anchor="middle" letter-spacing="4">PLATE II: MARITIME BEACON SILHOUETTE</text>
+</svg>

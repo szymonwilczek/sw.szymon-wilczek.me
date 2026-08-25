@@ -1,0 +1,32 @@
+#+title: Baltic Sea Coastal Sequence
+#+description: A multi-plate photographic sequence documenting the dunes, maritime beacon, and stormy breakwaters along Hel Peninsula.
+#+date: 2026-03-28
+#+location: Hel Peninsula, Poland
+#+camera: Leica M6
+#+lens: Summicron 35mm f/2 & Elmarit 28mm f/2.8
+#+aperture: f/4.0
+#+shutterSpeed: 1/500s
+#+iso: ISO 400
+#+image: /images/baltic-01.svg
+#+alt: Morning Mist & Sand Dunes along the Baltic Sea
+
+* Field Journal
+
+A late-March sequence capturing the atmospheric transition between winter maritime storms
+and early spring light along the northern Baltic coastline.
+
+* Visual Sequence: The Coastal Trilogy
+
+#+caption: Plate I — Morning mist over coastal pine forest and white sand dunes.
+[[/images/baltic-01.svg]]
+
+#+caption: Plate II — Mechanical lighthouse beacon silhouetted against overcast maritime skies.
+[[/images/baltic-02.svg]]
+
+#+caption: Plate III — Granite breakwaters enduring heavy wave displacement during gale-force winds.
+[[/images/baltic-03.svg]]
+
+* Emulsion & Darkroom Notes
+
+All three plates were exposed on traditional silver gelatin emulsion (Kodak Tri-X 400)
+rated at box speed and developed in Rodinal 1:50 at 20°C for heightened acutance and pronounced grain structure.

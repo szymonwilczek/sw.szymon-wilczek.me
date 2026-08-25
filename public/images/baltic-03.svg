@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800">
+  <defs>
+    <linearGradient id="bg3" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#182026"/>
+      <stop offset="60%" stop-color="#2c3842"/>
+      <stop offset="100%" stop-color="#102028"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="800" fill="url(#bg3)"/>
+  <!-- Waves & Breakwater Blocks -->
+  <path d="M0,600 C300,550 500,680 800,590 C1000,530 1100,620 1200,580 L1200,800 L0,800 Z" fill="#22303a"/>
+  <polygon points="200,750 320,620 480,640 400,780" fill="#2c291e"/>
+  <polygon points="420,780 500,600 680,630 620,790" fill="#3f3a2c"/>
+  <polygon points="640,790 720,640 900,660 840,800" fill="#2c291e"/>
+  <text x="600" y="750" font-family="monospace" font-size="20" fill="#cfbcad" text-anchor="middle" letter-spacing="4">PLATE III: GRANITE BREAKWATER DISPLACEMENT</text>
+</svg>
