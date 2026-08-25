@@ -2,31 +2,54 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 
-<BaseLayout title="Credits" description="Formal attributions.">
+<BaseLayout title="Credits & Attributions" description="Attributions, open source credits, and acknowledgements.">
   <article>
-    <h1>Credits & Attributions</h1>
+    <h1>Credits & Acknowledgements</h1>
 
-    <p>
-      This website is built with a profound respect for open source craftsmanship,
-      classical hypertext, and deliberate aesthetic design. Below are formal
-      attributions for the foundational assets that shape this site.
-    </p>
+    <hr />
 
-    <h2>Color Palette & Design Ethos</h2>
-    <ul>
-      <li><strong>Author:</strong> Protesilaos Stavrou (<a href="https://protesilaos.com" target="_blank" rel="noopener">protesilaos.com</a>)</li>
-      <li><strong>Project:</strong> <code>ef-themes</code> for GNU Emacs (<a href="https://github.com/protesilaos/ef-themes" target="_blank" rel="noopener">github.com/protesilaos/ef-themes</a>)</li>
-      <li><strong>License:</strong> GNU General Public License v3.0 or later</li>
-    </ul>
+    <section>
+      <h2>Visual Palette: Ef Themes</h2>
+      <p>
+        The color system of this site is directly ported from <strong>ef-themes</strong>,
+        a collection of colorful and legible themes for GNU Emacs created by
+        <a href="https://protesilaos.com" target="_blank" rel="noopener">Protesilaos Stavrou</a>.
+      </p>
 
-    <h2>Typography</h2>
-    <ul>
-      <li>
-        <strong>Source Serif 4 / Newsreader</strong>
-      </li>
-      <li>
-        <strong>Typus Mono / JetBrains Mono</strong>
-      </li>
-    </ul>
+      <ul>
+        <li>
+          <strong><code>ef-autumn</code> (Dark Mode)</strong>
+        </li>
+        <li>
+          <strong><code>ef-arcadia</code> (Light Mode)</strong>
+        </li>
+        <li>
+          <strong><code>ef-day</code> (Alternate Light Preset)</strong>
+        </li>
+      </ul>
+
+      <p>
+        All hexadecimal color values in the CSS stylesheets are 100% faithful to the upstream
+        Lisp source definitions in <code>ef-autumn-theme.el</code>, <code>ef-arcadia-theme.el</code>,
+        and <code>ef-day-theme.el</code>, released under the GNU General Public License v3.0 or later.
+      </p>
+    </section>
+
+    <hr />
+
+    <section>
+      <h2>Typography</h2>
+      <ul>
+        <li>
+          <strong>Headings, Navigation & Monospace</strong> - <strong>Typus Mono 95</strong>,
+          a customized monospace typeface created by Szymon Wilczek (me, ;D)
+          (<a href="https://github.com/szymonwilczek/typus-fonts" target="_blank" rel="noopener">typus-fonts repository</a>).
+        </li>
+        <li>
+          <strong>Prose & Reading Body</strong> - <em>Source Serif 4</em> (SIL Open Font License)
+          paired with <em>Newsreader</em> and <em>Charter</em> for classical print aesthetics.
+        </li>
+      </ul>
+    </section>
   </article>
 </BaseLayout>
