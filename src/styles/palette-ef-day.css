@@ -1,3 +1,4 @@
+:root[data-theme="light"],
 :root[data-theme="day"] {
   --bg-main: #fff5ea;
   --bg-dim: #f2e9db;

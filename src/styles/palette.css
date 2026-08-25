@@ -5,61 +5,61 @@
 @media (prefers-color-scheme: light) {
   :root[data-theme="auto"],
   :root:not([data-theme]) {
-    --bg-main: #d6e4d3;
-    --bg-dim: #ced7c8;
-    --bg-alt: #c5c9c8;
-    --fg-main: #40314e;
-    --fg-dim: #646170;
-    --fg-alt: #3f5f5f;
-    --bg-active: #b0b7aa;
-    --bg-inactive: #bfc2b0;
-    --border: #959a9f;
-    --cursor: #495080;
+    --bg-main: #fff5ea;
+    --bg-dim: #f2e9db;
+    --bg-alt: #e9e0d8;
+    --fg-main: #584141;
+    --fg-dim: #63728f;
+    --fg-alt: #8f5f4a;
+    --bg-active: #c9c0b8;
+    --bg-inactive: #f0e6db;
+    --border: #c8bdb6;
+    --cursor: #cf1f00;
 
-    --fg-link: #503094;
-    --fg-link-hover: #006e50;
-    --fg-link-active: #206020;
-    --fg-link-visited: #775228;
-    --fg-button: #40314e;
-    --bg-button: #c5c9c8;
-    --bg-button-hover: #b0b7aa;
-    --fg-button-hover: #503094;
+    --fg-link: #3f6faf;
+    --fg-link-hover: #0f7b8f;
+    --fg-link-active: #007a0a;
+    --fg-link-visited: #5f7200;
+    --fg-button: #584141;
+    --bg-button: #e9e0d8;
+    --bg-button-hover: #c9c0b8;
+    --fg-button-hover: #0f7b8f;
 
-    --red: #882000;
-    --red-warmer: #9a1500;
-    --red-cooler: #800e38;
-    --red-faint: #702f1f;
+    --red: #ba2d2f;
+    --red-warmer: #ce3f00;
+    --red-cooler: #cf2f4f;
+    --red-faint: #b05350;
 
-    --green: #206020;
-    --green-warmer: #3f6d00;
-    --green-cooler: #006e50;
-    --green-faint: #125724;
+    --green: #007a0a;
+    --green-warmer: #5f7200;
+    --green-cooler: #0f7f5f;
+    --green-faint: #527545;
 
-    --yellow: #6b4500;
-    --yellow-warmer: #743f00;
-    --yellow-cooler: #775228;
-    --yellow-faint: #6a5937;
+    --yellow: #a45a22;
+    --yellow-warmer: #b75515;
+    --yellow-cooler: #aa4f30;
+    --yellow-faint: #9a625a;
 
-    --blue: #113384;
-    --blue-warmer: #3a40a0;
-    --blue-cooler: #0020b9;
-    --blue-faint: #302080;
+    --blue: #375cc6;
+    --blue-warmer: #5f5fdf;
+    --blue-cooler: #265fbf;
+    --blue-faint: #4a659f;
 
-    --magenta: #922e7f;
-    --magenta-warmer: #960f4f;
-    --magenta-cooler: #503094;
-    --magenta-faint: #72366f;
+    --magenta: #ca3e54;
+    --magenta-warmer: #cb2f80;
+    --magenta-cooler: #8448aa;
+    --magenta-faint: #a04450;
 
-    --cyan: #125a7f;
-    --cyan-warmer: #2a5090;
-    --cyan-cooler: #005070;
-    --cyan-faint: #304650;
+    --cyan: #3f60af;
+    --cyan-warmer: #3f6faf;
+    --cyan-cooler: #0f7b8f;
+    --cyan-faint: #4f6f8f;
 
-    --bg-red-subtle: #efcabf;
-    --bg-green-subtle: #c3e6a0;
-    --bg-yellow-subtle: #efe07f;
-    --bg-blue-subtle: #c7dbe8;
-    --bg-magenta-subtle: #e3d0e7;
-    --bg-cyan-subtle: #bfe0d0;
+    --bg-red-subtle: #ffc6bf;
+    --bg-green-subtle: #c4f2af;
+    --bg-yellow-subtle: #f0f07f;
+    --bg-blue-subtle: #ccdfff;
+    --bg-magenta-subtle: #fad3ff;
+    --bg-cyan-subtle: #bfefff;
   }
 }
