@@ -1,68 +1,56 @@
-.container {
-  max-width: 72ch;
-  margin: 0 auto;
-  padding: 2.5rem 1.5rem 4rem 1.5rem;
-}
-
-.site-header {
-  margin-bottom: 2.5rem;
-}
-
-.site-title {
-  font-family: "Typus Mono", "JetBrains Mono", "SF Mono", Menlo, Consolas, Monaco, monospace;
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--fg-main);
-  text-decoration: none;
-  display: block;
-  margin-bottom: 0.75rem;
-  letter-spacing: -0.02em;
-}
-
-.site-title:hover {
-  color: var(--yellow-warmer);
-  text-decoration: none;
-}
-
-.site-divider {
-  border: none;
-  border-top: 1px solid var(--border);
-  margin: 0.75rem 0 1rem 0;
-}
-
-.site-nav {
-  font-family: "Typus Mono", "JetBrains Mono", "SF Mono", Menlo, Consolas, Monaco, monospace;
-  font-size: 0.95rem;
+.site-layout {
+  min-height: 100vh;
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem 0.85rem;
-  line-height: 1.4;
+  flex-direction: column;
 }
 
-.site-nav a {
-  color: var(--yellow-warmer);
-  text-decoration: none;
-  padding: 0.1rem 0.2rem;
+@media (min-width: 64em) {
+  .site-layout {
+    flex-direction: row;
+  }
+
+  .content-wrapper {
+    margin-left: 250px;
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    justify-content: flex-start;
+  }
+
+  .container,
+  #main-content {
+    max-width: 76ch;
+    width: 100%;
+    padding: 3.5rem 3rem 6rem 3.5rem;
+    margin: 0;
+  }
+
+  .mobile-footer {
+    display: none;
+  }
 }
 
-.site-nav a:hover {
-  color: var(--cyan-cooler);
-  text-decoration: underline;
-}
+@media (max-width: 63.99em) {
+  .content-wrapper {
+    width: 100%;
+  }
 
-.site-nav a.active {
-  color: var(--green-warmer);
-  font-weight: 600;
-}
+  .container,
+  #main-content {
+    max-width: 100%;
+    padding: 2rem 1.25rem 4rem 1.25rem;
+  }
 
-main {
-  margin-bottom: 4rem;
+  .mobile-footer {
+    display: block;
+    padding: 0 1.25rem 2.5rem 1.25rem;
+  }
 }
 
 .site-footer {
   border-top: 1px solid var(--border);
   padding-top: 1.5rem;
-  font-family: "Typus Mono", "JetBrains Mono", "SF Mono", Menlo, Consolas, Monaco, monospace;
+  font-family: "Typus Mono 95", "Typus Mono", monospace;
   font-size: 0.85rem;
   color: var(--fg-dim);
   text-align: left;
