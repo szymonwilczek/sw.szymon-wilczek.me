@@ -1,0 +1,113 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import FormattedDate from '../../components/FormattedDate.astro';
+
+const projects = (await getCollection('projects')).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+);
+---
+
+<BaseLayout title="Projects" description="Bespoke software projects, editor extensions, and tools built out of engineering necessity.">
+  <article>
+    <h1>Projects</h1>
+
+    <p>
+      A curated collection of my personal software projects, editor extensions,
+      and configurations. Each project originated from a tangible workflow need,
+      an exploration of low-level mechanisms, or a desire to solve a concrete
+      problem from first principles. Also: They did not make to portfolio.
+    </p>
+
+    <div class="project-grid">
+      {projects.map((project) => (
+        <section class="project-card">
+          <header class="card-header">
+            <h2>
+              <a href={`/projects/${project.id}`}>{project.data.title}</a>
+            </h2>
+            <span class="project-date">
+              <FormattedDate date={project.data.pubDate} />
+            </span>
+          </header>
+
+          <p class="card-desc">{project.data.description}</p>
+
+          <div class="card-meta">
+            <span class="status-badge">status: {project.data.status}</span>
+            {project.data.tags.length > 0 && (
+              <span class="tags">
+                [{project.data.tags.join(', ')}]
+              </span>
+            )}
+          </div>
+        </section>
+      ))}
+
+      {projects.length === 0 && (
+        <p>No projects published at this time.</p>
+      )}
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .project-grid {
+    margin-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .project-card {
+    border-left: 2px solid var(--border);
+    padding-left: 1.25rem;
+    transition: border-color 0.2s ease;
+  }
+
+  .project-card:hover {
+    border-left-color: var(--yellow-warmer);
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .card-header h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .project-date {
+    font-family: "Typus Mono", "JetBrains Mono", monospace;
+    font-size: 0.85rem;
+    color: var(--fg-dim);
+  }
+
+  .card-desc {
+    margin: 0.5rem 0 0.75rem 0;
+  }
+
+  .card-meta {
+    font-family: "Typus Mono", "JetBrains Mono", monospace;
+    font-size: 0.8rem;
+    color: var(--fg-dim);
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .status-badge {
+    color: var(--green-warmer);
+  }
+
+  .tags {
+    color: var(--fg-alt);
+  }
+</style>
