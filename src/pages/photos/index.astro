@@ -1,0 +1,97 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import FormattedDate from '../../components/FormattedDate.astro';
+
+const photos = (await getCollection('photos')).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
+);
+---
+
+<BaseLayout title="Photos" description="Curated personal photography gallery capturing moments, architecture, and landscapes.">
+  <article>
+    <h1>Photography</h1>
+
+    <p>
+    A personal visual archive capturing moments of stillness of mine.
+    All photographs are presented without compression artifacts.
+    </p>
+
+    <div class="gallery-grid">
+      {photos.map((photo) => (
+        <figure class="photo-item">
+          <div class="image-wrapper">
+            <img src={photo.data.image} alt={photo.data.alt} loading="lazy" />
+          </div>
+          <figcaption class="photo-caption">
+            <span class="photo-title">{photo.data.title}</span>
+            {photo.data.description && (
+              <p class="photo-note">{photo.data.description}</p>
+            )}
+            <div class="photo-meta">
+              <span><FormattedDate date={photo.data.date} /></span>
+              {photo.data.location && <span>· {photo.data.location}</span>}
+              {photo.data.camera && <span>· {photo.data.camera}</span>}
+            </div>
+          </figcaption>
+        </figure>
+      ))}
+
+      {photos.length === 0 && (
+        <p>No photographs cataloged in this collection yet.</p>
+      )}
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .gallery-grid {
+    margin-top: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
+  }
+
+  .photo-item {
+    margin: 0;
+    border: 1px solid var(--border);
+    background-color: var(--bg-dim);
+    padding: 0.75rem;
+  }
+
+  .image-wrapper {
+    overflow: hidden;
+    background-color: var(--bg-main);
+  }
+
+  .image-wrapper img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+  }
+
+  .photo-caption {
+    padding: 0.75rem 0.25rem 0.25rem 0.25rem;
+  }
+
+  .photo-title {
+    font-family: "Typus Mono", "JetBrains Mono", monospace;
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--fg-main);
+    display: block;
+  }
+
+  .photo-note {
+    font-size: 0.95rem;
+    margin: 0.35rem 0;
+    color: var(--fg-main);
+  }
+
+  .photo-meta {
+    font-family: "Typus Mono", "JetBrains Mono", monospace;
+    font-size: 0.8rem;
+    color: var(--fg-dim);
+    margin-top: 0.35rem;
+  }
+</style>
