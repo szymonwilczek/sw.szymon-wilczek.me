@@ -6,12 +6,170 @@ import { visit } from "unist-util-visit";
 import { createHighlighter } from "shiki";
 import { render } from "astro:content";
 
+const efAutumnTheme = {
+  name: "ef-autumn",
+  type: "dark" as const,
+  colors: {
+    "editor.background": "#211c19",
+    "editor.foreground": "#cfbcad",
+  },
+  tokenColors: [
+    {
+      scope: ["comment", "punctuation.definition.comment"],
+      settings: { foreground: "#847a86", fontStyle: "italic" },
+    },
+    {
+      scope: ["string", "string.quoted", "punctuation.definition.string"],
+      settings: { foreground: "#70b400" },
+    },
+    {
+      scope: [
+        "constant.numeric",
+        "constant.language",
+        "constant.character",
+        "constant.other",
+        "variable.other.constant",
+      ],
+      settings: { foreground: "#6fafff" },
+    },
+    {
+      scope: [
+        "keyword",
+        "keyword.control",
+        "keyword.operator.word",
+        "keyword.other",
+        "storage",
+        "storage.type",
+      ],
+      settings: { foreground: "#d570af" },
+    },
+    {
+      scope: [
+        "entity.name.function",
+        "support.function",
+        "meta.function-call",
+        "variable.function",
+      ],
+      settings: { foreground: "#3f95f6" },
+    },
+    {
+      scope: [
+        "variable",
+        "variable.other",
+        "variable.parameter",
+        "support.variable",
+      ],
+      settings: { foreground: "#2dc4bf" },
+    },
+    {
+      scope: [
+        "entity.name.type",
+        "entity.name.class",
+        "support.type",
+        "support.class",
+      ],
+      settings: { foreground: "#df8f6f" },
+    },
+    {
+      scope: [
+        "keyword.operator",
+        "punctuation.separator",
+        "punctuation.terminator",
+      ],
+      settings: { foreground: "#baa792" },
+    },
+    {
+      scope: ["entity.name.tag", "meta.tag"],
+      settings: { foreground: "#ef656a" },
+    },
+  ],
+};
+
+const efDayTheme = {
+  name: "ef-day",
+  type: "light" as const,
+  colors: {
+    "editor.background": "#f2e9db",
+    "editor.foreground": "#584141",
+  },
+  tokenColors: [
+    {
+      scope: ["comment", "punctuation.definition.comment"],
+      settings: { foreground: "#8f5f4a", fontStyle: "italic" },
+    },
+    {
+      scope: ["string", "string.quoted", "punctuation.definition.string"],
+      settings: { foreground: "#007a0a" },
+    },
+    {
+      scope: [
+        "constant.numeric",
+        "constant.language",
+        "constant.character",
+        "constant.other",
+        "variable.other.constant",
+      ],
+      settings: { foreground: "#3f6faf" },
+    },
+    {
+      scope: [
+        "keyword",
+        "keyword.control",
+        "keyword.operator.word",
+        "keyword.other",
+        "storage",
+        "storage.type",
+      ],
+      settings: { foreground: "#ca3e54" },
+    },
+    {
+      scope: [
+        "entity.name.function",
+        "support.function",
+        "meta.function-call",
+        "variable.function",
+      ],
+      settings: { foreground: "#375cc6" },
+    },
+    {
+      scope: [
+        "variable",
+        "variable.other",
+        "variable.parameter",
+        "support.variable",
+      ],
+      settings: { foreground: "#0f7b8f" },
+    },
+    {
+      scope: [
+        "entity.name.type",
+        "entity.name.class",
+        "support.type",
+        "support.class",
+      ],
+      settings: { foreground: "#a45a22" },
+    },
+    {
+      scope: [
+        "keyword.operator",
+        "punctuation.separator",
+        "punctuation.terminator",
+      ],
+      settings: { foreground: "#63728f" },
+    },
+    {
+      scope: ["entity.name.tag", "meta.tag"],
+      settings: { foreground: "#ba2d2f" },
+    },
+  ],
+};
+
 let highlighterInstance: any = null;
 
 async function getHighlighter() {
   if (!highlighterInstance) {
     highlighterInstance = await createHighlighter({
-      themes: ["github-dark", "github-light"],
+      themes: [efAutumnTheme, efDayTheme],
       langs: [
         "elisp",
         "lisp",
@@ -85,8 +243,8 @@ function rehypeShikiHighlight(highlighter: any) {
               const hast = highlighter.codeToHast(codeText.trimEnd(), {
                 lang: loadedLangs.includes(lang) ? lang : "text",
                 themes: {
-                  dark: "github-dark",
-                  light: "github-light",
+                  dark: "ef-autumn",
+                  light: "ef-day",
                 },
               });
 

@@ -88,21 +88,14 @@ pre code, .shiki code {
 
 /* Syntax Highlighting theme adaptation */
 :root[data-theme="dark"] .shiki span,
-:root[data-theme="autumn"] .shiki span,
-:root:not([data-theme]) .shiki span {
-  color: var(--shiki-dark, inherit) !important;
+:root[data-theme="autumn"] .shiki span {
+  color: var(--shiki-dark, inherit);
 }
 
-:root[data-theme="light"] .shiki span,
-:root[data-theme="day"] .shiki span,
-:root[data-theme="arcadia"] .shiki span {
-  color: var(--shiki-light, var(--shiki-default, inherit)) !important;
-}
-
-@media (prefers-color-scheme: light) {
+@media (prefers-color-scheme: dark) {
   :root[data-theme="auto"] .shiki span,
   :root:not([data-theme]) .shiki span {
-    color: var(--shiki-light, var(--shiki-default, inherit)) !important;
+    color: var(--shiki-dark, inherit);
   }
 }
 
