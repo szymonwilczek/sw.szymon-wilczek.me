@@ -2,10 +2,19 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
 import FormattedDate from '../../components/FormattedDate.astro';
+import VaultUnlock from '../../components/VaultUnlock.astro';
+import SearchFilter from '../../components/SearchFilter.astro';
 
 const files = (await getCollection('files')).sort(
   (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
 );
+
+const testVault = {
+  ciphertext: "cbE84Hru6AbakD2XRL9TIXak8e1wMUEQqhfJwLjqaL1CI6usFjiInRPzbiVo3++g41euyPyii8BY7b5E2wdBQbZbwxQ7syFqCQac+uKKMTkqsIc8q7tC8KW1NhXFiBDmjTqwya1z1B1nmpd97wAN8ATpc1rXKXPserza7gA9YFGbbWY61vU2VxzYriO6Nxgyk6DarJqAooUNZ16eyBp1UQT1ralqLUaWWSPrFhOEz9zh9DasALQDop674ItPvoLVDwqATmNAYE5PWorBr4+HPQg58LZbWtgeJP//GUNUGsBMtxe1L580YxP5tp9n2/E3tZz9TT9tEYejdla7TCmGSl7TnYMgbXr2pVtMoSzq8WvvlnQtrgH09m0Wa6xYvgE9E3QU6H6TqIJzy2FjbaMMDqvRYpwAAnn8qjvWuvNJy5H7eWFVfWjKLVMpUGywzxRNlbuTQajju15bke0Cl9AeNVl+uQrAzeTi5qljabanefcBILa6WBc+f13cc7rCXFrMYSUJfysHQ5SAK0wSR4gE/y1yhBHf8sEL5S2KLNgi2qJ1cyYSfXwe/pkyOkH0kRXgv/XcSr1K",
+  iv: "C2bN89PbqWuS13Xq",
+  salt: "K/chkjw2yXvr8E64pslj6w==",
+  hint: "Default test passphrase is 'emacs2026'",
+};
 ---
 
 <BaseLayout title="Files" description="Software distributions, tool packages, scripts, and documents with SHA-256 cryptographic verification.">
@@ -18,9 +27,18 @@ const files = (await getCollection('files')).sort(
       for provenance verification.
     </p>
 
+    <SearchFilter
+      placeholder="Filter files by filename, category, or SHA-256..."
+      targetSelector=".file-card"
+      containerSelector=".files-container"
+    />
+
     <div class="files-container">
       {files.map((file) => (
-        <section class="file-card">
+        <section
+          class="file-card"
+          data-search={`${file.data.title} ${file.data.filename} ${file.data.category} ${file.data.description} ${file.data.sha256}`}
+        >
           <header class="file-header">
             <h2>{file.data.title}</h2>
             <span class="file-date">
@@ -61,12 +79,29 @@ const files = (await getCollection('files')).sort(
         <p>No downloadable files indexed at this moment.</p>
       )}
     </div>
+
+    <hr />
+
+    <section class="vault-section">
+      <h2>Confidential Archives</h2>
+      <p>
+        Documents encrypted at compile-time with AES-256-GCM. Decryption occurs purely
+        in browser memory via the Web Crypto API without transmission to any server.
+      </p>
+
+      <VaultUnlock
+        ciphertext={testVault.ciphertext}
+        iv={testVault.iv}
+        salt={testVault.salt}
+        hint={testVault.hint}
+      />
+    </section>
   </article>
 </BaseLayout>
 
 <style>
   .files-container {
-    margin-top: 2rem;
+    margin-top: 1.5rem;
     display: flex;
     flex-direction: column;
     gap: 2.5rem;
@@ -79,7 +114,7 @@ const files = (await getCollection('files')).sort(
   }
 
   .file-card:hover {
-    border-left-color: var(--yellow-warmer);
+    border-left-color: var(--fg-link);
   }
 
   .file-header {
@@ -92,14 +127,14 @@ const files = (await getCollection('files')).sort(
 
   .file-header h2 {
     margin: 0;
-    font-size: 1.25rem;
+    font-size: 1.35rem;
     border-bottom: none;
     padding-bottom: 0;
   }
 
   .file-date {
-    font-family: "Typus Mono", "JetBrains Mono", monospace;
-    font-size: 0.85rem;
+    font-family: "Typus Mono 95", "Typus Mono", monospace;
+    font-size: 0.88rem;
     color: var(--fg-dim);
   }
 
@@ -108,15 +143,15 @@ const files = (await getCollection('files')).sort(
   }
 
   .file-details {
-    font-family: "Typus Mono", "JetBrains Mono", monospace;
+    font-family: "Typus Mono 95", "Typus Mono", monospace;
     font-size: 0.85rem;
     background-color: var(--bg-dim);
     border: 1px solid var(--border);
-    padding: 0.75rem 1rem;
+    padding: 0.85rem 1rem;
     margin-bottom: 1rem;
     display: flex;
     flex-direction: column;
-    gap: 0.35rem;
+    gap: 0.4rem;
   }
 
   .detail-row {
@@ -127,16 +162,20 @@ const files = (await getCollection('files')).sort(
 
   .label {
     color: var(--fg-dim);
-    min-width: 80px;
+    min-width: 85px;
   }
 
   .sha-code {
     word-break: break-all;
-    font-size: 0.8em;
+    font-size: 0.82em;
   }
 
   .download-action {
-    font-family: "Typus Mono", "JetBrains Mono", monospace;
-    font-size: 0.9rem;
+    font-family: "Typus Mono 95", "Typus Mono", monospace;
+    font-size: 0.95rem;
+  }
+
+  .vault-section {
+    margin-top: 2.5rem;
   }
 </style>
