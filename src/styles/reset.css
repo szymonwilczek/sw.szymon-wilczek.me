@@ -25,3 +25,10 @@ img, picture, video, canvas, svg {
 input, button, textarea, select {
   font: inherit;
 }
+
+dialog {
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+}
