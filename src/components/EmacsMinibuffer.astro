@@ -9,7 +9,7 @@
         type="text"
         id="minibuffer-input"
         class="minibuffer-input"
-        placeholder="Type a command..."
+        placeholder="Type a command (view-writings, theme-cycle)..."
         autocomplete="off"
         spellcheck="false"
       />
@@ -21,7 +21,7 @@
     </ul>
 
     <footer class="minibuffer-hints">
-      <span><kbd>&uarr;</kbd><kbd>&darr;</kbd> / <kbd>C-p</kbd><kbd>C-n</kbd> navigate</span>
+      <span><kbd>&uarr;</kbd><kbd>&darr;</kbd> navigate</span>
       <span><kbd>Enter</kbd> execute</span>
       <span><kbd>Esc</kbd> / <kbd>C-g</kbd> quit</span>
     </footer>
@@ -31,7 +31,7 @@
 <dialog id="keybindings-modal" class="emacs-dialog keybindings-dialog">
   <div class="keybindings-card">
     <header class="keybindings-header">
-      <h3>[ Keybindings &amp; Navigation ]</h3>
+      <h3 class="keybindings-title">[ Keybindings &amp; Navigation ]</h3>
       <button type="button" id="close-keybindings-btn" class="keybindings-close-btn" aria-label="Close keybindings">&times;</button>
     </header>
 
@@ -318,13 +318,13 @@
       });
 
       input.addEventListener('keydown', function(e) {
-        if (e.key === 'ArrowDown' || (e.ctrlKey && (e.key === 'n' || e.key === 'j'))) {
+        if (e.key === 'ArrowDown') {
           e.preventDefault();
           if (filtered.length > 0) {
             selectedIndex = (selectedIndex + 1) % filtered.length;
             renderCandidates();
           }
-        } else if (e.key === 'ArrowUp' || (e.ctrlKey && (e.key === 'p' || e.key === 'k'))) {
+        } else if (e.key === 'ArrowUp') {
           e.preventDefault();
           if (filtered.length > 0) {
             selectedIndex = (selectedIndex - 1 + filtered.length) % filtered.length;
@@ -433,6 +433,7 @@
     border-radius: 2px;
     box-shadow: 0 24px 64px rgba(0, 0, 0, 0.85);
     z-index: 3000;
+    font-family: "Typus Mono 95", "Typus Mono", monospace !important;
   }
 
   .emacs-dialog::backdrop {
@@ -450,6 +451,7 @@
     display: flex;
     flex-direction: column;
     max-height: 80vh;
+    font-family: "Typus Mono 95", "Typus Mono", monospace !important;
   }
 
   .minibuffer-prompt-row {
@@ -462,7 +464,7 @@
   }
 
   .minibuffer-prompt {
-    font-family: "Typus Mono 95", "Typus Mono", monospace;
+    font-family: "Typus Mono 95", "Typus Mono", monospace !important;
     font-weight: 700;
     font-size: 1.1rem;
     color: var(--fg-link);
@@ -475,12 +477,12 @@
     border: none;
     outline: none;
     color: var(--fg-main);
-    font-family: "Typus Mono 95", "Typus Mono", monospace;
+    font-family: "Typus Mono 95", "Typus Mono", monospace !important;
     font-size: 1rem;
   }
 
   .minibuffer-count {
-    font-family: "Typus Mono 95", "Typus Mono", monospace;
+    font-family: "Typus Mono 95", "Typus Mono", monospace !important;
     font-size: 0.82rem;
     color: var(--fg-dim);
     user-select: none;
@@ -488,55 +490,65 @@
 
   .minibuffer-candidates {
     list-style: none;
-    padding: 0.4rem 0;
+    padding: 0.35rem 0;
     margin: 0;
     overflow-y: auto;
     max-height: 380px;
+    font-family: "Typus Mono 95", "Typus Mono", monospace !important;
   }
 
-  .candidate-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    padding: 0.45rem 1.15rem;
-    font-family: "Typus Mono 95", "Typus Mono", monospace;
-    font-size: 0.9rem;
-    cursor: pointer;
-    gap: 1.5rem;
-    transition: background-color 0.1s ease;
+  .minibuffer-candidates :global(.candidate-row) {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 0.55rem 1.15rem !important;
+    font-family: "Typus Mono 95", "Typus Mono", monospace !important;
+    font-size: 0.92rem !important;
+    cursor: pointer !important;
+    gap: 1.5rem !important;
+    border-bottom: 1px solid rgba(120, 110, 100, 0.12) !important;
+    transition: background-color 0.12s ease !important;
   }
 
-  .candidate-row:hover,
-  .candidate-row.is-selected {
-    background-color: var(--bg-active);
+  .minibuffer-candidates :global(.candidate-row:hover),
+  .minibuffer-candidates :global(.candidate-row.is-selected) {
+    background-color: var(--bg-active) !important;
   }
 
-  .candidate-row.is-selected .candidate-name {
-    color: var(--fg-link-hover);
-    font-weight: 700;
+  .minibuffer-candidates :global(.candidate-name) {
+    color: var(--fg-link) !important;
+    font-family: "Typus Mono 95", "Typus Mono", monospace !important;
+    font-weight: 700 !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+    min-width: 175px !important;
   }
 
-  .candidate-name {
-    color: var(--fg-main);
-    white-space: nowrap;
+  .minibuffer-candidates :global(.candidate-row.is-selected .candidate-name) {
+    color: var(--fg-link-hover) !important;
+    text-decoration: underline !important;
+    text-underline-offset: 3px !important;
   }
 
-  .candidate-desc {
-    color: var(--fg-dim);
-    font-size: 0.82rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    text-align: right;
+  .minibuffer-candidates :global(.candidate-desc) {
+    color: var(--fg-dim) !important;
+    font-family: "Typus Mono 95", "Typus Mono", monospace !important;
+    font-size: 0.84rem !important;
+    font-weight: 400 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    text-align: right !important;
+    flex: 1 !important;
   }
 
-  .candidate-empty {
-    padding: 1.5rem;
-    font-family: "Typus Mono 95", "Typus Mono", monospace;
-    font-size: 0.9rem;
-    color: var(--fg-dim);
-    text-align: center;
-    font-style: italic;
+  .minibuffer-candidates :global(.candidate-empty) {
+    padding: 1.5rem !important;
+    font-family: "Typus Mono 95", "Typus Mono", monospace !important;
+    font-size: 0.9rem !important;
+    color: var(--fg-dim) !important;
+    text-align: center !important;
+    font-style: italic !important;
   }
 
   .minibuffer-hints {
@@ -544,7 +556,7 @@
     justify-content: space-between;
     padding: 0.5rem 1.15rem;
     border-top: 1px dashed var(--border);
-    font-family: "Typus Mono 95", "Typus Mono", monospace;
+    font-family: "Typus Mono 95", "Typus Mono", monospace !important;
     font-size: 0.78rem;
     color: var(--fg-dim);
     background-color: var(--bg-main);
@@ -555,6 +567,7 @@
   .keybindings-dialog {
     max-width: 600px;
     width: calc(100vw - 2rem);
+    font-family: "Typus Mono 95", "Typus Mono", monospace !important;
   }
 
   .keybindings-card {
@@ -570,9 +583,9 @@
     border-bottom: 1px solid var(--border);
   }
 
-  .keybindings-header h3 {
+  .keybindings-title {
     margin: 0;
-    font-family: "Typus Mono 95", "Typus Mono", monospace;
+    font-family: "Typus Mono 95", "Typus Mono", monospace !important;
     font-size: 1.1rem;
     font-weight: 700;
     color: var(--fg-link);
@@ -582,7 +595,7 @@
     background: transparent;
     border: none;
     color: var(--fg-dim);
-    font-family: "Typus Mono 95", "Typus Mono", monospace;
+    font-family: "Typus Mono 95", "Typus Mono", monospace !important;
     font-size: 1.4rem;
     cursor: pointer;
     line-height: 1;
@@ -600,7 +613,7 @@
   .keybindings-table {
     width: 100%;
     border-collapse: collapse;
-    font-family: "Typus Mono 95", "Typus Mono", monospace;
+    font-family: "Typus Mono 95", "Typus Mono", monospace !important;
     font-size: 0.88rem;
   }
 
@@ -608,6 +621,7 @@
     padding: 0.5rem 0.6rem;
     border-bottom: 1px solid var(--border);
     vertical-align: middle;
+    font-family: "Typus Mono 95", "Typus Mono", monospace !important;
   }
 
   .keybindings-table td:first-child {
@@ -623,7 +637,7 @@
     background-color: var(--bg-main);
     border: 1px solid var(--border);
     color: var(--fg-link);
-    font-family: "Typus Mono 95", "Typus Mono", monospace;
+    font-family: "Typus Mono 95", "Typus Mono", monospace !important;
     font-size: 0.82em;
     padding: 0.15em 0.45em;
     border-radius: 2px;
