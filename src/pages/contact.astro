@@ -1,47 +1,274 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import fs from 'node:fs';
+import path from 'node:path';
+
+const gpgPath = path.join(process.cwd(), 'public', 'szymon-wilczek.asc');
+let asciiArmoredKey = '';
+try {
+  asciiArmoredKey = fs.readFileSync(gpgPath, 'utf-8');
+} catch (e) {
+  asciiArmoredKey = '-----BEGIN PGP PUBLIC KEY BLOCK-----\n...\n-----END PGP PUBLIC KEY BLOCK-----';
+}
+
+const keyId = 'B8E9 4407 1CB7 EB8A';
+const rawKeyId = 'B8E944071CB7EB8A';
+const fingerprint = '3EE5 3281 2DF0 F36A B7A1  F178 B8E9 4407 1CB7 EB8A';
 ---
 
 <BaseLayout title="Contact" description="Verified communication endpoints, email, and cryptographic GPG public key.">
   <article>
-    <h1>Contact</h1>
+    <h1>Contact &amp; Identity</h1>
 
     <p>
       The most reliable method of contacting me is via traditional electronic mail.
+      For sensitive correspondence, security disclosures, or cryptographic identity verification,
+      please encrypt your message with my PGP/GPG public key.
     </p>
 
     <h2>Electronic Mail</h2>
     <ul>
       <li>
-        <strong>Primary:</strong> <code>swilczek.lx@gmail.com</code>
+        <strong>Personal</strong>
+        <a href="mailto:swilczek.lx@gmail.com"><code>swilczek.lx@gmail.com</code></a>
       </li>
     </ul>
 
-    <h2>Cryptographic PGP / GPG Key</h2>
+    <h2>Cryptographic PGP / GPG Identity</h2>
     <p>
-      All correspondence requiring confidentiality or identity verification can be
-      encrypted using my public key:
+      All git commits and software releases are cryptographically signed with the key below.
     </p>
 
-    <div class="key-info">
-      <p><strong>Key ID:</strong> <code>B8E944071CB7EB8A</code></p>
-      <p><strong>Fingerprint:</strong></p>
-      <pre><code>PuUygS3w82q3ofF4uOlEBxy364o= / B8E9 4407 1CB7 EB8A</code></pre>
-    </div>
+    <section class="pgp-card">
+      <header class="pgp-card-header">
+        <span class="pgp-badge">&#x1F510; GPG Key ID: <code>{keyId}</code></span>
+        <span class="pgp-algo">RSA 4096-bit</span>
+      </header>
 
-    <p>
-      All git commits across my repositories are cryptographically signed with this key.
-    </p>
+      <div class="pgp-details">
+        <div class="pgp-row">
+          <span class="pgp-label">UID:</span>
+          <span class="pgp-val">Szymon Wilczek &lt;swilczek.lx@gmail.com&gt;</span>
+        </div>
+        <div class="pgp-row">
+          <span class="pgp-label">Key ID:</span>
+          <span class="pgp-val"><code>{rawKeyId}</code></span>
+        </div>
+        <div class="pgp-row">
+          <span class="pgp-label">Fingerprint:</span>
+          <code class="pgp-fingerprint">{fingerprint}</code>
+        </div>
+      </div>
 
-    <h2>Web Presence</h2>
+      <div class="pgp-actions">
+        <button type="button" id="copy-fingerprint-btn" class="pgp-btn" data-fingerprint={fingerprint}>
+          [ Copy Fingerprint ]
+        </button>
+        <a href="/szymon-wilczek.asc" download="szymon-wilczek.asc" class="pgp-btn">
+          [ Download .asc ]
+        </a>
+        <button type="button" id="toggle-armored-btn" class="pgp-btn">
+          [ View Public Key ]
+        </button>
+      </div>
+
+      <div id="armored-key-drawer" class="armored-drawer" style="display: none;">
+        <div class="armored-header">
+          <span>ASCII-Armored GPG Key</span>
+          <button type="button" id="copy-armored-btn" class="pgp-copy-inner-btn">[ Copy Public Key ]</button>
+        </div>
+        <pre class="armored-pre"><code>{asciiArmoredKey}</code></pre>
+      </div>
+    </section>
+
+    <h2>Web Presence &amp; Source Repositories</h2>
     <ul>
-      <li><strong>GitHub:</strong> <a href="https://github.com/szymonwilczek" target="_blank" rel="noopener">github.com/szymonwilczek</a></li>
+      <li>
+        <strong>GitHub:</strong>
+        <a href="https://github.com/szymonwilczek" target="_blank" rel="noopener">github.com/szymonwilczek</a>
+      </li>
     </ul>
   </article>
 </BaseLayout>
 
+<script is:inline>
+  (function () {
+    var copyFpBtn = document.getElementById('copy-fingerprint-btn');
+    var toggleArmoredBtn = document.getElementById('toggle-armored-btn');
+    var armoredDrawer = document.getElementById('armored-key-drawer');
+    var copyArmoredBtn = document.getElementById('copy-armored-btn');
+
+    if (copyFpBtn) {
+      copyFpBtn.addEventListener('click', function () {
+        var fp = copyFpBtn.dataset.fingerprint || '';
+        navigator.clipboard.writeText(fp).then(function () {
+          copyFpBtn.textContent = '[ Copied Fingerprint ]';
+          setTimeout(function () { copyFpBtn.textContent = '[ Copy Fingerprint ]'; }, 2000);
+        });
+      });
+    }
+
+    if (toggleArmoredBtn && armoredDrawer) {
+      toggleArmoredBtn.addEventListener('click', function () {
+        var isOpen = armoredDrawer.style.display !== 'none';
+        armoredDrawer.style.display = isOpen ? 'none' : 'block';
+        toggleArmoredBtn.textContent = isOpen ? '[ View Public Key ]' : '[ Hide Public Key ]';
+      });
+    }
+
+    if (copyArmoredBtn) {
+      copyArmoredBtn.addEventListener('click', function () {
+        var pre = document.querySelector('.armored-pre code');
+        if (pre) {
+          navigator.clipboard.writeText(pre.textContent || '').then(function () {
+            copyArmoredBtn.textContent = '[ Copied Key ]';
+            setTimeout(function () { copyArmoredBtn.textContent = '[ Copy Public Key ]'; }, 2000);
+          });
+        }
+      });
+    }
+  })();
+</script>
+
 <style>
-  .key-info {
-    margin: 1.5rem 0;
+  .pgp-card {
+    background-color: var(--bg-dim);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 1.25rem 1.5rem;
+    margin: 1.75rem 0 2.5rem 0;
+    font-family: "Typus Mono 95", "Typus Mono", monospace;
+  }
+
+  .pgp-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .pgp-badge {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--fg-link);
+  }
+
+  .pgp-algo {
+    font-size: 0.82rem;
+    color: var(--fg-dim);
+  }
+
+  .pgp-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    font-size: 0.88rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .pgp-row {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .pgp-label {
+    color: var(--fg-dim);
+    min-width: 95px;
+  }
+
+  .pgp-val {
+    color: var(--fg-main);
+  }
+
+  .pgp-fingerprint {
+    color: var(--fg-link-hover);
+    word-break: break-all;
+    font-size: 0.85em;
+    background: transparent;
+    border: none;
+    padding: 0;
+  }
+
+  .pgp-actions {
+    display: flex;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+  }
+
+  .pgp-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    background-color: var(--bg-button) !important;
+    border: 1px solid var(--border) !important;
+    color: var(--fg-button) !important;
+    font-family: "Typus Mono 95", "Typus Mono", monospace !important;
+    font-size: 0.84rem !important;
+    font-weight: 600 !important;
+    padding: 0.4rem 0.85rem !important;
+    cursor: pointer !important;
+    border-radius: 2px !important;
+    text-decoration: none !important;
+    line-height: 1.4 !important;
+    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease !important;
+  }
+
+  .pgp-btn:hover {
+    background-color: var(--bg-button-hover) !important;
+    color: var(--fg-button-hover) !important;
+    border-color: var(--fg-button-hover) !important;
+  }
+
+  .armored-drawer {
+    margin-top: 1.25rem;
+    border: 1px solid var(--border);
+    background-color: var(--bg-main);
+    border-radius: 2px;
+  }
+
+  .armored-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0.85rem;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.8rem;
+    color: var(--fg-dim);
+  }
+
+  .pgp-copy-inner-btn {
+    background-color: var(--bg-button) !important;
+    border: 1px solid var(--border) !important;
+    color: var(--fg-button) !important;
+    font-family: "Typus Mono 95", "Typus Mono", monospace !important;
+    font-size: 0.78rem !important;
+    font-weight: 600 !important;
+    padding: 0.2rem 0.55rem !important;
+    cursor: pointer !important;
+    border-radius: 2px !important;
+    transition: all 0.15s ease !important;
+  }
+
+  .pgp-copy-inner-btn:hover {
+    background-color: var(--bg-button-hover) !important;
+    color: var(--fg-button-hover) !important;
+    border-color: var(--fg-button-hover) !important;
+  }
+
+  .armored-pre {
+    margin: 0 !important;
+    padding: 1rem !important;
+    background: transparent !important;
+    border: none !important;
+    font-family: "Typus Mono 95", "Typus Mono", monospace !important;
+    font-size: 0.76rem !important;
+    line-height: 1.45;
+    overflow-x: auto;
+    max-height: 320px;
+    color: var(--fg-alt) !important;
   }
 </style>
