@@ -22,6 +22,12 @@ const currentYear = new Date().getFullYear();
     <hr class="sidebar-divider" />
     <Navigation currentPath={currentPath} />
 
+    <div class="sidebar-theme-controls">
+      <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle color theme">
+        [Theme: <span id="theme-label">Auto</span>]
+      </button>
+    </div>
+
     <footer class="sidebar-footer">
       <p>(C) {currentYear} Szymon Wilczek</p>
     </footer>
@@ -30,6 +36,46 @@ const currentYear = new Date().getFullYear();
 
 <script is:inline>
   (function () {
+    function setupThemeToggle() {
+      var btn = document.getElementById('theme-toggle');
+      var label = document.getElementById('theme-label');
+      if (!btn) return;
+
+      var themes = ['auto', 'dark', 'light'];
+
+      function getEffectiveTheme(theme) {
+        if (theme === 'auto') {
+          return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+        }
+        return theme;
+      }
+
+      function updateUI() {
+        var current = localStorage.getItem('theme') || 'auto';
+        if (label) {
+          label.textContent = current.charAt(0).toUpperCase() + current.slice(1);
+        }
+        document.documentElement.setAttribute('data-theme', current === 'auto' ? getEffectiveTheme('auto') : current);
+      }
+
+      btn.onclick = function (e) {
+        e.preventDefault();
+        var current = localStorage.getItem('theme') || 'auto';
+        var nextIdx = (themes.indexOf(current) + 1) % themes.length;
+        var nextTheme = themes[nextIdx];
+        localStorage.setItem('theme', nextTheme);
+        updateUI();
+      };
+
+      window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', function () {
+        if (!localStorage.getItem('theme') || localStorage.getItem('theme') === 'auto') {
+          updateUI();
+        }
+      });
+
+      updateUI();
+    }
+
     function setupDrawer() {
       var sidebar = document.getElementById('site-sidebar');
       var openBtn = document.getElementById('mobile-menu-toggle');
@@ -83,10 +129,15 @@ const currentYear = new Date().getFullYear();
       });
     }
 
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', setupDrawer);
-    } else {
+    function init() {
       setupDrawer();
+      setupThemeToggle();
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
     }
   })();
 </script>
@@ -159,7 +210,7 @@ const currentYear = new Date().getFullYear();
       border: 1px solid var(--border);
       color: var(--yellow-warmer);
       font-family: "Typus Mono 95", "Typus Mono", monospace;
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       font-weight: 600;
       padding: 0.35rem 0.65rem;
       cursor: pointer;
@@ -180,7 +231,7 @@ const currentYear = new Date().getFullYear();
 
   .site-title {
     font-family: "Typus Mono 95", "Typus Mono", monospace;
-    font-size: 1.55rem;
+    font-size: 1.35rem;
     font-weight: 700;
     color: var(--fg-main);
     text-decoration: none;
@@ -200,15 +251,39 @@ const currentYear = new Date().getFullYear();
   .sidebar-divider {
     border: none;
     border-top: 1px solid var(--border);
-    margin: 1.25rem 0;
+    margin: 1.15rem 0;
+  }
+
+  .sidebar-theme-controls {
+    margin-top: 1.25rem;
+    padding-top: 0.75rem;
+    border-top: 1px dashed var(--border);
+  }
+
+  .theme-toggle-btn {
+    background: transparent;
+    border: none;
+    padding: 0;
+    color: var(--yellow-warmer);
+    font-family: "Typus Mono 95", "Typus Mono", monospace;
+    font-size: 0.95rem;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: color 0.15s ease;
+  }
+
+  .theme-toggle-btn:hover {
+    color: var(--cyan-cooler);
+    text-decoration: underline;
   }
 
   .sidebar-footer {
     font-family: "Typus Mono 95", "Typus Mono", monospace;
-    font-size: 0.92rem;
+    font-size: 0.85rem;
     color: var(--fg-dim);
     line-height: 1.4;
-    padding-top: 1.25rem;
+    padding-top: 1rem;
   }
 
   .sidebar-footer p {
