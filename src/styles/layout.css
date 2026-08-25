@@ -1,5 +1,5 @@
 :root {
-  --sidebar-width: 275px;
+  --sidebar-width: 320px;
 }
 
 .site-layout {
@@ -18,22 +18,20 @@
     margin-left: var(--sidebar-width);
     flex: 1;
     min-width: 0;
-    display: flex;
-    justify-content: center;
-    padding: 0 2rem;
   }
 
   .container,
   #main-content {
-    max-width: 78ch;
+    max-width: 80ch;
     width: 100%;
-    padding: 4rem 1.5rem 6rem 1.5rem;
-    margin: 0 auto;
+    padding: 4.5rem 4rem 6rem 4.5rem;
+    margin: 0;
   }
 
   .mobile-header,
   .mobile-footer,
-  .drawer-backdrop {
+  .drawer-backdrop,
+  .drawer-close-btn {
     display: none !important;
   }
 }
@@ -41,18 +39,18 @@
 /* Mobile layout */
 @media (max-width: 63.99em) {
   body.menu-open {
-    overflow: hidden;
+    overflow: hidden !important;
   }
 
   .content-wrapper {
     width: 100%;
-    padding-top: 3.5rem;
+    padding-top: 3.75rem;
   }
 
   .container,
   #main-content {
     max-width: 100%;
-    padding: 2rem 1.25rem 4rem 1.25rem;
+    padding: 2.25rem 1.25rem 4rem 1.25rem;
   }
 
   .mobile-footer {
@@ -66,7 +64,7 @@
   top: 0;
   left: 0;
   right: 0;
-  height: 3.5rem;
+  height: 3.75rem;
   background-color: var(--bg-dim);
   border-bottom: 1px solid var(--border);
   display: flex;
@@ -85,29 +83,33 @@
 }
 
 .mobile-menu-btn {
-  background: transparent;
+  background: var(--bg-alt);
   border: 1px solid var(--border);
   color: var(--yellow-warmer);
   font-family: "Typus Mono 95", "Typus Mono", monospace;
-  font-size: 0.88rem;
-  padding: 0.25rem 0.6rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0.35rem 0.75rem;
   cursor: pointer;
   border-radius: 2px;
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
 
-.mobile-menu-btn:hover {
+.mobile-menu-btn:hover,
+.mobile-menu-btn:focus {
   color: var(--cyan-cooler);
-  background-color: var(--bg-alt);
+  background-color: var(--bg-active);
 }
 
 .drawer-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(15, 14, 6, 0.75);
-  backdrop-filter: blur(2px);
+  background: rgba(15, 14, 6, 0.8);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   z-index: 998;
   opacity: 0;
   pointer-events: none;
@@ -115,8 +117,8 @@
 }
 
 body.menu-open .drawer-backdrop {
-  opacity: 1;
-  pointer-events: auto;
+  opacity: 1 !important;
+  pointer-events: auto !important;
 }
 
 .site-footer {
