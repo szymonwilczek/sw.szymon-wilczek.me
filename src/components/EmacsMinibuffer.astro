@@ -1,0 +1,634 @@
+---
+---
+
+<dialog id="emacs-minibuffer" class="emacs-dialog minibuffer-dialog">
+  <div class="minibuffer-container">
+    <div class="minibuffer-prompt-row">
+      <span class="minibuffer-prompt">M-x</span>
+      <input
+        type="text"
+        id="minibuffer-input"
+        class="minibuffer-input"
+        placeholder="Type a command..."
+        autocomplete="off"
+        spellcheck="false"
+      />
+      <span id="minibuffer-count" class="minibuffer-count">0/0</span>
+    </div>
+
+    <ul id="minibuffer-candidates" class="minibuffer-candidates" role="listbox">
+      <!-- injected dynamically -->
+    </ul>
+
+    <footer class="minibuffer-hints">
+      <span><kbd>&uarr;</kbd><kbd>&darr;</kbd> / <kbd>C-p</kbd><kbd>C-n</kbd> navigate</span>
+      <span><kbd>Enter</kbd> execute</span>
+      <span><kbd>Esc</kbd> / <kbd>C-g</kbd> quit</span>
+    </footer>
+  </div>
+</dialog>
+
+<dialog id="keybindings-modal" class="emacs-dialog keybindings-dialog">
+  <div class="keybindings-card">
+    <header class="keybindings-header">
+      <h3>[ Keybindings &amp; Navigation ]</h3>
+      <button type="button" id="close-keybindings-btn" class="keybindings-close-btn" aria-label="Close keybindings">&times;</button>
+    </header>
+
+    <div class="keybindings-table-wrapper">
+      <table class="keybindings-table">
+        <tbody>
+          <tr>
+            <td><kbd>M-x</kbd> / <kbd>Alt+x</kbd></td>
+            <td>Open Emacs command runner</td>
+          </tr>
+          <tr>
+            <td><kbd>Shift + W</kbd></td>
+            <td>Jump to writings &amp; essays (<code>/writings</code>)</td>
+          </tr>
+          <tr>
+            <td><kbd>Shift + P</kbd></td>
+            <td>Jump to software projects (<code>/projects</code>)</td>
+          </tr>
+          <tr>
+            <td><kbd>Shift + F</kbd></td>
+            <td>Jump to files &amp; archives (<code>/files</code>)</td>
+          </tr>
+          <tr>
+            <td><kbd>Shift + T</kbd></td>
+            <td>Cycle color theme (<code>ef-autumn</code> / <code>ef-day</code>)</td>
+          </tr>
+          <tr>
+            <td><kbd>g</kbd> <kbd>g</kbd></td>
+            <td>Scroll smoothly to top of page</td>
+          </tr>
+          <tr>
+            <td><kbd>Shift + G</kbd></td>
+            <td>Scroll smoothly to bottom of page</td>
+          </tr>
+          <tr>
+            <td><kbd>?</kbd></td>
+            <td>Toggle this keybindings help cheat sheet</td>
+          </tr>
+          <tr>
+            <td><kbd>Esc</kbd> / <kbd>C-g</kbd></td>
+            <td>Dismiss modal or close active menu</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</dialog>
+
+<script is:inline>
+  (function () {
+    var commands = [
+      {
+        id: 'view-writings',
+        name: 'view-writings',
+        desc: 'Jump to essays and manifestos (/writings)',
+        action: function () { window.location.href = '/writings'; }
+      },
+      {
+        id: 'view-projects',
+        name: 'view-projects',
+        desc: 'Jump to software projects (/projects)',
+        action: function () { window.location.href = '/projects'; }
+      },
+      {
+        id: 'view-photos',
+        name: 'view-photos',
+        desc: 'Jump to photography gallery (/photos)',
+        action: function () { window.location.href = '/photos'; }
+      },
+      {
+        id: 'view-files',
+        name: 'view-files',
+        desc: 'Jump to files and archives (/files)',
+        action: function () { window.location.href = '/files'; }
+      },
+      {
+        id: 'view-about',
+        name: 'view-about',
+        desc: 'Jump to personal about page (/about)',
+        action: function () { window.location.href = '/about'; }
+      },
+      {
+        id: 'view-contact',
+        name: 'view-contact',
+        desc: 'Jump to contact and PGP key (/contact)',
+        action: function () { window.location.href = '/contact'; }
+      },
+      {
+        id: 'view-credits',
+        name: 'view-credits',
+        desc: 'View typography & credits (/credits)',
+        action: function () { window.location.href = '/credits'; }
+      },
+      {
+        id: 'theme-cycle',
+        name: 'theme-cycle',
+        desc: 'Cycle between Auto, ef-autumn (Dark), and ef-day (Light)',
+        action: function () {
+          var btn = document.getElementById('theme-toggle');
+          if (btn) btn.click();
+        }
+      },
+      {
+        id: 'theme-set-dark',
+        name: 'theme-set-dark',
+        desc: 'Switch active theme to ef-autumn (Dark)',
+        action: function () {
+          localStorage.setItem('theme', 'dark');
+          document.documentElement.setAttribute('data-theme', 'dark');
+          var label = document.getElementById('theme-label');
+          if (label) label.textContent = 'Dark';
+        }
+      },
+      {
+        id: 'theme-set-light',
+        name: 'theme-set-light',
+        desc: 'Switch active theme to ef-day (Light)',
+        action: function () {
+          localStorage.setItem('theme', 'light');
+          document.documentElement.setAttribute('data-theme', 'light');
+          var label = document.getElementById('theme-label');
+          if (label) label.textContent = 'Light';
+        }
+      },
+      {
+        id: 'scroll-to-top',
+        name: 'scroll-to-top',
+        desc: 'Smooth scroll to the top of document (gg)',
+        action: function () { window.scrollTo({ top: 0, behavior: 'smooth' }); }
+      },
+      {
+        id: 'scroll-to-bottom',
+        name: 'scroll-to-bottom',
+        desc: 'Smooth scroll to the bottom of document (G)',
+        action: function () { window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }); }
+      },
+      {
+        id: 'describe-bindings',
+        name: 'describe-bindings',
+        desc: 'Display keybindings help cheat sheet (?)',
+        action: function () { openKeybindings(); }
+      }
+    ];
+
+    var minibuffer = document.getElementById('emacs-minibuffer');
+    var input = document.getElementById('minibuffer-input');
+    var countEl = document.getElementById('minibuffer-count');
+    var list = document.getElementById('minibuffer-candidates');
+    var keybindingsModal = document.getElementById('keybindings-modal');
+    var closeKeybindingsBtn = document.getElementById('close-keybindings-btn');
+
+    var selectedIndex = 0;
+    var filtered = [];
+    var lastGPress = 0;
+
+    function isInputActive() {
+      var el = document.activeElement;
+      if (!el) return false;
+      var tag = el.tagName.toLowerCase();
+      return tag === 'input' || tag === 'textarea' || tag === 'select' || el.isContentEditable;
+    }
+
+    function openMinibuffer() {
+      if (!minibuffer || !input) return;
+      input.value = '';
+      selectedIndex = 0;
+      renderCandidates();
+      if (typeof minibuffer.showModal === 'function') {
+        minibuffer.showModal();
+      } else {
+        minibuffer.setAttribute('open', '');
+      }
+      input.focus();
+    }
+
+    function closeMinibuffer() {
+      if (!minibuffer) return;
+      if (typeof minibuffer.close === 'function') {
+        minibuffer.close();
+      } else {
+        minibuffer.removeAttribute('open');
+      }
+    }
+
+    function openKeybindings() {
+      if (!keybindingsModal) return;
+      if (typeof keybindingsModal.showModal === 'function') {
+        keybindingsModal.showModal();
+      } else {
+        keybindingsModal.setAttribute('open', '');
+      }
+    }
+
+    function closeKeybindings() {
+      if (!keybindingsModal) return;
+      if (typeof keybindingsModal.close === 'function') {
+        keybindingsModal.close();
+      } else {
+        keybindingsModal.removeAttribute('open');
+      }
+    }
+
+    if (closeKeybindingsBtn) closeKeybindingsBtn.onclick = closeKeybindings;
+
+    if (keybindingsModal) {
+      keybindingsModal.addEventListener('click', function(e) {
+        if (e.target === keybindingsModal) closeKeybindings();
+      });
+    }
+
+    if (minibuffer) {
+      minibuffer.addEventListener('click', function(e) {
+        if (e.target === minibuffer) closeMinibuffer();
+      });
+    }
+
+    function renderCandidates() {
+      if (!list || !input) return;
+      var query = input.value.trim().toLowerCase();
+      var words = query.split(/\s+/).filter(Boolean);
+
+      filtered = commands.filter(function(cmd) {
+        if (words.length === 0) return true;
+        var target = (cmd.name + ' ' + cmd.desc).toLowerCase();
+        return words.every(function(w) { return target.indexOf(w) !== -1; });
+      });
+
+      if (selectedIndex >= filtered.length) selectedIndex = Math.max(0, filtered.length - 1);
+      if (countEl) countEl.textContent = filtered.length + '/' + commands.length;
+
+      list.innerHTML = '';
+
+      if (filtered.length === 0) {
+        var emptyLi = document.createElement('li');
+        emptyLi.className = 'candidate-empty';
+        emptyLi.textContent = '[No matching command]';
+        list.appendChild(emptyLi);
+        return;
+      }
+
+      filtered.forEach(function(cmd, idx) {
+        var li = document.createElement('li');
+        li.className = 'candidate-row' + (idx === selectedIndex ? ' is-selected' : '');
+        li.setAttribute('role', 'option');
+        li.setAttribute('aria-selected', idx === selectedIndex ? 'true' : 'false');
+
+        var nameSpan = document.createElement('span');
+        nameSpan.className = 'candidate-name';
+        nameSpan.textContent = cmd.name;
+
+        var descSpan = document.createElement('span');
+        descSpan.className = 'candidate-desc';
+        descSpan.textContent = cmd.desc;
+
+        li.appendChild(nameSpan);
+        li.appendChild(descSpan);
+
+        li.addEventListener('click', function() {
+          selectedIndex = idx;
+          executeSelected();
+        });
+
+        list.appendChild(li);
+      });
+
+      var selectedEl = list.children[selectedIndex];
+      if (selectedEl && typeof selectedEl.scrollIntoView === 'function') {
+        selectedEl.scrollIntoView({ block: 'nearest' });
+      }
+    }
+
+    function executeSelected() {
+      if (filtered.length > 0 && filtered[selectedIndex]) {
+        var action = filtered[selectedIndex].action;
+        closeMinibuffer();
+        if (typeof action === 'function') action();
+      }
+    }
+
+    if (input) {
+      input.addEventListener('input', function() {
+        selectedIndex = 0;
+        renderCandidates();
+      });
+
+      input.addEventListener('keydown', function(e) {
+        if (e.key === 'ArrowDown' || (e.ctrlKey && (e.key === 'n' || e.key === 'j'))) {
+          e.preventDefault();
+          if (filtered.length > 0) {
+            selectedIndex = (selectedIndex + 1) % filtered.length;
+            renderCandidates();
+          }
+        } else if (e.key === 'ArrowUp' || (e.ctrlKey && (e.key === 'p' || e.key === 'k'))) {
+          e.preventDefault();
+          if (filtered.length > 0) {
+            selectedIndex = (selectedIndex - 1 + filtered.length) % filtered.length;
+            renderCandidates();
+          }
+        } else if (e.key === 'Enter') {
+          e.preventDefault();
+          executeSelected();
+        } else if (e.key === 'Escape' || (e.ctrlKey && e.key === 'g')) {
+          e.preventDefault();
+          closeMinibuffer();
+        }
+      });
+    }
+
+    document.addEventListener('keydown', function (e) {
+      // M-x / Alt+x trigger
+      if (e.altKey && (e.key === 'x' || e.key === 'X' || e.code === 'KeyX')) {
+        e.preventDefault();
+        openMinibuffer();
+        return;
+      }
+
+      // Dismissing overlays
+      if (e.key === 'Escape' || (e.ctrlKey && e.key === 'g')) {
+        if (minibuffer && minibuffer.open) { closeMinibuffer(); return; }
+        if (keybindingsModal && keybindingsModal.open) { closeKeybindings(); return; }
+      }
+
+      // DO NOT trigger single-key navigation in inputs!!!!
+      if (isInputActive()) return;
+
+      // Keybindings cheat sheet
+      if (e.key === '?' && !e.ctrlKey && !e.altKey && !e.metaKey) {
+        e.preventDefault();
+        if (keybindingsModal && keybindingsModal.open) {
+          closeKeybindings();
+        } else {
+          openKeybindings();
+        }
+        return;
+      }
+
+      // Writings
+      if (e.shiftKey && (e.key === 'W' || e.code === 'KeyW') && !e.ctrlKey && !e.altKey && !e.metaKey) {
+        e.preventDefault();
+        window.location.href = '/writings';
+        return;
+      }
+
+      // Projects
+      if (e.shiftKey && (e.key === 'P' || e.code === 'KeyP') && !e.ctrlKey && !e.altKey && !e.metaKey) {
+        e.preventDefault();
+        window.location.href = '/projects';
+        return;
+      }
+
+      // Files
+      if (e.shiftKey && (e.key === 'F' || e.code === 'KeyF') && !e.ctrlKey && !e.altKey && !e.metaKey) {
+        e.preventDefault();
+        window.location.href = '/files';
+        return;
+      }
+
+      // Toggle / Cycle Theme
+      if (e.shiftKey && (e.key === 'T' || e.code === 'KeyT') && !e.ctrlKey && !e.altKey && !e.metaKey) {
+        e.preventDefault();
+        var themeBtn = document.getElementById('theme-toggle');
+        if (themeBtn) themeBtn.click();
+        return;
+      }
+
+      // Scroll to bottom
+      if (e.shiftKey && (e.key === 'G' || e.code === 'KeyG') && !e.ctrlKey && !e.altKey && !e.metaKey) {
+        e.preventDefault();
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        return;
+      }
+
+      // Scroll to top
+      if (e.key === 'g' && !e.shiftKey && !e.ctrlKey && !e.altKey && !e.metaKey) {
+        var now = Date.now();
+        if (now - lastGPress < 450) {
+          e.preventDefault();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          lastGPress = 0;
+        } else {
+          lastGPress = now;
+        }
+      }
+    });
+  })();
+</script>
+
+<style>
+  .emacs-dialog {
+    position: fixed;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    margin: 0 !important;
+    border: 1px solid var(--border);
+    background-color: var(--bg-dim);
+    color: var(--fg-main);
+    padding: 0;
+    border-radius: 2px;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.85);
+    z-index: 3000;
+  }
+
+  .emacs-dialog::backdrop {
+    background: rgba(15, 14, 6, 0.8);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+
+  .minibuffer-dialog {
+    max-width: 680px;
+    width: calc(100vw - 2rem);
+  }
+
+  .minibuffer-container {
+    display: flex;
+    flex-direction: column;
+    max-height: 80vh;
+  }
+
+  .minibuffer-prompt-row {
+    display: flex;
+    align-items: center;
+    padding: 0.85rem 1.15rem;
+    border-bottom: 1px solid var(--border);
+    background-color: var(--bg-main);
+    gap: 0.75rem;
+  }
+
+  .minibuffer-prompt {
+    font-family: "Typus Mono 95", "Typus Mono", monospace;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--fg-link);
+    user-select: none;
+  }
+
+  .minibuffer-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--fg-main);
+    font-family: "Typus Mono 95", "Typus Mono", monospace;
+    font-size: 1rem;
+  }
+
+  .minibuffer-count {
+    font-family: "Typus Mono 95", "Typus Mono", monospace;
+    font-size: 0.82rem;
+    color: var(--fg-dim);
+    user-select: none;
+  }
+
+  .minibuffer-candidates {
+    list-style: none;
+    padding: 0.4rem 0;
+    margin: 0;
+    overflow-y: auto;
+    max-height: 380px;
+  }
+
+  .candidate-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 0.45rem 1.15rem;
+    font-family: "Typus Mono 95", "Typus Mono", monospace;
+    font-size: 0.9rem;
+    cursor: pointer;
+    gap: 1.5rem;
+    transition: background-color 0.1s ease;
+  }
+
+  .candidate-row:hover,
+  .candidate-row.is-selected {
+    background-color: var(--bg-active);
+  }
+
+  .candidate-row.is-selected .candidate-name {
+    color: var(--fg-link-hover);
+    font-weight: 700;
+  }
+
+  .candidate-name {
+    color: var(--fg-main);
+    white-space: nowrap;
+  }
+
+  .candidate-desc {
+    color: var(--fg-dim);
+    font-size: 0.82rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: right;
+  }
+
+  .candidate-empty {
+    padding: 1.5rem;
+    font-family: "Typus Mono 95", "Typus Mono", monospace;
+    font-size: 0.9rem;
+    color: var(--fg-dim);
+    text-align: center;
+    font-style: italic;
+  }
+
+  .minibuffer-hints {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 1.15rem;
+    border-top: 1px dashed var(--border);
+    font-family: "Typus Mono 95", "Typus Mono", monospace;
+    font-size: 0.78rem;
+    color: var(--fg-dim);
+    background-color: var(--bg-main);
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .keybindings-dialog {
+    max-width: 600px;
+    width: calc(100vw - 2rem);
+  }
+
+  .keybindings-card {
+    padding: 1.5rem;
+  }
+
+  .keybindings-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .keybindings-header h3 {
+    margin: 0;
+    font-family: "Typus Mono 95", "Typus Mono", monospace;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--fg-link);
+  }
+
+  .keybindings-close-btn {
+    background: transparent;
+    border: none;
+    color: var(--fg-dim);
+    font-family: "Typus Mono 95", "Typus Mono", monospace;
+    font-size: 1.4rem;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0 0.25rem;
+  }
+
+  .keybindings-close-btn:hover {
+    color: var(--red-warmer);
+  }
+
+  .keybindings-table-wrapper {
+    overflow-x: auto;
+  }
+
+  .keybindings-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: "Typus Mono 95", "Typus Mono", monospace;
+    font-size: 0.88rem;
+  }
+
+  .keybindings-table td {
+    padding: 0.5rem 0.6rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+
+  .keybindings-table td:first-child {
+    white-space: nowrap;
+    width: 140px;
+  }
+
+  .keybindings-table td:last-child {
+    color: var(--fg-alt);
+  }
+
+  kbd {
+    background-color: var(--bg-main);
+    border: 1px solid var(--border);
+    color: var(--fg-link);
+    font-family: "Typus Mono 95", "Typus Mono", monospace;
+    font-size: 0.82em;
+    padding: 0.15em 0.45em;
+    border-radius: 2px;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+    display: inline-block;
+    margin-right: 0.2em;
+  }
+</style>

@@ -1,6 +1,7 @@
 ---
 import Sidebar from '../components/Sidebar.astro';
 import Footer from '../components/Footer.astro';
+import EmacsMinibuffer from '../components/EmacsMinibuffer.astro';
 import '../styles/global.css';
 
 interface Props {
@@ -68,5 +69,6 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
         </div>
       </div>
     </div>
+    <EmacsMinibuffer />
   </body>
 </html>
