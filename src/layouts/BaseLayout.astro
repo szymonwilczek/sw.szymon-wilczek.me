@@ -35,6 +35,15 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     <link rel="sitemap" href="/sitemap-index.xml" />
   </head>
   <body>
+    <header class="mobile-header">
+      <button id="mobile-menu-toggle" class="mobile-menu-btn" aria-label="Open navigation menu" aria-expanded="false">
+        <span>[Menu]</span>
+      </button>
+      <a href="/" class="mobile-title">Szymon Wilczek</a>
+    </header>
+
+    <div id="drawer-backdrop" class="drawer-backdrop" aria-hidden="true"></div>
+
     <div class="site-layout">
       <Sidebar currentPath={Astro.url.pathname} />
       <div class="content-wrapper">
