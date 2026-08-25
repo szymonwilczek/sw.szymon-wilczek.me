@@ -26,6 +26,13 @@ input, button, textarea, select {
   font: inherit;
 }
 
+button {
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  color: inherit;
+}
+
 dialog {
   padding: 0;
   border: none;
