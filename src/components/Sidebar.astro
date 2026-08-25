@@ -10,7 +10,7 @@ const currentYear = new Date().getFullYear();
 ---
 
 <aside id="site-sidebar" class="site-sidebar" aria-label="Site Sidebar">
-  <div class="sidebar-top">
+  <div class="sidebar-inner">
     <div class="sidebar-header-row">
       <header class="sidebar-header">
         <a href="/" class="site-title">Szymon Wilczek</a>
@@ -21,69 +21,80 @@ const currentYear = new Date().getFullYear();
     </div>
     <hr class="sidebar-divider" />
     <Navigation currentPath={currentPath} />
-  </div>
 
-  <div class="sidebar-bottom">
     <footer class="sidebar-footer">
       <p>(C) {currentYear} Szymon Wilczek</p>
     </footer>
   </div>
 </aside>
 
-<script>
-  function setupMobileDrawer() {
-    const sidebar = document.getElementById('site-sidebar');
-    const openBtn = document.getElementById('mobile-menu-toggle');
-    const closeBtn = document.getElementById('menu-close');
-    const backdrop = document.getElementById('drawer-backdrop');
+<script is:inline>
+  (function () {
+    function setupDrawer() {
+      var sidebar = document.getElementById('site-sidebar');
+      var openBtn = document.getElementById('mobile-menu-toggle');
+      var closeBtn = document.getElementById('menu-close');
+      var backdrop = document.getElementById('drawer-backdrop');
 
-    if (!sidebar) return;
+      if (!sidebar || !openBtn) return;
 
-    function openMenu() {
-      document.body.classList.add('menu-open');
-      sidebar?.classList.add('is-open');
-      openBtn?.setAttribute('aria-expanded', 'true');
-      closeBtn?.focus();
-    }
+      function open() {
+        document.body.classList.add('menu-open');
+        sidebar.classList.add('is-open');
+        openBtn.setAttribute('aria-expanded', 'true');
+      }
 
-    function closeMenu() {
-      document.body.classList.remove('menu-open');
-      sidebar?.classList.remove('is-open');
-      openBtn?.setAttribute('aria-expanded', 'false');
-      openBtn?.focus();
-    }
+      function close() {
+        document.body.classList.remove('menu-open');
+        sidebar.classList.remove('is-open');
+        openBtn.setAttribute('aria-expanded', 'false');
+      }
 
-    openBtn?.addEventListener('click', openMenu);
-    closeBtn?.addEventListener('click', closeMenu);
-    backdrop?.addEventListener('click', closeMenu);
+      openBtn.onclick = function (e) {
+        e.stopPropagation();
+        open();
+      };
 
-    sidebar.querySelectorAll('a').forEach((link) => {
-      link.addEventListener('click', () => {
-        if (window.innerWidth < 1024) {
-          closeMenu();
+      if (closeBtn) {
+        closeBtn.onclick = function (e) {
+          e.stopPropagation();
+          close();
+        };
+      }
+
+      if (backdrop) {
+        backdrop.onclick = function (e) {
+          e.stopPropagation();
+          close();
+        };
+      }
+
+      var links = sidebar.querySelectorAll('a');
+      for (var i = 0; i < links.length; i++) {
+        links[i].addEventListener('click', function () {
+          if (window.innerWidth < 1024) close();
+        });
+      }
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && document.body.classList.contains('menu-open')) {
+          close();
         }
       });
-    });
+    }
 
-    window.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && document.body.classList.contains('menu-open')) {
-        closeMenu();
-      }
-    });
-  }
-
-  setupMobileDrawer();
-  document.addEventListener('astro:page-load', setupMobileDrawer);
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', setupDrawer);
+    } else {
+      setupDrawer();
+    }
+  })();
 </script>
 
 <style>
   .site-sidebar {
     background-color: var(--bg-dim);
     color: var(--fg-main);
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    z-index: 1000;
   }
 
   /* Desktop layout */
@@ -93,10 +104,18 @@ const currentYear = new Date().getFullYear();
       top: 0;
       left: 0;
       bottom: 0;
-      width: var(--sidebar-width, 275px);
-      padding: 3rem 2rem 2rem 2rem;
+      width: 320px;
+      padding: 3rem 2.25rem 3rem 2.25rem;
       border-right: 1px solid var(--border);
-      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      z-index: 100;
+      transform: none !important;
+    }
+
+    .sidebar-inner {
+      width: 100%;
     }
 
     .drawer-close-btn {
@@ -111,19 +130,20 @@ const currentYear = new Date().getFullYear();
       top: 0;
       left: 0;
       bottom: 0;
-      width: 290px;
+      width: 300px;
       max-width: 85vw;
-      padding: 1.5rem;
+      padding: 1.75rem 1.5rem;
       border-right: 1px solid var(--border);
       overflow-y: auto;
-      transform: translateX(-100%);
-      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-      box-shadow: none;
+      z-index: 1000;
+      transform: translateX(-100%) !important;
+      transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
     }
 
+    :global(body.menu-open) .site-sidebar,
     .site-sidebar.is-open {
-      transform: translateX(0);
-      box-shadow: 4px 0 24px rgba(0, 0, 0, 0.7);
+      transform: translateX(0) !important;
+      box-shadow: 8px 0 36px rgba(0, 0, 0, 0.85) !important;
     }
 
     .sidebar-header-row {
@@ -134,19 +154,21 @@ const currentYear = new Date().getFullYear();
     }
 
     .drawer-close-btn {
-      background: transparent;
+      background: var(--bg-alt);
       border: 1px solid var(--border);
       color: var(--yellow-warmer);
       font-family: "Typus Mono 95", "Typus Mono", monospace;
-      font-size: 0.82rem;
-      padding: 0.2rem 0.5rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 0.3rem 0.65rem;
       cursor: pointer;
       border-radius: 2px;
+      transition: background-color 0.15s ease, color 0.15s ease;
     }
 
     .drawer-close-btn:hover {
       color: var(--cyan-cooler);
-      background-color: var(--bg-alt);
+      background-color: var(--bg-active);
     }
   }
 
@@ -177,7 +199,7 @@ const currentYear = new Date().getFullYear();
     font-size: 0.85rem;
     color: var(--fg-dim);
     line-height: 1.4;
-    padding-top: 1.5rem;
+    padding-top: 1.25rem;
   }
 
   .sidebar-footer p {
