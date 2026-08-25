@@ -2,29 +2,21 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
 import FormattedDate from '../../components/FormattedDate.astro';
-import VaultUnlock from '../../components/VaultUnlock.astro';
 import SearchFilter from '../../components/SearchFilter.astro';
 
 const files = (await getCollection('files')).sort(
   (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
 );
-
-const testVault = {
-  ciphertext: "cbE84Hru6AbakD2XRL9TIXak8e1wMUEQqhfJwLjqaL1CI6usFjiInRPzbiVo3++g41euyPyii8BY7b5E2wdBQbZbwxQ7syFqCQac+uKKMTkqsIc8q7tC8KW1NhXFiBDmjTqwya1z1B1nmpd97wAN8ATpc1rXKXPserza7gA9YFGbbWY61vU2VxzYriO6Nxgyk6DarJqAooUNZ16eyBp1UQT1ralqLUaWWSPrFhOEz9zh9DasALQDop674ItPvoLVDwqATmNAYE5PWorBr4+HPQg58LZbWtgeJP//GUNUGsBMtxe1L580YxP5tp9n2/E3tZz9TT9tEYejdla7TCmGSl7TnYMgbXr2pVtMoSzq8WvvlnQtrgH09m0Wa6xYvgE9E3QU6H6TqIJzy2FjbaMMDqvRYpwAAnn8qjvWuvNJy5H7eWFVfWjKLVMpUGywzxRNlbuTQajju15bke0Cl9AeNVl+uQrAzeTi5qljabanefcBILa6WBc+f13cc7rCXFrMYSUJfysHQ5SAK0wSR4gE/y1yhBHf8sEL5S2KLNgi2qJ1cyYSfXwe/pkyOkH0kRXgv/XcSr1K",
-  iv: "C2bN89PbqWuS13Xq",
-  salt: "K/chkjw2yXvr8E64pslj6w==",
-  hint: "Default test passphrase is 'emacs2026'",
-};
 ---
 
-<BaseLayout title="Files" description="Software distributions, tool packages, scripts, and documents with SHA-256 cryptographic verification.">
+<BaseLayout title="Files" description="Software distributions, tool packages, and encrypted archives with SHA-256 cryptographic verification.">
   <article>
     <h1>Files &amp; Archives</h1>
 
     <p>
-      An open archive of standalone utilities, lab software packages, scripts,
-      and documentation. Each entry provides a cryptographic SHA-256 checksum
-      for provenance verification.
+      An archive of standalone utilities, configuration snapshots, software packages,
+      and cryptographically sealed archives. Public files provide verified SHA-256 checksums,
+      while private archives require client-side passphrase decryption.
     </p>
 
     <SearchFilter
@@ -37,10 +29,13 @@ const testVault = {
       {files.map((file) => (
         <section
           class="file-card"
-          data-search={`${file.data.title} ${file.data.filename} ${file.data.category} ${file.data.description} ${file.data.sha256}`}
+          data-search={`${file.data.title} ${file.data.filename} ${file.data.category} ${file.data.description} ${file.data.sha256} ${file.data.encrypted ? 'encrypted private' : 'public'}`}
         >
           <header class="file-header">
-            <h2>{file.data.title}</h2>
+            <h2>
+              {file.data.title}
+              {file.data.encrypted && <span class="encrypted-pill">Private</span>}
+            </h2>
             <span class="file-date">
               <FormattedDate date={file.data.date} />
             </span>
@@ -67,11 +62,27 @@ const testVault = {
             </div>
           </div>
 
-          {file.data.downloadUrl && (
-            <div class="download-action">
-              <a href={file.data.downloadUrl} download>&darr; Download Archive</a>
-            </div>
-          )}
+          <div class="card-actions">
+            {file.data.encrypted ? (
+              <button
+                type="button"
+                class="unlock-archive-btn"
+                data-filename={file.data.filename}
+                data-url={file.data.encryptedUrl}
+                data-salt={file.data.salt}
+                data-iv={file.data.iv}
+                data-sha={file.data.sha256}
+              >
+                [ Unlock &amp; Download ]
+              </button>
+            ) : (
+              file.data.downloadUrl && (
+                <a href={file.data.downloadUrl} class="direct-download-link" download>
+                  Download Archive
+                </a>
+              )
+            )}
+          </div>
         </section>
       ))}
 
@@ -79,25 +90,188 @@ const testVault = {
         <p>No downloadable files indexed at this moment.</p>
       )}
     </div>
-
-    <hr />
-
-    <section class="vault-section">
-      <h2>Confidential Archives</h2>
-      <p>
-        Documents encrypted at compile-time with AES-256-GCM. Decryption occurs purely
-        in browser memory via the Web Crypto API without transmission to any server.
-      </p>
-
-      <VaultUnlock
-        ciphertext={testVault.ciphertext}
-        iv={testVault.iv}
-        salt={testVault.salt}
-        hint={testVault.hint}
-      />
-    </section>
   </article>
+
+  <dialog id="unlock-modal" class="unlock-dialog">
+    <div class="modal-card">
+      <header class="modal-header">
+        <h3 class="modal-title">[ Unlock Protected Archive ]</h3>
+        <button type="button" id="close-modal-btn" class="modal-close-btn" aria-label="Close dialog">&times;</button>
+      </header>
+
+      <div class="modal-body">
+        <p class="target-file-info">
+          Target File: <code id="modal-filename">archive.tar.gz</code>
+        </p>
+        <p class="modal-explanation">
+          This archive is sealed with client-side AES-256-GCM encryption.
+          Enter the secret passphrase to decrypt and trigger the immediate download.
+        </p>
+
+        <form id="modal-decrypt-form" onsubmit="return false;">
+          <div class="modal-input-group">
+            <input
+              type="password"
+              id="modal-passphrase"
+              class="modal-input"
+              placeholder="Enter Passphrase..."
+              autocomplete="off"
+              required
+            />
+            <button type="submit" id="modal-decrypt-btn" class="modal-submit-btn">
+              [ Decrypt &amp; Download ]
+            </button>
+          </div>
+          <div id="modal-status" class="modal-status-box" style="display: none;"></div>
+        </form>
+      </div>
+    </div>
+  </dialog>
 </BaseLayout>
+
+<script is:inline>
+  (function () {
+    function base64ToBuffer(b64) {
+      var bin = atob(b64);
+      var buf = new Uint8Array(bin.length);
+      for (var i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
+      return buf;
+    }
+
+    function initArchiveDecryption() {
+      var modal = document.getElementById('unlock-modal');
+      var closeBtn = document.getElementById('close-modal-btn');
+      var filenameEl = document.getElementById('modal-filename');
+      var passInput = document.getElementById('modal-passphrase');
+      var form = document.getElementById('modal-decrypt-form');
+      var submitBtn = document.getElementById('modal-decrypt-btn');
+      var statusBox = document.getElementById('modal-status');
+
+      if (!modal || !form || !passInput || !submitBtn || !statusBox) return;
+
+      var activeTarget = null;
+
+      document.querySelectorAll('.unlock-archive-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          activeTarget = {
+            filename: btn.dataset.filename,
+            url: btn.dataset.url,
+            salt: btn.dataset.salt,
+            iv: btn.dataset.iv,
+            sha: btn.dataset.sha,
+          };
+
+          if (filenameEl) filenameEl.textContent = activeTarget.filename;
+          passInput.value = '';
+          statusBox.style.display = 'none';
+          statusBox.textContent = '';
+          submitBtn.disabled = false;
+          submitBtn.textContent = '[ Decrypt & Download ]';
+
+          if (typeof modal.showModal === 'function') {
+            modal.showModal();
+          } else {
+            modal.setAttribute('open', '');
+          }
+          passInput.focus();
+        });
+      });
+
+      function closeModal() {
+        if (typeof modal.close === 'function') {
+          modal.close();
+        } else {
+          modal.removeAttribute('open');
+        }
+      }
+
+      if (closeBtn) closeBtn.onclick = closeModal;
+
+      modal.addEventListener('click', function (e) {
+        if (e.target === modal) closeModal();
+      });
+
+      form.onsubmit = async function (e) {
+        e.preventDefault();
+        var passphrase = passInput.value;
+        if (!passphrase || !activeTarget) return;
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = '[ Decrypting in RAM... ]';
+        statusBox.style.display = 'none';
+
+        try {
+          var resp = await fetch(activeTarget.url);
+          if (!resp.ok) throw new Error('Could not fetch encrypted payload.');
+          var encryptedData = await resp.arrayBuffer();
+
+          var salt = base64ToBuffer(activeTarget.salt);
+          var iv = base64ToBuffer(activeTarget.iv);
+
+          var enc = new TextEncoder();
+          var keyMaterial = await window.crypto.subtle.importKey(
+            'raw',
+            enc.encode(passphrase),
+            'PBKDF2',
+            false,
+            ['deriveKey']
+          );
+
+          var key = await window.crypto.subtle.deriveKey(
+            {
+              name: 'PBKDF2',
+              salt: salt,
+              iterations: 100000,
+              hash: 'SHA-256',
+            },
+            keyMaterial,
+            { name: 'AES-GCM', length: 256 },
+            false,
+            ['decrypt']
+          );
+
+          var decrypted = await window.crypto.subtle.decrypt(
+            { name: 'AES-GCM', iv: iv },
+            key,
+            encryptedData
+          );
+
+          var blob = new Blob([decrypted], { type: 'application/octet-stream' });
+          var downloadUrl = URL.createObjectURL(blob);
+          var a = document.createElement('a');
+          a.href = downloadUrl;
+          a.download = activeTarget.filename;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          setTimeout(function () { URL.revokeObjectURL(downloadUrl); }, 3000);
+
+          statusBox.textContent = 'Decrypted successfully! Downloading ' + activeTarget.filename + '...';
+          statusBox.className = 'modal-status-box success';
+          statusBox.style.display = 'block';
+
+          setTimeout(function () {
+            closeModal();
+          }, 1600);
+
+        } catch (err) {
+          statusBox.textContent = 'Decryption failed: Invalid passphrase for this archive.';
+          statusBox.className = 'modal-status-box error';
+          statusBox.style.display = 'block';
+          submitBtn.disabled = false;
+          submitBtn.textContent = '[ Decrypt & Download ]';
+          passInput.focus();
+        }
+      };
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initArchiveDecryption);
+    } else {
+      initArchiveDecryption();
+    }
+  })();
+</script>
 
 <style>
   .files-container {
@@ -130,6 +304,21 @@ const testVault = {
     font-size: 1.35rem;
     border-bottom: none;
     padding-bottom: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+  }
+
+  .encrypted-pill {
+    font-family: "Typus Mono 95", "Typus Mono", monospace;
+    font-size: 0.78rem;
+    font-weight: normal;
+    color: var(--yellow-warmer);
+    background-color: var(--bg-dim);
+    border: 1px solid var(--border);
+    padding: 0.1rem 0.45rem;
+    border-radius: 2px;
   }
 
   .file-date {
@@ -170,12 +359,162 @@ const testVault = {
     font-size: 0.82em;
   }
 
-  .download-action {
+  .card-actions {
+    margin-top: 0.5rem;
+  }
+
+  .direct-download-link {
     font-family: "Typus Mono 95", "Typus Mono", monospace;
     font-size: 0.95rem;
   }
 
-  .vault-section {
-    margin-top: 2.5rem;
+  .unlock-archive-btn {
+    background-color: var(--bg-button);
+    border: 1px solid var(--border);
+    color: var(--fg-button);
+    font-family: "Typus Mono 95", "Typus Mono", monospace;
+    font-size: 0.92rem;
+    font-weight: 600;
+    padding: 0.45rem 1rem;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: background-color 0.15s ease, color 0.15s ease;
+  }
+
+  .unlock-archive-btn:hover {
+    background-color: var(--bg-button-hover);
+    color: var(--fg-button-hover);
+  }
+
+  .unlock-dialog {
+    border: 1px solid var(--border);
+    background-color: var(--bg-dim);
+    color: var(--fg-main);
+    padding: 0;
+    max-width: 560px;
+    width: 90vw;
+    border-radius: 2px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+  }
+
+  .unlock-dialog::backdrop {
+    background: rgba(15, 14, 6, 0.75);
+    backdrop-filter: blur(4px);
+  }
+
+  .modal-card {
+    padding: 1.5rem;
+  }
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .modal-title {
+    margin: 0;
+    font-family: "Typus Mono 95", "Typus Mono", monospace;
+    font-size: 1.1rem;
+    color: var(--fg-link);
+  }
+
+  .modal-close-btn {
+    background: transparent;
+    border: none;
+    color: var(--fg-dim);
+    font-family: "Typus Mono 95", "Typus Mono", monospace;
+    font-size: 1.4rem;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0 0.25rem;
+  }
+
+  .modal-close-btn:hover {
+    color: var(--red-warmer);
+  }
+
+  .target-file-info {
+    font-family: "Typus Mono 95", "Typus Mono", monospace;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .modal-explanation {
+    font-size: 0.92rem;
+    color: var(--fg-alt);
+    margin-bottom: 1.25rem;
+    line-height: 1.5;
+  }
+
+  .modal-input-group {
+    display: flex;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+  }
+
+  .modal-input {
+    flex: 1;
+    min-width: 200px;
+    background-color: var(--bg-main);
+    border: 1px solid var(--border);
+    color: var(--fg-main);
+    padding: 0.45rem 0.75rem;
+    font-family: "Typus Mono 95", "Typus Mono", monospace;
+    font-size: 0.88rem;
+    letter-spacing: 0.08em;
+    border-radius: 2px;
+  }
+
+  .modal-input:focus {
+    outline: 1px solid var(--fg-link);
+    border-color: var(--fg-link);
+  }
+
+  .modal-submit-btn {
+    background-color: var(--bg-button);
+    border: 1px solid var(--border);
+    color: var(--fg-button);
+    font-family: "Typus Mono 95", "Typus Mono", monospace;
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 0.45rem 1rem;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: background-color 0.15s ease, color 0.15s ease;
+    white-space: nowrap;
+  }
+
+  .modal-submit-btn:hover:not(:disabled) {
+    background-color: var(--bg-button-hover);
+    color: var(--fg-button-hover);
+  }
+
+  .modal-submit-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .modal-status-box {
+    margin-top: 1rem;
+    font-family: "Typus Mono 95", "Typus Mono", monospace;
+    font-size: 0.88rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 2px;
+  }
+
+  .modal-status-box.success {
+    background-color: var(--bg-main);
+    color: var(--fg-link-active);
+    border: 1px solid var(--fg-link-active);
+  }
+
+  .modal-status-box.error {
+    background-color: var(--bg-main);
+    color: var(--red-warmer);
+    border: 1px solid var(--red-warmer);
   }
 </style>
