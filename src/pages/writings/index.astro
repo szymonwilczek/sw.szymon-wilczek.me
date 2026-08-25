@@ -1,0 +1,121 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import FormattedDate from '../../components/FormattedDate.astro';
+import SearchFilter from '../../components/SearchFilter.astro';
+
+const writings = (await getCollection('writings')).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+);
+---
+
+<BaseLayout title="Writings" description="Essays, manifestos, notes, and reflections on sovereign computing and hypermedia.">
+  <article>
+    <h1>Writings &amp; Essays</h1>
+
+    <p>
+      Long-form essays, manifestos, technical notes, and philosophical reflections
+      on software engineering, digital sovereignty, GNU Emacs, and classical hypermedia.
+    </p>
+
+    <SearchFilter
+      placeholder="Filter essays by keyword, tag, or title..."
+      targetSelector=".writing-card"
+      containerSelector=".writings-list"
+    />
+
+    <div class="writings-list">
+      {writings.map((post) => (
+        <section
+          class="writing-card"
+          data-search={`${post.data.title} ${post.data.description || ''} ${post.data.tags.join(' ')} ${post.data.category}`}
+        >
+          <header class="writing-header">
+            <h2>
+              <a href={`/writings/${post.id.replace(/\.(org|md|mdx)$/, '')}`}>{post.data.title}</a>
+            </h2>
+            <span class="writing-date">
+              <FormattedDate date={post.data.pubDate} />
+            </span>
+          </header>
+
+          {post.data.description && (
+            <p class="writing-desc">{post.data.description}</p>
+          )}
+
+          <div class="writing-meta">
+            <span class="category-badge">category: {post.data.category}</span>
+            {post.data.tags.length > 0 && (
+              <span class="tags">[{post.data.tags.join(', ')}]</span>
+            )}
+          </div>
+        </section>
+      ))}
+
+      {writings.length === 0 && (
+        <p>No essays or writings published yet.</p>
+      )}
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .writings-list {
+    margin-top: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2.25rem;
+  }
+
+  .writing-card {
+    border-left: 2px solid var(--border);
+    padding-left: 1.25rem;
+    transition: border-color 0.2s ease;
+  }
+
+  .writing-card:hover {
+    border-left-color: var(--fg-link);
+  }
+
+  .writing-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .writing-header h2 {
+    margin: 0;
+    font-size: 1.35rem;
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .writing-date {
+    font-family: "Typus Mono 95", "Typus Mono", monospace;
+    font-size: 0.88rem;
+    color: var(--fg-dim);
+  }
+
+  .writing-desc {
+    margin: 0.5rem 0 0.75rem 0;
+  }
+
+  .writing-meta {
+    font-family: "Typus Mono 95", "Typus Mono", monospace;
+    font-size: 0.82rem;
+    color: var(--fg-dim);
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .category-badge {
+    color: var(--fg-link-active);
+  }
+
+  .tags {
+    color: var(--fg-alt);
+  }
+</style>
