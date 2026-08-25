@@ -7,6 +7,9 @@ export default defineConfig({
   site: "https://sw.szymon-wilczek.me",
   output: "static",
   compressHTML: true,
+  devToolbar: {
+    enabled: false,
+  },
   build: {
     inlineStylesheets: "auto",
   },
