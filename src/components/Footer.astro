@@ -3,5 +3,73 @@ const currentYear = new Date().getFullYear();
 ---
 
 <footer class="site-footer">
-  <p> (C) {currentYear} Szymon Wilczek</p>
+  <div class="footer-line">
+    <span class="footer-copy">(C) {currentYear} Szymon Wilczek</span>
+    <span class="footer-sep">&middot;</span>
+    <button type="button" id="footer-keys-btn" class="footer-keys-btn" aria-label="Show keybindings cheat sheet">
+      Press <kbd>?</kbd> for keys &middot; <kbd>M-x</kbd> for commands
+    </button>
+  </div>
 </footer>
+
+<style is:global>
+  footer.site-footer {
+    font-family: "Typus Mono 95", "Typus Mono", monospace !important;
+    font-size: 0.84rem !important;
+    color: var(--fg-dim) !important;
+    line-height: 1.5 !important;
+  }
+
+  footer.site-footer .footer-line {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.65rem !important;
+    flex-wrap: wrap !important;
+    margin: 0 !important;
+    font-family: "Typus Mono 95", "Typus Mono", monospace !important;
+    font-size: 0.84rem !important;
+  }
+
+  footer.site-footer .footer-copy {
+    font-family: "Typus Mono 95", "Typus Mono", monospace !important;
+    color: var(--fg-dim) !important;
+    font-size: 0.84rem !important;
+    font-weight: 400 !important;
+  }
+
+  footer.site-footer .footer-sep {
+    color: var(--fg-dim) !important;
+    opacity: 0.5 !important;
+  }
+
+  footer.site-footer .footer-keys-btn {
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    color: var(--fg-dim) !important;
+    font-family: "Typus Mono 95", "Typus Mono", monospace !important;
+    font-size: 0.84rem !important;
+    font-weight: 400 !important;
+    cursor: pointer !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.35rem !important;
+    transition: color 0.15s ease !important;
+  }
+
+  footer.site-footer .footer-keys-btn:hover {
+    color: var(--fg-link-hover) !important;
+  }
+
+  footer.site-footer .footer-keys-btn kbd {
+    background-color: var(--bg-dim) !important;
+    border: 1px solid var(--border) !important;
+    color: var(--fg-link) !important;
+    font-family: "Typus Mono 95", "Typus Mono", monospace !important;
+    font-size: 0.82em !important;
+    font-weight: 700 !important;
+    padding: 0.12em 0.45em !important;
+    border-radius: 2px !important;
+    margin: 0 0.1em !important;
+  }
+</style>
