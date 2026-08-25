@@ -1,0 +1,95 @@
+---
+import Navigation from './Navigation.astro';
+
+interface Props {
+  currentPath?: string;
+}
+
+const { currentPath = Astro.url.pathname } = Astro.props;
+const currentYear = new Date().getFullYear();
+---
+
+<aside class="site-sidebar" aria-label="Site Sidebar">
+  <div class="sidebar-top">
+    <header class="sidebar-header">
+      <a href="/" class="site-title">Szymon Wilczek</a>
+    </header>
+    <hr class="sidebar-divider" />
+    <Navigation currentPath={currentPath} />
+  </div>
+
+  <div class="sidebar-bottom">
+    <footer class="sidebar-footer">
+      <p>(C) {currentYear} Szymon Wilczek</p>
+    </footer>
+  </div>
+</aside>
+
+<style>
+  .site-sidebar {
+    background-color: var(--bg-dim);
+    color: var(--fg-main);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  @media (min-width: 64em) {
+    .site-sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 250px;
+      padding: 2.5rem 1.75rem 1.75rem 1.75rem;
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+    }
+  }
+
+  @media (max-width: 63.99em) {
+    .site-sidebar {
+      position: static;
+      width: 100%;
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sidebar-bottom {
+      display: none;
+    }
+  }
+
+  .site-title {
+    font-family: "Typus Mono 95", "Typus Mono", monospace;
+    font-size: 1.45rem;
+    font-weight: 700;
+    color: var(--fg-main);
+    text-decoration: none;
+    display: block;
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+  }
+
+  .site-title:hover {
+    color: var(--yellow-warmer);
+    text-decoration: none;
+  }
+
+  .sidebar-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 1rem 0;
+  }
+
+  .sidebar-footer {
+    font-family: "Typus Mono 95", "Typus Mono", monospace;
+    font-size: 0.85rem;
+    color: var(--fg-dim);
+    line-height: 1.4;
+  }
+
+  .sidebar-footer p {
+    margin: 0;
+  }
+</style>
