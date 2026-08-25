@@ -83,9 +83,9 @@
 }
 
 .mobile-menu-btn {
-  background: var(--bg-alt);
+  background: var(--bg-button);
   border: 1px solid var(--border);
-  color: var(--yellow-warmer);
+  color: var(--fg-button);
   font-family: "Typus Mono 95", "Typus Mono", monospace;
   font-size: 0.9rem;
   font-weight: 600;
@@ -95,13 +95,14 @@
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  transition: background-color 0.15s ease, color 0.15s ease;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 
 .mobile-menu-btn:hover,
 .mobile-menu-btn:focus {
-  color: var(--cyan-cooler);
-  background-color: var(--bg-active);
+  color: var(--fg-button-hover);
+  background-color: var(--bg-button-hover);
+  border-color: var(--fg-button-hover);
 }
 
 .drawer-backdrop {

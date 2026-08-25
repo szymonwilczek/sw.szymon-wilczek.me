@@ -40,18 +40,18 @@ p {
 }
 
 a {
-  color: var(--yellow-warmer);
+  color: var(--fg-link);
   text-decoration: underline;
   text-underline-offset: 3px;
   text-decoration-thickness: 1px;
 }
 
 a:hover {
-  color: var(--cyan-cooler);
+  color: var(--fg-link-hover);
 }
 
 a:visited {
-  color: var(--yellow);
+  color: var(--fg-link-visited);
 }
 
 code, kbd, samp, pre {
@@ -61,7 +61,7 @@ code, kbd, samp, pre {
 
 code {
   background-color: var(--bg-dim);
-  color: var(--yellow-warmer);
+  color: var(--fg-link);
   padding: 0.15em 0.38em;
   border-radius: 2px;
   border: 1px solid var(--border);
@@ -86,7 +86,7 @@ pre code {
 }
 
 blockquote {
-  border-left: 3px solid var(--yellow-warmer);
+  border-left: 3px solid var(--fg-link);
   background-color: var(--bg-dim);
   padding: 0.95rem 1.45rem;
   margin: 1.85rem 0;
