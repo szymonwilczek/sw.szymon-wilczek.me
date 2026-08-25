@@ -1,5 +1,5 @@
 ---
-import Header from '../components/Header.astro';
+import Sidebar from '../components/Sidebar.astro';
 import Footer from '../components/Footer.astro';
 import '../styles/global.css';
 
@@ -35,12 +35,16 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     <link rel="sitemap" href="/sitemap-index.xml" />
   </head>
   <body>
-    <div class="container">
-      <Header currentPath={Astro.url.pathname} />
-      <main>
-        <slot />
-      </main>
-      <Footer />
+    <div class="site-layout">
+      <Sidebar currentPath={Astro.url.pathname} />
+      <div class="content-wrapper">
+        <main id="main-content">
+          <slot />
+        </main>
+        <div class="mobile-footer">
+          <Footer />
+        </div>
+      </div>
     </div>
   </body>
 </html>
