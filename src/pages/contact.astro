@@ -1,0 +1,47 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Contact" description="Verified communication endpoints, email, and cryptographic GPG public key.">
+  <article>
+    <h1>Contact</h1>
+
+    <p>
+      The most reliable method of contacting me is via traditional electronic mail.
+    </p>
+
+    <h2>Electronic Mail</h2>
+    <ul>
+      <li>
+        <strong>Primary:</strong> <code>swilczek.lx@gmail.com</code>
+      </li>
+    </ul>
+
+    <h2>Cryptographic PGP / GPG Key</h2>
+    <p>
+      All correspondence requiring confidentiality or identity verification can be
+      encrypted using my public key:
+    </p>
+
+    <div class="key-info">
+      <p><strong>Key ID:</strong> <code>B8E944071CB7EB8A</code></p>
+      <p><strong>Fingerprint:</strong></p>
+      <pre><code>PuUygS3w82q3ofF4uOlEBxy364o= / B8E9 4407 1CB7 EB8A</code></pre>
+    </div>
+
+    <p>
+      All git commits across my repositories are cryptographically signed with this key.
+    </p>
+
+    <h2>Web Presence</h2>
+    <ul>
+      <li><strong>GitHub:</strong> <a href="https://github.com/szymonwilczek" target="_blank" rel="noopener">github.com/szymonwilczek</a></li>
+    </ul>
+  </article>
+</BaseLayout>
+
+<style>
+  .key-info {
+    margin: 1.5rem 0;
+  }
+</style>
