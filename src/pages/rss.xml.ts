@@ -4,22 +4,32 @@ import type { APIContext } from "astro";
 
 export async function GET(context: APIContext) {
   const projects = await getCollection("projects");
+  const writings = await getCollection("writings");
 
-  const items = projects
-    .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
-    .map((project) => ({
-      title: project.data.title,
-      pubDate: project.data.pubDate,
-      description: project.data.description,
-      link: `/projects/${project.id}/`,
-    }));
+  const projectItems = projects.map((item) => ({
+    title: `[Project] ${item.data.title}`,
+    pubDate: item.data.pubDate,
+    description: item.data.description,
+    link: `/projects/${item.id.replace(/\.(org|md|mdx)$/, "")}/`,
+  }));
+
+  const writingItems = writings.map((item) => ({
+    title: item.data.title,
+    pubDate: item.data.pubDate,
+    description: item.data.description || item.data.title,
+    link: `/writings/${item.id.replace(/\.(org|md|mdx)$/, "")}/`,
+  }));
+
+  const allItems = [...projectItems, ...writingItems].sort(
+    (a, b) => b.pubDate.valueOf() - a.pubDate.valueOf(),
+  );
 
   return rss({
     title: "Szymon Wilczek",
     description:
-      "Personal projects, software releases, and technical writings of Szymon Wilczek.",
+      "Personal writings, essays, manifestos, software projects, and tools by Szymon Wilczek.",
     site: context.site ?? "https://sw.szymon-wilczek.me",
-    items,
+    items: allItems,
     customData: `<language>en-us</language>`,
   });
 }
