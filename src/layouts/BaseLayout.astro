@@ -72,5 +72,48 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
       </div>
     </div>
     <EmacsMinibuffer />
+
+    <script is:inline>
+      (function () {
+        function initCodeCopy() {
+          var pres = document.querySelectorAll('pre');
+          pres.forEach(function (pre) {
+            if (pre.closest('.raw-code-drawer') || (pre.parentElement && pre.parentElement.classList.contains('code-block-wrapper'))) return;
+
+            var wrapper = document.createElement('div');
+            wrapper.className = 'code-block-wrapper';
+
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'copy-code-btn';
+            btn.setAttribute('aria-label', 'Copy code to clipboard');
+            btn.textContent = '[ Copy ]';
+
+            btn.addEventListener('click', function () {
+              var code = pre.querySelector('code') || pre;
+              var text = code.innerText || code.textContent || '';
+              navigator.clipboard.writeText(text.trim()).then(function () {
+                btn.textContent = '[ Copied ]';
+                btn.classList.add('is-copied');
+                setTimeout(function () {
+                  btn.textContent = '[ Copy ]';
+                  btn.classList.remove('is-copied');
+                }, 2000);
+              });
+            });
+
+            pre.parentNode.insertBefore(wrapper, pre);
+            wrapper.appendChild(pre);
+            wrapper.appendChild(btn);
+          });
+        }
+
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', initCodeCopy);
+        } else {
+          initCodeCopy();
+        }
+      })();
+    </script>
   </body>
 </html>
