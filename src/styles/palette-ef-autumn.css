@@ -12,6 +12,16 @@
   --border: #50454b;
   --cursor: #f3b000;
 
+  /* Semantic Theme Elements */
+  --fg-link: #d0730f;
+  --fg-link-hover: #2dc4bf;
+  --fg-link-active: #70b400;
+  --fg-link-visited: #df8f6f;
+  --fg-button: #d0730f;
+  --bg-button: #2c291e;
+  --bg-button-hover: #4a4535;
+  --fg-button-hover: #2dc4bf;
+
   --red: #ef656a;
   --red-warmer: #f47340;
   --red-cooler: #f06a8f;
