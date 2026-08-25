@@ -1,0 +1,96 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection, render } from 'astro:content';
+import FormattedDate from '../../components/FormattedDate.astro';
+
+export async function getStaticPaths() {
+  const photos = await getCollection('photos');
+  return photos.map((photo) => ({
+    params: { slug: photo.id },
+    props: { photo },
+  }));
+}
+
+const { photo } = Astro.props;
+const { Content } = await render(photo);
+---
+
+<BaseLayout title={photo.data.title} description={photo.data.description || photo.data.title}>
+  <article class="photo-article">
+    <header class="photo-header">
+      <div class="back-link">
+        <a href="/photos">&larr; All photographs</a>
+      </div>
+      <h1>{photo.data.title}</h1>
+      <div class="photo-meta">
+        <span>Captured: <FormattedDate date={photo.data.date} /></span>
+        {photo.data.location && <span>Location: <code>{photo.data.location}</code></span>}
+        {photo.data.camera && <span>Equipment: <code>{photo.data.camera}</code></span>}
+      </div>
+    </header>
+
+    <figure class="featured-image-container">
+      <img src={photo.data.image} alt={photo.data.alt} />
+      {photo.data.description && (
+        <figcaption class="image-caption">{photo.data.description}</figcaption>
+      )}
+    </figure>
+
+    <div class="photo-narrative">
+      <Content />
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .photo-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .back-link {
+    font-family: "Typus Mono", "JetBrains Mono", monospace;
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+  }
+
+  .photo-header h1 {
+    margin-top: 0.25rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .photo-meta {
+    font-family: "Typus Mono", "JetBrains Mono", monospace;
+    font-size: 0.85rem;
+    color: var(--fg-dim);
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .featured-image-container {
+    margin: 2rem 0;
+    border: 1px solid var(--border);
+    background-color: var(--bg-dim);
+    padding: 0.75rem;
+  }
+
+  .featured-image-container img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .image-caption {
+    font-family: "Typus Mono", "JetBrains Mono", monospace;
+    font-size: 0.85rem;
+    color: var(--fg-dim);
+    padding: 0.5rem 0.25rem 0.25rem 0.25rem;
+  }
+
+  .photo-narrative {
+    margin-top: 2rem;
+    line-height: 1.75;
+  }
+</style>
