@@ -16,11 +16,14 @@ const efAutumnTheme = {
   tokenColors: [
     {
       scope: ["comment", "punctuation.definition.comment"],
-      settings: { foreground: "#847a86", fontStyle: "italic" },
+      settings: {
+        foreground: "#ba8a65",
+        fontStyle: "italic",
+      },
     },
     {
       scope: ["string", "string.quoted", "punctuation.definition.string"],
-      settings: { foreground: "#70b400" },
+      settings: { foreground: "#f47340" },
     },
     {
       scope: [
@@ -30,7 +33,7 @@ const efAutumnTheme = {
         "constant.other",
         "variable.other.constant",
       ],
-      settings: { foreground: "#6fafff" },
+      settings: { foreground: "#70b400" },
     },
     {
       scope: [
@@ -41,16 +44,22 @@ const efAutumnTheme = {
         "storage",
         "storage.type",
       ],
-      settings: { foreground: "#d570af" },
+      settings: {
+        foreground: "#d0730f",
+        fontStyle: "bold",
+      },
+    },
+    {
+      scope: ["support.function", "support.macro", "keyword.declaration"],
+      settings: { foreground: "#f06a8f" },
     },
     {
       scope: [
         "entity.name.function",
-        "support.function",
         "meta.function-call",
         "variable.function",
       ],
-      settings: { foreground: "#3f95f6" },
+      settings: { foreground: "#2dc4bf" },
     },
     {
       scope: [
@@ -59,7 +68,7 @@ const efAutumnTheme = {
         "variable.parameter",
         "support.variable",
       ],
-      settings: { foreground: "#2dc4bf" },
+      settings: { foreground: "#6fafff" },
     },
     {
       scope: [
@@ -68,7 +77,7 @@ const efAutumnTheme = {
         "support.type",
         "support.class",
       ],
-      settings: { foreground: "#df8f6f" },
+      settings: { foreground: "#4fb04f" },
     },
     {
       scope: [
@@ -95,11 +104,14 @@ const efDayTheme = {
   tokenColors: [
     {
       scope: ["comment", "punctuation.definition.comment"],
-      settings: { foreground: "#8f5f4a", fontStyle: "italic" },
+      settings: {
+        foreground: "#8f5f4a",
+        fontStyle: "italic",
+      },
     },
     {
       scope: ["string", "string.quoted", "punctuation.definition.string"],
-      settings: { foreground: "#007a0a" },
+      settings: { foreground: "#5f7200" },
     },
     {
       scope: [
@@ -109,7 +121,7 @@ const efDayTheme = {
         "constant.other",
         "variable.other.constant",
       ],
-      settings: { foreground: "#3f6faf" },
+      settings: { foreground: "#ce3f00" },
     },
     {
       scope: [
@@ -120,16 +132,22 @@ const efDayTheme = {
         "storage",
         "storage.type",
       ],
-      settings: { foreground: "#ca3e54" },
+      settings: {
+        foreground: "#b75515",
+        fontStyle: "bold",
+      },
+    },
+    {
+      scope: ["support.function", "support.macro", "keyword.declaration"],
+      settings: { foreground: "#cf2f4f" },
     },
     {
       scope: [
         "entity.name.function",
-        "support.function",
         "meta.function-call",
         "variable.function",
       ],
-      settings: { foreground: "#375cc6" },
+      settings: { foreground: "#ca3e54" },
     },
     {
       scope: [
@@ -138,7 +156,7 @@ const efDayTheme = {
         "variable.parameter",
         "support.variable",
       ],
-      settings: { foreground: "#0f7b8f" },
+      settings: { foreground: "#8448aa" },
     },
     {
       scope: [
@@ -147,7 +165,7 @@ const efDayTheme = {
         "support.type",
         "support.class",
       ],
-      settings: { foreground: "#a45a22" },
+      settings: { foreground: "#0f7f5f" },
     },
     {
       scope: [
