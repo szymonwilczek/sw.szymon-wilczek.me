@@ -130,3 +130,15 @@ body.menu-open .drawer-backdrop {
   color: var(--fg-dim);
   text-align: left;
 }
+
+.reading-progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 2px;
+  width: 0%;
+  background-color: var(--fg-link);
+  z-index: 9999;
+  pointer-events: none;
+  transition: width 0.05s linear;
+}
