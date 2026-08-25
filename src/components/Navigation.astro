@@ -19,24 +19,76 @@ const links = [
 ];
 ---
 
-<nav class="site-nav" aria-label="Main Navigation">
-  {links.map((link) => {
-    const isExternal = link.href.endsWith('.xml');
-    const isActive = !isExternal && (
-      normalizedCurrent === normalize(link.href) || 
-      (link.href !== '/' && normalizedCurrent.startsWith(normalize(link.href)))
-    );
+<nav class="sidebar-nav" aria-label="Main Navigation">
+  <ul class="nav-list">
+    {links.map((link) => {
+      const isExternal = link.href.endsWith('.xml');
+      const isActive = !isExternal && (
+        normalizedCurrent === normalize(link.href) || 
+        (link.href !== '/' && normalizedCurrent.startsWith(normalize(link.href)))
+      );
 
-    return (
-      <a
-        href={link.href}
-        class:list={{ active: isActive }}
-        target={isExternal ? '_blank' : undefined}
-        rel={isExternal ? 'alternate' : undefined}
-        type={isExternal ? 'application/rss+xml' : undefined}
-      >
-        {link.label}
-      </a>
-    );
-  })}
+      return (
+        <li class="nav-item">
+          <a
+            href={link.href}
+            class:list={['nav-link', { active: isActive }]}
+            target={isExternal ? '_blank' : undefined}
+            rel={isExternal ? 'alternate' : undefined}
+            type={isExternal ? 'application/rss+xml' : undefined}
+          >
+            {link.label}
+          </a>
+        </li>
+      );
+    })}
+  </ul>
 </nav>
+
+<style>
+  .sidebar-nav {
+    font-family: "Typus Mono 95", "Typus Mono", monospace;
+    font-size: 1.05rem;
+    margin: 1.5rem 0;
+  }
+
+  .nav-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+
+  @media (max-width: 63.99em) {
+    .nav-list {
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 0.5rem 0.85rem;
+    }
+  }
+
+  .nav-item {
+    margin: 0;
+    padding: 0;
+  }
+
+  .nav-link {
+    color: var(--yellow-warmer);
+    text-decoration: none;
+    display: inline-block;
+    padding: 0.1rem 0;
+    transition: color 0.15s ease;
+  }
+
+  .nav-link:hover {
+    color: var(--cyan-cooler);
+    text-decoration: underline;
+  }
+
+  .nav-link.active {
+    color: var(--green-warmer);
+    font-weight: 700;
+  }
+</style>
