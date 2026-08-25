@@ -2,6 +2,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
 import FormattedDate from '../../components/FormattedDate.astro';
+import SearchFilter from '../../components/SearchFilter.astro';
 
 const projects = (await getCollection('projects')).sort(
   (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
@@ -19,12 +20,21 @@ const projects = (await getCollection('projects')).sort(
       problem from first principles. Also: They did not make to portfolio.
     </p>
 
+    <SearchFilter
+      placeholder="Filter projects by name, tag, or description..."
+      targetSelector=".project-card"
+      containerSelector=".project-grid"
+    />
+
     <div class="project-grid">
       {projects.map((project) => (
-        <section class="project-card">
+        <section
+          class="project-card"
+          data-search={`${project.data.title} ${project.data.description} ${project.data.tags.join(' ')} ${project.data.status}`}
+        >
           <header class="card-header">
             <h2>
-              <a href={`/projects/${project.id}`}>{project.data.title}</a>
+              <a href={`/projects/${project.id.replace(/\.(org|md|mdx)$/, '')}`}>{project.data.title}</a>
             </h2>
             <span class="project-date">
               <FormattedDate date={project.data.pubDate} />
@@ -53,7 +63,7 @@ const projects = (await getCollection('projects')).sort(
 
 <style>
   .project-grid {
-    margin-top: 2rem;
+    margin-top: 1.5rem;
     display: flex;
     flex-direction: column;
     gap: 2rem;
@@ -66,7 +76,7 @@ const projects = (await getCollection('projects')).sort(
   }
 
   .project-card:hover {
-    border-left-color: var(--yellow-warmer);
+    border-left-color: var(--fg-link);
   }
 
   .card-header {
@@ -79,14 +89,14 @@ const projects = (await getCollection('projects')).sort(
 
   .card-header h2 {
     margin: 0;
-    font-size: 1.25rem;
+    font-size: 1.35rem;
     border-bottom: none;
     padding-bottom: 0;
   }
 
   .project-date {
-    font-family: "Typus Mono", "JetBrains Mono", monospace;
-    font-size: 0.85rem;
+    font-family: "Typus Mono 95", "Typus Mono", monospace;
+    font-size: 0.88rem;
     color: var(--fg-dim);
   }
 
@@ -95,8 +105,8 @@ const projects = (await getCollection('projects')).sort(
   }
 
   .card-meta {
-    font-family: "Typus Mono", "JetBrains Mono", monospace;
-    font-size: 0.8rem;
+    font-family: "Typus Mono 95", "Typus Mono", monospace;
+    font-size: 0.82rem;
     color: var(--fg-dim);
     display: flex;
     gap: 1rem;
@@ -104,7 +114,7 @@ const projects = (await getCollection('projects')).sort(
   }
 
   .status-badge {
-    color: var(--green-warmer);
+    color: var(--fg-link-active);
   }
 
   .tags {
