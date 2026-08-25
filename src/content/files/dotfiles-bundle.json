@@ -1,0 +1,10 @@
+{
+  "title": "Sovereign Dotfiles Bootstrap Tarball",
+  "description": "Compressed snapshot of GNU Emacs, Zsh, Tmux, and Alacritty configuration files with automated deployment script.",
+  "filename": "sw-dotfiles-2026.tar.gz",
+  "filesize": "18 KB",
+  "sha256": "f9bf2867cc24ab8f11611bf781079558e1879138bb0aedf5d48317e7e22535a9",
+  "category": "Configurations",
+  "date": "2026-04-10",
+  "downloadUrl": "/downloads/sw-dotfiles-2026.tar.gz"
+}

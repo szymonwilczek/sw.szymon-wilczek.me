@@ -1,0 +1,10 @@
+{
+  "title": "Minimalist POSIX Shell Toolchain",
+  "description": "Portable standalone POSIX shell utilities for batch text processing and GPG signature verification.",
+  "filename": "posix-tools-v1.4.tar.xz",
+  "filesize": "12 KB",
+  "sha256": "d7116af1a8e7703bdbececb358753d308b683242c837003a8f9c9987b3a1a4e2",
+  "category": "Software",
+  "date": "2026-03-01",
+  "downloadUrl": "/downloads/posix-tools-v1.4.tar.xz"
+}
