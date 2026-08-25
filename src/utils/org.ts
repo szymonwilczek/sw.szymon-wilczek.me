@@ -264,6 +264,7 @@ function rehypeShikiHighlight(highlighter: any) {
                   dark: "ef-autumn",
                   light: "ef-day",
                 },
+                defaultColor: false,
               });
 
               if (hast && parent && typeof index === "number") {

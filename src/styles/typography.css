@@ -86,16 +86,34 @@ pre code, .shiki code {
   color: inherit !important;
 }
 
-/* Syntax Highlighting theme adaptation */
-:root[data-theme="dark"] .shiki span,
-:root[data-theme="autumn"] .shiki span {
+.shiki span {
   color: var(--shiki-dark, inherit);
 }
 
-@media (prefers-color-scheme: dark) {
+/* Dark Mode */
+:root[data-theme="dark"] .shiki span,
+:root[data-theme="autumn"] .shiki span,
+:root:not([data-theme]) .shiki span {
+  color: var(--shiki-dark, inherit) !important;
+}
+
+/* Light Mode */
+:root[data-theme="light"] .shiki span,
+:root[data-theme="day"] .shiki span,
+:root[data-theme="arcadia"] .shiki span {
+  color: var(--shiki-light, inherit) !important;
+}
+
+@media (prefers-color-scheme: light) {
   :root[data-theme="auto"] .shiki span,
   :root:not([data-theme]) .shiki span {
-    color: var(--shiki-dark, inherit);
+    color: var(--shiki-light, inherit) !important;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-theme="auto"] .shiki span {
+    color: var(--shiki-dark, inherit) !important;
   }
 }
 
