@@ -88,6 +88,10 @@ const files = defineCollection({
     category: z.string().default("General"),
     date: flexibleDate,
     downloadUrl: z.string().optional(),
+    encrypted: z.boolean().default(false),
+    encryptedUrl: z.string().optional(),
+    salt: z.string().optional(),
+    iv: z.string().optional(),
   }),
 });
 
