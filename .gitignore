@@ -1,0 +1,27 @@
+# Build outputs
+dist/
+.astro/
+
+# Node dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Env
+.env
+.env.production
+.env.local
+*.env
+
+# Emacs backup and autosave files
+*~
+\#*\#
+.\#*
+auto-save-list/
+.dir-locals?.el
+
+# OS artifacts
+.DS_Store
+Thumbs.db
