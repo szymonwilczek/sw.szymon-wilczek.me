@@ -1,0 +1,69 @@
+.container {
+  max-width: 72ch;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 4rem 1.5rem;
+}
+
+.site-header {
+  margin-bottom: 2.5rem;
+}
+
+.site-title {
+  font-family: "Typus Mono", "JetBrains Mono", "SF Mono", Menlo, Consolas, Monaco, monospace;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--fg-main);
+  text-decoration: none;
+  display: block;
+  margin-bottom: 0.75rem;
+  letter-spacing: -0.02em;
+}
+
+.site-title:hover {
+  color: var(--yellow-warmer);
+  text-decoration: none;
+}
+
+.site-divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 0.75rem 0 1rem 0;
+}
+
+.site-nav {
+  font-family: "Typus Mono", "JetBrains Mono", "SF Mono", Menlo, Consolas, Monaco, monospace;
+  font-size: 0.95rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.85rem;
+  line-height: 1.4;
+}
+
+.site-nav a {
+  color: var(--yellow-warmer);
+  text-decoration: none;
+  padding: 0.1rem 0.2rem;
+}
+
+.site-nav a:hover {
+  color: var(--cyan-cooler);
+  text-decoration: underline;
+}
+
+.site-nav a.active {
+  color: var(--green-warmer);
+  font-weight: 600;
+}
+
+main {
+  margin-bottom: 4rem;
+}
+
+.site-footer {
+  border-top: 1px solid var(--border);
+  padding-top: 1.5rem;
+  font-family: "Typus Mono", "JetBrains Mono", "SF Mono", Menlo, Consolas, Monaco, monospace;
+  font-size: 0.85rem;
+  color: var(--fg-dim);
+  text-align: left;
+}
