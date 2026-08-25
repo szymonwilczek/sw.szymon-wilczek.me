@@ -1,20 +1,21 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getCollection, render } from 'astro:content';
+import { getCollection } from 'astro:content';
 import FormattedDate from '../../components/FormattedDate.astro';
 import ExifBar from '../../components/ExifBar.astro';
 import { getExifData } from '../../utils/exif';
+import { renderContentEntry } from '../../utils/org';
 
 export async function getStaticPaths() {
   const photos = await getCollection('photos');
   return photos.map((photo) => ({
-    params: { slug: photo.id },
+    params: { slug: photo.id.replace(/\.(org|md|mdx|json)$/, '') },
     props: { photo },
   }));
 }
 
 const { photo } = Astro.props;
-const { Content } = await render(photo);
+const { html, Content } = await renderContentEntry(photo);
 const exif = await getExifData(photo.data.image);
 ---
 
@@ -32,7 +33,7 @@ const exif = await getExifData(photo.data.image);
     </header>
 
     <figure class="featured-image-container">
-      <div class="image-frame">
+      <div class="image-frame zoomable">
         <img src={photo.data.image} alt={photo.data.alt} />
       </div>
       <ExifBar exif={exif} overrides={photo.data} />
@@ -42,7 +43,7 @@ const exif = await getExifData(photo.data.image);
     </figure>
 
     <div class="photo-narrative">
-      <Content />
+      {Content ? <Content /> : <div class="org-content" set:html={html} />}
     </div>
   </article>
 </BaseLayout>
@@ -55,8 +56,8 @@ const exif = await getExifData(photo.data.image);
   }
 
   .back-link {
-    font-family: "Typus Mono", "JetBrains Mono", monospace;
-    font-size: 0.85rem;
+    font-family: "Typus Mono 95", "Typus Mono", monospace;
+    font-size: 0.9rem;
     margin-bottom: 1rem;
   }
 
@@ -66,12 +67,12 @@ const exif = await getExifData(photo.data.image);
   }
 
   .photo-meta {
-    font-family: "Typus Mono", "JetBrains Mono", monospace;
-    font-size: 0.85rem;
+    font-family: "Typus Mono 95", "Typus Mono", monospace;
+    font-size: 0.9rem;
     color: var(--fg-dim);
     display: flex;
     flex-direction: column;
-    gap: 0.35rem;
+    gap: 0.4rem;
   }
 
   .featured-image-container {
@@ -82,23 +83,30 @@ const exif = await getExifData(photo.data.image);
     border: 1px solid var(--border);
     background-color: var(--bg-dim);
     padding: 0.5rem;
+    overflow: hidden;
   }
 
-  .image-frame img {
+  .image-frame.zoomable img {
     width: 100%;
-    height: auto;
+    max-height: 520px;
+    object-fit: contain;
     display: block;
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .image-frame.zoomable:hover img {
+    transform: scale(1.03);
   }
 
   .image-caption {
-    font-family: "Typus Mono", "JetBrains Mono", monospace;
-    font-size: 0.85rem;
+    font-family: "Typus Mono 95", "Typus Mono", monospace;
+    font-size: 0.88rem;
     color: var(--fg-dim);
     padding: 0.75rem 0.25rem 0.25rem 0.25rem;
   }
 
   .photo-narrative {
     margin-top: 2rem;
-    line-height: 1.75;
+    line-height: 1.8;
   }
 </style>

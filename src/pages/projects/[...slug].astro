@@ -1,18 +1,19 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getCollection, render } from 'astro:content';
+import { getCollection } from 'astro:content';
 import FormattedDate from '../../components/FormattedDate.astro';
+import { renderContentEntry } from '../../utils/org';
 
 export async function getStaticPaths() {
   const projects = await getCollection('projects');
   return projects.map((project) => ({
-    params: { slug: project.id },
+    params: { slug: project.id.replace(/\.(org|md|mdx)$/, '') },
     props: { project },
   }));
 }
 
 const { project } = Astro.props;
-const { Content } = await render(project);
+const { html, Content } = await renderContentEntry(project);
 ---
 
 <BaseLayout title={project.data.title} description={project.data.description}>
@@ -34,7 +35,7 @@ const { Content } = await render(project);
     </header>
 
     <div class="project-content">
-      <Content />
+      {Content ? <Content /> : <div class="org-content" set:html={html} />}
     </div>
   </article>
 </BaseLayout>
@@ -47,8 +48,8 @@ const { Content } = await render(project);
   }
 
   .back-link {
-    font-family: "Typus Mono", "JetBrains Mono", monospace;
-    font-size: 0.85rem;
+    font-family: "Typus Mono 95", "Typus Mono", monospace;
+    font-size: 0.9rem;
     margin-bottom: 1rem;
   }
 
@@ -58,15 +59,15 @@ const { Content } = await render(project);
   }
 
   .project-meta {
-    font-family: "Typus Mono", "JetBrains Mono", monospace;
-    font-size: 0.85rem;
+    font-family: "Typus Mono 95", "Typus Mono", monospace;
+    font-size: 0.9rem;
     color: var(--fg-dim);
     display: flex;
     flex-direction: column;
-    gap: 0.35rem;
+    gap: 0.4rem;
   }
 
   .project-content {
-    margin-top: 2rem;
+    margin-top: 2.25rem;
   }
 </style>
