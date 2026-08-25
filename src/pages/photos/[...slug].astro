@@ -2,6 +2,8 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getCollection, render } from 'astro:content';
 import FormattedDate from '../../components/FormattedDate.astro';
+import ExifBar from '../../components/ExifBar.astro';
+import { getExifData } from '../../utils/exif';
 
 export async function getStaticPaths() {
   const photos = await getCollection('photos');
@@ -13,6 +15,7 @@ export async function getStaticPaths() {
 
 const { photo } = Astro.props;
 const { Content } = await render(photo);
+const exif = await getExifData(photo.data.image);
 ---
 
 <BaseLayout title={photo.data.title} description={photo.data.description || photo.data.title}>
@@ -25,12 +28,14 @@ const { Content } = await render(photo);
       <div class="photo-meta">
         <span>Captured: <FormattedDate date={photo.data.date} /></span>
         {photo.data.location && <span>Location: <code>{photo.data.location}</code></span>}
-        {photo.data.camera && <span>Equipment: <code>{photo.data.camera}</code></span>}
       </div>
     </header>
 
     <figure class="featured-image-container">
-      <img src={photo.data.image} alt={photo.data.alt} />
+      <div class="image-frame">
+        <img src={photo.data.image} alt={photo.data.alt} />
+      </div>
+      <ExifBar exif={exif} overrides={photo.data} />
       {photo.data.description && (
         <figcaption class="image-caption">{photo.data.description}</figcaption>
       )}
@@ -71,12 +76,15 @@ const { Content } = await render(photo);
 
   .featured-image-container {
     margin: 2rem 0;
-    border: 1px solid var(--border);
-    background-color: var(--bg-dim);
-    padding: 0.75rem;
   }
 
-  .featured-image-container img {
+  .image-frame {
+    border: 1px solid var(--border);
+    background-color: var(--bg-dim);
+    padding: 0.5rem;
+  }
+
+  .image-frame img {
     width: 100%;
     height: auto;
     display: block;
@@ -86,7 +94,7 @@ const { Content } = await render(photo);
     font-family: "Typus Mono", "JetBrains Mono", monospace;
     font-size: 0.85rem;
     color: var(--fg-dim);
-    padding: 0.5rem 0.25rem 0.25rem 0.25rem;
+    padding: 0.75rem 0.25rem 0.25rem 0.25rem;
   }
 
   .photo-narrative {
