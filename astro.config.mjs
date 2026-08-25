@@ -6,5 +6,9 @@ import org from "@orgajs/astro";
 export default defineConfig({
   site: "https://sw.szymon-wilczek.me",
   output: "static",
+  compressHTML: true,
+  build: {
+    inlineStylesheets: "auto",
+  },
   integrations: [sitemap(), org()],
 });
