@@ -1,80 +1,89 @@
 ---
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getCollection } from 'astro:content';
-import FormattedDate from '../../components/FormattedDate.astro';
-import SearchFilter from '../../components/SearchFilter.astro';
-import Pagination from '../../components/Pagination.astro';
-import { calculateReadingStats } from '../../utils/reading-time';
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+import FormattedDate from "../../components/FormattedDate.astro";
+import SearchFilter from "../../components/SearchFilter.astro";
+import Pagination from "../../components/Pagination.astro";
+import { calculateReadingStats } from "../../utils/reading-time";
 
 const PAGE_SIZE = 10;
-const allWritings = (await getCollection('writings')).sort(
-  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+const allWritings = (await getCollection("writings")).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
 );
 
 const totalPages = Math.ceil(allWritings.length / PAGE_SIZE);
 const writings = allWritings.slice(0, PAGE_SIZE);
 ---
 
-<BaseLayout title="Writings" description="Essays, manifestos, notes, and reflections on sovereign computing and hypermedia.">
+<BaseLayout
+  title="Writings"
+  description="Essays, manifestos, notes, and reflections on sovereign computing and hypermedia."
+>
   <article>
     <h1>Writings &amp; Essays</h1>
 
     <p>
-      Long-form essays, manifestos, technical notes, and philosophical reflections
-      on software engineering, digital sovereignty, GNU Emacs, and classical hypermedia.
+      Technical notes, manifestos, with maybe some touch of philosophical
+      reflections on software engineering and digital sovereignty.
     </p>
 
     <SearchFilter
-      placeholder="Filter essays by keyword, tag, or title..."
+      placeholder="Filter by keyword, tag, or title..."
       targetSelector=".writing-card"
       containerSelector=".writings-list"
     />
 
     <div class="writings-list">
-      {writings.map((post) => {
-        const stats = calculateReadingStats(post.body);
-        return (
-          <section 
-            class="writing-card"
-            data-search={`${post.data.title} ${post.data.description || ''} ${post.data.tags.join(' ')} ${post.data.category}`}
-          >
-            <header class="writing-header">
-              <h2>
-                <a href={`/writings/${post.id.replace(/\.(org|md|mdx)$/, '')}`}>{post.data.title}</a>
-              </h2>
-              <span class="writing-date">
-                <FormattedDate date={post.data.pubDate} />
-              </span>
-            </header>
+      {
+        writings.map((post) => {
+          const stats = calculateReadingStats(post.body);
+          return (
+            <section
+              class="writing-card"
+              data-search={`${post.data.title} ${post.data.description || ""} ${post.data.tags.join(" ")} ${post.data.category}`}
+            >
+              <header class="writing-header">
+                <h2>
+                  <a
+                    href={`/writings/${post.id.replace(/\.(org|md|mdx)$/, "")}`}
+                  >
+                    {post.data.title}
+                  </a>
+                </h2>
+                <span class="writing-date">
+                  <FormattedDate date={post.data.pubDate} />
+                </span>
+              </header>
 
-            {post.data.description && (
-              <p class="writing-desc">{post.data.description}</p>
-            )}
-
-            <div class="writing-meta">
-              <span class="reading-time">{stats.text}</span>
-              <span class="meta-sep">&middot;</span>
-              <span class="category-badge">category: {post.data.category}</span>
-              {post.data.tags.length > 0 && (
-                <>
-                  <span class="meta-sep">&middot;</span>
-                  <span class="tags">[{post.data.tags.join(', ')}]</span>
-                </>
+              {post.data.description && (
+                <p class="writing-desc">{post.data.description}</p>
               )}
-            </div>
-          </section>
-        );
-      })}
 
-      {writings.length === 0 && (
-        <p>No essays or writings published yet.</p>
-      )}
+              <div class="writing-meta">
+                <span class="reading-time">{stats.text}</span>
+                <span class="meta-sep">&middot;</span>
+                <span class="category-badge">
+                  category: {post.data.category}
+                </span>
+                {post.data.tags.length > 0 && (
+                  <>
+                    <span class="meta-sep">&middot;</span>
+                    <span class="tags">[{post.data.tags.join(", ")}]</span>
+                  </>
+                )}
+              </div>
+            </section>
+          );
+        })
+      }
+
+      {writings.length === 0 && <p>No essays or writings published yet.</p>}
     </div>
 
     <Pagination
       currentPage={1}
       lastPage={totalPages}
-      nextUrl={totalPages > 1 ? '/writings/page/2' : undefined}
+      nextUrl={totalPages > 1 ? "/writings/page/2" : undefined}
       baseUrl="/writings"
     />
   </article>
