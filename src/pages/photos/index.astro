@@ -1,70 +1,93 @@
 ---
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getCollection } from 'astro:content';
-import FormattedDate from '../../components/FormattedDate.astro';
-import SearchFilter from '../../components/SearchFilter.astro';
-import Pagination from '../../components/Pagination.astro';
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+import FormattedDate from "../../components/FormattedDate.astro";
+import SearchFilter from "../../components/SearchFilter.astro";
+import Pagination from "../../components/Pagination.astro";
 
 const PAGE_SIZE = 12;
-const allPhotos = (await getCollection('photos')).sort(
-  (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
+const allPhotos = (await getCollection("photos")).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
 );
 
 const totalPages = Math.ceil(allPhotos.length / PAGE_SIZE);
 const photos = allPhotos.slice(0, PAGE_SIZE);
 ---
 
-<BaseLayout title="Photos" description="Curated personal photography gallery capturing moments, architecture, and landscapes.">
+<BaseLayout
+  title="Photos"
+  description="Curated personal photography gallery capturing moments, architecture, and landscapes."
+>
   <article>
     <h1>Photography</h1>
 
     <p>
-      A personal visual archive capturing moments of stillness of mine.
-      All photographs are presented without compression artifacts.
+      Personal visual archive. All photographs are presented without compression
+      artifacts.
     </p>
 
     <SearchFilter
-      placeholder="Filter photos by title, location, or camera..."
+      placeholder="Filter by title, location, or camera..."
       targetSelector=".photo-item"
       containerSelector=".gallery-grid"
     />
 
     <div class="gallery-grid">
-      {photos.map((photo) => (
-        <figure
-          class="photo-item"
-          data-search={`${photo.data.title} ${photo.data.location || ''} ${photo.data.camera || ''} ${photo.data.description || ''}`}
-        >
-          <a href={`/photos/${photo.id.replace(/\.(org|md|mdx|json)$/, '')}`} class="image-link">
-            <div class="image-wrapper">
-              <img src={photo.data.image} alt={photo.data.alt} loading="lazy" />
-            </div>
-          </a>
-          <figcaption class="photo-caption">
-            <a href={`/photos/${photo.id.replace(/\.(org|md|mdx)$/, '')}`} class="photo-title-link">
-              <span class="photo-title">{photo.data.title}</span>
+      {
+        photos.map((photo) => (
+          <figure
+            class="photo-item"
+            data-search={`${photo.data.title} ${photo.data.location || ""} ${photo.data.camera || ""} ${photo.data.description || ""}`}
+          >
+            <a
+              href={`/photos/${photo.id.replace(/\.(org|md|mdx|json)$/, "")}`}
+              class="image-link"
+            >
+              <div class="image-wrapper">
+                <img
+                  src={photo.data.image}
+                  alt={photo.data.alt}
+                  loading="lazy"
+                />
+              </div>
             </a>
-            {photo.data.description && (
-              <p class="photo-note">{photo.data.description}</p>
-            )}
-            <div class="photo-meta">
-              <span><FormattedDate date={photo.data.date} /></span>
-              {photo.data.location && <span>· {photo.data.location}</span>}
-              {photo.data.camera && <span>· <code>{photo.data.camera}</code></span>}
-            </div>
-          </figcaption>
-        </figure>
-      ))}
+            <figcaption class="photo-caption">
+              <a
+                href={`/photos/${photo.id.replace(/\.(org|md|mdx)$/, "")}`}
+                class="photo-title-link"
+              >
+                <span class="photo-title">{photo.data.title}</span>
+              </a>
+              {photo.data.description && (
+                <p class="photo-note">{photo.data.description}</p>
+              )}
+              <div class="photo-meta">
+                <span>
+                  <FormattedDate date={photo.data.date} />
+                </span>
+                {photo.data.location && <span>· {photo.data.location}</span>}
+                {photo.data.camera && (
+                  <span>
+                    · <code>{photo.data.camera}</code>
+                  </span>
+                )}
+              </div>
+            </figcaption>
+          </figure>
+        ))
+      }
 
-      {photos.length === 0 && (
-        <p>No photographs cataloged in this collection yet.</p>
-      )}
+      {
+        photos.length === 0 && (
+          <p>No photographs cataloged in this collection yet.</p>
+        )
+      }
     </div>
 
     <Pagination
       currentPage={1}
       lastPage={totalPages}
-      nextUrl={totalPages > 1 ? '/photos/page/2' : undefined}
+      nextUrl={totalPages > 1 ? "/photos/page/2" : undefined}
       baseUrl="/photos"
     />
   </article>
@@ -107,7 +130,9 @@ const photos = allPhotos.slice(0, PAGE_SIZE);
     height: 100%;
     object-fit: cover;
     display: block;
-    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
+    transition:
+      transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+      opacity 0.2s ease;
   }
 
   .image-link:hover .image-wrapper img {

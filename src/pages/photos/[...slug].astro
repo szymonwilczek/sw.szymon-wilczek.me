@@ -1,15 +1,15 @@
 ---
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getCollection } from 'astro:content';
-import FormattedDate from '../../components/FormattedDate.astro';
-import ExifBar from '../../components/ExifBar.astro';
-import { getExifData } from '../../utils/exif';
-import { renderContentEntry } from '../../utils/org';
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+import FormattedDate from "../../components/FormattedDate.astro";
+import ExifBar from "../../components/ExifBar.astro";
+import { getExifData } from "../../utils/exif";
+import { renderContentEntry } from "../../utils/org";
 
 export async function getStaticPaths() {
-  const photos = await getCollection('photos');
+  const photos = await getCollection("photos");
   return photos.map((photo) => ({
-    params: { slug: photo.id.replace(/\.(org|md|mdx|json)$/, '') },
+    params: { slug: photo.id.replace(/\.(org|md|mdx|json)$/, "") },
     props: { photo },
   }));
 }
@@ -19,7 +19,10 @@ const { html, Content } = await renderContentEntry(photo);
 const exif = await getExifData(photo.data.image);
 ---
 
-<BaseLayout title={photo.data.title} description={photo.data.description || photo.data.title}>
+<BaseLayout
+  title={photo.data.title}
+  description={photo.data.description || photo.data.title}
+>
   <article class="photo-article">
     <header class="photo-header">
       <div class="back-link">
@@ -28,7 +31,13 @@ const exif = await getExifData(photo.data.image);
       <h1>{photo.data.title}</h1>
       <div class="photo-meta">
         <span>Captured: <FormattedDate date={photo.data.date} /></span>
-        {photo.data.location && <span>Location: <code>{photo.data.location}</code></span>}
+        {
+          photo.data.location && (
+            <span>
+              Location: <code>{photo.data.location}</code>
+            </span>
+          )
+        }
       </div>
     </header>
 
@@ -37,9 +46,13 @@ const exif = await getExifData(photo.data.image);
         <img src={photo.data.image} alt={photo.data.alt} />
       </div>
       <ExifBar exif={exif} overrides={photo.data} />
-      {photo.data.description && (
-        <figcaption class="image-caption">{photo.data.description}</figcaption>
-      )}
+      {
+        photo.data.description && (
+          <figcaption class="image-caption">
+            {photo.data.description}
+          </figcaption>
+        )
+      }
     </figure>
 
     <div class="photo-narrative">
