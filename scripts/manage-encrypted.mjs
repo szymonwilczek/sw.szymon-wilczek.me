@@ -9,14 +9,15 @@ const [, , command, inputPath, passphrase, ...extraArgs] = process.argv;
 function showHelp() {
   console.log(`
 Usage:
-  1. Add encrypted note/document to the Vault (/vault):
-     node scripts/manage-encrypted.mjs vault <file.org|file.md|text> <passphrase> [title]
+  1. Add encrypted note or binary archive to the Vault (/vault):
+     node scripts/manage-encrypted.mjs vault <file.org|file.md|archive.tar.gz|text> <passphrase> [title]
 
   2. Add downloadable file/archive to Files & Archives (/files):
      node scripts/manage-encrypted.mjs file <path/to/archive.tar.gz> [passphrase] [category]
 
 Examples:
   node scripts/manage-encrypted.mjs vault ./my-secret.org "myMasterPassphrase" "Private Ledger"
+  node scripts/manage-encrypted.mjs vault ./keys.tar.gz "myMasterPassphrase" "Private Keys Archive"
   node scripts/manage-encrypted.mjs file ./backup.tar.gz "clientSecretKey" "Confidential Audit"
   node scripts/manage-encrypted.mjs file ./tool.tar.gz "" "Public Utilities"
 `);
@@ -74,41 +75,114 @@ function encryptAesGcm(bufferOrString, pass) {
   };
 }
 
+const binaryExtensions = [
+  ".tar.gz",
+  ".tgz",
+  ".tar.xz",
+  ".zip",
+  ".pdf",
+  ".png",
+  ".jpg",
+  ".jpeg",
+  ".iso",
+  ".bin",
+  ".sqlite",
+  ".gpg",
+  ".7z",
+  ".rar",
+];
+
+function isBinaryFile(filePath) {
+  const lower = filePath.toLowerCase();
+  return binaryExtensions.some((ext) => lower.endsWith(ext));
+}
+
 if (command === "vault") {
-  let content = "";
-  let defaultTitle = "Private Document";
-
-  if (fs.existsSync(inputPath)) {
-    content = fs.readFileSync(inputPath, "utf-8");
-    defaultTitle = path
-      .basename(inputPath, path.extname(inputPath))
-      .replace(/[-_]/g, " ");
-    defaultTitle = defaultTitle.charAt(0).toUpperCase() + defaultTitle.slice(1);
-  } else {
-    content = inputPath;
-  }
-
-  const title = extraArgs.join(" ") || defaultTitle;
-  const slug = slugify(title) || "secret-doc-" + Date.now();
-
-  const enc = encryptAesGcm(content, passphrase);
-
   const targetDir = path.join(rootDir, "src", "content", "vault");
+  const downloadsDir = path.join(rootDir, "public", "downloads");
   fs.mkdirSync(targetDir, { recursive: true });
+  fs.mkdirSync(downloadsDir, { recursive: true });
 
-  const targetFile = path.join(targetDir, `${slug}.json`);
-  const data = {
-    title,
-    date: new Date().toISOString().split("T")[0],
-    ciphertext: enc.ciphertext,
-    iv: enc.iv,
-    salt: enc.salt,
-  };
+  if (fs.existsSync(inputPath) && isBinaryFile(inputPath)) {
+    const filename = path.basename(inputPath);
+    const defaultTitle = filename.replace(/[-_.]/g, " ");
+    const title =
+      extraArgs.join(" ") ||
+      defaultTitle.charAt(0).toUpperCase() + defaultTitle.slice(1);
+    const slug = slugify(title) || "secret-file-" + Date.now();
 
-  fs.writeFileSync(targetFile, JSON.stringify(data, null, 2) + "\n");
-  console.log(`\nEncrypted document saved to: src/content/vault/${slug}.json`);
-  console.log(`  Title: "${title}"`);
-  console.log(`  Passphrase: "${passphrase}"`);
+    const fileBuf = fs.readFileSync(inputPath);
+    const sha256 = calculateSha256(fileBuf);
+    const filesize = formatBytes(fileBuf.length);
+
+    const enc = encryptAesGcm(fileBuf, passphrase);
+    const encFilename = `${filename}.enc`;
+    fs.writeFileSync(path.join(downloadsDir, encFilename), enc.rawEncrypted);
+
+    const data = {
+      title,
+      description: `Cryptographically sealed binary archive (${filesize}) protected by AES-256-GCM encryption.`,
+      date: new Date().toISOString().split("T")[0],
+      type: "file",
+      filename,
+      filesize,
+      sha256,
+      encryptedUrl: `/downloads/${encFilename}`,
+      iv: enc.iv,
+      salt: enc.salt,
+    };
+
+    fs.writeFileSync(
+      path.join(targetDir, `${slug}.json`),
+      JSON.stringify(data, null, 2) + "\n",
+    );
+    console.log(`\nEncrypted binary file saved to Vault!`);
+    console.log(`  File: ${filename} (${filesize})`);
+    console.log(`  Encrypted blob: public/downloads/${encFilename}`);
+    console.log(`  Vault descriptor: src/content/vault/${slug}.json`);
+    console.log(`  Passphrase: "${passphrase}"`);
+  } else {
+    let content = "";
+    let defaultTitle = "Private Document";
+    let filename = "document.org";
+
+    if (fs.existsSync(inputPath)) {
+      content = fs.readFileSync(inputPath, "utf-8");
+      filename = path.basename(inputPath);
+      defaultTitle = path
+        .basename(inputPath, path.extname(inputPath))
+        .replace(/[-_]/g, " ");
+      defaultTitle =
+        defaultTitle.charAt(0).toUpperCase() + defaultTitle.slice(1);
+    } else {
+      content = inputPath;
+    }
+
+    const title = extraArgs.join(" ") || defaultTitle;
+    const slug = slugify(title) || "secret-doc-" + Date.now();
+
+    const enc = encryptAesGcm(content, passphrase);
+
+    const data = {
+      title,
+      description: `Cryptographically sealed document protected by AES-256-GCM encryption.`,
+      date: new Date().toISOString().split("T")[0],
+      type: "note",
+      filename,
+      ciphertext: enc.ciphertext,
+      iv: enc.iv,
+      salt: enc.salt,
+    };
+
+    fs.writeFileSync(
+      path.join(targetDir, `${slug}.json`),
+      JSON.stringify(data, null, 2) + "\n",
+    );
+    console.log(`\nEncrypted text document saved to Secret Vault!`);
+    console.log(`  Title: "${title}"`);
+    console.log(`  Vault descriptor: src/content/vault/${slug}.json`);
+    console.log(`  Passphrase: "${passphrase}"`);
+  }
 } else if (command === "file") {
   if (!fs.existsSync(inputPath)) {
     console.error(`Error: File not found at ${inputPath}`);

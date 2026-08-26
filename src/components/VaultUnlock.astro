@@ -1,26 +1,40 @@
 ---
 interface Props {
-  ciphertext: string;
+  ciphertext?: string;
+  encryptedUrl?: string;
+  filename?: string;
+  filesize?: string;
   iv: string;
   salt: string;
   hint?: string;
 }
 
-const { ciphertext, iv, salt, hint } = Astro.props;
+const { ciphertext, encryptedUrl, filename, filesize, iv, salt, hint } = Astro.props;
+const isBinaryFile = Boolean(encryptedUrl);
 ---
 
-<div class="vault-container" data-ciphertext={ciphertext} data-iv={iv} data-salt={salt}>
+<div 
+  class="vault-container" 
+  data-ciphertext={ciphertext || ''} 
+  data-url={encryptedUrl || ''} 
+  data-filename={filename || 'document.org'}
+  data-is-file={isBinaryFile ? 'true' : 'false'}
+  data-iv={iv} 
+  data-salt={salt}
+>
   <div class="vault-prompt">
     <form class="vault-form" onsubmit="return false;">
       <div class="input-group">
         <input 
           type="password" 
           class="vault-input" 
-          placeholder="Enter Passphrase to decrypt..."
+          placeholder={isBinaryFile ? "Enter Passphrase to decrypt & download..." : "Enter Passphrase to decrypt..."}
           autocomplete="off" 
           required 
         />
-        <button type="submit" class="btn-action vault-btn">Unlock</button>
+        <button type="submit" class="btn-action vault-btn">
+          {isBinaryFile ? 'Unlock & Download' : 'Unlock'}
+        </button>
       </div>
       {hint && <span class="vault-hint">Hint: {hint}</span>}
       <div class="vault-error" style="display: none;"></div>
@@ -29,7 +43,15 @@ const { ciphertext, iv, salt, hint } = Astro.props;
 
   <div class="vault-unlocked" style="display: none;">
     <div class="unlocked-header">
-      <span class="unlocked-badge">Document Decrypted Successfully</span>
+      <span class="unlocked-badge">Decrypted Successfully</span>
+      <div class="unlocked-actions">
+        {!isBinaryFile && (
+          <button type="button" class="btn-action vault-copy-btn">Copy</button>
+        )}
+        <button type="button" class="btn-action vault-download-btn">
+          {isBinaryFile ? 'Download Again' : 'Download File'}
+        </button>
+      </div>
     </div>
     <div class="vault-content"></div>
   </div>
@@ -44,6 +66,30 @@ const { ciphertext, iv, salt, hint } = Astro.props;
       return buf;
     }
 
+    async function deriveAesKey(passphrase, salt) {
+      var enc = new TextEncoder();
+      var keyMaterial = await window.crypto.subtle.importKey(
+        'raw',
+        enc.encode(passphrase),
+        'PBKDF2',
+        false,
+        ['deriveKey']
+      );
+
+      return await window.crypto.subtle.deriveKey(
+        {
+          name: 'PBKDF2',
+          salt: salt,
+          iterations: 100000,
+          hash: 'SHA-256',
+        },
+        keyMaterial,
+        { name: 'AES-GCM', length: 256 },
+        false,
+        ['decrypt']
+      );
+    }
+
     async function unlockVault(container) {
       var input = container.querySelector('.vault-input');
       var errorEl = container.querySelector('.vault-error');
@@ -51,58 +97,106 @@ const { ciphertext, iv, salt, hint } = Astro.props;
       var unlockedEl = container.querySelector('.vault-unlocked');
       var contentEl = container.querySelector('.vault-content');
       var btn = container.querySelector('.vault-btn');
+      var copyBtn = container.querySelector('.vault-copy-btn');
+      var downloadBtn = container.querySelector('.vault-download-btn');
 
       if (!input || !errorEl || !promptEl || !unlockedEl || !contentEl || !btn) return;
 
       var passphrase = input.value;
       if (!passphrase) return;
 
+      var isFile = container.dataset.isFile === 'true';
+      var filename = container.dataset.filename || 'decrypted-file';
+      var salt = base64ToBuffer(container.dataset.salt || '');
+      var iv = base64ToBuffer(container.dataset.iv || '');
+
       btn.disabled = true;
-      btn.textContent = 'Verifying...';
+      btn.textContent = isFile ? 'Decrypting in RAM...' : 'Verifying...';
       errorEl.style.display = 'none';
 
       try {
-        var ciphertext = base64ToBuffer(container.dataset.ciphertext || '');
-        var iv = base64ToBuffer(container.dataset.iv || '');
-        var salt = base64ToBuffer(container.dataset.salt || '');
+        var key = await deriveAesKey(passphrase, salt);
+        var decryptedBytes;
+        var rawTextContent = '';
 
-        var enc = new TextEncoder();
-        var keyMaterial = await window.crypto.subtle.importKey(
-          'raw',
-          enc.encode(passphrase),
-          'PBKDF2',
-          false,
-          ['deriveKey']
-        );
+        if (isFile) {
+          var resp = await fetch(container.dataset.url);
+          if (!resp.ok) throw new Error('Could not fetch encrypted file payload.');
+          var encryptedData = await resp.arrayBuffer();
 
-        var key = await window.crypto.subtle.deriveKey(
-          {
-            name: 'PBKDF2',
-            salt: salt,
-            iterations: 100000,
-            hash: 'SHA-256',
-          },
-          keyMaterial,
-          { name: 'AES-GCM', length: 256 },
-          false,
-          ['decrypt']
-        );
+          decryptedBytes = await window.crypto.subtle.decrypt(
+            { name: 'AES-GCM', iv: iv },
+            key,
+            encryptedData
+          );
 
-        var decrypted = await window.crypto.subtle.decrypt(
-          { name: 'AES-GCM', iv: iv },
-          key,
-          ciphertext
-        );
+          var blob = new Blob([decryptedBytes], { type: 'application/octet-stream' });
+          var downloadUrl = URL.createObjectURL(blob);
+          var a = document.createElement('a');
+          a.href = downloadUrl;
+          a.download = filename;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
 
-        var dec = new TextDecoder();
-        contentEl.innerHTML = dec.decode(decrypted);
+          contentEl.innerHTML = '<p class="file-download-notice">Decrypted and downloaded <code>' + filename + '</code> directly to your device.</p>';
+
+          if (downloadBtn) {
+            downloadBtn.onclick = function() {
+              var a2 = document.createElement('a');
+              a2.href = downloadUrl;
+              a2.download = filename;
+              document.body.appendChild(a2);
+              a2.click();
+              document.body.removeChild(a2);
+            };
+          }
+        } else {
+          var ciphertext = base64ToBuffer(container.dataset.ciphertext || '');
+          decryptedBytes = await window.crypto.subtle.decrypt(
+            { name: 'AES-GCM', iv: iv },
+            key,
+            ciphertext
+          );
+
+          var dec = new TextDecoder();
+          rawTextContent = dec.decode(decryptedBytes);
+          contentEl.innerHTML = rawTextContent;
+
+          if (copyBtn) {
+            copyBtn.onclick = function() {
+              var plain = contentEl.innerText || rawTextContent;
+              navigator.clipboard.writeText(plain).then(function() {
+                var orig = copyBtn.textContent;
+                copyBtn.textContent = 'Copied!';
+                setTimeout(function() { copyBtn.textContent = orig; }, 2000);
+              });
+            };
+          }
+
+          if (downloadBtn) {
+            downloadBtn.onclick = function() {
+              var plain = contentEl.innerText || rawTextContent;
+              var blob = new Blob([plain], { type: 'text/plain;charset=utf-8' });
+              var dlUrl = URL.createObjectURL(blob);
+              var a = document.createElement('a');
+              a.href = dlUrl;
+              a.download = filename.endsWith('.org') || filename.endsWith('.txt') || filename.endsWith('.md') ? filename : filename + '.org';
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+              setTimeout(function() { URL.revokeObjectURL(dlUrl); }, 3000);
+            };
+          }
+        }
+
         promptEl.style.display = 'none';
         unlockedEl.style.display = 'block';
       } catch (e) {
         errorEl.textContent = 'Decryption failed: Invalid passphrase.';
         errorEl.style.display = 'block';
         btn.disabled = false;
-        btn.textContent = 'Unlock';
+        btn.textContent = isFile ? 'Unlock & Download' : 'Unlock';
         input.focus();
       }
     }
@@ -137,7 +231,7 @@ const { ciphertext, iv, salt, hint } = Astro.props;
   .vault-prompt {
     background: transparent;
     padding: 0;
-    max-width: 460px;
+    max-width: 480px;
   }
 
   .input-group {
@@ -164,7 +258,10 @@ const { ciphertext, iv, salt, hint } = Astro.props;
     border-color: var(--fg-link);
   }
 
-  .vault-btn {
+  .vault-btn,
+  .vault-action-btn,
+  .vault-copy-btn,
+  .vault-download-btn {
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -183,13 +280,19 @@ const { ciphertext, iv, salt, hint } = Astro.props;
     transition: background-color 0.12s ease, color 0.12s ease, border-color 0.12s ease !important;
   }
 
-  .vault-btn:hover:not(:disabled) {
+  .vault-btn:hover:not(:disabled),
+  .vault-action-btn:hover,
+  .vault-copy-btn:hover,
+  .vault-download-btn:hover {
     background-color: var(--fg-main) !important;
     color: var(--bg-main) !important;
     border-color: var(--fg-main) !important;
   }
 
-  .vault-btn:active:not(:disabled) {
+  .vault-btn:active:not(:disabled),
+  .vault-action-btn:active,
+  .vault-copy-btn:active,
+  .vault-download-btn:active {
     background-color: var(--fg-link) !important;
     color: var(--bg-main) !important;
     border-color: var(--fg-link) !important;
@@ -226,8 +329,13 @@ const { ciphertext, iv, salt, hint } = Astro.props;
 
   .unlocked-header {
     margin-bottom: 0.75rem;
-    padding-bottom: 0.4rem;
+    padding-bottom: 0.5rem;
     border-bottom: 1px dashed var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
   }
 
   .unlocked-badge {
@@ -237,10 +345,26 @@ const { ciphertext, iv, salt, hint } = Astro.props;
     color: var(--fg-link-active);
   }
 
+  .unlocked-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+
   .vault-content {
     line-height: 1.65;
     color: var(--fg-main);
     font-size: 0.95rem;
+  }
+
+  .file-download-notice {
+    margin: 0;
+    font-family: "Typus Mono 95", "Typus Mono", monospace;
+    font-size: 0.88rem;
+    color: var(--fg-main);
+  }
+
+  .file-download-notice code {
+    color: var(--fg-link);
   }
 
   .vault-content :global(h3) {

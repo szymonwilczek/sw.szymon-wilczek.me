@@ -68,6 +68,9 @@ const prevUrl = page.currentPage === 2 ? '/vault' : page.url.prev;
 
           <VaultUnlock 
             ciphertext={item.data.ciphertext}
+            encryptedUrl={item.data.encryptedUrl}
+            filename={item.data.filename || (item.id.replace(/\.(json|org|md)$/, '') + '.org')}
+            filesize={item.data.filesize}
             iv={item.data.iv}
             salt={item.data.salt}
             hint={item.data.hint}
