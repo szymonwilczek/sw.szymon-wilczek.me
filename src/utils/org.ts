@@ -1,6 +1,6 @@
 import { unified } from "unified";
-import reorgParse from "@orgajs/reorg-parse";
-import reorgRehype from "@orgajs/reorg-rehype";
+import uniorgParse from "uniorg-parse";
+import uniorgRehype from "uniorg-rehype";
 import rehypeStringify from "rehype-stringify";
 import { visit } from "unist-util-visit";
 import { createHighlighter } from "shiki";
@@ -285,8 +285,8 @@ export async function renderOrg(orgContent: string): Promise<string> {
 
   const highlighter = await getHighlighter();
   const processor = unified()
-    .use(reorgParse)
-    .use(reorgRehype)
+    .use(uniorgParse)
+    .use(uniorgRehype)
     .use(rehypeShikiHighlight, highlighter)
     .use(rehypeStringify);
 

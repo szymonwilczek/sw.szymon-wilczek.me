@@ -192,3 +192,83 @@ ul, ol {
 li {
   margin-bottom: 0.45rem;
 }
+
+dl {
+  margin: 1.5rem 0;
+}
+
+dt {
+  font-family: "Typus Mono 95", "Typus Mono", monospace;
+  font-weight: 700;
+  color: var(--fg-link);
+  margin-top: 1rem;
+}
+
+dd {
+  margin-left: 1.5rem;
+  margin-bottom: 1rem;
+  color: var(--fg-main);
+  line-height: 1.6;
+}
+
+/* Org-mode Tables */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 2rem 0;
+  font-family: "Typus Mono 95", "Typus Mono", monospace;
+  font-size: 0.88rem;
+  background-color: var(--bg-dim);
+  border: 1px solid var(--border);
+  overflow-x: auto;
+  display: block;
+}
+
+th, td {
+  padding: 0.65rem 1rem;
+  border: 1px solid var(--border);
+  text-align: left;
+}
+
+th {
+  background-color: var(--bg-main);
+  font-weight: 700;
+  color: var(--fg-main);
+  border-bottom: 2px solid var(--border);
+}
+
+tr:nth-child(even) {
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+/* Org-mode Checkboxes */
+input[type="checkbox"] {
+  accent-color: var(--fg-link);
+  margin-right: 0.4rem;
+  cursor: pointer;
+}
+
+/* Org-mode Footnotes */
+.footnotes, section[data-footnotes] {
+  margin-top: 3.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px dashed var(--border);
+  font-size: 0.88rem;
+  color: var(--fg-alt);
+}
+
+.footnotes ol, section[data-footnotes] ol {
+  padding-left: 1.5rem;
+}
+
+.footnotes li, section[data-footnotes] li {
+  margin-bottom: 0.65rem;
+}
+
+sup a {
+  font-family: "Typus Mono 95", "Typus Mono", monospace;
+  font-size: 0.8em;
+  font-weight: 700;
+  text-decoration: none;
+  padding: 0 0.15rem;
+}
