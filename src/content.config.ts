@@ -115,9 +115,26 @@ const photos = defineCollection({
   }),
 });
 
+const vault = defineCollection({
+  loader: glob({
+    pattern: "**/*.{json,org,md}",
+    base: "./src/content/vault",
+  }),
+  schema: z.object({
+    title: z.string(),
+    description: z.string().optional(),
+    date: flexibleDate.optional(),
+    ciphertext: z.string(),
+    iv: z.string(),
+    salt: z.string(),
+    hint: z.string().optional(),
+  }),
+});
+
 export const collections = {
   writings,
   projects,
   files,
   photos,
+  vault,
 };

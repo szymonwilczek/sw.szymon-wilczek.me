@@ -8,7 +8,9 @@
     "start": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "vault:add": "node scripts/manage-encrypted.mjs vault",
+    "file:add": "node scripts/manage-encrypted.mjs file"
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.11",
