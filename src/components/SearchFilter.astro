@@ -1,132 +1,144 @@
 ---
 interface Props {
-	placeholder?: string;
-	targetSelector: string;
-	containerSelector?: string;
+  placeholder?: string;
+  targetSelector: string;
+  containerSelector?: string;
 }
 
-const { placeholder = 'Filter by keyword, title, or tag...', targetSelector, containerSelector = '' } = Astro.props;
+const {
+  placeholder = "Filter by keyword, title, or tag...",
+  targetSelector,
+  containerSelector = "",
+} = Astro.props;
 ---
 
 <div class="search-filter-box" data-target={targetSelector} data-container={containerSelector}>
-	<div class="search-input-wrapper">
-		<span class="search-icon" aria-hidden="true">&gt;</span>
-		<input type="text" class="live-search-input" placeholder={placeholder} aria-label="Filter entries" autocomplete="off" />
-		<button type="button" class="clear-search-btn" style="display: none;" aria-label="Clear filter">&times;</button>
-	</div>
-	<div class="no-results" style="display: none;">
-		<p>No entries match the filter term.</p>
-	</div>
+  <div class="search-input-wrapper">
+    <span class="search-icon" aria-hidden="true">&gt;</span>
+    <input
+      type="text"
+      class="live-search-input"
+      placeholder={placeholder}
+      aria-label="Filter entries"
+      autocomplete="off"
+    />
+    <button type="button" class="clear-search-btn" style="display: none;" aria-label="Clear filter"
+      >&times;</button
+    >
+  </div>
+  <div class="no-results" style="display: none;">
+    <p>No entries match the filter term.</p>
+  </div>
 </div>
 
 <script is:inline>
-	(function () {
-		function setupSearchFilters() {
-			document.querySelectorAll('.search-filter-box').forEach(function (box) {
-				var input = box.querySelector('.live-search-input');
-				var clearBtn = box.querySelector('.clear-search-btn');
-				var noResults = box.querySelector('.no-results');
-				var targetSelector = box.dataset.target;
-				var containerSelector = box.dataset.container;
+  (function () {
+    function setupSearchFilters() {
+      document.querySelectorAll(".search-filter-box").forEach(function (box) {
+        var input = box.querySelector(".live-search-input");
+        var clearBtn = box.querySelector(".clear-search-btn");
+        var noResults = box.querySelector(".no-results");
+        var targetSelector = box.dataset.target;
+        var containerSelector = box.dataset.container;
 
-				if (!input || !targetSelector) return;
+        if (!input || !targetSelector) return;
 
-				var container = containerSelector ? document.querySelector(containerSelector) : document;
+        var container = containerSelector ? document.querySelector(containerSelector) : document;
 
-				function applyFilter() {
-					var query = input.value.trim().toLowerCase();
-					clearBtn.style.display = query ? 'inline-block' : 'none';
+        function applyFilter() {
+          var query = input.value.trim().toLowerCase();
+          clearBtn.style.display = query ? "inline-block" : "none";
 
-					var items = container.querySelectorAll(targetSelector);
-					var matchCount = 0;
+          var items = container.querySelectorAll(targetSelector);
+          var matchCount = 0;
 
-					items.forEach(function (item) {
-						var searchData = (item.dataset.search || item.textContent || '').toLowerCase();
-						var matches = !query || searchData.includes(query);
-						item.style.display = matches ? '' : 'none';
-						if (matches) matchCount++;
-					});
+          items.forEach(function (item) {
+            var searchData = (item.dataset.search || item.textContent || "").toLowerCase();
+            var matches = !query || searchData.includes(query);
+            item.style.display = matches ? "" : "none";
+            if (matches) matchCount++;
+          });
 
-					if (noResults) {
-						noResults.style.display = items.length > 0 && matchCount === 0 ? 'block' : 'none';
-					}
-				}
+          if (noResults) {
+            noResults.style.display = items.length > 0 && matchCount === 0 ? "block" : "none";
+          }
+        }
 
-				input.addEventListener('input', applyFilter);
+        input.addEventListener("input", applyFilter);
 
-				clearBtn.addEventListener('click', function () {
-					input.value = '';
-					applyFilter();
-					input.focus();
-				});
-			});
-		}
+        clearBtn.addEventListener("click", function () {
+          input.value = "";
+          applyFilter();
+          input.focus();
+        });
+      });
+    }
 
-		if (document.readyState === 'loading') {
-			document.addEventListener('DOMContentLoaded', setupSearchFilters);
-		} else {
-			setupSearchFilters();
-		}
-	})();
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", setupSearchFilters);
+    } else {
+      setupSearchFilters();
+    }
+  })();
 </script>
 
 <style>
-	.search-filter-box {
-		margin: 1.5rem 0 2rem 0;
-	}
+  .search-filter-box {
+    margin: 1.5rem 0 2rem 0;
+  }
 
-	.search-input-wrapper {
-		display: flex;
-		align-items: center;
-		background-color: var(--bg-dim);
-		border: 1px solid var(--border);
-		padding: 0.45rem 0.85rem;
-		border-radius: 2px;
-		transition: border-color 0.15s ease;
-	}
+  .search-input-wrapper {
+    display: flex;
+    align-items: center;
+    background-color: var(--bg-dim);
+    border: 1px solid var(--border);
+    padding: 0.45rem 0.85rem;
+    border-radius: 2px;
+    transition: border-color 0.15s ease;
+  }
 
-	.search-input-wrapper:focus-within {
-		border-color: var(--fg-link);
-		outline: 1px solid var(--fg-link);
-	}
+  .search-input-wrapper:focus-within {
+    border-color: var(--fg-link);
+    outline: 1px solid var(--fg-link);
+  }
 
-	.search-icon {
-		font-family: 'Typus Mono 95', 'Typus Mono', monospace;
-		font-weight: 700;
-		color: var(--fg-dim);
-		margin-right: 0.5rem;
-		user-select: none;
-	}
+  .search-icon {
+    font-family: "Typus Mono 95", "Typus Mono", monospace;
+    font-weight: 700;
+    color: var(--fg-dim);
+    margin-right: 0.5rem;
+    user-select: none;
+  }
 
-	.live-search-input {
-		flex: 1;
-		background: transparent;
-		border: none;
-		outline: none;
-		color: var(--fg-main);
-		font-family: 'Typus Mono 95', 'Typus Mono', monospace;
-		font-size: 0.95rem;
-	}
+  .live-search-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--fg-main);
+    font-family: "Typus Mono 95", "Typus Mono", monospace;
+    font-size: 0.95rem;
+  }
 
-	.clear-search-btn {
-		background: transparent;
-		border: none;
-		color: var(--fg-dim);
-		font-family: 'Typus Mono 95', 'Typus Mono', monospace;
-		font-size: 1.1rem;
-		cursor: pointer;
-		padding: 0 0.25rem;
-		line-height: 1;
-	}
+  .clear-search-btn {
+    background: transparent;
+    border: none;
+    color: var(--fg-dim);
+    font-family: "Typus Mono 95", "Typus Mono", monospace;
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding: 0 0.25rem;
+    line-height: 1;
+  }
 
-	.clear-search-btn:hover {
-		color: var(--red-warmer);
-	}
+  .clear-search-btn:hover {
+    color: var(--red-warmer);
+  }
 
-	.no-results {
-		padding: 1.5rem 0;
-		color: var(--fg-dim);
-		font-family: 'Typus Mono 95', 'Typus Mono', monospace;
-		font-style: italic;
-	}
+  .no-results {
+    padding: 1.5rem 0;
+    color: var(--fg-dim);
+    font-family: "Typus Mono 95", "Typus Mono", monospace;
+    font-style: italic;
+  }
 </style>

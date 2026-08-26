@@ -1,135 +1,155 @@
 ---
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getCollection } from 'astro:content';
-import FormattedDate from '../../components/FormattedDate.astro';
-import SearchFilter from '../../components/SearchFilter.astro';
-import Pagination from '../../components/Pagination.astro';
-import { calculateReadingStats } from '../../utils/reading-time';
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+import FormattedDate from "../../components/FormattedDate.astro";
+import SearchFilter from "../../components/SearchFilter.astro";
+import Pagination from "../../components/Pagination.astro";
+import { calculateReadingStats } from "../../utils/reading-time";
 
 const PAGE_SIZE = 10;
-const allWritings = (await getCollection('writings')).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+const allWritings = (await getCollection("writings")).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+);
 
 const totalPages = Math.ceil(allWritings.length / PAGE_SIZE);
 const writings = allWritings.slice(0, PAGE_SIZE);
 ---
 
-<BaseLayout title="Writings" description="Essays, manifestos, notes, and reflections on sovereign computing and hypermedia.">
-	<article>
-		<h1>Writings &amp; Essays</h1>
+<BaseLayout
+  title="Writings"
+  description="Essays, manifestos, notes, and reflections on sovereign computing and hypermedia."
+>
+  <article>
+    <h1>Writings &amp; Essays</h1>
 
-		<p>Technical notes, manifestos, with maybe some touch of philosophical reflections on software engineering and digital sovereignty.</p>
+    <p>
+      Technical notes, manifestos, with maybe some touch of philosophical reflections on software
+      engineering and digital sovereignty.
+    </p>
 
-		<SearchFilter placeholder="Filter by keyword, tag, or title..." targetSelector=".writing-card" containerSelector=".writings-list" />
+    <SearchFilter
+      placeholder="Filter by keyword, tag, or title..."
+      targetSelector=".writing-card"
+      containerSelector=".writings-list"
+    />
 
-		<div class="writings-list">
-			{
-				writings.map((post) => {
-					const stats = calculateReadingStats(post.body);
-					return (
-						<section
-							class="writing-card"
-							data-search={`${post.data.title} ${post.data.description || ''} ${post.data.tags.join(' ')} ${post.data.category}`}>
-							<header class="writing-header">
-								<h2>
-									<a href={`/writings/${post.id.replace(/\.(org|md|mdx)$/, '')}`}>{post.data.title}</a>
-								</h2>
-								<span class="writing-date">
-									<FormattedDate date={post.data.pubDate} />
-								</span>
-							</header>
+    <div class="writings-list">
+      {
+        writings.map((post) => {
+          const stats = calculateReadingStats(post.body);
+          return (
+            <section
+              class="writing-card"
+              data-search={`${post.data.title} ${post.data.description || ""} ${post.data.tags.join(" ")} ${post.data.category}`}
+            >
+              <header class="writing-header">
+                <h2>
+                  <a href={`/writings/${post.id.replace(/\.(org|md|mdx)$/, "")}`}>
+                    {post.data.title}
+                  </a>
+                </h2>
+                <span class="writing-date">
+                  <FormattedDate date={post.data.pubDate} />
+                </span>
+              </header>
 
-							{post.data.description && <p class="writing-desc">{post.data.description}</p>}
+              {post.data.description && <p class="writing-desc">{post.data.description}</p>}
 
-							<div class="writing-meta">
-								<span class="reading-time">{stats.text}</span>
-								<span class="meta-sep">&middot;</span>
-								<span class="category-badge">category: {post.data.category}</span>
-								{post.data.tags.length > 0 && (
-									<>
-										<span class="meta-sep">&middot;</span>
-										<span class="tags">[{post.data.tags.join(', ')}]</span>
-									</>
-								)}
-							</div>
-						</section>
-					);
-				})
-			}
+              <div class="writing-meta">
+                <span class="reading-time">{stats.text}</span>
+                <span class="meta-sep">&middot;</span>
+                <span class="category-badge">category: {post.data.category}</span>
+                {post.data.tags.length > 0 && (
+                  <>
+                    <span class="meta-sep">&middot;</span>
+                    <span class="tags">[{post.data.tags.join(", ")}]</span>
+                  </>
+                )}
+              </div>
+            </section>
+          );
+        })
+      }
 
-			{writings.length === 0 && <p>No essays or writings published yet.</p>}
-		</div>
+      {writings.length === 0 && <p>No essays or writings published yet.</p>}
+    </div>
 
-		<Pagination currentPage={1} lastPage={totalPages} nextUrl={totalPages > 1 ? '/writings/page/2' : undefined} baseUrl="/writings" />
-	</article>
+    <Pagination
+      currentPage={1}
+      lastPage={totalPages}
+      nextUrl={totalPages > 1 ? "/writings/page/2" : undefined}
+      baseUrl="/writings"
+    />
+  </article>
 </BaseLayout>
 
 <style>
-	.writings-list {
-		margin-top: 1.5rem;
-		display: flex;
-		flex-direction: column;
-		gap: 2.25rem;
-	}
+  .writings-list {
+    margin-top: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2.25rem;
+  }
 
-	.writing-card {
-		border-left: 2px solid var(--border);
-		padding-left: 1.25rem;
-		transition: border-color 0.2s ease;
-	}
+  .writing-card {
+    border-left: 2px solid var(--border);
+    padding-left: 1.25rem;
+    transition: border-color 0.2s ease;
+  }
 
-	.writing-card:hover {
-		border-left-color: var(--fg-link);
-	}
+  .writing-card:hover {
+    border-left-color: var(--fg-link);
+  }
 
-	.writing-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: baseline;
-		flex-wrap: wrap;
-		gap: 0.5rem;
-	}
+  .writing-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
 
-	.writing-header h2 {
-		margin: 0;
-		font-size: 1.35rem;
-		border-bottom: none;
-		padding-bottom: 0;
-	}
+  .writing-header h2 {
+    margin: 0;
+    font-size: 1.35rem;
+    border-bottom: none;
+    padding-bottom: 0;
+  }
 
-	.writing-date {
-		font-family: 'Typus Mono 95', 'Typus Mono', monospace;
-		font-size: 0.88rem;
-		color: var(--fg-dim);
-	}
+  .writing-date {
+    font-family: "Typus Mono 95", "Typus Mono", monospace;
+    font-size: 0.88rem;
+    color: var(--fg-dim);
+  }
 
-	.writing-desc {
-		margin: 0.5rem 0 0.75rem 0;
-	}
+  .writing-desc {
+    margin: 0.5rem 0 0.75rem 0;
+  }
 
-	.writing-meta {
-		font-family: 'Typus Mono 95', 'Typus Mono', monospace;
-		font-size: 0.82rem;
-		color: var(--fg-dim);
-		display: flex;
-		align-items: center;
-		gap: 0.6rem;
-		flex-wrap: wrap;
-	}
+  .writing-meta {
+    font-family: "Typus Mono 95", "Typus Mono", monospace;
+    font-size: 0.82rem;
+    color: var(--fg-dim);
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+  }
 
-	.reading-time {
-		color: var(--fg-alt);
-	}
+  .reading-time {
+    color: var(--fg-alt);
+  }
 
-	.meta-sep {
-		color: var(--fg-dim);
-		opacity: 0.6;
-	}
+  .meta-sep {
+    color: var(--fg-dim);
+    opacity: 0.6;
+  }
 
-	.category-badge {
-		color: var(--fg-link-active);
-	}
+  .category-badge {
+    color: var(--fg-link-active);
+  }
 
-	.tags {
-		color: var(--fg-alt);
-	}
+  .tags {
+    color: var(--fg-alt);
+  }
 </style>

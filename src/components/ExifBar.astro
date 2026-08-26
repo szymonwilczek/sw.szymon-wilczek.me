@@ -1,17 +1,17 @@
 ---
-import type { ExifData } from '../utils/exif';
+import type { ExifData } from "../utils/exif";
 
 interface Props {
-	exif: ExifData | null;
-	overrides?: {
-		camera?: string;
-		lens?: string;
-		aperture?: string;
-		shutterSpeed?: string;
-		iso?: string;
-		film?: string;
-		location?: string;
-	};
+  exif: ExifData | null;
+  overrides?: {
+    camera?: string;
+    lens?: string;
+    aperture?: string;
+    shutterSpeed?: string;
+    iso?: string;
+    film?: string;
+    location?: string;
+  };
 }
 
 const { exif, overrides = {} } = Astro.props;
@@ -19,7 +19,8 @@ const camera = overrides.camera || exif?.camera;
 const lens = overrides.lens || exif?.lens;
 const aperture = overrides.aperture || exif?.aperture;
 const shutter = overrides.shutterSpeed || exif?.shutterSpeed;
-const iso = overrides.iso || (overrides.film ? `${overrides.film} / ${exif?.iso || ''}`.trim() : exif?.iso);
+const iso =
+  overrides.iso || (overrides.film ? `${overrides.film} / ${exif?.iso || ""}`.trim() : exif?.iso);
 const focalLength = exif?.focalLength;
 const location = overrides.location;
 
@@ -27,86 +28,86 @@ const hasData = Boolean(camera || lens || aperture || shutter || iso || focalLen
 ---
 
 {
-	hasData && (
-		<div class="exif-bar" aria-label="Photo EXIF Metadata">
-			<div class="exif-grid">
-				{camera && (
-					<div class="exif-field">
-						<span class="exif-label">CAM:</span>
-						<span class="exif-value">{camera}</span>
-					</div>
-				)}
-				{lens && (
-					<div class="exif-field">
-						<span class="exif-label">LENS:</span>
-						<span class="exif-value">{lens}</span>
-					</div>
-				)}
-				{focalLength && (
-					<div class="exif-field">
-						<span class="exif-label">FL:</span>
-						<span class="exif-value">{focalLength}</span>
-					</div>
-				)}
-				{aperture && (
-					<div class="exif-field">
-						<span class="exif-label">AP:</span>
-						<span class="exif-value">{aperture}</span>
-					</div>
-				)}
-				{shutter && (
-					<div class="exif-field">
-						<span class="exif-label">EXP:</span>
-						<span class="exif-value">{shutter}</span>
-					</div>
-				)}
-				{iso && (
-					<div class="exif-field">
-						<span class="exif-label">ISO:</span>
-						<span class="exif-value">{iso}</span>
-					</div>
-				)}
-				{location && (
-					<div class="exif-field">
-						<span class="exif-label">LOC:</span>
-						<span class="exif-value">{location}</span>
-					</div>
-				)}
-			</div>
-		</div>
-	)
+  hasData && (
+    <div class="exif-bar" aria-label="Photo EXIF Metadata">
+      <div class="exif-grid">
+        {camera && (
+          <div class="exif-field">
+            <span class="exif-label">CAM:</span>
+            <span class="exif-value">{camera}</span>
+          </div>
+        )}
+        {lens && (
+          <div class="exif-field">
+            <span class="exif-label">LENS:</span>
+            <span class="exif-value">{lens}</span>
+          </div>
+        )}
+        {focalLength && (
+          <div class="exif-field">
+            <span class="exif-label">FL:</span>
+            <span class="exif-value">{focalLength}</span>
+          </div>
+        )}
+        {aperture && (
+          <div class="exif-field">
+            <span class="exif-label">AP:</span>
+            <span class="exif-value">{aperture}</span>
+          </div>
+        )}
+        {shutter && (
+          <div class="exif-field">
+            <span class="exif-label">EXP:</span>
+            <span class="exif-value">{shutter}</span>
+          </div>
+        )}
+        {iso && (
+          <div class="exif-field">
+            <span class="exif-label">ISO:</span>
+            <span class="exif-value">{iso}</span>
+          </div>
+        )}
+        {location && (
+          <div class="exif-field">
+            <span class="exif-label">LOC:</span>
+            <span class="exif-value">{location}</span>
+          </div>
+        )}
+      </div>
+    </div>
+  )
 }
 
 <style>
-	.exif-bar {
-		font-family: 'Typus Mono', 'JetBrains Mono', monospace;
-		font-size: 0.78rem;
-		background-color: var(--bg-dim);
-		border: 1px solid var(--border);
-		border-top: none;
-		padding: 0.45rem 0.75rem;
-		color: var(--fg-dim);
-		line-height: 1.4;
-	}
+  .exif-bar {
+    font-family: "Typus Mono", "JetBrains Mono", monospace;
+    font-size: 0.78rem;
+    background-color: var(--bg-dim);
+    border: 1px solid var(--border);
+    border-top: none;
+    padding: 0.45rem 0.75rem;
+    color: var(--fg-dim);
+    line-height: 1.4;
+  }
 
-	.exif-grid {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.5rem 1.25rem;
-	}
+  .exif-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.25rem;
+  }
 
-	.exif-field {
-		display: inline-flex;
-		gap: 0.35rem;
-		align-items: baseline;
-	}
+  .exif-field {
+    display: inline-flex;
+    gap: 0.35rem;
+    align-items: baseline;
+  }
 
-	.exif-label {
-		color: var(--fg-dim);
-		font-weight: 600;
-	}
+  .exif-label {
+    color: var(--fg-dim);
+    font-weight: 600;
+  }
 
-	.exif-value {
-		color: var(--fg-main);
-	}
+  .exif-value {
+    color: var(--fg-main);
+  }
 </style>

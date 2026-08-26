@@ -1,17 +1,22 @@
 root = true
 
-# Coding style for all source files
 [*]
 charset = utf-8
 end_of_line = lf
 insert_final_newline = true
 trim_trailing_whitespace = true
+indent_style = space
+indent_size = 2
+tab_width = 2
+max_line_length = 100
+
+[*.{c,h,s,S}]
 indent_style = tab
 indent_size = 8
 tab_width = 8
-max_line_length = 160
+max_line_length = 100
 
-[*.{js,mjs,cjs,ts,mts,cts,astro,json,css,html,sh}]
+[*.{sh,bash,zsh}]
 indent_style = tab
 indent_size = 8
 tab_width = 8

@@ -1,103 +1,117 @@
 ---
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import VaultUnlock from '../../components/VaultUnlock.astro';
-import Pagination from '../../components/Pagination.astro';
-import SearchFilter from '../../components/SearchFilter.astro';
-import FormattedDate from '../../components/FormattedDate.astro';
-import { getCollection } from 'astro:content';
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import VaultUnlock from "../../components/VaultUnlock.astro";
+import Pagination from "../../components/Pagination.astro";
+import SearchFilter from "../../components/SearchFilter.astro";
+import FormattedDate from "../../components/FormattedDate.astro";
+import { getCollection } from "astro:content";
 
 const PAGE_SIZE = 10;
-const allVaultItems = (await getCollection('vault')).sort((a, b) => (b.data.date?.valueOf() || 0) - (a.data.date?.valueOf() || 0));
+const allVaultItems = (await getCollection("vault")).sort(
+  (a, b) => (b.data.date?.valueOf() || 0) - (a.data.date?.valueOf() || 0)
+);
 
 const totalPages = Math.ceil(allVaultItems.length / PAGE_SIZE);
 const vaultItems = allVaultItems.slice(0, PAGE_SIZE);
 ---
 
 <BaseLayout title="Vault" description="Encrypted vault container.">
-	<article>
-		<h1>Cryptographic Vault</h1>
+  <article>
+    <h1>Cryptographic Vault</h1>
 
-		<p>This is a private document store. All contents on this page are encrypted.</p>
+    <p>This is a private document store. All contents on this page are encrypted.</p>
 
-		<SearchFilter placeholder="Filter by title, description, or keyword..." targetSelector=".vault-card" containerSelector=".vault-items" />
+    <SearchFilter
+      placeholder="Filter by title, description, or keyword..."
+      targetSelector=".vault-card"
+      containerSelector=".vault-items"
+    />
 
-		<div class="vault-items">
-			{
-				vaultItems.map((item) => (
-					<section class="vault-card" data-search={`${item.data.title} ${item.data.description || ''} ${item.data.hint || ''}`}>
-						<header class="vault-header">
-							<h2>{item.data.title}</h2>
-							{item.data.date && (
-								<span class="vault-date">
-									<FormattedDate date={item.data.date} />
-								</span>
-							)}
-						</header>
+    <div class="vault-items">
+      {
+        vaultItems.map((item) => (
+          <section
+            class="vault-card"
+            data-search={`${item.data.title} ${item.data.description || ""} ${item.data.hint || ""}`}
+          >
+            <header class="vault-header">
+              <h2>{item.data.title}</h2>
+              {item.data.date && (
+                <span class="vault-date">
+                  <FormattedDate date={item.data.date} />
+                </span>
+              )}
+            </header>
 
-						{item.data.description && <p class="vault-desc">{item.data.description}</p>}
+            {item.data.description && <p class="vault-desc">{item.data.description}</p>}
 
-						<VaultUnlock
-							ciphertext={item.data.ciphertext}
-							encryptedUrl={item.data.encryptedUrl}
-							filename={item.data.filename || item.id.replace(/\.(json|org|md)$/, '') + '.org'}
-							filesize={item.data.filesize}
-							iv={item.data.iv}
-							salt={item.data.salt}
-							hint={item.data.hint}
-						/>
-					</section>
-				))
-			}
+            <VaultUnlock
+              ciphertext={item.data.ciphertext}
+              encryptedUrl={item.data.encryptedUrl}
+              filename={item.data.filename || item.id.replace(/\.(json|org|md)$/, "") + ".org"}
+              filesize={item.data.filesize}
+              iv={item.data.iv}
+              salt={item.data.salt}
+              hint={item.data.hint}
+            />
+          </section>
+        ))
+      }
 
-			{vaultItems.length === 0 && <p>No encrypted vault documents stored at this moment.</p>}
-		</div>
+      {vaultItems.length === 0 && <p>No encrypted vault documents stored at this moment.</p>}
+    </div>
 
-		<Pagination currentPage={1} lastPage={totalPages} nextUrl={totalPages > 1 ? '/vault/page/2' : undefined} baseUrl="/vault" />
-	</article>
+    <Pagination
+      currentPage={1}
+      lastPage={totalPages}
+      nextUrl={totalPages > 1 ? "/vault/page/2" : undefined}
+      baseUrl="/vault"
+    />
+  </article>
 </BaseLayout>
 
 <style>
-	.vault-items {
-		margin-top: 1.5rem;
-		display: flex;
-		flex-direction: column;
-		gap: 2.25rem;
-	}
+  .vault-items {
+    margin-top: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2.25rem;
+  }
 
-	.vault-card {
-		border-left: 2px solid var(--border);
-		padding-left: 1.25rem;
-		transition: border-color 0.2s ease;
-	}
+  .vault-card {
+    border-left: 2px solid var(--border);
+    padding-left: 1.25rem;
+    transition: border-color 0.2s ease;
+  }
 
-	.vault-card:hover {
-		border-left-color: var(--fg-link);
-	}
+  .vault-card:hover {
+    border-left-color: var(--fg-link);
+  }
 
-	.vault-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: baseline;
-		flex-wrap: wrap;
-		gap: 0.5rem;
-	}
+  .vault-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
 
-	.vault-header h2 {
-		margin: 0;
-		font-size: 1.35rem;
-		border-bottom: none;
-		padding-bottom: 0;
-	}
+  .vault-header h2 {
+    margin: 0;
+    font-size: 1.35rem;
+    border-bottom: none;
+    padding-bottom: 0;
+  }
 
-	.vault-date {
-		font-family: 'Typus Mono 95', 'Typus Mono', monospace;
-		font-size: 0.88rem;
-		color: var(--fg-dim);
-	}
+  .vault-date {
+    font-family: "Typus Mono 95", "Typus Mono", monospace;
+    font-size: 0.88rem;
+    color: var(--fg-dim);
+  }
 
-	.vault-desc {
-		margin: 0.4rem 0 0.75rem 0;
-		font-size: 0.92rem;
-		color: var(--fg-main);
-	}
+  .vault-desc {
+    margin: 0.4rem 0 0.75rem 0;
+    font-size: 0.92rem;
+    color: var(--fg-main);
+  }
 </style>

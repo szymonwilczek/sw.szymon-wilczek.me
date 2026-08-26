@@ -1,11 +1,11 @@
 ---
 interface Props {
-	date: Date | string;
+  date: Date | string;
 }
 
 const { date } = Astro.props;
-const d = typeof date === 'string' ? new Date(date) : date;
-const isoString = d.toISOString().split('T')[0];
+const d = typeof date === "string" ? new Date(date) : date;
+const isoString = d.toISOString().split("T")[0];
 ---
 
 <time datetime={isoString}>{isoString}</time>

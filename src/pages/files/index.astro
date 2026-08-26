@@ -1,581 +1,613 @@
 ---
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getCollection } from 'astro:content';
-import FormattedDate from '../../components/FormattedDate.astro';
-import SearchFilter from '../../components/SearchFilter.astro';
-import Pagination from '../../components/Pagination.astro';
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+import FormattedDate from "../../components/FormattedDate.astro";
+import SearchFilter from "../../components/SearchFilter.astro";
+import Pagination from "../../components/Pagination.astro";
 
 const PAGE_SIZE = 10;
-const allFiles = (await getCollection('files')).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const allFiles = (await getCollection("files")).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
+);
 
 const totalPages = Math.ceil(allFiles.length / PAGE_SIZE);
 const files = allFiles.slice(0, PAGE_SIZE);
 ---
 
-<BaseLayout title="Files" description="Software distributions, tool packages, and encrypted archives with SHA-256 cryptographic verification.">
-	<article>
-		<h1>Files &amp; Archives</h1>
+<BaseLayout
+  title="Files"
+  description="Software distributions, tool packages, and encrypted archives with SHA-256 cryptographic verification."
+>
+  <article>
+    <h1>Files &amp; Archives</h1>
 
-		<p>Archive of standalone utilities, snapshots, packages, and sealed archives.</p>
+    <p>Archive of standalone utilities, snapshots, packages, and sealed archives.</p>
 
-		<SearchFilter placeholder="Filter by filename, category, or SHA-256..." targetSelector=".file-card" containerSelector=".files-container" />
+    <SearchFilter
+      placeholder="Filter by filename, category, or SHA-256..."
+      targetSelector=".file-card"
+      containerSelector=".files-container"
+    />
 
-		<div class="files-container">
-			{
-				files.map((file) => (
-					<section
-						class="file-card"
-						data-search={`${file.data.title} ${file.data.filename} ${file.data.category} ${file.data.description} ${file.data.sha256} ${file.data.encrypted ? 'encrypted private' : 'public'}`}>
-						<header class="file-header">
-							<h2>
-								{file.data.title}
-								{file.data.encrypted && <span class="encrypted-pill">Private</span>}
-							</h2>
-							<span class="file-date">
-								<FormattedDate date={file.data.date} />
-							</span>
-						</header>
+    <div class="files-container">
+      {
+        files.map((file) => (
+          <section
+            class="file-card"
+            data-search={`${file.data.title} ${file.data.filename} ${file.data.category} ${file.data.description} ${file.data.sha256} ${file.data.encrypted ? "encrypted private" : "public"}`}
+          >
+            <header class="file-header">
+              <h2>
+                {file.data.title}
+                {file.data.encrypted && <span class="encrypted-pill">Private</span>}
+              </h2>
+              <span class="file-date">
+                <FormattedDate date={file.data.date} />
+              </span>
+            </header>
 
-						<p class="file-desc">{file.data.description}</p>
+            <p class="file-desc">{file.data.description}</p>
 
-						<div class="file-details">
-							<div class="detail-row">
-								<span class="label">Filename:</span>
-								<code>{file.data.filename}</code>
-							</div>
-							<div class="detail-row">
-								<span class="label">Filesize:</span>
-								<span>{file.data.filesize}</span>
-							</div>
-							<div class="detail-row">
-								<span class="label">Category:</span>
-								<span>{file.data.category}</span>
-							</div>
-							<div class="detail-row sha-row">
-								<span class="label">SHA-256:</span>
-								<code class="sha-code">{file.data.sha256}</code>
-							</div>
-						</div>
+            <div class="file-details">
+              <div class="detail-row">
+                <span class="label">Filename:</span>
+                <code>{file.data.filename}</code>
+              </div>
+              <div class="detail-row">
+                <span class="label">Filesize:</span>
+                <span>{file.data.filesize}</span>
+              </div>
+              <div class="detail-row">
+                <span class="label">Category:</span>
+                <span>{file.data.category}</span>
+              </div>
+              <div class="detail-row sha-row">
+                <span class="label">SHA-256:</span>
+                <code class="sha-code">{file.data.sha256}</code>
+              </div>
+            </div>
 
-						<div class="card-actions">
-							{file.data.encrypted ? (
-								<button
-									type="button"
-									class="btn-action unlock-archive-btn"
-									data-filename={file.data.filename}
-									data-url={file.data.encryptedUrl}
-									data-salt={file.data.salt}
-									data-iv={file.data.iv}
-									data-sha={file.data.sha256}>
-									Unlock &amp; Download
-								</button>
-							) : (
-								file.data.downloadUrl && (
-									<a href={file.data.downloadUrl} class="btn-action" download>
-										Download Archive
-									</a>
-								)
-							)}
-						</div>
-					</section>
-				))
-			}
+            <div class="card-actions">
+              {file.data.encrypted ? (
+                <button
+                  type="button"
+                  class="btn-action unlock-archive-btn"
+                  data-filename={file.data.filename}
+                  data-url={file.data.encryptedUrl}
+                  data-salt={file.data.salt}
+                  data-iv={file.data.iv}
+                  data-sha={file.data.sha256}
+                >
+                  Unlock &amp; Download
+                </button>
+              ) : (
+                file.data.downloadUrl && (
+                  <a href={file.data.downloadUrl} class="btn-action" download>
+                    Download Archive
+                  </a>
+                )
+              )}
+            </div>
+          </section>
+        ))
+      }
 
-			{files.length === 0 && <p>No downloadable files indexed at this moment.</p>}
-		</div>
+      {files.length === 0 && <p>No downloadable files indexed at this moment.</p>}
+    </div>
 
-		<Pagination currentPage={1} lastPage={totalPages} nextUrl={totalPages > 1 ? '/files/page/2' : undefined} baseUrl="/files" />
+    <Pagination
+      currentPage={1}
+      lastPage={totalPages}
+      nextUrl={totalPages > 1 ? "/files/page/2" : undefined}
+      baseUrl="/files"
+    />
 
-		<dialog id="unlock-modal" class="unlock-dialog">
-			<div class="modal-card">
-				<header class="modal-header">
-					<h3 class="modal-title">Unlock Protected Archive</h3>
-					<button type="button" id="close-modal-btn" class="modal-close-btn" aria-label="Close dialog">&times;</button>
-				</header>
+    <dialog id="unlock-modal" class="unlock-dialog">
+      <div class="modal-card">
+        <header class="modal-header">
+          <h3 class="modal-title">Unlock Protected Archive</h3>
+          <button
+            type="button"
+            id="close-modal-btn"
+            class="modal-close-btn"
+            aria-label="Close dialog">&times;</button
+          >
+        </header>
 
-				<div class="modal-body">
-					<p class="target-file-info">
-						Target File: <code id="modal-filename">archive.tar.gz</code>
-					</p>
-					<p class="modal-explanation">
-						This archive is sealed with client-side AES-256-GCM encryption. <br />
-						Enter the passphrase to decrypt and trigger the immediate file download.
-					</p>
+        <div class="modal-body">
+          <p class="target-file-info">
+            Target File: <code id="modal-filename">archive.tar.gz</code>
+          </p>
+          <p class="modal-explanation">
+            This archive is sealed with client-side AES-256-GCM encryption. <br />
+            Enter the passphrase to decrypt and trigger the immediate file download.
+          </p>
 
-					<form id="modal-decrypt-form" onsubmit="return false;">
-						<div class="modal-input-group">
-							<input
-								type="password"
-								id="modal-passphrase"
-								class="modal-input"
-								placeholder="Enter Passphrase..."
-								autocomplete="off"
-								required
-							/>
-							<button type="submit" id="modal-decrypt-btn" class="btn-action modal-submit-btn">
-								Decrypt &amp; Download
-							</button>
-						</div>
-						<div id="modal-status" class="modal-status-box" style="display: none;"></div>
-					</form>
-				</div>
-			</div>
-		</dialog>
-	</article>
+          <form id="modal-decrypt-form" onsubmit="return false;">
+            <div class="modal-input-group">
+              <input
+                type="password"
+                id="modal-passphrase"
+                class="modal-input"
+                placeholder="Enter Passphrase..."
+                autocomplete="off"
+                required
+              />
+              <button type="submit" id="modal-decrypt-btn" class="btn-action modal-submit-btn">
+                Decrypt &amp; Download
+              </button>
+            </div>
+            <div id="modal-status" class="modal-status-box" style="display: none;"></div>
+          </form>
+        </div>
+      </div>
+    </dialog>
+  </article>
 </BaseLayout>
 
 <script is:inline>
-	(function () {
-		function base64ToBuffer(b64) {
-			var bin = atob(b64);
-			var buf = new Uint8Array(bin.length);
-			for (var i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
-			return buf;
-		}
+  (function () {
+    function base64ToBuffer(b64) {
+      var bin = atob(b64);
+      var buf = new Uint8Array(bin.length);
+      for (var i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
+      return buf;
+    }
 
-		function initArchiveDecryption() {
-			var modal = document.getElementById('unlock-modal');
-			var closeBtn = document.getElementById('close-modal-btn');
-			var filenameEl = document.getElementById('modal-filename');
-			var passInput = document.getElementById('modal-passphrase');
-			var form = document.getElementById('modal-decrypt-form');
-			var submitBtn = document.getElementById('modal-decrypt-btn');
-			var statusBox = document.getElementById('modal-status');
+    function initArchiveDecryption() {
+      var modal = document.getElementById("unlock-modal");
+      var closeBtn = document.getElementById("close-modal-btn");
+      var filenameEl = document.getElementById("modal-filename");
+      var passInput = document.getElementById("modal-passphrase");
+      var form = document.getElementById("modal-decrypt-form");
+      var submitBtn = document.getElementById("modal-decrypt-btn");
+      var statusBox = document.getElementById("modal-status");
 
-			if (!modal || !form || !passInput || !submitBtn || !statusBox) return;
+      if (!modal || !form || !passInput || !submitBtn || !statusBox) return;
 
-			var activeTarget = null;
+      var activeTarget = null;
 
-			document.querySelectorAll('.unlock-archive-btn').forEach(function (btn) {
-				btn.addEventListener('click', function () {
-					activeTarget = {
-						filename: btn.dataset.filename,
-						url: btn.dataset.url,
-						salt: btn.dataset.salt,
-						iv: btn.dataset.iv,
-						sha: btn.dataset.sha,
-					};
+      document.querySelectorAll(".unlock-archive-btn").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          activeTarget = {
+            filename: btn.dataset.filename,
+            url: btn.dataset.url,
+            salt: btn.dataset.salt,
+            iv: btn.dataset.iv,
+            sha: btn.dataset.sha,
+          };
 
-					if (filenameEl) filenameEl.textContent = activeTarget.filename;
-					passInput.value = '';
-					statusBox.style.display = 'none';
-					statusBox.textContent = '';
-					submitBtn.disabled = false;
-					submitBtn.textContent = 'Decrypt & Download';
+          if (filenameEl) filenameEl.textContent = activeTarget.filename;
+          passInput.value = "";
+          statusBox.style.display = "none";
+          statusBox.textContent = "";
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Decrypt & Download";
 
-					if (typeof modal.showModal === 'function') {
-						modal.showModal();
-					} else {
-						modal.setAttribute('open', '');
-					}
-					passInput.focus();
-				});
-			});
+          if (typeof modal.showModal === "function") {
+            modal.showModal();
+          } else {
+            modal.setAttribute("open", "");
+          }
+          passInput.focus();
+        });
+      });
 
-			function closeModal() {
-				if (typeof modal.close === 'function') {
-					modal.close();
-				} else {
-					modal.removeAttribute('open');
-				}
-			}
+      function closeModal() {
+        if (typeof modal.close === "function") {
+          modal.close();
+        } else {
+          modal.removeAttribute("open");
+        }
+      }
 
-			if (closeBtn) closeBtn.onclick = closeModal;
+      if (closeBtn) closeBtn.onclick = closeModal;
 
-			modal.addEventListener('click', function (e) {
-				if (e.target === modal) closeModal();
-			});
+      modal.addEventListener("click", function (e) {
+        if (e.target === modal) closeModal();
+      });
 
-			form.onsubmit = async function (e) {
-				e.preventDefault();
-				var passphrase = passInput.value;
-				if (!passphrase || !activeTarget) return;
+      form.onsubmit = async function (e) {
+        e.preventDefault();
+        var passphrase = passInput.value;
+        if (!passphrase || !activeTarget) return;
 
-				submitBtn.disabled = true;
-				submitBtn.textContent = 'Decrypting...';
-				statusBox.style.display = 'none';
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Decrypting...";
+        statusBox.style.display = "none";
 
-				try {
-					var resp = await fetch(activeTarget.url);
-					if (!resp.ok) throw new Error('Could not fetch encrypted payload.');
-					var encryptedData = await resp.arrayBuffer();
+        try {
+          var resp = await fetch(activeTarget.url);
+          if (!resp.ok) throw new Error("Could not fetch encrypted payload.");
+          var encryptedData = await resp.arrayBuffer();
 
-					var salt = base64ToBuffer(activeTarget.salt);
-					var iv = base64ToBuffer(activeTarget.iv);
+          var salt = base64ToBuffer(activeTarget.salt);
+          var iv = base64ToBuffer(activeTarget.iv);
 
-					var enc = new TextEncoder();
-					var keyMaterial = await window.crypto.subtle.importKey('raw', enc.encode(passphrase), 'PBKDF2', false, ['deriveKey']);
+          var enc = new TextEncoder();
+          var keyMaterial = await window.crypto.subtle.importKey(
+            "raw",
+            enc.encode(passphrase),
+            "PBKDF2",
+            false,
+            ["deriveKey"]
+          );
 
-					var key = await window.crypto.subtle.deriveKey(
-						{
-							name: 'PBKDF2',
-							salt: salt,
-							iterations: 100000,
-							hash: 'SHA-256',
-						},
-						keyMaterial,
-						{ name: 'AES-GCM', length: 256 },
-						false,
-						['decrypt'],
-					);
+          var key = await window.crypto.subtle.deriveKey(
+            {
+              name: "PBKDF2",
+              salt: salt,
+              iterations: 100000,
+              hash: "SHA-256",
+            },
+            keyMaterial,
+            { name: "AES-GCM", length: 256 },
+            false,
+            ["decrypt"]
+          );
 
-					var decrypted = await window.crypto.subtle.decrypt({ name: 'AES-GCM', iv: iv }, key, encryptedData);
+          var decrypted = await window.crypto.subtle.decrypt(
+            { name: "AES-GCM", iv: iv },
+            key,
+            encryptedData
+          );
 
-					var blob = new Blob([decrypted], {
-						type: 'application/octet-stream',
-					});
-					var downloadUrl = URL.createObjectURL(blob);
-					var a = document.createElement('a');
-					a.href = downloadUrl;
-					a.download = activeTarget.filename;
-					document.body.appendChild(a);
-					a.click();
-					document.body.removeChild(a);
-					setTimeout(function () {
-						URL.revokeObjectURL(downloadUrl);
-					}, 3000);
+          var blob = new Blob([decrypted], {
+            type: "application/octet-stream",
+          });
+          var downloadUrl = URL.createObjectURL(blob);
+          var a = document.createElement("a");
+          a.href = downloadUrl;
+          a.download = activeTarget.filename;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          setTimeout(function () {
+            URL.revokeObjectURL(downloadUrl);
+          }, 3000);
 
-					statusBox.textContent = 'Decrypted successfully! Downloading ' + activeTarget.filename + '...';
-					statusBox.className = 'modal-status-box success';
-					statusBox.style.display = 'block';
+          statusBox.textContent =
+            "Decrypted successfully! Downloading " + activeTarget.filename + "...";
+          statusBox.className = "modal-status-box success";
+          statusBox.style.display = "block";
 
-					setTimeout(function () {
-						closeModal();
-					}, 1600);
-				} catch (err) {
-					statusBox.textContent = 'Decryption failed: Invalid passphrase for this archive.';
-					statusBox.className = 'modal-status-box error';
-					statusBox.style.display = 'block';
-					submitBtn.disabled = false;
-					submitBtn.textContent = '[ Decrypt & Download ]';
-					passInput.focus();
-				}
-			};
-		}
+          setTimeout(function () {
+            closeModal();
+          }, 1600);
+        } catch (err) {
+          statusBox.textContent = "Decryption failed: Invalid passphrase for this archive.";
+          statusBox.className = "modal-status-box error";
+          statusBox.style.display = "block";
+          submitBtn.disabled = false;
+          submitBtn.textContent = "[ Decrypt & Download ]";
+          passInput.focus();
+        }
+      };
+    }
 
-		if (document.readyState === 'loading') {
-			document.addEventListener('DOMContentLoaded', initArchiveDecryption);
-		} else {
-			initArchiveDecryption();
-		}
-	})();
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", initArchiveDecryption);
+    } else {
+      initArchiveDecryption();
+    }
+  })();
 </script>
 
 <style>
-	.files-container {
-		margin-top: 1.5rem;
-		display: flex;
-		flex-direction: column;
-		gap: 2.5rem;
-	}
+  .files-container {
+    margin-top: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+  }
 
-	.file-card {
-		border-left: 2px solid var(--border);
-		padding-left: 1.25rem;
-		transition: border-color 0.2s ease;
-	}
+  .file-card {
+    border-left: 2px solid var(--border);
+    padding-left: 1.25rem;
+    transition: border-color 0.2s ease;
+  }
 
-	.file-card:hover {
-		border-left-color: var(--fg-link);
-	}
+  .file-card:hover {
+    border-left-color: var(--fg-link);
+  }
 
-	.file-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: baseline;
-		flex-wrap: wrap;
-		gap: 0.5rem;
-	}
+  .file-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
 
-	.file-header h2 {
-		margin: 0;
-		font-size: 1.35rem;
-		border-bottom: none;
-		padding-bottom: 0;
-		display: flex;
-		align-items: center;
-		gap: 0.6rem;
-		flex-wrap: wrap;
-	}
+  .file-header h2 {
+    margin: 0;
+    font-size: 1.35rem;
+    border-bottom: none;
+    padding-bottom: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+  }
 
-	.encrypted-pill {
-		font-family: 'Typus Mono 95', 'Typus Mono', monospace;
-		font-size: 0.8rem;
-		font-weight: 600;
-		color: var(--fg-link);
-		background-color: var(--bg-dim);
-		border: 1px solid var(--border);
-		padding: 0.15rem 0.5rem;
-		border-radius: 2px;
-	}
+  .encrypted-pill {
+    font-family: "Typus Mono 95", "Typus Mono", monospace;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--fg-link);
+    background-color: var(--bg-dim);
+    border: 1px solid var(--border);
+    padding: 0.15rem 0.5rem;
+    border-radius: 2px;
+  }
 
-	.file-date {
-		font-family: 'Typus Mono 95', 'Typus Mono', monospace;
-		font-size: 0.88rem;
-		color: var(--fg-dim);
-	}
+  .file-date {
+    font-family: "Typus Mono 95", "Typus Mono", monospace;
+    font-size: 0.88rem;
+    color: var(--fg-dim);
+  }
 
-	.file-desc {
-		margin: 0.5rem 0 1rem 0;
-	}
+  .file-desc {
+    margin: 0.5rem 0 1rem 0;
+  }
 
-	.file-details {
-		font-family: 'Typus Mono 95', 'Typus Mono', monospace;
-		font-size: 0.85rem;
-		background-color: var(--bg-dim);
-		border: 1px solid var(--border);
-		padding: 0.85rem 1rem;
-		margin-bottom: 1rem;
-		display: flex;
-		flex-direction: column;
-		gap: 0.4rem;
-	}
+  .file-details {
+    font-family: "Typus Mono 95", "Typus Mono", monospace;
+    font-size: 0.85rem;
+    background-color: var(--bg-dim);
+    border: 1px solid var(--border);
+    padding: 0.85rem 1rem;
+    margin-bottom: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
 
-	.detail-row {
-		display: flex;
-		gap: 0.75rem;
-		flex-wrap: wrap;
-	}
+  .detail-row {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
 
-	.label {
-		color: var(--fg-dim);
-		min-width: 85px;
-	}
+  .label {
+    color: var(--fg-dim);
+    min-width: 85px;
+  }
 
-	.sha-code {
-		word-break: break-all;
-		font-size: 0.82em;
-	}
+  .sha-code {
+    word-break: break-all;
+    font-size: 0.82em;
+  }
 
-	.card-actions {
-		margin-top: 0.85rem;
-	}
+  .card-actions {
+    margin-top: 0.85rem;
+  }
 
-	.btn-action,
-	.unlock-archive-btn,
-	.modal-submit-btn {
-		display: inline-flex !important;
-		align-items: center !important;
-		justify-content: center !important;
-		background: transparent !important;
-		border: 1px solid var(--border) !important;
-		color: var(--fg-main) !important;
-		font-family: 'Typus Mono 95', 'Typus Mono', monospace !important;
-		font-size: 0.85rem !important;
-		font-weight: 500 !important;
-		padding: 0.35rem 0.85rem !important;
-		border-radius: 0 !important;
-		cursor: pointer !important;
-		text-decoration: none !important;
-		line-height: 1.4 !important;
-		white-space: nowrap !important;
-		transition:
-			background-color 0.12s ease,
-			color 0.12s ease,
-			border-color 0.12s ease !important;
-	}
+  .btn-action,
+  .unlock-archive-btn,
+  .modal-submit-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: transparent !important;
+    border: 1px solid var(--border) !important;
+    color: var(--fg-main) !important;
+    font-family: "Typus Mono 95", "Typus Mono", monospace !important;
+    font-size: 0.85rem !important;
+    font-weight: 500 !important;
+    padding: 0.35rem 0.85rem !important;
+    border-radius: 0 !important;
+    cursor: pointer !important;
+    text-decoration: none !important;
+    line-height: 1.4 !important;
+    white-space: nowrap !important;
+    transition:
+      background-color 0.12s ease,
+      color 0.12s ease,
+      border-color 0.12s ease !important;
+  }
 
-	.btn-action:hover,
-	.unlock-archive-btn:hover:not(:disabled),
-	.modal-submit-btn:hover:not(:disabled) {
-		background-color: var(--fg-main) !important;
-		color: var(--bg-main) !important;
-		border-color: var(--fg-main) !important;
-	}
+  .btn-action:hover,
+  .unlock-archive-btn:hover:not(:disabled),
+  .modal-submit-btn:hover:not(:disabled) {
+    background-color: var(--fg-main) !important;
+    color: var(--bg-main) !important;
+    border-color: var(--fg-main) !important;
+  }
 
-	.btn-action:active,
-	.unlock-archive-btn:active:not(:disabled),
-	.modal-submit-btn:active:not(:disabled) {
-		background-color: var(--fg-link) !important;
-		color: var(--bg-main) !important;
-		border-color: var(--fg-link) !important;
-	}
+  .btn-action:active,
+  .unlock-archive-btn:active:not(:disabled),
+  .modal-submit-btn:active:not(:disabled) {
+    background-color: var(--fg-link) !important;
+    color: var(--bg-main) !important;
+    border-color: var(--fg-link) !important;
+  }
 
-	.unlock-archive-btn:disabled,
-	.modal-submit-btn:disabled {
-		opacity: 0.5;
-		cursor: not-allowed;
-	}
+  .unlock-archive-btn:disabled,
+  .modal-submit-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 
-	.unlock-dialog {
-		position: fixed;
-		top: 50% !important;
-		left: 50% !important;
-		transform: translate(-50%, -50%) !important;
-		margin: 0 !important;
-		border: 1px solid var(--border);
-		background-color: var(--bg-dim);
-		color: var(--fg-main);
-		padding: 0;
-		max-width: 540px;
-		width: calc(100vw - 2.5rem);
-		border-radius: 2px;
-		box-shadow: 0 20px 50px rgba(0, 0, 0, 0.75);
-		z-index: 2000;
-	}
+  .unlock-dialog {
+    position: fixed;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    margin: 0 !important;
+    border: 1px solid var(--border);
+    background-color: var(--bg-dim);
+    color: var(--fg-main);
+    padding: 0;
+    max-width: 540px;
+    width: calc(100vw - 2.5rem);
+    border-radius: 2px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.75);
+    z-index: 2000;
+  }
 
-	.unlock-dialog::backdrop {
-		background: rgba(15, 14, 6, 0.78);
-		backdrop-filter: blur(4px);
-		-webkit-backdrop-filter: blur(4px);
-	}
+  .unlock-dialog::backdrop {
+    background: rgba(15, 14, 6, 0.78);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
 
-	.modal-card {
-		padding: 1.5rem;
-		background-color: var(--bg-dim);
-	}
+  .modal-card {
+    padding: 1.5rem;
+    background-color: var(--bg-dim);
+  }
 
-	.modal-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		margin-bottom: 1.25rem;
-		padding-bottom: 0.5rem;
-		border-bottom: 1px solid var(--border);
-	}
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
 
-	.modal-title {
-		margin: 0;
-		font-family: 'Typus Mono 95', 'Typus Mono', monospace;
-		font-size: 1.1rem;
-		font-weight: 700;
-		color: var(--fg-link);
-	}
+  .modal-title {
+    margin: 0;
+    font-family: "Typus Mono 95", "Typus Mono", monospace;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--fg-link);
+  }
 
-	.modal-close-btn {
-		background: transparent;
-		border: none;
-		color: var(--fg-dim);
-		font-family: 'Typus Mono 95', 'Typus Mono', monospace;
-		font-size: 1.3rem;
-		cursor: pointer;
-		line-height: 1;
-		padding: 0 0.25rem;
-	}
+  .modal-close-btn {
+    background: transparent;
+    border: none;
+    color: var(--fg-dim);
+    font-family: "Typus Mono 95", "Typus Mono", monospace;
+    font-size: 1.3rem;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0 0.25rem;
+  }
 
-	.modal-close-btn:hover {
-		color: var(--red-warmer);
-	}
+  .modal-close-btn:hover {
+    color: var(--red-warmer);
+  }
 
-	.target-file-info {
-		font-family: 'Typus Mono 95', 'Typus Mono', monospace;
-		font-size: 0.9rem;
-		margin-bottom: 0.5rem;
-		color: var(--fg-main);
-	}
+  .target-file-info {
+    font-family: "Typus Mono 95", "Typus Mono", monospace;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+    color: var(--fg-main);
+  }
 
-	.target-file-info code {
-		color: var(--fg-link);
-	}
+  .target-file-info code {
+    color: var(--fg-link);
+  }
 
-	.modal-explanation {
-		font-size: 0.92rem;
-		color: var(--fg-alt);
-		margin-bottom: 1.25rem;
-		line-height: 1.55;
-	}
+  .modal-explanation {
+    font-size: 0.92rem;
+    color: var(--fg-alt);
+    margin-bottom: 1.25rem;
+    line-height: 1.55;
+  }
 
-	.modal-input-group {
-		display: flex;
-		gap: 0.6rem;
-		width: 100%;
-	}
+  .modal-input-group {
+    display: flex;
+    gap: 0.6rem;
+    width: 100%;
+  }
 
-	.modal-input {
-		background-color: var(--bg-main);
-		border: 1px solid var(--border);
-		color: var(--fg-main);
-		padding: 0.45rem 0.75rem;
-		font-family: 'Typus Mono 95', 'Typus Mono', monospace;
-		font-size: 0.88rem;
-		letter-spacing: 0.08em;
-		border-radius: 2px;
-	}
+  .modal-input {
+    background-color: var(--bg-main);
+    border: 1px solid var(--border);
+    color: var(--fg-main);
+    padding: 0.45rem 0.75rem;
+    font-family: "Typus Mono 95", "Typus Mono", monospace;
+    font-size: 0.88rem;
+    letter-spacing: 0.08em;
+    border-radius: 2px;
+  }
 
-	.modal-input:focus {
-		outline: 1px solid var(--fg-link);
-		border-color: var(--fg-link);
-	}
+  .modal-input:focus {
+    outline: 1px solid var(--fg-link);
+    border-color: var(--fg-link);
+  }
 
-	.modal-submit-btn {
-		background-color: var(--bg-button);
-		border: 1px solid var(--border);
-		color: var(--fg-button);
-		font-family: 'Typus Mono 95', 'Typus Mono', monospace;
-		font-size: 0.88rem;
-		font-weight: 600;
-		padding: 0.45rem 1rem;
-		cursor: pointer;
-		border-radius: 2px;
-		transition:
-			background-color 0.15s ease,
-			color 0.15s ease,
-			border-color 0.15s ease;
-		white-space: nowrap;
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-	}
+  .modal-submit-btn {
+    background-color: var(--bg-button);
+    border: 1px solid var(--border);
+    color: var(--fg-button);
+    font-family: "Typus Mono 95", "Typus Mono", monospace;
+    font-size: 0.88rem;
+    font-weight: 600;
+    padding: 0.45rem 1rem;
+    cursor: pointer;
+    border-radius: 2px;
+    transition:
+      background-color 0.15s ease,
+      color 0.15s ease,
+      border-color 0.15s ease;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
 
-	.modal-submit-btn:hover:not(:disabled) {
-		background-color: var(--bg-button-hover);
-		color: var(--fg-button-hover);
-		border-color: var(--fg-button-hover);
-	}
+  .modal-submit-btn:hover:not(:disabled) {
+    background-color: var(--bg-button-hover);
+    color: var(--fg-button-hover);
+    border-color: var(--fg-button-hover);
+  }
 
-	.modal-submit-btn:disabled {
-		opacity: 0.6;
-		cursor: not-allowed;
-	}
+  .modal-submit-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
 
-	/* Desktop layout */
-	@media (min-width: 40em) {
-		.modal-input-group {
-			flex-direction: row;
-			align-items: stretch;
-		}
-		.modal-input {
-			flex: 1;
-			min-width: 180px;
-		}
-		.modal-submit-btn {
-			flex-shrink: 0;
-		}
-	}
+  /* Desktop layout */
+  @media (min-width: 40em) {
+    .modal-input-group {
+      flex-direction: row;
+      align-items: stretch;
+    }
+    .modal-input {
+      flex: 1;
+      min-width: 180px;
+    }
+    .modal-submit-btn {
+      flex-shrink: 0;
+    }
+  }
 
-	/* Mobile layout */
-	@media (max-width: 39.99em) {
-		.modal-input-group {
-			flex-direction: column;
-			gap: 0.75rem;
-		}
-		.modal-input {
-			width: 100%;
-			min-width: 0;
-		}
-		.modal-submit-btn {
-			width: 100%;
-			padding: 0.6rem 1rem;
-		}
-	}
+  /* Mobile layout */
+  @media (max-width: 39.99em) {
+    .modal-input-group {
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .modal-input {
+      width: 100%;
+      min-width: 0;
+    }
+    .modal-submit-btn {
+      width: 100%;
+      padding: 0.6rem 1rem;
+    }
+  }
 
-	.modal-status-box {
-		margin-top: 1rem;
-		font-family: 'Typus Mono 95', 'Typus Mono', monospace;
-		font-size: 0.85rem;
-		padding: 0.6rem 0.85rem;
-		border-radius: 2px;
-	}
+  .modal-status-box {
+    margin-top: 1rem;
+    font-family: "Typus Mono 95", "Typus Mono", monospace;
+    font-size: 0.85rem;
+    padding: 0.6rem 0.85rem;
+    border-radius: 2px;
+  }
 
-	.modal-status-box.success {
-		background-color: var(--bg-main);
-		color: var(--fg-link-active);
-		border: 1px solid var(--fg-link-active);
-	}
+  .modal-status-box.success {
+    background-color: var(--bg-main);
+    color: var(--fg-link-active);
+    border: 1px solid var(--fg-link-active);
+  }
 
-	.modal-status-box.error {
-		background-color: var(--bg-main);
-		color: var(--red-warmer);
-		border: 1px solid var(--red-warmer);
-	}
+  .modal-status-box.error {
+    background-color: var(--bg-main);
+    color: var(--red-warmer);
+    border: 1px solid var(--red-warmer);
+  }
 </style>

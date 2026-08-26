@@ -1,124 +1,159 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
+import BaseLayout from "../layouts/BaseLayout.astro";
 ---
 
-<BaseLayout title="About" description="Biographical context, dualist editor philosophy, and open source contributions.">
-	<article class="about-article">
-		<header class="about-header">
-			<h1>About me</h1>
-			<p class="about-tagline">Software engineer, dualist editor enthusiast, and open-source contributor.</p>
-		</header>
+<BaseLayout
+  title="About"
+  description="Biographical context, dualist editor philosophy, and open source contributions."
+>
+  <article class="about-article">
+    <header class="about-header">
+      <h1>About me</h1>
+      <p class="about-tagline">
+        Software engineer, dualist editor enthusiast, and open-source contributor.
+      </p>
+    </header>
 
-		<hr />
+    <hr />
 
-		<section class="about-section">
-			<h2>Background & Origins</h2>
-			<p>
-				I am a software engineer with academic and practical roots at the
-				<strong>Silesian University of Technology</strong> (Faculty of Automatic Control, Electronics and Computer Science - AEI). <br
-				/> My engineering interests lie at the intersection of low-level operating systems, kernel internals, and sovereign computing tools.
-			</p>
-			<p>
-				My main portfolio and showcase can be found at
-				<a href="https://szymon-wilczek.me" target="_blank" rel="noopener">szymon-wilczek.me</a>, while this website serves as my
-				independent hypermedia space for tools, personal archives, and technical explorations.
-			</p>
-		</section>
+    <section class="about-section">
+      <h2>Background & Origins</h2>
+      <p>
+        I am a software engineer with academic and practical roots at the
+        <strong>Silesian University of Technology</strong> (Faculty of Automatic Control, Electronics
+        and Computer Science - AEI). <br /> My engineering interests lie at the intersection of low-level
+        operating systems, kernel internals, and sovereign computing tools.
+      </p>
+      <p>
+        My main portfolio and showcase can be found at
+        <a href="https://szymon-wilczek.me" target="_blank" rel="noopener">szymon-wilczek.me</a>,
+        while this website serves as my independent hypermedia space for tools, personal archives,
+        and technical explorations.
+      </p>
+    </section>
 
-		<section class="about-section">
-			<h2>The Dualist Philosophy (Neovim + Emacs)</h2>
-			<p>
-				Well, maybe some people would hang me for it, but in the long-standing text editor discourse, I belong firmly to the camp of the
-				<strong>Dualists</strong>:
-			</p>
-			<ul>
-				<li>
-					<strong>Neovim</strong>
-					is my primary code-writing weapon and high-speed editing environment. I rely on it for the majority of my daily programming,
-					build custom Lua plugins, and actively contribute to
-					<a href="https://github.com/neovim/neovim/issues?q=involves:szymonwilczek" target="_blank" rel="noopener">
-						Neovim upstream
-					</a> to help make the editor even faster and more extensible.
-				</li>
-				<li>
-					<strong>GNU Emacs</strong> serves as my mission control and operational headquarters. Powered by Org-mode, it drives my digital
-					garden, agenda, and literate programming workflows, along with occasional Lisp hacking.
-				</li>
-			</ul>
-			<p>
-				Rather than treating these tools as mutually exclusive (which most people do), I use the raw modal editing speed of Neovim
-				alongside the limitless extensibility of Emacs to create perfect balance in the force.
-			</p>
-		</section>
+    <section class="about-section">
+      <h2>The Dualist Philosophy (Neovim + Emacs)</h2>
+      <p>
+        Well, maybe some people would hang me for it, but in the long-standing text editor
+        discourse, I belong firmly to the camp of the
+        <strong>Dualists</strong>:
+      </p>
+      <ul>
+        <li>
+          <strong>Neovim</strong>
+          is my primary code-writing weapon and high-speed editing environment. I rely on it for the majority
+          of my daily programming, build custom Lua plugins, and actively contribute to
+          <a
+            href="https://github.com/neovim/neovim/issues?q=involves:szymonwilczek"
+            target="_blank"
+            rel="noopener"
+          >
+            Neovim upstream
+          </a> to help make the editor even faster and more extensible.
+        </li>
+        <li>
+          <strong>GNU Emacs</strong> serves as my mission control and operational headquarters. Powered
+          by Org-mode, it drives my digital garden, agenda, and literate programming workflows, along
+          with occasional Lisp hacking.
+        </li>
+      </ul>
+      <p>
+        Rather than treating these tools as mutually exclusive (which most people do), I use the raw
+        modal editing speed of Neovim alongside the limitless extensibility of Emacs to create
+        perfect balance in the force.
+      </p>
+    </section>
 
-		<section class="about-section">
-			<h2>Upstream Contributions & Free Software</h2>
-			<p>
-				I believe deeply (really deeply) in the ethos of Free and Open Source Software (FOSS). As a matter of principle, I contribute
-				back to the projects and tools I use:
-			</p>
-			<ul>
-				<li>
-					<strong>
-						<a href="https://lore.kernel.org/all/?q=swilczek.lx@gmail.com" target="_blank" rel="noopener">Linux Kernel</a>
-					</strong>
-				</li>
-				<li>
-					<strong>
-						<a href="https://github.com/neovim/neovim/issues?q=involves:szymonwilczek" target="_blank" rel="noopener">
-							Neovim
-						</a>
-					</strong>
-				</li>
-				<li>
-					<strong>Independent Open Source</strong> - I am author of many bespoke tools, and editor packages, including
-					<a href="https://github.com/szymonwilczek/typus-fonts" target="_blank" rel="noopener">fonts</a>,
-					<a href="https://github.com/szymonwilczek?tab=repositories&q=nvim" target="_blank" rel="noopener">Neovim plugins</a>,
-					<a href="https://github.com/szymonwilczek?tab=repositories&q=emacs" target="_blank" rel="noopener">Emacs utilities</a>,
-					and
-					<a href="https://github.com/szymonwilczek?tab=repositories" target="_blank" rel="noopener">more</a> suites.
-				</li>
-			</ul>
-		</section>
+    <section class="about-section">
+      <h2>Upstream Contributions & Free Software</h2>
+      <p>
+        I believe deeply (really deeply) in the ethos of Free and Open Source Software (FOSS). As a
+        matter of principle, I contribute back to the projects and tools I use:
+      </p>
+      <ul>
+        <li>
+          <strong>
+            <a
+              href="https://lore.kernel.org/all/?q=swilczek.lx@gmail.com"
+              target="_blank"
+              rel="noopener">Linux Kernel</a
+            >
+          </strong>
+        </li>
+        <li>
+          <strong>
+            <a
+              href="https://github.com/neovim/neovim/issues?q=involves:szymonwilczek"
+              target="_blank"
+              rel="noopener"
+            >
+              Neovim
+            </a>
+          </strong>
+        </li>
+        <li>
+          <strong>Independent Open Source</strong> - I am author of many bespoke tools, and editor packages,
+          including
+          <a href="https://github.com/szymonwilczek/typus-fonts" target="_blank" rel="noopener"
+            >fonts</a
+          >,
+          <a
+            href="https://github.com/szymonwilczek?tab=repositories&q=nvim"
+            target="_blank"
+            rel="noopener">Neovim plugins</a
+          >,
+          <a
+            href="https://github.com/szymonwilczek?tab=repositories&q=emacs"
+            target="_blank"
+            rel="noopener">Emacs utilities</a
+          >, and
+          <a href="https://github.com/szymonwilczek?tab=repositories" target="_blank" rel="noopener"
+            >more</a
+          > suites.
+        </li>
+      </ul>
+    </section>
 
-		<section class="about-section">
-			<h2>Bespoke Projects & Repositories</h2>
-			<p>
-				All of my independent experiments, and configurations are hosted on my
-				<a href="https://github.com/szymonwilczek" target="_blank" rel="noopener">GitHub profile</a>. <br />I&apos;m still very depenent
-				on GitHub infrastructure, maybe one day I&apos;ll transition to something else.
-			</p>
-		</section>
-	</article>
+    <section class="about-section">
+      <h2>Bespoke Projects & Repositories</h2>
+      <p>
+        All of my independent experiments, and configurations are hosted on my
+        <a href="https://github.com/szymonwilczek" target="_blank" rel="noopener">GitHub profile</a
+        >. <br />I&apos;m still very depenent on GitHub infrastructure, maybe one day I&apos;ll
+        transition to something else.
+      </p>
+    </section>
+  </article>
 </BaseLayout>
 
 <style>
-	.about-header {
-		margin-bottom: 2rem;
-	}
+  .about-header {
+    margin-bottom: 2rem;
+  }
 
-	.about-tagline {
-		font-family: 'Typus Mono 95', 'Typus Mono', monospace;
-		font-size: 1.05rem;
-		color: var(--fg-dim);
-		margin-top: 0.5rem;
-		line-height: 1.5;
-	}
+  .about-tagline {
+    font-family: "Typus Mono 95", "Typus Mono", monospace;
+    font-size: 1.05rem;
+    color: var(--fg-dim);
+    margin-top: 0.5rem;
+    line-height: 1.5;
+  }
 
-	.about-section {
-		margin-top: 2.25rem;
-	}
+  .about-section {
+    margin-top: 2.25rem;
+  }
 
-	.about-section h2 {
-		margin-top: 1.75rem;
-	}
+  .about-section h2 {
+    margin-top: 1.75rem;
+  }
 
-	.about-section ul {
-		margin-top: 0.75rem;
-		padding-left: 2rem;
-	}
+  .about-section ul {
+    margin-top: 0.75rem;
+    padding-left: 2rem;
+  }
 
-	.about-section li {
-		margin-bottom: 0.75rem;
-	}
+  .about-section li {
+    margin-bottom: 0.75rem;
+  }
 </style>

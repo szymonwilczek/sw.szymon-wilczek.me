@@ -1,91 +1,92 @@
 ---
 interface Props {
-	currentPath?: string;
+  currentPath?: string;
 }
 
-const { currentPath = '' } = Astro.props;
+const { currentPath = "" } = Astro.props;
 
-const normalize = (path: string) => path.replace(/\/$/, '') || '/';
+const normalize = (path: string) => path.replace(/\/$/, "") || "/";
 const normalizedCurrent = normalize(currentPath);
 
 const links = [
-	{ href: '/about', label: '[About]' },
-	{ href: '/writings', label: '[Writings]' },
-	{ href: '/projects', label: '[Projects]' },
-	{ href: '/files', label: '[Files]' },
-	{ href: '/photos', label: '[Photos]' },
-	{ href: '/contact', label: '[Contact]' },
-	{ href: '/credits', label: '[Credits]' },
-	{ href: '/rss.xml', label: '[RSS Feed]' },
+  { href: "/about", label: "[About]" },
+  { href: "/writings", label: "[Writings]" },
+  { href: "/projects", label: "[Projects]" },
+  { href: "/files", label: "[Files]" },
+  { href: "/photos", label: "[Photos]" },
+  { href: "/contact", label: "[Contact]" },
+  { href: "/credits", label: "[Credits]" },
+  { href: "/rss.xml", label: "[RSS Feed]" },
 ];
 ---
 
 <nav class="sidebar-nav" aria-label="Main Navigation">
-	<ul class="nav-list">
-		{
-			links.map((link) => {
-				const isExternal = link.href.endsWith('.xml');
-				const isActive =
-					!isExternal &&
-					(normalizedCurrent === normalize(link.href) ||
-						(link.href !== '/' && normalizedCurrent.startsWith(normalize(link.href))));
+  <ul class="nav-list">
+    {
+      links.map((link) => {
+        const isExternal = link.href.endsWith(".xml");
+        const isActive =
+          !isExternal &&
+          (normalizedCurrent === normalize(link.href) ||
+            (link.href !== "/" && normalizedCurrent.startsWith(normalize(link.href))));
 
-				return (
-					<li class="nav-item">
-						<a
-							href={link.href}
-							class:list={['nav-link', { active: isActive }]}
-							target={isExternal ? '_blank' : undefined}
-							rel={isExternal ? 'alternate' : undefined}
-							type={isExternal ? 'application/rss+xml' : undefined}>
-							{link.label}
-						</a>
-					</li>
-				);
-			})
-		}
-	</ul>
+        return (
+          <li class="nav-item">
+            <a
+              href={link.href}
+              class:list={["nav-link", { active: isActive }]}
+              target={isExternal ? "_blank" : undefined}
+              rel={isExternal ? "alternate" : undefined}
+              type={isExternal ? "application/rss+xml" : undefined}
+            >
+              {link.label}
+            </a>
+          </li>
+        );
+      })
+    }
+  </ul>
 </nav>
 
 <style>
-	.sidebar-nav {
-		font-family: 'Typus Mono 95', 'Typus Mono', monospace;
-		font-size: 1.15rem;
-		margin: 1.35rem 0;
-		width: 100%;
-	}
+  .sidebar-nav {
+    font-family: "Typus Mono 95", "Typus Mono", monospace;
+    font-size: 1.15rem;
+    margin: 1.35rem 0;
+    width: 100%;
+  }
 
-	.nav-list {
-		list-style: none;
-		padding: 0;
-		margin: 0;
-		display: flex;
-		flex-direction: column;
-		gap: 0.8rem;
-		width: 100%;
-	}
+  .nav-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    width: 100%;
+  }
 
-	.nav-item {
-		margin: 0;
-		padding: 0;
-		display: block;
-	}
+  .nav-item {
+    margin: 0;
+    padding: 0;
+    display: block;
+  }
 
-	.nav-link {
-		color: var(--fg-link);
-		text-decoration: none;
-		display: inline-block;
-		padding: 0.15rem 0;
-		transition: color 0.15s ease;
-	}
+  .nav-link {
+    color: var(--fg-link);
+    text-decoration: none;
+    display: inline-block;
+    padding: 0.15rem 0;
+    transition: color 0.15s ease;
+  }
 
-	.nav-link:hover {
-		color: var(--fg-link-hover);
-		text-decoration: underline;
-	}
+  .nav-link:hover {
+    color: var(--fg-link-hover);
+    text-decoration: underline;
+  }
 
-	.nav-link.active {
-		color: var(--fg-link-active);
-		font-weight: 700;
-	}
+  .nav-link.active {
+    color: var(--fg-link-active);
+    font-weight: 700;
+  }
 </style>

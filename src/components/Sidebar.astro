@@ -1,8 +1,8 @@
 ---
-import Navigation from './Navigation.astro';
+import Navigation from "./Navigation.astro";
 
 interface Props {
-	currentPath?: string;
+  currentPath?: string;
 }
 
 const { currentPath = Astro.url.pathname } = Astro.props;
@@ -10,281 +10,286 @@ const currentYear = new Date().getFullYear();
 ---
 
 <aside id="site-sidebar" class="site-sidebar" aria-label="Site Sidebar">
-	<div class="sidebar-inner">
-		<div class="sidebar-header-row">
-			<header class="sidebar-header">
-				<a href="/" class="site-title">Szymon Wilczek</a>
-			</header>
-			<button id="menu-close" class="drawer-close-btn" aria-label="Close navigation menu">[Close]</button>
-		</div>
-		<hr class="sidebar-divider" />
-		<Navigation currentPath={currentPath} />
+  <div class="sidebar-inner">
+    <div class="sidebar-header-row">
+      <header class="sidebar-header">
+        <a href="/" class="site-title">Szymon Wilczek</a>
+      </header>
+      <button id="menu-close" class="drawer-close-btn" aria-label="Close navigation menu"
+        >[Close]</button
+      >
+    </div>
+    <hr class="sidebar-divider" />
+    <Navigation currentPath={currentPath} />
 
-		<div class="sidebar-theme-controls">
-			<button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle color theme">
-				[Theme: <span id="theme-label">Auto</span>]
-			</button>
-		</div>
+    <div class="sidebar-theme-controls">
+      <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle color theme">
+        [Theme: <span id="theme-label">Auto</span>]
+      </button>
+    </div>
 
-		<footer class="sidebar-footer">
-			<p>(C) {currentYear} Szymon Wilczek</p>
-		</footer>
-	</div>
+    <footer class="sidebar-footer">
+      <p>(C) {currentYear} Szymon Wilczek</p>
+    </footer>
+  </div>
 </aside>
 
 <script is:inline>
-	(function () {
-		function setupThemeToggle() {
-			var btn = document.getElementById('theme-toggle');
-			var label = document.getElementById('theme-label');
-			if (!btn) return;
+  (function () {
+    function setupThemeToggle() {
+      var btn = document.getElementById("theme-toggle");
+      var label = document.getElementById("theme-label");
+      if (!btn) return;
 
-			var themes = ['auto', 'dark', 'light'];
+      var themes = ["auto", "dark", "light"];
 
-			function getEffectiveTheme(theme) {
-				if (theme === 'auto') {
-					return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
-				}
-				return theme;
-			}
+      function getEffectiveTheme(theme) {
+        if (theme === "auto") {
+          return window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+        }
+        return theme;
+      }
 
-			function updateUI() {
-				var current = localStorage.getItem('theme') || 'auto';
-				if (label) {
-					label.textContent = current.charAt(0).toUpperCase() + current.slice(1);
-				}
-				document.documentElement.setAttribute('data-theme', current === 'auto' ? getEffectiveTheme('auto') : current);
-			}
+      function updateUI() {
+        var current = localStorage.getItem("theme") || "auto";
+        if (label) {
+          label.textContent = current.charAt(0).toUpperCase() + current.slice(1);
+        }
+        document.documentElement.setAttribute(
+          "data-theme",
+          current === "auto" ? getEffectiveTheme("auto") : current
+        );
+      }
 
-			btn.onclick = function (e) {
-				e.preventDefault();
-				var current = localStorage.getItem('theme') || 'auto';
-				var nextIdx = (themes.indexOf(current) + 1) % themes.length;
-				var nextTheme = themes[nextIdx];
-				localStorage.setItem('theme', nextTheme);
-				updateUI();
-			};
+      btn.onclick = function (e) {
+        e.preventDefault();
+        var current = localStorage.getItem("theme") || "auto";
+        var nextIdx = (themes.indexOf(current) + 1) % themes.length;
+        var nextTheme = themes[nextIdx];
+        localStorage.setItem("theme", nextTheme);
+        updateUI();
+      };
 
-			window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', function () {
-				if (!localStorage.getItem('theme') || localStorage.getItem('theme') === 'auto') {
-					updateUI();
-				}
-			});
+      window.matchMedia("(prefers-color-scheme: light)").addEventListener("change", function () {
+        if (!localStorage.getItem("theme") || localStorage.getItem("theme") === "auto") {
+          updateUI();
+        }
+      });
 
-			updateUI();
-		}
+      updateUI();
+    }
 
-		function setupDrawer() {
-			var sidebar = document.getElementById('site-sidebar');
-			var openBtn = document.getElementById('mobile-menu-toggle');
-			var closeBtn = document.getElementById('menu-close');
-			var backdrop = document.getElementById('drawer-backdrop');
+    function setupDrawer() {
+      var sidebar = document.getElementById("site-sidebar");
+      var openBtn = document.getElementById("mobile-menu-toggle");
+      var closeBtn = document.getElementById("menu-close");
+      var backdrop = document.getElementById("drawer-backdrop");
 
-			if (!sidebar || !openBtn) return;
+      if (!sidebar || !openBtn) return;
 
-			function open() {
-				document.body.classList.add('menu-open');
-				sidebar.classList.add('is-open');
-				openBtn.setAttribute('aria-expanded', 'true');
-			}
+      function open() {
+        document.body.classList.add("menu-open");
+        sidebar.classList.add("is-open");
+        openBtn.setAttribute("aria-expanded", "true");
+      }
 
-			function close() {
-				document.body.classList.remove('menu-open');
-				sidebar.classList.remove('is-open');
-				openBtn.setAttribute('aria-expanded', 'false');
-			}
+      function close() {
+        document.body.classList.remove("menu-open");
+        sidebar.classList.remove("is-open");
+        openBtn.setAttribute("aria-expanded", "false");
+      }
 
-			openBtn.onclick = function (e) {
-				e.stopPropagation();
-				open();
-			};
+      openBtn.onclick = function (e) {
+        e.stopPropagation();
+        open();
+      };
 
-			if (closeBtn) {
-				closeBtn.onclick = function (e) {
-					e.stopPropagation();
-					close();
-				};
-			}
+      if (closeBtn) {
+        closeBtn.onclick = function (e) {
+          e.stopPropagation();
+          close();
+        };
+      }
 
-			if (backdrop) {
-				backdrop.onclick = function (e) {
-					e.stopPropagation();
-					close();
-				};
-			}
+      if (backdrop) {
+        backdrop.onclick = function (e) {
+          e.stopPropagation();
+          close();
+        };
+      }
 
-			var links = sidebar.querySelectorAll('a');
-			for (var i = 0; i < links.length; i++) {
-				links[i].addEventListener('click', function () {
-					if (window.innerWidth < 1024) close();
-				});
-			}
+      var links = sidebar.querySelectorAll("a");
+      for (var i = 0; i < links.length; i++) {
+        links[i].addEventListener("click", function () {
+          if (window.innerWidth < 1024) close();
+        });
+      }
 
-			document.addEventListener('keydown', function (e) {
-				if (e.key === 'Escape' && document.body.classList.contains('menu-open')) {
-					close();
-				}
-			});
-		}
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape" && document.body.classList.contains("menu-open")) {
+          close();
+        }
+      });
+    }
 
-		function init() {
-			setupDrawer();
-			setupThemeToggle();
-		}
+    function init() {
+      setupDrawer();
+      setupThemeToggle();
+    }
 
-		if (document.readyState === 'loading') {
-			document.addEventListener('DOMContentLoaded', init);
-		} else {
-			init();
-		}
-		document.addEventListener('astro:page-load', init);
-	})();
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", init);
+    } else {
+      init();
+    }
+    document.addEventListener("astro:page-load", init);
+  })();
 </script>
 
 <style>
-	.site-sidebar {
-		background-color: var(--bg-dim);
-		color: var(--fg-main);
-	}
+  .site-sidebar {
+    background-color: var(--bg-dim);
+    color: var(--fg-main);
+  }
 
-	/* Desktop layout */
-	@media (min-width: 64em) {
-		.site-sidebar {
-			position: fixed;
-			top: 0;
-			left: 0;
-			bottom: 0;
-			width: 320px;
-			padding: 3rem 2.25rem 3rem 2.25rem;
-			border-right: 1px solid var(--border);
-			display: flex;
-			flex-direction: column;
-			justify-content: flex-end;
-			z-index: 100;
-			transform: none !important;
-		}
+  /* Desktop layout */
+  @media (min-width: 64em) {
+    .site-sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 320px;
+      padding: 3rem 2.25rem 3rem 2.25rem;
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      z-index: 100;
+      transform: none !important;
+    }
 
-		.sidebar-inner {
-			width: 100%;
-		}
+    .sidebar-inner {
+      width: 100%;
+    }
 
-		.drawer-close-btn {
-			display: none !important;
-		}
-	}
+    .drawer-close-btn {
+      display: none !important;
+    }
+  }
 
-	/* Mobile sliding drawer */
-	@media (max-width: 63.99em) {
-		.site-sidebar {
-			position: fixed;
-			top: 0;
-			left: 0;
-			bottom: 0;
-			width: 300px;
-			max-width: 85vw;
-			padding: 1.75rem 1.5rem;
-			border-right: 1px solid var(--border);
-			overflow-y: auto;
-			z-index: 1000;
-			transform: translateX(-100%) !important;
-			transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
-		}
+  /* Mobile sliding drawer */
+  @media (max-width: 63.99em) {
+    .site-sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 300px;
+      max-width: 85vw;
+      padding: 1.75rem 1.5rem;
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      z-index: 1000;
+      transform: translateX(-100%) !important;
+      transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
 
-		:global(body.menu-open) .site-sidebar,
-		.site-sidebar.is-open {
-			transform: translateX(0) !important;
-			box-shadow: 8px 0 36px rgba(0, 0, 0, 0.85) !important;
-		}
+    :global(body.menu-open) .site-sidebar,
+    .site-sidebar.is-open {
+      transform: translateX(0) !important;
+      box-shadow: 8px 0 36px rgba(0, 0, 0, 0.85) !important;
+    }
 
-		.sidebar-header-row {
-			display: flex;
-			justify-content: space-between;
-			align-items: center;
-			gap: 0.75rem;
-			flex-wrap: nowrap;
-		}
+    .sidebar-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: nowrap;
+    }
 
-		.drawer-close-btn {
-			background: transparent;
-			border: none;
-			color: var(--fg-link);
-			font-family: 'Typus Mono 95', 'Typus Mono', monospace;
-			font-size: 0.92rem;
-			font-weight: 400;
-			padding: 0;
-			cursor: pointer;
-			text-decoration: underline;
-			text-underline-offset: 3px;
-			white-space: nowrap;
-			flex-shrink: 0;
-			display: inline-flex;
-			align-items: center;
-			transition: color 0.15s ease;
-		}
+    .drawer-close-btn {
+      background: transparent;
+      border: none;
+      color: var(--fg-link);
+      font-family: "Typus Mono 95", "Typus Mono", monospace;
+      font-size: 0.92rem;
+      font-weight: 400;
+      padding: 0;
+      cursor: pointer;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      transition: color 0.15s ease;
+    }
 
-		.drawer-close-btn:hover {
-			color: var(--fg-link-hover);
-		}
-	}
+    .drawer-close-btn:hover {
+      color: var(--fg-link-hover);
+    }
+  }
 
-	.site-title {
-		font-family: 'Typus Mono 95', 'Typus Mono', monospace;
-		font-size: 1.35rem;
-		font-weight: 700;
-		color: var(--fg-main);
-		text-decoration: none;
-		display: block;
-		letter-spacing: -0.02em;
-		line-height: 1.2;
-		white-space: nowrap;
-		overflow: hidden;
-		text-overflow: ellipsis;
-	}
+  .site-title {
+    font-family: "Typus Mono 95", "Typus Mono", monospace;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--fg-main);
+    text-decoration: none;
+    display: block;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 
-	.site-title:hover {
-		color: var(--fg-link);
-		text-decoration: none;
-	}
+  .site-title:hover {
+    color: var(--fg-link);
+    text-decoration: none;
+  }
 
-	.sidebar-divider {
-		border: none;
-		border-top: 1px solid var(--border);
-		margin: 1.15rem 0;
-	}
+  .sidebar-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 1.15rem 0;
+  }
 
-	.sidebar-theme-controls {
-		margin-top: 1.25rem;
-		padding-top: 0.85rem;
-		border-top: 1px dashed var(--border);
-	}
+  .sidebar-theme-controls {
+    margin-top: 1.25rem;
+    padding-top: 0.85rem;
+    border-top: 1px dashed var(--border);
+  }
 
-	.theme-toggle-btn {
-		background: transparent;
-		border: none;
-		padding: 0;
-		color: var(--fg-link);
-		font-family: 'Typus Mono 95', 'Typus Mono', monospace;
-		font-size: 0.95rem;
-		cursor: pointer;
-		text-decoration: none;
-		display: inline-block;
-		transition: color 0.15s ease;
-	}
+  .theme-toggle-btn {
+    background: transparent;
+    border: none;
+    padding: 0;
+    color: var(--fg-link);
+    font-family: "Typus Mono 95", "Typus Mono", monospace;
+    font-size: 0.95rem;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: color 0.15s ease;
+  }
 
-	.theme-toggle-btn:hover {
-		color: var(--fg-link-hover);
-		text-decoration: underline;
-	}
+  .theme-toggle-btn:hover {
+    color: var(--fg-link-hover);
+    text-decoration: underline;
+  }
 
-	.sidebar-footer {
-		font-family: 'Typus Mono 95', 'Typus Mono', monospace;
-		font-size: 0.85rem;
-		color: var(--fg-dim);
-		line-height: 1.4;
-		padding-top: 0.85rem;
-	}
+  .sidebar-footer {
+    font-family: "Typus Mono 95", "Typus Mono", monospace;
+    font-size: 0.85rem;
+    color: var(--fg-dim);
+    line-height: 1.4;
+    padding-top: 0.85rem;
+  }
 
-	.sidebar-footer p {
-		margin: 0;
-	}
+  .sidebar-footer p {
+    margin: 0;
+  }
 </style>
