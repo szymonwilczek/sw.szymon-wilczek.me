@@ -121,7 +121,7 @@ if (command === "vault") {
 
     const data = {
       title,
-      description: `Cryptographically sealed binary archive (${filesize}) protected by AES-256-GCM encryption.`,
+      description: `Sealed binary archive (${filesize}).`,
       date: new Date().toISOString().split("T")[0],
       type: "file",
       filename,
@@ -165,7 +165,7 @@ if (command === "vault") {
 
     const data = {
       title,
-      description: `Cryptographically sealed document protected by AES-256-GCM encryption.`,
+      description: `Sealed document.`,
       date: new Date().toISOString().split("T")[0],
       type: "note",
       filename,
@@ -209,7 +209,7 @@ if (command === "vault") {
 
     const docData = {
       title: filename.replace(/[-_]/g, " "),
-      description: `Cryptographically sealed archive protected by AES-256-GCM encryption.`,
+      description: `Sealed archive.`,
       filename,
       filesize,
       sha256,

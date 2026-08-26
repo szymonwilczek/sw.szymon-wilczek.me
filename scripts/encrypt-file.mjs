@@ -65,7 +65,7 @@ const jsonPath = path.join(
 
 const metadata = {
   title: titleInput || `Confidential Archive (${filename})`,
-  description: `Cryptographically sealed archive protected by AES-256-GCM encryption.`,
+  description: `Sealed archive.`,
   filename: filename,
   filesize: formattedSize,
   sha256: sha256,
