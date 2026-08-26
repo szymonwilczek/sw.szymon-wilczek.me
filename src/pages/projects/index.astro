@@ -1,73 +1,78 @@
 ---
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getCollection } from 'astro:content';
-import FormattedDate from '../../components/FormattedDate.astro';
-import SearchFilter from '../../components/SearchFilter.astro';
-import Pagination from '../../components/Pagination.astro';
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+import FormattedDate from "../../components/FormattedDate.astro";
+import SearchFilter from "../../components/SearchFilter.astro";
+import Pagination from "../../components/Pagination.astro";
 
 const PAGE_SIZE = 10;
-const allProjects = (await getCollection('projects')).sort(
-  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+const allProjects = (await getCollection("projects")).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
 );
 
 const totalPages = Math.ceil(allProjects.length / PAGE_SIZE);
 const projects = allProjects.slice(0, PAGE_SIZE);
 ---
 
-<BaseLayout title="Projects" description="Bespoke software projects, editor extensions, and tools built out of engineering necessity.">
+<BaseLayout
+  title="Projects"
+  description="Bespoke software projects, editor extensions, and tools built out of engineering necessity."
+>
   <article>
     <h1>Projects</h1>
 
     <p>
-      A curated collection of my personal software projects, editor extensions,
-      and configurations. Each project originated from a tangible workflow need,
-      an exploration of low-level mechanisms, or a desire to solve a concrete
-      problem from first principles. Also: They did not make to portfolio.
+      Collection of my personal software projects. Each project originated from
+      a tangible workflow need, an exploration of low-level mechanisms, or a
+      desire to solve a concrete problem from first principles. Also: They did
+      not make to portfolio.
     </p>
 
     <SearchFilter
-      placeholder="Filter projects by name, tag, or description..."
+      placeholder="Filter by name, tag, or description..."
       targetSelector=".project-card"
       containerSelector=".project-grid"
     />
 
     <div class="project-grid">
-      {projects.map((project) => (
-        <section
-          class="project-card"
-          data-search={`${project.data.title} ${project.data.description} ${project.data.tags.join(' ')} ${project.data.status}`}
-        >
-          <header class="card-header">
-            <h2>
-              <a href={`/projects/${project.id.replace(/\.(org|md|mdx)$/, '')}`}>{project.data.title}</a>
-            </h2>
-            <span class="project-date">
-              <FormattedDate date={project.data.pubDate} />
-            </span>
-          </header>
-
-          <p class="card-desc">{project.data.description}</p>
-
-          <div class="card-meta">
-            <span class="status-badge">status: {project.data.status}</span>
-            {project.data.tags.length > 0 && (
-              <span class="tags">
-                [{project.data.tags.join(', ')}]
+      {
+        projects.map((project) => (
+          <section
+            class="project-card"
+            data-search={`${project.data.title} ${project.data.description} ${project.data.tags.join(" ")} ${project.data.status}`}
+          >
+            <header class="card-header">
+              <h2>
+                <a
+                  href={`/projects/${project.id.replace(/\.(org|md|mdx)$/, "")}`}
+                >
+                  {project.data.title}
+                </a>
+              </h2>
+              <span class="project-date">
+                <FormattedDate date={project.data.pubDate} />
               </span>
-            )}
-          </div>
-        </section>
-      ))}
+            </header>
 
-      {projects.length === 0 && (
-        <p>No projects published at this time.</p>
-      )}
+            <p class="card-desc">{project.data.description}</p>
+
+            <div class="card-meta">
+              <span class="status-badge">status: {project.data.status}</span>
+              {project.data.tags.length > 0 && (
+                <span class="tags">[{project.data.tags.join(", ")}]</span>
+              )}
+            </div>
+          </section>
+        ))
+      }
+
+      {projects.length === 0 && <p>No projects published at this time.</p>}
     </div>
 
     <Pagination
       currentPage={1}
       lastPage={totalPages}
-      nextUrl={totalPages > 1 ? '/projects/page/2' : undefined}
+      nextUrl={totalPages > 1 ? "/projects/page/2" : undefined}
       baseUrl="/projects"
     />
   </article>
