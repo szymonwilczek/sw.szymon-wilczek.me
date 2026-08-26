@@ -11,6 +11,7 @@
     "astro": "astro",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "media:sync": "rsync -avzP public/images/ hermes:~/media/photos/",
     "vault:add": "node scripts/manage-encrypted.mjs vault",
     "file:add": "node scripts/manage-encrypted.mjs file"
   },
