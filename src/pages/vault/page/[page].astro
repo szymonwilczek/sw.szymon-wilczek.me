@@ -2,6 +2,7 @@
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import VaultUnlock from '../../../components/VaultUnlock.astro';
 import Pagination from '../../../components/Pagination.astro';
+import SearchFilter from '../../../components/SearchFilter.astro';
 import { getCollection, type CollectionEntry } from 'astro:content';
 import type { GetStaticPathsOptions, Page } from 'astro';
 
@@ -39,9 +40,18 @@ const prevUrl = page.currentPage === 2 ? '/vault' : page.url.prev;
       Neither GitHub Pages, Cloudflare, nor any network intermediary possesses the decryption key or plaintext.
     </p>
 
+    <SearchFilter
+      placeholder="Filter vault documents by title, description, or hint..."
+      targetSelector=".vault-item-entry"
+      containerSelector=".vault-items"
+    />
+
     <div class="vault-items">
       {vaultItems.map((item) => (
-        <section class="vault-item-entry">
+        <section 
+          class="vault-item-entry"
+          data-search={`${item.data.title} ${item.data.description || ''} ${item.data.hint || ''}`}
+        >
           <h2>{item.data.title}</h2>
           {item.data.description && <p class="vault-item-desc">{item.data.description}</p>}
           <VaultUnlock 
