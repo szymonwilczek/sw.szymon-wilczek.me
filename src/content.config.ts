@@ -1,5 +1,5 @@
 import { defineCollection, z } from "astro:content";
-import { glob } from "astro/loaders";
+import { orgContentLoader } from "./utils/org-loader";
 
 // Helper for parsing Org-mode dates with angle brackets <2026-03-15> or standard strings
 const flexibleDate = z.preprocess((arg) => {
@@ -30,8 +30,7 @@ const flexibleTags = z
   .default([]);
 
 const writings = defineCollection({
-  loader: glob({
-    pattern: "**/*.{org,md,mdx}",
+  loader: orgContentLoader({
     base: "./src/content/writings",
   }),
   schema: z
@@ -51,8 +50,7 @@ const writings = defineCollection({
 });
 
 const projects = defineCollection({
-  loader: glob({
-    pattern: "**/*.{org,md,mdx}",
+  loader: orgContentLoader({
     base: "./src/content/projects",
   }),
   schema: z
@@ -75,8 +73,7 @@ const projects = defineCollection({
 });
 
 const files = defineCollection({
-  loader: glob({
-    pattern: "**/*.{org,md,mdx,json}",
+  loader: orgContentLoader({
     base: "./src/content/files",
   }),
   schema: z.object({
@@ -96,8 +93,7 @@ const files = defineCollection({
 });
 
 const photos = defineCollection({
-  loader: glob({
-    pattern: "**/*.{org,md,mdx,json}",
+  loader: orgContentLoader({
     base: "./src/content/photos",
   }),
   schema: z.object({
@@ -116,8 +112,7 @@ const photos = defineCollection({
 });
 
 const vault = defineCollection({
-  loader: glob({
-    pattern: "**/*.{json,org,md}",
+  loader: orgContentLoader({
     base: "./src/content/vault",
   }),
   schema: z.object({

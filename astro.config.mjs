@@ -1,6 +1,5 @@
 import { defineConfig } from "astro/config";
 import sitemap from "@astrojs/sitemap";
-import org from "@orgajs/astro";
 
 // https://astro.build/config
 export default defineConfig({
@@ -13,5 +12,5 @@ export default defineConfig({
   build: {
     inlineStylesheets: "auto",
   },
-  integrations: [sitemap(), org()],
+  integrations: [sitemap()],
 });
