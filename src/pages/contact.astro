@@ -1,42 +1,49 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
-import fs from 'node:fs';
-import path from 'node:path';
+import BaseLayout from "../layouts/BaseLayout.astro";
+import fs from "node:fs";
+import path from "node:path";
 
-const gpgPath = path.join(process.cwd(), 'public', 'szymon-wilczek.asc');
-let asciiArmoredKey = '';
+const gpgPath = path.join(process.cwd(), "public", "szymon-wilczek.asc");
+let asciiArmoredKey = "";
 try {
-  asciiArmoredKey = fs.readFileSync(gpgPath, 'utf-8');
+  asciiArmoredKey = fs.readFileSync(gpgPath, "utf-8");
 } catch (e) {
-  asciiArmoredKey = '-----BEGIN PGP PUBLIC KEY BLOCK-----\n...\n-----END PGP PUBLIC KEY BLOCK-----';
+  asciiArmoredKey =
+    "-----BEGIN PGP PUBLIC KEY BLOCK-----\n...\n-----END PGP PUBLIC KEY BLOCK-----";
 }
 
-const keyId = 'B8E9 4407 1CB7 EB8A';
-const rawKeyId = 'B8E944071CB7EB8A';
-const fingerprint = '3EE5 3281 2DF0 F36A B7A1  F178 B8E9 4407 1CB7 EB8A';
+const keyId = "B8E9 4407 1CB7 EB8A";
+const rawKeyId = "B8E944071CB7EB8A";
+const fingerprint = "3EE5 3281 2DF0 F36A B7A1  F178 B8E9 4407 1CB7 EB8A";
 ---
 
-<BaseLayout title="Contact" description="Verified communication endpoints, email, and cryptographic GPG public key.">
+<BaseLayout
+  title="Contact"
+  description="Verified communication endpoints, email, and cryptographic GPG public key."
+>
   <article>
     <h1>Contact &amp; Identity</h1>
 
     <p>
-      The most reliable method of contacting me is via traditional electronic mail.
-      For sensitive correspondence, security disclosures, or cryptographic identity verification,
-      please encrypt your message with my PGP/GPG public key.
+      The most reliable method of contacting me is via traditional electronic
+      mail. <br /> For sensitive correspondence, security disclosures, or cryptographic
+      identity verification, please encrypt your message with my PGP/GPG public key.
     </p>
 
     <h2>Electronic Mail</h2>
     <ul>
       <li>
-        <strong>Personal</strong>
-        <a href="mailto:swilczek.lx@gmail.com"><code>swilczek.lx@gmail.com</code></a>
+        <strong>Personal - </strong>
+        <a href="mailto:swilczek.lx@gmail.com"
+          ><code>swilczek.lx@gmail.com</code></a
+        >
       </li>
     </ul>
 
     <h2>Cryptographic PGP / GPG Identity</h2>
     <p>
-      All git commits and software releases are cryptographically signed with the key below.
+      All git commits and software releases are cryptographically signed with
+      the key below.
     </p>
 
     <section class="pgp-card">
@@ -48,7 +55,9 @@ const fingerprint = '3EE5 3281 2DF0 F36A B7A1  F178 B8E9 4407 1CB7 EB8A';
       <div class="pgp-details">
         <div class="pgp-row">
           <span class="pgp-label">UID:</span>
-          <span class="pgp-val">Szymon Wilczek &lt;swilczek.lx@gmail.com&gt;</span>
+          <span class="pgp-val"
+            >Szymon Wilczek &lt;swilczek.lx@gmail.com&gt;</span
+          >
         </div>
         <div class="pgp-row">
           <span class="pgp-label">Key ID:</span>
@@ -61,10 +70,19 @@ const fingerprint = '3EE5 3281 2DF0 F36A B7A1  F178 B8E9 4407 1CB7 EB8A';
       </div>
 
       <div class="pgp-actions">
-        <button type="button" id="copy-fingerprint-btn" class="btn-action" data-fingerprint={fingerprint}>
+        <button
+          type="button"
+          id="copy-fingerprint-btn"
+          class="btn-action"
+          data-fingerprint={fingerprint}
+        >
           Copy Fingerprint
         </button>
-        <a href="/szymon-wilczek.asc" download="szymon-wilczek.asc" class="btn-action">
+        <a
+          href="/szymon-wilczek.asc"
+          download="szymon-wilczek.asc"
+          class="btn-action"
+        >
           Download .asc
         </a>
         <button type="button" id="toggle-armored-btn" class="btn-action">
@@ -72,7 +90,11 @@ const fingerprint = '3EE5 3281 2DF0 F36A B7A1  F178 B8E9 4407 1CB7 EB8A';
         </button>
       </div>
 
-      <div id="armored-key-drawer" class="armored-drawer" style="display: none;">
+      <div
+        id="armored-key-drawer"
+        class="armored-drawer"
+        style="display: none;"
+      >
         <pre class="armored-pre"><code>{asciiArmoredKey}</code></pre>
       </div>
     </section>
@@ -80,20 +102,26 @@ const fingerprint = '3EE5 3281 2DF0 F36A B7A1  F178 B8E9 4407 1CB7 EB8A';
     <h2>Web Presence &amp; Source Repositories</h2>
     <ul>
       <li>
-        <strong>Main Portfolio:</strong>
-        <a href="https://szymon-wilczek.me" target="_blank" rel="noopener">szymon-wilczek.me</a>
+        <strong>Main Portfolio - </strong>
+        <a href="https://szymon-wilczek.me" target="_blank" rel="noopener"
+          >szymon-wilczek.me</a
+        >
       </li>
       <li>
-        <strong>GitHub Profile:</strong>
-        <a href="https://github.com/szymonwilczek" target="_blank" rel="noopener">github.com/szymonwilczek</a>
+        <strong>GitHub Profile - </strong>
+        <a
+          href="https://github.com/szymonwilczek"
+          target="_blank"
+          rel="noopener">github.com/szymonwilczek</a
+        >
       </li>
       <li>
-        <strong>Website Source Code:</strong>
-        <a href="https://github.com/szymonwilczek/sw.szymon-wilczek.me" target="_blank" rel="noopener">github.com/szymonwilczek/sw.szymon-wilczek.me</a>
-      </li>
-      <li>
-        <strong>Dotfiles &amp; Systems Config:</strong>
-        <a href="https://github.com/szymonwilczek/dotfiles" target="_blank" rel="noopener">github.com/szymonwilczek/dotfiles</a>
+        <strong>Website Source Code - </strong>
+        <a
+          href="https://github.com/szymonwilczek/sw.szymon-wilczek.me"
+          target="_blank"
+          rel="noopener">github.com/szymonwilczek/sw.szymon-wilczek.me</a
+        >
       </li>
     </ul>
   </article>
@@ -101,25 +129,29 @@ const fingerprint = '3EE5 3281 2DF0 F36A B7A1  F178 B8E9 4407 1CB7 EB8A';
 
 <script is:inline>
   (function () {
-    var copyFpBtn = document.getElementById('copy-fingerprint-btn');
-    var toggleArmoredBtn = document.getElementById('toggle-armored-btn');
-    var armoredDrawer = document.getElementById('armored-key-drawer');
+    var copyFpBtn = document.getElementById("copy-fingerprint-btn");
+    var toggleArmoredBtn = document.getElementById("toggle-armored-btn");
+    var armoredDrawer = document.getElementById("armored-key-drawer");
 
     if (copyFpBtn) {
-      copyFpBtn.addEventListener('click', function () {
-        var fp = copyFpBtn.dataset.fingerprint || '';
+      copyFpBtn.addEventListener("click", function () {
+        var fp = copyFpBtn.dataset.fingerprint || "";
         navigator.clipboard.writeText(fp).then(function () {
-          copyFpBtn.textContent = 'Copied';
-          setTimeout(function () { copyFpBtn.textContent = 'Copy Fingerprint'; }, 2000);
+          copyFpBtn.textContent = "Copied";
+          setTimeout(function () {
+            copyFpBtn.textContent = "Copy Fingerprint";
+          }, 2000);
         });
       });
     }
 
     if (toggleArmoredBtn && armoredDrawer) {
-      toggleArmoredBtn.addEventListener('click', function () {
-        var isOpen = armoredDrawer.style.display !== 'none';
-        armoredDrawer.style.display = isOpen ? 'none' : 'block';
-        toggleArmoredBtn.textContent = isOpen ? 'View Public Key' : 'Hide Public Key';
+      toggleArmoredBtn.addEventListener("click", function () {
+        var isOpen = armoredDrawer.style.display !== "none";
+        armoredDrawer.style.display = isOpen ? "none" : "block";
+        toggleArmoredBtn.textContent = isOpen
+          ? "View Public Key"
+          : "Hide Public Key";
       });
     }
   })();
@@ -213,7 +245,10 @@ const fingerprint = '3EE5 3281 2DF0 F36A B7A1  F178 B8E9 4407 1CB7 EB8A';
     text-decoration: none !important;
     line-height: 1.4 !important;
     white-space: nowrap !important;
-    transition: background-color 0.12s ease, color 0.12s ease, border-color 0.12s ease !important;
+    transition:
+      background-color 0.12s ease,
+      color 0.12s ease,
+      border-color 0.12s ease !important;
   }
 
   .btn-action:hover {

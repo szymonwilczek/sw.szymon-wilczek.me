@@ -1,65 +1,76 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
-import { getCollection } from 'astro:content';
-import FormattedDate from '../components/FormattedDate.astro';
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
 
-const projects = (await getCollection('projects')).sort(
-  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
-).slice(0, 3);
+const projects = (await getCollection("projects"))
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+  .slice(0, 3);
 ---
 
 <BaseLayout title="Szymon Wilczek">
   <section class="intro">
     <p>
-      Hello. I am <strong>Szymon Wilczek</strong>. I am a software engineer,
-      systems enthusiast, and free software (FOSS) advocate.
+      Hello. I am <strong>Szymon Wilczek</strong>.
     </p>
     <p>
-      This website serves as my personal, sovereign hypermedia space - a central
-      repository for my software projects that didn't make to portfolio,
-      tools, file archives, photography, and technical reflections on computing
-      and engineering.
+      This website is my sovereign hypermedia space: a central archive for my
+      software projects, custom developer utilities, downloadable files,
+      writings, photography, and plain-text essays.
     </p>
   </section>
 
   <hr />
 
-  <section class="section-block">
-    <h2>Current Status</h2>
-    <p>
-      Currently focused on developing bespoke developer tooling, investigating
-      low-level systems architecture, refining GNU Emacs workflows,
-      and producing open technical documentation.
-    </p>
-  </section>
-
-  {projects.length > 0 && (
-    <section class="section-block">
-      <h2>Featured Projects</h2>
-      <ul class="project-list">
-        {projects.map((project) => (
-          <li>
-            <a href={`/projects/${project.id}`}>{project.data.title}</a>
-            {' — '}
-            <span class="project-desc">{project.data.description}</span>
-          </li>
-        ))}
-      </ul>
-      <p>
-        <a href="/projects">&rarr; View all projects</a>
-      </p>
-    </section>
-  )}
+  {
+    projects.length > 0 && (
+      <section class="section-block">
+        <h2>Featured Projects</h2>
+        <ul class="project-list">
+          {projects.map((project) => (
+            <li>
+              <a
+                href={`/projects/${project.id.replace(/\.(org|md|mdx)$/, "")}`}
+              >
+                {project.data.title}
+              </a>
+              {" — "}
+              <span class="project-desc">{project.data.description}</span>
+            </li>
+          ))}
+        </ul>
+        <p>
+          <a href="/projects">&rarr; View all projects</a>
+        </p>
+      </section>
+    )
+  }
 
   <section class="section-block">
-    <h2>Index & Navigation</h2>
+    <h2>Navigation</h2>
     <ul>
-      <li><a href="/about">About</a> - biographical notes, engineering principles, and computing philosophy.</li>
-      <li><a href="/projects">Projects</a> - bespoke tools, editors, and utilities with full design rationales.</li>
-      <li><a href="/files">Files</a> - downloadable packages, software archives, and scripts with SHA-256 sums.</li>
-      <li><a href="/photos">Photos</a> - curated photograph gallery rendered in warm autumnal tones.</li>
-      <li><a href="/contact">Contact</a> - verified communication channels, email, and cryptographic PGP key.</li>
-      <li><a href="/credits">Credits</a> - formal attributions and open tooling.</li>
+      <li>
+        <a href="/about">About</a> - biographical context and open-source contributions.
+      </li>
+      <li>
+        <a href="/writings">Writings</a> - thoughts, essays on low-level computing,
+        and systems design.
+      </li>
+      <li>
+        <a href="/projects">Projects</a> - tools, typefaces, and utilities.
+      </li>
+      <li>
+        <a href="/files">Files</a> - downloadable software packages, scripts and archives.
+      </li>
+      <li>
+        <a href="/photos">Photos</a> - photograph gallery (I sometimes take a photo).
+      </li>
+      <li>
+        <a href="/contact">Contact</a> - communication channels, web links, and PGP
+        key.
+      </li>
+      <li>
+        <a href="/credits">Credits</a> - attributions, typography, and licenses.
+      </li>
     </ul>
   </section>
 </BaseLayout>
