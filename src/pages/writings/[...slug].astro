@@ -168,8 +168,7 @@ const rawLines = post.body ? post.body.split('\n').length : 0;
   }
 
   .btn-action,
-  .raw-action-btn,
-  .raw-copy-btn {
+  .raw-action-btn {
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -188,25 +187,57 @@ const rawLines = post.body ? post.body.split('\n').length : 0;
     transition: background-color 0.12s ease, color 0.12s ease, border-color 0.12s ease !important;
   }
 
-  .raw-copy-btn {
-    font-size: 0.78rem !important;
-    padding: 0.2rem 0.55rem !important;
-  }
-
   .btn-action:hover,
-  .raw-action-btn:hover,
-  .raw-copy-btn:hover {
+  .raw-action-btn:hover {
     background-color: var(--fg-main) !important;
     color: var(--bg-main) !important;
     border-color: var(--fg-main) !important;
   }
 
   .btn-action:active,
-  .raw-action-btn:active,
-  .raw-copy-btn:active {
+  .raw-action-btn:active {
     background-color: var(--fg-link) !important;
     color: var(--bg-main) !important;
     border-color: var(--fg-link) !important;
+  }
+
+  .raw-code-drawer {
+    margin-top: 1.25rem;
+    border: 1px solid var(--border);
+    background-color: var(--bg-dim);
+    border-radius: 2px;
+  }
+
+  .raw-drawer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.6rem 1rem;
+    background-color: var(--bg-main);
+    border-bottom: 1px solid var(--border);
+    font-family: "Typus Mono 95", "Typus Mono", monospace;
+    font-size: 0.82rem;
+    color: var(--fg-dim);
+  }
+
+  .raw-copy-btn {
+    background: transparent !important;
+    border: none !important;
+    color: var(--fg-link) !important;
+    font-family: "Typus Mono 95", "Typus Mono", monospace !important;
+    font-size: 0.82rem !important;
+    font-weight: 400 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    cursor: pointer !important;
+    text-decoration: underline !important;
+    text-underline-offset: 3px !important;
+    transition: color 0.15s ease !important;
+  }
+
+  .raw-copy-btn:hover {
+    color: var(--fg-link-hover) !important;
+    background: transparent !important;
   }
 
   .raw-code-pre {
