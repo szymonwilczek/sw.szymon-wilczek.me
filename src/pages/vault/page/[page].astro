@@ -1,15 +1,28 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
-import VaultUnlock from '../components/VaultUnlock.astro';
-import { getCollection } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import VaultUnlock from '../../../components/VaultUnlock.astro';
+import Pagination from '../../../components/Pagination.astro';
+import { getCollection, type CollectionEntry } from 'astro:content';
+import type { GetStaticPathsOptions, Page } from 'astro';
 
-const vaultItems = (await getCollection('vault')).sort(
-  (a, b) => (b.data.date?.valueOf() || 0) - (a.data.date?.valueOf() || 0)
-);
+export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
+  const vaultItems = (await getCollection('vault')).sort(
+    (a, b) => (b.data.date?.valueOf() || 0) - (a.data.date?.valueOf() || 0)
+  );
+  return paginate(vaultItems, { pageSize: 10 });
+}
+
+interface Props {
+  page: Page<CollectionEntry<'vault'>>;
+}
+
+const { page } = Astro.props;
+const vaultItems = page.data;
+const prevUrl = page.currentPage === 2 ? '/vault' : page.url.prev;
 ---
 
 <BaseLayout 
-  title="Secret Cryptographic Vault" 
+  title={`Secret Cryptographic Vault — Page ${page.currentPage}`} 
   description="Client-side zero-knowledge encrypted vault container."
 >
   <article>
@@ -41,9 +54,17 @@ const vaultItems = (await getCollection('vault')).sort(
       ))}
 
       {vaultItems.length === 0 && (
-        <p>No encrypted vault documents stored at this moment.</p>
+        <p>No encrypted vault documents stored on this page.</p>
       )}
     </div>
+
+    <Pagination
+      currentPage={page.currentPage}
+      lastPage={page.lastPage}
+      prevUrl={prevUrl}
+      nextUrl={page.url.next}
+      baseUrl="/vault"
+    />
   </article>
 </BaseLayout>
 

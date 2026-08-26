@@ -1,0 +1,76 @@
+---
+interface Props {
+  currentPage: number;
+  lastPage: number;
+  prevUrl?: string;
+  nextUrl?: string;
+  baseUrl: string;
+}
+
+const { currentPage, lastPage, prevUrl, nextUrl, baseUrl } = Astro.props;
+---
+
+{lastPage > 1 && (
+  <nav class="pagination-nav" aria-label="Pagination">
+    <div class="pagination-container">
+      {prevUrl ? (
+        <a href={prevUrl} class="btn-action pagination-btn">
+          &larr; Newer
+        </a>
+      ) : (
+        <span class="btn-action pagination-btn disabled" aria-disabled="true">
+          &larr; Newer
+        </span>
+      )}
+
+      <span class="pagination-status">
+        Page <span class="page-num">{currentPage}</span> of <span class="page-num">{lastPage}</span>
+      </span>
+
+      {nextUrl ? (
+        <a href={nextUrl} class="btn-action pagination-btn">
+          Older &rarr;
+        </a>
+      ) : (
+        <span class="btn-action pagination-btn disabled" aria-disabled="true">
+          Older &rarr;
+        </span>
+      )}
+    </div>
+  </nav>
+)}
+
+<style>
+  .pagination-nav {
+    margin-top: 3.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    font-family: "Typus Mono 95", "Typus Mono", monospace;
+  }
+
+  .pagination-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .pagination-status {
+    font-size: 0.9rem;
+    color: var(--fg-dim);
+  }
+
+  .page-num {
+    color: var(--fg-main);
+    font-weight: 600;
+  }
+
+  .pagination-btn.disabled {
+    opacity: 0.35 !important;
+    cursor: not-allowed !important;
+    border-color: var(--border) !important;
+    color: var(--fg-dim) !important;
+    background: transparent !important;
+  }
+</style>

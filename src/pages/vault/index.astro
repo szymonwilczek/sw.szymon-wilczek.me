@@ -1,0 +1,80 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import VaultUnlock from '../../components/VaultUnlock.astro';
+import Pagination from '../../components/Pagination.astro';
+import { getCollection } from 'astro:content';
+
+const PAGE_SIZE = 10;
+const allVaultItems = (await getCollection('vault')).sort(
+  (a, b) => (b.data.date?.valueOf() || 0) - (a.data.date?.valueOf() || 0)
+);
+
+const totalPages = Math.ceil(allVaultItems.length / PAGE_SIZE);
+const vaultItems = allVaultItems.slice(0, PAGE_SIZE);
+---
+
+<BaseLayout 
+  title="Secret Cryptographic Vault" 
+  description="Client-side zero-knowledge encrypted vault container."
+>
+  <article>
+    <h1>Cryptographic Vault</h1>
+
+    <p>
+      This is a private, zero-knowledge document store. All contents on this page are encrypted 
+      with <strong>AES-256-GCM</strong> and key-stretched using <strong>PBKDF2 (100,000 rounds of SHA-256)</strong>.
+    </p>
+
+    <p>
+      Decryption happens strictly within your local browser memory via the 
+      hardware-accelerated Web Cryptography API (<code>window.crypto.subtle</code>). 
+      Neither GitHub Pages, Cloudflare, nor any network intermediary possesses the decryption key or plaintext.
+    </p>
+
+    <div class="vault-items">
+      {vaultItems.map((item) => (
+        <section class="vault-item-entry">
+          <h2>{item.data.title}</h2>
+          {item.data.description && <p class="vault-item-desc">{item.data.description}</p>}
+          <VaultUnlock 
+            ciphertext={item.data.ciphertext}
+            iv={item.data.iv}
+            salt={item.data.salt}
+            hint={item.data.hint}
+          />
+        </section>
+      ))}
+
+      {vaultItems.length === 0 && (
+        <p>No encrypted vault documents stored at this moment.</p>
+      )}
+    </div>
+
+    <Pagination
+      currentPage={1}
+      lastPage={totalPages}
+      nextUrl={totalPages > 1 ? '/vault/page/2' : undefined}
+      baseUrl="/vault"
+    />
+  </article>
+</BaseLayout>
+
+<style>
+  .vault-items {
+    margin-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
+  }
+
+  .vault-item-entry h2 {
+    font-size: 1.35rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .vault-item-desc {
+    color: var(--fg-alt);
+    font-size: 0.95rem;
+    margin-bottom: 1rem;
+  }
+</style>

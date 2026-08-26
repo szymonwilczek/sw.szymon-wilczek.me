@@ -1,21 +1,32 @@
 ---
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getCollection } from 'astro:content';
-import FormattedDate from '../../components/FormattedDate.astro';
-import SearchFilter from '../../components/SearchFilter.astro';
-import Pagination from '../../components/Pagination.astro';
-import { calculateReadingStats } from '../../utils/reading-time';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { getCollection, type CollectionEntry } from 'astro:content';
+import FormattedDate from '../../../components/FormattedDate.astro';
+import SearchFilter from '../../../components/SearchFilter.astro';
+import Pagination from '../../../components/Pagination.astro';
+import { calculateReadingStats } from '../../../utils/reading-time';
+import type { GetStaticPathsOptions, Page } from 'astro';
 
-const PAGE_SIZE = 10;
-const allWritings = (await getCollection('writings')).sort(
-  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
-);
+export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
+  const writings = (await getCollection('writings')).sort(
+    (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+  );
+  return paginate(writings, { pageSize: 10 });
+}
 
-const totalPages = Math.ceil(allWritings.length / PAGE_SIZE);
-const writings = allWritings.slice(0, PAGE_SIZE);
+interface Props {
+  page: Page<CollectionEntry<'writings'>>;
+}
+
+const { page } = Astro.props;
+const writings = page.data;
+const prevUrl = page.currentPage === 2 ? '/writings' : page.url.prev;
 ---
 
-<BaseLayout title="Writings" description="Essays, manifestos, notes, and reflections on sovereign computing and hypermedia.">
+<BaseLayout 
+  title={`Writings — Page ${page.currentPage}`} 
+  description="Essays, manifestos, notes, and reflections on sovereign computing and hypermedia."
+>
   <article>
     <h1>Writings &amp; Essays</h1>
 
@@ -67,14 +78,15 @@ const writings = allWritings.slice(0, PAGE_SIZE);
       })}
 
       {writings.length === 0 && (
-        <p>No essays or writings published yet.</p>
+        <p>No essays or writings published on this page.</p>
       )}
     </div>
 
     <Pagination
-      currentPage={1}
-      lastPage={totalPages}
-      nextUrl={totalPages > 1 ? '/writings/page/2' : undefined}
+      currentPage={page.currentPage}
+      lastPage={page.lastPage}
+      prevUrl={prevUrl}
+      nextUrl={page.url.next}
       baseUrl="/writings"
     />
   </article>

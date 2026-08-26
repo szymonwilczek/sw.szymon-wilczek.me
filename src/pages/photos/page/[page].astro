@@ -1,20 +1,31 @@
 ---
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getCollection } from 'astro:content';
-import FormattedDate from '../../components/FormattedDate.astro';
-import SearchFilter from '../../components/SearchFilter.astro';
-import Pagination from '../../components/Pagination.astro';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { getCollection, type CollectionEntry } from 'astro:content';
+import FormattedDate from '../../../components/FormattedDate.astro';
+import SearchFilter from '../../../components/SearchFilter.astro';
+import Pagination from '../../../components/Pagination.astro';
+import type { GetStaticPathsOptions, Page } from 'astro';
 
-const PAGE_SIZE = 12;
-const allPhotos = (await getCollection('photos')).sort(
-  (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
-);
+export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
+  const photos = (await getCollection('photos')).sort(
+    (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
+  );
+  return paginate(photos, { pageSize: 12 });
+}
 
-const totalPages = Math.ceil(allPhotos.length / PAGE_SIZE);
-const photos = allPhotos.slice(0, PAGE_SIZE);
+interface Props {
+  page: Page<CollectionEntry<'photos'>>;
+}
+
+const { page } = Astro.props;
+const photos = page.data;
+const prevUrl = page.currentPage === 2 ? '/photos' : page.url.prev;
 ---
 
-<BaseLayout title="Photos" description="Curated personal photography gallery capturing moments, architecture, and landscapes.">
+<BaseLayout 
+  title={`Photography — Page ${page.currentPage}`} 
+  description="Curated personal photography gallery capturing moments, architecture, and landscapes."
+>
   <article>
     <h1>Photography</h1>
 
@@ -57,14 +68,15 @@ const photos = allPhotos.slice(0, PAGE_SIZE);
       ))}
 
       {photos.length === 0 && (
-        <p>No photographs cataloged in this collection yet.</p>
+        <p>No photographs cataloged on this page.</p>
       )}
     </div>
 
     <Pagination
-      currentPage={1}
-      lastPage={totalPages}
-      nextUrl={totalPages > 1 ? '/photos/page/2' : undefined}
+      currentPage={page.currentPage}
+      lastPage={page.lastPage}
+      prevUrl={prevUrl}
+      nextUrl={page.url.next}
       baseUrl="/photos"
     />
   </article>

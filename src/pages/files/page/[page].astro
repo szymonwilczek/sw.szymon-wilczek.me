@@ -1,20 +1,31 @@
 ---
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getCollection } from 'astro:content';
-import FormattedDate from '../../components/FormattedDate.astro';
-import SearchFilter from '../../components/SearchFilter.astro';
-import Pagination from '../../components/Pagination.astro';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { getCollection, type CollectionEntry } from 'astro:content';
+import FormattedDate from '../../../components/FormattedDate.astro';
+import SearchFilter from '../../../components/SearchFilter.astro';
+import Pagination from '../../../components/Pagination.astro';
+import type { GetStaticPathsOptions, Page } from 'astro';
 
-const PAGE_SIZE = 10;
-const allFiles = (await getCollection('files')).sort(
-  (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
-);
+export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
+  const files = (await getCollection('files')).sort(
+    (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
+  );
+  return paginate(files, { pageSize: 10 });
+}
 
-const totalPages = Math.ceil(allFiles.length / PAGE_SIZE);
-const files = allFiles.slice(0, PAGE_SIZE);
+interface Props {
+  page: Page<CollectionEntry<'files'>>;
+}
+
+const { page } = Astro.props;
+const files = page.data;
+const prevUrl = page.currentPage === 2 ? '/files' : page.url.prev;
 ---
 
-<BaseLayout title="Files" description="Software distributions, tool packages, and encrypted archives with SHA-256 cryptographic verification.">
+<BaseLayout 
+  title={`Files — Page ${page.currentPage}`} 
+  description="Software distributions, tool packages, and encrypted archives with SHA-256 cryptographic verification."
+>
   <article>
     <h1>Files &amp; Archives</h1>
 
@@ -92,14 +103,15 @@ const files = allFiles.slice(0, PAGE_SIZE);
       ))}
 
       {files.length === 0 && (
-        <p>No downloadable files indexed at this moment.</p>
+        <p>No downloadable files indexed on this page.</p>
       )}
     </div>
 
     <Pagination
-      currentPage={1}
-      lastPage={totalPages}
-      nextUrl={totalPages > 1 ? '/files/page/2' : undefined}
+      currentPage={page.currentPage}
+      lastPage={page.lastPage}
+      prevUrl={prevUrl}
+      nextUrl={page.url.next}
       baseUrl="/files"
     />
 
@@ -178,7 +190,7 @@ const files = allFiles.slice(0, PAGE_SIZE);
           statusBox.style.display = 'none';
           statusBox.textContent = '';
           submitBtn.disabled = false;
-          submitBtn.textContent = '[ Decrypt & Download ]';
+          submitBtn.textContent = 'Decrypt & Download';
 
           if (typeof modal.showModal === 'function') {
             modal.showModal();
@@ -209,7 +221,7 @@ const files = allFiles.slice(0, PAGE_SIZE);
         if (!passphrase || !activeTarget) return;
 
         submitBtn.disabled = true;
-        submitBtn.textContent = '[ Decrypting in RAM... ]';
+        submitBtn.textContent = 'Decrypting in RAM...';
         statusBox.style.display = 'none';
 
         try {
@@ -271,7 +283,7 @@ const files = allFiles.slice(0, PAGE_SIZE);
           statusBox.className = 'modal-status-box error';
           statusBox.style.display = 'block';
           submitBtn.disabled = false;
-          submitBtn.textContent = '[ Decrypt & Download ]';
+          submitBtn.textContent = 'Decrypt & Download';
           passInput.focus();
         }
       };

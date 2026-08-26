@@ -1,20 +1,31 @@
 ---
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getCollection } from 'astro:content';
-import FormattedDate from '../../components/FormattedDate.astro';
-import SearchFilter from '../../components/SearchFilter.astro';
-import Pagination from '../../components/Pagination.astro';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { getCollection, type CollectionEntry } from 'astro:content';
+import FormattedDate from '../../../components/FormattedDate.astro';
+import SearchFilter from '../../../components/SearchFilter.astro';
+import Pagination from '../../../components/Pagination.astro';
+import type { GetStaticPathsOptions, Page } from 'astro';
 
-const PAGE_SIZE = 10;
-const allProjects = (await getCollection('projects')).sort(
-  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
-);
+export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
+  const projects = (await getCollection('projects')).sort(
+    (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+  );
+  return paginate(projects, { pageSize: 10 });
+}
 
-const totalPages = Math.ceil(allProjects.length / PAGE_SIZE);
-const projects = allProjects.slice(0, PAGE_SIZE);
+interface Props {
+  page: Page<CollectionEntry<'projects'>>;
+}
+
+const { page } = Astro.props;
+const projects = page.data;
+const prevUrl = page.currentPage === 2 ? '/projects' : page.url.prev;
 ---
 
-<BaseLayout title="Projects" description="Bespoke software projects, editor extensions, and tools built out of engineering necessity.">
+<BaseLayout 
+  title={`Projects — Page ${page.currentPage}`} 
+  description="Bespoke software projects, editor extensions, and tools built out of engineering necessity."
+>
   <article>
     <h1>Projects</h1>
 
@@ -60,14 +71,15 @@ const projects = allProjects.slice(0, PAGE_SIZE);
       ))}
 
       {projects.length === 0 && (
-        <p>No projects published at this time.</p>
+        <p>No projects published on this page.</p>
       )}
     </div>
 
     <Pagination
-      currentPage={1}
-      lastPage={totalPages}
-      nextUrl={totalPages > 1 ? '/projects/page/2' : undefined}
+      currentPage={page.currentPage}
+      lastPage={page.lastPage}
+      prevUrl={prevUrl}
+      nextUrl={page.url.next}
       baseUrl="/projects"
     />
   </article>
