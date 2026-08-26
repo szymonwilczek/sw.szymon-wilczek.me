@@ -49,14 +49,14 @@ const rawLines = post.body ? post.body.split('\n').length : 0;
           <code>{post.id}</code>
         </div>
         <div class="raw-source-actions">
-          <button type="button" id="toggle-raw-btn" class="raw-action-btn">
-            [ View raw .org source ]
+          <button type="button" id="toggle-raw-btn" class="btn-action raw-action-btn">
+            View raw .org source
           </button>
-          <a href={`/writings/${slug}.org`} class="raw-action-btn" target="_blank" rel="noopener">
-            [ Open raw buffer ]
+          <a href={`/writings/${slug}.org`} class="btn-action raw-action-btn" target="_blank" rel="noopener">
+            Open raw buffer
           </a>
-          <a href={`/writings/${slug}.org`} download={`${slug}.org`} class="raw-action-btn">
-            [ Download .org ]
+          <a href={`/writings/${slug}.org`} download={`${slug}.org`} class="btn-action raw-action-btn">
+            Download .org
           </a>
         </div>
       </div>
@@ -64,7 +64,7 @@ const rawLines = post.body ? post.body.split('\n').length : 0;
       <div id="raw-code-drawer" class="raw-code-drawer" style="display: none;">
         <div class="raw-drawer-header">
           <span>Buffer: <code>{post.id}</code> ({rawLines} lines &middot; {stats.words} words)</span>
-          <button type="button" id="copy-raw-btn" class="raw-copy-btn">[ Copy buffer ]</button>
+          <button type="button" id="copy-raw-btn" class="btn-action raw-copy-btn">Copy buffer</button>
         </div>
         <pre class="raw-code-pre"><code>{post.body}</code></pre>
       </div>
@@ -82,7 +82,7 @@ const rawLines = post.body ? post.body.split('\n').length : 0;
       toggleBtn.addEventListener('click', function () {
         var isOpen = drawer.style.display !== 'none';
         drawer.style.display = isOpen ? 'none' : 'block';
-        toggleBtn.textContent = isOpen ? '[ View raw .org source ]' : '[ Hide raw source ]';
+        toggleBtn.textContent = isOpen ? 'View raw .org source' : 'Hide raw source';
       });
     }
 
@@ -91,8 +91,8 @@ const rawLines = post.body ? post.body.split('\n').length : 0;
         var pre = document.querySelector('.raw-code-pre code');
         if (pre) {
           navigator.clipboard.writeText(pre.textContent || '').then(function () {
-            copyBtn.textContent = '[ ✓ Copied buffer ]';
-            setTimeout(function () { copyBtn.textContent = '[ Copy buffer ]'; }, 2000);
+            copyBtn.textContent = 'Copied';
+            setTimeout(function () { copyBtn.textContent = 'Copy buffer'; }, 2000);
           });
         }
       });
@@ -162,69 +162,51 @@ const rawLines = post.body ? post.body.split('\n').length : 0;
 
   .raw-source-actions {
     display: flex;
-    gap: 0.6rem;
+    gap: 0.65rem;
+    align-items: center;
     flex-wrap: wrap;
   }
 
-  .raw-action-btn {
+  .btn-action,
+  .raw-action-btn,
+  .raw-copy-btn {
     display: inline-flex !important;
     align-items: center !important;
-    background-color: var(--bg-button) !important;
+    justify-content: center !important;
+    background: transparent !important;
     border: 1px solid var(--border) !important;
-    color: var(--fg-button) !important;
+    color: var(--fg-main) !important;
     font-family: "Typus Mono 95", "Typus Mono", monospace !important;
     font-size: 0.84rem !important;
-    font-weight: 600 !important;
-    padding: 0.4rem 0.85rem !important;
+    font-weight: 500 !important;
+    padding: 0.3rem 0.75rem !important;
+    border-radius: 0 !important;
     cursor: pointer !important;
-    border-radius: 2px !important;
     text-decoration: none !important;
     line-height: 1.4 !important;
-    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease !important;
-  }
-
-  .raw-action-btn:hover {
-    background-color: var(--bg-button-hover) !important;
-    color: var(--fg-button-hover) !important;
-    border-color: var(--fg-button-hover) !important;
-  }
-
-  .raw-code-drawer {
-    margin-top: 1.25rem;
-    border: 1px solid var(--border);
-    background-color: var(--bg-dim);
-    border-radius: 2px;
-  }
-
-  .raw-drawer-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.6rem 1rem;
-    background-color: var(--bg-main);
-    border-bottom: 1px solid var(--border);
-    font-family: "Typus Mono 95", "Typus Mono", monospace;
-    font-size: 0.82rem;
-    color: var(--fg-dim);
+    white-space: nowrap !important;
+    transition: background-color 0.12s ease, color 0.12s ease, border-color 0.12s ease !important;
   }
 
   .raw-copy-btn {
-    background-color: var(--bg-button) !important;
-    border: 1px solid var(--border) !important;
-    color: var(--fg-button) !important;
-    font-family: "Typus Mono 95", "Typus Mono", monospace !important;
-    font-size: 0.8rem !important;
-    font-weight: 600 !important;
-    padding: 0.25rem 0.6rem !important;
-    cursor: pointer !important;
-    border-radius: 2px !important;
-    transition: all 0.15s ease !important;
+    font-size: 0.78rem !important;
+    padding: 0.2rem 0.55rem !important;
   }
 
+  .btn-action:hover,
+  .raw-action-btn:hover,
   .raw-copy-btn:hover {
-    background-color: var(--bg-button-hover) !important;
-    color: var(--fg-button-hover) !important;
-    border-color: var(--fg-button-hover) !important;
+    background-color: var(--fg-main) !important;
+    color: var(--bg-main) !important;
+    border-color: var(--fg-main) !important;
+  }
+
+  .btn-action:active,
+  .raw-action-btn:active,
+  .raw-copy-btn:active {
+    background-color: var(--fg-link) !important;
+    color: var(--bg-main) !important;
+    border-color: var(--fg-link) !important;
   }
 
   .raw-code-pre {

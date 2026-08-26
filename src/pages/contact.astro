@@ -61,14 +61,14 @@ const fingerprint = '3EE5 3281 2DF0 F36A B7A1  F178 B8E9 4407 1CB7 EB8A';
       </div>
 
       <div class="pgp-actions">
-        <button type="button" id="copy-fingerprint-btn" class="pgp-btn" data-fingerprint={fingerprint}>
-          [ Copy Fingerprint ]
+        <button type="button" id="copy-fingerprint-btn" class="btn-action" data-fingerprint={fingerprint}>
+          Copy Fingerprint
         </button>
-        <a href="/szymon-wilczek.asc" download="szymon-wilczek.asc" class="pgp-btn">
-          [ Download .asc ]
+        <a href="/szymon-wilczek.asc" download="szymon-wilczek.asc" class="btn-action">
+          Download .asc
         </a>
-        <button type="button" id="toggle-armored-btn" class="pgp-btn">
-          [ View Public Key ]
+        <button type="button" id="toggle-armored-btn" class="btn-action">
+          View Public Key
         </button>
       </div>
 
@@ -97,8 +97,8 @@ const fingerprint = '3EE5 3281 2DF0 F36A B7A1  F178 B8E9 4407 1CB7 EB8A';
       copyFpBtn.addEventListener('click', function () {
         var fp = copyFpBtn.dataset.fingerprint || '';
         navigator.clipboard.writeText(fp).then(function () {
-          copyFpBtn.textContent = '[ Copied Fingerprint ]';
-          setTimeout(function () { copyFpBtn.textContent = '[ Copy Fingerprint ]'; }, 2000);
+          copyFpBtn.textContent = 'Copied';
+          setTimeout(function () { copyFpBtn.textContent = 'Copy Fingerprint'; }, 2000);
         });
       });
     }
@@ -107,7 +107,7 @@ const fingerprint = '3EE5 3281 2DF0 F36A B7A1  F178 B8E9 4407 1CB7 EB8A';
       toggleArmoredBtn.addEventListener('click', function () {
         var isOpen = armoredDrawer.style.display !== 'none';
         armoredDrawer.style.display = isOpen ? 'none' : 'block';
-        toggleArmoredBtn.textContent = isOpen ? '[ View Public Key ]' : '[ Hide Public Key ]';
+        toggleArmoredBtn.textContent = isOpen ? 'View Public Key' : 'Hide Public Key';
       });
     }
   })();
@@ -179,31 +179,41 @@ const fingerprint = '3EE5 3281 2DF0 F36A B7A1  F178 B8E9 4407 1CB7 EB8A';
 
   .pgp-actions {
     display: flex;
-    gap: 0.6rem;
+    gap: 0.75rem;
+    align-items: center;
     flex-wrap: wrap;
+    margin-top: 0.75rem;
   }
 
-  .pgp-btn {
+  .btn-action {
     display: inline-flex !important;
     align-items: center !important;
-    background-color: var(--bg-button) !important;
+    justify-content: center !important;
+    background: transparent !important;
     border: 1px solid var(--border) !important;
-    color: var(--fg-button) !important;
+    color: var(--fg-main) !important;
     font-family: "Typus Mono 95", "Typus Mono", monospace !important;
-    font-size: 0.84rem !important;
-    font-weight: 600 !important;
-    padding: 0.4rem 0.85rem !important;
+    font-size: 0.85rem !important;
+    font-weight: 500 !important;
+    padding: 0.35rem 0.85rem !important;
+    border-radius: 0 !important;
     cursor: pointer !important;
-    border-radius: 2px !important;
     text-decoration: none !important;
     line-height: 1.4 !important;
-    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease !important;
+    white-space: nowrap !important;
+    transition: background-color 0.12s ease, color 0.12s ease, border-color 0.12s ease !important;
   }
 
-  .pgp-btn:hover {
-    background-color: var(--bg-button-hover) !important;
-    color: var(--fg-button-hover) !important;
-    border-color: var(--fg-button-hover) !important;
+  .btn-action:hover {
+    background-color: var(--fg-main) !important;
+    color: var(--bg-main) !important;
+    border-color: var(--fg-main) !important;
+  }
+
+  .btn-action:active {
+    background-color: var(--fg-link) !important;
+    color: var(--bg-main) !important;
+    border-color: var(--fg-link) !important;
   }
 
   .armored-drawer {

@@ -28,7 +28,7 @@ const { ciphertext, iv, salt, hint } = Astro.props;
           autocomplete="off" 
           required 
         />
-        <button type="submit" class="vault-btn">[ Unlock ]</button>
+        <button type="submit" class="btn-action vault-btn">Unlock</button>
       </div>
       <div class="vault-error" style="display: none;"></div>
     </form>
@@ -65,7 +65,7 @@ const { ciphertext, iv, salt, hint } = Astro.props;
       if (!passphrase) return;
 
       btn.disabled = true;
-      btn.textContent = '[ Verifying... ]';
+      btn.textContent = 'Verifying...';
       errorEl.style.display = 'none';
 
       try {
@@ -109,7 +109,7 @@ const { ciphertext, iv, salt, hint } = Astro.props;
         errorEl.textContent = 'Decryption failed: Invalid passphrase or corrupted ciphertext.';
         errorEl.style.display = 'block';
         btn.disabled = false;
-        btn.textContent = '[ Unlock ]';
+        btn.textContent = 'Unlock';
         input.focus();
       }
     }
@@ -186,7 +186,7 @@ const { ciphertext, iv, salt, hint } = Astro.props;
     font-family: "Typus Mono 95", "Typus Mono", monospace;
     font-size: 0.88rem;
     letter-spacing: 0.08em;
-    border-radius: 2px;
+    border-radius: 0;
   }
 
   .vault-input:focus {
@@ -195,26 +195,38 @@ const { ciphertext, iv, salt, hint } = Astro.props;
   }
 
   .vault-btn {
-    background-color: var(--bg-button);
-    border: 1px solid var(--border);
-    color: var(--fg-button);
-    padding: 0.45rem 1rem;
-    font-family: "Typus Mono 95", "Typus Mono", monospace;
-    font-size: 0.9rem;
-    font-weight: 600;
-    cursor: pointer;
-    border-radius: 2px;
-    transition: background-color 0.15s ease, color 0.15s ease;
-    white-space: nowrap;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: transparent !important;
+    border: 1px solid var(--border) !important;
+    color: var(--fg-main) !important;
+    font-family: "Typus Mono 95", "Typus Mono", monospace !important;
+    font-size: 0.85rem !important;
+    font-weight: 500 !important;
+    padding: 0.35rem 0.85rem !important;
+    border-radius: 0 !important;
+    cursor: pointer !important;
+    text-decoration: none !important;
+    line-height: 1.4 !important;
+    white-space: nowrap !important;
+    transition: background-color 0.12s ease, color 0.12s ease, border-color 0.12s ease !important;
   }
 
   .vault-btn:hover:not(:disabled) {
-    background-color: var(--bg-button-hover);
-    color: var(--fg-button-hover);
+    background-color: var(--fg-main) !important;
+    color: var(--bg-main) !important;
+    border-color: var(--fg-main) !important;
+  }
+
+  .vault-btn:active:not(:disabled) {
+    background-color: var(--fg-link) !important;
+    color: var(--bg-main) !important;
+    border-color: var(--fg-link) !important;
   }
 
   .vault-btn:disabled {
-    opacity: 0.6;
+    opacity: 0.5;
     cursor: not-allowed;
   }
 

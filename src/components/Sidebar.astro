@@ -207,26 +207,25 @@ const currentYear = new Date().getFullYear();
     }
 
     .drawer-close-btn {
-      background: var(--bg-button);
-      border: 1px solid var(--border);
-      color: var(--fg-button);
+      background: transparent;
+      border: none;
+      color: var(--fg-link);
       font-family: "Typus Mono 95", "Typus Mono", monospace;
-      font-size: 0.82rem;
-      font-weight: 600;
-      padding: 0.35rem 0.65rem;
+      font-size: 0.92rem;
+      font-weight: 400;
+      padding: 0;
       cursor: pointer;
-      border-radius: 2px;
+      text-decoration: underline;
+      text-underline-offset: 3px;
       white-space: nowrap;
       flex-shrink: 0;
       display: inline-flex;
       align-items: center;
-      transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+      transition: color 0.15s ease;
     }
 
     .drawer-close-btn:hover {
-      color: var(--fg-button-hover);
-      background-color: var(--bg-button-hover);
-      border-color: var(--fg-button-hover);
+      color: var(--fg-link-hover);
     }
   }
 

@@ -66,18 +66,18 @@ const files = (await getCollection('files')).sort(
             {file.data.encrypted ? (
               <button
                 type="button"
-                class="unlock-archive-btn"
+                class="btn-action unlock-archive-btn"
                 data-filename={file.data.filename}
                 data-url={file.data.encryptedUrl}
                 data-salt={file.data.salt}
                 data-iv={file.data.iv}
                 data-sha={file.data.sha256}
               >
-                [ Unlock &amp; Download ]
+                Unlock &amp; Download
               </button>
             ) : (
               file.data.downloadUrl && (
-                <a href={file.data.downloadUrl} class="direct-download-link" download>
+                <a href={file.data.downloadUrl} class="btn-action" download>
                   Download Archive
                 </a>
               )
@@ -94,7 +94,7 @@ const files = (await getCollection('files')).sort(
     <dialog id="unlock-modal" class="unlock-dialog">
       <div class="modal-card">
         <header class="modal-header">
-          <h3 class="modal-title">[ Unlock Protected Archive ]</h3>
+          <h3 class="modal-title">Unlock Protected Archive</h3>
           <button type="button" id="close-modal-btn" class="modal-close-btn" aria-label="Close dialog">&times;</button>
         </header>
 
@@ -117,8 +117,8 @@ const files = (await getCollection('files')).sort(
                 autocomplete="off"
                 required
               />
-              <button type="submit" id="modal-decrypt-btn" class="modal-submit-btn">
-                [ Decrypt &amp; Download ]
+              <button type="submit" id="modal-decrypt-btn" class="btn-action modal-submit-btn">
+                Decrypt &amp; Download
               </button>
             </div>
             <div id="modal-status" class="modal-status-box" style="display: none;"></div>
@@ -360,44 +360,50 @@ const files = (await getCollection('files')).sort(
   }
 
   .card-actions {
-    margin-top: 0.75rem;
+    margin-top: 0.85rem;
   }
 
-  .direct-download-link {
-    font-family: "Typus Mono 95", "Typus Mono", monospace;
-    font-size: 0.92rem;
-    font-weight: 600;
-    color: var(--fg-link);
-    text-decoration: underline;
-    text-underline-offset: 3px;
-    display: inline-block;
-    transition: color 0.15s ease;
+  .btn-action,
+  .unlock-archive-btn,
+  .modal-submit-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: transparent !important;
+    border: 1px solid var(--border) !important;
+    color: var(--fg-main) !important;
+    font-family: "Typus Mono 95", "Typus Mono", monospace !important;
+    font-size: 0.85rem !important;
+    font-weight: 500 !important;
+    padding: 0.35rem 0.85rem !important;
+    border-radius: 0 !important;
+    cursor: pointer !important;
+    text-decoration: none !important;
+    line-height: 1.4 !important;
+    white-space: nowrap !important;
+    transition: background-color 0.12s ease, color 0.12s ease, border-color 0.12s ease !important;
   }
 
-  .direct-download-link:hover {
-    color: var(--fg-link-hover);
+  .btn-action:hover,
+  .unlock-archive-btn:hover:not(:disabled),
+  .modal-submit-btn:hover:not(:disabled) {
+    background-color: var(--fg-main) !important;
+    color: var(--bg-main) !important;
+    border-color: var(--fg-main) !important;
   }
 
-  .unlock-archive-btn {
-    background-color: var(--bg-button);
-    border: 1px solid var(--border);
-    color: var(--fg-button);
-    font-family: "Typus Mono 95", "Typus Mono", monospace;
-    font-size: 0.88rem;
-    font-weight: 600;
-    padding: 0.4rem 0.9rem;
-    cursor: pointer;
-    border-radius: 2px;
-    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
+  .btn-action:active,
+  .unlock-archive-btn:active:not(:disabled),
+  .modal-submit-btn:active:not(:disabled) {
+    background-color: var(--fg-link) !important;
+    color: var(--bg-main) !important;
+    border-color: var(--fg-link) !important;
   }
 
-  .unlock-archive-btn:hover {
-    background-color: var(--bg-button-hover);
-    color: var(--fg-button-hover);
-    border-color: var(--fg-button-hover);
+  .unlock-archive-btn:disabled,
+  .modal-submit-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 
   .unlock-dialog {

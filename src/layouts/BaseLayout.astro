@@ -96,16 +96,16 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
             btn.type = 'button';
             btn.className = 'copy-code-btn';
             btn.setAttribute('aria-label', 'Copy code to clipboard');
-            btn.textContent = '[ Copy ]';
+            btn.textContent = 'Copy';
 
             btn.addEventListener('click', function () {
               var code = pre.querySelector('code') || pre;
               var text = code.innerText || code.textContent || '';
               navigator.clipboard.writeText(text.trim()).then(function () {
-                btn.textContent = '[ Copied ]';
+                btn.textContent = 'Copied';
                 btn.classList.add('is-copied');
                 setTimeout(function () {
-                  btn.textContent = '[ Copy ]';
+                  btn.textContent = 'Copy';
                   btn.classList.remove('is-copied');
                 }, 2000);
               });

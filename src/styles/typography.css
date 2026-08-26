@@ -103,17 +103,18 @@ pre code, .shiki code {
   top: 0.55rem;
   right: 0.55rem;
   font-family: "Typus Mono 95", "Typus Mono", monospace !important;
-  font-size: 0.78rem !important;
-  font-weight: 600 !important;
-  background-color: var(--bg-button) !important;
-  color: var(--fg-button) !important;
+  font-size: 0.74rem !important;
+  font-weight: 500 !important;
+  background-color: var(--bg-main) !important;
+  color: var(--fg-dim) !important;
   border: 1px solid var(--border) !important;
-  border-radius: 2px !important;
-  padding: 0.22rem 0.55rem !important;
+  border-radius: 0 !important;
+  padding: 0.2rem 0.55rem !important;
   cursor: pointer !important;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.15s ease, background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease !important;
+  text-decoration: none !important;
+  transition: opacity 0.15s ease, background-color 0.12s ease, color 0.12s ease, border-color 0.12s ease !important;
   user-select: none;
   z-index: 10;
 }
@@ -125,16 +126,16 @@ pre code, .shiki code {
 }
 
 .copy-code-btn:hover {
-  background-color: var(--bg-button-hover) !important;
-  color: var(--fg-button-hover) !important;
-  border-color: var(--fg-button-hover) !important;
+  background-color: var(--fg-main) !important;
+  color: var(--bg-main) !important;
+  border-color: var(--fg-main) !important;
 }
 
 .copy-code-btn.is-copied {
   opacity: 1 !important;
-  background-color: var(--bg-main) !important;
-  color: var(--fg-link-hover) !important;
-  border-color: var(--fg-link-hover) !important;
+  background-color: var(--fg-link-active) !important;
+  color: var(--bg-main) !important;
+  border-color: var(--fg-link-active) !important;
 }
 
 .shiki span {
