@@ -12,8 +12,7 @@ const { ciphertext, iv, salt, hint } = Astro.props;
 <div class="vault-container" data-ciphertext={ciphertext} data-iv={iv} data-salt={salt}>
   <div class="vault-prompt">
     <div class="vault-header">
-      <span class="vault-lock-symbol">&#x1F512;</span>
-      <span class="vault-title">ENCRYPTED DOCUMENT</span>
+      <span class="vault-title">[ Encrypted Document ]</span>
     </div>
     <p class="vault-message">
       This resource is protected by client-side AES-256-GCM encryption.
