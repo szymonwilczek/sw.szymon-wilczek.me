@@ -59,6 +59,10 @@
             <td>Cycle color theme (<code>ef-autumn</code> / <code>ef-day</code>)</td>
           </tr>
           <tr>
+            <td><kbd>Shift + B</kbd></td>
+            <td>Cycle serif font (<code>IBM Plex</code>, <code>Newsreader</code>, <code>Charter</code>...)</td>
+          </tr>
+          <tr>
             <td><kbd>g</kbd> <kbd>g</kbd></td>
             <td>Scroll smoothly to top of page</td>
           </tr>
@@ -154,6 +158,91 @@
           document.documentElement.setAttribute('data-theme', 'light');
           var label = document.getElementById('theme-label');
           if (label) label.textContent = 'Light';
+        }
+      },
+      {
+        id: 'font-cycle',
+        name: 'font-cycle',
+        desc: 'Cycle through serif & monospace fonts (Shift+B)',
+        action: function () {
+          var fonts = ['ibm-plex', 'newsreader', 'charter', 'garamond', 'literata', 'vollkorn', 'lora', 'mono'];
+          var current = localStorage.getItem('font-preference') || 'ibm-plex';
+          var nextIdx = (fonts.indexOf(current) + 1) % fonts.length;
+          var nextFont = fonts[nextIdx];
+          localStorage.setItem('font-preference', nextFont);
+          document.documentElement.setAttribute('data-font', nextFont);
+        }
+      },
+      {
+        id: 'font-set-ibm-plex',
+        name: 'font-set-ibm-plex',
+        desc: 'Set body font to IBM Plex Serif (Technical & Modern)',
+        action: function () {
+          localStorage.setItem('font-preference', 'ibm-plex');
+          document.documentElement.setAttribute('data-font', 'ibm-plex');
+        }
+      },
+      {
+        id: 'font-set-newsreader',
+        name: 'font-set-newsreader',
+        desc: 'Set body font to Newsreader (Editorial & Literary)',
+        action: function () {
+          localStorage.setItem('font-preference', 'newsreader');
+          document.documentElement.setAttribute('data-font', 'newsreader');
+        }
+      },
+      {
+        id: 'font-set-charter',
+        name: 'font-set-charter',
+        desc: 'Set body font to Charter / Bitstream Charter (Clean & Crisp)',
+        action: function () {
+          localStorage.setItem('font-preference', 'charter');
+          document.documentElement.setAttribute('data-font', 'charter');
+        }
+      },
+      {
+        id: 'font-set-garamond',
+        name: 'font-set-garamond',
+        desc: 'Set body font to EB Garamond (Renaissance & Humanist)',
+        action: function () {
+          localStorage.setItem('font-preference', 'garamond');
+          document.documentElement.setAttribute('data-font', 'garamond');
+        }
+      },
+      {
+        id: 'font-set-literata',
+        name: 'font-set-literata',
+        desc: 'Set body font to Literata (Screen Reading & E-Book)',
+        action: function () {
+          localStorage.setItem('font-preference', 'literata');
+          document.documentElement.setAttribute('data-font', 'literata');
+        }
+      },
+      {
+        id: 'font-set-vollkorn',
+        name: 'font-set-vollkorn',
+        desc: 'Set body font to Vollkorn (Heavy, Earthy & Monastic)',
+        action: function () {
+          localStorage.setItem('font-preference', 'vollkorn');
+          document.documentElement.setAttribute('data-font', 'vollkorn');
+        }
+      },
+      {
+        id: 'font-set-lora',
+        name: 'font-set-lora',
+        desc: 'Set body font to Lora (Contemporary & Calligraphic)',
+        action: function () {
+          localStorage.setItem('font-preference', 'lora');
+          document.documentElement.setAttribute('data-font', 'lora');
+        }
+      },
+      {
+        id: 'font-set-mono',
+        name: 'font-set-mono',
+        desc: 'Set body font to Typus Mono 95 (Full Monospace Terminal)',
+        action: function () {
+          localStorage.setItem('font-preference', 'mono');
+          document.documentElement.setAttribute('data-font', 'mono');
         }
       },
       {
@@ -408,6 +497,17 @@
         e.preventDefault();
         var themeBtn = document.getElementById('theme-toggle');
         if (themeBtn) themeBtn.click();
+        return;
+      }
+
+      if (e.shiftKey && (e.key === 'B' || e.code === 'KeyB') && !e.ctrlKey && !e.altKey && !e.metaKey) {
+        e.preventDefault();
+        var fonts = ['ibm-plex', 'newsreader', 'charter', 'garamond', 'literata', 'vollkorn', 'lora', 'mono'];
+        var current = localStorage.getItem('font-preference') || 'ibm-plex';
+        var nextIdx = (fonts.indexOf(current) + 1) % fonts.length;
+        var nextFont = fonts[nextIdx];
+        localStorage.setItem('font-preference', nextFont);
+        document.documentElement.setAttribute('data-font', nextFont);
         return;
       }
 

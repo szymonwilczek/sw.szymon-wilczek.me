@@ -1,5 +1,27 @@
+:root {
+  --font-serif-ibm: "IBM Plex Serif", "Charter", Georgia, serif;
+  --font-serif-newsreader: "Newsreader", "Charter", Georgia, serif;
+  --font-serif-charter: "Charter", "Bitstream Charter", Cambria, Georgia, serif;
+  --font-serif-garamond: "EB Garamond", Garamond, Georgia, serif;
+  --font-serif-literata: "Literata", Georgia, serif;
+  --font-serif-vollkorn: "Vollkorn", Georgia, serif;
+  --font-serif-lora: "Lora", Georgia, serif;
+  --font-serif-mono: "Typus Mono 95", "Typus Mono", monospace;
+
+  --font-serif: var(--font-serif-ibm);
+}
+
+:root[data-font="ibm-plex"] { --font-serif: var(--font-serif-ibm); }
+:root[data-font="newsreader"] { --font-serif: var(--font-serif-newsreader); }
+:root[data-font="charter"] { --font-serif: var(--font-serif-charter); }
+:root[data-font="garamond"] { --font-serif: var(--font-serif-garamond); }
+:root[data-font="literata"] { --font-serif: var(--font-serif-literata); }
+:root[data-font="vollkorn"] { --font-serif: var(--font-serif-vollkorn); }
+:root[data-font="lora"] { --font-serif: var(--font-serif-lora); }
+:root[data-font="mono"] { --font-serif: var(--font-serif-mono); }
+
 body {
-  font-family: "Source Serif 4", "Newsreader", "Charter", "Bitstream Charter", Cambria, Georgia, serif;
+  font-family: var(--font-serif);
   font-size: 1.34rem;
   line-height: 1.85;
   color: var(--fg-main);
