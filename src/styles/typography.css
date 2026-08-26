@@ -8,7 +8,7 @@
   --font-serif-lora: "Lora", Georgia, serif;
   --font-serif-mono: "Typus Mono 95", "Typus Mono", monospace;
 
-  --font-serif: var(--font-serif-ibm);
+  --font-serif: var(--font-serif-literata);
 }
 
 :root[data-font="ibm-plex"] { --font-serif: var(--font-serif-ibm); }

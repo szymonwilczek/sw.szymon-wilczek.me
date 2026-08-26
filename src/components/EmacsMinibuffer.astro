@@ -166,7 +166,7 @@
         desc: 'Cycle through serif & monospace fonts (Shift+B)',
         action: function () {
           var fonts = ['ibm-plex', 'newsreader', 'charter', 'garamond', 'literata', 'vollkorn', 'lora', 'mono'];
-          var current = localStorage.getItem('font-preference') || 'ibm-plex';
+          var current = localStorage.getItem('font-preference') || 'literata';
           var nextIdx = (fonts.indexOf(current) + 1) % fonts.length;
           var nextFont = fonts[nextIdx];
           localStorage.setItem('font-preference', nextFont);
@@ -503,7 +503,7 @@
       if (e.shiftKey && (e.key === 'B' || e.code === 'KeyB') && !e.ctrlKey && !e.altKey && !e.metaKey) {
         e.preventDefault();
         var fonts = ['ibm-plex', 'newsreader', 'charter', 'garamond', 'literata', 'vollkorn', 'lora', 'mono'];
-        var current = localStorage.getItem('font-preference') || 'ibm-plex';
+        var current = localStorage.getItem('font-preference') || 'literata';
         var nextIdx = (fonts.indexOf(current) + 1) % fonts.length;
         var nextFont = fonts[nextIdx];
         localStorage.setItem('font-preference', nextFont);
