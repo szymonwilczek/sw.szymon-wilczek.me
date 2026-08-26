@@ -1,0 +1,30 @@
+root = true
+
+# Coding style for all source files
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = tab
+indent_size = 8
+tab_width = 8
+max_line_length = 160
+
+[*.{js,mjs,cjs,ts,mts,cts,astro,json,css,html,sh}]
+indent_style = tab
+indent_size = 8
+tab_width = 8
+
+[*.{yml,yaml}]
+indent_style = space
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false
+
+[*.org]
+indent_style = space
+indent_size = 2
+tab_width = 2
+trim_trailing_whitespace = false
