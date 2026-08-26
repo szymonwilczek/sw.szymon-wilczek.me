@@ -40,6 +40,8 @@ p {
 }
 
 a {
+  font-family: "Typus Mono 95", "Typus Mono", monospace;
+  font-size: 0.94em;
   color: var(--fg-link);
   text-decoration: underline;
   text-underline-offset: 3px;
