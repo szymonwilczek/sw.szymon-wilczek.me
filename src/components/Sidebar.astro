@@ -139,6 +139,7 @@ const currentYear = new Date().getFullYear();
     } else {
       init();
     }
+    document.addEventListener('astro:page-load', init);
   })();
 </script>
 

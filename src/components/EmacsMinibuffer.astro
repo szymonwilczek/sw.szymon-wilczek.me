@@ -236,7 +236,19 @@
     }
 
     if (closeKeybindingsBtn) closeKeybindingsBtn.onclick = closeKeybindings;
-    if (footerKeysBtn) footerKeysBtn.onclick = openKeybindings;
+
+    function handleFooterKeysBtn() {
+      var btn = document.getElementById('footer-keys-btn');
+      if (btn) btn.onclick = openKeybindings;
+    }
+    handleFooterKeysBtn();
+    document.addEventListener('astro:page-load', handleFooterKeysBtn);
+
+    document.addEventListener('click', function(e) {
+      if (e.target && e.target.closest('#footer-keys-btn')) {
+        openKeybindings();
+      }
+    });
 
     if (keybindingsModal) {
       keybindingsModal.addEventListener('click', function(e) {

@@ -154,3 +154,11 @@ body.menu-open .drawer-backdrop {
   pointer-events: none;
   transition: width 0.05s linear;
 }
+
+::view-transition-old(root),
+::view-transition-new(root),
+::view-transition-group(root),
+::view-transition-image-pair(root) {
+  animation: none !important;
+  mix-blend-mode: normal !important;
+}
