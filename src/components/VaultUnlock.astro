@@ -1,385 +1,389 @@
 ---
 interface Props {
-  ciphertext?: string;
-  encryptedUrl?: string;
-  filename?: string;
-  filesize?: string;
-  iv: string;
-  salt: string;
-  hint?: string;
+	ciphertext?: string;
+	encryptedUrl?: string;
+	filename?: string;
+	filesize?: string;
+	iv: string;
+	salt: string;
+	hint?: string;
 }
 
 const { ciphertext, encryptedUrl, filename, filesize, iv, salt, hint } = Astro.props;
 const isBinaryFile = Boolean(encryptedUrl);
 ---
 
-<div 
-  class="vault-container" 
-  data-ciphertext={ciphertext || ''} 
-  data-url={encryptedUrl || ''} 
-  data-filename={filename || 'document.org'}
-  data-is-file={isBinaryFile ? 'true' : 'false'}
-  data-iv={iv} 
-  data-salt={salt}
->
-  <div class="vault-prompt">
-    <form class="vault-form" onsubmit="return false;">
-      <div class="input-group">
-        <input 
-          type="password" 
-          class="vault-input" 
-          placeholder={isBinaryFile ? "Enter Passphrase to decrypt & download..." : "Enter Passphrase to decrypt..."}
-          autocomplete="off" 
-          required 
-        />
-        <button type="submit" class="btn-action vault-btn">
-          {isBinaryFile ? 'Unlock & Download' : 'Unlock'}
-        </button>
-      </div>
-      {hint && <span class="vault-hint">Hint: {hint}</span>}
-      <div class="vault-error" style="display: none;"></div>
-    </form>
-  </div>
+<div
+	class="vault-container"
+	data-ciphertext={ciphertext || ''}
+	data-url={encryptedUrl || ''}
+	data-filename={filename || 'document.org'}
+	data-is-file={isBinaryFile ? 'true' : 'false'}
+	data-iv={iv}
+	data-salt={salt}>
+	<div class="vault-prompt">
+		<form class="vault-form" onsubmit="return false;">
+			<div class="input-group">
+				<input
+					type="password"
+					class="vault-input"
+					placeholder={isBinaryFile ? 'Enter Passphrase to decrypt & download...' : 'Enter Passphrase to decrypt...'}
+					autocomplete="off"
+					required
+				/>
+				<button type="submit" class="btn-action vault-btn">
+					{isBinaryFile ? 'Unlock & Download' : 'Unlock'}
+				</button>
+			</div>
+			{hint && <span class="vault-hint">Hint: {hint}</span>}
+			<div class="vault-error" style="display: none;"></div>
+		</form>
+	</div>
 
-  <div class="vault-unlocked" style="display: none;">
-    <div class="unlocked-header">
-      <span class="unlocked-badge">Decrypted Successfully</span>
-      <div class="unlocked-actions">
-        {!isBinaryFile && (
-          <button type="button" class="btn-action vault-copy-btn">Copy</button>
-        )}
-        <button type="button" class="btn-action vault-download-btn">
-          {isBinaryFile ? 'Download Again' : 'Download File'}
-        </button>
-      </div>
-    </div>
-    <div class="vault-content"></div>
-  </div>
+	<div class="vault-unlocked" style="display: none;">
+		<div class="unlocked-header">
+			<span class="unlocked-badge">Decrypted Successfully</span>
+			<div class="unlocked-actions">
+				{
+					!isBinaryFile && (
+						<button type="button" class="btn-action vault-copy-btn">
+							Copy
+						</button>
+					)
+				}
+				<button type="button" class="btn-action vault-download-btn">
+					{isBinaryFile ? 'Download Again' : 'Download File'}
+				</button>
+			</div>
+		</div>
+		<div class="vault-content"></div>
+	</div>
 </div>
 
 <script is:inline>
-  (function() {
-    function base64ToBuffer(b64) {
-      var bin = atob(b64);
-      var buf = new Uint8Array(bin.length);
-      for (var i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
-      return buf;
-    }
+	(function () {
+		function base64ToBuffer(b64) {
+			var bin = atob(b64);
+			var buf = new Uint8Array(bin.length);
+			for (var i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
+			return buf;
+		}
 
-    async function deriveAesKey(passphrase, salt) {
-      var enc = new TextEncoder();
-      var keyMaterial = await window.crypto.subtle.importKey(
-        'raw',
-        enc.encode(passphrase),
-        'PBKDF2',
-        false,
-        ['deriveKey']
-      );
+		async function deriveAesKey(passphrase, salt) {
+			var enc = new TextEncoder();
+			var keyMaterial = await window.crypto.subtle.importKey('raw', enc.encode(passphrase), 'PBKDF2', false, ['deriveKey']);
 
-      return await window.crypto.subtle.deriveKey(
-        {
-          name: 'PBKDF2',
-          salt: salt,
-          iterations: 100000,
-          hash: 'SHA-256',
-        },
-        keyMaterial,
-        { name: 'AES-GCM', length: 256 },
-        false,
-        ['decrypt']
-      );
-    }
+			return await window.crypto.subtle.deriveKey(
+				{
+					name: 'PBKDF2',
+					salt: salt,
+					iterations: 100000,
+					hash: 'SHA-256',
+				},
+				keyMaterial,
+				{ name: 'AES-GCM', length: 256 },
+				false,
+				['decrypt'],
+			);
+		}
 
-    async function unlockVault(container) {
-      var input = container.querySelector('.vault-input');
-      var errorEl = container.querySelector('.vault-error');
-      var promptEl = container.querySelector('.vault-prompt');
-      var unlockedEl = container.querySelector('.vault-unlocked');
-      var contentEl = container.querySelector('.vault-content');
-      var btn = container.querySelector('.vault-btn');
-      var copyBtn = container.querySelector('.vault-copy-btn');
-      var downloadBtn = container.querySelector('.vault-download-btn');
+		async function unlockVault(container) {
+			var input = container.querySelector('.vault-input');
+			var errorEl = container.querySelector('.vault-error');
+			var promptEl = container.querySelector('.vault-prompt');
+			var unlockedEl = container.querySelector('.vault-unlocked');
+			var contentEl = container.querySelector('.vault-content');
+			var btn = container.querySelector('.vault-btn');
+			var copyBtn = container.querySelector('.vault-copy-btn');
+			var downloadBtn = container.querySelector('.vault-download-btn');
 
-      if (!input || !errorEl || !promptEl || !unlockedEl || !contentEl || !btn) return;
+			if (!input || !errorEl || !promptEl || !unlockedEl || !contentEl || !btn) return;
 
-      var passphrase = input.value;
-      if (!passphrase) return;
+			var passphrase = input.value;
+			if (!passphrase) return;
 
-      var isFile = container.dataset.isFile === 'true';
-      var filename = container.dataset.filename || 'decrypted-file';
-      var salt = base64ToBuffer(container.dataset.salt || '');
-      var iv = base64ToBuffer(container.dataset.iv || '');
+			var isFile = container.dataset.isFile === 'true';
+			var filename = container.dataset.filename || 'decrypted-file';
+			var salt = base64ToBuffer(container.dataset.salt || '');
+			var iv = base64ToBuffer(container.dataset.iv || '');
 
-      btn.disabled = true;
-      btn.textContent = isFile ? 'Decrypting in RAM...' : 'Verifying...';
-      errorEl.style.display = 'none';
+			btn.disabled = true;
+			btn.textContent = isFile ? 'Decrypting in RAM...' : 'Verifying...';
+			errorEl.style.display = 'none';
 
-      try {
-        var key = await deriveAesKey(passphrase, salt);
-        var decryptedBytes;
-        var rawTextContent = '';
+			try {
+				var key = await deriveAesKey(passphrase, salt);
+				var decryptedBytes;
+				var rawTextContent = '';
 
-        if (isFile) {
-          var resp = await fetch(container.dataset.url);
-          if (!resp.ok) throw new Error('Could not fetch encrypted file payload.');
-          var encryptedData = await resp.arrayBuffer();
+				if (isFile) {
+					var resp = await fetch(container.dataset.url);
+					if (!resp.ok) throw new Error('Could not fetch encrypted file payload.');
+					var encryptedData = await resp.arrayBuffer();
 
-          decryptedBytes = await window.crypto.subtle.decrypt(
-            { name: 'AES-GCM', iv: iv },
-            key,
-            encryptedData
-          );
+					decryptedBytes = await window.crypto.subtle.decrypt({ name: 'AES-GCM', iv: iv }, key, encryptedData);
 
-          var blob = new Blob([decryptedBytes], { type: 'application/octet-stream' });
-          var downloadUrl = URL.createObjectURL(blob);
-          var a = document.createElement('a');
-          a.href = downloadUrl;
-          a.download = filename;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
+					var blob = new Blob([decryptedBytes], { type: 'application/octet-stream' });
+					var downloadUrl = URL.createObjectURL(blob);
+					var a = document.createElement('a');
+					a.href = downloadUrl;
+					a.download = filename;
+					document.body.appendChild(a);
+					a.click();
+					document.body.removeChild(a);
 
-          contentEl.innerHTML = '<p class="file-download-notice">Decrypted and downloaded <code>' + filename + '</code> directly to your device.</p>';
+					contentEl.innerHTML =
+						'<p class="file-download-notice">Decrypted and downloaded <code>' +
+						filename +
+						'</code> directly to your device.</p>';
 
-          if (downloadBtn) {
-            downloadBtn.onclick = function() {
-              var a2 = document.createElement('a');
-              a2.href = downloadUrl;
-              a2.download = filename;
-              document.body.appendChild(a2);
-              a2.click();
-              document.body.removeChild(a2);
-            };
-          }
-        } else {
-          var ciphertext = base64ToBuffer(container.dataset.ciphertext || '');
-          decryptedBytes = await window.crypto.subtle.decrypt(
-            { name: 'AES-GCM', iv: iv },
-            key,
-            ciphertext
-          );
+					if (downloadBtn) {
+						downloadBtn.onclick = function () {
+							var a2 = document.createElement('a');
+							a2.href = downloadUrl;
+							a2.download = filename;
+							document.body.appendChild(a2);
+							a2.click();
+							document.body.removeChild(a2);
+						};
+					}
+				} else {
+					var ciphertext = base64ToBuffer(container.dataset.ciphertext || '');
+					decryptedBytes = await window.crypto.subtle.decrypt({ name: 'AES-GCM', iv: iv }, key, ciphertext);
 
-          var dec = new TextDecoder();
-          rawTextContent = dec.decode(decryptedBytes);
-          contentEl.innerHTML = rawTextContent;
+					var dec = new TextDecoder();
+					rawTextContent = dec.decode(decryptedBytes);
+					contentEl.innerHTML = rawTextContent;
 
-          if (copyBtn) {
-            copyBtn.onclick = function() {
-              var plain = contentEl.innerText || rawTextContent;
-              navigator.clipboard.writeText(plain).then(function() {
-                var orig = copyBtn.textContent;
-                copyBtn.textContent = 'Copied!';
-                setTimeout(function() { copyBtn.textContent = orig; }, 2000);
-              });
-            };
-          }
+					if (copyBtn) {
+						copyBtn.onclick = function () {
+							var plain = contentEl.innerText || rawTextContent;
+							navigator.clipboard.writeText(plain).then(function () {
+								var orig = copyBtn.textContent;
+								copyBtn.textContent = 'Copied!';
+								setTimeout(function () {
+									copyBtn.textContent = orig;
+								}, 2000);
+							});
+						};
+					}
 
-          if (downloadBtn) {
-            downloadBtn.onclick = function() {
-              var plain = contentEl.innerText || rawTextContent;
-              var blob = new Blob([plain], { type: 'text/plain;charset=utf-8' });
-              var dlUrl = URL.createObjectURL(blob);
-              var a = document.createElement('a');
-              a.href = dlUrl;
-              a.download = filename.endsWith('.org') || filename.endsWith('.txt') || filename.endsWith('.md') ? filename : filename + '.org';
-              document.body.appendChild(a);
-              a.click();
-              document.body.removeChild(a);
-              setTimeout(function() { URL.revokeObjectURL(dlUrl); }, 3000);
-            };
-          }
-        }
+					if (downloadBtn) {
+						downloadBtn.onclick = function () {
+							var plain = contentEl.innerText || rawTextContent;
+							var blob = new Blob([plain], {
+								type: 'text/plain;charset=utf-8',
+							});
+							var dlUrl = URL.createObjectURL(blob);
+							var a = document.createElement('a');
+							a.href = dlUrl;
+							a.download =
+								filename.endsWith('.org') || filename.endsWith('.txt') || filename.endsWith('.md')
+									? filename
+									: filename + '.org';
+							document.body.appendChild(a);
+							a.click();
+							document.body.removeChild(a);
+							setTimeout(function () {
+								URL.revokeObjectURL(dlUrl);
+							}, 3000);
+						};
+					}
+				}
 
-        promptEl.style.display = 'none';
-        unlockedEl.style.display = 'block';
-      } catch (e) {
-        errorEl.textContent = 'Decryption failed: Invalid passphrase.';
-        errorEl.style.display = 'block';
-        btn.disabled = false;
-        btn.textContent = isFile ? 'Unlock & Download' : 'Unlock';
-        input.focus();
-      }
-    }
+				promptEl.style.display = 'none';
+				unlockedEl.style.display = 'block';
+			} catch (e) {
+				errorEl.textContent = 'Decryption failed: Invalid passphrase.';
+				errorEl.style.display = 'block';
+				btn.disabled = false;
+				btn.textContent = isFile ? 'Unlock & Download' : 'Unlock';
+				input.focus();
+			}
+		}
 
-    function initVaults() {
-      document.querySelectorAll('.vault-container').forEach(function(container) {
-        var form = container.querySelector('.vault-form');
-        if (form && !form.dataset.bound) {
-          form.dataset.bound = 'true';
-          form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            unlockVault(container);
-          });
-        }
-      });
-    }
+		function initVaults() {
+			document.querySelectorAll('.vault-container').forEach(function (container) {
+				var form = container.querySelector('.vault-form');
+				if (form && !form.dataset.bound) {
+					form.dataset.bound = 'true';
+					form.addEventListener('submit', function (e) {
+						e.preventDefault();
+						unlockVault(container);
+					});
+				}
+			});
+		}
 
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initVaults);
-    } else {
-      initVaults();
-    }
-    document.addEventListener('astro:page-load', initVaults);
-  })();
+		if (document.readyState === 'loading') {
+			document.addEventListener('DOMContentLoaded', initVaults);
+		} else {
+			initVaults();
+		}
+		document.addEventListener('astro:page-load', initVaults);
+	})();
 </script>
 
 <style>
-  .vault-container {
-    margin: 0.5rem 0 0 0;
-  }
+	.vault-container {
+		margin: 0.5rem 0 0 0;
+	}
 
-  .vault-prompt {
-    background: transparent;
-    padding: 0;
-    max-width: 480px;
-  }
+	.vault-prompt {
+		background: transparent;
+		padding: 0;
+		max-width: 480px;
+	}
 
-  .input-group {
-    display: flex;
-    gap: 0.5rem;
-    align-items: stretch;
-  }
+	.input-group {
+		display: flex;
+		gap: 0.5rem;
+		align-items: stretch;
+	}
 
-  .vault-input {
-    flex: 1;
-    min-width: 0;
-    background-color: var(--bg-dim);
-    border: 1px solid var(--border);
-    color: var(--fg-main);
-    padding: 0.35rem 0.75rem;
-    font-family: "Typus Mono 95", "Typus Mono", monospace;
-    font-size: 0.85rem;
-    letter-spacing: 0.05em;
-    border-radius: 0;
-  }
+	.vault-input {
+		flex: 1;
+		min-width: 0;
+		background-color: var(--bg-dim);
+		border: 1px solid var(--border);
+		color: var(--fg-main);
+		padding: 0.35rem 0.75rem;
+		font-family: 'Typus Mono 95', 'Typus Mono', monospace;
+		font-size: 0.85rem;
+		letter-spacing: 0.05em;
+		border-radius: 0;
+	}
 
-  .vault-input:focus {
-    outline: 1px solid var(--fg-link);
-    border-color: var(--fg-link);
-  }
+	.vault-input:focus {
+		outline: 1px solid var(--fg-link);
+		border-color: var(--fg-link);
+	}
 
-  .vault-btn,
-  .vault-action-btn,
-  .vault-copy-btn,
-  .vault-download-btn {
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    background: transparent !important;
-    border: 1px solid var(--border) !important;
-    color: var(--fg-main) !important;
-    font-family: "Typus Mono 95", "Typus Mono", monospace !important;
-    font-size: 0.85rem !important;
-    font-weight: 500 !important;
-    padding: 0.35rem 0.85rem !important;
-    border-radius: 0 !important;
-    cursor: pointer !important;
-    text-decoration: none !important;
-    line-height: 1.4 !important;
-    white-space: nowrap !important;
-    transition: background-color 0.12s ease, color 0.12s ease, border-color 0.12s ease !important;
-  }
+	.vault-btn,
+	.vault-action-btn,
+	.vault-copy-btn,
+	.vault-download-btn {
+		display: inline-flex !important;
+		align-items: center !important;
+		justify-content: center !important;
+		background: transparent !important;
+		border: 1px solid var(--border) !important;
+		color: var(--fg-main) !important;
+		font-family: 'Typus Mono 95', 'Typus Mono', monospace !important;
+		font-size: 0.85rem !important;
+		font-weight: 500 !important;
+		padding: 0.35rem 0.85rem !important;
+		border-radius: 0 !important;
+		cursor: pointer !important;
+		text-decoration: none !important;
+		line-height: 1.4 !important;
+		white-space: nowrap !important;
+		transition:
+			background-color 0.12s ease,
+			color 0.12s ease,
+			border-color 0.12s ease !important;
+	}
 
-  .vault-btn:hover:not(:disabled),
-  .vault-action-btn:hover,
-  .vault-copy-btn:hover,
-  .vault-download-btn:hover {
-    background-color: var(--fg-main) !important;
-    color: var(--bg-main) !important;
-    border-color: var(--fg-main) !important;
-  }
+	.vault-btn:hover:not(:disabled),
+	.vault-action-btn:hover,
+	.vault-copy-btn:hover,
+	.vault-download-btn:hover {
+		background-color: var(--fg-main) !important;
+		color: var(--bg-main) !important;
+		border-color: var(--fg-main) !important;
+	}
 
-  .vault-btn:active:not(:disabled),
-  .vault-action-btn:active,
-  .vault-copy-btn:active,
-  .vault-download-btn:active {
-    background-color: var(--fg-link) !important;
-    color: var(--bg-main) !important;
-    border-color: var(--fg-link) !important;
-  }
+	.vault-btn:active:not(:disabled),
+	.vault-action-btn:active,
+	.vault-copy-btn:active,
+	.vault-download-btn:active {
+		background-color: var(--fg-link) !important;
+		color: var(--bg-main) !important;
+		border-color: var(--fg-link) !important;
+	}
 
-  .vault-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
+	.vault-btn:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
 
-  .vault-hint {
-    display: block;
-    font-family: "Typus Mono 95", "Typus Mono", monospace;
-    font-size: 0.78rem;
-    color: var(--fg-dim);
-    margin-top: 0.35rem;
-  }
+	.vault-hint {
+		display: block;
+		font-family: 'Typus Mono 95', 'Typus Mono', monospace;
+		font-size: 0.78rem;
+		color: var(--fg-dim);
+		margin-top: 0.35rem;
+	}
 
-  .vault-error {
-    font-family: "Typus Mono 95", "Typus Mono", monospace;
-    font-size: 0.82rem;
-    color: var(--red-warmer);
-    margin-top: 0.45rem;
-  }
+	.vault-error {
+		font-family: 'Typus Mono 95', 'Typus Mono', monospace;
+		font-size: 0.82rem;
+		color: var(--red-warmer);
+		margin-top: 0.45rem;
+	}
 
-  .vault-unlocked {
-    background-color: var(--bg-dim);
-    border: 1px solid var(--border);
-    padding: 1.25rem 1.5rem;
-    max-width: 680px;
-    border-radius: 0;
-    margin-top: 0.75rem;
-  }
+	.vault-unlocked {
+		background-color: var(--bg-dim);
+		border: 1px solid var(--border);
+		padding: 1.25rem 1.5rem;
+		max-width: 680px;
+		border-radius: 0;
+		margin-top: 0.75rem;
+	}
 
-  .unlocked-header {
-    margin-bottom: 0.75rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px dashed var(--border);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 0.75rem;
-    flex-wrap: wrap;
-  }
+	.unlocked-header {
+		margin-bottom: 0.75rem;
+		padding-bottom: 0.5rem;
+		border-bottom: 1px dashed var(--border);
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: 0.75rem;
+		flex-wrap: wrap;
+	}
 
-  .unlocked-badge {
-    font-family: "Typus Mono 95", "Typus Mono", monospace;
-    font-size: 0.82rem;
-    font-weight: 600;
-    color: var(--fg-link-active);
-  }
+	.unlocked-badge {
+		font-family: 'Typus Mono 95', 'Typus Mono', monospace;
+		font-size: 0.82rem;
+		font-weight: 600;
+		color: var(--fg-link-active);
+	}
 
-  .unlocked-actions {
-    display: flex;
-    gap: 0.5rem;
-  }
+	.unlocked-actions {
+		display: flex;
+		gap: 0.5rem;
+	}
 
-  .vault-content {
-    line-height: 1.65;
-    color: var(--fg-main);
-    font-size: 0.95rem;
-  }
+	.vault-content {
+		line-height: 1.65;
+		color: var(--fg-main);
+		font-size: 0.95rem;
+	}
 
-  .file-download-notice {
-    margin: 0;
-    font-family: "Typus Mono 95", "Typus Mono", monospace;
-    font-size: 0.88rem;
-    color: var(--fg-main);
-  }
+	.file-download-notice {
+		margin: 0;
+		font-family: 'Typus Mono 95', 'Typus Mono', monospace;
+		font-size: 0.88rem;
+		color: var(--fg-main);
+	}
 
-  .file-download-notice code {
-    color: var(--fg-link);
-  }
+	.file-download-notice code {
+		color: var(--fg-link);
+	}
 
-  .vault-content :global(h3) {
-    font-size: 1.15rem;
-    margin: 0.25rem 0 0.5rem 0;
-    padding: 0;
-    border: none;
-  }
+	.vault-content :global(h3) {
+		font-size: 1.15rem;
+		margin: 0.25rem 0 0.5rem 0;
+		padding: 0;
+		border: none;
+	}
 
-  .vault-content :global(p) {
-    margin: 0.4rem 0;
-  }
+	.vault-content :global(p) {
+		margin: 0.4rem 0;
+	}
 
-  .vault-content :global(ul) {
-    margin: 0.4rem 0;
-    padding-left: 1.5rem;
-  }
+	.vault-content :global(ul) {
+		margin: 0.4rem 0;
+		padding-left: 1.5rem;
+	}
 </style>

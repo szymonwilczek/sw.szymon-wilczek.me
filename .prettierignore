@@ -1,0 +1,13 @@
+dist/
+node_modules/
+.astro/
+.github/
+public/downloads/
+public/fonts/
+public/images/
+src/content/
+*.org
+*.enc
+*.tar.gz
+*.tar.xz
+*.zip

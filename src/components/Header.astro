@@ -2,14 +2,14 @@
 import Navigation from './Navigation.astro';
 
 interface Props {
-  currentPath?: string;
+	currentPath?: string;
 }
 
 const { currentPath = Astro.url.pathname } = Astro.props;
 ---
 
 <header class="site-header">
-  <a href="/" class="site-title">Szymon Wilczek</a>
-  <hr class="site-divider" />
-  <Navigation currentPath={currentPath} />
+	<a href="/" class="site-title">Szymon Wilczek</a>
+	<hr class="site-divider" />
+	<Navigation currentPath={currentPath} />
 </header>

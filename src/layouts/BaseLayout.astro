@@ -6,14 +6,11 @@ import { ClientRouter } from 'astro:transitions';
 import '../styles/global.css';
 
 interface Props {
-  title?: string;
-  description?: string;
+	title?: string;
+	description?: string;
 }
 
-const {
-  title = 'Szymon Wilczek',
-  description = 'Personal website, projects, files, and writings.',
-} = Astro.props;
+const { title = 'Szymon Wilczek', description = 'Personal website, projects, files, and writings.' } = Astro.props;
 
 const pageTitle = title === 'Szymon Wilczek' ? title : `${title} · Szymon Wilczek`;
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
@@ -21,112 +18,116 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{pageTitle}</title>
-    <meta name="description" content={description} />
-    <link rel="canonical" href={canonicalURL} />
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>{pageTitle}</title>
+		<meta name="description" content={description} />
+		<link rel="canonical" href={canonicalURL} />
 
-    <ClientRouter />
+		<ClientRouter />
 
-    <script is:inline>
-      (function() {
-        function applyThemeAndFont() {
-          var stored = localStorage.getItem('theme');
-          if (stored === 'light' || stored === 'dark' || stored === 'arcadia' || stored === 'day' || stored === 'autumn') {
-            document.documentElement.setAttribute('data-theme', stored);
-          } else {
-            var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
-            document.documentElement.setAttribute('data-theme', prefersLight ? 'light' : 'dark');
-          }
+		<script is:inline>
+			(function () {
+				function applyThemeAndFont() {
+					var stored = localStorage.getItem('theme');
+					if (stored === 'light' || stored === 'dark' || stored === 'arcadia' || stored === 'day' || stored === 'autumn') {
+						document.documentElement.setAttribute('data-theme', stored);
+					} else {
+						var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+						document.documentElement.setAttribute('data-theme', prefersLight ? 'light' : 'dark');
+					}
 
-          var font = localStorage.getItem('font-preference');
-          if (font) {
-            document.documentElement.setAttribute('data-font', font);
-          }
-        }
-        applyThemeAndFont();
-        document.addEventListener('astro:after-swap', applyThemeAndFont);
-      })();
-    </script>
+					var font = localStorage.getItem('font-preference');
+					if (font) {
+						document.documentElement.setAttribute('data-font', font);
+					}
+				}
+				applyThemeAndFont();
+				document.addEventListener('astro:after-swap', applyThemeAndFont);
+			})();
+		</script>
 
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content={canonicalURL} />
-    <meta property="og:title" content={pageTitle} />
-    <meta property="og:description" content={description} />
+		<meta property="og:type" content="website" />
+		<meta property="og:url" content={canonicalURL} />
+		<meta property="og:title" content={pageTitle} />
+		<meta property="og:description" content={description} />
 
-    <link rel="alternate" type="application/rss+xml" title="Szymon Wilczek RSS Feed" href="/rss.xml" />
-    <link rel="sitemap" href="/sitemap-index.xml" />
-  </head>
-  <body transition:animate="none">
-    <header class="mobile-header">
-      <button id="mobile-menu-toggle" class="mobile-menu-btn" aria-label="Open navigation menu" aria-expanded="false">
-        <span>[Menu]</span>
-      </button>
-      <a href="/" class="mobile-title">Szymon Wilczek</a>
-    </header>
+		<link rel="alternate" type="application/rss+xml" title="Szymon Wilczek RSS Feed" href="/rss.xml" />
+		<link rel="sitemap" href="/sitemap-index.xml" />
+	</head>
+	<body transition:animate="none">
+		<header class="mobile-header">
+			<button id="mobile-menu-toggle" class="mobile-menu-btn" aria-label="Open navigation menu" aria-expanded="false">
+				<span>[Menu]</span>
+			</button>
+			<a href="/" class="mobile-title">Szymon Wilczek</a>
+		</header>
 
-    <div id="drawer-backdrop" class="drawer-backdrop" aria-hidden="true"></div>
+		<div id="drawer-backdrop" class="drawer-backdrop" aria-hidden="true"></div>
 
-    <div class="site-layout">
-      <Sidebar currentPath={Astro.url.pathname} />
-      <div class="content-wrapper">
-        <main id="main-content" transition:animate="none">
-          <div class="main-body">
-            <slot />
-          </div>
-          <div class="site-page-footer">
-            <Footer />
-          </div>
-        </main>
-      </div>
-    </div>
+		<div class="site-layout">
+			<Sidebar currentPath={Astro.url.pathname} />
+			<div class="content-wrapper">
+				<main id="main-content" transition:animate="none">
+					<div class="main-body">
+						<slot />
+					</div>
+					<div class="site-page-footer">
+						<Footer />
+					</div>
+				</main>
+			</div>
+		</div>
 
-    <EmacsMinibuffer />
+		<EmacsMinibuffer />
 
-    <script is:inline>
-      (function () {
-        function initCodeCopy() {
-          var pres = document.querySelectorAll('pre');
-          pres.forEach(function (pre) {
-            if (pre.closest('.raw-code-drawer') || (pre.parentElement && pre.parentElement.classList.contains('code-block-wrapper'))) return;
+		<script is:inline>
+			(function () {
+				function initCodeCopy() {
+					var pres = document.querySelectorAll('pre');
+					pres.forEach(function (pre) {
+						if (
+							pre.closest('.raw-code-drawer') ||
+							(pre.parentElement && pre.parentElement.classList.contains('code-block-wrapper'))
+						)
+							return;
 
-            var wrapper = document.createElement('div');
-            wrapper.className = 'code-block-wrapper';
+						var wrapper = document.createElement('div');
+						wrapper.className = 'code-block-wrapper';
 
-            var btn = document.createElement('button');
-            btn.type = 'button';
-            btn.className = 'copy-code-btn';
-            btn.setAttribute('aria-label', 'Copy code to clipboard');
-            btn.textContent = 'Copy';
+						var btn = document.createElement('button');
+						btn.type = 'button';
+						btn.className = 'copy-code-btn';
+						btn.setAttribute('aria-label', 'Copy code to clipboard');
+						btn.textContent = 'Copy';
 
-            btn.addEventListener('click', function () {
-              var code = pre.querySelector('code') || pre;
-              var text = code.innerText || code.textContent || '';
-              navigator.clipboard.writeText(text.trim()).then(function () {
-                btn.textContent = 'Copied';
-                btn.classList.add('is-copied');
-                setTimeout(function () {
-                  btn.textContent = 'Copy';
-                  btn.classList.remove('is-copied');
-                }, 2000);
-              });
-            });
+						btn.addEventListener('click', function () {
+							var code = pre.querySelector('code') || pre;
+							var text = code.innerText || code.textContent || '';
+							navigator.clipboard.writeText(text.trim()).then(function () {
+								btn.textContent = 'Copied';
+								btn.classList.add('is-copied');
+								setTimeout(function () {
+									btn.textContent = 'Copy';
+									btn.classList.remove('is-copied');
+								}, 2000);
+							});
+						});
 
-            pre.parentNode.insertBefore(wrapper, pre);
-            wrapper.appendChild(pre);
-            wrapper.appendChild(btn);
-          });
-        }
+						pre.parentNode.insertBefore(wrapper, pre);
+						wrapper.appendChild(pre);
+						wrapper.appendChild(btn);
+					});
+				}
 
-        if (document.readyState === 'loading') {
-          document.addEventListener('DOMContentLoaded', initCodeCopy);
-        } else {
-          initCodeCopy();
-        }
-        document.addEventListener('astro:page-load', initCodeCopy);
-      })();
-    </script>
-  </body>
+				if (document.readyState === 'loading') {
+					document.addEventListener('DOMContentLoaded', initCodeCopy);
+				} else {
+					initCodeCopy();
+				}
+				document.addEventListener('astro:page-load', initCodeCopy);
+			})();
+		</script>
+	</body>
 </html>

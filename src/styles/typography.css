@@ -1,278 +1,310 @@
 :root {
-  --font-serif-ibm: "IBM Plex Serif", "Charter", Georgia, serif;
-  --font-serif-newsreader: "Newsreader", "Charter", Georgia, serif;
-  --font-serif-charter: "Charter", "Bitstream Charter", Cambria, Georgia, serif;
-  --font-serif-garamond: "EB Garamond", Garamond, Georgia, serif;
-  --font-serif-literata: "Literata", Georgia, serif;
-  --font-serif-vollkorn: "Vollkorn", Georgia, serif;
-  --font-serif-lora: "Lora", Georgia, serif;
-  --font-serif-mono: "Typus Mono 95", "Typus Mono", monospace;
+	--font-serif-ibm: 'IBM Plex Serif', 'Charter', Georgia, serif;
+	--font-serif-newsreader: 'Newsreader', 'Charter', Georgia, serif;
+	--font-serif-charter: 'Charter', 'Bitstream Charter', Cambria, Georgia, serif;
+	--font-serif-garamond: 'EB Garamond', Garamond, Georgia, serif;
+	--font-serif-literata: 'Literata', Georgia, serif;
+	--font-serif-vollkorn: 'Vollkorn', Georgia, serif;
+	--font-serif-lora: 'Lora', Georgia, serif;
+	--font-serif-mono: 'Typus Mono 95', 'Typus Mono', monospace;
 
-  --font-serif: var(--font-serif-literata);
+	--font-serif: var(--font-serif-literata);
 }
 
-:root[data-font="ibm-plex"] { --font-serif: var(--font-serif-ibm); }
-:root[data-font="newsreader"] { --font-serif: var(--font-serif-newsreader); }
-:root[data-font="charter"] { --font-serif: var(--font-serif-charter); }
-:root[data-font="garamond"] { --font-serif: var(--font-serif-garamond); }
-:root[data-font="literata"] { --font-serif: var(--font-serif-literata); }
-:root[data-font="vollkorn"] { --font-serif: var(--font-serif-vollkorn); }
-:root[data-font="lora"] { --font-serif: var(--font-serif-lora); }
-:root[data-font="mono"] { --font-serif: var(--font-serif-mono); }
+:root[data-font='ibm-plex'] {
+	--font-serif: var(--font-serif-ibm);
+}
+:root[data-font='newsreader'] {
+	--font-serif: var(--font-serif-newsreader);
+}
+:root[data-font='charter'] {
+	--font-serif: var(--font-serif-charter);
+}
+:root[data-font='garamond'] {
+	--font-serif: var(--font-serif-garamond);
+}
+:root[data-font='literata'] {
+	--font-serif: var(--font-serif-literata);
+}
+:root[data-font='vollkorn'] {
+	--font-serif: var(--font-serif-vollkorn);
+}
+:root[data-font='lora'] {
+	--font-serif: var(--font-serif-lora);
+}
+:root[data-font='mono'] {
+	--font-serif: var(--font-serif-mono);
+}
 
 body {
-  font-family: var(--font-serif);
-  font-size: 1.34rem;
-  line-height: 1.85;
-  color: var(--fg-main);
-  background-color: var(--bg-main);
+	font-family: var(--font-serif);
+	font-size: 1.34rem;
+	line-height: 1.85;
+	color: var(--fg-main);
+	background-color: var(--bg-main);
 }
 
-h1, h2, h3, h4, h5, h6 {
-  font-family: "Typus Mono 95", "Typus Mono", monospace;
-  font-weight: 600;
-  line-height: 1.3;
-  color: var(--fg-main);
-  margin-top: 2.5rem;
-  margin-bottom: 1rem;
-  letter-spacing: -0.01em;
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	font-family: 'Typus Mono 95', 'Typus Mono', monospace;
+	font-weight: 600;
+	line-height: 1.3;
+	color: var(--fg-main);
+	margin-top: 2.5rem;
+	margin-bottom: 1rem;
+	letter-spacing: -0.01em;
 }
 
 h1 {
-  font-size: 2.35rem;
-  margin-top: 0;
+	font-size: 2.35rem;
+	margin-top: 0;
 }
 
 h2 {
-  font-size: 1.72rem;
-  border-bottom: 1px solid var(--border);
-  padding-bottom: 0.45rem;
+	font-size: 1.72rem;
+	border-bottom: 1px solid var(--border);
+	padding-bottom: 0.45rem;
 }
 
 h3 {
-  font-size: 1.42rem;
+	font-size: 1.42rem;
 }
 
 h4 {
-  font-size: 1.34rem;
+	font-size: 1.34rem;
 }
 
 p {
-  margin-bottom: 1.5rem;
+	margin-bottom: 1.5rem;
 }
 
 a {
-  font-family: "Typus Mono 95", "Typus Mono", monospace;
-  font-size: 0.94em;
-  color: var(--fg-link);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  text-decoration-thickness: 1px;
+	font-family: 'Typus Mono 95', 'Typus Mono', monospace;
+	font-size: 0.94em;
+	color: var(--fg-link);
+	text-decoration: underline;
+	text-underline-offset: 3px;
+	text-decoration-thickness: 1px;
 }
 
 a:hover {
-  color: var(--fg-link-hover);
+	color: var(--fg-link-hover);
 }
 
 a:visited {
-  color: var(--fg-link-visited);
+	color: var(--fg-link-visited);
 }
 
-code, kbd, samp, pre {
-  font-family: "Typus Mono 95", "Typus Mono", monospace;
-  font-size: 0.92em;
+code,
+kbd,
+samp,
+pre {
+	font-family: 'Typus Mono 95', 'Typus Mono', monospace;
+	font-size: 0.92em;
 }
 
 code {
-  background-color: var(--bg-dim);
-  color: var(--fg-link);
-  padding: 0.15em 0.38em;
-  border-radius: 2px;
-  border: 1px solid var(--border);
+	background-color: var(--bg-dim);
+	color: var(--fg-link);
+	padding: 0.15em 0.38em;
+	border-radius: 2px;
+	border: 1px solid var(--border);
 }
 
-pre, .shiki {
-  background-color: var(--bg-dim) !important;
-  color: var(--fg-main) !important;
-  padding: 1.25rem;
-  border: 1px solid var(--border);
-  overflow-x: auto;
-  margin-bottom: 1.85rem;
-  line-height: 1.55;
-  font-size: 0.92em;
-  border-radius: 2px;
+pre,
+.shiki {
+	background-color: var(--bg-dim) !important;
+	color: var(--fg-main) !important;
+	padding: 1.25rem;
+	border: 1px solid var(--border);
+	overflow-x: auto;
+	margin-bottom: 1.85rem;
+	line-height: 1.55;
+	font-size: 0.92em;
+	border-radius: 2px;
 }
 
-pre code, .shiki code {
-  background: transparent !important;
-  border: none !important;
-  padding: 0 !important;
-  color: inherit !important;
+pre code,
+.shiki code {
+	background: transparent !important;
+	border: none !important;
+	padding: 0 !important;
+	color: inherit !important;
 }
 
 .code-block-wrapper {
-  position: relative;
-  margin-bottom: 1.85rem;
+	position: relative;
+	margin-bottom: 1.85rem;
 }
 
 .code-block-wrapper pre,
 .code-block-wrapper .shiki {
-  margin-bottom: 0 !important;
+	margin-bottom: 0 !important;
 }
 
 .copy-code-btn {
-  position: absolute;
-  top: 0.55rem;
-  right: 0.55rem;
-  font-family: "Typus Mono 95", "Typus Mono", monospace !important;
-  font-size: 0.74rem !important;
-  font-weight: 500 !important;
-  background-color: var(--bg-main) !important;
-  color: var(--fg-dim) !important;
-  border: 1px solid var(--border) !important;
-  border-radius: 0 !important;
-  padding: 0.2rem 0.55rem !important;
-  cursor: pointer !important;
-  opacity: 0;
-  pointer-events: none;
-  text-decoration: none !important;
-  transition: opacity 0.15s ease, background-color 0.12s ease, color 0.12s ease, border-color 0.12s ease !important;
-  user-select: none;
-  z-index: 10;
+	position: absolute;
+	top: 0.55rem;
+	right: 0.55rem;
+	font-family: 'Typus Mono 95', 'Typus Mono', monospace !important;
+	font-size: 0.74rem !important;
+	font-weight: 500 !important;
+	background-color: var(--bg-main) !important;
+	color: var(--fg-dim) !important;
+	border: 1px solid var(--border) !important;
+	border-radius: 0 !important;
+	padding: 0.2rem 0.55rem !important;
+	cursor: pointer !important;
+	opacity: 0;
+	pointer-events: none;
+	text-decoration: none !important;
+	transition:
+		opacity 0.15s ease,
+		background-color 0.12s ease,
+		color 0.12s ease,
+		border-color 0.12s ease !important;
+	user-select: none;
+	z-index: 10;
 }
 
 .code-block-wrapper:hover .copy-code-btn,
 .copy-code-btn:focus-visible {
-  opacity: 1;
-  pointer-events: auto;
+	opacity: 1;
+	pointer-events: auto;
 }
 
 .copy-code-btn:hover {
-  background-color: var(--fg-main) !important;
-  color: var(--bg-main) !important;
-  border-color: var(--fg-main) !important;
+	background-color: var(--fg-main) !important;
+	color: var(--bg-main) !important;
+	border-color: var(--fg-main) !important;
 }
 
 .copy-code-btn.is-copied {
-  opacity: 1 !important;
-  background-color: var(--fg-link-active) !important;
-  color: var(--bg-main) !important;
-  border-color: var(--fg-link-active) !important;
+	opacity: 1 !important;
+	background-color: var(--fg-link-active) !important;
+	color: var(--bg-main) !important;
+	border-color: var(--fg-link-active) !important;
 }
 
 .shiki span {
-  color: var(--shiki-dark, inherit);
+	color: var(--shiki-dark, inherit);
 }
 
 /* Dark Mode */
-:root[data-theme="dark"] .shiki span,
-:root[data-theme="autumn"] .shiki span,
+:root[data-theme='dark'] .shiki span,
+:root[data-theme='autumn'] .shiki span,
 :root:not([data-theme]) .shiki span {
-  color: var(--shiki-dark, inherit) !important;
+	color: var(--shiki-dark, inherit) !important;
 }
 
 /* Light Mode */
-:root[data-theme="light"] .shiki span,
-:root[data-theme="day"] .shiki span,
-:root[data-theme="arcadia"] .shiki span {
-  color: var(--shiki-light, inherit) !important;
+:root[data-theme='light'] .shiki span,
+:root[data-theme='day'] .shiki span,
+:root[data-theme='arcadia'] .shiki span {
+	color: var(--shiki-light, inherit) !important;
 }
 
 @media (prefers-color-scheme: light) {
-  :root[data-theme="auto"] .shiki span,
-  :root:not([data-theme]) .shiki span {
-    color: var(--shiki-light, inherit) !important;
-  }
+	:root[data-theme='auto'] .shiki span,
+	:root:not([data-theme]) .shiki span {
+		color: var(--shiki-light, inherit) !important;
+	}
 }
 
 @media (prefers-color-scheme: dark) {
-  :root[data-theme="auto"] .shiki span {
-    color: var(--shiki-dark, inherit) !important;
-  }
+	:root[data-theme='auto'] .shiki span {
+		color: var(--shiki-dark, inherit) !important;
+	}
 }
 
 blockquote {
-  border-left: 3px solid var(--fg-link);
-  background-color: var(--bg-dim);
-  padding: 0.95rem 1.45rem;
-  margin: 1.85rem 0;
-  color: var(--fg-alt);
-  font-style: italic;
+	border-left: 3px solid var(--fg-link);
+	background-color: var(--bg-dim);
+	padding: 0.95rem 1.45rem;
+	margin: 1.85rem 0;
+	color: var(--fg-alt);
+	font-style: italic;
 }
 
 hr {
-  border: none;
-  border-top: 1px solid var(--border);
-  margin: 2.5rem 0;
+	border: none;
+	border-top: 1px solid var(--border);
+	margin: 2.5rem 0;
 }
 
-ul, ol {
-  margin-bottom: 1.5rem;
-  padding-left: 2.2rem;
+ul,
+ol {
+	margin-bottom: 1.5rem;
+	padding-left: 2.2rem;
 }
 
 li {
-  margin-bottom: 0.45rem;
+	margin-bottom: 0.45rem;
 }
 
 dl {
-  margin: 1.5rem 0;
+	margin: 1.5rem 0;
 }
 
 dt {
-  font-family: "Typus Mono 95", "Typus Mono", monospace;
-  font-weight: 700;
-  color: var(--fg-link);
-  margin-top: 1rem;
+	font-family: 'Typus Mono 95', 'Typus Mono', monospace;
+	font-weight: 700;
+	color: var(--fg-link);
+	margin-top: 1rem;
 }
 
 dd {
-  margin-left: 1.5rem;
-  margin-bottom: 1rem;
-  color: var(--fg-main);
-  line-height: 1.6;
+	margin-left: 1.5rem;
+	margin-bottom: 1rem;
+	color: var(--fg-main);
+	line-height: 1.6;
 }
 
 /* Org-mode Tables */
 .table-container {
-  width: 100%;
-  overflow-x: auto;
-  margin: 2.25rem 0;
-  border: 1px solid var(--border);
-  background-color: var(--bg-dim);
-  border-radius: 2px;
+	width: 100%;
+	overflow-x: auto;
+	margin: 2.25rem 0;
+	border: 1px solid var(--border);
+	background-color: var(--bg-dim);
+	border-radius: 2px;
 }
 
 .table-container table,
 table {
-  width: 100%;
-  min-width: 100%;
-  border-collapse: collapse;
-  margin: 0;
-  font-family: "Typus Mono 95", "Typus Mono", monospace;
-  font-size: 0.88rem;
-  background-color: transparent;
-  border: none;
-  display: table;
-  table-layout: auto;
+	width: 100%;
+	min-width: 100%;
+	border-collapse: collapse;
+	margin: 0;
+	font-family: 'Typus Mono 95', 'Typus Mono', monospace;
+	font-size: 0.88rem;
+	background-color: transparent;
+	border: none;
+	display: table;
+	table-layout: auto;
 }
 
-th, td {
-  padding: 0.75rem 1rem;
-  border: 1px solid var(--border);
-  text-align: left;
-  vertical-align: top;
+th,
+td {
+	padding: 0.75rem 1rem;
+	border: 1px solid var(--border);
+	text-align: left;
+	vertical-align: top;
 }
 
 th {
-  background-color: var(--bg-main);
-  font-weight: 700;
-  color: var(--fg-main);
-  border-bottom: 2px solid var(--border);
+	background-color: var(--bg-main);
+	font-weight: 700;
+	color: var(--fg-main);
+	border-bottom: 2px solid var(--border);
 }
 
 tr:nth-child(even) {
-  background-color: rgba(255, 255, 255, 0.02);
+	background-color: rgba(255, 255, 255, 0.02);
 }
 
 /* Org-mode Example Blocks and Verse Blocks */
@@ -282,156 +314,160 @@ div.example,
 pre.example,
 pre.verse,
 .verse {
-  display: block;
-  font-family: "Typus Mono 95", "Typus Mono", monospace !important;
-  font-size: 0.88rem !important;
-  white-space: pre !important;
-  word-break: normal !important;
-  overflow-x: auto;
-  background-color: var(--bg-dim) !important;
-  border: 1px solid var(--border) !important;
-  padding: 1.25rem !important;
-  margin: 1.85rem 0 !important;
-  line-height: 1.55 !important;
-  color: var(--fg-main) !important;
-  border-radius: 2px;
+	display: block;
+	font-family: 'Typus Mono 95', 'Typus Mono', monospace !important;
+	font-size: 0.88rem !important;
+	white-space: pre !important;
+	word-break: normal !important;
+	overflow-x: auto;
+	background-color: var(--bg-dim) !important;
+	border: 1px solid var(--border) !important;
+	padding: 1.25rem !important;
+	margin: 1.85rem 0 !important;
+	line-height: 1.55 !important;
+	color: var(--fg-main) !important;
+	border-radius: 2px;
 }
 
 .example-block code,
 div.example code,
 pre.example code,
 pre.verse code {
-  background: transparent !important;
-  border: none !important;
-  padding: 0 !important;
-  color: inherit !important;
-  font-family: inherit !important;
-  font-size: inherit !important;
-  white-space: pre !important;
+	background: transparent !important;
+	border: none !important;
+	padding: 0 !important;
+	color: inherit !important;
+	font-family: inherit !important;
+	font-size: inherit !important;
+	white-space: pre !important;
 }
 
 /* Org-mode Task Headings, Badges & Priorities */
 .todo-badge,
 .todo-keyword {
-  display: inline-block;
-  font-family: "Typus Mono 95", "Typus Mono", monospace;
-  font-size: 0.72em;
-  font-weight: 700;
-  text-transform: uppercase;
-  padding: 0.15em 0.55em;
-  border-radius: 2px;
-  line-height: 1.2;
-  vertical-align: middle;
-  margin-right: 0.45rem;
+	display: inline-block;
+	font-family: 'Typus Mono 95', 'Typus Mono', monospace;
+	font-size: 0.72em;
+	font-weight: 700;
+	text-transform: uppercase;
+	padding: 0.15em 0.55em;
+	border-radius: 2px;
+	line-height: 1.2;
+	vertical-align: middle;
+	margin-right: 0.45rem;
 }
 
 .todo-badge.todo-todo,
 .todo-keyword.TODO {
-  background-color: rgba(239, 101, 106, 0.15);
-  color: #ef656a;
-  border: 1px solid rgba(239, 101, 106, 0.4);
+	background-color: rgba(239, 101, 106, 0.15);
+	color: #ef656a;
+	border: 1px solid rgba(239, 101, 106, 0.4);
 }
 
 .todo-badge.todo-waiting,
 .todo-keyword.WAITING,
 .todo-badge.todo-hold,
 .todo-keyword.HOLD {
-  background-color: rgba(208, 115, 15, 0.15);
-  color: #d0730f;
-  border: 1px solid rgba(208, 115, 15, 0.4);
+	background-color: rgba(208, 115, 15, 0.15);
+	color: #d0730f;
+	border: 1px solid rgba(208, 115, 15, 0.4);
 }
 
 .todo-badge.todo-next,
 .todo-keyword.NEXT {
-  background-color: rgba(111, 175, 255, 0.15);
-  color: #6fafff;
-  border: 1px solid rgba(111, 175, 255, 0.4);
+	background-color: rgba(111, 175, 255, 0.15);
+	color: #6fafff;
+	border: 1px solid rgba(111, 175, 255, 0.4);
 }
 
 .todo-badge.todo-done,
 .todo-keyword.DONE {
-  background-color: rgba(112, 180, 0, 0.15);
-  color: #70b400;
-  border: 1px solid rgba(112, 180, 0, 0.4);
+	background-color: rgba(112, 180, 0, 0.15);
+	color: #70b400;
+	border: 1px solid rgba(112, 180, 0, 0.4);
 }
 
 .priority-badge,
 .priority {
-  display: inline-block;
-  font-family: "Typus Mono 95", "Typus Mono", monospace;
-  font-size: 0.75em;
-  font-weight: 700;
-  color: var(--fg-link);
-  margin-right: 0.35rem;
-  vertical-align: middle;
+	display: inline-block;
+	font-family: 'Typus Mono 95', 'Typus Mono', monospace;
+	font-size: 0.75em;
+	font-weight: 700;
+	color: var(--fg-link);
+	margin-right: 0.35rem;
+	vertical-align: middle;
 }
 
 .tags {
-  font-size: 0.72em;
-  font-weight: normal;
-  color: var(--fg-dim);
-  margin-left: 0.75rem;
+	font-size: 0.72em;
+	font-weight: normal;
+	color: var(--fg-dim);
+	margin-left: 0.75rem;
 }
 
 .tag {
-  display: inline-block;
-  background-color: var(--bg-dim);
-  border: 1px solid var(--border);
-  color: var(--fg-dim);
-  padding: 0.1em 0.45em;
-  border-radius: 2px;
-  margin-left: 0.25rem;
+	display: inline-block;
+	background-color: var(--bg-dim);
+	border: 1px solid var(--border);
+	color: var(--fg-dim);
+	padding: 0.1em 0.45em;
+	border-radius: 2px;
+	margin-left: 0.25rem;
 }
 
 .statistics-cookie {
-  display: inline-block;
-  font-family: "Typus Mono 95", "Typus Mono", monospace;
-  font-size: 0.8em;
-  font-weight: 700;
-  color: var(--fg-link);
-  background-color: var(--bg-dim);
-  border: 1px solid var(--border);
-  padding: 0.1em 0.45em;
-  border-radius: 2px;
-  vertical-align: middle;
+	display: inline-block;
+	font-family: 'Typus Mono 95', 'Typus Mono', monospace;
+	font-size: 0.8em;
+	font-weight: 700;
+	color: var(--fg-link);
+	background-color: var(--bg-dim);
+	border: 1px solid var(--border);
+	padding: 0.1em 0.45em;
+	border-radius: 2px;
+	vertical-align: middle;
 }
 
 /* Org-mode Task Checkboxes */
 li.task-list-item {
-  list-style-type: none;
-  margin-left: -1.2rem;
+	list-style-type: none;
+	margin-left: -1.2rem;
 }
 
 .org-checkbox,
-input[type="checkbox"] {
-  accent-color: var(--fg-link);
-  margin-right: 0.45rem;
-  transform: scale(1.1);
-  vertical-align: -1px;
-  cursor: pointer;
+input[type='checkbox'] {
+	accent-color: var(--fg-link);
+	margin-right: 0.45rem;
+	transform: scale(1.1);
+	vertical-align: -1px;
+	cursor: pointer;
 }
 
 /* Org-mode Footnotes */
-.footnotes, section[data-footnotes], .footnote-definition {
-  margin-top: 3.5rem;
-  padding-top: 1.5rem;
-  border-top: 1px dashed var(--border);
-  font-size: 0.88rem;
-  color: var(--fg-alt);
+.footnotes,
+section[data-footnotes],
+.footnote-definition {
+	margin-top: 3.5rem;
+	padding-top: 1.5rem;
+	border-top: 1px dashed var(--border);
+	font-size: 0.88rem;
+	color: var(--fg-alt);
 }
 
-.footnotes ol, section[data-footnotes] ol {
-  padding-left: 1.5rem;
+.footnotes ol,
+section[data-footnotes] ol {
+	padding-left: 1.5rem;
 }
 
-.footnotes li, section[data-footnotes] li {
-  margin-bottom: 0.65rem;
+.footnotes li,
+section[data-footnotes] li {
+	margin-bottom: 0.65rem;
 }
 
 sup a {
-  font-family: "Typus Mono 95", "Typus Mono", monospace;
-  font-size: 0.8em;
-  font-weight: 700;
-  text-decoration: none;
-  padding: 0 0.15rem;
+	font-family: 'Typus Mono 95', 'Typus Mono', monospace;
+	font-size: 0.8em;
+	font-weight: 700;
+	text-decoration: none;
+	padding: 0 0.15rem;
 }

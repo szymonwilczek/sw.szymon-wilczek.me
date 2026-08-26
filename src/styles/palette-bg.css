@@ -1,9 +1,9 @@
 :root {
-  /* ef-autumn core backgrounds */
-  --bg-main: #0f0e06;
-  --bg-dim: #26211d;
-  --bg-alt: #36322f;
-  --bg-active: #56524f;
-  --bg-inactive: #25241d;
-  --border: #58514f;
+	/* ef-autumn core backgrounds */
+	--bg-main: #0f0e06;
+	--bg-dim: #26211d;
+	--bg-alt: #36322f;
+	--bg-active: #56524f;
+	--bg-inactive: #25241d;
+	--border: #58514f;
 }

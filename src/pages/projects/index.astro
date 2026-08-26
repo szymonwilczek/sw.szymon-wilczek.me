@@ -1,140 +1,117 @@
 ---
-import BaseLayout from "../../layouts/BaseLayout.astro";
-import { getCollection } from "astro:content";
-import FormattedDate from "../../components/FormattedDate.astro";
-import SearchFilter from "../../components/SearchFilter.astro";
-import Pagination from "../../components/Pagination.astro";
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import FormattedDate from '../../components/FormattedDate.astro';
+import SearchFilter from '../../components/SearchFilter.astro';
+import Pagination from '../../components/Pagination.astro';
 
 const PAGE_SIZE = 10;
-const allProjects = (await getCollection("projects")).sort(
-  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
-);
+const allProjects = (await getCollection('projects')).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 
 const totalPages = Math.ceil(allProjects.length / PAGE_SIZE);
 const projects = allProjects.slice(0, PAGE_SIZE);
 ---
 
-<BaseLayout
-  title="Projects"
-  description="Bespoke software projects, editor extensions, and tools built out of engineering necessity."
->
-  <article>
-    <h1>Projects</h1>
+<BaseLayout title="Projects" description="Bespoke software projects, editor extensions, and tools built out of engineering necessity.">
+	<article>
+		<h1>Projects</h1>
 
-    <p>
-      Collection of my personal software projects. Each project originated from
-      a tangible workflow need, an exploration of low-level mechanisms, or a
-      desire to solve a concrete problem from first principles. Also: They did
-      not make to portfolio.
-    </p>
+		<p>
+			Collection of my personal software projects. Each project originated from a tangible workflow need, an exploration of low-level
+			mechanisms, or a desire to solve a concrete problem from first principles. Also: They did not make to portfolio.
+		</p>
 
-    <SearchFilter
-      placeholder="Filter by name, tag, or description..."
-      targetSelector=".project-card"
-      containerSelector=".project-grid"
-    />
+		<SearchFilter placeholder="Filter by name, tag, or description..." targetSelector=".project-card" containerSelector=".project-grid" />
 
-    <div class="project-grid">
-      {
-        projects.map((project) => (
-          <section
-            class="project-card"
-            data-search={`${project.data.title} ${project.data.description} ${project.data.tags.join(" ")} ${project.data.status}`}
-          >
-            <header class="card-header">
-              <h2>
-                <a
-                  href={`/projects/${project.id.replace(/\.(org|md|mdx)$/, "")}`}
-                >
-                  {project.data.title}
-                </a>
-              </h2>
-              <span class="project-date">
-                <FormattedDate date={project.data.pubDate} />
-              </span>
-            </header>
+		<div class="project-grid">
+			{
+				projects.map((project) => (
+					<section
+						class="project-card"
+						data-search={`${project.data.title} ${project.data.description} ${project.data.tags.join(' ')} ${project.data.status}`}>
+						<header class="card-header">
+							<h2>
+								<a href={`/projects/${project.id.replace(/\.(org|md|mdx)$/, '')}`}>{project.data.title}</a>
+							</h2>
+							<span class="project-date">
+								<FormattedDate date={project.data.pubDate} />
+							</span>
+						</header>
 
-            <p class="card-desc">{project.data.description}</p>
+						<p class="card-desc">{project.data.description}</p>
 
-            <div class="card-meta">
-              <span class="status-badge">status: {project.data.status}</span>
-              {project.data.tags.length > 0 && (
-                <span class="tags">[{project.data.tags.join(", ")}]</span>
-              )}
-            </div>
-          </section>
-        ))
-      }
+						<div class="card-meta">
+							<span class="status-badge">status: {project.data.status}</span>
+							{project.data.tags.length > 0 && <span class="tags">[{project.data.tags.join(', ')}]</span>}
+						</div>
+					</section>
+				))
+			}
 
-      {projects.length === 0 && <p>No projects published at this time.</p>}
-    </div>
+			{projects.length === 0 && <p>No projects published at this time.</p>}
+		</div>
 
-    <Pagination
-      currentPage={1}
-      lastPage={totalPages}
-      nextUrl={totalPages > 1 ? "/projects/page/2" : undefined}
-      baseUrl="/projects"
-    />
-  </article>
+		<Pagination currentPage={1} lastPage={totalPages} nextUrl={totalPages > 1 ? '/projects/page/2' : undefined} baseUrl="/projects" />
+	</article>
 </BaseLayout>
 
 <style>
-  .project-grid {
-    margin-top: 1.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-  }
+	.project-grid {
+		margin-top: 1.5rem;
+		display: flex;
+		flex-direction: column;
+		gap: 2rem;
+	}
 
-  .project-card {
-    border-left: 2px solid var(--border);
-    padding-left: 1.25rem;
-    transition: border-color 0.2s ease;
-  }
+	.project-card {
+		border-left: 2px solid var(--border);
+		padding-left: 1.25rem;
+		transition: border-color 0.2s ease;
+	}
 
-  .project-card:hover {
-    border-left-color: var(--fg-link);
-  }
+	.project-card:hover {
+		border-left-color: var(--fg-link);
+	}
 
-  .card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-  }
+	.card-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: baseline;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+	}
 
-  .card-header h2 {
-    margin: 0;
-    font-size: 1.35rem;
-    border-bottom: none;
-    padding-bottom: 0;
-  }
+	.card-header h2 {
+		margin: 0;
+		font-size: 1.35rem;
+		border-bottom: none;
+		padding-bottom: 0;
+	}
 
-  .project-date {
-    font-family: "Typus Mono 95", "Typus Mono", monospace;
-    font-size: 0.88rem;
-    color: var(--fg-dim);
-  }
+	.project-date {
+		font-family: 'Typus Mono 95', 'Typus Mono', monospace;
+		font-size: 0.88rem;
+		color: var(--fg-dim);
+	}
 
-  .card-desc {
-    margin: 0.5rem 0 0.75rem 0;
-  }
+	.card-desc {
+		margin: 0.5rem 0 0.75rem 0;
+	}
 
-  .card-meta {
-    font-family: "Typus Mono 95", "Typus Mono", monospace;
-    font-size: 0.82rem;
-    color: var(--fg-dim);
-    display: flex;
-    gap: 1rem;
-    flex-wrap: wrap;
-  }
+	.card-meta {
+		font-family: 'Typus Mono 95', 'Typus Mono', monospace;
+		font-size: 0.82rem;
+		color: var(--fg-dim);
+		display: flex;
+		gap: 1rem;
+		flex-wrap: wrap;
+	}
 
-  .status-badge {
-    color: var(--fg-link-active);
-  }
+	.status-badge {
+		color: var(--fg-link-active);
+	}
 
-  .tags {
-    color: var(--fg-alt);
-  }
+	.tags {
+		color: var(--fg-alt);
+	}
 </style>
