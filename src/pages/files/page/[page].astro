@@ -1,110 +1,110 @@
 ---
-import BaseLayout from '../../../layouts/BaseLayout.astro';
-import { getCollection, type CollectionEntry } from 'astro:content';
-import FormattedDate from '../../../components/FormattedDate.astro';
-import SearchFilter from '../../../components/SearchFilter.astro';
-import Pagination from '../../../components/Pagination.astro';
-import type { GetStaticPathsOptions, Page } from 'astro';
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import { getCollection, type CollectionEntry } from "astro:content";
+import FormattedDate from "../../../components/FormattedDate.astro";
+import SearchFilter from "../../../components/SearchFilter.astro";
+import Pagination from "../../../components/Pagination.astro";
+import type { GetStaticPathsOptions, Page } from "astro";
 
 export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
-  const files = (await getCollection('files')).sort(
-    (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
+  const files = (await getCollection("files")).sort(
+    (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
   );
   return paginate(files, { pageSize: 10 });
 }
 
 interface Props {
-  page: Page<CollectionEntry<'files'>>;
+  page: Page<CollectionEntry<"files">>;
 }
 
 const { page } = Astro.props;
 const files = page.data;
-const prevUrl = page.currentPage === 2 ? '/files' : page.url.prev;
+const prevUrl = page.currentPage === 2 ? "/files" : page.url.prev;
 ---
 
-<BaseLayout 
-  title={`Files — Page ${page.currentPage}`} 
+<BaseLayout
+  title={`Files — Page ${page.currentPage}`}
   description="Software distributions, tool packages, and encrypted archives with SHA-256 cryptographic verification."
 >
   <article>
     <h1>Files &amp; Archives</h1>
 
     <p>
-      An archive of standalone utilities, configuration snapshots, software packages,
-      and cryptographically sealed archives. Public files provide verified SHA-256 checksums,
-      while private archives require client-side passphrase decryption.
+      Archive of standalone utilities, snapshots, packages, and sealed archives.
     </p>
 
     <SearchFilter
-      placeholder="Filter files by filename, category, or SHA-256..."
+      placeholder="Filter by filename, category, or SHA-256..."
       targetSelector=".file-card"
       containerSelector=".files-container"
     />
 
     <div class="files-container">
-      {files.map((file) => (
-        <section
-          class="file-card"
-          data-search={`${file.data.title} ${file.data.filename} ${file.data.category} ${file.data.description} ${file.data.sha256} ${file.data.encrypted ? 'encrypted private' : 'public'}`}
-        >
-          <header class="file-header">
-            <h2>
-              {file.data.title}
-              {file.data.encrypted && <span class="encrypted-pill">Private</span>}
-            </h2>
-            <span class="file-date">
-              <FormattedDate date={file.data.date} />
-            </span>
-          </header>
+      {
+        files.map((file) => (
+          <section
+            class="file-card"
+            data-search={`${file.data.title} ${file.data.filename} ${file.data.category} ${file.data.description} ${file.data.sha256} ${file.data.encrypted ? "encrypted private" : "public"}`}
+          >
+            <header class="file-header">
+              <h2>
+                {file.data.title}
+                {file.data.encrypted && (
+                  <span class="encrypted-pill">Private</span>
+                )}
+              </h2>
+              <span class="file-date">
+                <FormattedDate date={file.data.date} />
+              </span>
+            </header>
 
-          <p class="file-desc">{file.data.description}</p>
+            <p class="file-desc">{file.data.description}</p>
 
-          <div class="file-details">
-            <div class="detail-row">
-              <span class="label">Filename:</span>
-              <code>{file.data.filename}</code>
+            <div class="file-details">
+              <div class="detail-row">
+                <span class="label">Filename:</span>
+                <code>{file.data.filename}</code>
+              </div>
+              <div class="detail-row">
+                <span class="label">Filesize:</span>
+                <span>{file.data.filesize}</span>
+              </div>
+              <div class="detail-row">
+                <span class="label">Category:</span>
+                <span>{file.data.category}</span>
+              </div>
+              <div class="detail-row sha-row">
+                <span class="label">SHA-256:</span>
+                <code class="sha-code">{file.data.sha256}</code>
+              </div>
             </div>
-            <div class="detail-row">
-              <span class="label">Filesize:</span>
-              <span>{file.data.filesize}</span>
-            </div>
-            <div class="detail-row">
-              <span class="label">Category:</span>
-              <span>{file.data.category}</span>
-            </div>
-            <div class="detail-row sha-row">
-              <span class="label">SHA-256:</span>
-              <code class="sha-code">{file.data.sha256}</code>
-            </div>
-          </div>
 
-          <div class="card-actions">
-            {file.data.encrypted ? (
-              <button
-                type="button"
-                class="btn-action unlock-archive-btn"
-                data-filename={file.data.filename}
-                data-url={file.data.encryptedUrl}
-                data-salt={file.data.salt}
-                data-iv={file.data.iv}
-                data-sha={file.data.sha256}
-              >
-                Unlock &amp; Download
-              </button>
-            ) : (
-              file.data.downloadUrl && (
-                <a href={file.data.downloadUrl} class="btn-action" download>
-                  Download Archive
-                </a>
-              )
-            )}
-          </div>
-        </section>
-      ))}
+            <div class="card-actions">
+              {file.data.encrypted ? (
+                <button
+                  type="button"
+                  class="btn-action unlock-archive-btn"
+                  data-filename={file.data.filename}
+                  data-url={file.data.encryptedUrl}
+                  data-salt={file.data.salt}
+                  data-iv={file.data.iv}
+                  data-sha={file.data.sha256}
+                >
+                  Unlock &amp; Download
+                </button>
+              ) : (
+                file.data.downloadUrl && (
+                  <a href={file.data.downloadUrl} class="btn-action" download>
+                    Download Archive
+                  </a>
+                )
+              )}
+            </div>
+          </section>
+        ))
+      }
 
-      {files.length === 0 && (
-        <p>No downloadable files indexed on this page.</p>
-      )}
+      {files.length === 0 && <p>No downloadable files indexed on this page.</p>}
     </div>
 
     <Pagination
@@ -119,7 +119,12 @@ const prevUrl = page.currentPage === 2 ? '/files' : page.url.prev;
       <div class="modal-card">
         <header class="modal-header">
           <h3 class="modal-title">Unlock Protected Archive</h3>
-          <button type="button" id="close-modal-btn" class="modal-close-btn" aria-label="Close dialog">&times;</button>
+          <button
+            type="button"
+            id="close-modal-btn"
+            class="modal-close-btn"
+            aria-label="Close dialog">&times;</button
+          >
         </header>
 
         <div class="modal-body">
@@ -128,7 +133,8 @@ const prevUrl = page.currentPage === 2 ? '/files' : page.url.prev;
           </p>
           <p class="modal-explanation">
             This archive is sealed with client-side AES-256-GCM encryption.
-            Enter the secret passphrase to decrypt and trigger the immediate file download.
+            Enter the secret passphrase to decrypt and trigger the immediate
+            file download.
           </p>
 
           <form id="modal-decrypt-form" onsubmit="return false;">
@@ -141,11 +147,20 @@ const prevUrl = page.currentPage === 2 ? '/files' : page.url.prev;
                 autocomplete="off"
                 required
               />
-              <button type="submit" id="modal-decrypt-btn" class="btn-action modal-submit-btn">
+              <button
+                type="submit"
+                id="modal-decrypt-btn"
+                class="btn-action modal-submit-btn"
+              >
                 Decrypt &amp; Download
               </button>
             </div>
-            <div id="modal-status" class="modal-status-box" style="display: none;"></div>
+            <div
+              id="modal-status"
+              class="modal-status-box"
+              style="display: none;"
+            >
+            </div>
           </form>
         </div>
       </div>
@@ -163,20 +178,20 @@ const prevUrl = page.currentPage === 2 ? '/files' : page.url.prev;
     }
 
     function initArchiveDecryption() {
-      var modal = document.getElementById('unlock-modal');
-      var closeBtn = document.getElementById('close-modal-btn');
-      var filenameEl = document.getElementById('modal-filename');
-      var passInput = document.getElementById('modal-passphrase');
-      var form = document.getElementById('modal-decrypt-form');
-      var submitBtn = document.getElementById('modal-decrypt-btn');
-      var statusBox = document.getElementById('modal-status');
+      var modal = document.getElementById("unlock-modal");
+      var closeBtn = document.getElementById("close-modal-btn");
+      var filenameEl = document.getElementById("modal-filename");
+      var passInput = document.getElementById("modal-passphrase");
+      var form = document.getElementById("modal-decrypt-form");
+      var submitBtn = document.getElementById("modal-decrypt-btn");
+      var statusBox = document.getElementById("modal-status");
 
       if (!modal || !form || !passInput || !submitBtn || !statusBox) return;
 
       var activeTarget = null;
 
-      document.querySelectorAll('.unlock-archive-btn').forEach(function (btn) {
-        btn.addEventListener('click', function () {
+      document.querySelectorAll(".unlock-archive-btn").forEach(function (btn) {
+        btn.addEventListener("click", function () {
           activeTarget = {
             filename: btn.dataset.filename,
             url: btn.dataset.url,
@@ -186,32 +201,32 @@ const prevUrl = page.currentPage === 2 ? '/files' : page.url.prev;
           };
 
           if (filenameEl) filenameEl.textContent = activeTarget.filename;
-          passInput.value = '';
-          statusBox.style.display = 'none';
-          statusBox.textContent = '';
+          passInput.value = "";
+          statusBox.style.display = "none";
+          statusBox.textContent = "";
           submitBtn.disabled = false;
-          submitBtn.textContent = 'Decrypt & Download';
+          submitBtn.textContent = "Decrypt & Download";
 
-          if (typeof modal.showModal === 'function') {
+          if (typeof modal.showModal === "function") {
             modal.showModal();
           } else {
-            modal.setAttribute('open', '');
+            modal.setAttribute("open", "");
           }
           passInput.focus();
         });
       });
 
       function closeModal() {
-        if (typeof modal.close === 'function') {
+        if (typeof modal.close === "function") {
           modal.close();
         } else {
-          modal.removeAttribute('open');
+          modal.removeAttribute("open");
         }
       }
 
       if (closeBtn) closeBtn.onclick = closeModal;
 
-      modal.addEventListener('click', function (e) {
+      modal.addEventListener("click", function (e) {
         if (e.target === modal) closeModal();
       });
 
@@ -221,12 +236,12 @@ const prevUrl = page.currentPage === 2 ? '/files' : page.url.prev;
         if (!passphrase || !activeTarget) return;
 
         submitBtn.disabled = true;
-        submitBtn.textContent = 'Decrypting in RAM...';
-        statusBox.style.display = 'none';
+        submitBtn.textContent = "Decrypting...";
+        statusBox.style.display = "none";
 
         try {
           var resp = await fetch(activeTarget.url);
-          if (!resp.ok) throw new Error('Could not fetch encrypted payload.');
+          if (!resp.ok) throw new Error("Could not fetch encrypted payload.");
           var encryptedData = await resp.arrayBuffer();
 
           var salt = base64ToBuffer(activeTarget.salt);
@@ -234,63 +249,70 @@ const prevUrl = page.currentPage === 2 ? '/files' : page.url.prev;
 
           var enc = new TextEncoder();
           var keyMaterial = await window.crypto.subtle.importKey(
-            'raw',
+            "raw",
             enc.encode(passphrase),
-            'PBKDF2',
+            "PBKDF2",
             false,
-            ['deriveKey']
+            ["deriveKey"],
           );
 
           var key = await window.crypto.subtle.deriveKey(
             {
-              name: 'PBKDF2',
+              name: "PBKDF2",
               salt: salt,
               iterations: 100000,
-              hash: 'SHA-256',
+              hash: "SHA-256",
             },
             keyMaterial,
-            { name: 'AES-GCM', length: 256 },
+            { name: "AES-GCM", length: 256 },
             false,
-            ['decrypt']
+            ["decrypt"],
           );
 
           var decrypted = await window.crypto.subtle.decrypt(
-            { name: 'AES-GCM', iv: iv },
+            { name: "AES-GCM", iv: iv },
             key,
-            encryptedData
+            encryptedData,
           );
 
-          var blob = new Blob([decrypted], { type: 'application/octet-stream' });
+          var blob = new Blob([decrypted], {
+            type: "application/octet-stream",
+          });
           var downloadUrl = URL.createObjectURL(blob);
-          var a = document.createElement('a');
+          var a = document.createElement("a");
           a.href = downloadUrl;
           a.download = activeTarget.filename;
           document.body.appendChild(a);
           a.click();
           document.body.removeChild(a);
-          setTimeout(function () { URL.revokeObjectURL(downloadUrl); }, 3000);
+          setTimeout(function () {
+            URL.revokeObjectURL(downloadUrl);
+          }, 3000);
 
-          statusBox.textContent = 'Decrypted successfully! Downloading ' + activeTarget.filename + '...';
-          statusBox.className = 'modal-status-box success';
-          statusBox.style.display = 'block';
+          statusBox.textContent =
+            "Decrypted successfully! Downloading " +
+            activeTarget.filename +
+            "...";
+          statusBox.className = "modal-status-box success";
+          statusBox.style.display = "block";
 
           setTimeout(function () {
             closeModal();
           }, 1600);
-
         } catch (err) {
-          statusBox.textContent = 'Decryption failed: Invalid passphrase for this archive.';
-          statusBox.className = 'modal-status-box error';
-          statusBox.style.display = 'block';
+          statusBox.textContent =
+            "Decryption failed: Invalid passphrase for this archive.";
+          statusBox.className = "modal-status-box error";
+          statusBox.style.display = "block";
           submitBtn.disabled = false;
-          submitBtn.textContent = 'Decrypt & Download';
+          submitBtn.textContent = "Decrypt & Download";
           passInput.focus();
         }
       };
     }
 
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initArchiveDecryption);
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", initArchiveDecryption);
     } else {
       initArchiveDecryption();
     }
@@ -405,7 +427,10 @@ const prevUrl = page.currentPage === 2 ? '/files' : page.url.prev;
     text-decoration: none !important;
     line-height: 1.4 !important;
     white-space: nowrap !important;
-    transition: background-color 0.12s ease, color 0.12s ease, border-color 0.12s ease !important;
+    transition:
+      background-color 0.12s ease,
+      color 0.12s ease,
+      border-color 0.12s ease !important;
   }
 
   .btn-action:hover,
@@ -540,7 +565,10 @@ const prevUrl = page.currentPage === 2 ? '/files' : page.url.prev;
     padding: 0.45rem 1rem;
     cursor: pointer;
     border-radius: 2px;
-    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+    transition:
+      background-color 0.15s ease,
+      color 0.15s ease,
+      border-color 0.15s ease;
     white-space: nowrap;
     display: inline-flex;
     align-items: center;
