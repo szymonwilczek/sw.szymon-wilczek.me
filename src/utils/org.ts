@@ -280,6 +280,169 @@ function rehypeShikiHighlight(highlighter: any) {
   };
 }
 
+function rehypeOrgEnhancements() {
+  return (tree: any) => {
+    visit(
+      tree,
+      "element",
+      (node: any, index: number | undefined, parent: any) => {
+        // Example blocks
+        if (
+          node.tagName === "div" &&
+          node.properties?.className &&
+          (node.properties.className.includes("example") ||
+            (Array.isArray(node.properties.className) &&
+              node.properties.className.some((c: string) =>
+                c.includes("example"),
+              )))
+        ) {
+          node.tagName = "pre";
+          node.properties.className = ["example-block"];
+          const children = node.children || [];
+          node.children = [
+            {
+              type: "element",
+              tagName: "code",
+              properties: {},
+              children: children,
+            },
+          ];
+        }
+
+        // Headings
+        if (/^h[1-6]$/.test(node.tagName)) {
+          if (node.children && node.children.length > 0) {
+            for (const child of node.children) {
+              if (child.properties?.className) {
+                const classes = Array.isArray(child.properties.className)
+                  ? child.properties.className
+                  : [child.properties.className];
+                if (
+                  classes.some(
+                    (c: string) =>
+                      c.includes("todo-keyword") ||
+                      c === "TODO" ||
+                      c === "DONE",
+                  )
+                ) {
+                  child.properties.className = ["todo-badge", ...classes];
+                }
+                if (classes.some((c: string) => c.includes("priority"))) {
+                  child.properties.className = ["priority-badge", ...classes];
+                }
+              }
+            }
+
+            const first = node.children[0];
+            if (first.type === "text") {
+              const match = first.value.match(
+                /^(WAITING|NEXT|HOLD|CANCELLED|TODO|DONE)\s+(\[#[A-Z]\]\s+)?(.*)$/,
+              );
+              if (match) {
+                const state = match[1];
+                const prio = match[2] ? match[2].trim() : "";
+                const rest = match[3];
+
+                const newChildren: any[] = [];
+                newChildren.push({
+                  type: "element",
+                  tagName: "span",
+                  properties: {
+                    className: ["todo-badge", `todo-${state.toLowerCase()}`],
+                  },
+                  children: [{ type: "text", value: state }],
+                });
+
+                if (prio) {
+                  newChildren.push({ type: "text", value: " " });
+                  newChildren.push({
+                    type: "element",
+                    tagName: "span",
+                    properties: {
+                      className: [
+                        "priority-badge",
+                        `priority-${prio.replace(/[\[#\]]/g, "").toLowerCase()}`,
+                      ],
+                    },
+                    children: [{ type: "text", value: prio }],
+                  });
+                }
+
+                newChildren.push({ type: "text", value: " " + rest });
+                node.children = [...newChildren, ...node.children.slice(1)];
+              }
+            }
+          }
+        }
+
+        // Task checkboxes in list items
+        if (node.tagName === "li") {
+          function processCheckbox(container: any) {
+            if (!container.children || container.children.length === 0)
+              return false;
+            const firstChild = container.children[0];
+            if (firstChild.type === "text") {
+              const cbMatch = firstChild.value.match(/^\[([ Xx-])\]\s*(.*)$/);
+              if (cbMatch) {
+                const state = cbMatch[1];
+                const rest = cbMatch[2];
+                const isChecked = state === "X" || state === "x";
+                const isIndeterminate = state === "-";
+
+                firstChild.value = rest;
+
+                const checkboxNode: any = {
+                  type: "element",
+                  tagName: "input",
+                  properties: {
+                    type: "checkbox",
+                    disabled: true,
+                    className: [
+                      "org-checkbox",
+                      isIndeterminate ? "is-indeterminate" : "",
+                    ].filter(Boolean),
+                  },
+                  children: [],
+                };
+                if (isChecked) checkboxNode.properties.checked = true;
+
+                container.children.unshift({ type: "text", value: " " });
+                container.children.unshift(checkboxNode);
+                return true;
+              }
+            }
+            return false;
+          }
+
+          const handled = processCheckbox(node);
+          if (!handled && node.children && node.children[0]?.tagName === "p") {
+            processCheckbox(node.children[0]);
+          }
+        }
+
+        // Tables
+        if (
+          node.tagName === "table" &&
+          parent &&
+          typeof index === "number" &&
+          (!parent.properties?.className ||
+            (Array.isArray(parent.properties.className)
+              ? !parent.properties.className.includes("table-container")
+              : !parent.properties.className.includes("table-container")))
+        ) {
+          const wrapper = {
+            type: "element",
+            tagName: "div",
+            properties: { className: ["table-container"] },
+            children: [node],
+          };
+          parent.children[index] = wrapper;
+        }
+      },
+    );
+  };
+}
+
 export async function renderOrg(orgContent: string): Promise<string> {
   if (!orgContent) return "";
 
@@ -287,6 +450,7 @@ export async function renderOrg(orgContent: string): Promise<string> {
   const processor = unified()
     .use(uniorgParse)
     .use(uniorgRehype)
+    .use(rehypeOrgEnhancements)
     .use(rehypeShikiHighlight, highlighter)
     .use(rehypeStringify);
 
