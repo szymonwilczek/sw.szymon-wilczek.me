@@ -3,6 +3,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import VaultUnlock from '../../components/VaultUnlock.astro';
 import Pagination from '../../components/Pagination.astro';
 import SearchFilter from '../../components/SearchFilter.astro';
+import FormattedDate from '../../components/FormattedDate.astro';
 import { getCollection } from 'astro:content';
 
 const PAGE_SIZE = 10;
@@ -34,18 +35,29 @@ const vaultItems = allVaultItems.slice(0, PAGE_SIZE);
 
     <SearchFilter
       placeholder="Filter vault documents by title, description, or hint..."
-      targetSelector=".vault-item-entry"
+      targetSelector=".vault-card"
       containerSelector=".vault-items"
     />
 
     <div class="vault-items">
       {vaultItems.map((item) => (
         <section 
-          class="vault-item-entry"
+          class="vault-card"
           data-search={`${item.data.title} ${item.data.description || ''} ${item.data.hint || ''}`}
         >
-          <h2>{item.data.title}</h2>
-          {item.data.description && <p class="vault-item-desc">{item.data.description}</p>}
+          <header class="vault-header">
+            <h2>{item.data.title}</h2>
+            {item.data.date && (
+              <span class="vault-date">
+                <FormattedDate date={item.data.date} />
+              </span>
+            )}
+          </header>
+
+          {item.data.description && (
+            <p class="vault-desc">{item.data.description}</p>
+          )}
+
           <VaultUnlock 
             ciphertext={item.data.ciphertext}
             iv={item.data.iv}
@@ -71,20 +83,46 @@ const vaultItems = allVaultItems.slice(0, PAGE_SIZE);
 
 <style>
   .vault-items {
-    margin-top: 2rem;
+    margin-top: 1.5rem;
     display: flex;
     flex-direction: column;
-    gap: 3rem;
+    gap: 2.25rem;
   }
 
-  .vault-item-entry h2 {
+  .vault-card {
+    border-left: 2px solid var(--border);
+    padding-left: 1.25rem;
+    transition: border-color 0.2s ease;
+  }
+
+  .vault-card:hover {
+    border-left-color: var(--fg-link);
+  }
+
+  .vault-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .vault-header h2 {
+    margin: 0;
     font-size: 1.35rem;
-    margin-bottom: 0.5rem;
+    border-bottom: none;
+    padding-bottom: 0;
   }
 
-  .vault-item-desc {
-    color: var(--fg-alt);
-    font-size: 0.95rem;
-    margin-bottom: 1rem;
+  .vault-date {
+    font-family: "Typus Mono 95", "Typus Mono", monospace;
+    font-size: 0.88rem;
+    color: var(--fg-dim);
+  }
+
+  .vault-desc {
+    margin: 0.4rem 0 0.75rem 0;
+    font-size: 0.92rem;
+    color: var(--fg-main);
   }
 </style>
