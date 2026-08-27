@@ -2,7 +2,6 @@
 import Sidebar from "../components/Sidebar.astro";
 import Footer from "../components/Footer.astro";
 import EmacsMinibuffer from "../components/EmacsMinibuffer.astro";
-import { ClientRouter } from "astro:transitions";
 import "../styles/global.css";
 
 interface Props {
@@ -24,11 +23,31 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link
+      rel="preload"
+      href="/fonts/TypusMono95-Regular.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/fonts/TypusMono95-Bold.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/fonts/Literata-Regular.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonicalURL} />
-
-    <ClientRouter />
 
     <script is:inline>
       (function () {
@@ -53,7 +72,6 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
           }
         }
         applyThemeAndFont();
-        document.addEventListener("astro:after-swap", applyThemeAndFont);
       })();
     </script>
 
@@ -69,8 +87,25 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
       href="/rss.xml"
     />
     <link rel="sitemap" href="/sitemap-index.xml" />
+
+    <script type="speculationrules">
+      {
+        "prerender": [
+          {
+            "where": {
+              "and": [
+                { "href_matches": "/*" },
+                { "not": { "href_matches": "/*.xml" } },
+                { "not": { "href_matches": "/downloads/*" } }
+              ]
+            },
+            "eagerness": "moderate"
+          }
+        ]
+      }
+    </script>
   </head>
-  <body transition:animate="none">
+  <body>
     <header class="mobile-header">
       <button
         id="mobile-menu-toggle"
@@ -88,7 +123,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     <div class="site-layout">
       <Sidebar currentPath={Astro.url.pathname} />
       <div class="content-wrapper">
-        <main id="main-content" transition:animate="none">
+        <main id="main-content">
           <div class="main-body">
             <slot />
           </div>
@@ -101,7 +136,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 
     <EmacsMinibuffer />
 
-    <script is:inline>
+    <script>
       (function () {
         function initCodeCopy() {
           var pres = document.querySelectorAll("pre");
@@ -140,12 +175,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
           });
         }
 
-        if (document.readyState === "loading") {
-          document.addEventListener("DOMContentLoaded", initCodeCopy);
-        } else {
-          initCodeCopy();
-        }
-        document.addEventListener("astro:page-load", initCodeCopy);
+        initCodeCopy();
       })();
     </script>
   </body>

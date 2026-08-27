@@ -94,7 +94,7 @@
   </div>
 </dialog>
 
-<script is:inline>
+<script>
   (function () {
     var commands = [
       {
@@ -496,12 +496,7 @@
       }
     }
 
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", setupMinibufferUI);
-    } else {
-      setupMinibufferUI();
-    }
-    document.addEventListener("astro:page-load", setupMinibufferUI);
+    setupMinibufferUI();
 
     document.addEventListener("click", function (e) {
       if (e.target && e.target.closest("#footer-keys-btn")) {

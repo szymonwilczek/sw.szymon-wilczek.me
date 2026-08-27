@@ -31,7 +31,7 @@ const {
   </div>
 </div>
 
-<script is:inline>
+<script>
   (function () {
     function setupSearchFilters() {
       document.querySelectorAll(".search-filter-box").forEach(function (box) {
@@ -74,11 +74,7 @@ const {
       });
     }
 
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", setupSearchFilters);
-    } else {
-      setupSearchFilters();
-    }
+    setupSearchFilters();
   })();
 </script>
 

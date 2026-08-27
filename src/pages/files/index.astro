@@ -145,7 +145,7 @@ const files = allFiles.slice(0, PAGE_SIZE);
   </article>
 </BaseLayout>
 
-<script is:inline>
+<script>
   (function () {
     function base64ToBuffer(b64) {
       var bin = atob(b64);
@@ -285,11 +285,7 @@ const files = allFiles.slice(0, PAGE_SIZE);
       };
     }
 
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", initArchiveDecryption);
-    } else {
-      initArchiveDecryption();
-    }
+    initArchiveDecryption();
   })();
 </script>
 

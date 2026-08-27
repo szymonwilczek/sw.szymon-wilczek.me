@@ -154,7 +154,7 @@ const prevUrl = page.currentPage === 2 ? "/files/" : page.url.prev;
   </article>
 </BaseLayout>
 
-<script is:inline>
+<script>
   (function () {
     function base64ToBuffer(b64) {
       var bin = atob(b64);
@@ -294,11 +294,7 @@ const prevUrl = page.currentPage === 2 ? "/files/" : page.url.prev;
       };
     }
 
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", initArchiveDecryption);
-    } else {
-      initArchiveDecryption();
-    }
+    initArchiveDecryption();
   })();
 </script>
 

@@ -34,7 +34,7 @@ const currentYear = new Date().getFullYear();
   </div>
 </aside>
 
-<script is:inline>
+<script>
   (function () {
     function setupThemeToggle() {
       var btn = document.getElementById("theme-toggle");
@@ -144,12 +144,7 @@ const currentYear = new Date().getFullYear();
       setupThemeToggle();
     }
 
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", init);
-    } else {
-      init();
-    }
-    document.addEventListener("astro:page-load", init);
+    init();
   })();
 </script>
 

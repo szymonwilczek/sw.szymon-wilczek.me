@@ -105,7 +105,7 @@ const fingerprint = "3EE5 3281 2DF0 F36A B7A1  F178 B8E9 4407 1CB7 EB8A";
   </article>
 </BaseLayout>
 
-<script is:inline>
+<script>
   (function () {
     function initContactPage() {
       var copyFpBtn = document.getElementById("copy-fingerprint-btn");
@@ -133,12 +133,7 @@ const fingerprint = "3EE5 3281 2DF0 F36A B7A1  F178 B8E9 4407 1CB7 EB8A";
       }
     }
 
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", initContactPage);
-    } else {
-      initContactPage();
-    }
-    document.addEventListener("astro:page-load", initContactPage);
+    initContactPage();
   })();
 </script>
 

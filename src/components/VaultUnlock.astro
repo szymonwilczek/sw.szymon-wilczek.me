@@ -63,7 +63,7 @@ const isBinaryFile = Boolean(encryptedUrl);
   </div>
 </div>
 
-<script is:inline>
+<script>
   (function () {
     function base64ToBuffer(b64) {
       var bin = atob(b64);
@@ -232,12 +232,7 @@ const isBinaryFile = Boolean(encryptedUrl);
       });
     }
 
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", initVaults);
-    } else {
-      initVaults();
-    }
-    document.addEventListener("astro:page-load", initVaults);
+    initVaults();
   })();
 </script>
 
