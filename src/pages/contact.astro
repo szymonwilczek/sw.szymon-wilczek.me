@@ -107,29 +107,38 @@ const fingerprint = "3EE5 3281 2DF0 F36A B7A1  F178 B8E9 4407 1CB7 EB8A";
 
 <script is:inline>
   (function () {
-    var copyFpBtn = document.getElementById("copy-fingerprint-btn");
-    var toggleArmoredBtn = document.getElementById("toggle-armored-btn");
-    var armoredDrawer = document.getElementById("armored-key-drawer");
+    function initContactPage() {
+      var copyFpBtn = document.getElementById("copy-fingerprint-btn");
+      var toggleArmoredBtn = document.getElementById("toggle-armored-btn");
+      var armoredDrawer = document.getElementById("armored-key-drawer");
 
-    if (copyFpBtn) {
-      copyFpBtn.addEventListener("click", function () {
-        var fp = copyFpBtn.dataset.fingerprint || "";
-        navigator.clipboard.writeText(fp).then(function () {
-          copyFpBtn.textContent = "Copied";
-          setTimeout(function () {
-            copyFpBtn.textContent = "Copy Fingerprint";
-          }, 2000);
-        });
-      });
+      if (copyFpBtn) {
+        copyFpBtn.onclick = function () {
+          var fp = copyFpBtn.dataset.fingerprint || "";
+          navigator.clipboard.writeText(fp).then(function () {
+            copyFpBtn.textContent = "Copied";
+            setTimeout(function () {
+              copyFpBtn.textContent = "Copy Fingerprint";
+            }, 2000);
+          });
+        };
+      }
+
+      if (toggleArmoredBtn && armoredDrawer) {
+        toggleArmoredBtn.onclick = function () {
+          var isOpen = armoredDrawer.style.display !== "none";
+          armoredDrawer.style.display = isOpen ? "none" : "block";
+          toggleArmoredBtn.textContent = isOpen ? "View Public Key" : "Hide Public Key";
+        };
+      }
     }
 
-    if (toggleArmoredBtn && armoredDrawer) {
-      toggleArmoredBtn.addEventListener("click", function () {
-        var isOpen = armoredDrawer.style.display !== "none";
-        armoredDrawer.style.display = isOpen ? "none" : "block";
-        toggleArmoredBtn.textContent = isOpen ? "View Public Key" : "Hide Public Key";
-      });
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", initContactPage);
+    } else {
+      initContactPage();
     }
+    document.addEventListener("astro:page-load", initContactPage);
   })();
 </script>
 
@@ -257,5 +266,61 @@ const fingerprint = "3EE5 3281 2DF0 F36A B7A1  F178 B8E9 4407 1CB7 EB8A";
     overflow-x: auto;
     max-height: 340px;
     color: var(--fg-alt) !important;
+    max-width: 100%;
+  }
+
+  article ul li {
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
+
+  article a {
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
+
+  @media (max-width: 63.99em) {
+    .pgp-card {
+      padding: 1rem;
+      margin: 1.25rem 0 2rem 0;
+      max-width: 100%;
+    }
+
+    .pgp-row {
+      flex-direction: column;
+      gap: 0.25rem;
+      min-width: 0;
+    }
+
+    .pgp-label {
+      min-width: 0;
+    }
+
+    .pgp-val {
+      min-width: 0;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+    }
+
+    .pgp-fingerprint {
+      min-width: 0;
+      word-break: break-all;
+      white-space: normal;
+      overflow-wrap: anywhere;
+      font-size: 0.8em;
+    }
+
+    .pgp-actions {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.5rem;
+    }
+
+    .btn-action {
+      width: 100%;
+      justify-content: center;
+      white-space: normal !important;
+      text-align: center;
+    }
   }
 </style>
