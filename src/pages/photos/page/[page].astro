@@ -1,17 +1,26 @@
 ---
-import BaseLayout from "../../layouts/BaseLayout.astro";
-import { getAllAlbums } from "../../utils/albums";
-import SearchFilter from "../../components/SearchFilter.astro";
-import Pagination from "../../components/Pagination.astro";
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import { getAllAlbums, type PhotoAlbum } from "../../../utils/albums";
+import SearchFilter from "../../../components/SearchFilter.astro";
+import Pagination from "../../../components/Pagination.astro";
+import type { GetStaticPathsOptions, Page } from "astro";
 
-const PAGE_SIZE = 6;
-const allAlbums = await getAllAlbums();
-const totalPages = Math.ceil(allAlbums.length / PAGE_SIZE);
-const albums = allAlbums.slice(0, PAGE_SIZE);
+export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
+  const albums = await getAllAlbums();
+  return paginate(albums, { pageSize: 6 });
+}
+
+interface Props {
+  page: Page<PhotoAlbum>;
+}
+
+const { page } = Astro.props;
+const albums = page.data;
+const prevUrl = page.currentPage === 2 ? "/photos" : page.url.prev;
 ---
 
 <BaseLayout
-  title="Photo Albums"
+  title={`Photo Albums - Page ${page.currentPage}`}
   description="A personal archive of places I've walked through and things I found worth remembering."
 >
   <article class="photos-index-article">
@@ -64,13 +73,14 @@ const albums = allAlbums.slice(0, PAGE_SIZE);
         ))
       }
 
-      {albums.length === 0 && <p>No photo albums cataloged yet.</p>}
+      {albums.length === 0 && <p>No photo albums cataloged on this page.</p>}
     </div>
 
     <Pagination
-      currentPage={1}
-      lastPage={totalPages}
-      nextUrl={totalPages > 1 ? "/photos/page/2" : undefined}
+      currentPage={page.currentPage}
+      lastPage={page.lastPage}
+      prevUrl={prevUrl}
+      nextUrl={page.url.next}
       baseUrl="/photos"
     />
   </article>
