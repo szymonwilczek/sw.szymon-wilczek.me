@@ -1,0 +1,328 @@
+#+TITLE: Building a Modular Sanctuary: An Engineer's Dualism
+#+AUTHOR: Szymon Wilczek
+#+DATE: <2026-08-27 Thu>
+#+CATEGORY: Emacs
+#+TAGS: emacs neovim
+#+DESCRIPTION: On the eternal ping-pong between Neovim and Emacs and building a modular setup that stops pretending to be something it is not.
+
+* The Confession of an Incurable Addict
+:PROPERTIES:
+:CUSTOM_ID: confession-of-a-vim-addict
+:END:
+
+Let us get the uncomfortable truth out of the way first: I am, and almost certainly will remain until the heat death of the universe, a creature of the Vi lineage.
+
+Years of modal editing do not just change how you write code; they permanently rewire your nervous system. Hitting =Escape= is no longer a conscious command, but a spinal reflex. Traversing text with =hjkl=, swapping words with =ciw=, or deleting whole function bodies with =da{= are burned so deep into my muscle memory that putting me in front of a standard, modeless editor is a recipe for instant humiliation.
+
+And then, of course, there is Neovim.
+
+Neovim is an engineering masterpiece. It boots in under 15 milliseconds, runs an asynchronous C core that treats latency as a personal insult, and executes Lua with near-native efficiency. It follows the classic Unix philosophy to the letter: it edits text, it does it blisteringly fast, and it gets out of your way.
+
+So why on earth did I spend hundreds of hours configuring GNU Emacs?
+
+For a long time, I lived in a state of perpetual identity crisis. I bounced between both editors like an indecisive maniac. Ping...and pong...and ping...and pong. On Monday, I was a devout Unix minimalist: /"Look at this 12ms startup! Look at this memory footprint! Lua is the pinnacle of human reason!"/ On Tuesday, I would fire up Emacs because no Neovim plugin in existence comes within a lightyear of Org-mode, only to spend Wednesday cursing at single-threaded ELisp as a heavy JSON payload from an LSP server caused my cursor to freeze while the Garbage Collector took a leisurely stroll.
+
+Eventually, the penny dropped: *stop trying to turn Emacs into a faster Neovim*.
+
+You cannot out-C an editor written in C using an interpreter conceived during the Carter administration. If GNU Emacs ever reaches true sub-millisecond input parity with Neovim, I will pack my bags and move into Emacs permanently without blinking. But as of today, that is simply not reality. Single-threaded execution and legacy runtime baggage have hard, physical limits. 
+
+When I need to rip through a Go codebase, debug C systems code, or patch a remote server over SSH, Neovim is my weapon of choice. 
+
+Emacs, however, became something entirely different: my personal computing sanctuary. An unmatched environment for thinking, academic planning, technical writing, and LaTeX authoring. To make it livable without tearing my hair out, I had to strip away the pre-packaged things, stop caring about what Reddit thought, and rebuild it from raw metal.
+
+* The Distro Trap: Why Doom and Spacemacs Aren't the Answer
+:PROPERTIES:
+:CUSTOM_ID: the-distro-trap
+:END:
+
+Every Vim user who wanders into the Emacs territory makes the exact same rookie mistake: *„I'll just install Doom Emacs or Spacemacs! It has Evil mode, leader keys, and everything works out of the box!”*
+
+I did it too. For the first week, you feel like a wizard. And then, inevitably, you want to change one tiny behavior that the distribution maintainers did not anticipate. 
+
+Suddenly you are not debugging Emacs. You are not learning Emacs Lisp. You are drowning in tens of thousands of lines of terrifying macro magic, nested hooks, and obscure domain-specific abstractions written by someone who had a completely different philosophy of computing than you. Maybe that is designed and suitable for someone, but that someone is not /me/.
+
+The hard engineering reality is simple: *the only Emacs configuration you will ever truly understand is the one you write yourself.*
+
+I threw out the frameworks and established a strict, modular layout. Every functional area gets its own sandbox split cleanly into two files:
+- =<module>-mod.el= - packages, logic, and configuration.
+- =<module>-keys.el= - exclusively keybindings wired through =general.el= and the Leader key.
+
+That is something I've done, and want to share it - maybe it will suitable for *you* as well?
+
+#+begin_src text
+~/.config/emacs/
+├── early-init.el      # Frame allocation, GC tuning, anti-flashbang
+├── init.el            # Module loader
+├── .bg-cache          # Cached frame background HEX color
+├── .theme-cache       # Active theme persistence
+└── modules/
+    ├── core.el        # Runtime sanitation, I/O hygiene, performance
+    ├── evil/          # Vim thinkerings
+    ├── completion/    # Vertico, Orderless, Consult, Marginalia, Company
+    ├── lsp/           # Eglot, Tree-sitter, format engine
+    ├── git/           # Magit, Forge, Lazygit ports
+    ├── ui/            # Themes, fonts
+    ├── projectile/    # Workspace isolation
+    ├── tabs/          # My bufferline takes
+    ├── terminal/      # Ghostel (libghostty engine)
+    ├── academic/      # Org-mode, LaTeX, citations and academic related things
+    └── writing/       # Olivetti, Zen mode
+#+end_src
+
+* Wrestling the Engine: Milliseconds, Flashbangs, and Garbage
+:PROPERTIES:
+:CUSTOM_ID: wrestling-the-engine
+:END:
+
+Tuning Emacs feels a lot like wrenching on a 1990s Japanese sports car (believe me, I have one - and it's called /Mitsubishi Galant/): the mechanical soul is brilliant, but the factory defaults were chosen when floppy disks were considered high-capacity storage.
+
+** Retinal Surgery Prevention
+If you use a dark theme on a tiling Wayland compositor (like I'm using Sway), you are painfully familiar with the Emacs flashbang: you spawn a client frame in a pitch-black room at 2 AM, and before Emacs even begins evaluating your theme file, the Wayland surface blinds you with a pure white rectangle.
+
+The fix is delightfully crude and 100% effective. In =early-init.el= (which executes long before any graphical window is drawn), you just have to read the background color from a tiny cache file and shove it directly into =default-frame-alist=:
+
+#+begin_src elisp
+;; early-init.el -*- lexical-binding: t; -*-
+(defvar my-bg-cache-file (expand-file-name ".bg-cache" user-emacs-directory))
+
+  (let ((bg-color (if (file-exists-p my-bg-cache-file)
+                      (with-temp-buffer
+                        (insert-file-contents my-bg-cache-file)
+                        (string-trim (buffer-string)))
+                    "#121212")))
+    (when (and bg-color (string-prefix-p "#" bg-color))
+      (push `(background-color . ,bg-color) default-frame-alist)))
+#+end_src
+
+Whenever I switch themes, a hook writes the new HEX color to =.bg-cache=. On the next startup, the display server allocates the window with the correct dark background from frame zero. No flashing, no retinal burn.
+
+** The 800 KB Garbage Joke
+By default, Emacs sets its garbage collection threshold to 800 kilobytes. In 2026, where my own workstation has 128 gigabytes of DDR5 RAM, Emacs defaults to a memory ceiling designed for a toaster. The result? The GC runs dozens of times a second just while scrolling a text file.
+
+#+begin_src elisp
+;; Inhibit GC completely during boot
+(setq gc-cons-threshold most-positive-fixnum
+      gc-cons-percentage 0.6)
+
+;; Set a SANE working ceiling
+(add-hook 'emacs-startup-hook
+          (lambda ()
+            (setq gc-cons-threshold (* 128 1024 1024)
+                  gc-cons-percentage 0.1)))
+
+;; Only sweep when I'm staring blankly at the screen for 15 seconds
+(run-with-idle-timer 15.0 t #'garbage-collect)
+#+end_src
+
+** Git Repository Pollution: Banishing .# Lockfiles
+Another vintage Emacs quirk: generating lockfiles (=.#file.c=) and tilde backups (=file.c~=) directly in your project root. If you work with modern file watchers, these ghost files trigger infinite rebuild loops and pollute your Git status.
+
+Kill them with fire:
+
+#+begin_src elisp
+(setq create-lockfiles nil
+      make-backup-files nil
+      auto-save-default nil
+      auto-save-list-file-prefix nil)
+
+;; If Emacs insists on auto-saving, isolate it to a dedicated sandbox
+(let ((auto-save-dir (expand-file-name "auto-save/" user-emacs-directory)))
+  (make-directory auto-save-dir t)
+  (setq auto-save-file-name-transforms `((".*" ,auto-save-dir t))))
+#+end_src
+
+** JSON Acceleration for LSP
+Adding a single environment variable in =early-init.el= instructs Emacs to parse JSON structures directly into property lists (/plists/) rather than hash tables:
+
+#+begin_src elisp
+(setenv "LSP_USE_PLISTS" "true")
+#+end_src
+
+Combined with native =libjansson= support in C, this delivers an instant **3x throughput boost** when deserializing language server messages inside Eglot.
+
+* The Modeline Trauma
+:PROPERTIES:
+:CUSTOM_ID: modeline-trauma
+:END:
+
+Many third-party statusline packages (looking at you, =doom-modeline=) suffer from a critical design flaw: they re-evaluate Git status, branch heads, LSP diagnostics, and buffer metrics **on every single keystroke**.
+
+A commit message from my dotfiles repository during the early days of this setup summarizes the experience accurately:
+#+begin_quote
+/„God it was laggy. God damn.”/
+#+end_quote
+
+I threw the packages out and wrote =modeline.el= from scratch, inspired by Neovim's Lualine. The secret sauce is simple: *strict time throttling* on expensive operations.
+
+#+begin_src elisp
+;;; modeline.el -*- lexical-binding: t; -*-
+(require 'timeout)
+
+(defvar-local my/modeline--cached-diagnostics "")
+
+(defun my/modeline-update-diagnostics ()
+  (setq my/modeline--cached-diagnostics
+        (if (bound-and-true-p flymake-mode)
+            (let* ((known-diags (flymake-diagnostics))
+                   (errs 0) (warns 0))
+              (dolist (d known-diags)
+                (pcase (flymake-diagnostic-type d)
+                  (:error (cl-incf errs))
+                  (:warning (cl-incf warns))))
+              (concat " ["
+                      (propertize (format "%d" errs) 'face 'error)
+                      " "
+                      (propertize (format "%d" warns) 'face 'warning)
+                      "] "))
+          "")))
+
+;; Never query diagnostics more frequently than once every 250ms!
+(timeout-throttle #'my/modeline-update-diagnostics 0.25)
+#+end_src
+
+Inactive windows fold down automatically to a dim, understated filename. No spinners, no animated icons eating CPU cycles, and butter-smooth typing.
+
+* The Dashboard Cemetery
+:PROPERTIES:
+:CUSTOM_ID: shotgun-for-a-fly
+:END:
+
+For a brief period, I succumbed to the temptation of pretty splash screens. I configured the =dashboard= package with an ASCII banner, recent file lists, and quick-open bookmarks. It looked fantastic for Reddit screenshots on =r/unixporn=. (I still use it in Neovim.)
+
+In practice, it was infuriating. Whenever you spawn a quick frame via =emacsclient= to edit a file, the dashboard insists on hijacking the buffer.
+
+In commit =279fd28=, I nuked it from orbit with the commit message:
+#+begin_quote
+/„It was really a pain in the ass to maintain ANY new frame when dashboard kept popping up. Sometimes it should be okay to use a shotgun for a fly.”/
+#+end_quote
+
+Emacs does not need splash screens. A clean =*scratch*= buffer get you to work in zero milliseconds.
+
+* Magit: The Reason We Forgive Emacs Everything
+:PROPERTIES:
+:CUSTOM_ID: magit-the-crown-jewel
+:END:
+
+If there is one piece of software on Earth that justifies having GNU Emacs installed on your system, it is **Magit**.
+
+No CLI alias, no graphical client, and no Neovim wrapper has ever come close to the precision of staging individual lines, crafting cherry-picks, and navigating interactive rebases. DO NOT get me wrong: I'm as well using Lazygit and when I'm not using Magit OR Lazygit, I still use CLI commands. Sometimes is just okay to accept patch line-by-line or in chunks. I like it, so I will keep doing that.
+
+Since I also appreciate the speed of /Lazygit/, I ported my favorite operations directly into ELisp:
+
+** Enforcing GPG Signing and Signoffs
+I refuse to manually check signing boxes in transient menus. By inspecting Magit's internal transient structures, I inject signing flags directly into the commit prefix.
+
+Every single commit is cryptographically signed with my hardware key and stamped with a =Signed-off-by= trailer automatically.
+
+** Single-Key Co-Author Attribution
+Pairing with colleagues or AI agents (not you Claude, you will continue to add yourself as Co-author anyway) usually means typing out tedious =Co-authored-by: Name <email>= trailers by hand. I bound =my/magit-add-co-author= to =W= in Magit log buffers:
+
+#+begin_src elisp
+  (defun my/magit-add-co-author (author)
+    "Add Co-authored-by trailer to commit at point or HEAD."
+    (interactive
+     (let* ((cmd "(git log --format='%aN <%aE>'; git log --all --format='%(trailers:key=Co-authored-by,valueonly=true)') | sed '/^$/d' | sort -u")
+            (authors (split-string (shell-command-to-string cmd) "\n" t))
+            (chosen (completing-read "Pick Co-author: " authors nil nil)))
+       (list chosen)))
+    (let* ((commit (or (magit-commit-at-point) (magit-rev-parse "HEAD")))
+           (head (magit-rev-parse "HEAD"))
+           (branch (magit-get-current-branch)))
+      (if (magit-rev-equal commit head)
+          (magit-call-git "commit" "--amend" "--no-edit" (format "--trailer=Co-authored-by: %s" author))
+        (if (and branch (magit-commit-p commit))
+            (progn
+              (magit-call-git "checkout" commit)
+              (magit-call-git "commit" "--amend" "--no-edit" (format "--trailer=Co-authored-by: %s" author))
+              (magit-call-git "rebase" "--onto" "HEAD" commit branch))
+          (user-error "Cannot rebase without an active branch")))
+      (magit-refresh)))
+#+end_src
+
+The function scrapes the repository's commit history for all past contributors, feeds them into Vertico fuzzy search, and amends the trailer directly into the commit. One keypress, select the name, hit Enter. Done. Cool?
+
+* Deterministic Formatting vs Plugin Circus
+:PROPERTIES:
+:CUSTOM_ID: deterministic-formatting
+:END:
+
+Have you ever installed a 500-line formatting package only to watch your cursor jump to line 1 and your viewport glitch violently every time you save a buffer?
+
+Instead of bringing in heavy external dependencies, I wrote =my/format-buffer-with-command=. It executes CLI formatters (Prettier, clang-format, gofmt) directly through =call-process-region=:
+1. Caches exact =point= and =window-start= positions.
+2. Streams buffer contents through the external binary.
+3. On exit code 0, replaces buffer contents and restores view coordinates instantly.
+4. On parse error, rolls back changes atomically and logs the diagnostic.
+
+#+begin_src elisp
+(defun my/format-buffer-with-command (cmd-args)
+  (let* ((cmd (car cmd-args))
+         (args (mapcar (lambda (arg)
+                         (if (string-match-p "%f" arg)
+                             (replace-regexp-in-string "%f" (or (buffer-file-name) "temp.md") arg)
+                           arg))
+                       (cdr cmd-args))))
+    (when (executable-find cmd)
+      (let ((orig-point (point))
+            (orig-window-start (window-start))
+            (orig-content (buffer-string))
+            (err-file (make-temp-file "formatter-err-")))
+        (unwind-protect
+            (let ((exit-code (apply #'call-process-region
+                                    (point-min) (point-max)
+                                    cmd t (list t err-file) nil args)))
+              (if (= exit-code 0)
+                  (progn
+                    (goto-char (min orig-point (point-max)))
+                    (set-window-start nil orig-window-start)
+                    (message "Formatted buffer with %s" cmd)
+                    t)
+                (erase-buffer)
+                (insert orig-content)
+                (goto-char orig-point)
+                (message "Formatter returned non-zero exit status")
+                nil))
+          (when (file-exists-p err-file)
+            (delete-file err-file)))))))
+#+end_src
+
+Feel free to use it if you also stumbled upon the same problems as I did.
+
+* The Sanctuary: Where Emacs Actually Wins
+:PROPERTIES:
+:CUSTOM_ID: the-sanctuary
+:END:
+
+Once you stop treating Emacs as an underperforming IDE for heavy systems programming and treat it as a personal computing substrate, it becomes completely irreplaceable.
+
+** 1. Academic Sanity: plan-polsl.el
+I study computer science at the Silesian University of Technology. Navigating university web portals in 2026 just to find out which lab room I need to run to is an exercise in psychological endurance. MAYBE if this website worked, was intuitive or something, then it would be okay. In the meantime, I DARE *YOU* to try to navigate on [[https://plan.polsl.pl][it]].
+
+I wrote [[https://github.com/szymonwilczek/plan-polsl.el][plan-polsl.el]], which hits the university schedule API directly, normalizes course data, and generates a structured =plan-polsl.org= file. Plugged into =org-agenda=, it renders my entire week on an 8:00–20:00 grid with Polish day names and a live time marker.
+
+** 2. Org-Mode and Real-Time Vector LaTeX
+Markdown is fine for README files. For academic papers and technical prose, Org-mode is on another planet. Nothing more to add here from me.
+
+** 3. Distraction-Free Zen Writing
+When I write essays - or articles, such as this one - I switch to Zen mode based on =olivetti=: text is constrained to 74 columns, line numbers vanish, and soft wrapping engages.
+
+* The Dualist Manifesto
+:PROPERTIES:
+:CUSTOM_ID: the-dualist-manifesto
+:END:
+
+Software engineering culture loves religious wars. You are expected to pick a camp, buy the t-shirt, and vehemently argue on forums why your editor is objectively superior to everything else.
+
+People will tell you that you *have* to pick a side. I don't really believe that. I think those two editors (which their communities are at war since the beginning of time) CAN and SHOULD coexist, as they serve - in my opinion - different purpose. Therefore, I choose to be a dualist.
+
+When I need to write a Go service, patch configuration files over SSH, or perform rapid codebase surgery: **I open Neovim.** Because it is blazingly fast, predictable, and does exactly what I ask without arguing.
+
+When I sit down to write an essay, organize university schedules, or author LaTeX documents: **I open GNU Emacs.** Because as an environment for thinking, structuring ideas, and manipulating text, it has no equal.
+
+The engineering challenge was never about finding one magic tool that does everything poorly. It is about understanding the strengths and trade-offs of your tools, bending them to your will, and staying in complete sovereign control of your computing environment. Remember - tools are meant to serve you, not the opposite way. If you ever catch yourself as a slave of your tools, you probably have to change a thing or two in your life.
+
+The configuration backing this setup is public in my dotfiles repository. Pick what you like, discard what you do not, and build your own sanctuary. Tinkering is a funny hobby.
+
+As always:
+
+~Signed-off-by: Szymon Wilczek <swilczek.lx@gmail.com>~
