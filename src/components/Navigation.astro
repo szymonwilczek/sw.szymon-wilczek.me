@@ -34,6 +34,7 @@ const links = [
           <li class="nav-item">
             <a
               href={link.href}
+              data-astro-prefetch={isExternal ? undefined : "hover"}
               class:list={["nav-link", { active: isActive }]}
               target={isExternal ? "_blank" : undefined}
               rel={isExternal ? "alternate" : undefined}

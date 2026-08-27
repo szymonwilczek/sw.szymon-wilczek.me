@@ -9,7 +9,7 @@ import type { GetStaticPathsOptions, Page } from "astro";
 
 export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
   const writings = (await getCollection("writings")).sort(
-    (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+    (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
   );
   return paginate(writings, { pageSize: 10 });
 }
@@ -52,7 +52,10 @@ const prevUrl = page.currentPage === 2 ? "/writings" : page.url.prev;
             >
               <header class="writing-header">
                 <h2>
-                  <a href={`/writings/${post.id.replace(/\.(org|md|mdx)$/, "")}`}>
+                  <a
+                    href={`/writings/${post.id.replace(/\.(org|md|mdx)$/, "")}`}
+                    data-astro-prefetch="hover"
+                  >
                     {post.data.title}
                   </a>
                 </h2>

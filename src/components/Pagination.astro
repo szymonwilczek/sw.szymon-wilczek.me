@@ -15,7 +15,7 @@ const { currentPage, lastPage, prevUrl, nextUrl, baseUrl } = Astro.props;
     <nav class="pagination-nav" aria-label="Pagination">
       <div class="pagination-container">
         {prevUrl ? (
-          <a href={prevUrl} class="btn-action pagination-btn">
+          <a href={prevUrl} data-astro-prefetch="hover" class="btn-action pagination-btn">
             &larr; Newer
           </a>
         ) : (
@@ -30,7 +30,7 @@ const { currentPage, lastPage, prevUrl, nextUrl, baseUrl } = Astro.props;
         </span>
 
         {nextUrl ? (
-          <a href={nextUrl} class="btn-action pagination-btn">
+          <a href={nextUrl} data-astro-prefetch="hover" class="btn-action pagination-btn">
             Older &rarr;
           </a>
         ) : (

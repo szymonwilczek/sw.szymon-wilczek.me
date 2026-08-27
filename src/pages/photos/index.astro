@@ -35,7 +35,7 @@ const albums = allAlbums.slice(0, PAGE_SIZE);
             class="album-card"
             data-search={`${album.title} ${album.dateFormatted} ${album.id}`}
           >
-            <a href={`/photos/${album.slug}`} class="album-cover-link">
+            <a href={`/photos/${album.slug}`} data-astro-prefetch="hover" class="album-cover-link">
               <div class="album-cover-wrapper">
                 <img src={album.coverImage} alt={`Cover photo for ${album.title}`} loading="lazy" />
                 <span class="album-count-badge">
@@ -46,7 +46,9 @@ const albums = allAlbums.slice(0, PAGE_SIZE);
 
             <div class="album-info">
               <h2 class="album-title">
-                <a href={`/photos/${album.slug}`}>{album.title}</a>
+                <a href={`/photos/${album.slug}`} data-astro-prefetch="hover">
+                  {album.title}
+                </a>
               </h2>
               <div class="album-meta">
                 <span class="album-date">{album.dateFormatted}</span>
@@ -55,7 +57,7 @@ const albums = allAlbums.slice(0, PAGE_SIZE);
               </div>
               {album.description && <p class="album-note">{album.description}</p>}
               <div class="album-action">
-                <a href={`/photos/${album.slug}`} class="btn-action">
+                <a href={`/photos/${album.slug}`} data-astro-prefetch="hover" class="btn-action">
                   View Album &rarr;
                 </a>
               </div>

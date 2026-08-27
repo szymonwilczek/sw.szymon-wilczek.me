@@ -8,7 +8,7 @@ import { calculateReadingStats } from "../../utils/reading-time";
 
 const PAGE_SIZE = 10;
 const allWritings = (await getCollection("writings")).sort(
-  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
 );
 
 const totalPages = Math.ceil(allWritings.length / PAGE_SIZE);
@@ -44,7 +44,10 @@ const writings = allWritings.slice(0, PAGE_SIZE);
             >
               <header class="writing-header">
                 <h2>
-                  <a href={`/writings/${post.id.replace(/\.(org|md|mdx)$/, "")}`}>
+                  <a
+                    href={`/writings/${post.id.replace(/\.(org|md|mdx)$/, "")}`}
+                    data-astro-prefetch="hover"
+                  >
                     {post.data.title}
                   </a>
                 </h2>

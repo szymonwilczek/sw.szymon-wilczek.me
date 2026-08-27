@@ -6,6 +6,10 @@ export default defineConfig({
   site: "https://sw.szymon-wilczek.me",
   output: "static",
   compressHTML: true,
+  prefetch: {
+    prefetchAll: true,
+    defaultStrategy: "hover",
+  },
   devToolbar: {
     enabled: false,
   },
