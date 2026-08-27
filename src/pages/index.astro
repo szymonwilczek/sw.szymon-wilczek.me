@@ -27,7 +27,7 @@ const projects = (await getCollection("projects"))
         <ul class="project-list">
           {projects.map((project) => (
             <li>
-              <a href={`/projects/${project.id.replace(/\.(org|md|mdx)$/, "")}`}>
+              <a href={`/projects/${project.id.replace(/\.(org|md|mdx)$/, "")}/`}>
                 {project.data.title}
               </a>
               {" — "}
@@ -36,7 +36,7 @@ const projects = (await getCollection("projects"))
           ))}
         </ul>
         <p>
-          <a href="/projects">&rarr; View all projects</a>
+          <a href="/projects/">&rarr; View all projects</a>
         </p>
       </section>
     )
@@ -46,25 +46,25 @@ const projects = (await getCollection("projects"))
     <h2>Navigation</h2>
     <ul>
       <li>
-        <a href="/about">About</a> - biographical context and open-source contributions.
+        <a href="/about/">About</a> - biographical context and open-source contributions.
       </li>
       <li>
-        <a href="/writings">Writings</a> - thoughts, essays on low-level computing, and systems design.
+        <a href="/writings/">Writings</a> - thoughts, essays on low-level computing, and systems design.
       </li>
       <li>
-        <a href="/projects">Projects</a> - tools, typefaces, and utilities.
+        <a href="/projects/">Projects</a> - tools, typefaces, and utilities.
       </li>
       <li>
-        <a href="/files">Files</a> - downloadable software packages, scripts and archives.
+        <a href="/files/">Files</a> - downloadable software packages, scripts and archives.
       </li>
       <li>
-        <a href="/photos">Photos</a> - photograph gallery (I sometimes take a photo).
+        <a href="/photos/">Photos</a> - photograph gallery (I sometimes take a photo).
       </li>
       <li>
-        <a href="/contact">Contact</a> - communication channels, web links, and PGP key.
+        <a href="/contact/">Contact</a> - communication channels, web links, and PGP key.
       </li>
       <li>
-        <a href="/credits">Credits</a> - attributions, typography, and licenses.
+        <a href="/credits/">Credits</a> - attributions, typography, and licenses.
       </li>
     </ul>
   </section>

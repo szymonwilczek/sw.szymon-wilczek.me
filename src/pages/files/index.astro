@@ -98,8 +98,8 @@ const files = allFiles.slice(0, PAGE_SIZE);
     <Pagination
       currentPage={1}
       lastPage={totalPages}
-      nextUrl={totalPages > 1 ? "/files/page/2" : undefined}
-      baseUrl="/files"
+      nextUrl={totalPages > 1 ? "/files/page/2/" : undefined}
+      baseUrl="/files/"
     />
 
     <dialog id="unlock-modal" class="unlock-dialog">

@@ -19,7 +19,7 @@ interface Props {
 
 const { page } = Astro.props;
 const projects = page.data;
-const prevUrl = page.currentPage === 2 ? "/projects" : page.url.prev;
+const prevUrl = page.currentPage === 2 ? "/projects/" : page.url.prev;
 ---
 
 <BaseLayout
@@ -50,7 +50,7 @@ const prevUrl = page.currentPage === 2 ? "/projects" : page.url.prev;
           >
             <header class="card-header">
               <h2>
-                <a href={`/projects/${project.id.replace(/\.(org|md|mdx)$/, "")}`}>
+                <a href={`/projects/${project.id.replace(/\.(org|md|mdx)$/, "")}/`}>
                   {project.data.title}
                 </a>
               </h2>
@@ -79,7 +79,7 @@ const prevUrl = page.currentPage === 2 ? "/projects" : page.url.prev;
       lastPage={page.lastPage}
       prevUrl={prevUrl}
       nextUrl={page.url.next}
-      baseUrl="/projects"
+      baseUrl="/projects/"
     />
   </article>
 </BaseLayout>

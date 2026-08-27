@@ -20,7 +20,7 @@ interface Props {
 
 const { page } = Astro.props;
 const vaultItems = page.data;
-const prevUrl = page.currentPage === 2 ? "/vault" : page.url.prev;
+const prevUrl = page.currentPage === 2 ? "/vault/" : page.url.prev;
 ---
 
 <BaseLayout title={`Vault - Page ${page.currentPage}`} description="Encrypted vault container.">
@@ -74,7 +74,7 @@ const prevUrl = page.currentPage === 2 ? "/vault" : page.url.prev;
       lastPage={page.lastPage}
       prevUrl={prevUrl}
       nextUrl={page.url.next}
-      baseUrl="/vault"
+      baseUrl="/vault/"
     />
   </article>
 </BaseLayout>

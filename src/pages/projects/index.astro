@@ -42,7 +42,7 @@ const projects = allProjects.slice(0, PAGE_SIZE);
           >
             <header class="card-header">
               <h2>
-                <a href={`/projects/${project.id.replace(/\.(org|md|mdx)$/, "")}`}>
+                <a href={`/projects/${project.id.replace(/\.(org|md|mdx)$/, "")}/`}>
                   {project.data.title}
                 </a>
               </h2>
@@ -69,8 +69,8 @@ const projects = allProjects.slice(0, PAGE_SIZE);
     <Pagination
       currentPage={1}
       lastPage={totalPages}
-      nextUrl={totalPages > 1 ? "/projects/page/2" : undefined}
-      baseUrl="/projects"
+      nextUrl={totalPages > 1 ? "/projects/page/2/" : undefined}
+      baseUrl="/projects/"
     />
   </article>
 </BaseLayout>

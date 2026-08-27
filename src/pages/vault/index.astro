@@ -64,8 +64,8 @@ const vaultItems = allVaultItems.slice(0, PAGE_SIZE);
     <Pagination
       currentPage={1}
       lastPage={totalPages}
-      nextUrl={totalPages > 1 ? "/vault/page/2" : undefined}
-      baseUrl="/vault"
+      nextUrl={totalPages > 1 ? "/vault/page/2/" : undefined}
+      baseUrl="/vault/"
     />
   </article>
 </BaseLayout>

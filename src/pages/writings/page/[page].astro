@@ -20,7 +20,7 @@ interface Props {
 
 const { page } = Astro.props;
 const writings = page.data;
-const prevUrl = page.currentPage === 2 ? "/writings" : page.url.prev;
+const prevUrl = page.currentPage === 2 ? "/writings/" : page.url.prev;
 ---
 
 <BaseLayout
@@ -53,7 +53,7 @@ const prevUrl = page.currentPage === 2 ? "/writings" : page.url.prev;
               <header class="writing-header">
                 <h2>
                   <a
-                    href={`/writings/${post.id.replace(/\.(org|md|mdx)$/, "")}`}
+                    href={`/writings/${post.id.replace(/\.(org|md|mdx)$/, "")}/`}
                     data-astro-prefetch="hover"
                   >
                     {post.data.title}
@@ -90,7 +90,7 @@ const prevUrl = page.currentPage === 2 ? "/writings" : page.url.prev;
       lastPage={page.lastPage}
       prevUrl={prevUrl}
       nextUrl={page.url.next}
-      baseUrl="/writings"
+      baseUrl="/writings/"
     />
   </article>
 </BaseLayout>

@@ -19,7 +19,7 @@ interface Props {
 
 const { page } = Astro.props;
 const files = page.data;
-const prevUrl = page.currentPage === 2 ? "/files" : page.url.prev;
+const prevUrl = page.currentPage === 2 ? "/files/" : page.url.prev;
 ---
 
 <BaseLayout
@@ -108,7 +108,7 @@ const prevUrl = page.currentPage === 2 ? "/files" : page.url.prev;
       lastPage={page.lastPage}
       prevUrl={prevUrl}
       nextUrl={page.url.next}
-      baseUrl="/files"
+      baseUrl="/files/"
     />
 
     <dialog id="unlock-modal" class="unlock-dialog">

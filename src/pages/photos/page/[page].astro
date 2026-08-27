@@ -16,7 +16,7 @@ interface Props {
 
 const { page } = Astro.props;
 const albums = page.data;
-const prevUrl = page.currentPage === 2 ? "/photos" : page.url.prev;
+const prevUrl = page.currentPage === 2 ? "/photos/" : page.url.prev;
 ---
 
 <BaseLayout
@@ -41,7 +41,7 @@ const prevUrl = page.currentPage === 2 ? "/photos" : page.url.prev;
             class="album-card"
             data-search={`${album.title} ${album.dateFormatted} ${album.id}`}
           >
-            <a href={`/photos/${album.slug}`} data-astro-prefetch="hover" class="album-cover-link">
+            <a href={`/photos/${album.slug}/`} data-astro-prefetch="hover" class="album-cover-link">
               <div class="album-cover-wrapper">
                 <img
                   src={album.coverThumb || album.coverImage}
@@ -57,7 +57,7 @@ const prevUrl = page.currentPage === 2 ? "/photos" : page.url.prev;
 
             <div class="album-info">
               <h2 class="album-title">
-                <a href={`/photos/${album.slug}`} data-astro-prefetch="hover">
+                <a href={`/photos/${album.slug}/`} data-astro-prefetch="hover">
                   {album.title}
                 </a>
               </h2>
@@ -68,7 +68,7 @@ const prevUrl = page.currentPage === 2 ? "/photos" : page.url.prev;
               </div>
               {album.description && <p class="album-note">{album.description}</p>}
               <div class="album-action">
-                <a href={`/photos/${album.slug}`} data-astro-prefetch="hover" class="btn-action">
+                <a href={`/photos/${album.slug}/`} data-astro-prefetch="hover" class="btn-action">
                   View Album &rarr;
                 </a>
               </div>
@@ -85,7 +85,7 @@ const prevUrl = page.currentPage === 2 ? "/photos" : page.url.prev;
       lastPage={page.lastPage}
       prevUrl={prevUrl}
       nextUrl={page.url.next}
-      baseUrl="/photos"
+      baseUrl="/photos/"
     />
   </article>
 </BaseLayout>
