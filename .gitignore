@@ -1,6 +1,7 @@
 # Build outputs
 dist/
 .astro/
+public/images/.thumbs/
 
 # Node dependencies
 node_modules/

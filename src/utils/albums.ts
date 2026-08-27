@@ -9,6 +9,7 @@ export interface PhotoItem {
   id: string;
   filename: string;
   src: string;
+  thumbSrc: string;
   sizeBytes: number;
   sizeFormatted: string;
   sha256: string;
@@ -39,11 +40,53 @@ export interface PhotoAlbum {
   date: Date;
   dateFormatted: string;
   coverImage: string;
+  coverThumb: string;
   photoCount: number;
   totalSizeBytes: number;
   totalSizeFormatted: string;
   photos: PhotoItem[];
   narrativeHtml?: string;
+}
+
+async function getOrCreateThumbnail(
+  originalFsPath: string,
+  folderName: string,
+  filename: string,
+  maxDimension = 1200,
+): Promise<string> {
+  const thumbsDir = path.resolve(`./public/images/.thumbs/${folderName}`);
+  if (!fs.existsSync(thumbsDir)) {
+    fs.mkdirSync(thumbsDir, { recursive: true });
+  }
+
+  const baseName = path.parse(filename).name;
+  const thumbFilename = `${baseName}-${maxDimension}.webp`;
+  const thumbFsPath = path.join(thumbsDir, thumbFilename);
+  const thumbPublicUrl = `/images/.thumbs/${folderName}/${thumbFilename}`;
+
+  try {
+    if (fs.existsSync(thumbFsPath)) {
+      const origStat = fs.statSync(originalFsPath);
+      const thumbStat = fs.statSync(thumbFsPath);
+      if (thumbStat.mtimeMs >= origStat.mtimeMs) {
+        return thumbPublicUrl;
+      }
+    }
+
+    await sharp(originalFsPath)
+      .rotate()
+      .resize(maxDimension, maxDimension, {
+        fit: "inside",
+        withoutEnlargement: true,
+      })
+      .webp({ quality: 82, effort: 4 })
+      .toFile(thumbFsPath);
+
+    return thumbPublicUrl;
+  } catch (err) {
+    console.warn(`[albums] Failed to generate thumbnail for ${filename}:`, err);
+    return `/images/${folderName}/${filename}`;
+  }
 }
 
 function formatBytes(bytes: number): string {
@@ -103,7 +146,7 @@ export async function getAllAlbums(): Promise<PhotoAlbum[]> {
     const folderFiles = fs.readdirSync(albumPath);
 
     const imageFiles = folderFiles.filter(
-      (f) => /\.(jpe?g|png|webp|avif)$/i.test(f) && !f.startsWith(".")
+      (f) => /\.(jpe?g|png|webp|avif)$/i.test(f) && !f.startsWith("."),
     );
 
     if (imageFiles.length === 0) continue;
@@ -142,7 +185,7 @@ export async function getAllAlbums(): Promise<PhotoAlbum[]> {
       (f) =>
         f.endsWith(".org") &&
         !f.startsWith(".") &&
-        !imageFiles.some((img) => img.startsWith(path.parse(f).name))
+        !imageFiles.some((img) => img.startsWith(path.parse(f).name)),
     );
 
     if (orgFile) {
@@ -172,7 +215,7 @@ export async function getAllAlbums(): Promise<PhotoAlbum[]> {
         const generalOrg = orgRaw
           .replace(
             /(?:^|\n)\*\s+(?:Photo Notes|Field Notes|Photo Comments|Captions)[\s\S]*?(?=(?:\n\*\s+[^\*])|$)/i,
-            ""
+            "",
           )
           .trim();
         if (generalOrg) {
@@ -310,11 +353,13 @@ export async function getAllAlbums(): Promise<PhotoAlbum[]> {
 
       const photoId = path.parse(file).name;
       const note = photoNotes[photoId] || photoNotes[file];
+      const thumbSrc = await getOrCreateThumbnail(filePath, folderName, file, 1200);
 
       photos.push({
         id: photoId,
         filename: file,
         src: `/images/${folderName}/${file}`,
+        thumbSrc,
         sizeBytes,
         sizeFormatted: formatBytes(sizeBytes),
         sha256,
@@ -341,9 +386,20 @@ export async function getAllAlbums(): Promise<PhotoAlbum[]> {
       year: "numeric",
     });
 
+    const coverFilename = albumMetadata.cover || (photos.length > 0 ? photos[0].filename : "");
     const coverImage = albumMetadata.cover
       ? `/images/${folderName}/${albumMetadata.cover}`
-      : photos[0].src;
+      : photos.length > 0
+        ? photos[0].src
+        : "";
+    const coverThumb = coverFilename
+      ? await getOrCreateThumbnail(
+          path.join(albumPath, coverFilename),
+          folderName,
+          coverFilename,
+          800,
+        )
+      : coverImage;
 
     albums.push({
       id: folderName,
@@ -354,6 +410,7 @@ export async function getAllAlbums(): Promise<PhotoAlbum[]> {
       date: earliestDate,
       dateFormatted,
       coverImage,
+      coverThumb,
       photoCount: photos.length,
       totalSizeBytes,
       totalSizeFormatted: formatBytes(totalSizeBytes),
