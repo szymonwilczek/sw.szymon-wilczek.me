@@ -24,29 +24,12 @@ function getTrackedGitRepoSize() {
       if (fs.existsSync(file)) {
         try {
           total += fs.statSync(file).size;
-        } catch {
-          // ignore
-        }
+        } catch {}
       }
     }
     return total;
   } catch {
-    let total = 0;
-    const ignoreDirs = new Set(["node_modules", ".git", ".astro", "dist", ".gemini", "scratch"]);
-    const walk = (d) => {
-      for (const e of fs.readdirSync(d, { withFileTypes: true })) {
-        if (ignoreDirs.has(e.name)) continue;
-        const full = path.join(d, e.name);
-        if (e.isDirectory()) walk(full);
-        else if (e.isFile()) {
-          try {
-            total += fs.statSync(full).size;
-          } catch {}
-        }
-      }
-    };
-    walk(process.cwd());
-    return total;
+    return 0;
   }
 }
 
@@ -58,7 +41,7 @@ function renderProgressBar(usedBytes, totalBytes, length = 36) {
   return `[${bar}] ${formatBytes(usedBytes)} / ${formatBytes(totalBytes)} (${percent.toFixed(1)}%)`;
 }
 
-async function compressImageFile(filePath) {
+async function compressImageFile(filePath, force = false) {
   const stat = fs.statSync(filePath);
   const buffer = fs.readFileSync(filePath);
   const meta = await sharp(buffer).metadata();
@@ -66,7 +49,7 @@ async function compressImageFile(filePath) {
   const isWide = (meta.width || 0) > MAX_DIMENSION || (meta.height || 0) > MAX_DIMENSION;
   const isHeavy = stat.size > 2.0 * 1024 * 1024; // > 2.0MB
 
-  if (!isWide && !isHeavy && meta.format === "jpeg") {
+  if (!force && !isWide && !isHeavy && meta.format === "jpeg") {
     return { skipped: true, oldSize: stat.size, newSize: stat.size };
   }
 
@@ -107,11 +90,12 @@ async function main() {
   const imagesBaseDir = path.resolve("./public/images");
 
   let filesToProcess = [];
+  const isExplicitTarget = Boolean(targetArg);
 
   if (targetArg) {
     const targetPath = path.resolve(targetArg);
     if (!fs.existsSync(targetPath)) {
-      console.error(`Error: Path does not exist: ${targetArg}`);
+      console.error(`Error: Target path does not exist: ${targetArg}`);
       process.exit(1);
     }
     const stat = fs.statSync(targetPath);
@@ -142,7 +126,7 @@ async function main() {
   }
 
   console.log(`Target Max Resolution: ${MAX_DIMENSION}px\nMozJPEG Quality: ${JPEG_QUALITY}`);
-  console.log(`Files to evaluate: ${filesToProcess.length}`);
+  console.log(`Target: ${targetArg || "All gallery images"} (${filesToProcess.length} files)`);
 
   let totalOld = 0;
   let totalNew = 0;
@@ -152,7 +136,7 @@ async function main() {
   for (const file of filesToProcess) {
     const relPath = path.relative(process.cwd(), file);
     try {
-      const res = await compressImageFile(file);
+      const res = await compressImageFile(file, isExplicitTarget);
       totalOld += res.oldSize;
       totalNew += res.newSize;
 
@@ -180,8 +164,8 @@ async function main() {
   if (totalOld > 0 && processedCount > 0) {
     const savedTotal = totalOld - totalNew;
     const savedPct = ((savedTotal / totalOld) * 100).toFixed(1);
-    console.log(`Total Media Size Before: ${formatBytes(totalOld)}`);
-    console.log(`Total Media Size After:  ${formatBytes(totalNew)}`);
+    console.log(`Total Size Before:       ${formatBytes(totalOld)}`);
+    console.log(`Total Size After:        ${formatBytes(totalNew)}`);
     console.log(`Total Space Saved:       ${formatBytes(savedTotal)} (-${savedPct}%)`);
   }
   console.log("---------------------------------------------------------------");
