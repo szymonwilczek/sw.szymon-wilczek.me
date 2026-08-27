@@ -24,12 +24,9 @@ const prevUrl = page.currentPage === 2 ? "/photos" : page.url.prev;
   description="A personal archive of places I've walked through and things I found worth remembering."
 >
   <article class="photos-index-article">
-    <header class="gallery-header">
-      <h1>Photography &amp; Albums</h1>
-      <p class="gallery-desc">
-        A personal archive of places I've walked through and things I found worth remembering.
-      </p>
-    </header>
+    <h1>Photography &amp; Albums</h1>
+
+    <p>A personal archive of places I've walked through and things I found worth remembering.</p>
 
     <SearchFilter
       placeholder="Filter by location, title, or date..."
@@ -94,16 +91,6 @@ const prevUrl = page.currentPage === 2 ? "/photos" : page.url.prev;
 </BaseLayout>
 
 <style>
-  .gallery-header {
-    margin-bottom: 1.75rem;
-  }
-
-  .gallery-desc {
-    color: var(--fg-dim);
-    margin-top: 0.5rem;
-    line-height: 1.6;
-  }
-
   .albums-grid {
     margin-top: 1.5rem;
     display: grid;
