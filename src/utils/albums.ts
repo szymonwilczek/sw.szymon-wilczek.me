@@ -5,8 +5,6 @@ import exifr from "exifr";
 import sharp from "sharp";
 import { renderOrg } from "./org";
 
-const MEDIA_BASE_URL = (process.env.PUBLIC_MEDIA_URL || "").replace(/\/$/, "");
-
 export interface PhotoItem {
   id: string;
   filename: string;
@@ -287,14 +285,11 @@ export async function getAllAlbums(): Promise<PhotoAlbum[]> {
 
       const photoId = path.parse(file).name;
       const note = photoNotes[photoId] || photoNotes[file];
-      const photoSrc = MEDIA_BASE_URL
-        ? `${MEDIA_BASE_URL}/${folderName}/${file}`
-        : `/images/${folderName}/${file}`;
 
       photos.push({
         id: photoId,
         filename: file,
-        src: photoSrc,
+        src: `/images/${folderName}/${file}`,
         sizeBytes,
         sizeFormatted: formatBytes(sizeBytes),
         sha256,
@@ -322,9 +317,7 @@ export async function getAllAlbums(): Promise<PhotoAlbum[]> {
     });
 
     const coverImage = albumMetadata.cover
-      ? MEDIA_BASE_URL
-        ? `${MEDIA_BASE_URL}/${folderName}/${albumMetadata.cover}`
-        : `/images/${folderName}/${albumMetadata.cover}`
+      ? `/images/${folderName}/${albumMetadata.cover}`
       : photos[0].src;
 
     albums.push({

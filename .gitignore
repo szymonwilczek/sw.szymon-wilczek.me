@@ -25,3 +25,6 @@ auto-save-list/
 # OS artifacts
 .DS_Store
 Thumbs.db
+
+# Scratch artifacts
+scratch/
