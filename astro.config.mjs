@@ -9,13 +9,13 @@ export default defineConfig({
   compressHTML: true,
   prefetch: {
     prefetchAll: true,
-    defaultStrategy: "hover",
+    defaultStrategy: "viewport",
   },
   devToolbar: {
     enabled: false,
   },
   build: {
-    inlineStylesheets: "auto",
+    inlineStylesheets: "always",
   },
   integrations: [sitemap()],
 });

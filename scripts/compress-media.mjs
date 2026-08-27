@@ -52,33 +52,59 @@ async function generateThumbnail(filePath, force = false) {
   }
 
   const thumbPath = path.join(thumbsDir, `${base}.webp`);
+  const coverPath = path.join(thumbsDir, `${base}-600.webp`);
   const origStat = fs.statSync(filePath);
 
-  if (!force && fs.existsSync(thumbPath)) {
-    const thumbStat = fs.statSync(thumbPath);
-    if (thumbStat.mtimeMs >= origStat.mtimeMs && thumbStat.size > 0) {
-      return { skipped: true, size: thumbStat.size };
-    }
-  }
+  let streamThumbCreated = false;
+  let coverThumbCreated = false;
 
   const buffer = fs.readFileSync(filePath);
-  const thumbBuffer = await sharp(buffer)
-    .rotate()
-    .resize({
-      width: 1200,
-      height: 1200,
-      fit: "inside",
-      withoutEnlargement: true,
-    })
-    .toColorspace("srgb")
-    .webp({
-      quality: 82,
-      effort: 4,
-    })
-    .toBuffer();
 
-  fs.writeFileSync(thumbPath, thumbBuffer);
-  return { skipped: false, size: thumbBuffer.length };
+  if (force || !fs.existsSync(thumbPath) || fs.statSync(thumbPath).mtimeMs < origStat.mtimeMs) {
+    const thumbBuffer = await sharp(buffer)
+      .rotate()
+      .resize({
+        width: 1200,
+        height: 1200,
+        fit: "inside",
+        withoutEnlargement: true,
+      })
+      .toColorspace("srgb")
+      .webp({
+        quality: 80,
+        effort: 4,
+      })
+      .toBuffer();
+    fs.writeFileSync(thumbPath, thumbBuffer);
+    streamThumbCreated = true;
+  }
+
+  if (force || !fs.existsSync(coverPath) || fs.statSync(coverPath).mtimeMs < origStat.mtimeMs) {
+    const coverBuffer = await sharp(buffer)
+      .rotate()
+      .resize({
+        width: 600,
+        height: 600,
+        fit: "inside",
+        withoutEnlargement: true,
+      })
+      .toColorspace("srgb")
+      .webp({
+        quality: 78,
+        effort: 4,
+      })
+      .toBuffer();
+    fs.writeFileSync(coverPath, coverBuffer);
+    coverThumbCreated = true;
+  }
+
+  const thumbSize = fs.existsSync(thumbPath) ? fs.statSync(thumbPath).size : 0;
+  const coverSize = fs.existsSync(coverPath) ? fs.statSync(coverPath).size : 0;
+
+  return {
+    skipped: !streamThumbCreated && !coverThumbCreated,
+    size: thumbSize + coverSize,
+  };
 }
 
 async function compressImageFile(filePath, force = false) {

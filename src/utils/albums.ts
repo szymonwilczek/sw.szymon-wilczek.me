@@ -358,13 +358,18 @@ export async function getAllAlbums(): Promise<PhotoAlbum[]> {
       : photos.length > 0
         ? photos[0].id
         : "";
+    const cover600FsPath = coverPhotoId
+      ? path.join(albumPath, "thumbs", `${coverPhotoId}-600.webp`)
+      : "";
     const coverThumbFsPath = coverPhotoId
       ? path.join(albumPath, "thumbs", `${coverPhotoId}.webp`)
       : "";
     const coverThumb =
-      coverThumbFsPath && fs.existsSync(coverThumbFsPath)
-        ? `/images/${folderName}/thumbs/${coverPhotoId}.webp`
-        : coverImage;
+      cover600FsPath && fs.existsSync(cover600FsPath)
+        ? `/images/${folderName}/thumbs/${coverPhotoId}-600.webp`
+        : coverThumbFsPath && fs.existsSync(coverThumbFsPath)
+          ? `/images/${folderName}/thumbs/${coverPhotoId}.webp`
+          : coverImage;
 
     albums.push({
       id: folderName,

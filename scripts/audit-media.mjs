@@ -83,15 +83,20 @@ async function main() {
       const ext = path.extname(file);
       const base = path.basename(file, ext);
       const thumbPath = path.join(albumPath, "thumbs", `${base}.webp`);
+      const coverPath = path.join(albumPath, "thumbs", `${base}-600.webp`);
 
       const stat = fs.statSync(filePath);
       const buffer = fs.readFileSync(filePath);
       albumBytes += stat.size;
       totalMediaBytes += stat.size;
 
-      if (fs.existsSync(thumbPath)) {
-        totalThumbBytes += fs.statSync(thumbPath).size;
-      } else {
+      const hasThumb = fs.existsSync(thumbPath);
+      const hasCover = fs.existsSync(coverPath);
+
+      if (hasThumb) totalThumbBytes += fs.statSync(thumbPath).size;
+      if (hasCover) totalThumbBytes += fs.statSync(coverPath).size;
+
+      if (!hasThumb || !hasCover) {
         missingThumbCount++;
         albumMissingThumbs++;
       }
@@ -103,13 +108,14 @@ async function main() {
           (meta.height || 0) > MAX_RECOMMENDED_DIMENSION;
         const isTooHeavy = stat.size > MAX_RECOMMENDED_SIZE_BYTES;
 
-        if (isTooWide || isTooHeavy || !fs.existsSync(thumbPath)) {
+        if (isTooWide || isTooHeavy || !hasThumb || !hasCover) {
           totalNeedsOptimization++;
           albumUnoptimizedCount++;
           const reasons = [];
           if (isTooWide) reasons.push("Resolution > 2.5K");
           if (isTooHeavy) reasons.push("Size > 2MB");
-          if (!fs.existsSync(thumbPath)) reasons.push("Missing WebP Thumbnail");
+          if (!hasThumb) reasons.push("Missing 1200px WebP");
+          if (!hasCover) reasons.push("Missing 600px WebP");
 
           unoptimizedList.push({
             album,
