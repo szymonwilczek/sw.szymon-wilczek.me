@@ -103,7 +103,7 @@ export async function getAllAlbums(): Promise<PhotoAlbum[]> {
     const folderFiles = fs.readdirSync(albumPath);
 
     const imageFiles = folderFiles.filter(
-      (f) => /\.(jpe?g|png|webp|avif)$/i.test(f) && !f.startsWith("."),
+      (f) => /\.(jpe?g|png|webp|avif)$/i.test(f) && !f.startsWith(".")
     );
 
     if (imageFiles.length === 0) continue;
@@ -142,7 +142,7 @@ export async function getAllAlbums(): Promise<PhotoAlbum[]> {
       (f) =>
         f.endsWith(".org") &&
         !f.startsWith(".") &&
-        !imageFiles.some((img) => img.startsWith(path.parse(f).name)),
+        !imageFiles.some((img) => img.startsWith(path.parse(f).name))
     );
 
     if (orgFile) {
@@ -172,7 +172,7 @@ export async function getAllAlbums(): Promise<PhotoAlbum[]> {
         const generalOrg = orgRaw
           .replace(
             /(?:^|\n)\*\s+(?:Photo Notes|Field Notes|Photo Comments|Captions)[\s\S]*?(?=(?:\n\*\s+[^\*])|$)/i,
-            "",
+            ""
           )
           .trim();
         if (generalOrg) {
@@ -220,6 +220,7 @@ export async function getAllAlbums(): Promise<PhotoAlbum[]> {
               "ExposureTime",
               "ISO",
               "FocalLength",
+              "FocalLengthIn35mmFormat",
               "DateTimeOriginal",
               "CreateDate",
             ],
@@ -250,14 +251,34 @@ export async function getAllAlbums(): Promise<PhotoAlbum[]> {
         camera = model.startsWith(make) ? model : `${make} ${model}`.trim();
       }
 
-      let lens: string | undefined;
-      if (parsedExif?.LensModel) {
-        lens = parsedExif.LensModel.trim();
+      let focalLength: string | undefined;
+      if (parsedExif?.FocalLengthIn35mmFormat) {
+        focalLength = `${Math.round(parsedExif.FocalLengthIn35mmFormat)}mm`;
+      } else if (parsedExif?.FocalLength) {
+        focalLength = `${Math.round(parsedExif.FocalLength)}mm`;
       }
 
-      let focalLength: string | undefined;
-      if (parsedExif?.FocalLength) {
-        focalLength = `${Math.round(parsedExif.FocalLength)}mm`;
+      let lens: string | undefined;
+      if (parsedExif?.LensModel) {
+        const raw = parsedExif.LensModel.trim();
+        if (/iphone.*camera/i.test(raw)) {
+          const f35 = parsedExif.FocalLengthIn35mmFormat;
+          const fPhys = parsedExif.FocalLength;
+          if (f35 <= 16 || (fPhys !== undefined && fPhys < 3.5) || /2\.22/i.test(raw)) {
+            lens = "Ultra Wide (13mm)";
+          } else if (f35 >= 70 || (fPhys !== undefined && fPhys >= 10) || /15\.66/i.test(raw)) {
+            lens = "Telephoto (120mm)";
+          } else if (/front/i.test(raw)) {
+            lens = "Front Camera (23mm)";
+          } else {
+            lens = "Main (24mm)";
+          }
+        } else {
+          lens = raw
+            .replace(/^apple\s+/i, "")
+            .replace(/back\s+(triple|dual|single)?\s*camera\s*/i, "")
+            .trim();
+        }
       }
 
       let aperture: string | undefined;
