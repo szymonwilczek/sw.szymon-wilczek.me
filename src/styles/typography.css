@@ -38,8 +38,8 @@
 
 body {
   font-family: var(--font-serif);
-  font-size: 1.34rem;
-  line-height: 1.85;
+  font-size: 1.15rem;
+  line-height: 1.78;
   color: var(--fg-main);
   background-color: var(--bg-main);
 }
@@ -54,32 +54,32 @@ h6 {
   font-weight: 600;
   line-height: 1.3;
   color: var(--fg-main);
-  margin-top: 2.5rem;
-  margin-bottom: 1rem;
+  margin-top: 2.25rem;
+  margin-bottom: 0.85rem;
   letter-spacing: -0.01em;
 }
 
 h1 {
-  font-size: 2.35rem;
+  font-size: 2.05rem;
   margin-top: 0;
 }
 
 h2 {
-  font-size: 1.72rem;
+  font-size: 1.55rem;
   border-bottom: 1px solid var(--border);
-  padding-bottom: 0.45rem;
+  padding-bottom: 0.35rem;
 }
 
 h3 {
-  font-size: 1.42rem;
+  font-size: 1.3rem;
 }
 
 h4 {
-  font-size: 1.34rem;
+  font-size: 1.15rem;
 }
 
 p {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.4rem;
 }
 
 a {
@@ -472,4 +472,38 @@ sup a {
   font-weight: 700;
   text-decoration: none;
   padding: 0 0.15rem;
+}
+
+@media (max-width: 63.99em) {
+  body {
+    font-size: 1.05rem;
+    line-height: 1.68;
+  }
+
+  h1 {
+    font-size: 1.65rem;
+    margin-top: 0;
+    margin-bottom: 0.75rem;
+  }
+
+  h2 {
+    font-size: 1.35rem;
+    margin-top: 1.85rem;
+    margin-bottom: 0.65rem;
+    padding-bottom: 0.25rem;
+  }
+
+  h3 {
+    font-size: 1.18rem;
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  h4 {
+    font-size: 1.05rem;
+  }
+
+  p {
+    margin-bottom: 1.2rem;
+  }
 }
