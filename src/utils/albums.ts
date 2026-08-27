@@ -208,22 +208,26 @@ export async function getAllAlbums(): Promise<PhotoAlbum[]> {
       }
 
       let parsedExif: any = null;
+      let gpsData: { latitude: number; longitude: number } | null = null;
       try {
-        parsedExif = await exifr.parse(fileBuffer, {
-          pick: [
-            "Make",
-            "Model",
-            "LensModel",
-            "FNumber",
-            "ExposureTime",
-            "ISO",
-            "FocalLength",
-            "DateTimeOriginal",
-            "CreateDate",
-            "latitude",
-            "longitude",
-          ],
-        });
+        const [exif, rawGps] = await Promise.all([
+          exifr.parse(fileBuffer, {
+            pick: [
+              "Make",
+              "Model",
+              "LensModel",
+              "FNumber",
+              "ExposureTime",
+              "ISO",
+              "FocalLength",
+              "DateTimeOriginal",
+              "CreateDate",
+            ],
+          }),
+          exifr.gps(fileBuffer),
+        ]);
+        parsedExif = exif;
+        gpsData = rawGps;
       } catch {
         // graceful fallback
       }
@@ -273,13 +277,13 @@ export async function getAllAlbums(): Promise<PhotoAlbum[]> {
       }
 
       let gps: PhotoItem["gps"];
-      if (typeof parsedExif?.latitude === "number" && typeof parsedExif?.longitude === "number") {
-        const lat = parsedExif.latitude;
-        const lon = parsedExif.longitude;
+      if (typeof gpsData?.latitude === "number" && typeof gpsData?.longitude === "number") {
+        const lat = gpsData.latitude;
+        const lon = gpsData.longitude;
         gps = {
           latitude: lat,
           longitude: lon,
-          mapsUrl: `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}#map=15/${lat}/${lon}`,
+          mapsUrl: `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}#map=16/${lat}/${lon}`,
         };
       }
 
