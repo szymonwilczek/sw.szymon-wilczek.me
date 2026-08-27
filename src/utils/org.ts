@@ -15,25 +15,46 @@ const efAutumnTheme = {
   },
   tokenColors: [
     {
-      scope: ["comment", "punctuation.definition.comment"],
+      scope: ["comment", "comment.line", "comment.block", "punctuation.definition.comment"],
       settings: {
         foreground: "#ba8a65",
         fontStyle: "italic",
       },
     },
     {
-      scope: ["string", "string.quoted", "punctuation.definition.string"],
+      scope: [
+        "string",
+        "string.quoted",
+        "string.quoted.double",
+        "string.quoted.single",
+        "punctuation.definition.string",
+      ],
       settings: { foreground: "#f47340" },
     },
     {
       scope: [
         "constant.numeric",
         "constant.language",
+        "constant.language.nil",
+        "constant.boolean",
         "constant.character",
         "constant.other",
+        "constant.other.quoted.symbol",
+        "punctuation.definition.symbol",
+        "punctuation.definition.quoted.symbol",
         "variable.other.constant",
       ],
       settings: { foreground: "#70b400" },
+    },
+    {
+      scope: [
+        "constant.keyword",
+        "constant.other.keyword",
+        "punctuation.definition.keyword",
+        "entity.name.tag",
+        "meta.tag",
+      ],
+      settings: { foreground: "#6fafff" },
     },
     {
       scope: [
@@ -43,6 +64,8 @@ const efAutumnTheme = {
         "keyword.other",
         "storage",
         "storage.type",
+        "storage.binding",
+        "storage.modifier",
       ],
       settings: {
         foreground: "#d0730f",
@@ -50,28 +73,40 @@ const efAutumnTheme = {
       },
     },
     {
-      scope: ["support.function", "support.macro", "keyword.declaration"],
+      scope: [
+        "support.function",
+        "support.macro",
+        "support.function.emacs.lisp",
+        "keyword.declaration",
+        "entity.function.name",
+        "entity.name.function",
+        "meta.function-call",
+        "variable.function",
+      ],
       settings: { foreground: "#f06a8f" },
     },
     {
-      scope: ["entity.name.function", "meta.function-call", "variable.function"],
+      scope: [
+        "variable",
+        "variable.other",
+        "variable.parameter",
+        "support.variable",
+        "entity.name.variable",
+      ],
       settings: { foreground: "#2dc4bf" },
-    },
-    {
-      scope: ["variable", "variable.other", "variable.parameter", "support.variable"],
-      settings: { foreground: "#6fafff" },
     },
     {
       scope: ["entity.name.type", "entity.name.class", "support.type", "support.class"],
       settings: { foreground: "#4fb04f" },
     },
     {
-      scope: ["keyword.operator", "punctuation.separator", "punctuation.terminator"],
+      scope: [
+        "keyword.operator",
+        "punctuation.separator",
+        "punctuation.terminator",
+        "punctuation.section",
+      ],
       settings: { foreground: "#baa792" },
-    },
-    {
-      scope: ["entity.name.tag", "meta.tag"],
-      settings: { foreground: "#ef656a" },
     },
   ],
 };
@@ -85,25 +120,46 @@ const efDayTheme = {
   },
   tokenColors: [
     {
-      scope: ["comment", "punctuation.definition.comment"],
+      scope: ["comment", "comment.line", "comment.block", "punctuation.definition.comment"],
       settings: {
         foreground: "#8f5f4a",
         fontStyle: "italic",
       },
     },
     {
-      scope: ["string", "string.quoted", "punctuation.definition.string"],
-      settings: { foreground: "#5f7200" },
+      scope: [
+        "string",
+        "string.quoted",
+        "string.quoted.double",
+        "string.quoted.single",
+        "punctuation.definition.string",
+      ],
+      settings: { foreground: "#ce3f00" },
     },
     {
       scope: [
         "constant.numeric",
         "constant.language",
+        "constant.language.nil",
+        "constant.boolean",
         "constant.character",
         "constant.other",
+        "constant.other.quoted.symbol",
+        "punctuation.definition.symbol",
+        "punctuation.definition.quoted.symbol",
         "variable.other.constant",
       ],
-      settings: { foreground: "#ce3f00" },
+      settings: { foreground: "#5f7200" },
+    },
+    {
+      scope: [
+        "constant.keyword",
+        "constant.other.keyword",
+        "punctuation.definition.keyword",
+        "entity.name.tag",
+        "meta.tag",
+      ],
+      settings: { foreground: "#3f6faf" },
     },
     {
       scope: [
@@ -113,6 +169,8 @@ const efDayTheme = {
         "keyword.other",
         "storage",
         "storage.type",
+        "storage.binding",
+        "storage.modifier",
       ],
       settings: {
         foreground: "#b75515",
@@ -120,28 +178,40 @@ const efDayTheme = {
       },
     },
     {
-      scope: ["support.function", "support.macro", "keyword.declaration"],
+      scope: [
+        "support.function",
+        "support.macro",
+        "support.function.emacs.lisp",
+        "keyword.declaration",
+        "entity.function.name",
+        "entity.name.function",
+        "meta.function-call",
+        "variable.function",
+      ],
       settings: { foreground: "#cf2f4f" },
     },
     {
-      scope: ["entity.name.function", "meta.function-call", "variable.function"],
-      settings: { foreground: "#ca3e54" },
-    },
-    {
-      scope: ["variable", "variable.other", "variable.parameter", "support.variable"],
-      settings: { foreground: "#8448aa" },
-    },
-    {
-      scope: ["entity.name.type", "entity.name.class", "support.type", "support.class"],
+      scope: [
+        "variable",
+        "variable.other",
+        "variable.parameter",
+        "support.variable",
+        "entity.name.variable",
+      ],
       settings: { foreground: "#0f7f5f" },
     },
     {
-      scope: ["keyword.operator", "punctuation.separator", "punctuation.terminator"],
-      settings: { foreground: "#63728f" },
+      scope: ["entity.name.type", "entity.name.class", "support.type", "support.class"],
+      settings: { foreground: "#8448aa" },
     },
     {
-      scope: ["entity.name.tag", "meta.tag"],
-      settings: { foreground: "#ba2d2f" },
+      scope: [
+        "keyword.operator",
+        "punctuation.separator",
+        "punctuation.terminator",
+        "punctuation.section",
+      ],
+      settings: { foreground: "#63728f" },
     },
   ],
 };
@@ -203,7 +273,8 @@ function rehypeShikiHighlight(highlighter: any) {
           // language alias normalizations
           if (lang === "nasm" || lang === "assembly") lang = "asm";
           if (lang === "sh" || lang === "shell") lang = "bash";
-          if (lang === "emacs-lisp") lang = "elisp";
+          if (lang === "emacs-lisp" || lang === "lisp") lang = "elisp";
+          if (lang === "commonlisp") lang = "common-lisp";
 
           let codeText = "";
           function extractText(n: any) {

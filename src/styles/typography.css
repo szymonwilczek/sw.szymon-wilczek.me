@@ -194,6 +194,9 @@ pre code,
 
 .shiki span {
   color: var(--shiki-dark, inherit);
+  font-weight: var(--shiki-dark-font-weight, inherit);
+  font-style: var(--shiki-dark-font-style, inherit);
+  text-decoration: var(--shiki-dark-text-decoration, inherit);
 }
 
 /* Dark Mode */
@@ -201,6 +204,9 @@ pre code,
 :root[data-theme="autumn"] .shiki span,
 :root:not([data-theme]) .shiki span {
   color: var(--shiki-dark, inherit) !important;
+  font-weight: var(--shiki-dark-font-weight, inherit) !important;
+  font-style: var(--shiki-dark-font-style, inherit) !important;
+  text-decoration: var(--shiki-dark-text-decoration, inherit) !important;
 }
 
 /* Light Mode */
@@ -208,18 +214,27 @@ pre code,
 :root[data-theme="day"] .shiki span,
 :root[data-theme="arcadia"] .shiki span {
   color: var(--shiki-light, inherit) !important;
+  font-weight: var(--shiki-light-font-weight, inherit) !important;
+  font-style: var(--shiki-light-font-style, inherit) !important;
+  text-decoration: var(--shiki-light-text-decoration, inherit) !important;
 }
 
 @media (prefers-color-scheme: light) {
   :root[data-theme="auto"] .shiki span,
   :root:not([data-theme]) .shiki span {
     color: var(--shiki-light, inherit) !important;
+    font-weight: var(--shiki-light-font-weight, inherit) !important;
+    font-style: var(--shiki-light-font-style, inherit) !important;
+    text-decoration: var(--shiki-light-text-decoration, inherit) !important;
   }
 }
 
 @media (prefers-color-scheme: dark) {
   :root[data-theme="auto"] .shiki span {
     color: var(--shiki-dark, inherit) !important;
+    font-weight: var(--shiki-dark-font-weight, inherit) !important;
+    font-style: var(--shiki-dark-font-style, inherit) !important;
+    text-decoration: var(--shiki-dark-text-decoration, inherit) !important;
   }
 }
 
