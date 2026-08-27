@@ -39,19 +39,14 @@ const prevUrl = page.currentPage === 2 ? "/photos" : page.url.prev;
 
     <div class="albums-grid">
       {
-        albums.map((album, idx) => (
+        albums.map((album) => (
           <article
             class="album-card"
             data-search={`${album.title} ${album.dateFormatted} ${album.id}`}
           >
             <a href={`/photos/${album.slug}`} data-astro-prefetch="hover" class="album-cover-link">
               <div class="album-cover-wrapper">
-                <img
-                  src={album.coverThumb || album.coverImage}
-                  alt={`Cover photo for ${album.title}`}
-                  loading={idx < 2 ? "eager" : "lazy"}
-                  decoding="async"
-                />
+                <img src={album.coverImage} alt={`Cover photo for ${album.title}`} loading="lazy" />
                 <span class="album-count-badge">
                   {album.photoCount} {album.photoCount === 1 ? "capture" : "captures"}
                 </span>
