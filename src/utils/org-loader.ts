@@ -48,16 +48,13 @@ export function orgContentLoader({ base }: { base: string }): Loader {
       const baseDir = path.resolve(process.cwd(), base);
       if (!fs.existsSync(baseDir)) return;
 
-      const entries = fs.readdirSync(baseDir, { withFileTypes: true });
-
-      for (const entry of entries) {
-        if (entry.name === ".gitkeep" || entry.name.startsWith(".")) continue;
-
-        const fullPath = path.join(baseDir, entry.name);
-        if (!entry.isFile()) continue;
-
-        const ext = path.extname(entry.name).toLowerCase();
-        const id = path.basename(entry.name, ext);
+      async function syncFile(fullPath: string) {
+        if (!fs.existsSync(fullPath)) return;
+        const filename = path.basename(fullPath);
+        if (filename === ".gitkeep" || filename.startsWith(".")) return;
+        const ext = path.extname(filename).toLowerCase();
+        if (![".org", ".json", ".md", ".mdx"].includes(ext)) return;
+        const id = path.basename(filename, ext);
         const rawContent = fs.readFileSync(fullPath, "utf-8");
 
         let rawData: Record<string, any> = {};
@@ -69,8 +66,8 @@ export function orgContentLoader({ base }: { base: string }): Loader {
         } else if (ext === ".json") {
           try {
             rawData = JSON.parse(rawContent);
-          } catch (e) {
-            continue;
+          } catch {
+            return;
           }
           body = "";
         } else if (ext === ".md" || ext === ".mdx") {
@@ -103,6 +100,38 @@ export function orgContentLoader({ base }: { base: string }): Loader {
           body,
           digest,
           filePath: path.relative(process.cwd(), fullPath),
+        });
+      }
+
+      async function syncAll() {
+        const entries = fs.readdirSync(baseDir, { withFileTypes: true });
+        for (const entry of entries) {
+          if (entry.isFile()) {
+            await syncFile(path.join(baseDir, entry.name));
+          }
+        }
+      }
+
+      await syncAll();
+
+      if (watcher) {
+        watcher.on("change", async (changedPath: string) => {
+          if (changedPath.startsWith(baseDir)) {
+            await syncFile(changedPath);
+          }
+        });
+        watcher.on("add", async (addedPath: string) => {
+          if (addedPath.startsWith(baseDir)) {
+            await syncFile(addedPath);
+          }
+        });
+        watcher.on("unlink", (deletedPath: string) => {
+          if (deletedPath.startsWith(baseDir)) {
+            const filename = path.basename(deletedPath);
+            const ext = path.extname(filename).toLowerCase();
+            const id = path.basename(filename, ext);
+            store.delete(id);
+          }
         });
       }
     },
