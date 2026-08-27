@@ -125,11 +125,18 @@ const currentYear = new Date().getFullYear();
         });
       }
 
-      document.addEventListener("keydown", function (e) {
-        if (e.key === "Escape" && document.body.classList.contains("menu-open")) {
-          close();
-        }
-      });
+      if (!window.__sidebarEscapeListenerAdded) {
+        window.__sidebarEscapeListenerAdded = true;
+        document.addEventListener("keydown", function (e) {
+          if (e.key === "Escape" && document.body.classList.contains("menu-open")) {
+            document.body.classList.remove("menu-open");
+            var sb = document.getElementById("site-sidebar");
+            var ob = document.getElementById("mobile-menu-toggle");
+            if (sb) sb.classList.remove("is-open");
+            if (ob) ob.setAttribute("aria-expanded", "false");
+          }
+        });
+      }
     }
 
     function init() {

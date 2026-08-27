@@ -102,7 +102,7 @@
         name: "view-writings",
         desc: "Jump to essays and manifestos (/writings)",
         action: function () {
-          window.location.href = "/writings";
+          window.location.href = "/writings/";
         },
       },
       {
@@ -110,7 +110,7 @@
         name: "view-projects",
         desc: "Jump to software projects (/projects)",
         action: function () {
-          window.location.href = "/projects";
+          window.location.href = "/projects/";
         },
       },
       {
@@ -118,7 +118,7 @@
         name: "view-photos",
         desc: "Jump to photography gallery (/photos)",
         action: function () {
-          window.location.href = "/photos";
+          window.location.href = "/photos/";
         },
       },
       {
@@ -126,7 +126,7 @@
         name: "view-files",
         desc: "Jump to files and archives (/files)",
         action: function () {
-          window.location.href = "/files";
+          window.location.href = "/files/";
         },
       },
       {
@@ -134,7 +134,7 @@
         name: "view-about",
         desc: "Jump to personal about page (/about)",
         action: function () {
-          window.location.href = "/about";
+          window.location.href = "/about/";
         },
       },
       {
@@ -142,7 +142,7 @@
         name: "view-contact",
         desc: "Jump to contact and PGP key (/contact)",
         action: function () {
-          window.location.href = "/contact";
+          window.location.href = "/contact/";
         },
       },
       {
@@ -150,7 +150,7 @@
         name: "view-credits",
         desc: "View typography & credits (/credits)",
         action: function () {
-          window.location.href = "/credits";
+          window.location.href = "/credits/";
         },
       },
       {
@@ -304,17 +304,20 @@
       },
     ];
 
-    var minibuffer = document.getElementById("emacs-minibuffer");
-    var input = document.getElementById("minibuffer-input");
-    var countEl = document.getElementById("minibuffer-count");
-    var list = document.getElementById("minibuffer-candidates");
-    var keybindingsModal = document.getElementById("keybindings-modal");
-    var closeKeybindingsBtn = document.getElementById("close-keybindings-btn");
-    var footerKeysBtn = document.getElementById("footer-keys-btn");
-
     var selectedIndex = 0;
     var filtered = [];
     var lastGPress = 0;
+
+    function getElements() {
+      return {
+        minibuffer: document.getElementById("emacs-minibuffer"),
+        input: document.getElementById("minibuffer-input"),
+        countEl: document.getElementById("minibuffer-count"),
+        list: document.getElementById("minibuffer-candidates"),
+        keybindingsModal: document.getElementById("keybindings-modal"),
+        closeKeybindingsBtn: document.getElementById("close-keybindings-btn"),
+      };
+    }
 
     function isInputActive() {
       var el = document.activeElement;
@@ -335,75 +338,53 @@
     }
 
     function openMinibuffer() {
-      if (!minibuffer || !input) return;
-      input.value = "";
+      var els = getElements();
+      if (!els.minibuffer || !els.input) return;
+      els.input.value = "";
       selectedIndex = 0;
       renderCandidates();
-      if (typeof minibuffer.showModal === "function") {
-        minibuffer.showModal();
+      if (typeof els.minibuffer.showModal === "function") {
+        els.minibuffer.showModal();
       } else {
-        minibuffer.setAttribute("open", "");
+        els.minibuffer.setAttribute("open", "");
       }
-      input.focus();
+      els.input.focus();
     }
 
     function closeMinibuffer() {
-      if (!minibuffer) return;
-      if (typeof minibuffer.close === "function") {
-        minibuffer.close();
+      var els = getElements();
+      if (!els.minibuffer) return;
+      if (typeof els.minibuffer.close === "function") {
+        els.minibuffer.close();
       } else {
-        minibuffer.removeAttribute("open");
+        els.minibuffer.removeAttribute("open");
       }
     }
 
     function openKeybindings() {
-      if (!keybindingsModal) return;
-      if (typeof keybindingsModal.showModal === "function") {
-        keybindingsModal.showModal();
+      var els = getElements();
+      if (!els.keybindingsModal) return;
+      if (typeof els.keybindingsModal.showModal === "function") {
+        els.keybindingsModal.showModal();
       } else {
-        keybindingsModal.setAttribute("open", "");
+        els.keybindingsModal.setAttribute("open", "");
       }
     }
 
     function closeKeybindings() {
-      if (!keybindingsModal) return;
-      if (typeof keybindingsModal.close === "function") {
-        keybindingsModal.close();
+      var els = getElements();
+      if (!els.keybindingsModal) return;
+      if (typeof els.keybindingsModal.close === "function") {
+        els.keybindingsModal.close();
       } else {
-        keybindingsModal.removeAttribute("open");
+        els.keybindingsModal.removeAttribute("open");
       }
-    }
-
-    if (closeKeybindingsBtn) closeKeybindingsBtn.onclick = closeKeybindings;
-
-    function handleFooterKeysBtn() {
-      var btn = document.getElementById("footer-keys-btn");
-      if (btn) btn.onclick = openKeybindings;
-    }
-    handleFooterKeysBtn();
-    document.addEventListener("astro:page-load", handleFooterKeysBtn);
-
-    document.addEventListener("click", function (e) {
-      if (e.target && e.target.closest("#footer-keys-btn")) {
-        openKeybindings();
-      }
-    });
-
-    if (keybindingsModal) {
-      keybindingsModal.addEventListener("click", function (e) {
-        if (e.target === keybindingsModal) closeKeybindings();
-      });
-    }
-
-    if (minibuffer) {
-      minibuffer.addEventListener("click", function (e) {
-        if (e.target === minibuffer) closeMinibuffer();
-      });
     }
 
     function renderCandidates() {
-      if (!list || !input) return;
-      var query = input.value.trim().toLowerCase();
+      var els = getElements();
+      if (!els.list || !els.input) return;
+      var query = els.input.value.trim().toLowerCase();
       var words = query.split(/\s+/).filter(Boolean);
 
       filtered = commands.filter(function (cmd) {
@@ -415,15 +396,15 @@
       });
 
       if (selectedIndex >= filtered.length) selectedIndex = Math.max(0, filtered.length - 1);
-      if (countEl) countEl.textContent = filtered.length + "/" + commands.length;
+      if (els.countEl) els.countEl.textContent = filtered.length + "/" + commands.length;
 
-      list.innerHTML = "";
+      els.list.innerHTML = "";
 
       if (filtered.length === 0) {
         var emptyLi = document.createElement("li");
         emptyLi.className = "candidate-empty";
         emptyLi.textContent = "[No matching command]";
-        list.appendChild(emptyLi);
+        els.list.appendChild(emptyLi);
         return;
       }
 
@@ -449,10 +430,10 @@
           executeSelected();
         });
 
-        list.appendChild(li);
+        els.list.appendChild(li);
       });
 
-      var selectedEl = list.children[selectedIndex];
+      var selectedEl = els.list.children[selectedIndex];
       if (selectedEl && typeof selectedEl.scrollIntoView === "function") {
         selectedEl.scrollIntoView({ block: "nearest" });
       }
@@ -466,190 +447,228 @@
       }
     }
 
-    if (input) {
-      input.addEventListener("input", function () {
-        selectedIndex = 0;
-        renderCandidates();
-      });
+    function setupMinibufferUI() {
+      var els = getElements();
 
-      input.addEventListener("keydown", function (e) {
-        if (e.key === "ArrowDown") {
-          e.preventDefault();
-          if (filtered.length > 0) {
-            selectedIndex = (selectedIndex + 1) % filtered.length;
-            renderCandidates();
+      if (els.closeKeybindingsBtn) {
+        els.closeKeybindingsBtn.onclick = closeKeybindings;
+      }
+
+      if (els.keybindingsModal) {
+        els.keybindingsModal.onclick = function (e) {
+          if (e.target === els.keybindingsModal) closeKeybindings();
+        };
+      }
+
+      if (els.minibuffer) {
+        els.minibuffer.onclick = function (e) {
+          if (e.target === els.minibuffer) closeMinibuffer();
+        };
+      }
+
+      if (els.input) {
+        els.input.oninput = function () {
+          selectedIndex = 0;
+          renderCandidates();
+        };
+
+        els.input.onkeydown = function (e) {
+          if (e.key === "ArrowDown") {
+            e.preventDefault();
+            if (filtered.length > 0) {
+              selectedIndex = (selectedIndex + 1) % filtered.length;
+              renderCandidates();
+            }
+          } else if (e.key === "ArrowUp") {
+            e.preventDefault();
+            if (filtered.length > 0) {
+              selectedIndex = (selectedIndex - 1 + filtered.length) % filtered.length;
+              renderCandidates();
+            }
+          } else if (e.key === "Enter") {
+            e.preventDefault();
+            executeSelected();
+          } else if (e.key === "Escape" || (e.ctrlKey && e.key === "g")) {
+            e.preventDefault();
+            closeMinibuffer();
           }
-        } else if (e.key === "ArrowUp") {
+        };
+      }
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", setupMinibufferUI);
+    } else {
+      setupMinibufferUI();
+    }
+    document.addEventListener("astro:page-load", setupMinibufferUI);
+
+    document.addEventListener("click", function (e) {
+      if (e.target && e.target.closest("#footer-keys-btn")) {
+        openKeybindings();
+      }
+    });
+
+    if (!window.__emacsMinibufferGlobalKeydownRegistered) {
+      window.__emacsMinibufferGlobalKeydownRegistered = true;
+
+      window.addEventListener("keydown", function (e) {
+        var els = getElements();
+
+        if (e.altKey && (e.key === "x" || e.key === "X" || e.code === "KeyX")) {
           e.preventDefault();
-          if (filtered.length > 0) {
-            selectedIndex = (selectedIndex - 1 + filtered.length) % filtered.length;
-            renderCandidates();
+          openMinibuffer();
+          return;
+        }
+
+        if (e.key === "Escape" || (e.ctrlKey && e.key === "g")) {
+          if (els.minibuffer && els.minibuffer.open) {
+            closeMinibuffer();
+            return;
           }
-        } else if (e.key === "Enter") {
+          if (els.keybindingsModal && els.keybindingsModal.open) {
+            closeKeybindings();
+            return;
+          }
+        }
+
+        // DO NOT trigger single-key navigation in inputs or when dialogs are open
+        if (isInputActive()) return;
+        if (els.minibuffer && els.minibuffer.open) return;
+        if (els.keybindingsModal && els.keybindingsModal.open) return;
+
+        var lightboxActive = document.querySelector("#lightbox-modal.active");
+        if (lightboxActive) return;
+
+        if (e.key === "j" && !e.shiftKey && !e.ctrlKey && !e.altKey && !e.metaKey) {
           e.preventDefault();
-          executeSelected();
-        } else if (e.key === "Escape" || (e.ctrlKey && e.key === "g")) {
+          window.scrollBy({ top: 160, behavior: "smooth" });
+          return;
+        }
+
+        if (e.key === "k" && !e.shiftKey && !e.ctrlKey && !e.altKey && !e.metaKey) {
           e.preventDefault();
-          closeMinibuffer();
+          window.scrollBy({ top: -160, behavior: "smooth" });
+          return;
+        }
+
+        // Keybindings cheat sheet
+        if (e.key === "?" && !e.ctrlKey && !e.altKey && !e.metaKey) {
+          e.preventDefault();
+          if (els.keybindingsModal && els.keybindingsModal.open) {
+            closeKeybindings();
+          } else {
+            openKeybindings();
+          }
+          return;
+        }
+
+        // Writings
+        if (
+          e.shiftKey &&
+          (e.key === "W" || e.code === "KeyW") &&
+          !e.ctrlKey &&
+          !e.altKey &&
+          !e.metaKey
+        ) {
+          e.preventDefault();
+          window.location.href = "/writings/";
+          return;
+        }
+
+        // Projects
+        if (
+          e.shiftKey &&
+          (e.key === "P" || e.code === "KeyP") &&
+          !e.ctrlKey &&
+          !e.altKey &&
+          !e.metaKey
+        ) {
+          e.preventDefault();
+          window.location.href = "/projects/";
+          return;
+        }
+
+        // Files
+        if (
+          e.shiftKey &&
+          (e.key === "F" || e.code === "KeyF") &&
+          !e.ctrlKey &&
+          !e.altKey &&
+          !e.metaKey
+        ) {
+          e.preventDefault();
+          window.location.href = "/files/";
+          return;
+        }
+
+        // Cycle Theme
+        if (
+          e.shiftKey &&
+          (e.key === "T" || e.code === "KeyT") &&
+          !e.ctrlKey &&
+          !e.altKey &&
+          !e.metaKey
+        ) {
+          e.preventDefault();
+          var themeBtn = document.getElementById("theme-toggle");
+          if (themeBtn) themeBtn.click();
+          return;
+        }
+
+        // Cycle Font
+        if (
+          e.shiftKey &&
+          (e.key === "B" || e.code === "KeyB") &&
+          !e.ctrlKey &&
+          !e.altKey &&
+          !e.metaKey
+        ) {
+          e.preventDefault();
+          var fonts = [
+            "ibm-plex",
+            "newsreader",
+            "charter",
+            "garamond",
+            "literata",
+            "vollkorn",
+            "lora",
+            "mono",
+          ];
+          var current = localStorage.getItem("font-preference") || "literata";
+          var nextIdx = (fonts.indexOf(current) + 1) % fonts.length;
+          var nextFont = fonts[nextIdx];
+          localStorage.setItem("font-preference", nextFont);
+          document.documentElement.setAttribute("data-font", nextFont);
+          return;
+        }
+
+        // Scroll to bottom
+        if (
+          e.shiftKey &&
+          (e.key === "G" || e.code === "KeyG") &&
+          !e.ctrlKey &&
+          !e.altKey &&
+          !e.metaKey
+        ) {
+          e.preventDefault();
+          window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+          return;
+        }
+
+        // Scroll to top
+        if (e.key === "g" && !e.shiftKey && !e.ctrlKey && !e.altKey && !e.metaKey) {
+          var now = Date.now();
+          if (now - lastGPress < 450) {
+            e.preventDefault();
+            window.scrollTo({ top: 0, behavior: "smooth" });
+            lastGPress = 0;
+          } else {
+            lastGPress = now;
+          }
         }
       });
     }
-
-    document.addEventListener("keydown", function (e) {
-      // M-x / Alt+x trigger
-      if (e.altKey && (e.key === "x" || e.key === "X" || e.code === "KeyX")) {
-        e.preventDefault();
-        openMinibuffer();
-        return;
-      }
-
-      // Dismissing overlays
-      if (e.key === "Escape" || (e.ctrlKey && e.key === "g")) {
-        if (minibuffer && minibuffer.open) {
-          closeMinibuffer();
-          return;
-        }
-        if (keybindingsModal && keybindingsModal.open) {
-          closeKeybindings();
-          return;
-        }
-      }
-
-      // DO NOT trigger single-key navigation in inputs or when dialogs are open!!!
-      if (isInputActive()) return;
-      if (minibuffer && minibuffer.open) return;
-      if (keybindingsModal && keybindingsModal.open) return;
-
-      var lightboxActive = document.querySelector("#lightbox-modal.active");
-      if (lightboxActive) return;
-
-      if (e.key === "j" && !e.shiftKey && !e.ctrlKey && !e.altKey && !e.metaKey) {
-        e.preventDefault();
-        window.scrollBy({ top: 160, behavior: "smooth" });
-        return;
-      }
-
-      if (e.key === "k" && !e.shiftKey && !e.ctrlKey && !e.altKey && !e.metaKey) {
-        e.preventDefault();
-        window.scrollBy({ top: -160, behavior: "smooth" });
-        return;
-      }
-
-      // Keybindings cheat sheet
-      if (e.key === "?" && !e.ctrlKey && !e.altKey && !e.metaKey) {
-        e.preventDefault();
-        if (keybindingsModal && keybindingsModal.open) {
-          closeKeybindings();
-        } else {
-          openKeybindings();
-        }
-        return;
-      }
-
-      // Writings
-      if (
-        e.shiftKey &&
-        (e.key === "W" || e.code === "KeyW") &&
-        !e.ctrlKey &&
-        !e.altKey &&
-        !e.metaKey
-      ) {
-        e.preventDefault();
-        window.location.href = "/writings";
-        return;
-      }
-
-      // Projects
-      if (
-        e.shiftKey &&
-        (e.key === "P" || e.code === "KeyP") &&
-        !e.ctrlKey &&
-        !e.altKey &&
-        !e.metaKey
-      ) {
-        e.preventDefault();
-        window.location.href = "/projects";
-        return;
-      }
-
-      // Files
-      if (
-        e.shiftKey &&
-        (e.key === "F" || e.code === "KeyF") &&
-        !e.ctrlKey &&
-        !e.altKey &&
-        !e.metaKey
-      ) {
-        e.preventDefault();
-        window.location.href = "/files";
-        return;
-      }
-
-      // Toggle / Cycle Theme
-      if (
-        e.shiftKey &&
-        (e.key === "T" || e.code === "KeyT") &&
-        !e.ctrlKey &&
-        !e.altKey &&
-        !e.metaKey
-      ) {
-        e.preventDefault();
-        var themeBtn = document.getElementById("theme-toggle");
-        if (themeBtn) themeBtn.click();
-        return;
-      }
-
-      if (
-        e.shiftKey &&
-        (e.key === "B" || e.code === "KeyB") &&
-        !e.ctrlKey &&
-        !e.altKey &&
-        !e.metaKey
-      ) {
-        e.preventDefault();
-        var fonts = [
-          "ibm-plex",
-          "newsreader",
-          "charter",
-          "garamond",
-          "literata",
-          "vollkorn",
-          "lora",
-          "mono",
-        ];
-        var current = localStorage.getItem("font-preference") || "literata";
-        var nextIdx = (fonts.indexOf(current) + 1) % fonts.length;
-        var nextFont = fonts[nextIdx];
-        localStorage.setItem("font-preference", nextFont);
-        document.documentElement.setAttribute("data-font", nextFont);
-        return;
-      }
-
-      // Scroll to bottom
-      if (
-        e.shiftKey &&
-        (e.key === "G" || e.code === "KeyG") &&
-        !e.ctrlKey &&
-        !e.altKey &&
-        !e.metaKey
-      ) {
-        e.preventDefault();
-        window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
-        return;
-      }
-
-      // Scroll to top
-      if (e.key === "g" && !e.shiftKey && !e.ctrlKey && !e.altKey && !e.metaKey) {
-        var now = Date.now();
-        if (now - lastGPress < 450) {
-          e.preventDefault();
-          window.scrollTo({ top: 0, behavior: "smooth" });
-          lastGPress = 0;
-        } else {
-          lastGPress = now;
-        }
-      }
-    });
   })();
 </script>
 
