@@ -189,18 +189,27 @@ const { album } = Astro.props;
     if (!modal || !modalImg) return;
 
     const links = document.querySelectorAll("[data-lightbox]");
+    const linkArray = Array.from(links);
+    let currentIndex = -1;
 
-    links.forEach((link) => {
+    const showImage = (index: number) => {
+      if (index < 0 || index >= linkArray.length) return;
+      currentIndex = index;
+      const link = linkArray[currentIndex];
+      const src = link.getAttribute("data-lightbox") || "";
+      const title = link.getAttribute("data-title") || "";
+
+      modalImg.src = src;
+      if (modalCaption) modalCaption.textContent = title;
+      modal.classList.add("active");
+      modal.setAttribute("aria-hidden", "false");
+      document.body.style.overflow = "hidden";
+    };
+
+    linkArray.forEach((link, idx) => {
       link.addEventListener("click", (e) => {
         e.preventDefault();
-        const src = link.getAttribute("data-lightbox") || "";
-        const title = link.getAttribute("data-title") || "";
-
-        modalImg.src = src;
-        if (modalCaption) modalCaption.textContent = title;
-        modal.classList.add("active");
-        modal.setAttribute("aria-hidden", "false");
-        document.body.style.overflow = "hidden";
+        showImage(idx);
       });
     });
 
@@ -209,6 +218,7 @@ const { album } = Astro.props;
       modal.setAttribute("aria-hidden", "true");
       modalImg.src = "";
       document.body.style.overflow = "";
+      currentIndex = -1;
     };
 
     closeBtn?.addEventListener("click", closeModal);
@@ -228,8 +238,30 @@ const { album } = Astro.props;
     });
 
     window.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && modal.classList.contains("active")) {
+      if (!modal.classList.contains("active")) return;
+
+      if (e.key === "Escape") {
         closeModal();
+      } else if (
+        (e.key === "j" || e.key === "ArrowRight" || e.key === "ArrowDown") &&
+        !e.ctrlKey &&
+        !e.altKey &&
+        !e.metaKey
+      ) {
+        if (currentIndex < linkArray.length - 1) {
+          e.preventDefault();
+          showImage(currentIndex + 1);
+        }
+      } else if (
+        (e.key === "k" || e.key === "ArrowLeft" || e.key === "ArrowUp") &&
+        !e.ctrlKey &&
+        !e.altKey &&
+        !e.metaKey
+      ) {
+        if (currentIndex > 0) {
+          e.preventDefault();
+          showImage(currentIndex - 1);
+        }
       }
     });
   }

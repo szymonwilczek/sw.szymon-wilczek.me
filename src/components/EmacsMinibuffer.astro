@@ -62,24 +62,23 @@
           </tr>
           <tr>
             <td><kbd>Shift + T</kbd></td>
-            <td>
-              Cycle color theme (<code>ef-autumn</code> / <code>ef-day</code>)
-            </td>
+            <td>Cycle color theme</td>
           </tr>
           <tr>
             <td><kbd>Shift + B</kbd></td>
-            <td>
-              Cycle serif font (<code>IBM Plex</code>, <code>Newsreader</code>, <code>Charter</code
-              >...)
-            </td>
+            <td>Cycle serif font</td>
+          </tr>
+          <tr>
+            <td><kbd>j</kbd> / <kbd>k</kbd></td>
+            <td>Scroll down / up</td>
           </tr>
           <tr>
             <td><kbd>g</kbd> <kbd>g</kbd></td>
-            <td>Scroll smoothly to top of page</td>
+            <td>Scroll to the top of page</td>
           </tr>
           <tr>
             <td><kbd>Shift + G</kbd></td>
-            <td>Scroll smoothly to bottom of page</td>
+            <td>Scroll to the bottom of page</td>
           </tr>
           <tr>
             <td><kbd>?</kbd></td>
@@ -320,8 +319,19 @@
     function isInputActive() {
       var el = document.activeElement;
       if (!el) return false;
-      var tag = el.tagName.toLowerCase();
-      return tag === "input" || tag === "textarea" || tag === "select" || el.isContentEditable;
+      var tag = el.tagName ? el.tagName.toLowerCase() : "";
+      if (tag === "input" || tag === "textarea" || tag === "select" || el.isContentEditable) {
+        return true;
+      }
+      if (
+        el.closest &&
+        el.closest(
+          "input, textarea, select, [contenteditable='true'], .minibuffer-input, .search-filter-input, #vault-passphrase-input",
+        )
+      ) {
+        return true;
+      }
+      return false;
     }
 
     function openMinibuffer() {
@@ -505,8 +515,25 @@
         }
       }
 
-      // DO NOT trigger single-key navigation in inputs!!!!
+      // DO NOT trigger single-key navigation in inputs or when dialogs are open!!!
       if (isInputActive()) return;
+      if (minibuffer && minibuffer.open) return;
+      if (keybindingsModal && keybindingsModal.open) return;
+
+      var lightboxActive = document.querySelector("#lightbox-modal.active");
+      if (lightboxActive) return;
+
+      if (e.key === "j" && !e.shiftKey && !e.ctrlKey && !e.altKey && !e.metaKey) {
+        e.preventDefault();
+        window.scrollBy({ top: 160, behavior: "smooth" });
+        return;
+      }
+
+      if (e.key === "k" && !e.shiftKey && !e.ctrlKey && !e.altKey && !e.metaKey) {
+        e.preventDefault();
+        window.scrollBy({ top: -160, behavior: "smooth" });
+        return;
+      }
 
       // Keybindings cheat sheet
       if (e.key === "?" && !e.ctrlKey && !e.altKey && !e.metaKey) {
