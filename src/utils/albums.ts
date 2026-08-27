@@ -9,6 +9,7 @@ export interface PhotoItem {
   id: string;
   filename: string;
   src: string;
+  thumbSrc: string;
   sizeBytes: number;
   sizeFormatted: string;
   sha256: string;
@@ -39,6 +40,7 @@ export interface PhotoAlbum {
   date: Date;
   dateFormatted: string;
   coverImage: string;
+  coverThumb: string;
   photoCount: number;
   totalSizeBytes: number;
   totalSizeFormatted: string;
@@ -93,7 +95,9 @@ export async function getAllAlbums(): Promise<PhotoAlbum[]> {
   }
 
   const entries = fs.readdirSync(imagesDir, { withFileTypes: true });
-  const albumDirs = entries.filter((e) => e.isDirectory() && !e.name.startsWith("."));
+  const albumDirs = entries.filter(
+    (e) => e.isDirectory() && e.name !== "thumbs" && !e.name.startsWith("."),
+  );
 
   const albums: PhotoAlbum[] = [];
 
@@ -102,9 +106,7 @@ export async function getAllAlbums(): Promise<PhotoAlbum[]> {
     const albumPath = path.join(imagesDir, folderName);
     const folderFiles = fs.readdirSync(albumPath);
 
-    const imageFiles = folderFiles.filter(
-      (f) => /\.(jpe?g|png|webp|avif)$/i.test(f) && !f.startsWith(".")
-    );
+    const imageFiles = folderFiles.filter((f) => /\.(jpe?g|png)$/i.test(f) && !f.startsWith("."));
 
     if (imageFiles.length === 0) continue;
 
@@ -142,7 +144,7 @@ export async function getAllAlbums(): Promise<PhotoAlbum[]> {
       (f) =>
         f.endsWith(".org") &&
         !f.startsWith(".") &&
-        !imageFiles.some((img) => img.startsWith(path.parse(f).name))
+        !imageFiles.some((img) => img.startsWith(path.parse(f).name)),
     );
 
     if (orgFile) {
@@ -172,7 +174,7 @@ export async function getAllAlbums(): Promise<PhotoAlbum[]> {
         const generalOrg = orgRaw
           .replace(
             /(?:^|\n)\*\s+(?:Photo Notes|Field Notes|Photo Comments|Captions)[\s\S]*?(?=(?:\n\*\s+[^\*])|$)/i,
-            ""
+            "",
           )
           .trim();
         if (generalOrg) {
@@ -310,11 +312,16 @@ export async function getAllAlbums(): Promise<PhotoAlbum[]> {
 
       const photoId = path.parse(file).name;
       const note = photoNotes[photoId] || photoNotes[file];
+      const thumbFsPath = path.join(albumPath, "thumbs", `${photoId}.webp`);
+      const thumbSrc = fs.existsSync(thumbFsPath)
+        ? `/images/${folderName}/thumbs/${photoId}.webp`
+        : `/images/${folderName}/${file}`;
 
       photos.push({
         id: photoId,
         filename: file,
         src: `/images/${folderName}/${file}`,
+        thumbSrc,
         sizeBytes,
         sizeFormatted: formatBytes(sizeBytes),
         sha256,
@@ -343,7 +350,21 @@ export async function getAllAlbums(): Promise<PhotoAlbum[]> {
 
     const coverImage = albumMetadata.cover
       ? `/images/${folderName}/${albumMetadata.cover}`
-      : photos[0].src;
+      : photos.length > 0
+        ? photos[0].src
+        : "";
+    const coverPhotoId = albumMetadata.cover
+      ? path.parse(albumMetadata.cover).name
+      : photos.length > 0
+        ? photos[0].id
+        : "";
+    const coverThumbFsPath = coverPhotoId
+      ? path.join(albumPath, "thumbs", `${coverPhotoId}.webp`)
+      : "";
+    const coverThumb =
+      coverThumbFsPath && fs.existsSync(coverThumbFsPath)
+        ? `/images/${folderName}/thumbs/${coverPhotoId}.webp`
+        : coverImage;
 
     albums.push({
       id: folderName,
@@ -354,6 +375,7 @@ export async function getAllAlbums(): Promise<PhotoAlbum[]> {
       date: earliestDate,
       dateFormatted,
       coverImage,
+      coverThumb,
       photoCount: photos.length,
       totalSizeBytes,
       totalSizeFormatted: formatBytes(totalSizeBytes),

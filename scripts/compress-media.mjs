@@ -41,6 +41,46 @@ function renderProgressBar(usedBytes, totalBytes, length = 36) {
   return `[${bar}] ${formatBytes(usedBytes)} / ${formatBytes(totalBytes)} (${percent.toFixed(1)}%)`;
 }
 
+async function generateThumbnail(filePath, force = false) {
+  const dir = path.dirname(filePath);
+  const ext = path.extname(filePath);
+  const base = path.basename(filePath, ext);
+  const thumbsDir = path.join(dir, "thumbs");
+
+  if (!fs.existsSync(thumbsDir)) {
+    fs.mkdirSync(thumbsDir, { recursive: true });
+  }
+
+  const thumbPath = path.join(thumbsDir, `${base}.webp`);
+  const origStat = fs.statSync(filePath);
+
+  if (!force && fs.existsSync(thumbPath)) {
+    const thumbStat = fs.statSync(thumbPath);
+    if (thumbStat.mtimeMs >= origStat.mtimeMs && thumbStat.size > 0) {
+      return { skipped: true, size: thumbStat.size };
+    }
+  }
+
+  const buffer = fs.readFileSync(filePath);
+  const thumbBuffer = await sharp(buffer)
+    .rotate()
+    .resize({
+      width: 1200,
+      height: 1200,
+      fit: "inside",
+      withoutEnlargement: true,
+    })
+    .toColorspace("srgb")
+    .webp({
+      quality: 82,
+      effort: 4,
+    })
+    .toBuffer();
+
+  fs.writeFileSync(thumbPath, thumbBuffer);
+  return { skipped: false, size: thumbBuffer.length };
+}
+
 async function compressImageFile(filePath, force = false) {
   const stat = fs.statSync(filePath);
   const buffer = fs.readFileSync(filePath);
@@ -49,37 +89,44 @@ async function compressImageFile(filePath, force = false) {
   const isWide = (meta.width || 0) > MAX_DIMENSION || (meta.height || 0) > MAX_DIMENSION;
   const isHeavy = stat.size > 2.0 * 1024 * 1024; // > 2.0MB
 
-  if (!force && !isWide && !isHeavy && meta.format === "jpeg") {
-    return { skipped: true, oldSize: stat.size, newSize: stat.size };
+  let compressed = false;
+  let newMasterSize = stat.size;
+
+  if (force || isWide || isHeavy || meta.format !== "jpeg") {
+    const optimizedBuffer = await sharp(buffer)
+      .rotate() // auto-orient from EXIF
+      .resize({
+        width: MAX_DIMENSION,
+        height: MAX_DIMENSION,
+        fit: "inside",
+        withoutEnlargement: true,
+      })
+      .toColorspace("srgb")
+      .jpeg({
+        quality: JPEG_QUALITY,
+        mozjpeg: true,
+        trellisQuantisation: true,
+        overshootDeringing: true,
+        optimiseScans: true,
+        quantisationTable: 3,
+        chromaSubsampling: "4:2:0",
+      })
+      .withMetadata()
+      .toBuffer();
+
+    fs.writeFileSync(filePath, optimizedBuffer);
+    compressed = true;
+    newMasterSize = optimizedBuffer.length;
   }
 
-  const optimizedBuffer = await sharp(buffer)
-    .rotate() // auto-orient from EXIF
-    .resize({
-      width: MAX_DIMENSION,
-      height: MAX_DIMENSION,
-      fit: "inside",
-      withoutEnlargement: true,
-    })
-    .toColorspace("srgb")
-    .jpeg({
-      quality: JPEG_QUALITY,
-      mozjpeg: true,
-      trellisQuantisation: true,
-      overshootDeringing: true,
-      optimiseScans: true,
-      quantisationTable: 3,
-      chromaSubsampling: "4:2:0",
-    })
-    .withMetadata()
-    .toBuffer();
-
-  fs.writeFileSync(filePath, optimizedBuffer);
+  const thumbRes = await generateThumbnail(filePath, force);
 
   return {
-    skipped: false,
+    skipped: !compressed && thumbRes.skipped,
     oldSize: stat.size,
-    newSize: optimizedBuffer.length,
+    newSize: newMasterSize,
+    thumbSize: thumbRes.size,
+    thumbCreated: !thumbRes.skipped,
     oldDims: `${meta.width}x${meta.height}`,
     newDims: `${Math.min(meta.width || 0, MAX_DIMENSION)}x${Math.min(meta.height || 0, MAX_DIMENSION)}`,
   };
@@ -103,8 +150,9 @@ async function main() {
       const walk = (d) => {
         for (const e of fs.readdirSync(d, { withFileTypes: true })) {
           const full = path.join(d, e.name);
-          if (e.isDirectory()) walk(full);
-          else if (/\.(jpe?g|png)$/i.test(e.name)) filesToProcess.push(full);
+          if (e.isDirectory() && e.name !== "thumbs" && !e.name.startsWith(".")) walk(full);
+          else if (/\.(jpe?g|png)$/i.test(e.name) && !e.name.startsWith("."))
+            filesToProcess.push(full);
         }
       };
       walk(targetPath);
@@ -116,7 +164,7 @@ async function main() {
       const walk = (d) => {
         for (const e of fs.readdirSync(d, { withFileTypes: true })) {
           const full = path.join(d, e.name);
-          if (e.isDirectory() && !e.name.startsWith(".")) walk(full);
+          if (e.isDirectory() && e.name !== "thumbs" && !e.name.startsWith(".")) walk(full);
           else if (/\.(jpe?g|png)$/i.test(e.name) && !e.name.startsWith("."))
             filesToProcess.push(full);
         }

@@ -5,6 +5,7 @@ import sitemap from "@astrojs/sitemap";
 export default defineConfig({
   site: "https://sw.szymon-wilczek.me",
   output: "static",
+  trailingSlash: "always",
   compressHTML: true,
   prefetch: {
     prefetchAll: true,

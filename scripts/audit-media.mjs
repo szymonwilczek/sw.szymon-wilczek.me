@@ -50,15 +50,19 @@ async function main() {
 
   const albums = fs
     .readdirSync(imagesBaseDir, { withFileTypes: true })
-    .filter((d) => d.isDirectory() && !d.name.startsWith("."))
+    .filter((d) => d.isDirectory() && d.name !== "thumbs" && !d.name.startsWith("."))
     .map((d) => d.name);
 
-  console.log(`Standard: Max ${MAX_RECOMMENDED_DIMENSION}px (2.5K)\nTarget size < 2.0MB per photo`);
+  console.log(
+    `Standard: Max ${MAX_RECOMMENDED_DIMENSION}px (2.5K)\nTarget size < 2.0MB per photo\nWebP Thumbnails in thumbs/`,
+  );
 
   let totalPhotos = 0;
   let totalOptimized = 0;
   let totalNeedsOptimization = 0;
   let totalMediaBytes = 0;
+  let totalThumbBytes = 0;
+  let missingThumbCount = 0;
 
   const unoptimizedList = [];
   const albumBreakdown = [];
@@ -71,14 +75,26 @@ async function main() {
 
     let albumBytes = 0;
     let albumUnoptimizedCount = 0;
+    let albumMissingThumbs = 0;
 
     for (const file of files) {
       totalPhotos++;
       const filePath = path.join(albumPath, file);
+      const ext = path.extname(file);
+      const base = path.basename(file, ext);
+      const thumbPath = path.join(albumPath, "thumbs", `${base}.webp`);
+
       const stat = fs.statSync(filePath);
       const buffer = fs.readFileSync(filePath);
       albumBytes += stat.size;
       totalMediaBytes += stat.size;
+
+      if (fs.existsSync(thumbPath)) {
+        totalThumbBytes += fs.statSync(thumbPath).size;
+      } else {
+        missingThumbCount++;
+        albumMissingThumbs++;
+      }
 
       try {
         const meta = await sharp(buffer).metadata();
@@ -87,21 +103,21 @@ async function main() {
           (meta.height || 0) > MAX_RECOMMENDED_DIMENSION;
         const isTooHeavy = stat.size > MAX_RECOMMENDED_SIZE_BYTES;
 
-        if (isTooWide || isTooHeavy) {
+        if (isTooWide || isTooHeavy || !fs.existsSync(thumbPath)) {
           totalNeedsOptimization++;
           albumUnoptimizedCount++;
+          const reasons = [];
+          if (isTooWide) reasons.push("Resolution > 2.5K");
+          if (isTooHeavy) reasons.push("Size > 2MB");
+          if (!fs.existsSync(thumbPath)) reasons.push("Missing WebP Thumbnail");
+
           unoptimizedList.push({
             album,
             file,
             relPath: path.relative(process.cwd(), filePath),
             dims: `${meta.width}x${meta.height}`,
             size: formatBytes(stat.size),
-            reason:
-              isTooWide && isTooHeavy
-                ? "Resolution & Size"
-                : isTooWide
-                  ? "Resolution > 2.5K"
-                  : "Size > 2MB",
+            reason: reasons.join(", "),
           });
         } else {
           totalOptimized++;
@@ -116,6 +132,7 @@ async function main() {
       photoCount: files.length,
       sizeFormatted: formatBytes(albumBytes),
       unoptimizedCount: albumUnoptimizedCount,
+      missingThumbs: albumMissingThumbs,
     });
   }
 
