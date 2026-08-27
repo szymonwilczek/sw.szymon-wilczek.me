@@ -196,7 +196,7 @@ function rehypeShikiHighlight(highlighter: any) {
           const className = codeNode.properties?.className || [];
           const classList = Array.isArray(className) ? className : [className];
           const langClass = classList.find(
-            (c: string) => typeof c === "string" && c.startsWith("language-")
+            (c: string) => typeof c === "string" && c.startsWith("language-"),
           );
           let lang = langClass ? langClass.replace("language-", "").toLowerCase() : "text";
 
@@ -268,7 +268,7 @@ function rehypeOrgEnhancements() {
                 : [child.properties.className];
               if (
                 classes.some(
-                  (c: string) => c.includes("todo-keyword") || c === "TODO" || c === "DONE"
+                  (c: string) => c.includes("todo-keyword") || c === "TODO" || c === "DONE",
                 )
               ) {
                 child.properties.className = ["todo-badge", ...classes];
@@ -282,7 +282,7 @@ function rehypeOrgEnhancements() {
           const first = node.children[0];
           if (first.type === "text") {
             const match = first.value.match(
-              /^(WAITING|NEXT|HOLD|CANCELLED|TODO|DONE)\s+(\[#[A-Z]\]\s+)?(.*)$/
+              /^(WAITING|NEXT|HOLD|CANCELLED|TODO|DONE)\s+(\[#[A-Z]\]\s+)?(.*)$/,
             );
             if (match) {
               const state = match[1];
@@ -343,7 +343,7 @@ function rehypeOrgEnhancements() {
                   type: "checkbox",
                   disabled: true,
                   className: ["org-checkbox", isIndeterminate ? "is-indeterminate" : ""].filter(
-                    Boolean
+                    Boolean,
                   ),
                 },
                 children: [],

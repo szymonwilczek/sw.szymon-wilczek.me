@@ -21,7 +21,7 @@ export async function GET(context: APIContext) {
   }));
 
   const allItems = [...projectItems, ...writingItems].sort(
-    (a, b) => b.pubDate.valueOf() - a.pubDate.valueOf()
+    (a, b) => b.pubDate.valueOf() - a.pubDate.valueOf(),
   );
 
   return rss({

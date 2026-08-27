@@ -8,7 +8,7 @@ import type { GetStaticPathsOptions, Page } from "astro";
 
 export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
   const files = (await getCollection("files")).sort(
-    (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
+    (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
   );
   return paginate(files, { pageSize: 10 });
 }
@@ -239,7 +239,7 @@ const prevUrl = page.currentPage === 2 ? "/files" : page.url.prev;
             enc.encode(passphrase),
             "PBKDF2",
             false,
-            ["deriveKey"]
+            ["deriveKey"],
           );
 
           var key = await window.crypto.subtle.deriveKey(
@@ -252,13 +252,13 @@ const prevUrl = page.currentPage === 2 ? "/files" : page.url.prev;
             keyMaterial,
             { name: "AES-GCM", length: 256 },
             false,
-            ["decrypt"]
+            ["decrypt"],
           );
 
           var decrypted = await window.crypto.subtle.decrypt(
             { name: "AES-GCM", iv: iv },
             key,
-            encryptedData
+            encryptedData,
           );
 
           var blob = new Blob([decrypted], {

@@ -7,7 +7,7 @@ import Pagination from "../../components/Pagination.astro";
 
 const PAGE_SIZE = 10;
 const allFiles = (await getCollection("files")).sort(
-  (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
 );
 
 const totalPages = Math.ceil(allFiles.length / PAGE_SIZE);
@@ -230,7 +230,7 @@ const files = allFiles.slice(0, PAGE_SIZE);
             enc.encode(passphrase),
             "PBKDF2",
             false,
-            ["deriveKey"]
+            ["deriveKey"],
           );
 
           var key = await window.crypto.subtle.deriveKey(
@@ -243,13 +243,13 @@ const files = allFiles.slice(0, PAGE_SIZE);
             keyMaterial,
             { name: "AES-GCM", length: 256 },
             false,
-            ["decrypt"]
+            ["decrypt"],
           );
 
           var decrypted = await window.crypto.subtle.decrypt(
             { name: "AES-GCM", iv: iv },
             key,
-            encryptedData
+            encryptedData,
           );
 
           var blob = new Blob([decrypted], {

@@ -79,7 +79,7 @@ const isBinaryFile = Boolean(encryptedUrl);
         enc.encode(passphrase),
         "PBKDF2",
         false,
-        ["deriveKey"]
+        ["deriveKey"],
       );
 
       return await window.crypto.subtle.deriveKey(
@@ -92,7 +92,7 @@ const isBinaryFile = Boolean(encryptedUrl);
         keyMaterial,
         { name: "AES-GCM", length: 256 },
         false,
-        ["decrypt"]
+        ["decrypt"],
       );
     }
 
@@ -133,7 +133,7 @@ const isBinaryFile = Boolean(encryptedUrl);
           decryptedBytes = await window.crypto.subtle.decrypt(
             { name: "AES-GCM", iv: iv },
             key,
-            encryptedData
+            encryptedData,
           );
 
           var blob = new Blob([decryptedBytes], { type: "application/octet-stream" });
@@ -165,7 +165,7 @@ const isBinaryFile = Boolean(encryptedUrl);
           decryptedBytes = await window.crypto.subtle.decrypt(
             { name: "AES-GCM", iv: iv },
             key,
-            ciphertext
+            ciphertext,
           );
 
           var dec = new TextDecoder();

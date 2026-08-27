@@ -5,7 +5,7 @@ export default {
   singleQuote: false,
   tabWidth: 2,
   useTabs: false,
-  trailingComma: "es5",
+  trailingComma: "all",
   printWidth: 100,
   bracketSameLine: false,
   overrides: [

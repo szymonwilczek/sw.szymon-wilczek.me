@@ -207,7 +207,7 @@ if (command === "vault") {
 
     fs.writeFileSync(
       path.join(filesContentDir, `${slug}.json`),
-      JSON.stringify(docData, null, 2) + "\n"
+      JSON.stringify(docData, null, 2) + "\n",
     );
     console.log(`\nEncrypted file archive saved!`);
     console.log(`  Encrypted binary: public/downloads/${encFilename}`);
@@ -230,7 +230,7 @@ if (command === "vault") {
 
     fs.writeFileSync(
       path.join(filesContentDir, `${slug}.json`),
-      JSON.stringify(docData, null, 2) + "\n"
+      JSON.stringify(docData, null, 2) + "\n",
     );
     console.log(`\nPublic file archive saved!`);
     console.log(`  Binary copy: public/downloads/${filename}`);

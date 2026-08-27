@@ -8,7 +8,7 @@ import { getCollection } from "astro:content";
 
 const PAGE_SIZE = 10;
 const allVaultItems = (await getCollection("vault")).sort(
-  (a, b) => (b.data.date?.valueOf() || 0) - (a.data.date?.valueOf() || 0)
+  (a, b) => (b.data.date?.valueOf() || 0) - (a.data.date?.valueOf() || 0),
 );
 
 const totalPages = Math.ceil(allVaultItems.length / PAGE_SIZE);

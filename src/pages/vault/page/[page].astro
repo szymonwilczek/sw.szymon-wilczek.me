@@ -9,7 +9,7 @@ import type { GetStaticPathsOptions, Page } from "astro";
 
 export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
   const vaultItems = (await getCollection("vault")).sort(
-    (a, b) => (b.data.date?.valueOf() || 0) - (a.data.date?.valueOf() || 0)
+    (a, b) => (b.data.date?.valueOf() || 0) - (a.data.date?.valueOf() || 0),
   );
   return paginate(vaultItems, { pageSize: 10 });
 }
