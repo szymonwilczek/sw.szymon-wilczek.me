@@ -212,7 +212,8 @@ Since I also appreciate the speed of /Lazygit/, I ported my favorite operations 
 ** Enforcing GPG Signing and Signoffs
 I refuse to manually check signing boxes in transient menus. By inspecting Magit's internal transient structures, I inject signing flags directly into the commit prefix.
 
-Every single commit is cryptographically signed with my hardware key and stamped with a =Signed-off-by= trailer automatically.
+Every single commit is cryptographically signed with my hardware key and stamped with a \\
+=Signed-off-by= trailer automatically.
 
 ** Single-Key Co-Author Attribution
 Pairing with colleagues or AI agents (not you Claude, you will continue to add yourself as Co-author anyway) usually means typing out tedious =Co-authored-by: Name <email>= trailers by hand. I bound =my/magit-add-co-author= to =W= in Magit log buffers:
@@ -248,7 +249,8 @@ The function scrapes the repository's commit history for all past contributors, 
 
 Have you ever installed a 500-line formatting package only to watch your cursor jump to line 1 and your viewport glitch violently every time you save a buffer?
 
-Instead of bringing in heavy external dependencies, I wrote =my/format-buffer-with-command=. It executes CLI formatters (Prettier, clang-format, gofmt) directly through =call-process-region=:
+Instead of bringing in heavy external dependencies, I wrote =my/format-buffer-with-command=. \\
+It executes CLI formatters (Prettier, clang-format, gofmt) directly through =call-process-region=:
 1. Caches exact =point= and =window-start= positions.
 2. Streams buffer contents through the external binary.
 3. On exit code 0, replaces buffer contents and restores view coordinates instantly.
@@ -296,9 +298,10 @@ Feel free to use it if you also stumbled upon the same problems as I did.
 Once you stop treating Emacs as an underperforming IDE for heavy systems programming and treat it as a personal computing substrate, it becomes completely irreplaceable.
 
 ** 1. Academic Sanity: plan-polsl.el
-I study computer science at the Silesian University of Technology. Navigating university web portals in 2026 just to find out which lab room I need to run to is an exercise in psychological endurance. MAYBE if this website worked, was intuitive or something, then it would be okay. In the meantime, I DARE *YOU* to try to navigate on [[https://plan.polsl.pl][it]].
+I study computer science at the Silesian University of Technology. Navigating university web portals in 2026 just to find out which lab room I need to run to is an exercise in psychological endurance. MAYBE if this website worked, was intuitive or something, then it would be okay. \\
+In the meantime, I DARE *YOU* to try to navigate on [[https://plan.polsl.pl][it]].
 
-I wrote [[https://github.com/szymonwilczek/plan-polsl.el][plan-polsl.el]], which hits the university schedule API directly, normalizes course data, and generates a structured =plan-polsl.org= file. Plugged into =org-agenda=, it renders my entire week on an 8:00–20:00 grid with Polish day names and a live time marker.
+I wrote [[https://github.com/szymonwilczek/plan-polsl.el][plan-polsl.el]], which hits the university schedule API directly, normalizes course data, and generates a structured =plan-polsl.org= file. Plugged into =org-agenda=, it renders my entire week on an 8:00-20:00 grid with Polish day names and a live time marker.
 
 ** 2. Org-Mode and Real-Time Vector LaTeX
 Markdown is fine for README files. For academic papers and technical prose, Org-mode is on another planet. Nothing more to add here from me.
