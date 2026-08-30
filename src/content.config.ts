@@ -1,16 +1,43 @@
 import { defineCollection, z } from "astro:content";
 import { orgContentLoader } from "./utils/org-loader";
 
-// Helper for parsing Org-mode dates with angle brackets <2026-03-15> or standard strings
-const flexibleDate = z.preprocess((arg) => {
+// Helper for parsing Org-mode dates:
+// With angle brackets <2026-03-15 Thu>,
+// Brackets [2026-03-15],
+// Or standard ISO strings
+const parseFlexibleDate = (arg: unknown): Date | undefined => {
+  if (arg === undefined || arg === null || arg === "") return undefined;
+  if (arg instanceof Date) return isNaN(arg.getTime()) ? undefined : arg;
   if (typeof arg === "string") {
-    const cleaned = arg.replace(/[<>[\]]/g, "").trim();
+    const trimmed = arg.trim();
+    if (!trimmed) return undefined;
+    const cleaned = trimmed.replace(/^[<\[]+|[>\]]+$/g, "").trim();
+
+    const orgMatch = cleaned.match(
+      /^(\d{4}[-/]\d{1,2}[-/]\d{1,2})(?:\s+[A-Za-z]+)?(?:\s+(\d{1,2}:\d{2}(?::\d{2})?))?/,
+    );
+    if (orgMatch) {
+      const datePart = orgMatch[1].replace(/\//g, "-");
+      const [year, month, day] = datePart.split("-");
+      const formattedDate = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+      if (orgMatch[2]) {
+        const timePart = orgMatch[2];
+        const timeStr = timePart.length === 5 ? `${timePart}:00` : timePart;
+        const d = new Date(`${formattedDate}T${timeStr}Z`);
+        if (!isNaN(d.getTime())) return d;
+      } else {
+        const d = new Date(`${formattedDate}T00:00:00.000Z`);
+        if (!isNaN(d.getTime())) return d;
+      }
+    }
+
     const d = new Date(cleaned);
     if (!isNaN(d.getTime())) return d;
   }
-  if (arg instanceof Date) return arg;
-  return new Date();
-}, z.date());
+  return undefined;
+};
+
+const flexibleDate = z.preprocess((arg) => parseFlexibleDate(arg), z.date());
 
 // Helper for parsing Org-mode tags:
 // supports JSON arrays, space/comma separated strings, and :tag:format:
