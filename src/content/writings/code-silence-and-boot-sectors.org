@@ -1,0 +1,138 @@
+#+TITLE: The Sins of Low-Level Bootstrapping
+#+AUTHOR: Szymon Wilczek
+#+DATE: <2026-08-29 Sat>
+#+CATEGORY: YouTube
+#+TAGS: assembly linux youtube
+#+DESCRIPTION: On starting a no-talking programming channel and building an 8-part Linux bootloader in complete silence.
+
+* The Algorithmic Hysteria of Tech YouTube
+:PROPERTIES:
+:CUSTOM_ID: algorithmic-hysteria
+:END:
+
+Like every proper article, this will also begin with my thesis: \\
+*Technical YouTube has become genuinely exhausting to watch.*
+
+Almost everything pushed by the algorithm today feels either centered on artificial intelligence or noticeably written by it. It’s hard to shake the feeling that most content has devolved into recycled documentation and synthetic scripts, packaged into high-energy videos designed to chase engagement metrics rather than teach actual engineering. Take a look at most technical channels. They mostly just summarize /what is new in AI this week/. One creator will actually DO some research, the rest are just copycats, uploading and reuploading the same stuff over and over again, so I can see the same video multiple times - just from different accounts.
+
+I just couldn't see myself in that ecosystem. For me, programming has never been about frantic pacing or chasing whatever framework or LLM wrapper came out this morning. \\
+Non-technical people believe the AI will come to replace us - /the programmers/, the ancient coders that write the code by their hand, watching us like people watch small dogs, thinking: /Awww... it's cute... Look! He's doing the trick!/ \\
+
+The trick - my fellow readers - is being quiet when that person is speaking.
+
+Real software development - at least the kind that keeps me at the keyboard - is quiet, stubborn, and deeply, intimately personal. It's about sitting alone with a problem until the abstractions melt away and you're dealing directly with it yourself. \\
+It is DEEP, and if anyone disagrees about that - well, we've got ourselves a viber!
+
+#+begin_quote
+This is essentially what a program was, a love letter from the programmer to the hardware, full of the intimate details known only to partners in an affair.
+~ Michael Marcotty
+#+end_quote
+
+That quote captures why I fell in love with computing in the first place. Ellen Ullman put it equally well in [[https://www.themarginalian.org/2012/07/26/close-to-the-machine-ellen-ullman/][Close to the Machine]] - there’s something almost intimate about stripping away the noise and confronting the raw mechanics of the magical hardware.
+
+So when I decided to start sharing my work on YouTube, I chose a ~No Talking~ format. \\
+No commentary, no camera pointed at my face, no sponsor plugs. Just a dark buffer, audio, and the code being written *by hand* (/aaand... scene!/).
+
+* The First Project: Building MiniBoot
+:PROPERTIES:
+:CUSTOM_ID: building-miniboot
+:END:
+
+For my first project, I knew I didn't want to build something that I've already seen before (that would be kind of hypocritical, right?). I wanted something that forced me to touch bare metal and to show that I understand how a computer actually wakes up from dead silicon.
+
+That curiosity turned into MiniBoot: a two-stage x86 bootloader written in assembly, capable of loading a 64-bit Linux kernel into BusyBox userspace.
+
+The project grew into an eight-part series, where each episode tackled a specific hurdle of the PC architecture:
+
+1. [[https://www.youtube.com/watch?v=BS-IOpHpvyU][Stage 1 (MBR)]]: Setting up segments, writing BIOS TTY print routines, and squeezing the boot signature into the unforgiving 512-byte limit.
+
+2. [[https://youtu.be/7TT6he72WCI][Stage 2 Loader and BIOS Disk I/O]]: Loading subsequent sectors from the drive and executing a far jump to hand over control.
+
+3. [[https://youtu.be/3C1JJJrkPZs][Text-Mode UI Engine]]: Querying the RTC timer to seed a pseudo-random generator, cycling status slogans directly in VGA text memory.
+
+4. [[https://youtu.be/NmRHWWEs_1A][A20 Gate]]: Wrestling with ancient PC quirks to enable the A20 line and bypass the 1 MB real-mode memory wrap-around.
+
+5. [[https://youtu.be/tTp4Xd5x2JY][Unreal Mode]]: Briefly entering Protected Mode to stretch the segment limits to 4 GB.
+
+6. [[https://youtu.be/3PfisHAM4is][32-Bit EDD Disk Driver]]: Using EDD packets to stream multi-megabyte payloads off disk without being held back by CHS limits.
+
+7. [[https://youtu.be/Gcfy00WT9Ho][Decoding the bzImage]]: Parsing kernel setup headers, validating the =HdrS= signature, configuring heap pointers, and passing command-line parameters.
+
+8. [[https://youtu.be/pvLNE2GlRuk][The Leap to Linux]]: Relocating the 32-bit payload, positioning the initramfs, clearing the IDTR, and jumping straight into the kernel entry point.
+
+If you - just like me - like everything in one place, then you're in good hands. I've also made [[https://www.youtube.com/playlist?list=PLVuQCPKH0CEc][a playlist]]. Or maybe do you want *really* everything in one place? Sure, no problem, if also made a [[https://youtu.be/UAl9zcX3CGA][complete video]].
+
+* Real-World Friction
+:PROPERTIES:
+:CUSTOM_ID: real-world-friction
+:END:
+
+Recording in complete silence sounds peaceful in theory. In practice, it was a nightmare. \\
+*Disclaimer:* writing the code in complete silence is delightful, but recording THE complete silence is what I'm talking about.
+
+When you don't have a voiceover or background music to hide behind, you quickly realize just how loud the world is. I never really thought about it. Recording in the summer meant battling crickets outside my window. I lost count of how many hours I spent staring at audio spectrograms, hunting down and notching out the exact high frequencies where crickets were chirping - all while trying not to ruin the natural, tactile sound of the keyboard switches. \\
+To prove that I'm not an anti-AI guy (which I'm not), I actually gave it a shot. \\
+The Antigravity CLI completely blew me away, practically forcing me to stand up and applaud. Really. It was that GOOD. Of course the prompt to clear something from an audio track WAS technologically deep, not just this:
+
+#+begin_quote
+Clear the crickets mister. Thanks!
+#+end_quote
+
+I have not tried that. I do not know what kind of output it will give me. I first jumped into Audacity, ran a quick spectrogram analysis, and learned that these f*ckin crickets were chatting with each other in a high-frequency range (9kHz - 11kHz), which meant I could obliterate them surgically - with the AI. Since AI did a fantastic job, I gladly used it to clear the same crickets from the rest of the videos. See? Tool. Tool to kill the crickets. And a good one!
+
+If you ever have a cricket problem like me, the same *tool* happily spat out an *allegedly* reusable command to fix every video. (That's satire, for anyone who couldn't tell):
+
+#+begin_src sh
+ffmpeg -i video1.mp4 \
+      -af "highpass=f=75:p=2,equalizer=f=8277.1:t=q:w=35:g=-30,equalizer=f=8436.
+  0:t=q:w=35:g=-30,equalizer=f=8518.8:t=q:w=35:g=-30,equalizer=f=8616.2:t=q:w=35:g=-
+  30,equalizer=f=8720.2:t=q:w=35:g=-30,equalizer=f=8778.1:t=q:w=35:g=-30,
+  equalizer=f=8847.7:t=q:w=35:g=-30,equalizer=f=8871.8:t=q:w=35:g=-30,
+  equalizer=f=9073.2:t=q:w=35:g=-30,equalizer=f=9116.5:t=q:w=35:g=-30,
+  equalizer=f=9137.0:t=q:w=35:g=-30,equalizer=f=9195.6:t=q:w=35:g=-30,
+  equalizer=f=9219.7:t=q:w=35:g=-30,equalizer=f=9255.6:t=q:w=35:g=-30,
+  equalizer=f=9282.7:t=q:w=35:g=-30,equalizer=f=9325.2:t=q:w=35:g=-30,
+  equalizer=f=9345.7:t=q:w=35:g=-30,equalizer=f=9483.4:t=q:w=35:g=-30,
+  equalizer=f=9525.2:t=q:w=35:g=-30,equalizer=f=9619.6:t=q:w=35:g=-30,
+  equalizer=f=9642.3:t=q:w=35:g=-30,equalizer=f=9683.4:t=q:w=35:g=-30,
+  equalizer=f=9724.4:t=q:w=35:g=-30,equalizer=f=9769.0:t=q:w=35:g=-30,
+  equalizer=f=9880.4:t=q:w=35:g=-30,equalizer=f=9895.8:t=q:w=35:g=-30,
+  equalizer=f=9912.6:t=q:w=35:g=-30,equalizer=f=10031.3:t=q:w=35:g=-30,
+  equalizer=f=10052.5:t=q:w=35:g=-30,equalizer=f=10073.7:t=q:w=35:g=-30,
+  equalizer=f=10114.8:t=q:w=35:g=-30,equalizer=f=10130.9:t=q:w=35:g=-30,
+  equalizer=f=10279.5:t=q:w=35:g=-30,equalizer=f=10302.3:t=q:w=35:g=-30,
+  equalizer=f=10392.3:t=q:w=35:g=-30,equalizer=f=10407.7:t=q:w=35:g=-30,
+  equalizer=f=10708.7:t=q:w=35:g=-30,equalizer=f=10741.0:t=q:w=35:g=-30,
+  equalizer=f=10899.9:t=q:w=35:g=-30,loudnorm=I=-16:TP=-1.5:LRA=11:linear=true,
+  aresample=48000" \
+      -c:v copy -c:a aac -b:a 320k video1_cleaned.mp4 
+#+end_src
+It gave me exactly this command with a description ~To run it again on other videos or to automate the process in FFmpeg, run this~. I'm sure that the equalizer settings will match every video's audio. Thanks.
+
+** Not only the crickets
+Then there were the software bugs, as always.
+
+Building an initramfs on a modern Fedora host, for instance, turned out to have some nasty traps. If you let BusyBox run its default =--install= or accidentally generate absolute symlinks, those symlinks point back to your host's root directory, not the target environment. You get that magical moment where the kernel boots, mounts the filesystem, and immediately dies with =sh: ls: not found= because every single binary points into the void.
+
+Or terminal sessions. The first time you boot cleanly into =/bin/sh=, you're greeted with:
+
+#+begin_src sh
+sh: can't access tty; job control turned off
+#+end_src
+
+Fixing that required wrestling with process session management, pairing =setsid= with BusyBox’s =cttyhack= just to give =/bin/sh= a proper controlling terminal on =/dev/tty0=.
+
+* What Comes Next
+:PROPERTIES:
+:CUSTOM_ID: what-comes-next
+:END:
+
+Some of you may ask if I'll ever do spoken architectural deep-dives or lecture-style videos on OS internals. Not planning it for now. Maybe eventually - there's plenty of fascinating theory I'd love to talk through.
+
+But for now, I really enjoy the honesty of silent implementation. There's no persona to maintain and no algorithm to pander to. Thank you for reading, and watch out for the crickets if you ever think about recording silent coding videos.
+
+The entire 8-part series and the complete full-course video are up on YouTube.
+
+As always:
+
+~Signed-off-by: Szymon Wilczek swilczek.lx@gmail.com~
