@@ -1,6 +1,6 @@
 #+TITLE: The Sins of Low-Level Bootstrapping
 #+AUTHOR: Szymon Wilczek
-#+DATE: <2026-08-29 Sat>
+#+DATE: <2026-08-30 Sun>
 #+CATEGORY: YouTube
 #+TAGS: assembly linux youtube
 #+DESCRIPTION: On starting a no-talking programming channel and building an 8-part Linux bootloader in complete silence.
