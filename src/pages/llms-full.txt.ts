@@ -43,10 +43,5 @@ ${body.trim()}
 `;
   }
 
-  return new Response(content.trim() + "\n", {
-    headers: {
-      "Content-Type": "text/plain; charset=utf-8",
-      "Cache-Control": "public, max-age=3600",
-    },
-  });
+  return new Response(content.trim() + "\n");
 };
