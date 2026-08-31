@@ -1,0 +1,327 @@
+#+TITLE: Architecture of Inevitable Hypocrisy
+#+AUTHOR: Szymon Wilczek
+#+DATE: <2026-09-01 Tue>
+#+CATEGORY: Philosophy
+#+TAGS: philosophy privacy sovereignty open-source
+#+DESCRIPTION: On the illusion of ideological purity, the doomed romanticism of rebellion, the AI enclosure of the digital commons, and the inescapable hypocrisy of modern digital life.
+
+* Purity Trap and the Fantasy
+:PROPERTIES:
+:CUSTOM_ID: purity-trap-and-fantasy
+:END:
+
+Ideological purity is remarkably easy to preach when it costs you nothing.
+
+In the clean, abstract world of computing philosophy, the battle lines are drawn with theatrical clarity. Stallman refuses to touch non-free JavaScript or run machines with proprietary firmware blobs. Snowden reminds us with mathematical precision that a cellular smartphone is, by architectural definition, a tracking beacon broadcasting physical coordinates to proprietary baseband processors and cellular towers.
+
+There is a deeply romantic, radical instinct in many of us who care about digital freedom - \\
+the fantasy of the uncompromising rebel wanting to burn the corporate monolithic towers to the ground (/you caught that reference, right?/). Part of me sympathizes entirely with that raw anger. Modern corporate software ecosystems are predatory, extractive, and parasitic by design. You want to see the whole edifice dismantled.
+
+Except it is a war doomed to fail before it even begins.
+
+Corporations are no longer external adversaries we can simply boycott or burn down; they are the water supply, the power grid, the telecommunications backbone, and the operating system of civil society. Nobody likes this arrangement, yet we all inhabit it.
+
+I am not writing this to advocate for paranoid survivalist cosplay. I am not going to tell anyone to route every git commit through disposable virtual machines, or to swap their smartphone for a vintage Nokia - especially when telecommunication giants are already decommissioning the 2G and 3G networks that kept those phones alive. I won't pretend that masking your git author address behind an =ID+username@users.noreply.github.com= alias preserves your anonymity, because data brokers and scraping engines will inevitably link your identity anyway.
+
+Total non-participation does not make you a sovereign digital rebel. It simply renders you incapable of living in the modern world.
+
+* Gas Station Paradox
+:PROPERTIES:
+:CUSTOM_ID: the-gas-station-paradox
+:END:
+
+Consider a mundane, almost embarrassingly petty scenario that played out in my mind recently at a petrol station.
+
+I despise closed, proprietary ecosystems. I run Linux on bare metal, audit my dotfiles with obsessive care, avoid walled gardens, and strive to keep my digital footprint deliberate and minimal. 
+
+Yet there I stood, pulling a smartphone out of my pocket - a closed glass slab running proprietary firmware - just to scan a loyalty barcode inside a proprietary app for a minor discount per liter of fuel.
+
+The internal monologue immediately rushed to construct a defense: /"I am outsmarting the system. I don't use this phone for anything else; I'm just wringing a little economic value out of a predatory corporation."/
+
+It is a comforting lie. But hey, at least I know it.
+
+Who extracted value from whom? To save a few coins, I surrendered telemetry, validated my identity, confirmed my physical location, and - most insidiously - allowed an algorithm to subtly dictate my physical driving route through the city. I did not exploit the system; I complied with its incentive architecture. The illusion of agency was just the lubricant that made the concession painless.
+
+Of course, a familiar rationalization immediately follows: /"I am nobody special. I am just an ordinary, unremarkable person commuting between daily errands; why would any corporation care about my mundane telemetry?"/
+
+I remember Linus Torvalds saying that his personal philosophy on privacy was simply to /[[https://youtu.be/mfv0V1SxbNA?si=7MDt8a-3wcHp6IDg&t=2980]["be so uninteresting that nobody cares"]]./ Perhaps for some, that defense works. But I find it difficult to accept the premise that the only way to survive surveillance is to preemptively dilute who you are - to make yourself deliberately gray, uniform, and uninteresting just to be left alone.
+
+Sure, they might not look at my data directly. I might just be an anonymous row in an automated database. But that misses the point entirely.
+
+This is not about whether some corporate analyst is actively inspecting my telemetry; it is about *my own internal peace of mind*. Nobody genuinely enjoys living with the persistent, low-grade awareness of being observed, quantified, and nudged. \\
+Desiring unmonitored boundaries is not paranoia - it is a fundamental human instinct to want to move through the world without an uninvited corporate passenger sitting silently in the passenger seat of your life.
+
+* The Illusion of Open Protocols and the Subscription Enclosure
+:PROPERTIES:
+:CUSTOM_ID: subscription-enclosure
+:END:
+
+We like to tell ourselves that open protocols are the antidote. We point to email, the decentralized pioneer of the early internet.
+
+Yet try running your own sovereign mail server today. Within hours, your meticulously configured Postfix instance will have its packets silently dropped into the spam abyss by the corporate duopoly of Google and Microsoft, who have effectively cartelized email delivery under the banner of reputation scoring.
+
+And what happens when you turn to privacy-respecting alternatives? When you sign up for an encrypted, independent provider like Proton, you land right back into the defining economic cage of the twenty-first century: *the indefinite monthly subscription*.
+
+Subscriptions are everywhere. You no longer buy tools; you rent temporary permission to use them. You cannot escape the recurring debit, because sovereignty itself has been repackaged as a premium service tier. We trade one form of corporate dependency for another, congratulating ourselves on choosing the "ethical" landlord.
+
+* AI Enclosure: The Great GPL Expropriation
+:PROPERTIES:
+:CUSTOM_ID: ai-enclosure-gpl-expropriation
+:END:
+
+For decades, the free software movement operated under a noble, almost sacred premise: *the digital commons*. 
+
+Generations of developers contributed millions of lines of code under the GPL, copyleft, and permissive licenses, believing they were constructing a shared, un-enclosable reservoir of human knowledge. The philosophical pact was simple: you take freely from the commons, and in return, you contribute back to the commons.
+
+Then came large language models.
+
+Without asking for consent, negotiating terms, or honoring license attribution clauses, tech monopolies scraped decades of open-source repositories to train commercial neural networks. Today, those same corporations package the synthesis of our own collective work into tools like GitHub Copilot and ChatGPT, selling it back to us behind recurring monthly paywalls.
+
+The irony is devastating: the open-source movement did not dismantle software monopolies. It ended up serving as free, uncompensated fuel for the most centralized and impenetrable corporate walled gardens in technological history.
+
+* Should Closed-Source Software Even Exist?
+:PROPERTIES:
+:CUSTOM_ID: should-closed-source-exist
+:END:
+
+If we strip away the marketing rhetoric, a fundamental, uncomfortable question remains: \\
+*is there any legitimate ethical reason for closed-source software to exist at all?*
+
+Whenever this is debated, defenders of proprietary code offer the same predictable arguments:
+1. /Developers need to eat; if the source code is public, competitors will copy it and destroy the business./
+2. /Proprietary algorithms are the intellectual property that gives a firm value./
+3. /If attackers can read the source code, they will discover zero-day exploits and compromise users./
+
+Yet when examined through an engineering lens, these justifications crumble into rationalizations for artificial control.
+
+Security through obscurity has been proven a dangerous fallacy for decades. Closing the source does not eliminate vulnerabilities; it just sweeps them behind NDAs and legal threats.
+
+And the economic argument? It equates software not with mathematics, literature, or shared human engineering knowledge, but with artificial scarcity. Closed source has never been about making software better. Its entire purpose is to erect a legal fence around a digital commons so that rent can be extracted indefinitely. It transforms software from a tool of human agency into a mechanism of leverage, where the user never truly owns the machine, only licensed to operate within the vendor's designated parameters.
+
+If closed source is an inherently artificial, anti-user construct, then every time we compile a proprietary binary or accept a closed EULA, we are validating a system designed to disenfranchise us.
+
+And yet, we do it every single day.
+
+* Software-Defined Hardware
+:PROPERTIES:
+:CUSTOM_ID: death-of-physical-ownership
+:END:
+
+The encroachment of closed code has long escaped the boundaries of the monitor; it has colonized the physical world.
+
+Consider the modern reality of the Right to Repair. You can purchase a [[https://www.npr.org/2025/01/15/nx-s1-5260895/john-deere-ftc-lawsuit-right-to-repair-tractors][John Deere]] tractor, drive a modern connected vehicle ([[https://evcarlatest.com/bmw-cancels-heated-seat-subscription-criticism/][where seat heating or acceleration curves are gated behind software toggles]]), or buy a flagship smartphone. Physically, the object sits in your garage or your pocket.
+
+Yet you do not own it.
+
+Through cryptographic parts serialization - where components like camera sensors, batteries, or display panels are digitally paired to the logic board at the factory - replacing a broken module with an identical, genuine replacement fails unless authorized by the manufacturer's remote validation server.
+
+Code has transformed physical atoms into licensed services (sometimes with wheels). If a manufacturer decides to sunset an activation API, disable a feature, or declare your hardware obsolete, your physical property is reduced to an expensive paperweight. You are no longer a buyer; you are a permanent licensee of matter.
+
+* Cashless Chokepoint and the Crypto Mirage
+:PROPERTIES:
+:CUSTOM_ID: cashless-chokepoint-crypto-mirage
+:END:
+
+True sovereignty does not merely concern source code or file formats; its ultimate frontier is economic.
+
+The steady, orchestrated elimination of physical cash in favor of digital payment rails (Visa, Mastercard, mobile contactless schemes) represents the structural death of transactional anonymity. Every coffee, every tank of fuel, and every server hosting invoice is routed through centralized payment processors that possess the unilateral power of financial deplatforming. When you cannot transact without an intermediary's cryptographic blessing, your right to participate in society is strictly provisional.
+
+For a brief moment, cryptocurrency was heralded as the mathematical salvation - a trustless, decentralized medium of exchange that would disintermediate the banks and restore monetary sovereignty.
+
+To dismiss the entire ecosystem as a simple joke or generic scam, however, misses the real architectural and economic mechanics at play.
+
+Proponents and traders argue that crypto markets represent the purest form of financial meritocracy - a ruthless game of skill, quantitative analysis, and risk management where the most disciplined participants extract legitimate alpha.
+
+Yet when scrutinized through the cold lens of market microstructure and systems engineering, the structural reality is unforgiving:
+
+1. Unlike productive equities - which are backed by enterprises producing real-world goods, services, and cash flows - secondary token speculation is structurally a *negative-sum game*. Once you account for exchange trading fees, network gas, slippage, and liquidation penalties, capital is continuously drained from the system. In a closed loop without organic external revenue, every dollar of profit extracted by a skilled trader is mathematically paid for by the capital loss of another participant acting as exit liquidity. It is not an engine of shared economic value; it is an adversarial player-versus-player matchmaking arena.
+2. On-chain, retail participants are systematically outmatched by *Maximal Extractable Value*. High-frequency searcher bots and block builders monitor the public mempool in real time, executing sandwich attacks, front-running, and arbitrage that extract rent directly from ordinary transactions before they are even confirmed in a block.
+3. Forensic blockchain analytics and peer-reviewed economic research have documented that between [[https://www.forbes.com/sites/javierpaz/2022/08/26/more-than-half-of-all-bitcoin-trades-are-fake/][50%]] and [[https://www.nber.org/papers/w30783][70%]] of reported volume across unregulated exchanges consists of automated wash trading - market makers trading with themselves to fabricate artificial liquidity and create the illusion of genuine market depth.
+4. The ultimate irony is architectural. The vast majority of the crypto economy does not run on sovereign, self-hosted nodes. It relies on centralized custodial exchanges, centralized RPC node infrastructure (Infura or Alchemy hosted on AWS), and centralized stablecoins (USDT and USDC). In these stablecoins, the issuers maintain administrative smart-contract functions enabling them to freeze, blacklist, and confiscate balances with a single multi-signature transaction.
+
+Crypto did not deliver a sovereign, censorship-resistant currency for daily commerce; extreme volatility and throughput constraints disqualified it as a stable unit of account.
+
+Instead, we traded regulated commercial banks for opaque offshore exchanges and automated front-running bots, proving once again how easily the dream of decentralization collapses into another layer of compromise.
+
+* Convenience Trap: Illusion of Proprietary Security
+:PROPERTIES:
+:CUSTOM_ID: convenience-trap-and-security
+:END:
+
+Whenever the conversation turns to proprietary software, someone inevitably brings up mobile banking or digital identity.
+
+The standard defense is immediate: /"Well, critical financial and government software has to be closed and heavily restricted - otherwise, it wouldn't be secure."/
+
+This is not a nostalgic plea for the days of standing in physical bank queues or carrying binders of paper documents; instant digital transactions and modern identity verification are genuine engineering achievements. But we must be intellectually honest about the architectural trade-off we accepted.
+
+We bought into the premise that digital progress requires total vendor control: proprietary hardware attestations, Play Integrity checks, closed binary blobs, and continuous background telemetry. We accepted the doctrine that opacity equals safety.
+
+Yet reality continually punctures that illusion.
+
+Consider centralized systems and digital ID ecosystems like Poland's [[https://www.gov.pl/web/mobywatel][mObywatel]] and state-integrated medical registries - championed as the pinnacle of mobile civic convenience. Despite all the closed-source security theater, when a massive third-party breach [[https://www.eska.pl/news/biznes/wyciekly-dane-medyczne-milionow-polakow-gawkowski-apeluje-o-zastrzeganie-numerow-pesel-aa-EzQ9-WF7j-zxjo.html][exposed sensitive medical records and PESEL numbers for millions of citizens]], the state’s primary advice was to scramble into yet another proprietary mobile menu to lock our IDs.
+
+The closed architecture did not make the system impervious; it just ensured that when the failure occurred, the users were entirely powerless.
+
+Why, then, do we continue to surrender our devices to closed ecosystems? The answer is rarely about superior security. It comes down to what Neil Postman diagnosed in /Technopoly/ [fn:postman] - the total surrender of human culture to the mandate of algorithmic efficiency.
+
+#+begin_quote
+Technopoly eliminates alternatives to itself in precisely the way Aldous Huxley outlined in Brave New World. It does not make them illegal. It does not make them immoral. It does not even make them unpopular. It makes them invisible and therefore irrelevant. And it does so by redefining what we mean by religion, by art, by family, by politics, by history, by truth, by privacy, by intelligence, so that our definitions fit its new requirements. Technopoly, in other words, is totalitarian technocracy.
+~ Neil Postman
+#+end_quote
+
+Convenience is the universal solvent of engineering ethics. It dissolves ideological resistance far more effectively than state coercion or corporate mandate ever could. We didn't migrate our finances and state identities into closed mobile silos because we audited their cryptographic superiority; we did it because authenticating from our pocket felt like two clicks easier.
+
+* Militarization of Closed Code: The Pegasus Reality
+:PROPERTIES:
+:CUSTOM_ID: militarization-of-closed-code
+:END:
+
+If ad trackers, loyalty algorithms, and subscription models represent the banal, everyday monetization of our compliance, there is a far darker frontier at the extreme end of the proprietary spectrum: *mercenary spyware*.
+
+Take Pegasus, developed by Israel's NSO Group - and the broader, shadow ecosystem of state-grade cyberweapons (Candiru, and their unnamed successors).
+
+Pegasus is not something you download by mistake. It operates on exploit chains: a silent, weaponized payload delivered through an invisible iMessage, an unanswered WhatsApp call, or a malformed font rasterization request. It requires zero interaction from the victim. Within seconds, it gains absolute, invisible root privileges over your device - extracting encrypted communications, harvesting credentials, activating cameras, recording ambient microphone audio, and streaming real-time GPS coordinates.
+
+The existence of such tools is an obscenity, yet it represents the logical, inevitable culmination of a world built on closed proprietary black boxes.
+
+Tech giants market these smartphones as impenetrable, luxury vaults of personal privacy. We pay premium prices to carry them. Yet because the entire stack - from the baseband processor firmware to the proprietary operating system kernel - is shrouded behind legal and technical walls, independent scrutiny is perpetually handicapped. Zero-day vulnerabilities are quietly hoarded and commodified by private cyber-arms dealers, auctioned off to intelligence agencies, authoritarian regimes, and sovereign wealth funds.
+
+It exposes the ultimate reality of the modern smartphone: *you are never the root user of your own hardware.*
+
+You are just a tenant occupying a glass slab, while private mercenaries and state actors hold the master keys. We reassure ourselves that our mundane, quiet lives make us uninteresting targets. But the fundamental architectural vulnerability remains: the physical device in our pocket is architecturally untrustworthy.
+
+* Price of Admission to "Society"
+:PROPERTIES:
+:CUSTOM_ID: price-of-admission-to-society
+:END:
+
+To be intellectually honest, we must acknowledge an obvious counter-argument: *nobody is physically forcing you to surrender* (very obvious reference to /Brave New World/ by Huxley).
+
+You can choose absolute digital sovereignty today. You can flash a fully deblobbed Linux kernel onto an ancient ThinkPad, air-gap your workstation, sit in your room, and achieve immaculate software purity. Nobody is breaking down your door to force a proprietary binary onto your disk. The option of total isolation is real and achievable.
+
+The catch, of course, is the door itself.
+
+The moment you want to step outside your room and participate in the circle known as *Society*, the terms of engagement change completely.
+
+This dynamic was articulated with prophetic clarity by Jacques Ellul in /The Technological Society/ [fn:ellul]. Ellul demonstrated that /Technique/ is not just a collection of machines, but the autonomous, unstoppable pursuit of absolute efficiency and rationalization in every domain of human activity. When Technique becomes our primary environment, it subordinates ethics, politics, and culture, forcing the individual into constant adaptation under threat of total social exile.
+
+#+begin_quote
+No technique is possible when men are free. ... Technique requires predictability and, no less, exactness of prediction. It is necessary, then, that technique prevail over the human being. ... The individual must be fashioned by techniques ... in order to wipe out the blots his personal determination introduces into the perfect design of the organization.
+~ Jacques Ellul
+#+end_quote
+
+Modern society does not enforce technical compliance through legal statutes; it enforces it through this exact mechanism of Technique - an unwritten web of wild, unspoken standards that humanity arbitrarily decided to call *norms*.
+
+Need to board a train or access an event? /"Just present the dynamic QR code in our proprietary app."/ \\
+Need to communicate with your family or coordinate with colleagues? /"Why aren't you on WhatsApp? Everyone is there."/ \\
+Need to rent an apartment, authenticate with a government portal, or split an expense? /"Just use the instant mobile transfer."/
+
+If you refuse to use these closed platforms, you are not celebrated as a principled philosopher of software freedom. You are treated as an intolerable source of social friction - an eccentric nuisance who refuses to play by the arbitrary rules of the game.
+
+Society has effectively weaponized human connection against technical sovereignty. The real trade-off is never just about software; it is an ultimatum between ideological purity in total exile, or quiet compromise as the mandatory price of admission to human community.
+
+* Fourfold Litmus Test of the Impossible Outlaw
+:PROPERTIES:
+:CUSTOM_ID: fourfold-litmus-test
+:END:
+
+To truly understand how deeply the corporate apparatus is intertwined with daily existence, consider a simple thought experiment. What would it actually look like if you refused every single technical compromise today?
+
+Apply the litmus test across four mundane dimensions of living:
+
+1. Does your home internet run through the ISP-provided black-box router with un-auditable factory firmware and closed Wi-Fi binary blobs? Or did you source open hardware, compile a deblobbed OpenWrt image from source, and inspect every incoming packet?
+2. When you finish work and want to relax, do you stream music on Spotify, watch a film on Netflix, or launch a game on PlayStation - passively accepting their DRM wrappers and telemetry algorithms? Or do you maintain an offline library of hand-ripped, DRM-free FLAC and MKV files on a local NAS?
+3. When you open your sovereign Neovim or Emacs buffer, do you pipe keystrokes to cloud-hosted LLM assistants like Copilot, Claude, or ChatGPT? Do you download thousands of opaque, transient dependencies on the fly via =npm=, =cargo=, or =pip= from centralized corporate registries?
+4. This one is mostly Poland-based: How do you collect a parcel or buy groceries? Do you tap InPost parcel lockers using a mobile app with Bluetooth and GPS permissions, paying instantly with contactless tokens and BLIK? Or do you walk to the post office with physical banknotes, waiting in line and refusing to register a phone number?
+
+Reading this list reveals the brutal truth: if you tried to achieve an uncompromised "yes" across all four categories, you would not be an enthusiast of software freedom.
+
+You would be *an outcast*. You would spend forty hours a week maintaining the friction of your own existence, alienating friends, family, and colleagues, and appearing to the surrounding world like a deranged technological eccentric.
+
+The modern infrastructure was deliberately engineered so that opting out requires superhuman stamina.
+
+* Anatomy of Modern Hypocrisy
+:PROPERTIES:
+:CUSTOM_ID: anatomy-of-hypocrisy
+:END:
+
+This brings us to the central wound of this essay: *what does hypocrisy actually look like for a software engineer today?*
+
+It is not just about scanning a barcode at a gas station or carrying a smartphone. The hypocrisy is woven directly into our livelihoods.
+
+In /The Myth of the Machine/ [fn:mumford], Lewis Mumford described the /Megamachine/ - a massive, institutionalized socio-technical apparatus where human beings are stripped of autonomous agency and repurposed as standardized, interchangeable components.
+
+#+begin_quote
+The one lasting contribution of the megamachine was the myth of the machine itself: the notion that this machine was, by its very nature, absolutely irresistible - and yet, provided one did not oppose it, ultimately beneficent. That magical spell still enthralls both the controllers and the mass victims of the megamachine today.
+~ Lewis Mumford
+#+end_quote
+
+Consider how neatly the modern software industry fulfills Mumford's diagnosis:
+
+From nine to five, we write closed-source, proprietary code for companies whose business models rely on telemetry, tracking, vendor lock-in, and algorithmic engagement. We act as standard-issue cogs assembling the very digital walls we despise. We implement tracking SDKs, optimize conversion funnels, and sign contracts forbidding us from sharing our work. We collect paychecks funded directly by surveillance capitalism.
+
+Then, at five o'clock, we close our corporate laptops, switch to our personal Linux machines, fire up Emacs or Neovim, and write impassioned essays about software sovereignty, the beauty of open source, and the sanctity of user privacy.
+
+We maintain a hierarchy of comfortable justifications:
+- /"I need to pay rent and feed my family."/
+- /"I'm just an engineer; I don't make product decisions."/
+- /"I'm nudging the company toward better open-source practices from within."/
+
+These rationalizations may be practically true. But they do not dissolve the moral contradiction. We are the willing architects of the digital enclosures we spend our evenings lamenting.
+
+Is this *active hypocrisy* - a cynical, bad-faith betrayal of our stated values? Or is it *structural hypocrisy* - the unavoidable condition of existing inside a megamachine where total ideological purity requires social and professional suicide?
+
+* On Dualism: The Schizophrenia of the Modern Practitioner
+:PROPERTIES:
+:CUSTOM_ID: on-dualism
+:END:
+
+What does it actually mean to be a /"dualist"/ in technology?
+
+In classical philosophy, dualism explored the tension between the immaterial mind and the physical body - two radically different realities forced to inhabit the same space. In modern computing, dualism is the psychological split between the *sovereign craftsman* and the *networked citizen*.
+
+As a craftsman, I obsess over control. I spent months configuring the sub-millisecond modal editing of Neovim, only to switch to the expansive, self-contained universe of GNU Emacs because both satisfy different, uncompromised ideals of my technical identity. I want local executables, deterministic builds, and clean abstractions that obey my will.
+
+As a citizen, however, I must interface with a world that operates on the exact opposite principles: closed binary blobs, opaque cloud backends, mandatory 2FA authenticators, and telemetry-laden platforms.
+
+To the dogmatic purist, this dualism looks like cowardice and hypocrisy. You preach open-source sovereignty at your desk, yet swipe a proprietary glass screen at the cash register. 
+
+To the average consumer, the dualism looks like neurotic overthinking. Why spend hundreds of hours tailoring a text editor when X (where =X= is probably VS Code) works out of the box?
+
+Is the dualist a hypocrite? Or is dualism the only viable survival strategy for someone who refuses to succumb to either total apathy or total isolation?
+
+* Living in the Unresolved Tension
+:PROPERTIES:
+:CUSTOM_ID: living-in-tension
+:END:
+
+I do not have a five-point manifesto to resolve this contradiction. I am not writing this from an off-grid cabin running on open-hardware RISC-V silicon. I am writing this on a machine entangled in global corporate supply chains, living in an economy that demands continuous digital compliance.
+
+Perhaps the goal of reflecting on hypocrisy is not to discover some miraculous escape hatch where we emerge morally immaculate. 
+
+Perhaps the real value is simply refusing to let the hypocrisy become invisible.
+
+When we stop pretending that our pragmatic trade-offs are "smart hacks," when we admit that our convenience comes at the cost of our principles, we preserve a tiny ember of critical friction. 
+
+Knowing that you are participating in a system you despise will not make you pure. 
+
+But it might be the only thing that keeps you from mistaking your cage for a home.
+
+And yet, here is the ultimate, undeniable irony: I am publishing all of these thoughts on a public website, linked directly in my portfolio and pinned to my GitHub profile - complete with curated OpenGraph tags, semantic SEO, and structured GEO scaffolding designed specifically to be ingested and indexed by LLMs. And to put the cherry on top, I sign off every commit with a Gmail address - as you can see at the very bottom.
+
+Maybe I really am a hypocrite after all.
+
+Who knows. Apparently, that is not for me to judge.
+
+As always:
+
+~Signed-off-by: Szymon Wilczek <swilczek.lx@gmail.com>~
+
+* Footnotes & References
+:PROPERTIES:
+:CUSTOM_ID: footnotes-references
+:END:
+
+[fn:ellul] Jacques Ellul, /The Technological Society/ (New York: Vintage Books, 1954; translated from French by John Wilkinson, 1964).
+[fn:postman] Neil Postman, /Technopoly: The Surrender of Culture to Technology/ (New York: Vintage Books, 1992).
+[fn:mumford] Lewis Mumford, /The Myth of the Machine: Technics and Human Development/ (New York: Harcourt, Brace & World, 1967).
