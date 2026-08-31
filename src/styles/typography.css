@@ -275,10 +275,18 @@ pre code,
 blockquote {
   border-left: 3px solid var(--fg-link);
   background-color: var(--bg-dim);
-  padding: 0.95rem 1.45rem;
-  margin: 1.85rem 0;
+  padding: 0.85rem 1.35rem;
+  margin: 1.5rem 0;
   color: var(--fg-alt);
   font-style: italic;
+}
+
+blockquote p {
+  margin-bottom: 0.75rem;
+}
+
+blockquote p:last-child {
+  margin-bottom: 0;
 }
 
 hr {
