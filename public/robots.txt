@@ -2,4 +2,32 @@ User-agent: *
 Allow: /
 Disallow: /vault/
 
+User-agent: GPTBot
+Allow: /
+Disallow: /vault/
+
+User-agent: ChatGPT-User
+Allow: /
+Disallow: /vault/
+
+User-agent: PerplexityBot
+Allow: /
+Disallow: /vault/
+
+User-agent: ClaudeBot
+Allow: /
+Disallow: /vault/
+
+User-agent: Google-Extended
+Allow: /
+Disallow: /vault/
+
+User-agent: Applebot-Extended
+Allow: /
+Disallow: /vault/
+
+User-agent: cohere-ai
+Allow: /
+Disallow: /vault/
+
 Sitemap: https://sw.szymon-wilczek.me/sitemap-index.xml

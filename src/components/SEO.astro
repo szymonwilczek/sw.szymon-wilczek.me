@@ -98,6 +98,15 @@ const personSchema = {
     "https://szymon-wilczek.me",
     "https://linkedin.com/in/szymon-wilczek",
   ],
+  knowsAbout: [
+    "Systems Programming",
+    "GNU Emacs",
+    "Neovim",
+    "Typography & Type Design",
+    "Linux Systems",
+    "Sovereign Computing",
+    "C",
+  ],
 };
 
 const websiteSchema = {
@@ -211,6 +220,7 @@ const articleSchema =
 
 <link rel="icon" type="image/x-icon" href="/favicon.ico" />
 <link rel="alternate" type="application/rss+xml" title="Szymon Wilczek RSS Feed" href="/rss.xml" />
+<link rel="alternate" type="text/plain" href="/llms.txt" title="LLM Context" />
 <link rel="sitemap" href="/sitemap-index.xml" />
 
 <script is:inline type="application/ld+json" set:html={JSON.stringify(personSchema)} />
