@@ -1,6 +1,13 @@
 import { getCollection } from "astro:content";
 import type { APIRoute } from "astro";
 
+function cleanOrgBody(body: string): string {
+  return body
+    .replace(/^(?:#\+\w+:.*\n?)+/, "")
+    .replace(/^[ \t]*:PROPERTIES:\n(?:.*\n)*?[ \t]*:END:\n?/gm, "")
+    .trim();
+}
+
 export const GET: APIRoute = async ({ site }) => {
   const siteUrl = site ? site.toString().replace(/\/$/, "") : "https://sw.szymon-wilczek.me";
 
@@ -26,7 +33,7 @@ export const GET: APIRoute = async ({ site }) => {
     const category = post.data.category || "Essay";
     const tags = post.data.tags ? post.data.tags.join(", ") : "";
     const htmlUrl = `${siteUrl}/writings/${slug}/`;
-    const body = post.body || "";
+    const body = cleanOrgBody(post.body || "");
 
     content += `
 ================================================================================
