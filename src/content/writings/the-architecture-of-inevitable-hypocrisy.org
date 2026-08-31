@@ -317,11 +317,6 @@ As always:
 
 ~Signed-off-by: Szymon Wilczek <swilczek.lx@gmail.com>~
 
-* Footnotes & References
-:PROPERTIES:
-:CUSTOM_ID: footnotes-references
-:END:
-
 [fn:ellul] Jacques Ellul, /The Technological Society/ (New York: Vintage Books, 1954; translated from French by John Wilkinson, 1964).
 [fn:postman] Neil Postman, /Technopoly: The Surrender of Culture to Technology/ (New York: Vintage Books, 1992).
 [fn:mumford] Lewis Mumford, /The Myth of the Machine: Technics and Human Development/ (New York: Harcourt, Brace & World, 1967).

@@ -517,6 +517,68 @@ function rehypeOrgEnhancements() {
         parent.children[index] = wrapper;
       }
     });
+
+    // clean up and unify footnotes
+    const newChildren: any[] = [];
+    let footnotesSection: any = null;
+
+    for (let i = 0; i < tree.children.length; i++) {
+      const node = tree.children[i];
+
+      const isUniorgFootnoteHeading =
+        /^h[1-6]$/.test(node.tagName) &&
+        node.children?.[0]?.value?.trim().toLowerCase() === "footnotes:";
+
+      const isFootnoteDef =
+        node.tagName === "div" &&
+        (node.properties?.className?.includes("footnote-definition") ||
+          (Array.isArray(node.properties?.className) &&
+            node.properties.className.includes("footnote-definition")));
+
+      if (isUniorgFootnoteHeading) {
+        const prev = newChildren[newChildren.length - 1];
+        const prevIsHeading =
+          prev &&
+          /^h[1-6]$/.test(prev.tagName) &&
+          (prev.children?.[0]?.value?.toLowerCase().includes("footnote") ||
+            prev.children?.[0]?.value?.toLowerCase().includes("reference"));
+
+        if (!prevIsHeading) {
+          if (!footnotesSection) {
+            footnotesSection = {
+              type: "element",
+              tagName: "section",
+              properties: { className: ["footnotes-section"], id: "footnotes" },
+              children: [],
+            };
+            newChildren.push(footnotesSection);
+          }
+          node.tagName = "h2";
+          node.properties = { className: ["footnotes-title"] };
+          if (node.children?.[0]) node.children[0].value = "Footnotes";
+          footnotesSection.children.push(node);
+        }
+        continue;
+      }
+
+      if (isFootnoteDef) {
+        if (!footnotesSection) {
+          footnotesSection = {
+            type: "element",
+            tagName: "section",
+            properties: { className: ["footnotes-section"], id: "footnotes" },
+            children: [],
+          };
+          newChildren.push(footnotesSection);
+        }
+        footnotesSection.children.push(node);
+      } else {
+        footnotesSection = null;
+        newChildren.push(node);
+      }
+    }
+
+    tree.children = newChildren;
   };
 }
 

@@ -504,13 +504,22 @@ input[type="checkbox"] {
 
 /* Org-mode Footnotes */
 .footnotes,
-section[data-footnotes],
-.footnote-definition {
+.footnotes-section,
+section[data-footnotes] {
   margin-top: 3.5rem;
   padding-top: 1.5rem;
   border-top: 1px dashed var(--border);
   font-size: 0.88rem;
   color: var(--fg-alt);
+}
+
+.footnotes-section .footnotes-title {
+  font-size: 1.25rem;
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: var(--fg-main);
+  border-bottom: none;
+  padding-bottom: 0;
 }
 
 .footnotes ol,
@@ -520,7 +529,45 @@ section[data-footnotes] ol {
 
 .footnotes li,
 section[data-footnotes] li {
+  margin-bottom: 0.5rem;
+}
+
+.footnote-definition {
+  display: flex;
+  align-items: baseline;
+  gap: 0.65rem;
+  margin-top: 0 !important;
+  padding-top: 0 !important;
   margin-bottom: 0.65rem;
+  border-top: none !important;
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: var(--fg-alt);
+}
+
+.footnote-definition:last-child {
+  margin-bottom: 0;
+}
+
+.footnote-definition .footdef {
+  flex: 1;
+}
+
+.footnote-definition .footdef p {
+  margin-bottom: 0;
+  display: inline;
+}
+
+.footnote-definition sup {
+  top: 0;
+  font-size: 0.85em;
+}
+
+.footnote-definition .footnum {
+  font-family: "Typus Mono 95", "Typus Mono", monospace;
+  font-weight: 700;
+  color: var(--fg-link);
+  text-decoration: none;
 }
 
 sup a {
