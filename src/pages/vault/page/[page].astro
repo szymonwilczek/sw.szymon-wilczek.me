@@ -11,7 +11,7 @@ export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
   const vaultItems = (await getCollection("vault")).sort(
     (a, b) => (b.data.date?.valueOf() || 0) - (a.data.date?.valueOf() || 0),
   );
-  return paginate(vaultItems, { pageSize: 10 });
+  return paginate(vaultItems, { pageSize: 10 }).slice(1);
 }
 
 interface Props {
@@ -23,7 +23,11 @@ const vaultItems = page.data;
 const prevUrl = page.currentPage === 2 ? "/vault/" : page.url.prev;
 ---
 
-<BaseLayout title={`Vault - Page ${page.currentPage}`} description="Encrypted vault container.">
+<BaseLayout
+  title={`Vault — Page ${page.currentPage}`}
+  description="Encrypted cryptographic vault document store."
+  noindex={true}
+>
   <article>
     <h1>Cryptographic Vault</h1>
 

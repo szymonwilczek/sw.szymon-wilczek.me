@@ -20,6 +20,9 @@ const { album } = Astro.props;
 <BaseLayout
   title={`${album.title} - Photography Album`}
   description={`Photography journal from ${album.title} (${album.dateFormatted}). ${album.photoCount} high-fidelity captures.`}
+  image={album.photos[0]?.src}
+  imageAlt={album.photos[0]?.alt || `${album.title} Photography`}
+  category="Photography"
 >
   <article class="album-page">
     <header class="album-header">

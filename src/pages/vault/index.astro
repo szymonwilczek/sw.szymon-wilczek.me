@@ -15,7 +15,11 @@ const totalPages = Math.ceil(allVaultItems.length / PAGE_SIZE);
 const vaultItems = allVaultItems.slice(0, PAGE_SIZE);
 ---
 
-<BaseLayout title="Vault" description="Encrypted vault container.">
+<BaseLayout
+  title="Vault"
+  description="Encrypted cryptographic vault document store."
+  noindex={true}
+>
   <article>
     <h1>Cryptographic Vault</h1>
 

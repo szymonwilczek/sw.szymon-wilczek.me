@@ -2,20 +2,42 @@
 import Sidebar from "../components/Sidebar.astro";
 import Footer from "../components/Footer.astro";
 import EmacsMinibuffer from "../components/EmacsMinibuffer.astro";
+import SEO from "../components/SEO.astro";
 import "../styles/global.css";
 
-interface Props {
+export interface Props {
   title?: string;
   description?: string;
+  image?: string;
+  imageAlt?: string;
+  type?: "website" | "article" | "profile";
+  pubDate?: Date;
+  updatedDate?: Date;
+  category?: string;
+  tags?: string[];
+  author?: string;
+  noindex?: boolean;
+  breadcrumbs?: Array<{ name: string; url: string }>;
+  prevUrl?: string;
+  nextUrl?: string;
 }
 
 const {
   title = "Szymon Wilczek",
-  description = "Personal website, projects, files, and writings.",
+  description = "Personal website, software projects, developer utilities, photography, and plain-text writings.",
+  image,
+  imageAlt,
+  type = "website",
+  pubDate,
+  updatedDate,
+  category,
+  tags,
+  author,
+  noindex = false,
+  breadcrumbs,
+  prevUrl,
+  nextUrl,
 } = Astro.props;
-
-const pageTitle = title === "Szymon Wilczek" ? title : `${title} · Szymon Wilczek`;
-const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 ---
 
 <!doctype html>
@@ -45,9 +67,23 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
       type="font/woff2"
       crossorigin
     />
-    <title>{pageTitle}</title>
-    <meta name="description" content={description} />
-    <link rel="canonical" href={canonicalURL} />
+
+    <SEO
+      title={title}
+      description={description}
+      image={image}
+      imageAlt={imageAlt}
+      type={type}
+      pubDate={pubDate}
+      updatedDate={updatedDate}
+      category={category}
+      tags={tags}
+      author={author}
+      noindex={noindex}
+      breadcrumbs={breadcrumbs}
+      prevUrl={prevUrl}
+      nextUrl={nextUrl}
+    />
 
     <script is:inline>
       (function () {
@@ -74,19 +110,6 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
         applyThemeAndFont();
       })();
     </script>
-
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content={canonicalURL} />
-    <meta property="og:title" content={pageTitle} />
-    <meta property="og:description" content={description} />
-
-    <link
-      rel="alternate"
-      type="application/rss+xml"
-      title="Szymon Wilczek RSS Feed"
-      href="/rss.xml"
-    />
-    <link rel="sitemap" href="/sitemap-index.xml" />
 
     <script type="speculationrules">
       {

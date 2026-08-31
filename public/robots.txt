@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /vault/
+
+Sitemap: https://sw.szymon-wilczek.me/sitemap-index.xml

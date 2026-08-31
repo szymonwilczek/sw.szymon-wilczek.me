@@ -18,7 +18,14 @@ const { html, Content } = await renderContentEntry(project);
 const rawLines = project.body ? project.body.split("\n").length : 0;
 ---
 
-<BaseLayout title={project.data.title} description={project.data.description}>
+<BaseLayout
+  title={project.data.title}
+  description={project.data.description}
+  pubDate={project.data.pubDate}
+  updatedDate={project.data.updatedDate}
+  tags={project.data.tags}
+  category="Project"
+>
   <article class="project-article">
     <header class="project-header">
       <div class="back-link">

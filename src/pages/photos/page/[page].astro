@@ -7,7 +7,7 @@ import type { GetStaticPathsOptions, Page } from "astro";
 
 export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
   const albums = await getAllAlbums();
-  return paginate(albums, { pageSize: 6 });
+  return paginate(albums, { pageSize: 6 }).slice(1);
 }
 
 interface Props {
@@ -20,8 +20,10 @@ const prevUrl = page.currentPage === 2 ? "/photos/" : page.url.prev;
 ---
 
 <BaseLayout
-  title={`Photo Albums - Page ${page.currentPage}`}
+  title={`Photo Albums — Page ${page.currentPage}`}
   description="A personal archive of places I've walked through and things I found worth remembering."
+  prevUrl={prevUrl}
+  nextUrl={page.url.next}
 >
   <article class="photos-index-article">
     <h1>Photography &amp; Albums</h1>

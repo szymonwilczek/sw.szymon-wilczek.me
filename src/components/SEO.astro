@@ -1,0 +1,227 @@
+---
+export interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+  imageAlt?: string;
+  type?: "website" | "article" | "profile";
+  pubDate?: Date;
+  updatedDate?: Date;
+  category?: string;
+  tags?: string[];
+  author?: string;
+  noindex?: boolean;
+  breadcrumbs?: Array<{ name: string; url: string }>;
+  prevUrl?: string;
+  nextUrl?: string;
+}
+
+const {
+  title = "Szymon Wilczek",
+  description = "Personal website, software projects, developer utilities, photography, and plain-text writings.",
+  image = "/og-default.png",
+  imageAlt = "Szymon Wilczek - Software Engineer",
+  type = "website",
+  pubDate,
+  updatedDate,
+  category,
+  tags = [],
+  author = "Szymon Wilczek",
+  noindex = false,
+  breadcrumbs,
+  prevUrl,
+  nextUrl,
+} = Astro.props;
+
+const siteUrl = Astro.site
+  ? Astro.site.toString().replace(/\/$/, "")
+  : "https://sw.szymon-wilczek.me";
+const pageTitle = title === "Szymon Wilczek" ? title : `${title} · Szymon Wilczek`;
+const canonicalURL = new URL(Astro.url.pathname, siteUrl);
+const ogImageURL = new URL(
+  image.startsWith("http") ? image : `${siteUrl}${image.startsWith("/") ? "" : "/"}${image}`,
+  siteUrl,
+);
+
+const robotsContent = noindex
+  ? "noindex, nofollow"
+  : "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1";
+
+const defaultKeywords = [
+  "Szymon Wilczek",
+  "software engineer",
+  "low-level programming",
+  "linux",
+  "emacs",
+  "neovim",
+  "sovereign computing",
+  "c",
+  "typography",
+  "ghostty",
+];
+const allKeywords = Array.from(new Set([...tags, ...defaultKeywords]));
+
+// auto-construct breadcrumb list if not explicitly provided
+let breadcrumbItems = breadcrumbs;
+if (!breadcrumbItems && Astro.url.pathname !== "/") {
+  const segments = Astro.url.pathname.split("/").filter(Boolean);
+  breadcrumbItems = [{ name: "Home", url: `${siteUrl}/` }];
+  let currentPath = "";
+  for (let i = 0; i < segments.length; i++) {
+    const seg = segments[i];
+    currentPath += `/${seg}`;
+    if (i === segments.length - 1 && title !== "Szymon Wilczek") {
+      breadcrumbItems.push({ name: title, url: `${siteUrl}${currentPath}/` });
+    } else {
+      const segName = seg.charAt(0).toUpperCase() + seg.slice(1).replace(/-/g, " ");
+      breadcrumbItems.push({ name: segName, url: `${siteUrl}${currentPath}/` });
+    }
+  }
+}
+
+const personSchema = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "@id": `${siteUrl}/#identity`,
+  name: "Szymon Wilczek",
+  givenName: "Szymon",
+  familyName: "Wilczek",
+  url: siteUrl,
+  image: `${siteUrl}/avatar.png`,
+  jobTitle: "Software Engineer",
+  alumniOf: {
+    "@type": "EducationalOrganization",
+    name: "Silesian University of Technology",
+  },
+  sameAs: [
+    "https://github.com/szymonwilczek",
+    "https://szymon-wilczek.me",
+    "https://linkedin.com/in/szymon-wilczek",
+  ],
+};
+
+const websiteSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "@id": `${siteUrl}/#website`,
+  url: `${siteUrl}/`,
+  name: "Szymon Wilczek",
+  description:
+    "Personal hypermedia space, software projects, developer utilities, photography, and plain-text essays.",
+  publisher: {
+    "@id": `${siteUrl}/#identity`,
+  },
+  inLanguage: "en-US",
+};
+
+const breadcrumbSchema =
+  breadcrumbItems && breadcrumbItems.length > 1
+    ? {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        itemListElement: breadcrumbItems.map((item, index) => ({
+          "@type": "ListItem",
+          position: index + 1,
+          name: item.name,
+          item: item.url,
+        })),
+      }
+    : null;
+
+const articleSchema =
+  type === "article"
+    ? {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "@id": `${canonicalURL.toString()}#article`,
+        mainEntityOfPage: {
+          "@type": "WebPage",
+          "@id": canonicalURL.toString(),
+        },
+        headline: title,
+        name: title,
+        description: description,
+        image: ogImageURL.toString(),
+        datePublished: pubDate ? pubDate.toISOString() : undefined,
+        dateModified: updatedDate
+          ? updatedDate.toISOString()
+          : pubDate
+            ? pubDate.toISOString()
+            : undefined,
+        author: {
+          "@id": `${siteUrl}/#identity`,
+        },
+        publisher: {
+          "@id": `${siteUrl}/#identity`,
+        },
+        keywords: tags.length > 0 ? tags.join(", ") : undefined,
+        articleSection: category || "Essay",
+        inLanguage: "en-US",
+      }
+    : null;
+---
+
+<title>{pageTitle}</title>
+<meta name="title" content={pageTitle} />
+<meta name="description" content={description} />
+<meta name="author" content={author} />
+<meta name="creator" content={author} />
+<meta name="publisher" content={author} />
+<meta name="keywords" content={allKeywords.join(", ")} />
+<meta name="robots" content={robotsContent} />
+<meta name="googlebot" content={robotsContent} />
+<meta name="theme-color" content="#18181b" />
+
+<link rel="canonical" href={canonicalURL} />
+
+{prevUrl && <link rel="prev" href={prevUrl} />}
+{nextUrl && <link rel="next" href={nextUrl} />}
+
+<meta property="og:site_name" content="Szymon Wilczek" />
+<meta property="og:locale" content="en_US" />
+<meta property="og:type" content={type} />
+<meta property="og:url" content={canonicalURL} />
+<meta property="og:title" content={pageTitle} />
+<meta property="og:description" content={description} />
+<meta property="og:image" content={ogImageURL} />
+<meta property="og:image:alt" content={imageAlt} />
+
+{
+  type === "article" && pubDate && (
+    <meta property="article:published_time" content={pubDate.toISOString()} />
+  )
+}
+{
+  type === "article" && updatedDate && (
+    <meta property="article:modified_time" content={updatedDate.toISOString()} />
+  )
+}
+{type === "article" && <meta property="article:author" content={`${siteUrl}/about/`} />}
+{type === "article" && category && <meta property="article:section" content={category} />}
+{type === "article" && tags.map((tag) => <meta property="article:tag" content={tag} />)}
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:url" content={canonicalURL} />
+<meta name="twitter:title" content={pageTitle} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={ogImageURL} />
+<meta name="twitter:image:alt" content={imageAlt} />
+<meta name="twitter:creator" content="@szymonwilczek" />
+<meta name="twitter:site" content="@szymonwilczek" />
+
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<link rel="alternate" type="application/rss+xml" title="Szymon Wilczek RSS Feed" href="/rss.xml" />
+<link rel="sitemap" href="/sitemap-index.xml" />
+
+<script is:inline type="application/ld+json" set:html={JSON.stringify(personSchema)} />
+<script is:inline type="application/ld+json" set:html={JSON.stringify(websiteSchema)} />
+{
+  breadcrumbSchema && (
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
+  )
+}
+{
+  articleSchema && (
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(articleSchema)} />
+  )
+}

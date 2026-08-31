@@ -11,7 +11,7 @@ export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
   const writings = (await getCollection("writings")).sort(
     (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
   );
-  return paginate(writings, { pageSize: 10 });
+  return paginate(writings, { pageSize: 10 }).slice(1);
 }
 
 interface Props {
@@ -26,6 +26,8 @@ const prevUrl = page.currentPage === 2 ? "/writings/" : page.url.prev;
 <BaseLayout
   title={`Writings — Page ${page.currentPage}`}
   description="Essays, manifestos, notes, and reflections on sovereign computing and hypermedia."
+  prevUrl={prevUrl}
+  nextUrl={page.url.next}
 >
   <article>
     <h1>Writings &amp; Essays</h1>

@@ -18,9 +18,23 @@ const { slug } = Astro.params;
 const { html, Content } = await renderContentEntry(post);
 const stats = calculateReadingStats(post.body);
 const rawLines = post.body ? post.body.split("\n").length : 0;
+
+// First image from org body if present for rich OpenGraph preview
+const imageMatch = post.body ? post.body.match(/\[\[(\/images\/[^\]]+)\]\]/) : null;
+const postImage = imageMatch ? imageMatch[1] : undefined;
 ---
 
-<BaseLayout title={post.data.title} description={post.data.description || post.data.title}>
+<BaseLayout
+  title={post.data.title}
+  description={post.data.description || post.data.title}
+  type="article"
+  pubDate={post.data.pubDate}
+  updatedDate={post.data.updatedDate}
+  category={post.data.category}
+  tags={post.data.tags}
+  image={postImage}
+  imageAlt={post.data.title}
+>
   <article class="writing-article">
     <header class="writing-header">
       <div class="back-link">

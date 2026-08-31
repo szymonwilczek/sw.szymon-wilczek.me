@@ -10,7 +10,7 @@ export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
   const projects = (await getCollection("projects")).sort(
     (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
   );
-  return paginate(projects, { pageSize: 10 });
+  return paginate(projects, { pageSize: 10 }).slice(1);
 }
 
 interface Props {
@@ -25,6 +25,8 @@ const prevUrl = page.currentPage === 2 ? "/projects/" : page.url.prev;
 <BaseLayout
   title={`Projects — Page ${page.currentPage}`}
   description="Bespoke software projects, editor extensions, and tools built out of engineering necessity."
+  prevUrl={prevUrl}
+  nextUrl={page.url.next}
 >
   <article>
     <h1>Projects</h1>
