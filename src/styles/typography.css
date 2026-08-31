@@ -57,6 +57,40 @@ h6 {
   margin-top: 2.25rem;
   margin-bottom: 0.85rem;
   letter-spacing: -0.01em;
+  scroll-margin-top: 2rem;
+  position: relative;
+}
+
+.heading-anchor {
+  display: inline-block;
+  margin-left: 0.55rem;
+  font-family: "Typus Mono 95", "Typus Mono", monospace;
+  font-size: 0.85em;
+  font-weight: 400;
+  color: var(--fg-dim);
+  text-decoration: none !important;
+  opacity: 0;
+  cursor: pointer;
+  user-select: none;
+  vertical-align: baseline;
+  transition:
+    opacity 0.15s ease,
+    color 0.15s ease;
+}
+
+h1:hover .heading-anchor,
+h2:hover .heading-anchor,
+h3:hover .heading-anchor,
+h4:hover .heading-anchor,
+h5:hover .heading-anchor,
+h6:hover .heading-anchor,
+.heading-anchor:focus-visible {
+  opacity: 0.55;
+}
+
+.heading-anchor:hover {
+  opacity: 1 !important;
+  color: var(--fg-link) !important;
 }
 
 h1 {
@@ -493,6 +527,15 @@ sup a {
   body {
     font-size: 1.05rem;
     line-height: 1.68;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    scroll-margin-top: 4.5rem;
   }
 
   h1 {

@@ -305,6 +305,54 @@ function rehypeShikiHighlight(highlighter: any) {
   };
 }
 
+function slugify(text: string): string {
+  return (text || "")
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/\[\[.*?\]\[(.*?)\]\]/g, "$1")
+    .replace(/\[\[(.*?)\]\]/g, "$1")
+    .replace(/[^\w\s-]/g, "")
+    .replace(/[\s_-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function uniorgHeadlines() {
+  return (tree: any) => {
+    const idCounts = new Map<string, number>();
+
+    visit(tree, "section", (node: any) => {
+      let customId: string | null = null;
+      const drawer = node.children?.find((c: any) => c.type === "property-drawer");
+      if (drawer) {
+        const prop = drawer.children?.find(
+          (p: any) => p.type === "node-property" && p.key === "CUSTOM_ID",
+        );
+        if (prop && prop.value) {
+          customId = prop.value.trim();
+        }
+      }
+
+      const headline = node.children?.find((c: any) => c.type === "headline");
+      if (headline) {
+        let baseId = customId || slugify(headline.rawValue || "section");
+        if (!baseId) baseId = "section";
+
+        let finalId = baseId;
+        const count = idCounts.get(baseId) || 0;
+        if (count > 0) {
+          finalId = `${baseId}-${count}`;
+        }
+        idCounts.set(baseId, count + 1);
+
+        headline.data = headline.data || {};
+        headline.data.hProperties = headline.data.hProperties || {};
+        headline.data.hProperties.id = finalId;
+      }
+    });
+  };
+}
+
 function rehypeOrgEnhancements() {
   return (tree: any) => {
     visit(tree, "element", (node: any, index: number | undefined, parent: any) => {
@@ -329,8 +377,23 @@ function rehypeOrgEnhancements() {
         ];
       }
 
-      // Headings
+      // Headings and Anchor Links
       if (/^h[1-6]$/.test(node.tagName)) {
+        const id = node.properties?.id;
+        if (id) {
+          node.children = node.children || [];
+          node.children.push({
+            type: "element",
+            tagName: "a",
+            properties: {
+              href: `#${id}`,
+              className: ["heading-anchor"],
+              "aria-label": "Link to this section",
+            },
+            children: [{ type: "text", value: "#" }],
+          });
+        }
+
         if (node.children && node.children.length > 0) {
           for (const child of node.children) {
             if (child.properties?.className) {
@@ -463,6 +526,7 @@ export async function renderOrg(orgContent: string): Promise<string> {
   const highlighter = await getHighlighter();
   const processor = unified()
     .use(uniorgParse)
+    .use(uniorgHeadlines)
     .use(uniorgRehype)
     .use(rehypeOrgEnhancements)
     .use(rehypeShikiHighlight, highlighter)
