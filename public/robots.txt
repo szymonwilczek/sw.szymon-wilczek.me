@@ -10,11 +10,23 @@ User-agent: ChatGPT-User
 Allow: /
 Disallow: /vault/
 
+User-agent: OAI-SearchBot
+Allow: /
+Disallow: /vault/
+
 User-agent: PerplexityBot
 Allow: /
 Disallow: /vault/
 
 User-agent: ClaudeBot
+Allow: /
+Disallow: /vault/
+
+User-agent: Claude-User
+Allow: /
+Disallow: /vault/
+
+User-agent: Claude-SearchBot
 Allow: /
 Disallow: /vault/
 
@@ -27,6 +39,18 @@ Allow: /
 Disallow: /vault/
 
 User-agent: cohere-ai
+Allow: /
+Disallow: /vault/
+
+User-agent: Bytespider
+Allow: /
+Disallow: /vault/
+
+User-agent: Meta-ExternalAgent
+Allow: /
+Disallow: /vault/
+
+User-agent: Meta-ExternalFetcher
 Allow: /
 Disallow: /vault/
 
