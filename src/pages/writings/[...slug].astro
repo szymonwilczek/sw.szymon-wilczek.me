@@ -21,7 +21,7 @@ const rawLines = post.body ? post.body.split("\n").length : 0;
 
 // First image from org body if present for rich OpenGraph preview,
 // otherwise fall back to the build-time generated OG card for this article
-const imageMatch = post.body ? post.body.match(/\[\[(\/images\/[^\]]+)\]\]/) : null;
+const imageMatch = post.body ? post.body.match(/\[\[(\/(?:assets|images)\/[^\]]+)\]\]/) : null;
 const postImage = imageMatch ? imageMatch[1] : `/og/${slug}.png`;
 ---
 

@@ -8,7 +8,7 @@ import type { APIRoute } from "astro";
 const fontRegular = fs.readFileSync(path.resolve("./src/assets/fonts/TypusMono95-Regular.ttf"));
 const fontBold = fs.readFileSync(path.resolve("./src/assets/fonts/TypusMono95-Bold.ttf"));
 
-const INLINE_IMAGE_RE = /\[\[(\/images\/[^\]]+)\]\]/;
+const INLINE_IMAGE_RE = /\[\[(\/(?:assets|images)\/[^\]]+)\]\]/;
 
 export async function getStaticPaths() {
   const writings = await getCollection("writings");

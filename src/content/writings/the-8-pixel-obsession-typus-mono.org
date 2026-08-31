@@ -39,7 +39,7 @@ To compensate, I had to completely remap the weight hierarchy. In Typus Mono, *R
 
 While restructuring the tables, I also addressed programming ligatures. I understand why some developers enjoy watching =->= turn into an arrow or =!== collapse into a single glyph. Personally, I despise them. Code is code; a dash should remain a dash and an equals sign an equals sign. The build script stripped every ~calt~, ~liga~, and ~dlig~ lookup table from the OpenType ~GSUB~ registry.
 
-[[/images/typus-fonts/preview.png]]
+[[/assets/typus-fonts/preview.png]]
 
 The result above speaks for itself: clean numerals, distinct operators, zero ligatures, and a tight 530-pixel horizontal footprint for 64 columns of text. At that point, it felt like the hard part was done.
 
@@ -60,7 +60,7 @@ Applying a naive 8% horizontal scale across the entire patch set broke down imme
 2. *Levitating Glyphs*: Standalone icons designed for full cell heights floated awkwardly 200 units above the text baseline, hovering near the ceiling while adjacent text sat on the floor.
 3. *Fedora Hole Massacre*: TrueType outlines depend on Non-Zero Winding rules. If an outer contour runs clockwise, any inner cutout (like the transparent center of the Fedora logo or the loops of a =%= sign) must run counter-clockwise. An early winding algorithm I tested incorrectly treated every secondary contour as a cutout. The bottom loop of my percent signs and the middle of the Fedora icon collapsed into solid, pitch-black blobs.
 
-[[/images/typus-fonts/grid_specimen.png]]
+[[/assets/typus-fonts/grid_specimen.png]]
 
 Resolving this required formalizing a dedicated layout pipeline (*Approach A*):
 - *Baseline Anchoring*: Every standalone icon is mathematically anchored to the font baseline (=Y = 0=).
