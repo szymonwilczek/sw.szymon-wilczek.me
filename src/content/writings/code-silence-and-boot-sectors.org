@@ -135,4 +135,4 @@ The entire 8-part series and the complete full-course video are up on YouTube.
 
 As always:
 
-~Signed-off-by: Szymon Wilczek swilczek.lx@gmail.com~
+~Signed-off-by: Szymon Wilczek <swilczek.lx@gmail.com>~

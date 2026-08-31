@@ -85,4 +85,4 @@ If you share the same stubborn typographic preferences, the entire family (with 
 
 As always:
 
-~Signed-off-by: Szymon Wilczek swilczek.lx@gmail.com~
+~Signed-off-by: Szymon Wilczek <swilczek.lx@gmail.com>~
