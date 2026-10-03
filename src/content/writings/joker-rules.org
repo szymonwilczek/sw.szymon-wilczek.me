@@ -1,0 +1,183 @@
+#+TITLE: Rules of Joker: Silesian Remik
+#+AUTHOR: Szymon Wilczek
+#+DATE: <2026-10-03 Sat>
+#+CATEGORY: Games
+#+TAGS: cards joker remik rules silesia
+#+DESCRIPTION: The complete, dated rulebook of Joker - the Silesian variant of rummy - as played at our table, written down once so the arguments can finally stop :)
+
+* Why This Page Exists
+:PROPERTIES:
+:CUSTOM_ID: why-this-page-exists
+:END:
+
+Joker - or /remik/, as most of Poland calls it - is one of those card games everybody knows and nobody plays the same way. Every region, every family, every kitchen table has its own house rules, and every new game starts with the same ritual: ten minutes of arguing about whether you can take from the discard pile, how much an ace is worth, and what happens to the joker.
+
+So I wrote it down. All of it, in one place, with a date attached.
+
+What follows is the variant we play - Silesian rummy - spelled out precisely enough that the next argument can be settled by sending a link. The rest of this page is in Polish, because that's the language the game is played in at our table. If you wandered in here from somewhere else: these are just rules of a card game, nothing more.
+
+* Pojęcia
+:PROPERTIES:
+:CUSTOM_ID: pojecia
+:END:
+
+Żeby nie było żadnych niedomówień, najpierw słownik. Każde z tych słów w dalszej części znaczy dokładnie to, co tutaj.
+
+- *Talia* - zakryty stos kart, z którego się ciągnie.
+- *Stos odrzuconych* - odkryty stos kart obok talii, na który odrzuca się kartę na koniec tury. Ciągnąć z niego można tylko wierzchnią kartę.
+- *Ręka* - karty, które gracz trzyma i których nie widzą inni.
+- *Tura* - jeden ruch jednego gracza: od pociągnięcia karty do odrzucenia karty.
+- *Runda* - jedno rozdanie: od rozdania kart do momentu, w którym ktoś skończy.
+- *Rozgrywka* - cała gra, czyli tyle rund, ile trzeba, żeby ktoś przekroczył ustalony limit punktów.
+- *Układ* - co najmniej 3 karty leżące razem na stole, tworzące sekwens albo grupę.
+- *Sekwens* - co najmniej 3 karty w jednym kolorze, po kolei (np. 5 kier, 6 kier 7 kier ~lub~ 3 kier, 3 pik, 3 karo).
+- *Sekwens schodkowy* - specjalny rodzaj sekwensu, który obejmuje co najmniej 3 karty w jednym kolorze *tylko* po kolei (np. 5 kier, 6 kier, 7 kier, ~ale nie~: 3 kier, 3 pik, 3 karo)
+- *Czysty sekwens* - sekwens schodkowy bez ani jednego Jokera.
+- *Grupa* - 3 lub 4 karty tej samej wartości, każda w innym kolorze (np. 3 kier, 3 pik, 3 karo, 3 trefl).
+- *Wyłożenie się* - pierwsze położenie własnych układów na stole w danej rundzie.
+- *Dokładanie* - dokładanie kart z ręki do układów, które już leżą na stole (swoich lub cudzych).
+- *Skończenie* - pozbycie się wszystkich kart z ręki, co kończy rundę.
+- *Przełożenie* - przełożenie potasowanej talii przed rozdaniem, połączone z prawem do szukania Jokera (szczegóły niżej).
+- *Czyszczenie* - zebranie pełnej grupy ze stołu na stos odrzuconych.
+
+* Karty i rozdanie
+:PROPERTIES:
+:CUSTOM_ID: karty-i-rozdanie
+:END:
+
+- Gra się dwiema taliami po 52 karty plus 4 Jokery - razem 108 kart (dla 2 osób, czyli rozgrywka ~1 vs 1~ często grywa się też jedną talią, wtedy 2 Jokery jedynie).
+- Każdy gracz dostaje 13 kart. Rozdający dostaje 14.
+- Rozdaje się po dżentelmeńsku: po jednej karcie, zgodnie z ruchem wskazówek zegara, zaczynając od osoby siedzącej obok rozdającego. Ostatnia karta każdego okrążenia trafia więc do rozdającego, a na sam koniec rozdający daje sobie jeszcze jedną, czternastą kartę. Rozdawanie kończy się podwójną kartą dla siebie - nikt inny nie dostaje niczego "dodatkowego" w trakcie.
+- Pozostałe karty kładzie się zakryte na środku - to jest talia. Stos odrzuconych na początku jest pusty.
+- W następnej rundzie rozdaje kolejna osoba zgodnie z ruchem wskazówek zegara.
+
+* Przełożenie
+:PROPERTIES:
+:CUSTOM_ID: przelozenie
+:END:
+
+- Tasuje i rozdaje zawsze ta sama osoba - rozdający danej rundy.
+- Prawo do przełożenia talii ma osoba następna po rozdającym, zgodnie z ruchem wskazówek zegara - czyli ta, która w następnej rundzie będzie tasować i rozdawać. Lub dowolnie, jeśli zostanie to uzgodnione - kto pierwszy ten lepszy, najczęściej jednak żeby uniknąć chaosu zalecana jest kolejność zgodnie z ruchem wskazówek zegara.
+- Przełożenie wygląda tak: przekładający sam wybiera moment i miejsce, w którym zdejmuje część potasowanej talii. Ogląda 3 karty z dołu zdjętej części i sprawdza, czy jest wśród nich Joker.
+- Jeśli jest - może go sobie wziąć. Wtedy rozdający daje mu już tylko 12 kart, bo trzynastą jest Joker znaleziony przy przełożeniu.
+- Nawet jeśli wśród 3 kart są 2 Jokery, wziąć można *tylko jednego*.
+- Wzięcie Jokera jest prawem, nie obowiązkiem. Jeśli przekładający go nie weźmie (albo żadnego nie znajdzie), dostaje normalnie 13 kart.
+
+* Przebieg tury
+:PROPERTIES:
+:CUSTOM_ID: przebieg-tury
+:END:
+
+- Gra toczy się zgodnie z ruchem wskazówek zegara.
+- Rundę zaczyna rozdający. Ma 14 kart, więc jego pierwsza tura polega wyłącznie na odrzuceniu jednej karty na stos odrzuconych - bez ciągnięcia. To jedyny wyjątek od normalnego przebiegu tury.
+- Każda kolejna tura wygląda tak:
+  1. *Początek:* pociągnięcie jednej karty - z talii albo wierzchniej karty ze stosu odrzuconych (zasady ciągnięcia ze stosu odrzuconych niżej).
+  2. *Środek:* opcjonalnie - wyłożenie się, dokładanie, podmiana Jokera, o ile gracz spełnia warunki.
+  3. *Koniec:* odrzucenie jednej karty na stos odrzuconych - albo skończenie (które też kończy się odrzuceniem karty).
+- Gdy talia się wyczerpie, stos odrzuconych - poza wierzchnią kartą - tasuje się i kładzie zakryty jako nowa talia.
+
+* Układy
+:PROPERTIES:
+:CUSTOM_ID: uklady
+:END:
+
+- Sekwens jest zdefiniowany na górze strony.
+- Grupa (/też zdefiniowana na górze/) to 3 lub 4 karty tej samej wartości, każda w innym kolorze. Gramy dwiema taliami, więc istnieją dwie identyczne karty (np. dwie 3 karo) - w jednej grupie może leżeć *najwyżej* jedna z nich (ergo, bez duplikatów).
+- As może być na dole sekwensu (3-2-A) albo na górze (A-K-D). Nie może być w środku - zawijanie (2-A-K) jest niedozwolone i nie istnieje.
+- Joker zastępuje dowolną kartę. Nie ma limitu Jokerów w jednym układzie, ale układ nie może składać się z samych Jokerów - musi w nim być przynajmniej jedna normalna karta.
+
+* Czyszczenie
+:PROPERTIES:
+:CUSTOM_ID: czyszczenie
+:END:
+
+- Czyszczenie dotyczy tylko grup.
+- Grupa jest skończona, gdy leżą w niej 4 karty - po jednej z każdego koloru. Nic więcej nie da się do niej dołożyć.
+- Skończoną grupę można zebrać ze stołu i położyć na stos odrzuconych. Nie jest to obowiązkowe - można, ale nie trzeba.
+
+* Wyłożenie się
+:PROPERTIES:
+:CUSTOM_ID: wylozenie-sie
+:END:
+
+Żeby się wyłożyć, trzeba jednocześnie spełnić oba warunki:
+
+1. *Czysty sekwens* - wśród wykładanych układów musi być przynajmniej jeden *czysty sekwens*. 3-2-A liczy się jako czysty sekwens.
+2. *51 punktów* - suma wartości wszystkich wykładanych kart musi wynosić co najmniej 51.
+
+Wartości kart przy wykładaniu:
+
+| Karta             |                         Punkty |
+|-------------------+--------------------------------|
+| 2-10              |                wartość z karty |
+| Walet, Dama, Król |                             10 |
+| As w 3-2-A        |                              1 |
+| As w A-K-D        |                             10 |
+| As w grupie asów  |                             10 |
+| Joker             | wartość karty, którą zastępuje |
+
+Dalsze zasady:
+
+- Dokładać do układów na stole (swoich i cudzych) może tylko gracz, który jest już wyłożony, lub kończy z ręki całą turę - wtedy może dołożyć ile chce, ale nadal potrzebuje *czystego sekwensu* oraz jednej karty do odrzucenia - może natomiast się dołożyć, ale warunkiem jest, że nie zostanie mu żadna karta - czyli skończy na raz.
+- W turze, w której gracz się wyłożył, nie może jeszcze dokładać. Dokładać może dopiero od swojej następnej tury.
+
+* Ciągnięcie ze stosu odrzuconych
+:PROPERTIES:
+:CUSTOM_ID: ciagniecie-ze-stosu-odrzuconych
+:END:
+
+- Ciągnąć ze stosu odrzuconych można tylko wierzchnią kartę, i tylko zamiast ciągnięcia z talii - nigdy oprócz.
+- Karta wzięta ze stosu odrzuconych musi zostać użyta w tej samej turze.
+- *Gracz wyłożony* może ciągnąć ze stosu odrzuconych w każdej swojej turze.
+- *Gracz niewyłożony* może ciągnąć ze stosu odrzuconych tylko wtedy, gdy w tej samej turze skończy - czyli spełni wszystkie warunki skończenia, łącznie z czystym sekwensem.
+
+* Joker
+:PROPERTIES:
+:CUSTOM_ID: joker
+:END:
+
+- Jokera leżącego w układzie na stole (swoim lub cudzym) można zabrać tylko w jeden sposób: kładąc w jego miejsce dokładnie tę kartę, którą zastępował.
+- Podmieniać Jokera może tylko gracz wyłożony. Wyjątek: gracz niewyłożony może to zrobić, jeśli w tej samej turze skończy.
+- Zabranego Jokera trzeba od razu, w tej samej turze, użyć w układzie na stole. Nie można go schować na rękę.
+- Jokera wolno odrzucić na stos odrzuconych. Zasady tego nie zabraniają - zdrowy rozsądek owszem. Joker pasuje do wszystkiego, a na ręce na koniec rundy kosztuje 100 punktów, więc oddanie go następnemu graczowi to akt hojności, który trudno odróżnić od sabotażu własnej gry. Kto tak robi, ten albo wie coś, czego reszta stołu nie wie, albo jest już lekko pijany. Statystycznie raczej to drugie.
+
+* Skończenie
+:PROPERTIES:
+:CUSTOM_ID: skonczenie
+:END:
+
+- Skończyć to pozbyć się wszystkich kart z ręki: wszystkie poza jedną muszą trafić do układów na stole (własnych albo dołożone do cudzych), a ostatnią *trzeba* odrzucić na stos odrzuconych.
+- Skończenie *zawsze* kończy się odrzuceniem jednej karty. Nie ma innej drogi. Kto wyłożył wszystkie karty i nie ma czego odrzucić - nie skończył.
+- Do skończenia potrzebny jest *czysty sekwens* wśród własnych układów gracza na stole.
+- Można skończyć /z ręki/, czyli w jednej turze wyłożyć się i pozbyć wszystkich kart, bez wcześniejszego wykładania. Nie daje to żadnych dodatkowych punktów ani dodatkowej kary dla pozostałych.
+- Przy skończeniu z ręki wymagany jest *czysty sekwens*, ale *nie obowiązuje* próg 51 punktów. Kończąc, gracz czyści rękę, a nie zbiera punktację - próg 51 dotyczy tylko zwykłego wyłożenia się.
+- W turze skończenia wszystko dzieje się naraz, dlatego zasady muszą się tu poprawnie zazębić. Przykład: Ania jest wyłożona, Bartek nie. Bartek ma na ręce czysty sekwens, kartę pasującą do układu Ani i kartę, którą w układzie Ani zastępuje Joker. W jednej turze może: wyłożyć swój czysty sekwens, dołożyć kartę do układu Ani, podmienić Jokera, od razu użyć Jokera w swoim układzie i odrzucić ostatnią kartę. Wszystko to jest dozwolone tylko dlatego, że tą turą kończy - gdyby choć jedna karta mu została, mógłby najwyżej zwyczajnie się wyłożyć (o ile miałby 51 punktów), ale już nie dokładać ani podmieniać Jokera.
+
+* Punktacja
+:PROPERTIES:
+:CUSTOM_ID: punktacja
+:END:
+
+- Gdy ktoś skończy, runda się kończy. Gracz, który skończył, dostaje 0 punktów.
+- Pozostali gracze dostają punkty karne - sumę wartości kart, które zostały im na ręce. Karty leżące na stole się nie liczą.
+
+| Karta na ręce         | Punkty karne    |
+|-----------------------+-----------------|
+| 2-10                  | wartość z karty |
+| Walet, Dama, Król, As | 10              |
+| Joker                 | 100 (buła)      |
+
+- Punkty karne sumują się przez wszystkie rundy rozgrywki.
+
+* Koniec rozgrywki
+:PROPERTIES:
+:CUSTOM_ID: koniec-rozgrywki
+:END:
+
+- Przed rozgrywką gracze umawiają się, do ilu punktów grają. Nie ma tu domyślnego limitu - ile się ustali, tyle obowiązuje. Często gramy też pojedyncze rundy (bez zapisywania).
+- Gdy po którejś rundzie ktokolwiek przekroczy ustalony limit, rozgrywka się kończy.
+- Podlicza się punkty wszystkich graczy. Wygrywa ten, kto ma ich najmniej.
+
+As always:
+
+~Signed-off-by: Szymon Wilczek <swilczek.lx@gmail.com>~
