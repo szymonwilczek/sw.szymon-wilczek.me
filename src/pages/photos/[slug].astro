@@ -577,31 +577,13 @@ const { album } = Astro.props;
 
   .lightbox-container {
     position: absolute;
+    inset: 0;
     z-index: 100000;
     display: flex;
-    flex-direction: column;
     align-items: center;
+    justify-content: center;
     box-sizing: border-box;
-    padding: 0.75rem;
-    gap: 0.4rem;
-  }
-
-  @media (min-width: 64em) {
-    .lightbox-container {
-      top: 0;
-      right: 0;
-      bottom: 0;
-      left: var(--sidebar-width, 320px);
-    }
-  }
-
-  @media (max-width: 63.99em) {
-    .lightbox-container {
-      top: 3.75rem;
-      right: 0;
-      bottom: 0;
-      left: 0;
-    }
+    padding: 3.75rem 4rem;
   }
 
   .lightbox-close-btn {
@@ -627,6 +609,16 @@ const { album } = Astro.props;
       border-color 0.12s ease;
   }
 
+  @media (max-width: 63.99em) {
+    .lightbox-container {
+      padding: 7.25rem 0.75rem;
+    }
+
+    .lightbox-close-btn {
+      top: 4.5rem;
+    }
+  }
+
   .lightbox-close-btn:hover {
     background-color: var(--fg-main);
     color: var(--bg-main);
@@ -634,12 +626,11 @@ const { album } = Astro.props;
   }
 
   .lightbox-image-wrapper {
-    flex: 1;
-    min-height: 0;
     display: flex;
     align-items: center;
     justify-content: center;
     width: 100%;
+    height: 100%;
   }
 
   .lightbox-image-wrapper img {
@@ -651,7 +642,11 @@ const { album } = Astro.props;
   }
 
   .lightbox-caption {
-    flex-shrink: 0;
+    position: absolute;
+    right: 0.75rem;
+    bottom: 1rem;
+    left: 0.75rem;
+    margin: 0;
     font-family: "Typus Mono 95", "Typus Mono", monospace;
     font-size: 0.85rem;
     color: var(--fg-dim, #e0e0e0);
