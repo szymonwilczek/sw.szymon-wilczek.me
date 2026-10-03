@@ -343,7 +343,10 @@ export async function getAllAlbums(): Promise<PhotoAlbum[]> {
     photos.sort((a, b) => a.date.getTime() - b.date.getTime());
 
     const earliestDate = photos.length > 0 ? photos[0].date : new Date();
-    const dateFormatted = earliestDate.toLocaleDateString("en-US", {
+    const albumDate = dateSuffix
+      ? new Date(dateSuffix.year, dateSuffix.month - 1, 1)
+      : earliestDate;
+    const dateFormatted = albumDate.toLocaleDateString("en-US", {
       month: "long",
       year: "numeric",
     });
@@ -377,7 +380,7 @@ export async function getAllAlbums(): Promise<PhotoAlbum[]> {
       title: albumMetadata.title || derivedTitle,
       description: albumMetadata.description,
       location: albumMetadata.location,
-      date: earliestDate,
+      date: albumDate,
       dateFormatted,
       coverImage,
       coverThumb,
@@ -389,7 +392,11 @@ export async function getAllAlbums(): Promise<PhotoAlbum[]> {
     });
   }
 
-  albums.sort((a, b) => b.date.getTime() - a.date.getTime());
+  albums.sort(
+    (a, b) =>
+      b.date.getTime() - a.date.getTime() ||
+      (b.photos[0]?.date.getTime() ?? 0) - (a.photos[0]?.date.getTime() ?? 0),
+  );
 
   albumsCache = albums;
   return albums;
