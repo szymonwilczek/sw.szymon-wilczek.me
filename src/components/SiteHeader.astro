@@ -11,7 +11,69 @@ const links = [
   { href: "/files/", label: "files" },
   { href: "/about/", label: "about" },
 ];
+
+const menu = [...links, { href: "/contact/", label: "contact" }];
 ---
+
+<header class="mobile-header">
+  <a href="/" class="site-brand">
+    <Seal glyph="狼" size={36} />
+    <span class="brand-name">Szymon Wilczek</span>
+  </a>
+  <button
+    id="menu-open"
+    type="button"
+    class="icon-button"
+    aria-label="Open menu"
+    aria-controls="menu-sheet"
+    aria-expanded="false"
+  >
+    <svg width="28" height="20" viewBox="0 0 28 20" aria-hidden="true">
+      <path d="M2 3 C 9 2, 18 4, 26 2.5 M3 10 C 10 9, 17 11, 24 9.5 M2 17 C 8 16, 14 18, 19 16.5" />
+    </svg>
+  </button>
+</header>
+
+<dialog id="menu-sheet" class="menu-sheet" aria-label="Menu">
+  <div class="menu-top">
+    <a href="/" class="site-brand">
+      <Seal glyph="狼" size={36} />
+      <span class="brand-name">Szymon Wilczek</span>
+    </a>
+    <button id="menu-close" type="button" class="icon-button" aria-label="Close menu">
+      <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true">
+        <path d="M3 3 C 8 8, 13 13, 19 19.5 M19 2.5 C 14 8, 9 13, 2.5 19" />
+      </svg>
+    </button>
+  </div>
+
+  <nav aria-label="Main">
+    <ol class="menu-list">
+      {
+        menu.map((link, i) => (
+          <li>
+            <a href={link.href} aria-current={isActive(link.href) ? "page" : undefined}>
+              <span class="menu-num">{String(i + 1).padStart(2, "0")}</span>
+              <span class="menu-label">{link.label}</span>
+            </a>
+          </li>
+        ))
+      }
+    </ol>
+  </nav>
+
+  <button type="button" class="menu-theme" data-theme-open>
+    <span class="theme-dots" aria-hidden="true"><span></span><span></span></span>
+    <span>M-x au-themes-select</span>
+    <span class="menu-theme-current" data-theme-label>aurum · night</span>
+  </button>
+
+  <p class="menu-extra">
+    <a href="/credits/">credits</a>
+    <a href="/rss.xml">rss</a>
+    <a href="/vault/">vault</a>
+  </p>
+</dialog>
 
 <header class="site-header">
   <a href="/" class="site-brand">
@@ -157,6 +219,160 @@ const links = [
     margin-left: -5px;
     background: var(--red);
   }
+
+  .mobile-header,
+  .menu-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .mobile-header .site-brand,
+  .menu-top .site-brand {
+    gap: 0.75rem;
+  }
+
+  .mobile-header .brand-name,
+  .menu-top .brand-name {
+    font-size: 1.125rem;
+  }
+
+  .icon-button {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+  }
+
+  .icon-button path {
+    fill: none;
+    stroke: var(--fg-main);
+    stroke-width: 1.8;
+    stroke-linecap: round;
+  }
+
+  .menu-sheet {
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    max-height: none;
+    margin: 0;
+    padding: 1.25rem var(--gutter);
+    border: 0;
+    background: var(--bg-main);
+    color: var(--fg-main);
+    flex-direction: column;
+  }
+
+  .menu-sheet[open] {
+    display: flex;
+  }
+
+  :global(html:has(.menu-sheet[open])) {
+    overflow: hidden;
+  }
+
+  .menu-sheet::backdrop {
+    background: var(--bg-main);
+  }
+
+  .menu-list {
+    margin: 4rem 0 2rem;
+    padding: 0;
+    list-style: none;
+  }
+
+  .menu-list li {
+    border-top: 1px dashed var(--border);
+  }
+
+  .menu-list a {
+    display: flex;
+    align-items: baseline;
+    gap: 1.125rem;
+    padding: 0.875rem 0;
+    color: var(--fg-main);
+    text-decoration: none;
+  }
+
+  .menu-num {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--cursor);
+  }
+
+  .menu-label {
+    font-size: 2.125rem;
+    font-weight: 300;
+    line-height: 1.1;
+  }
+
+  .menu-list a[aria-current="page"] .menu-label {
+    color: var(--cursor);
+  }
+
+  .menu-theme {
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    min-height: 48px;
+    padding: 0 1rem;
+    border: 1px solid var(--border);
+    border-radius: 24px 20px 23px 21px;
+    background: transparent;
+    color: var(--fg-dim);
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    cursor: pointer;
+  }
+
+  .menu-theme .theme-dots span {
+    width: 12px;
+    height: 12px;
+  }
+
+  .menu-theme .theme-dots span + span {
+    margin-left: -6px;
+  }
+
+  .menu-theme-current {
+    margin-left: auto;
+    color: var(--fg-main);
+  }
+
+  .menu-extra {
+    margin: 1.125rem 0 0;
+    display: flex;
+    gap: 1.125rem;
+    font-family: var(--font-hand);
+    font-weight: 300;
+    font-size: 1.0625rem;
+  }
+
+  .menu-extra a {
+    color: var(--fg-dim);
+    text-decoration: none;
+  }
+
+  @media (min-width: 48em) {
+    .mobile-header,
+    .menu-sheet {
+      display: none !important;
+    }
+  }
+
+  @media (max-width: 47.99em) {
+    .site-header {
+      display: none;
+    }
+  }
 </style>
 
 <script is:inline>
@@ -169,12 +385,28 @@ const links = [
       });
     }
 
-    var btn = document.getElementById("theme-toggle");
-    btn.addEventListener("click", function () {
+    function step() {
       var ids = window.auTheme.ids;
       var current = window.auTheme.resolve(window.auTheme.get());
       window.auTheme.set(ids[(ids.indexOf(current) + 1) % ids.length]);
+    }
+
+    document.getElementById("theme-toggle").addEventListener("click", step);
+
+    var sheet = document.getElementById("menu-sheet");
+    var openBtn = document.getElementById("menu-open");
+
+    openBtn.addEventListener("click", function () {
+      sheet.showModal();
+      openBtn.setAttribute("aria-expanded", "true");
     });
+    document.getElementById("menu-close").addEventListener("click", function () {
+      sheet.close();
+    });
+    sheet.addEventListener("close", function () {
+      openBtn.setAttribute("aria-expanded", "false");
+    });
+    sheet.querySelector("[data-theme-open]").addEventListener("click", step);
 
     document.addEventListener("au-theme-change", label);
     document.addEventListener("DOMContentLoaded", label);
