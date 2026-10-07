@@ -13,6 +13,20 @@ const links = [
 ];
 
 const menu = [...links, { href: "/contact/", label: "contact" }];
+
+function brush(seed: string) {
+  let h = 0;
+  for (const c of seed) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  const r = (n: number) => {
+    h = (h * 1103515245 + 12345) >>> 0;
+    return (((h >>> 8) % 1000) / 1000) * n;
+  };
+  const f = (n: number) => n.toFixed(1);
+  return (
+    `M2 ${f(5 + r(2))} C ${f(12 + r(8))} ${f(3 + r(3))}, ${f(30 + r(8))} ${f(7 + r(3))}, ` +
+    `${f(46 + r(8))} ${f(5 + r(2))} S ${f(62 + r(4))} ${f(4 + r(3))}, 68 ${f(3 + r(3))}`
+  );
+}
 ---
 
 <header class="mobile-header">
@@ -29,8 +43,7 @@ const menu = [...links, { href: "/contact/", label: "contact" }];
     aria-expanded="false"
   >
     <svg width="28" height="20" viewBox="0 0 28 20" aria-hidden="true">
-      <path d="M2 3 C 9 2, 18 4, 26 2.5 M3 10 C 10 9, 17 11, 24 9.5 M2 17 C 8 16, 14 18, 19 16.5"
-      ></path>
+      <path d="M2 3 C 9 2, 18 4, 26 2.5 M3 10 C 10 9, 17 11, 24 9.5 M2 17 C 8 16, 14 18, 19 16.5"></path>
     </svg>
   </button>
 </header>
@@ -50,23 +63,26 @@ const menu = [...links, { href: "/contact/", label: "contact" }];
 
   <nav aria-label="Main">
     <ol class="menu-list">
-      {
-        menu.map((link, i) => (
-          <li>
-            <a href={link.href} aria-current={isActive(link.href) ? "page" : undefined}>
-              <span class="menu-num">{String(i + 1).padStart(2, "0")}</span>
-              <span class="menu-label">{link.label}</span>
-            </a>
-          </li>
-        ))
-      }
+      {menu.map((link, i) => (
+        <li>
+          <a href={link.href} aria-current={isActive(link.href) ? "page" : undefined}>
+            <span class="menu-num">{String(i + 1).padStart(2, "0")}</span>
+            <span class="menu-label">{link.label}</span>
+          </a>
+        </li>
+      ))}
     </ol>
   </nav>
 
   <button type="button" class="menu-theme" data-theme-open>
-    <span class="theme-dots" aria-hidden="true"><span></span><span></span></span>
+    <span class="theme-dots" aria-hidden="true">
+      <span></span>
+      <span></span>
+    </span>
     <span>M-x au-themes-select</span>
-    <span class="menu-theme-current" data-theme-label>aurum · night</span>
+    <span class="menu-theme-current" data-theme-label>
+      aurum · night
+    </span>
   </button>
 
   <p class="menu-extra">
@@ -86,22 +102,18 @@ const menu = [...links, { href: "/contact/", label: "contact" }];
   </a>
 
   <nav class="site-nav" aria-label="Main">
-    {
-      links.map((link) => (
-        <a
-          href={link.href}
-          class:list={["nav-link", { active: isActive(link.href) }]}
-          aria-current={isActive(link.href) ? "page" : undefined}
-        >
-          {link.label}
-          {isActive(link.href) && (
-            <svg class="brush" viewBox="0 0 70 12" preserveAspectRatio="none" aria-hidden="true">
-              <path d="M2 6 C 16 4, 34 9, 50 6 S 64 5, 68 4" vector-effect="non-scaling-stroke" />
-            </svg>
-          )}
-        </a>
-      ))
-    }
+    {links.map((link) => (
+      <a
+        href={link.href}
+        class:list={["nav-link", { active: isActive(link.href) }]}
+        aria-current={isActive(link.href) ? "page" : undefined}
+      >
+        {link.label}
+        <svg class="brush" viewBox="0 0 70 12" preserveAspectRatio="none" aria-hidden="true">
+          <path d={brush(link.label)} vector-effect="non-scaling-stroke" />
+        </svg>
+      </a>
+    ))}
     <button
       id="theme-toggle"
       type="button"
@@ -109,7 +121,10 @@ const menu = [...links, { href: "/contact/", label: "contact" }];
       aria-label="Choose colour theme"
       data-theme-open
     >
-      <span class="theme-dots" aria-hidden="true"><span></span><span></span></span>
+      <span class="theme-dots" aria-hidden="true">
+        <span></span>
+        <span></span>
+      </span>
       <span data-theme-label>aurum · night</span>
     </button>
   </nav>
@@ -181,6 +196,23 @@ const menu = [...links, { href: "/contact/", label: "contact" }];
     bottom: -6px;
     width: calc(100% + 8px);
     height: 12px;
+    overflow: visible;
+    clip-path: inset(-4px 100% -4px -4px);
+    transition: clip-path 0.12s ease-in;
+  }
+
+  .nav-link:hover .brush,
+  .nav-link:focus-visible .brush,
+  .nav-link.active .brush {
+    clip-path: inset(-4px -4px -4px -4px);
+    transition: clip-path 0.38s cubic-bezier(0.3, 0.6, 0.35, 1);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .brush,
+    .nav-link:hover .brush {
+      transition: none;
+    }
   }
 
   .brush path {
