@@ -1,271 +1,254 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { getAllAlbums, type PhotoAlbum } from "../../utils/albums";
+import Divider from "../../components/Divider.astro";
+import Seal from "../../components/Seal.astro";
+import { getAllAlbums, type PhotoAlbum, type PhotoItem } from "../../utils/albums";
 
 export async function getStaticPaths() {
   const albums = await getAllAlbums();
-  return albums.map((album) => ({
+  return albums.map((album, i) => ({
     params: { slug: album.slug },
-    props: { album },
+    props: { album, newer: albums[i - 1], older: albums[i + 1] },
   }));
 }
 
 interface Props {
   album: PhotoAlbum;
+  newer?: PhotoAlbum;
+  older?: PhotoAlbum;
 }
 
-const { album } = Astro.props;
+const { album, newer, older } = Astro.props;
+const { photos } = album;
+
+const pad = (n: number) => String(n).padStart(2, "0");
+const day = (d: Date) => `${pad(d.getDate())}·${pad(d.getMonth() + 1)}`;
+const shotAt = (d: Date) =>
+  `${day(d)}·${d.getFullYear()} · ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+
+const first = photos[0]?.date;
+const last = photos[photos.length - 1]?.date;
+const when =
+  first && last
+    ? day(first) === day(last)
+      ? `${day(first)}·${first.getFullYear()}`
+      : `${day(first)} – ${day(last)}·${last.getFullYear()}`
+    : album.dateFormatted;
+
+const cameras = photos.map((p) => p.camera).filter(Boolean) as string[];
+const camera = cameras.sort(
+  (a, b) => cameras.filter((c) => c === b).length - cameras.filter((c) => c === a).length,
+)[0];
+
+const light = (p: PhotoItem) =>
+  [p.focalLength, p.aperture, p.shutterSpeed].filter(Boolean) as string[];
+
+const RADII = ["3px 7px 4px 8px", "6px 3px 7px 4px", "4px 6px 3px 7px", "7px 4px 6px 3px"];
 ---
 
 <BaseLayout
-  title={`${album.title} - Photography Album`}
-  description={`Photography journal from ${album.title} (${album.dateFormatted}). ${album.photoCount} high-fidelity captures.`}
-  image={album.photos[0]?.src}
-  imageAlt={album.photos[0]?.alt || `${album.title} Photography`}
+  title={album.title}
+  description={
+    album.description ?? `${album.title}, ${album.dateFormatted}. ${album.photoCount} frames.`
+  }
+  image={photos[0]?.src}
+  imageAlt={album.title}
   category="Photography"
 >
-  <article class="album-page">
-    <header class="album-header">
-      <div class="back-nav">
-        <a href="/photos/" class="back-link">&larr; All Albums</a>
+  <a href="/photos/" class="back hand">
+    <svg width="40" height="18" viewBox="0 0 40 18" aria-hidden="true">
+      <path d="M38 10 C 28 8, 18 11, 4 9" />
+      <path d="M11 3 L 3 9 L 11 15" />
+    </svg>
+    all albums
+  </a>
+
+  <header class="album-head">
+    <h1>{album.title}</h1>
+    <dl>
+      <div>
+        <dt>when</dt>
+        <dd>{when}</dd>
       </div>
-      <h1>{album.title}</h1>
-      <div class="album-stats-bar">
-        <span class="stat-item">Date: <strong>{album.dateFormatted}</strong></span>
-        <span class="stat-sep">&middot;</span>
-        <span class="stat-item">
-          Captures: <strong>{album.photoCount}</strong>
-        </span>
-        <span class="stat-sep">&middot;</span>
-        <span class="stat-item">
-          Master Data: <strong>{album.totalSizeFormatted}</strong>
-        </span>
+      <div>
+        <dt>frames</dt>
+        <dd>{album.photoCount}</dd>
       </div>
+      {camera && (
+        <div>
+          <dt>camera</dt>
+          <dd>{camera}</dd>
+        </div>
+      )}
+    </dl>
+  </header>
 
-      {album.description && <p class="album-lead-text">{album.description}</p>}
-    </header>
+  {album.description && <p class="lede">{album.description}</p>}
+  {album.narrativeHtml && <div class="narrative prose" set:html={album.narrativeHtml} />}
 
-    {
-      album.narrativeHtml && (
-        <section class="album-narrative-section">
-          <div class="org-content" set:html={album.narrativeHtml} />
-        </section>
-      )
-    }
+  <Divider from={620} to={860} />
 
-    <hr />
-
-    <div class="album-photos-stream">
-      {
-        album.photos.map((photo, index) => (
-          <figure
-            class={`photo-card ${photo.isPortrait ? "layout-portrait" : "layout-landscape"}`}
-            id={photo.id}
+  <ol class="frames">
+    {photos.map((photo, i) => (
+      <li id={photo.id} class:list={{ "is-portrait": photo.isPortrait }}>
+        <figure>
+          <a
+            href={photo.src}
+            class="shot"
+            data-lightbox={photo.src}
+            data-title={`${album.title} · ${photo.filename}`}
+            aria-label={`Open ${photo.filename} full size`}
           >
-            <div class="photo-media">
-              <a
-                href={photo.src}
-                target="_blank"
-                rel="noopener"
-                class="photo-lightbox-trigger"
-                data-lightbox={photo.src}
-                data-title={`${album.title} — ${photo.filename}`}
-              >
-                <img
-                  src={photo.thumbSrc || photo.src}
-                  alt={`${album.title} capture ${index + 1}`}
-                  loading={index < 2 ? "eager" : "lazy"}
-                  decoding="async"
-                />
-              </a>
-            </div>
+            <img
+              src={photo.thumbSrc || photo.src}
+              alt={`${album.title}, photo ${i + 1}`}
+              width={photo.width || undefined}
+              height={photo.height || undefined}
+              loading={i < 2 ? "eager" : "lazy"}
+              decoding="async"
+              style={`border-radius: ${RADII[i % RADII.length]}`}
+            />
+          </a>
 
-            <figcaption class="photo-details">
-              <div class="photo-info-row">
-                <span class="photo-num">
-                  #{index + 1} &middot; <code>{photo.filename}</code>
-                </span>
-                <span class="photo-date">
-                  {photo.date.toLocaleString("en-US", {
-                    month: "short",
-                    day: "numeric",
-                    year: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </span>
-              </div>
+          <figcaption>
+            <p class="frame-head">
+              <span class="frame-num">{pad(i + 1)}</span>
+              <span class="frame-file">
+                <span>{photo.filename}</span>
+                <span>{shotAt(photo.date)}</span>
+              </span>
+            </p>
 
-              {photo.note && (
-                <div class="photo-user-note">
-                  <span class="note-label">Field Note:</span>
-                  <p>{photo.note}</p>
-                </div>
-              )}
+            {photo.note && <p class="note hand">{photo.note}</p>}
 
-              <div class="exif-telemetry-grid">
+            <table class="exif" aria-label={`EXIF for ${photo.filename}`}>
+              <tbody>
                 {photo.camera && (
-                  <div class="exif-cell">
-                    <span class="exif-label">Camera</span>
-                    <span class="exif-val">{photo.camera}</span>
-                  </div>
+                  <tr>
+                    <th scope="row">camera</th>
+                    <td>{photo.camera}</td>
+                  </tr>
                 )}
                 {photo.lens && (
-                  <div class="exif-cell">
-                    <span class="exif-label">Lens</span>
-                    <span class="exif-val">{photo.lens}</span>
-                  </div>
+                  <tr>
+                    <th scope="row">lens</th>
+                    <td>{photo.lens}</td>
+                  </tr>
                 )}
-                {photo.focalLength && (
-                  <div class="exif-cell">
-                    <span class="exif-label">Focal</span>
-                    <span class="exif-val">{photo.focalLength}</span>
-                  </div>
-                )}
-                {photo.aperture && (
-                  <div class="exif-cell">
-                    <span class="exif-label">Aperture</span>
-                    <span class="exif-val">{photo.aperture}</span>
-                  </div>
-                )}
-                {photo.shutterSpeed && (
-                  <div class="exif-cell">
-                    <span class="exif-label">Shutter</span>
-                    <span class="exif-val">{photo.shutterSpeed}</span>
-                  </div>
-                )}
-                {photo.iso && (
-                  <div class="exif-cell">
-                    <span class="exif-label">ISO</span>
-                    <span class="exif-val">{photo.iso}</span>
-                  </div>
+                {(light(photo).length > 0 || photo.iso) && (
+                  <tr>
+                    <th scope="row">light</th>
+                    <td>
+                      <span class="light">
+                        {light(photo).map((v) => (
+                          <span>{v}</span>
+                        ))}
+                        {photo.iso && <span class="iso">{photo.iso}</span>}
+                      </span>
+                    </td>
+                  </tr>
                 )}
                 {photo.gps && (
-                  <div class="exif-cell exif-cell-wide">
-                    <span class="exif-label">Coordinates</span>
-                    <span class="exif-val">
-                      <a href={photo.gps.mapsUrl} target="_blank" rel="noopener" class="gps-link">
-                        {photo.gps.latitude.toFixed(4)}&deg; N, {photo.gps.longitude.toFixed(4)}
-                        &deg; E [OpenStreetMap]
+                  <tr>
+                    <th scope="row">where</th>
+                    <td>
+                      <a href={photo.gps.mapsUrl} rel="noopener">
+                        {photo.gps.latitude.toFixed(4)}, {photo.gps.longitude.toFixed(4)}
                       </a>
-                    </span>
-                  </div>
+                    </td>
+                  </tr>
                 )}
-              </div>
+                <tr>
+                  <th scope="row">sha-256</th>
+                  <td class="sha">{photo.sha256}</td>
+                </tr>
+              </tbody>
+            </table>
 
-              <div class="file-integrity-block">
-                <span class="sha-label">SHA-256 Integrity Sum:</span>
-                <code class="sha-hash-full">{photo.sha256}</code>
-              </div>
+            <a href={photo.src} download={photo.filename} class="original">
+              original · {photo.sizeFormatted}
+            </a>
+          </figcaption>
+        </figure>
+      </li>
+    ))}
+  </ol>
 
-              <div class="download-action-row">
-                <a href={photo.src} download={photo.filename} class="btn-action">
-                  Download Original ({photo.sizeFormatted})
-                </a>
-              </div>
-            </figcaption>
-          </figure>
-        ))
-      }
-    </div>
+  <nav class="adjacent" aria-label="Adjacent albums">
+    {older ? (
+      <a href={`/photos/${older.slug}/`}>
+        <span class="adjacent-dir">← older album</span>
+        <span>{older.title}</span>
+      </a>
+    ) : (
+      <span class="adjacent-dir">oldest album</span>
+    )}
+    <Seal glyph="終" size={40} tilt={3} label="end of album" />
+    {newer ? (
+      <a href={`/photos/${newer.slug}/`} class="adjacent-newer">
+        <span class="adjacent-dir">newer album →</span>
+        <span>{newer.title}</span>
+      </a>
+    ) : (
+      <span class="adjacent-dir">newest album</span>
+    )}
+  </nav>
 
-    <div id="lightbox-modal" class="lightbox-modal" aria-hidden="true">
-      <div class="lightbox-backdrop"></div>
-      <div class="lightbox-container">
-        <button class="lightbox-close-btn" aria-label="Close image preview">&times;</button>
-        <div class="lightbox-image-wrapper">
-          <img id="lightbox-img" src="" alt="Fullscreen capture preview" />
-        </div>
-        <p id="lightbox-caption" class="lightbox-caption"></p>
-      </div>
-    </div>
-  </article>
+  <dialog class="lightbox" id="lightbox" aria-label="Photo">
+    <form method="dialog">
+      <button class="lightbox-close" aria-label="Close">
+        <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true">
+          <path d="M4 4.5 C 8 8, 12 12, 16 15.5 M 15.5 4 C 12 8, 8 12, 4.5 16" />
+        </svg>
+      </button>
+    </form>
+    <img id="lightbox-img" src="" alt="" />
+    <p id="lightbox-caption" class="lightbox-caption"></p>
+  </dialog>
 </BaseLayout>
 
 <script>
   function setupLightbox() {
-    const modal = document.getElementById("lightbox-modal");
-    const modalImg = document.getElementById("lightbox-img") as HTMLImageElement;
-    const modalCaption = document.getElementById("lightbox-caption");
-    const closeBtn = document.querySelector(".lightbox-close-btn");
-    const backdrop = document.querySelector(".lightbox-backdrop");
+    const dialog = document.getElementById("lightbox") as HTMLDialogElement | null;
+    const img = document.getElementById("lightbox-img") as HTMLImageElement | null;
+    const caption = document.getElementById("lightbox-caption");
+    if (!dialog || !img) return;
 
-    if (!modal || !modalImg) return;
+    const links = Array.from(document.querySelectorAll<HTMLAnchorElement>("[data-lightbox]"));
+    let current = -1;
 
-    const links = document.querySelectorAll("[data-lightbox]");
-    const linkArray = Array.from(links);
-    let currentIndex = -1;
-
-    const showImage = (index: number) => {
-      if (index < 0 || index >= linkArray.length) return;
-      currentIndex = index;
-      const link = linkArray[currentIndex];
-      const src = link.getAttribute("data-lightbox") || "";
-      const title = link.getAttribute("data-title") || "";
-
-      modalImg.src = src;
-      if (modalCaption) modalCaption.textContent = title;
-      modal.classList.add("active");
-      modal.setAttribute("aria-hidden", "false");
-      document.body.style.overflow = "hidden";
+    const show = (i: number) => {
+      if (i < 0 || i >= links.length) return;
+      current = i;
+      img.src = links[i].dataset.lightbox || "";
+      if (caption) caption.textContent = links[i].dataset.title || "";
+      if (!dialog.open) dialog.showModal();
     };
 
-    linkArray.forEach((link, idx) => {
+    links.forEach((link, i) =>
       link.addEventListener("click", (e) => {
         e.preventDefault();
-        showImage(idx);
-      });
+        show(i);
+      }),
+    );
+
+    // click on the backdrop, not the photo, closes it
+    dialog.addEventListener("click", (e) => {
+      if (e.target === dialog) dialog.close();
+    });
+    dialog.addEventListener("close", () => {
+      img.src = "";
+      current = -1;
     });
 
-    const closeModal = () => {
-      modal.classList.remove("active");
-      modal.setAttribute("aria-hidden", "true");
-      modalImg.src = "";
-      document.body.style.overflow = "";
-      currentIndex = -1;
-    };
-
-    closeBtn?.addEventListener("click", closeModal);
-    backdrop?.addEventListener("click", closeModal);
-
-    const container = document.querySelector(".lightbox-container");
-    container?.addEventListener("click", (e) => {
-      const target = e.target as HTMLElement;
-      if (
-        target !== modalImg &&
-        target !== modalCaption &&
-        target !== closeBtn &&
-        !target.closest(".lightbox-close-btn")
-      ) {
-        closeModal();
-      }
-    });
-
-    window.addEventListener("keydown", (e) => {
-      if (!modal.classList.contains("active")) return;
-
-      if (e.key === "Escape") {
-        closeModal();
-      } else if (
-        (e.key === "j" || e.key === "ArrowRight" || e.key === "ArrowDown") &&
-        !e.ctrlKey &&
-        !e.altKey &&
-        !e.metaKey
-      ) {
-        if (currentIndex < linkArray.length - 1) {
-          e.preventDefault();
-          showImage(currentIndex + 1);
-        }
-      } else if (
-        (e.key === "k" || e.key === "ArrowLeft" || e.key === "ArrowUp") &&
-        !e.ctrlKey &&
-        !e.altKey &&
-        !e.metaKey
-      ) {
-        if (currentIndex > 0) {
-          e.preventDefault();
-          showImage(currentIndex - 1);
-        }
+    dialog.addEventListener("keydown", (e) => {
+      if (e.ctrlKey || e.altKey || e.metaKey) return;
+      if (["j", "ArrowRight", "ArrowDown"].includes(e.key)) {
+        e.preventDefault();
+        show(current + 1);
+      } else if (["k", "ArrowLeft", "ArrowUp"].includes(e.key)) {
+        e.preventDefault();
+        show(current - 1);
       }
     });
   }
@@ -275,386 +258,417 @@ const { album } = Astro.props;
 </script>
 
 <style>
-  .album-header {
-    margin-bottom: 2rem;
-  }
-
-  .back-nav {
-    margin-bottom: 1rem;
-  }
-
-  .back-link {
-    font-family: "Typus Mono 95", "Typus Mono", monospace;
-    font-size: 0.95rem;
-    color: var(--fg-link);
+  .back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+    min-height: 2.75rem;
+    font-size: 1.1875rem;
+    font-weight: 400;
+    color: var(--fg-dim);
     text-decoration: none;
   }
 
-  .back-link:hover {
-    color: var(--fg-link-hover);
-    text-decoration: underline;
-  }
-
-  .album-header h1 {
-    margin: 0.25rem 0 0.75rem 0;
-  }
-
-  .album-stats-bar {
-    font-family: "Typus Mono 95", "Typus Mono", monospace;
-    font-size: 0.92rem;
-    color: var(--fg-dim);
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .stat-sep {
-    opacity: 0.4;
-  }
-
-  .album-lead-text {
-    margin-top: 1rem;
-    font-size: 1.05rem;
-    line-height: 1.6;
+  .back:hover {
     color: var(--fg-main);
   }
 
-  .album-narrative-section {
-    margin: 2rem 0;
-    padding: 1.5rem;
-    border: 1px solid var(--border);
-    background-color: var(--bg-dim);
+  .back path {
+    fill: none;
+    stroke: var(--cursor);
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
   }
 
-  .album-photos-stream {
-    margin-top: 2.5rem;
+  .album-head {
     display: flex;
-    flex-direction: column;
-    gap: 3.5rem;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 1.25rem 3.5rem;
+    margin-top: 1.5rem;
   }
 
-  .photo-card {
+  .album-head h1 {
     margin: 0;
-    border: 1px solid var(--border);
-    background-color: var(--bg-dim);
-    padding: 1.25rem;
+    font-size: clamp(3rem, 2rem + 3.5vw, 4.75rem);
+    line-height: 1;
+    letter-spacing: -0.015em;
+  }
+
+  .album-head dl {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.75rem;
+    margin: 0;
+    padding-bottom: 0.625rem;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: var(--fg-dim);
+  }
+
+  .album-head dl div {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .album-head dt {
+    margin: 0;
+    font: inherit;
+  }
+
+  .album-head dd {
+    margin: 0;
+    color: var(--fg-main);
+  }
+
+  .lede,
+  .narrative {
+    max-width: 38.75rem;
+    margin: 2rem 0 0;
+    color: var(--fg-dim);
+  }
+
+  .frames {
     display: flex;
     flex-direction: column;
-    gap: 1.25rem;
+    gap: 7.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
   }
 
-  @media (min-width: 75em) {
-    .photo-card.layout-portrait {
-      display: grid;
-      grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
-      gap: 1.75rem;
-      align-items: start;
-    }
-
-    .photo-card.layout-portrait .photo-media {
-      width: 100%;
-    }
-
-    .photo-card.layout-portrait .photo-media img {
-      max-height: 650px;
-    }
-  }
-
-  .photo-card.layout-landscape {
+  figure {
     display: flex;
-    flex-direction: column;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 3rem;
+    margin: 0;
   }
 
-  .photo-media {
-    background: transparent;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
+  .frames li:nth-child(even) figure {
+    flex-direction: row-reverse;
   }
 
-  .photo-lightbox-trigger {
-    display: block;
-    width: 100%;
+  .shot {
+    flex: 999 1 30rem;
+    min-width: 0;
     cursor: zoom-in;
-    text-decoration: none;
   }
 
-  .photo-media img {
+  .is-portrait figure {
+    justify-content: center;
+  }
+
+  .is-portrait .shot {
+    flex: 0 1 27.5rem;
+    max-width: 27.5rem;
+  }
+
+  .shot img {
+    display: block;
     width: 100%;
     height: auto;
-    max-height: 750px;
-    object-fit: cover;
-    display: block;
-    border: 1px solid var(--border);
-    background-color: transparent;
-    transition: transform 0.25s ease;
   }
 
-  .photo-lightbox-trigger:hover img {
-    transform: scale(1.01);
-  }
-
-  .photo-details {
+  figcaption {
+    flex: 1 1 23rem;
+    min-width: 0;
+    max-width: 26.25rem;
     display: flex;
     flex-direction: column;
-    gap: 1.15rem;
-    flex: 1;
-  }
-
-  .photo-info-row {
-    font-family: "Typus Mono 95", "Typus Mono", monospace;
-    font-size: 0.9rem;
-    color: var(--fg-dim);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    border-bottom: 1px dashed var(--border);
-    padding-bottom: 0.5rem;
-  }
-
-  .photo-num {
-    font-weight: 600;
-    color: var(--fg-main);
-  }
-
-  .photo-user-note {
-    background-color: var(--bg-main);
-    border-left: 3px solid var(--fg-link);
-    padding: 0.65rem 0.85rem;
-    font-size: 0.92rem;
-    line-height: 1.5;
-  }
-
-  .note-label {
-    font-family: "Typus Mono 95", "Typus Mono", monospace;
-    font-size: 0.75rem;
-    color: var(--fg-link);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    display: block;
-    margin-bottom: 0.25rem;
-    font-weight: 600;
-  }
-
-  .photo-user-note p {
-    margin: 0;
-    color: var(--fg-main);
-  }
-
-  .exif-telemetry-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-    gap: 0.75rem;
-    background-color: var(--bg-main);
-    border: 1px solid var(--border);
-    padding: 0.85rem;
-  }
-
-  .exif-cell {
-    display: flex;
-    flex-direction: column;
-    gap: 0.2rem;
-  }
-
-  .exif-cell-wide {
-    grid-column: 1 / -1;
-  }
-
-  .exif-label {
-    font-family: "Typus Mono 95", "Typus Mono", monospace;
-    font-size: 0.72rem;
-    color: var(--fg-dim);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  .exif-val {
-    font-family: "Typus Mono 95", "Typus Mono", monospace;
-    font-size: 0.86rem;
-    color: var(--fg-main);
-    font-weight: 500;
-  }
-
-  .gps-link {
-    color: var(--fg-link);
-    text-decoration: none;
-  }
-
-  .gps-link:hover {
-    color: var(--fg-link-hover);
-    text-decoration: underline;
-  }
-
-  .file-integrity-block {
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
-  }
-
-  .sha-label {
-    font-family: "Typus Mono 95", "Typus Mono", monospace;
-    font-size: 0.72rem;
-    color: var(--fg-dim);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  .sha-hash-full {
-    font-family: "Typus Mono 95", "Typus Mono", monospace;
-    font-size: 0.76rem;
-    color: var(--fg-dim);
-    background-color: var(--bg-main);
-    border: 1px solid var(--border);
-    padding: 0.45rem 0.65rem;
-    word-break: break-all;
-    display: block;
-    line-height: 1.4;
-  }
-
-  .download-action-row {
-    display: flex;
-    align-items: center;
+    gap: 1.125rem;
     padding-top: 0.25rem;
   }
 
-  .btn-action {
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    background: transparent !important;
-    border: 1px solid var(--border) !important;
-    color: var(--fg-main) !important;
-    font-family: "Typus Mono 95", "Typus Mono", monospace !important;
-    font-size: 0.85rem !important;
-    font-weight: 500 !important;
-    padding: 0.4rem 0.95rem !important;
-    border-radius: 0 !important;
-    cursor: pointer !important;
-    text-decoration: none !important;
-    line-height: 1.4 !important;
-    white-space: nowrap !important;
-    transition:
-      background-color 0.12s ease,
-      color 0.12s ease,
-      border-color 0.12s ease !important;
+  .is-portrait figcaption {
+    flex: 0 1 23.75rem;
   }
 
-  .btn-action:hover {
-    background-color: var(--fg-main) !important;
-    color: var(--bg-main) !important;
-    border-color: var(--fg-main) !important;
-  }
-
-  .btn-action:active {
-    background-color: var(--fg-link) !important;
-    color: var(--bg-main) !important;
-    border-color: var(--fg-link) !important;
-  }
-
-  .lightbox-modal {
-    display: none;
-    position: fixed;
-    inset: 0;
-    z-index: 99999;
-  }
-
-  .lightbox-modal.active {
-    display: block;
-  }
-
-  .lightbox-backdrop {
-    position: absolute;
-    inset: 0;
-    background-color: rgba(0, 0, 0, 0.92);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    cursor: pointer;
-  }
-
-  .lightbox-container {
-    position: absolute;
-    inset: 0;
-    z-index: 100000;
+  .frame-head {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    box-sizing: border-box;
-    padding: 3.75rem 4rem;
+    align-items: baseline;
+    gap: 0.875rem;
+    margin: 0;
+    padding-bottom: 0.875rem;
+    border-bottom: 1px dashed var(--border);
   }
 
-  .lightbox-close-btn {
-    position: absolute;
-    top: 0.75rem;
-    right: 0.75rem;
-    background: var(--bg-main, #211c19);
-    border: 1px solid var(--border, #4a4535);
-    color: var(--fg-main, #ffffff);
-    font-family: "Typus Mono 95", "Typus Mono", monospace;
-    font-size: 1.4rem;
-    width: 2.75rem;
-    height: 2.75rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
+  .frame-num {
+    font-size: 2.75rem;
+    font-weight: 300;
+    font-style: italic;
     line-height: 1;
-    z-index: 100001;
-    transition:
-      background-color 0.12s ease,
-      color 0.12s ease,
-      border-color 0.12s ease;
+    color: var(--cursor);
   }
 
-  @media (max-width: 63.99em) {
-    .lightbox-container {
-      padding: 7.25rem 0.75rem;
-    }
-
-    .lightbox-close-btn {
-      top: 4.5rem;
-    }
+  .frame-file {
+    display: flex;
+    flex-direction: column;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    line-height: 1.5;
+    color: var(--fg-dim);
   }
 
-  .lightbox-close-btn:hover {
-    background-color: var(--fg-main);
-    color: var(--bg-main);
-    border-color: var(--fg-main);
+  .note {
+    margin: 0;
+    font-size: 1.25rem;
+    line-height: 1.35;
+    color: var(--fg-main);
+    transform: rotate(-1.5deg);
   }
 
-  .lightbox-image-wrapper {
+  .exif {
+    --label: 6.125rem;
+    width: 100%;
+    margin: 0.25rem 0 0;
+    border-collapse: collapse;
+    table-layout: fixed;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    line-height: 1.4;
+  }
+
+  .exif th,
+  .exif td {
+    position: relative;
+    padding: 0.75rem 0;
+    border: 0;
+    vertical-align: baseline;
+  }
+
+  .exif th::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: -3px;
+    width: 6px;
+    background: var(--fg-dim);
+    opacity: 0.75;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 6 100' preserveAspectRatio='none'%3E%3Cpath d='M3 0 C 2.2 30, 3.8 62, 3 100' fill='none' stroke='black' stroke-width='1.2' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E")
+      no-repeat center / 100% 100%;
+  }
+
+  .exif tr:nth-child(even) > th::after {
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 6 100' preserveAspectRatio='none'%3E%3Cpath d='M3 0 C 3.8 34, 2.2 70, 3 100' fill='none' stroke='black' stroke-width='1.2' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E");
+  }
+
+  .exif tr:first-child > th::after {
+    top: -0.375rem;
+  }
+
+  .exif tr:last-child > th::after {
+    bottom: -0.375rem;
+  }
+
+  .exif tr + tr > ::before {
+    content: "";
+    position: absolute;
+    top: -3px;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: var(--border);
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 6' preserveAspectRatio='none'%3E%3Cpath d='M0 3.4 C 30 2.6, 62 4, 100 2.8' fill='none' stroke='black' stroke-width='1.1' stroke-linecap='round' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E")
+      no-repeat center / 100% 100%;
+  }
+
+  .exif tr + tr > th::before {
+    left: 0.375rem;
+  }
+
+  .exif tr:nth-child(odd) > ::before {
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 6' preserveAspectRatio='none'%3E%3Cpath d='M0 2.8 C 36 3.8, 70 2.4, 100 3.2' fill='none' stroke='black' stroke-width='1.1' stroke-linecap='round' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E");
+  }
+
+  .exif tr:nth-child(odd) > th::before {
+    left: 0.875rem;
+  }
+
+  .exif tr:nth-child(odd) > td::before {
+    right: 0.5rem;
+  }
+
+  .exif tr:first-child > * {
+    padding-top: 0.125rem;
+  }
+
+  .exif tr:last-child > * {
+    padding-bottom: 0.125rem;
+  }
+
+  .exif th {
+    width: var(--label);
+    padding-right: 1rem;
+    text-align: right;
+    font-family: var(--font-hand);
+    font-size: 1rem;
+    font-weight: 300;
+    color: var(--fg-dim);
+  }
+
+  .exif td {
+    padding-left: 1.125rem;
+    color: var(--fg-main);
+  }
+
+  .light {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1rem;
+  }
+
+  .iso {
+    color: var(--cursor);
+  }
+
+  .exif .sha {
+    font-size: 0.6875rem;
+    letter-spacing: 0.02em;
+    word-break: break-all;
+    color: var(--fg-dim);
+  }
+
+  .original {
+    align-self: flex-start;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--fg-link);
+    text-decoration: none;
+  }
+
+  .original:hover {
+    color: var(--cursor);
+  }
+
+  .adjacent {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1.5rem;
+    margin-top: 7.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .adjacent a {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-height: 2.75rem;
+    text-decoration: none;
+  }
+
+  .adjacent-newer {
+    text-align: right;
+  }
+
+  .adjacent-dir {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--fg-dim);
+  }
+
+  .lightbox {
+    width: 100vw;
+    max-width: none;
+    height: 100dvh;
+    max-height: none;
+    margin: 0;
+    padding: 3.75rem 4rem;
+    border: 0;
+    background: transparent;
+  }
+
+  .lightbox[open] {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 100%;
-    height: 100%;
   }
 
-  .lightbox-image-wrapper img {
+  .lightbox::backdrop {
+    background: color-mix(in srgb, var(--bg-main) 92%, transparent);
+    backdrop-filter: blur(6px);
+  }
+
+  .lightbox img {
     max-width: 100%;
     max-height: 100%;
     object-fit: contain;
-    display: block;
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 3px 7px 4px 8px;
+    box-shadow: 0 24px 48px -24px rgba(0, 0, 0, 0.5);
+  }
+
+  .lightbox-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+  }
+
+  .lightbox-close path {
+    fill: none;
+    stroke: var(--fg-main);
+    stroke-width: 1.6;
+    stroke-linecap: round;
+  }
+
+  .lightbox-close:hover path {
+    stroke: var(--cursor);
   }
 
   .lightbox-caption {
     position: absolute;
-    right: 0.75rem;
+    left: 1rem;
+    right: 1rem;
     bottom: 1rem;
-    left: 0.75rem;
     margin: 0;
-    font-family: "Typus Mono 95", "Typus Mono", monospace;
-    font-size: 0.85rem;
-    color: var(--fg-dim, #e0e0e0);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--fg-dim);
     text-align: center;
-    max-width: 100%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    padding: 0.15rem 0.5rem;
+  }
+
+  @media (max-width: 47.99em) {
+    .frames {
+      gap: 4.5rem;
+    }
+
+    figure,
+    .frames li:nth-child(even) figure {
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .shot,
+    .is-portrait .shot,
+    figcaption,
+    .is-portrait figcaption {
+      flex: 0 0 auto;
+      width: 100%;
+      max-width: 100%;
+    }
+
+    .exif {
+      --label: 5.25rem;
+    }
+
+    .adjacent {
+      margin-top: 4.5rem;
+    }
+
+    .lightbox {
+      padding: 4rem 0.75rem;
+    }
   }
 </style>
