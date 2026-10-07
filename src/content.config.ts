@@ -76,27 +76,6 @@ const writings = defineCollection({
     })),
 });
 
-const projects = defineCollection({
-  loader: orgContentLoader({
-    base: "./src/content/projects",
-  }),
-  schema: z
-    .object({
-      title: z.string(),
-      description: z.string(),
-      pubDate: flexibleDate.optional(),
-      date: flexibleDate.optional(),
-      updatedDate: flexibleDate.optional(),
-      repo: z.string().optional(),
-      status: z.enum(["active", "maintained", "archived", "completed"]).default("active"),
-      tags: flexibleTags,
-    })
-    .transform((data) => ({
-      ...data,
-      pubDate: data.pubDate || data.date || new Date(),
-    })),
-});
-
 const files = defineCollection({
   loader: orgContentLoader({
     base: "./src/content/files",
@@ -158,7 +137,6 @@ const vault = defineCollection({
 
 export const collections = {
   writings,
-  projects,
   files,
   photos,
   vault,

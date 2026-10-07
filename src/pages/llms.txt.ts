@@ -11,13 +11,6 @@ export const GET: APIRoute = async ({ site }) => {
     );
   } catch {}
 
-  let projects = [];
-  try {
-    projects = (await getCollection("projects")).sort(
-      (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
-    );
-  } catch {}
-
   let content = `# Szymon Wilczek
 
 > Personal hypermedia space, software engineering archive, custom developer utilities, typography, photography, and plain-text essays by Szymon Wilczek.
@@ -54,22 +47,11 @@ export const GET: APIRoute = async ({ site }) => {
     content += `*No published writings available yet.*\n`;
   }
 
-  if (projects.length > 0) {
-    content += `\n## Software Projects & Tools\n\n`;
-    for (const proj of projects) {
-      const slug = proj.id.replace(/\.(org|md|mdx)$/, "");
-      const title = proj.data.title;
-      const desc = proj.data.description || "";
-      const htmlUrl = `${siteUrl}/projects/${slug}/`;
-      content += `- [${title}](${htmlUrl}): ${desc}\n`;
-    }
-  }
-
   content += `
 ## Direct Plain-Text Feeds & Context
 
 - [Full Content Archive for LLMs](${siteUrl}/llms-full.txt): Complete concatenated full-text dump of all published essays and writings.
-- [RSS XML Feed](${siteUrl}/rss.xml): Standard RSS syndication feed for new articles and projects.
+- [RSS XML Feed](${siteUrl}/rss.xml): Standard RSS syndication feed for new articles.
 - [XML Sitemap](${siteUrl}/sitemap-index.xml): Full URL hierarchy for search and index crawlers.
 
 ## Excluded Sections

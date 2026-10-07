@@ -33,9 +33,6 @@ export default defineConfig({
         } else if (item.url.includes("/writings/")) {
           item.priority = 0.9;
           item.changefreq = "monthly";
-        } else if (item.url.includes("/projects/")) {
-          item.priority = 0.8;
-          item.changefreq = "monthly";
         } else if (item.url.includes("/photos/")) {
           item.priority = 0.7;
           item.changefreq = "monthly";
