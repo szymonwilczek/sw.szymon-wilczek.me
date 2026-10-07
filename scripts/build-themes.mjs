@@ -102,7 +102,7 @@ function renderJson(themes) {
     variant,
     polarity,
     description,
-    swatch: [colors.get("bg-main"), colors.get("fg-main"), colors.get("accent-0")],
+    swatch: [colors.get("bg-main"), colors.get("fg-main"), colors.get("cursor"), colors.get("red")],
   }));
   return JSON.stringify(entries, null, 2) + "\n";
 }

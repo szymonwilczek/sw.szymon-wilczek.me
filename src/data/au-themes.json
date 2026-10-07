@@ -5,7 +5,7 @@
     "variant": "day",
     "polarity": "light",
     "description": "Warm daylight theme with zero blue-light hazard, calibrated for photophobia.",
-    "swatch": ["#ded8cc", "#2b2720", "#6c6400"]
+    "swatch": ["#ded8cc", "#2b2720", "#8c5a08", "#a54b32"]
   },
   {
     "id": "aurum-twilight",
@@ -13,7 +13,7 @@
     "variant": "twilight",
     "polarity": "dark",
     "description": "Intermediate dark theme with gold and purple accents for transitional lighting.",
-    "swatch": ["#12100e", "#ada490", "#c49c3e"]
+    "swatch": ["#12100e", "#ada490", "#dca032", "#b84c3e"]
   },
   {
     "id": "aurum-night",
@@ -21,7 +21,7 @@
     "variant": "night",
     "polarity": "dark",
     "description": "Warm dark theme without blue-light hazard, calibrated for nocturnal photophobia.",
-    "swatch": ["#12100e", "#ada490", "#caa042"]
+    "swatch": ["#12100e", "#ada490", "#dca032", "#b84c3e"]
   },
   {
     "id": "herbarium-day",
@@ -29,7 +29,7 @@
     "variant": "day",
     "polarity": "light",
     "description": "Herbal daylight theme with dried botanicals and pressed leaves.",
-    "swatch": ["#d6d8c8", "#242820", "#944818"]
+    "swatch": ["#d6d8c8", "#242820", "#286440", "#9a3c2e"]
   },
   {
     "id": "herbarium-night",
@@ -37,7 +37,7 @@
     "variant": "night",
     "polarity": "dark",
     "description": "Nocturnal herbal theme with dried botanicals and pressed leaves.",
-    "swatch": ["#141312", "#969e90", "#b48e3c"]
+    "swatch": ["#141312", "#969e90", "#9670aa", "#ba483e"]
   },
   {
     "id": "parchment-day",
@@ -45,7 +45,7 @@
     "variant": "day",
     "polarity": "light",
     "description": "Low-chroma daylight theme with typographic italics and minimal color variance.",
-    "swatch": ["#ded6c4", "#282420", "#6e594c"]
+    "swatch": ["#ded6c4", "#282420", "#62564c", "#9e3a2a"]
   },
   {
     "id": "parchment-night",
@@ -53,7 +53,7 @@
     "variant": "night",
     "polarity": "dark",
     "description": "Low-chroma nocturnal theme with typographic italics and minimal color variance.",
-    "swatch": ["#18130e", "#a29a88", "#b2959c"]
+    "swatch": ["#18130e", "#a29a88", "#beaa84", "#aa4238"]
   },
   {
     "id": "salina-day",
@@ -61,7 +61,7 @@
     "variant": "day",
     "polarity": "light",
     "description": "Coastal daylight theme with sea-salt and dune tones.",
-    "swatch": ["#dad8cf", "#202826", "#725c10"]
+    "swatch": ["#dad8cf", "#202826", "#924626", "#9c3a2e"]
   },
   {
     "id": "salina-night",
@@ -69,7 +69,7 @@
     "variant": "night",
     "polarity": "dark",
     "description": "Nocturnal coastal theme with deep oceanic and coral tones.",
-    "swatch": ["#101414", "#8e9fa2", "#9e8644"]
+    "swatch": ["#101414", "#8e9fa2", "#ac6a3e", "#ba483e"]
   },
   {
     "id": "whispergrove-morning",
@@ -77,7 +77,7 @@
     "variant": "morning",
     "polarity": "light",
     "description": "Subdued daylight theme with reduced canvas luminance for sensitive eyes.",
-    "swatch": ["#9aa29c", "#141c16", "#303753"]
+    "swatch": ["#9aa29c", "#141c16", "#06566c", "#94322a"]
   },
   {
     "id": "whispergrove-day",
@@ -85,7 +85,7 @@
     "variant": "day",
     "polarity": "light",
     "description": "Low-glare daylight theme with muted green and neutral tones.",
-    "swatch": ["#cfd1c9", "#242d26", "#39405e"]
+    "swatch": ["#cfd1c9", "#242d26", "#0e648a", "#a13b32"]
   },
   {
     "id": "whispergrove-evening",
@@ -93,7 +93,7 @@
     "variant": "evening",
     "polarity": "dark",
     "description": "Elevated dark theme for intermediate ambient lighting and reduced pupil strain.",
-    "swatch": ["#1a221c", "#9ea8a0", "#308096"]
+    "swatch": ["#1a221c", "#9ea8a0", "#54a8be", "#c24e46"]
   },
   {
     "id": "whispergrove-night",
@@ -101,6 +101,6 @@
     "variant": "night",
     "polarity": "dark",
     "description": "Deep nocturnal theme calibrated for low photic irradiation and OLED/LCD displays.",
-    "swatch": ["#0a0d08", "#9ca69e", "#227086"]
+    "swatch": ["#0a0d08", "#9ca69e", "#4a9cb2", "#b6463e"]
   }
 ]
