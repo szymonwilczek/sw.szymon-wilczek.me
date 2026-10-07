@@ -1,0 +1,36 @@
+/*
+ * Design tokens layered on top of the generated au-themes palettes.
+ * Colours here are only aliases; the Emacs themes stay the single source of truth.
+ */
+:root {
+  --paper: var(--bg-popup);
+  --tape: var(--bg-yellow-subtle);
+  --sky: var(--bg-blue-subtle);
+  --leaf: var(--bg-green-subtle);
+  --sea: var(--bg-cyan-subtle);
+
+  --fg-link-hover: var(--cursor);
+  --fg-link-active: var(--accent-0);
+  --fg-button: var(--fg-main);
+  --bg-button: var(--bg-alt);
+  --bg-button-hover: var(--bg-active);
+  --fg-button-hover: var(--cursor);
+
+  --font-body: "Literata", Georgia, serif;
+  --font-mono: "Typus Mono 95", "Typus Mono", monospace;
+  --font-hand: "Kalam", "Segoe Print", cursive;
+  --font-seal: "Yuji Syuku", serif;
+
+  --radius-paper: 2px 3px 2px 4px;
+  --radius-soft: 3px 6px 4px 7px;
+  --radius-pill: 22px 18px 21px 19px;
+
+  --page-width: 70rem;
+  --gutter: 2rem;
+}
+
+@media (max-width: 47.99em) {
+  :root {
+    --gutter: 1.25rem;
+  }
+}
