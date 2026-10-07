@@ -12,3 +12,5 @@ src/content/
 *.tar.xz
 *.zip
 scratch/
+src/styles/au-themes.css
+src/data/au-themes.json

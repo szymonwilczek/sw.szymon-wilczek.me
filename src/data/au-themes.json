@@ -1,0 +1,106 @@
+[
+  {
+    "id": "aurum-day",
+    "family": "aurum",
+    "variant": "day",
+    "polarity": "light",
+    "description": "Warm daylight theme with zero blue-light hazard, calibrated for photophobia.",
+    "swatch": ["#ded8cc", "#2b2720", "#6c6400"]
+  },
+  {
+    "id": "aurum-twilight",
+    "family": "aurum",
+    "variant": "twilight",
+    "polarity": "dark",
+    "description": "Intermediate dark theme with gold and purple accents for transitional lighting.",
+    "swatch": ["#12100e", "#ada490", "#c49c3e"]
+  },
+  {
+    "id": "aurum-night",
+    "family": "aurum",
+    "variant": "night",
+    "polarity": "dark",
+    "description": "Warm dark theme without blue-light hazard, calibrated for nocturnal photophobia.",
+    "swatch": ["#12100e", "#ada490", "#caa042"]
+  },
+  {
+    "id": "herbarium-day",
+    "family": "herbarium",
+    "variant": "day",
+    "polarity": "light",
+    "description": "Herbal daylight theme with dried botanicals and pressed leaves.",
+    "swatch": ["#d6d8c8", "#242820", "#944818"]
+  },
+  {
+    "id": "herbarium-night",
+    "family": "herbarium",
+    "variant": "night",
+    "polarity": "dark",
+    "description": "Nocturnal herbal theme with dried botanicals and pressed leaves.",
+    "swatch": ["#141312", "#969e90", "#b48e3c"]
+  },
+  {
+    "id": "parchment-day",
+    "family": "parchment",
+    "variant": "day",
+    "polarity": "light",
+    "description": "Low-chroma daylight theme with typographic italics and minimal color variance.",
+    "swatch": ["#ded6c4", "#282420", "#6e594c"]
+  },
+  {
+    "id": "parchment-night",
+    "family": "parchment",
+    "variant": "night",
+    "polarity": "dark",
+    "description": "Low-chroma nocturnal theme with typographic italics and minimal color variance.",
+    "swatch": ["#18130e", "#a29a88", "#b2959c"]
+  },
+  {
+    "id": "salina-day",
+    "family": "salina",
+    "variant": "day",
+    "polarity": "light",
+    "description": "Coastal daylight theme with sea-salt and dune tones.",
+    "swatch": ["#dad8cf", "#202826", "#725c10"]
+  },
+  {
+    "id": "salina-night",
+    "family": "salina",
+    "variant": "night",
+    "polarity": "dark",
+    "description": "Nocturnal coastal theme with deep oceanic and coral tones.",
+    "swatch": ["#101414", "#8e9fa2", "#9e8644"]
+  },
+  {
+    "id": "whispergrove-morning",
+    "family": "whispergrove",
+    "variant": "morning",
+    "polarity": "light",
+    "description": "Subdued daylight theme with reduced canvas luminance for sensitive eyes.",
+    "swatch": ["#9aa29c", "#141c16", "#303753"]
+  },
+  {
+    "id": "whispergrove-day",
+    "family": "whispergrove",
+    "variant": "day",
+    "polarity": "light",
+    "description": "Low-glare daylight theme with muted green and neutral tones.",
+    "swatch": ["#cfd1c9", "#242d26", "#39405e"]
+  },
+  {
+    "id": "whispergrove-evening",
+    "family": "whispergrove",
+    "variant": "evening",
+    "polarity": "dark",
+    "description": "Elevated dark theme for intermediate ambient lighting and reduced pupil strain.",
+    "swatch": ["#1a221c", "#9ea8a0", "#308096"]
+  },
+  {
+    "id": "whispergrove-night",
+    "family": "whispergrove",
+    "variant": "night",
+    "polarity": "dark",
+    "description": "Deep nocturnal theme calibrated for low photic irradiation and OLED/LCD displays.",
+    "swatch": ["#0a0d08", "#9ca69e", "#227086"]
+  }
+]
