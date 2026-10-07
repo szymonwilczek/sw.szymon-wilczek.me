@@ -32,7 +32,7 @@
 <dialog id="keybindings-modal" class="emacs-dialog keybindings-dialog">
   <div class="keybindings-card">
     <header class="keybindings-header">
-      <h3 class="keybindings-title">[ Keybindings &amp; Navigation ]</h3>
+      <h3 class="keybindings-title">keybindings &amp; navigation</h3>
       <button
         type="button"
         id="close-keybindings-btn"
@@ -665,239 +665,224 @@
   })();
 </script>
 
-<style is:global>
-  dialog.emacs-dialog {
-    position: fixed !important;
-    top: 50% !important;
-    left: 50% !important;
-    transform: translate(-50%, -50%) !important;
-    margin: 0 !important;
-    border: 1px solid var(--border) !important;
-    background-color: var(--bg-dim) !important;
-    color: var(--fg-main) !important;
-    padding: 0 !important;
-    border-radius: 2px !important;
-    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.85) !important;
-    z-index: 3000 !important;
-    font-family: "Typus Mono 95", "Typus Mono", monospace !important;
+
+<style>
+  .emacs-dialog {
+    padding: 0;
+    border: 0;
+    color: var(--fg-main);
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    line-height: 1.5;
   }
 
-  dialog.emacs-dialog::backdrop {
-    background: rgba(15, 14, 6, 0.8) !important;
-    backdrop-filter: blur(4px) !important;
-    -webkit-backdrop-filter: blur(4px) !important;
+  .emacs-dialog::backdrop {
+    background: transparent;
   }
 
   .minibuffer-dialog {
-    max-width: 680px !important;
-    width: calc(100vw - 2rem) !important;
+    width: 100%;
+    max-width: none;
+    margin: auto 0 0;
+    border-top: 1px solid var(--border);
+    background: var(--bg-dim);
   }
 
   .minibuffer-container {
-    display: flex !important;
-    flex-direction: column !important;
-    max-height: 80vh !important;
-    font-family: "Typus Mono 95", "Typus Mono", monospace !important;
+    display: flex;
+    flex-direction: column;
+    max-width: var(--page-width);
+    max-height: 70vh;
+    margin: 0 auto;
+    padding: 1.125rem var(--gutter) 1rem;
   }
 
   .minibuffer-prompt-row {
-    display: flex !important;
-    align-items: center !important;
-    padding: 0.85rem 1.15rem !important;
-    border-bottom: 1px solid var(--border) !important;
-    background-color: var(--bg-main) !important;
-    gap: 0.75rem !important;
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
   }
 
   .minibuffer-prompt {
-    font-family: "Typus Mono 95", "Typus Mono", monospace !important;
-    font-weight: 700 !important;
-    font-size: 1.1rem !important;
-    color: var(--fg-link) !important;
-    user-select: none !important;
+    color: var(--fg-dim);
+    user-select: none;
+  }
+
+  .minibuffer-prompt::after {
+    content: " ›";
+    color: var(--cursor);
   }
 
   .minibuffer-input {
-    flex: 1 !important;
-    background: transparent !important;
-    border: none !important;
-    outline: none !important;
-    color: var(--fg-main) !important;
-    font-family: "Typus Mono 95", "Typus Mono", monospace !important;
-    font-size: 1rem !important;
+    flex: 1;
+    min-width: 0;
+    min-height: 44px;
+    padding: 0 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 6px 4px 7px 5px;
+    background: var(--bg-main);
+    color: var(--fg-main);
+    font: inherit;
+  }
+
+  .minibuffer-input:focus {
+    outline: 1px solid var(--cursor);
+    outline-offset: 1px;
   }
 
   .minibuffer-count {
-    font-family: "Typus Mono 95", "Typus Mono", monospace !important;
-    font-size: 0.82rem !important;
-    color: var(--fg-dim) !important;
-    user-select: none !important;
+    color: var(--fg-dim);
+    user-select: none;
   }
 
-  ul.minibuffer-candidates {
-    list-style: none !important;
-    padding: 0.35rem 0 !important;
-    margin: 0 !important;
-    overflow-y: auto !important;
-    max-height: 380px !important;
-    font-family: "Typus Mono 95", "Typus Mono", monospace !important;
+  .minibuffer-candidates {
+    margin: 0.625rem 0 0;
+    padding: 0;
+    list-style: none;
+    overflow-y: auto;
   }
 
-  .minibuffer-candidates li.candidate-row {
-    display: flex !important;
-    flex-direction: row !important;
-    justify-content: space-between !important;
-    align-items: center !important;
-    padding: 0.6rem 1.15rem !important;
-    font-family: "Typus Mono 95", "Typus Mono", monospace !important;
-    font-size: 0.92rem !important;
-    cursor: pointer !important;
-    gap: 1.5rem !important;
-    border-bottom: 1px solid rgba(120, 110, 100, 0.12) !important;
-    transition: background-color 0.12s ease !important;
-    list-style: none !important;
-    margin: 0 !important;
-    width: 100% !important;
-    box-sizing: border-box !important;
+  :global(.candidate-row) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem 1.5rem;
+    min-height: 44px;
+    padding: 0.375rem 0.75rem;
+    border-radius: 4px;
+    cursor: pointer;
   }
 
-  .minibuffer-candidates li.candidate-row:hover,
-  .minibuffer-candidates li.candidate-row.is-selected {
-    background-color: var(--bg-active) !important;
+  :global(.candidate-row:hover),
+  :global(.candidate-row.is-selected) {
+    background: var(--bg-main);
   }
 
-  .minibuffer-candidates .candidate-name {
-    color: var(--fg-link) !important;
-    font-family: "Typus Mono 95", "Typus Mono", monospace !important;
-    font-weight: 700 !important;
-    white-space: nowrap !important;
-    flex-shrink: 0 !important;
-    min-width: 175px !important;
-    display: inline-block !important;
+  :global(.candidate-name) {
+    min-width: 15rem;
+    white-space: nowrap;
   }
 
-  .minibuffer-candidates li.candidate-row.is-selected .candidate-name {
-    color: var(--fg-link-hover) !important;
-    text-decoration: underline !important;
-    text-underline-offset: 3px !important;
+  :global(.candidate-row.is-selected .candidate-name) {
+    color: var(--cursor);
   }
 
-  .minibuffer-candidates .candidate-desc {
-    color: var(--fg-dim) !important;
-    font-family: "Typus Mono 95", "Typus Mono", monospace !important;
-    font-size: 0.84rem !important;
-    font-weight: 400 !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    text-align: right !important;
-    flex: 1 !important;
-    display: inline-block !important;
+  :global(.candidate-desc) {
+    flex: 1 1 15rem;
+    color: var(--fg-dim);
   }
 
-  .minibuffer-candidates li.candidate-empty {
-    padding: 1.5rem !important;
-    font-family: "Typus Mono 95", "Typus Mono", monospace !important;
-    font-size: 0.9rem !important;
-    color: var(--fg-dim) !important;
-    text-align: center !important;
-    font-style: italic !important;
-    list-style: none !important;
-    margin: 0 !important;
+  :global(.candidate-empty) {
+    padding: 0.75rem;
+    color: var(--fg-dim);
+    font-style: italic;
   }
 
   .minibuffer-hints {
-    display: flex !important;
-    justify-content: space-between !important;
-    padding: 0.5rem 1.15rem !important;
-    border-top: 1px dashed var(--border) !important;
-    font-family: "Typus Mono 95", "Typus Mono", monospace !important;
-    font-size: 0.78rem !important;
-    color: var(--fg-dim) !important;
-    background-color: var(--bg-main) !important;
-    flex-wrap: wrap !important;
-    gap: 0.5rem !important;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+    margin-top: 0.75rem;
+    padding-top: 0.625rem;
+    border-top: 1px dashed var(--border);
+    font-size: 0.75rem;
+    color: var(--fg-dim);
   }
 
   .keybindings-dialog {
-    max-width: 600px !important;
-    width: calc(100vw - 2rem) !important;
-    font-family: "Typus Mono 95", "Typus Mono", monospace !important;
+    width: calc(100vw - 2 * var(--gutter));
+    max-width: 36rem;
+    margin: auto;
+    background: var(--paper);
+    border-radius: var(--radius-soft);
+    box-shadow:
+      0 1px 0 var(--border),
+      0 24px 40px -24px rgb(0 0 0 / 0.6);
+  }
+
+  .keybindings-dialog::backdrop {
+    background: rgb(0 0 0 / 0.25);
   }
 
   .keybindings-card {
-    padding: 1.5rem !important;
+    padding: 1.5rem 1.75rem 1.75rem;
   }
 
   .keybindings-header {
-    display: flex !important;
-    justify-content: space-between !important;
-    align-items: center !important;
-    margin-bottom: 1.25rem !important;
-    padding-bottom: 0.5rem !important;
-    border-bottom: 1px solid var(--border) !important;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
   }
 
   .keybindings-title {
-    margin: 0 !important;
-    font-family: "Typus Mono 95", "Typus Mono", monospace !important;
-    font-size: 1.1rem !important;
-    font-weight: 700 !important;
-    color: var(--fg-link) !important;
+    margin: 0;
+    font-family: var(--font-hand);
+    font-size: 1.375rem;
+    font-weight: 300;
+    color: var(--fg-dim);
+    transform: rotate(-1.5deg);
   }
 
   .keybindings-close-btn {
-    background: transparent !important;
-    border: none !important;
-    color: var(--fg-dim) !important;
-    font-family: "Typus Mono 95", "Typus Mono", monospace !important;
-    font-size: 1.4rem !important;
-    cursor: pointer !important;
-    line-height: 1 !important;
-    padding: 0 0.25rem !important;
+    width: 44px;
+    height: 44px;
+    border: 0;
+    background: transparent;
+    color: var(--fg-dim);
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
   }
 
   .keybindings-close-btn:hover {
-    color: var(--red-warmer) !important;
+    color: var(--fg-main);
   }
 
   .keybindings-table-wrapper {
-    overflow-x: auto !important;
+    overflow-x: auto;
   }
 
   .keybindings-table {
-    width: 100% !important;
-    border-collapse: collapse !important;
-    font-family: "Typus Mono 95", "Typus Mono", monospace !important;
-    font-size: 0.88rem !important;
+    width: 100%;
+    margin: 0;
+    border: 0;
+    border-collapse: collapse;
   }
 
   .keybindings-table td {
-    padding: 0.5rem 0.6rem !important;
-    border-bottom: 1px solid var(--border) !important;
-    vertical-align: middle !important;
-    font-family: "Typus Mono 95", "Typus Mono", monospace !important;
+    padding: 0.5rem;
+    border: 0;
+    border-top: 1px dashed var(--border);
+    background: none;
+    vertical-align: middle;
   }
 
   .keybindings-table td:first-child {
-    white-space: nowrap !important;
-    width: 140px !important;
+    width: 9rem;
+    white-space: nowrap;
   }
 
   .keybindings-table td:last-child {
-    color: var(--fg-alt) !important;
+    color: var(--fg-dim);
   }
 
-  kbd {
-    background-color: var(--bg-main) !important;
-    border: 1px solid var(--border) !important;
-    color: var(--fg-link) !important;
-    font-family: "Typus Mono 95", "Typus Mono", monospace !important;
-    font-size: 0.82em !important;
-    padding: 0.15em 0.45em !important;
-    border-radius: 2px !important;
-    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2) !important;
-    display: inline-block !important;
-    margin-right: 0.2em !important;
+  .emacs-dialog kbd {
+    display: inline-block;
+    margin-right: 0.2em;
+    padding: 0.1em 0.4em;
+    border: 1px solid var(--border);
+    border-radius: 3px 4px 3px 5px;
+    background: var(--bg-main);
+    color: var(--fg-main);
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+  }
+
+  .emacs-dialog code {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--cursor);
   }
 </style>
