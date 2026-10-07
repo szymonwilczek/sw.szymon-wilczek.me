@@ -1,0 +1,25 @@
+.tape {
+  position: absolute;
+  width: 84px;
+  height: 22px;
+  background: var(--tape);
+  opacity: 0.85;
+  transform: rotate(4deg);
+  clip-path: polygon(0 10%, 5% 0, 95% 8%, 100% 0, 97% 50%, 100% 100%, 93% 92%, 4% 100%, 2% 50%);
+  pointer-events: none;
+}
+
+.paper {
+  background: var(--paper);
+  border-radius: var(--radius-paper);
+  box-shadow:
+    0 1px 0 var(--border),
+    0 16px 26px -22px rgb(0 0 0 / 0.5);
+}
+
+.hand {
+  font-family: var(--font-hand);
+  font-weight: 300;
+  line-height: 1.35;
+  color: var(--fg-dim);
+}
