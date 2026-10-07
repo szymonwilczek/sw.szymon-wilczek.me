@@ -6,20 +6,19 @@ import { visit } from "unist-util-visit";
 import { createHighlighter } from "shiki";
 import { render } from "astro:content";
 
-const efAutumnTheme = {
-  name: "ef-autumn",
+// Shiki theme whose colours are au-themes custom properties,
+// so code follows whichever palette the page has loaded
+const auTheme = {
+  name: "au",
   type: "dark" as const,
   colors: {
-    "editor.background": "#211c19",
-    "editor.foreground": "#cfbcad",
+    "editor.background": "var(--bg-dim)",
+    "editor.foreground": "var(--fg-main)",
   },
   tokenColors: [
     {
       scope: ["comment", "comment.line", "comment.block", "punctuation.definition.comment"],
-      settings: {
-        foreground: "#ba8a65",
-        fontStyle: "italic",
-      },
+      settings: { foreground: "var(--comment)", fontStyle: "italic" },
     },
     {
       scope: [
@@ -29,11 +28,14 @@ const efAutumnTheme = {
         "string.quoted.single",
         "punctuation.definition.string",
       ],
-      settings: { foreground: "#f47340" },
+      settings: { foreground: "var(--string)" },
+    },
+    {
+      scope: ["constant.numeric"],
+      settings: { foreground: "var(--number)" },
     },
     {
       scope: [
-        "constant.numeric",
         "constant.language",
         "constant.language.nil",
         "constant.boolean",
@@ -44,7 +46,7 @@ const efAutumnTheme = {
         "punctuation.definition.quoted.symbol",
         "variable.other.constant",
       ],
-      settings: { foreground: "#70b400" },
+      settings: { foreground: "var(--constant)" },
     },
     {
       scope: [
@@ -54,7 +56,7 @@ const efAutumnTheme = {
         "entity.name.tag",
         "meta.tag",
       ],
-      settings: { foreground: "#6fafff" },
+      settings: { foreground: "var(--builtin)" },
     },
     {
       scope: [
@@ -67,10 +69,7 @@ const efAutumnTheme = {
         "storage.binding",
         "storage.modifier",
       ],
-      settings: {
-        foreground: "#d0730f",
-        fontStyle: "bold",
-      },
+      settings: { foreground: "var(--keyword)" },
     },
     {
       scope: [
@@ -83,7 +82,7 @@ const efAutumnTheme = {
         "meta.function-call",
         "variable.function",
       ],
-      settings: { foreground: "#f06a8f" },
+      settings: { foreground: "var(--fnname)" },
     },
     {
       scope: [
@@ -93,11 +92,15 @@ const efAutumnTheme = {
         "support.variable",
         "entity.name.variable",
       ],
-      settings: { foreground: "#2dc4bf" },
+      settings: { foreground: "var(--variable)" },
     },
     {
       scope: ["entity.name.type", "entity.name.class", "support.type", "support.class"],
-      settings: { foreground: "#4fb04f" },
+      settings: { foreground: "var(--type)" },
+    },
+    {
+      scope: ["entity.other.attribute-name", "support.type.property-name"],
+      settings: { foreground: "var(--property)" },
     },
     {
       scope: [
@@ -106,112 +109,7 @@ const efAutumnTheme = {
         "punctuation.terminator",
         "punctuation.section",
       ],
-      settings: { foreground: "#baa792" },
-    },
-  ],
-};
-
-const efDayTheme = {
-  name: "ef-day",
-  type: "light" as const,
-  colors: {
-    "editor.background": "#f2e9db",
-    "editor.foreground": "#584141",
-  },
-  tokenColors: [
-    {
-      scope: ["comment", "comment.line", "comment.block", "punctuation.definition.comment"],
-      settings: {
-        foreground: "#8f5f4a",
-        fontStyle: "italic",
-      },
-    },
-    {
-      scope: [
-        "string",
-        "string.quoted",
-        "string.quoted.double",
-        "string.quoted.single",
-        "punctuation.definition.string",
-      ],
-      settings: { foreground: "#ce3f00" },
-    },
-    {
-      scope: [
-        "constant.numeric",
-        "constant.language",
-        "constant.language.nil",
-        "constant.boolean",
-        "constant.character",
-        "constant.other",
-        "constant.other.quoted.symbol",
-        "punctuation.definition.symbol",
-        "punctuation.definition.quoted.symbol",
-        "variable.other.constant",
-      ],
-      settings: { foreground: "#5f7200" },
-    },
-    {
-      scope: [
-        "constant.keyword",
-        "constant.other.keyword",
-        "punctuation.definition.keyword",
-        "entity.name.tag",
-        "meta.tag",
-      ],
-      settings: { foreground: "#3f6faf" },
-    },
-    {
-      scope: [
-        "keyword",
-        "keyword.control",
-        "keyword.operator.word",
-        "keyword.other",
-        "storage",
-        "storage.type",
-        "storage.binding",
-        "storage.modifier",
-      ],
-      settings: {
-        foreground: "#b75515",
-        fontStyle: "bold",
-      },
-    },
-    {
-      scope: [
-        "support.function",
-        "support.macro",
-        "support.function.emacs.lisp",
-        "keyword.declaration",
-        "entity.function.name",
-        "entity.name.function",
-        "meta.function-call",
-        "variable.function",
-      ],
-      settings: { foreground: "#cf2f4f" },
-    },
-    {
-      scope: [
-        "variable",
-        "variable.other",
-        "variable.parameter",
-        "support.variable",
-        "entity.name.variable",
-      ],
-      settings: { foreground: "#0f7f5f" },
-    },
-    {
-      scope: ["entity.name.type", "entity.name.class", "support.type", "support.class"],
-      settings: { foreground: "#8448aa" },
-    },
-    {
-      scope: [
-        "keyword.operator",
-        "punctuation.separator",
-        "punctuation.terminator",
-        "punctuation.section",
-      ],
-      settings: { foreground: "#63728f" },
+      settings: { foreground: "var(--operator)" },
     },
   ],
 };
@@ -221,7 +119,7 @@ let highlighterInstance: any = null;
 async function getHighlighter() {
   if (!highlighterInstance) {
     highlighterInstance = await createHighlighter({
-      themes: [efAutumnTheme, efDayTheme],
+      themes: [auTheme],
       langs: [
         "elisp",
         "lisp",
@@ -286,11 +184,7 @@ function rehypeShikiHighlight(highlighter: any) {
           try {
             const hast = highlighter.codeToHast(codeText.trimEnd(), {
               lang: loadedLangs.includes(lang) ? lang : "text",
-              themes: {
-                dark: "ef-autumn",
-                light: "ef-day",
-              },
-              defaultColor: false,
+              theme: "au",
             });
 
             if (hast && parent && typeof index === "number") {
