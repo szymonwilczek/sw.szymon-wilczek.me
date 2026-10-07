@@ -41,41 +41,19 @@ const currentYear = new Date().getFullYear();
       var label = document.getElementById("theme-label");
       if (!btn) return;
 
-      var themes = ["auto", "dark", "light"];
-
-      function getEffectiveTheme(theme) {
-        if (theme === "auto") {
-          return window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
-        }
-        return theme;
-      }
+      var themes = ["auto", "aurum-day", "aurum-night"];
 
       function updateUI() {
-        var current = localStorage.getItem("theme") || "auto";
-        if (label) {
-          label.textContent = current.charAt(0).toUpperCase() + current.slice(1);
-        }
-        document.documentElement.setAttribute(
-          "data-theme",
-          current === "auto" ? getEffectiveTheme("auto") : current,
-        );
+        if (label) label.textContent = window.auTheme.get();
       }
 
       btn.onclick = function (e) {
         e.preventDefault();
-        var current = localStorage.getItem("theme") || "auto";
-        var nextIdx = (themes.indexOf(current) + 1) % themes.length;
-        var nextTheme = themes[nextIdx];
-        localStorage.setItem("theme", nextTheme);
-        updateUI();
+        var nextIdx = (themes.indexOf(window.auTheme.get()) + 1) % themes.length;
+        window.auTheme.set(themes[nextIdx]);
       };
 
-      window.matchMedia("(prefers-color-scheme: light)").addEventListener("change", function () {
-        if (!localStorage.getItem("theme") || localStorage.getItem("theme") === "auto") {
-          updateUI();
-        }
-      });
-
+      document.addEventListener("au-theme-change", updateUI);
       updateUI();
     }
 

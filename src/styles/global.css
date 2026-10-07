@@ -1,5 +1,6 @@
 @import "./fonts.css";
-@import "./palette.css";
+@import "./au-themes.css";
+@import "./tokens.css";
 @import "./reset.css";
 @import "./typography.css";
 @import "./layout.css";

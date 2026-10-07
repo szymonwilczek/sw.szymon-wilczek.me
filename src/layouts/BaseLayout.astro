@@ -3,7 +3,10 @@ import Sidebar from "../components/Sidebar.astro";
 import Footer from "../components/Footer.astro";
 import EmacsMinibuffer from "../components/EmacsMinibuffer.astro";
 import SEO from "../components/SEO.astro";
+import auThemes from "../data/au-themes.json";
 import "../styles/global.css";
+
+const themeIds = auThemes.map((theme) => theme.id);
 
 export interface Props {
   title?: string;
@@ -85,32 +88,68 @@ const {
       nextUrl={nextUrl}
     />
 
-    <script is:inline>
+    <script is:inline define:vars={{ themeIds }}>
       (function () {
-        function applyThemeAndFont() {
-          var stored = localStorage.getItem("theme");
-          if (
-            stored === "light" ||
-            stored === "dark" ||
-            stored === "arcadia" ||
-            stored === "day" ||
-            stored === "autumn"
-          ) {
-            document.documentElement.setAttribute("data-theme", stored);
-          } else {
-            var prefersLight = window.matchMedia("(prefers-color-scheme: light)").matches;
-            document.documentElement.setAttribute("data-theme", prefersLight ? "light" : "dark");
-          }
+        var KEY = "au-theme";
+        var DEFAULTS = { light: "aurum-day", dark: "aurum-night" };
+        var root = document.documentElement;
+        var light = window.matchMedia("(prefers-color-scheme: light)");
 
-          var font = localStorage.getItem("font-preference");
-          if (font) {
-            document.documentElement.setAttribute("data-font", font);
+        function read() {
+          try {
+            var stored = localStorage.getItem(KEY);
+            return themeIds.indexOf(stored) === -1 ? "auto" : stored;
+          } catch (e) {
+            return "auto";
           }
         }
-        applyThemeAndFont();
+
+        function resolve(choice) {
+          if (choice !== "auto") return choice;
+          return light.matches ? DEFAULTS.light : DEFAULTS.dark;
+        }
+
+        function apply(choice) {
+          root.setAttribute("data-theme", resolve(choice));
+          root.setAttribute("data-theme-choice", choice);
+        }
+
+        window.auTheme = {
+          ids: themeIds,
+          get: read,
+          resolve: resolve,
+          set: function (choice) {
+            try {
+              if (choice === "auto") localStorage.removeItem(KEY);
+              else localStorage.setItem(KEY, choice);
+            } catch (e) {}
+            apply(choice);
+            document.dispatchEvent(
+              new CustomEvent("au-theme-change", {
+                detail: { choice: choice, theme: resolve(choice) },
+              }),
+            );
+          },
+          preview: function (id) {
+            root.setAttribute("data-theme", id || resolve(read()));
+          },
+        };
+
+        try {
+          localStorage.removeItem("theme");
+        } catch (e) {}
+
+        light.addEventListener("change", function () {
+          if (read() === "auto") apply("auto");
+        });
+        apply(read());
+
+        try {
+          var font = localStorage.getItem("font-preference");
+          if (font) root.setAttribute("data-font", font);
+        } catch (e) {}
       })();
     </script>
-
     <script type="speculationrules">
       {
         "prerender": [
@@ -138,7 +177,9 @@ const {
       >
         <span>[Menu]</span>
       </button>
-      <a href="/" class="mobile-title">Szymon Wilczek</a>
+      <a href="/" class="mobile-title">
+        Szymon Wilczek
+      </a>
     </header>
 
     <div id="drawer-backdrop" class="drawer-backdrop" aria-hidden="true"></div>

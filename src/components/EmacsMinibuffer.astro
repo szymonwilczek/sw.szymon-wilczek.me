@@ -156,7 +156,7 @@
       {
         id: "theme-cycle",
         name: "theme-cycle",
-        desc: "Cycle between Auto, ef-autumn (Dark), and ef-day (Light)",
+        desc: "Cycle between Auto, aurum-day and aurum-night",
         action: function () {
           var btn = document.getElementById("theme-toggle");
           if (btn) btn.click();
@@ -165,23 +165,17 @@
       {
         id: "theme-set-dark",
         name: "theme-set-dark",
-        desc: "Switch active theme to ef-autumn (Dark)",
+        desc: "Switch active theme to aurum-night",
         action: function () {
-          localStorage.setItem("theme", "dark");
-          document.documentElement.setAttribute("data-theme", "dark");
-          var label = document.getElementById("theme-label");
-          if (label) label.textContent = "Dark";
+          window.auTheme.set("aurum-night");
         },
       },
       {
         id: "theme-set-light",
         name: "theme-set-light",
-        desc: "Switch active theme to ef-day (Light)",
+        desc: "Switch active theme to aurum-day",
         action: function () {
-          localStorage.setItem("theme", "light");
-          document.documentElement.setAttribute("data-theme", "light");
-          var label = document.getElementById("theme-label");
-          if (label) label.textContent = "Light";
+          window.auTheme.set("aurum-day");
         },
       },
       {
