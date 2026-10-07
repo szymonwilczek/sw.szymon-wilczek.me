@@ -1,62 +1,365 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import Divider from "../components/Divider.astro";
+import themes from "../data/au-themes.json";
+
+const RADII = ["46% 54% 50% 50%", "52% 48% 44% 56%", "50% 50% 56% 44%", "44% 56% 48% 52%"];
+
+const fonts = [
+  {
+    sample: "Aa",
+    family: "var(--font-mono)",
+    size: "2.5rem",
+    name: "Typus Mono 95",
+    role: "metadata & code",
+    by: "my own · github.com/szymonwilczek/typus-fonts",
+  },
+  {
+    sample: "Aa",
+    family: "var(--font-body)",
+    size: "2.75rem",
+    name: "Literata",
+    role: "reading",
+    by: "TypeTogether · SIL Open Font License",
+  },
+  {
+    sample: "Aa",
+    family: "var(--font-hand)",
+    size: "2.625rem",
+    name: "Kalam",
+    role: "handwriting",
+    by: "Indian Type Foundry · SIL Open Font License",
+  },
+  {
+    sample: "狼",
+    family: "var(--font-seal)",
+    size: "2.5rem",
+    name: "Yuji Syuku",
+    role: "seals",
+    by: "Kinuta Font Factory · SIL Open Font License",
+  },
+];
 ---
 
-<BaseLayout
-  title="Credits & Attributions"
-  description="Attributions, open source credits, and acknowledgements."
->
-  <article>
-    <h1>Credits & Acknowledgements</h1>
+<BaseLayout title="Credits" description="Attributions, open source credits, and acknowledgements.">
+  <h1 class="credits-title">Credits &amp; acknowledgements</h1>
 
-    <hr />
+  <Divider from={700} to={900} />
 
+  <div class="sections">
     <section>
-      <h2>Visual Palette</h2>
-      <p>
-        The color system of this site is directly ported from <strong>ef-themes</strong>, a
-        collection of - I think - the best themes for GNU Emacs created by
-        <a href="https://protesilaos.com" target="_blank" rel="noopener">Protesilaos Stavrou</a>.
+      <p class="num" aria-hidden="true">
+        01
       </p>
+      <div class="body">
+        <h2>Colour</h2>
+        <p>
+          Every colour here is generated from <strong>au-themes</strong> — my own thirteen palettes
+          for GNU Emacs, made for autistic sensory needs and photophobia. The Lisp palettes are the
+          single source of truth; this site only reads them.
+        </p>
+        <p class="dim">
+          They stand on the shoulders of <em>modus-themes</em> by
+          <a href="https://protesilaos.com" rel="noopener">
+            Protesilaos Stavrou
+          </a>
+          , whose ef-themes coloured the previous version of this garden.
+        </p>
 
-      <ul>
-        <li>
-          <strong><code>ef-autumn</code> (Dark Mode)</strong>
-        </li>
-        <li>
-          <strong><code>ef-arcadia</code> (Light Mode)</strong>
-        </li>
-        <li>
-          <strong><code>ef-day</code> (Alternate Light Preset)</strong>
-        </li>
-      </ul>
-
-      <p>
-        All color values in the stylesheets are 100% faithful to the upstream Lisp source
-        definitions released under the GNU General Public License v3.0 or later.
-      </p>
+        <div class="swatches">
+          {themes.map((t, i) => (
+            <button
+              type="button"
+              class="swatch"
+              data-choice={t.id}
+              title={`au-${t.id}: ${t.description}`}
+              aria-label={`Use au-${t.id}`}
+            >
+              <span
+                class="chip"
+                style={`border-radius: ${RADII[i % RADII.length]}; background: ${t.swatch[0]}`}
+              >
+                <span class="dot" style={`background: ${t.swatch[1]}`} />
+                <span class="dot dot-accent" style={`background: ${t.swatch[2]}`} />
+              </span>
+              <span class="swatch-name">
+                {t.family === "whispergrove" ? "whisper·" : t.family}
+                <br />
+                {t.variant}
+              </span>
+            </button>
+          ))}
+        </div>
+        <p class="hint hand">
+          pick yours here, or with{" "}
+          <button type="button" data-theme-open>
+            M-x au-themes-select
+          </button>
+        </p>
+      </div>
     </section>
 
-    <hr />
+    <section>
+      <p class="num" aria-hidden="true">
+        02
+      </p>
+      <div class="body">
+        <h2>Type</h2>
+        <ul class="fonts">
+          {fonts.map((f) => (
+            <li>
+              <span class="specimen" style={`font-family: ${f.family}; font-size: ${f.size}`}>
+                {f.sample}
+              </span>
+              <span class="font-meta">
+                <span>
+                  {f.name} <span class="dim">— {f.role}</span>
+                </span>
+                <span class="font-by">{f.by}</span>
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
 
     <section>
-      <h2>Typography</h2>
-      <ul>
-        <li>
-          <strong>Headings, Navigation & Monospace</strong> - <strong>Typus Mono 95</strong>, a
-          customized monospace typeface created by me (<a
-            href="https://github.com/szymonwilczek/typus-fonts"
-            target="_blank"
-            rel="noopener"
-          >
-            Typus Mono repository
-          </a>).
-        </li>
-        <li>
-          <strong>Prose & Reading Body</strong> - <em>Literata</em> (designed by TypeTogether under the
-          SIL Open Font License).
-        </li>
-      </ul>
+      <p class="num" aria-hidden="true">
+        03
+      </p>
+      <div class="body">
+        <h2>Tools</h2>
+        <p>
+          Written in <strong>Org mode</strong>, parsed by
+          <a href="https://github.com/rasendubi/uniorg" rel="noopener">
+            uniorg
+          </a>
+          , built with
+          <a href="https://astro.build" rel="noopener">
+            Astro
+          </a>
+          , code highlighted by
+          <a href="https://shiki.style" rel="noopener">
+            Shiki
+          </a>
+          , photo metadata read with
+          <a href="https://github.com/MikeKovarik/exifr" rel="noopener">
+            exifr
+          </a>
+          .
+        </p>
+      </div>
     </section>
-  </article>
+  </div>
 </BaseLayout>
+
+<script>
+  function mark() {
+    const active = window.auTheme?.resolve(window.auTheme.get());
+    document.querySelectorAll<HTMLElement>(".swatch").forEach((s) => {
+      s.classList.toggle("is-active", s.dataset.choice === active);
+    });
+  }
+
+  document
+    .querySelectorAll<HTMLElement>(".swatch")
+    .forEach((s) => s.addEventListener("click", () => window.auTheme?.set(s.dataset.choice!)));
+  document.addEventListener("au-theme-change", mark);
+  mark();
+</script>
+
+<style>
+  .credits-title {
+    margin: 0;
+    font-size: clamp(2.375rem, 1.75rem + 2.4vw, 3.5rem);
+  }
+
+  .sections {
+    display: flex;
+    flex-direction: column;
+    gap: 5rem;
+  }
+
+  section {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 3rem;
+  }
+
+  .num {
+    flex: 0 0 6rem;
+    margin: 0;
+    font-size: 3rem;
+    font-weight: 300;
+    font-style: italic;
+    line-height: 1;
+    color: var(--cursor);
+  }
+
+  .body {
+    flex: 999 1 35rem;
+    min-width: 0;
+    max-width: 45rem;
+  }
+
+  .body h2 {
+    margin: 0 0 1rem;
+    font-size: 1.75rem;
+  }
+
+  .body p {
+    margin: 0 0 0.875rem;
+  }
+
+  strong {
+    font-weight: 600;
+  }
+
+  .dim {
+    color: var(--fg-dim);
+  }
+
+  .swatches {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.875rem 0.625rem;
+    margin-top: 1.75rem;
+  }
+
+  .swatch {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    width: 4rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+  }
+
+  .chip {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    box-shadow: inset 0 0 0 1px var(--border);
+    transition: transform 0.15s ease;
+  }
+
+  .swatch:hover .chip,
+  .swatch:focus-visible .chip {
+    transform: rotate(-6deg) scale(1.06);
+  }
+
+  .dot {
+    position: absolute;
+    left: 9px;
+    top: 11px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+  }
+
+  .dot-accent {
+    left: 18px;
+    top: 17px;
+  }
+
+  .swatch-name {
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    line-height: 1.2;
+    text-align: center;
+    color: var(--fg-dim);
+  }
+
+  .is-active .swatch-name {
+    color: var(--cursor);
+  }
+
+  .is-active .chip {
+    box-shadow:
+      inset 0 0 0 1px var(--border),
+      0 0 0 2px var(--bg-main),
+      0 0 0 3px var(--cursor);
+  }
+
+  .hint {
+    margin: 0.875rem 0 0;
+    font-size: 1.125rem;
+    transform: rotate(-1deg);
+  }
+
+  .hint button {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--fg-link);
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .hint button:hover {
+    color: var(--cursor);
+  }
+
+  .fonts {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .fonts li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 1.5rem;
+    margin: 0;
+    padding: 1.125rem 0;
+    border-bottom: 1px dashed var(--border);
+  }
+
+  .specimen {
+    flex: 0 0 5.5rem;
+    line-height: 1;
+    color: var(--fg-main);
+  }
+
+  .font-meta {
+    flex: 1 1 16.25rem;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .font-by {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--fg-dim);
+    overflow-wrap: anywhere;
+  }
+
+  @media (max-width: 47.99em) {
+    .sections {
+      gap: 3.5rem;
+    }
+
+    .num {
+      flex-basis: 100%;
+      font-size: 2rem;
+    }
+
+    .body h2 {
+      font-size: 1.5rem;
+    }
+
+    .swatch {
+      width: 3.5rem;
+    }
+
+    .specimen {
+      flex-basis: 4rem;
+    }
+  }
+</style>
