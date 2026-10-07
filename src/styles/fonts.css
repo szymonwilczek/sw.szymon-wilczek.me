@@ -83,3 +83,13 @@
   font-style: normal;
   font-display: swap;
 }
+
+/* Subset to the seal glyphs only */
+@font-face {
+  font-family: "Yuji Syuku";
+  src: url("/fonts/YujiSyuku-seals.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: block;
+  unicode-range: U+72FC, U+7D42, U+5C01, U+9375, U+8FF7;
+}
