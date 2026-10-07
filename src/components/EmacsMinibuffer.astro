@@ -53,10 +53,6 @@
             <td>Jump to writings &amp; essays (<code>/writings</code>)</td>
           </tr>
           <tr>
-            <td><kbd>Shift + P</kbd></td>
-            <td>Jump to software projects (<code>/projects</code>)</td>
-          </tr>
-          <tr>
             <td><kbd>Shift + F</kbd></td>
             <td>Jump to files &amp; archives (<code>/files</code>)</td>
           </tr>
@@ -103,14 +99,6 @@
         desc: "Jump to essays and manifestos (/writings)",
         action: function () {
           window.location.href = "/writings/";
-        },
-      },
-      {
-        id: "view-projects",
-        name: "view-projects",
-        desc: "Jump to software projects (/projects)",
-        action: function () {
-          window.location.href = "/projects/";
         },
       },
       {
@@ -567,19 +555,6 @@
         ) {
           e.preventDefault();
           window.location.href = "/writings/";
-          return;
-        }
-
-        // Projects
-        if (
-          e.shiftKey &&
-          (e.key === "P" || e.code === "KeyP") &&
-          !e.ctrlKey &&
-          !e.altKey &&
-          !e.metaKey
-        ) {
-          e.preventDefault();
-          window.location.href = "/projects/";
           return;
         }
 
