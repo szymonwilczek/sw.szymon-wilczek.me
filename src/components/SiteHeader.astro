@@ -1,0 +1,183 @@
+---
+import Seal from "./Seal.astro";
+
+const normalize = (path: string) => path.replace(/\/$/, "") || "/";
+const current = normalize(Astro.url.pathname);
+const isActive = (href: string) => current.startsWith(normalize(href));
+
+const links = [
+  { href: "/writings/", label: "writings" },
+  { href: "/photos/", label: "photos" },
+  { href: "/files/", label: "files" },
+  { href: "/about/", label: "about" },
+];
+---
+
+<header class="site-header">
+  <a href="/" class="site-brand">
+    <Seal glyph="狼" ring class="brand-seal" />
+    <span class="brand-text">
+      <span class="brand-name">Szymon Wilczek</span>
+      <span class="brand-domain">sw.szymon-wilczek.me</span>
+    </span>
+  </a>
+
+  <nav class="site-nav" aria-label="Main">
+    {links.map((link) => (
+      <a
+        href={link.href}
+        class:list={["nav-link", { active: isActive(link.href) }]}
+        aria-current={isActive(link.href) ? "page" : undefined}
+      >
+        {link.label}
+        {isActive(link.href) && (
+          <svg class="brush" viewBox="0 0 70 12" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M2 6 C 16 4, 34 9, 50 6 S 64 5, 68 4" vector-effect="non-scaling-stroke" />
+          </svg>
+        )}
+      </a>
+    ))}
+    <button id="theme-toggle" type="button" class="theme-button" aria-label="Choose colour theme">
+      <span class="theme-dots" aria-hidden="true">
+        <span></span>
+        <span></span>
+      </span>
+      <span data-theme-label>aurum · night</span>
+    </button>
+  </nav>
+</header>
+
+<style>
+  .site-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+  }
+
+  .site-brand {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: var(--fg-main);
+    text-decoration: none;
+  }
+
+  .site-brand:hover {
+    color: var(--fg-main);
+    text-decoration: none;
+  }
+
+  .brand-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+  }
+
+  .brand-name {
+    font-size: 1.25rem;
+    letter-spacing: 0.01em;
+  }
+
+  .brand-domain {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--fg-dim);
+  }
+
+  .site-nav {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1.75rem;
+    font-size: 1.0625rem;
+  }
+
+  .nav-link {
+    position: relative;
+    padding: 0.25rem 0;
+    color: var(--fg-dim);
+    text-decoration: none;
+  }
+
+  .nav-link:hover,
+  .nav-link.active {
+    color: var(--fg-main);
+    text-decoration: none;
+  }
+
+  .brush {
+    position: absolute;
+    left: -4px;
+    bottom: -6px;
+    width: calc(100% + 8px);
+    height: 12px;
+  }
+
+  .brush path {
+    fill: none;
+    stroke: var(--cursor);
+    stroke-width: 2.4;
+    stroke-linecap: round;
+  }
+
+  .theme-button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 44px;
+    padding: 0 0.875rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    background: transparent;
+    color: var(--fg-dim);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    cursor: pointer;
+  }
+
+  .theme-button:hover {
+    color: var(--fg-main);
+    border-color: var(--fg-dim);
+  }
+
+  .theme-dots {
+    display: flex;
+  }
+
+  .theme-dots span {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--cursor);
+  }
+
+  .theme-dots span + span {
+    margin-left: -5px;
+    background: var(--red);
+  }
+</style>
+
+<script is:inline>
+  (function () {
+    // until the picker lands, the button steps through every theme
+    function label() {
+      var text = window.auTheme.resolve(window.auTheme.get()).replace("-", " · ");
+      document.querySelectorAll("[data-theme-label]").forEach(function (el) {
+        el.textContent = text;
+      });
+    }
+
+    var btn = document.getElementById("theme-toggle");
+    btn.addEventListener("click", function () {
+      var ids = window.auTheme.ids;
+      var current = window.auTheme.resolve(window.auTheme.get());
+      window.auTheme.set(ids[(ids.indexOf(current) + 1) % ids.length]);
+    });
+
+    document.addEventListener("au-theme-change", label);
+    document.addEventListener("DOMContentLoaded", label);
+    label();
+  })();
+</script>

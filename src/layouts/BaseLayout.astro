@@ -1,5 +1,5 @@
 ---
-import Sidebar from "../components/Sidebar.astro";
+import SiteHeader from "../components/SiteHeader.astro";
 import Footer from "../components/Footer.astro";
 import EmacsMinibuffer from "../components/EmacsMinibuffer.astro";
 import SEO from "../components/SEO.astro";
@@ -168,34 +168,12 @@ const {
     </script>
   </head>
   <body>
-    <header class="mobile-header">
-      <button
-        id="mobile-menu-toggle"
-        class="mobile-menu-btn"
-        aria-label="Open navigation menu"
-        aria-expanded="false"
-      >
-        <span>[Menu]</span>
-      </button>
-      <a href="/" class="mobile-title">
-        Szymon Wilczek
-      </a>
-    </header>
-
-    <div id="drawer-backdrop" class="drawer-backdrop" aria-hidden="true"></div>
-
-    <div class="site-layout">
-      <Sidebar currentPath={Astro.url.pathname} />
-      <div class="content-wrapper">
-        <main id="main-content">
-          <div class="main-body">
-            <slot />
-          </div>
-          <div class="site-page-footer">
-            <Footer />
-          </div>
-        </main>
-      </div>
+    <div class="site-page">
+      <SiteHeader />
+      <main id="main-content">
+        <slot />
+      </main>
+      <Footer />
     </div>
 
     <EmacsMinibuffer />
