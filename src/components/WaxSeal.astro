@@ -1,0 +1,54 @@
+---
+// for sealed things: encrypted files, the vault, the GPG key
+interface Props {
+  glyph?: string;
+  size?: number;
+  label?: string;
+  class?: string;
+}
+
+const { glyph = "封", size = 48, label, class: className } = Astro.props;
+---
+
+<svg
+  class:list={["wax", className]}
+  width={size}
+  height={size}
+  viewBox="0 0 48 48"
+  role={label ? "img" : undefined}
+  aria-label={label}
+  aria-hidden={label ? undefined : "true"}
+>
+  <path
+    class="wax-body"
+    d="M24 3 C 30 2, 34 6, 38 7 C 43 9, 44 14, 45 19 C 47 25, 44 29, 44 34 C 43 40, 37 42, 32 44 C 27 46, 21 46, 16 44 C 10 42, 6 39, 4 33 C 2 28, 3 22, 4 17 C 6 11, 10 7, 15 5 C 18 4, 21 3, 24 3 Z"
+  ></path>
+  <circle class="wax-ring" cx="24" cy="24" r="14.5"></circle>
+  <text x="24" y="31" text-anchor="middle" class="wax-glyph">
+    {glyph}
+  </text>
+</svg>
+
+<style>
+  .wax {
+    flex: none;
+    display: block;
+  }
+
+  .wax-body {
+    fill: var(--red);
+  }
+
+  .wax-ring {
+    fill: none;
+    stroke: var(--red-warmer);
+    stroke-width: 1.4;
+    opacity: 0.55;
+  }
+
+  .wax-glyph {
+    fill: var(--bg-main);
+    font-family: var(--font-seal);
+    font-size: 18px;
+  }
+</style>
