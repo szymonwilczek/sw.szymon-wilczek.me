@@ -1,0 +1,9 @@
+{
+  "updated": "[DATE]",
+  "items": [
+    { "label": "reading", "value": "[BOOK]" },
+    { "label": "writing", "value": "[NEXT ESSAY]" },
+    { "label": "tinkering", "value": "au-themes, for this garden" },
+    { "label": "listening", "value": "[ALBUM]" }
+  ]
+}

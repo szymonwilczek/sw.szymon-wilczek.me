@@ -1,93 +1,400 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import Divider from "../components/Divider.astro";
 import { getCollection } from "astro:content";
+import { getAllAlbums } from "../utils/albums";
+import { dottedDate, writingSlug } from "../utils/format";
+import now from "../data/now.json";
 
-const projects = (await getCollection("projects"))
+const posts = (await getCollection("writings"))
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
-  .slice(0, 3);
+  .slice(0, 5);
+
+const albums = (await getAllAlbums()).sort((a, b) => b.date.valueOf() - a.date.valueOf());
+const files = await getCollection("files");
+
+// with no files to list the sidebar shows second album
+const lensAlbums = albums.slice(0, files.length > 0 ? 1 : 2);
+const recentFiles = files.slice(0, 3);
 ---
 
 <BaseLayout
   title="Szymon Wilczek"
-  description="Software engineer, open-source creator, and systems explorer. Central archive for software projects, developer utilities, photography, and plain-text technical writings."
+  description="Essays on low-level computing and the philosophy of software, notes written in plain Org, files worth downloading, and photographs from places I walked through."
 >
-  <section class="intro">
-    <p>
-      Hello. I am <strong>Szymon Wilczek</strong>.
-    </p>
-    <p>
-      This website is my sovereign hypermedia space: a central archive for my software projects,
-      custom developer utilities, downloadable files, writings, photography, and plain-text essays.
-    </p>
+  <section class="hero">
+    <div class="hero-text">
+      <h1>
+        Hello. I am <em>Szymon</em>,<br />
+        and this is where I keep things.
+      </h1>
+      <p>
+        Essays on low-level computing and the philosophy of software, notes written in plain Org,
+        files worth downloading, and photographs from places I walked through. Nothing here is
+        finished.
+      </p>
+      <p>
+        Projects live in my <a href="https://szymon-wilczek.me">portfolio</a>.
+      </p>
+    </div>
+
+    <aside class="now paper" aria-label="Now">
+      <span class="tape now-tape" aria-hidden="true"></span>
+      <p class="now-title">now —</p>
+      <dl>
+        {now.items.map((item) => (
+          <div>
+            <dt>{item.label}</dt>
+            <dd>{item.value}</dd>
+          </div>
+        ))}
+      </dl>
+      <p class="now-updated">updated {now.updated}</p>
+    </aside>
   </section>
 
-  <hr />
+  <Divider from={300} to={540} />
 
-  {
-    projects.length > 0 && (
-      <section class="section-block">
-        <h2>Featured Projects</h2>
-        <ul class="project-list">
-          {projects.map((project) => (
-            <li>
-              <a href={`/projects/${project.id.replace(/\.(org|md|mdx)$/, "")}/`}>
-                {project.data.title}
+  <div class="home-grid">
+    <section class="writings">
+      <div class="section-head">
+        <h2>Writings</h2>
+        <a href="/writings/" class="hand-link">
+          all of them →
+        </a>
+      </div>
+      <ol class="post-list">
+        {posts.map((post) => (
+          <li>
+            <span class="post-date">{dottedDate(post.data.pubDate)}</span>
+            <span class="post-body">
+              <a href={`/writings/${writingSlug(post.id)}/`} class="post-title">
+                {post.data.title}
               </a>
-              {" — "}
-              <span class="project-desc">{project.data.description}</span>
-            </li>
-          ))}
-        </ul>
-        <p>
-          <a href="/projects/">&rarr; View all projects</a>
-        </p>
-      </section>
-    )
-  }
+              {post.data.description && <span class="post-desc">{post.data.description}</span>}
+              {post.data.tags.length > 0 && (
+                <span class="post-tags">{post.data.tags.slice(0, 3).join(" · ")}</span>
+              )}
+            </span>
+          </li>
+        ))}
+      </ol>
+    </section>
 
-  <section class="section-block">
-    <h2>Navigation</h2>
-    <ul>
-      <li>
-        <a href="/about/">About</a> - biographical context and open-source contributions.
-      </li>
-      <li>
-        <a href="/writings/">Writings</a> - thoughts, essays on low-level computing, and systems design.
-      </li>
-      <li>
-        <a href="/projects/">Projects</a> - tools, typefaces, and utilities.
-      </li>
-      <li>
-        <a href="/files/">Files</a> - downloadable software packages, scripts and archives.
-      </li>
-      <li>
-        <a href="/photos/">Photos</a> - photograph gallery (I sometimes take a photo).
-      </li>
-      <li>
-        <a href="/contact/">Contact</a> - communication channels, web links, and PGP key.
-      </li>
-      <li>
-        <a href="/credits/">Credits</a> - attributions, typography, and licenses.
-      </li>
-    </ul>
-  </section>
+    <aside class="side">
+      {lensAlbums.length > 0 && (
+        <section>
+          <h2>Lately, through a lens</h2>
+          {lensAlbums.map((album) => (
+            <figure class="lens">
+              <a href={`/photos/${album.slug}/`}>
+                <img
+                  src={album.coverThumb}
+                  alt={`${album.title}, ${album.dateFormatted}`}
+                  loading="lazy"
+                  decoding="async"
+                />
+              </a>
+              <figcaption class="hand">
+                {album.title}, {album.dateFormatted}
+              </figcaption>
+            </figure>
+          ))}
+        </section>
+      )}
+
+      {recentFiles.length > 0 && (
+        <section>
+          <h2>Files</h2>
+          <ul class="file-list">
+            {recentFiles.map((file) => (
+              <li>
+                <a href="/files/">{file.data.filename}</a>
+                <span>{file.data.filesize}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+    </aside>
+  </div>
 </BaseLayout>
 
 <style>
-  .intro {
-    margin-bottom: 2rem;
+  .hero {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3rem;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-top: 1rem;
   }
 
-  .section-block {
-    margin-top: 2.75rem;
+  .hero-text {
+    flex: 999 1 32.5rem;
+    min-width: 0;
+    max-width: 42.5rem;
   }
 
-  .project-list {
-    list-style-type: square;
-    padding-left: 2rem;
+  .hero h1 {
+    margin: 0;
+    font-size: clamp(2.25rem, 1.5rem + 2.6vw, 3.375rem);
+    line-height: 1.12;
+    letter-spacing: -0.01em;
   }
 
-  .project-desc {
+  .hero h1 em {
+    font-weight: 400;
+  }
+
+  .hero p {
+    max-width: 35rem;
+    margin: 1rem 0 0;
     color: var(--fg-dim);
+  }
+
+  .hero p:first-of-type {
+    margin-top: 1.75rem;
+  }
+
+  .hero p a {
+    color: var(--fg-link);
+    text-decoration: none;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .now {
+    flex: 1 1 16.25rem;
+    max-width: 18.75rem;
+    position: relative;
+    margin-top: 0.75rem;
+    padding: 1.875rem 1.5rem 1.25rem;
+    transform: rotate(2deg);
+  }
+
+  .now-tape {
+    top: -11px;
+    left: 50%;
+    width: 92px;
+    height: 24px;
+    margin-left: -46px;
+    opacity: 0.9;
+    transform: rotate(-3deg);
+  }
+
+  .now-title {
+    margin: 0;
+    font-family: var(--font-hand);
+    font-size: 1.625rem;
+    line-height: 1;
+    color: var(--cursor);
+  }
+
+  .now dl {
+    margin: 0.875rem 0 0;
+    font-family: var(--font-hand);
+    font-weight: 300;
+    font-size: 1.125rem;
+    line-height: 1.35;
+  }
+
+  .now dl div {
+    display: flex;
+    gap: 0.625rem;
+    padding: 0.4375rem 0;
+    border-bottom: 1px dotted var(--border);
+  }
+
+  .now dl div:last-child {
+    border-bottom: 0;
+  }
+
+  .now dt,
+  .now dd {
+    margin: 0;
+    font: inherit;
+  }
+
+  .now dt {
+    flex: none;
+    width: 5.25rem;
+    color: var(--fg-dim);
+  }
+
+  .now-updated {
+    margin: 0.625rem 0 0;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    color: var(--fg-dim);
+  }
+
+  .home-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4rem;
+  }
+
+  .home-grid h2 {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-weight: 400;
+  }
+
+  .writings {
+    flex: 999 1 35rem;
+    min-width: 0;
+  }
+
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .writings h2 {
+    font-size: 1.75rem;
+  }
+
+  .hand-link {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    font-family: var(--font-hand);
+    font-size: 1.125rem;
+    color: var(--fg-link);
+    text-decoration: none;
+  }
+
+  .post-list {
+    margin: 1rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .post-list li {
+    display: grid;
+    grid-template-columns: 7.5rem minmax(0, 1fr);
+    gap: 1.5rem;
+    padding: 1.375rem 0;
+    border-top: 1px dashed var(--border);
+  }
+
+  .post-date {
+    padding-top: 0.375rem;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: var(--fg-dim);
+  }
+
+  .post-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+  }
+
+  .post-title {
+    font-size: 1.3125rem;
+    line-height: 1.3;
+    color: var(--fg-main);
+    text-decoration: none;
+  }
+
+  .post-title:hover {
+    color: var(--fg-link-hover);
+  }
+
+  .post-desc {
+    font-size: 1rem;
+    line-height: 1.55;
+    color: var(--fg-dim);
+  }
+
+  .post-tags {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--accent-0);
+  }
+
+  .side {
+    flex: 1 1 17.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
+  }
+
+  .side h2 {
+    font-size: 1.375rem;
+  }
+
+  .lens {
+    margin: 1.25rem 0 0;
+  }
+
+  .lens + .lens {
+    margin-top: 2rem;
+  }
+
+  .lens img {
+    display: block;
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    border-radius: var(--radius-soft);
+    filter: saturate(0.85);
+  }
+
+  .lens figcaption {
+    margin-top: 0.625rem;
+    font-size: 1.125rem;
+  }
+
+  .file-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+    margin: 1rem 0 0;
+    padding: 0;
+    list-style: none;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+  }
+
+  .file-list li {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  .file-list span {
+    color: var(--fg-dim);
+  }
+
+  @media (max-width: 47.99em) {
+    .hero {
+      gap: 2.5rem;
+    }
+
+    .now {
+      display: none;
+    }
+
+    .writings h2 {
+      font-size: 1.5rem;
+    }
+
+    .post-list li {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 0.375rem;
+    }
+
+    .post-date {
+      padding-top: 0;
+    }
+
+    .post-title {
+      font-size: 1.25rem;
+    }
   }
 </style>
