@@ -10,7 +10,7 @@
         type="text"
         id="minibuffer-input"
         class="minibuffer-input"
-        placeholder="Type a command (view-writings, theme-cycle)..."
+        placeholder="Type a command (view-writings, au-themes-select)..."
         autocomplete="off"
         spellcheck="false"
       />
@@ -62,7 +62,7 @@
           </tr>
           <tr>
             <td><kbd>Shift + T</kbd></td>
-            <td>Cycle color theme</td>
+            <td>Choose colour theme (<code>au-themes-select</code>)</td>
           </tr>
           <tr>
             <td><kbd>Shift + B</kbd></td>
@@ -154,30 +154,41 @@
         },
       },
       {
-        id: "theme-cycle",
-        name: "theme-cycle",
-        desc: "Cycle between Auto, aurum-day and aurum-night",
+        id: "au-themes-select",
+        name: "au-themes-select",
+        desc: "Choose a colour theme with live preview (Shift+T)",
         action: function () {
-          var btn = document.getElementById("theme-toggle");
-          if (btn) btn.click();
+          window.auTheme.openPicker();
         },
       },
       {
-        id: "theme-set-dark",
-        name: "theme-set-dark",
-        desc: "Switch active theme to aurum-night",
+        id: "au-themes-cycle",
+        name: "au-themes-cycle",
+        desc: "Load the next au-theme",
         action: function () {
-          window.auTheme.set("aurum-night");
+          var ids = window.auTheme.ids;
+          var current = window.auTheme.resolve(window.auTheme.get());
+          window.auTheme.set(ids[(ids.indexOf(current) + 1) % ids.length]);
         },
       },
       {
-        id: "theme-set-light",
-        name: "theme-set-light",
-        desc: "Switch active theme to aurum-day",
+        id: "au-themes-auto",
+        name: "au-themes-auto",
+        desc: "Follow the system: aurum-day by light, aurum-night by dark",
         action: function () {
-          window.auTheme.set("aurum-day");
+          window.auTheme.set("auto");
         },
       },
+      ...window.auTheme.ids.map(function (themeId) {
+        return {
+          id: "load-theme-" + themeId,
+          name: "load-theme " + themeId,
+          desc: "Switch to au-" + themeId,
+          action: function () {
+            window.auTheme.set(themeId);
+          },
+        };
+      }),
       {
         id: "font-cycle",
         name: "font-cycle",
@@ -492,12 +503,6 @@
 
     setupMinibufferUI();
 
-    document.addEventListener("click", function (e) {
-      if (e.target && e.target.closest("#footer-keys-btn")) {
-        openKeybindings();
-      }
-    });
-
     if (!window.__emacsMinibufferGlobalKeydownRegistered) {
       window.__emacsMinibufferGlobalKeydownRegistered = true;
 
@@ -591,7 +596,7 @@
           return;
         }
 
-        // Cycle Theme
+        // Choose theme
         if (
           e.shiftKey &&
           (e.key === "T" || e.code === "KeyT") &&
@@ -600,8 +605,7 @@
           !e.metaKey
         ) {
           e.preventDefault();
-          var themeBtn = document.getElementById("theme-toggle");
-          if (themeBtn) themeBtn.click();
+          window.auTheme.openPicker();
           return;
         }
 
