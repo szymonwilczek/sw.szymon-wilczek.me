@@ -85,25 +85,33 @@ const menu = [...links, { href: "/contact/", label: "contact" }];
   </a>
 
   <nav class="site-nav" aria-label="Main">
-    {links.map((link) => (
-      <a
-        href={link.href}
-        class:list={["nav-link", { active: isActive(link.href) }]}
-        aria-current={isActive(link.href) ? "page" : undefined}
-      >
-        {link.label}
-        {isActive(link.href) && (
-          <svg class="brush" viewBox="0 0 70 12" preserveAspectRatio="none" aria-hidden="true">
-            <path d="M2 6 C 16 4, 34 9, 50 6 S 64 5, 68 4" vector-effect="non-scaling-stroke" />
-          </svg>
-        )}
-      </a>
-    ))}
-    <button id="theme-toggle" type="button" class="theme-button" aria-label="Choose colour theme">
-      <span class="theme-dots" aria-hidden="true">
-        <span></span>
-        <span></span>
-      </span>
+    {
+      links.map((link) => (
+        <a
+          href={link.href}
+          class:list={["nav-link", { active: isActive(link.href) }]}
+          aria-current={isActive(link.href) ? "page" : undefined}
+        >
+          {link.label}
+          {isActive(link.href) && (
+            <svg class="brush" viewBox="0 0 70 12" preserveAspectRatio="none" aria-hidden="true">
+              <path
+                d="M2 6 C 16 4, 34 9, 50 6 S 64 5, 68 4"
+                vector-effect="non-scaling-stroke"
+              />
+            </svg>
+          )}
+        </a>
+      ))
+    }
+    <button
+      id="theme-toggle"
+      type="button"
+      class="theme-button"
+      aria-label="Choose colour theme"
+      data-theme-open
+    >
+      <span class="theme-dots" aria-hidden="true"><span></span><span></span></span>
       <span data-theme-label>aurum · night</span>
     </button>
   </nav>
@@ -377,21 +385,12 @@ const menu = [...links, { href: "/contact/", label: "contact" }];
 
 <script is:inline>
   (function () {
-    // until the picker lands, the button steps through every theme
     function label() {
       var text = window.auTheme.resolve(window.auTheme.get()).replace("-", " · ");
       document.querySelectorAll("[data-theme-label]").forEach(function (el) {
         el.textContent = text;
       });
     }
-
-    function step() {
-      var ids = window.auTheme.ids;
-      var current = window.auTheme.resolve(window.auTheme.get());
-      window.auTheme.set(ids[(ids.indexOf(current) + 1) % ids.length]);
-    }
-
-    document.getElementById("theme-toggle").addEventListener("click", step);
 
     var sheet = document.getElementById("menu-sheet");
     var openBtn = document.getElementById("menu-open");
@@ -406,7 +405,6 @@ const menu = [...links, { href: "/contact/", label: "contact" }];
     sheet.addEventListener("close", function () {
       openBtn.setAttribute("aria-expanded", "false");
     });
-    sheet.querySelector("[data-theme-open]").addEventListener("click", step);
 
     document.addEventListener("au-theme-change", label);
     document.addEventListener("DOMContentLoaded", label);

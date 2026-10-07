@@ -1,0 +1,357 @@
+---
+// M-x au-themes-select: a minibuffer-like sheet listing every au-theme.
+import auThemes from "../data/au-themes.json";
+
+const families: Array<{ name: string; themes: typeof auThemes }> = [];
+for (const theme of auThemes) {
+  let group = families.find((g) => g.name === theme.family);
+  if (!group) {
+    group = { name: theme.family, themes: [] };
+    families.push(group);
+  }
+  group.themes.push(theme);
+}
+---
+
+<dialog id="theme-picker" class="picker" aria-label="Choose colour theme">
+  <div class="picker-inner">
+    <div class="picker-prompt">
+      <label for="picker-query">
+        M-x au-themes-select <span class="caret">›</span>
+      </label>
+      <input
+        id="picker-query"
+        type="text"
+        placeholder="aurum, night, salina…"
+        autocomplete="off"
+        spellcheck="false"
+      />
+      <span class="picker-count" data-picker-count>
+        {auThemes.length}/{auThemes.length}
+      </span>
+    </div>
+
+    <button type="button" class="picker-row picker-auto" data-choice="auto">
+      <span class="mark" aria-hidden="true"></span>
+      <span class="row-id">auto</span>
+      <span class="row-desc">follow the system: aurum-day by light, aurum-night by dark</span>
+    </button>
+
+    <div class="picker-list">
+      {families.map((family) => (
+        <div class="picker-group" data-family={family.name}>
+          <div class="group-name">{family.name}</div>
+          {family.themes.map((theme) => (
+            <button
+              type="button"
+              class="picker-row"
+              data-choice={theme.id}
+              data-search={`${theme.id} ${theme.polarity} ${theme.description}`.toLowerCase()}
+            >
+              <span class="mark" aria-hidden="true" />
+              <span class="swatch" aria-hidden="true">
+                {theme.swatch.map((colour) => (
+                  <span style={`background: ${colour}`} />
+                ))}
+              </span>
+              <span class="row-id">{theme.id}</span>
+              <span class="row-polarity">{theme.polarity}</span>
+              <span class="row-desc">{theme.description}</span>
+            </button>
+          ))}
+        </div>
+      ))}
+    </div>
+  </div>
+</dialog>
+
+<style>
+  .picker {
+    width: 100%;
+    max-width: none;
+    margin: auto 0 0;
+    padding: 0;
+    border: 0;
+    border-top: 1px solid var(--border);
+    background: var(--bg-dim);
+    color: var(--fg-main);
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+
+  .picker::backdrop {
+    background: transparent;
+  }
+
+  .picker-inner {
+    max-width: var(--page-width);
+    margin: 0 auto;
+    padding: 1.125rem var(--gutter) 1.5rem;
+  }
+
+  .picker-prompt {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.625rem;
+  }
+
+  .picker-prompt label,
+  .picker-count {
+    color: var(--fg-dim);
+  }
+
+  .caret {
+    color: var(--cursor);
+  }
+
+  .picker-prompt input {
+    flex: 1 1 15rem;
+    min-height: 44px;
+    padding: 0 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 6px 4px 7px 5px;
+    background: var(--bg-main);
+    color: var(--fg-main);
+    font: inherit;
+  }
+
+  .picker-prompt input:focus {
+    outline: 1px solid var(--cursor);
+    outline-offset: 1px;
+  }
+
+  .picker-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+    max-height: 22.5rem;
+    margin-top: 0.625rem;
+    overflow-y: auto;
+  }
+
+  .group-name {
+    padding: 0.375rem 0.75rem 0.125rem;
+    color: var(--accent-0);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+
+  .picker-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.875rem;
+    width: 100%;
+    min-height: 44px;
+    padding: 0.375rem 0.75rem;
+    border: 0;
+    border-radius: 4px;
+    background: transparent;
+    color: var(--fg-main);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .picker-auto {
+    margin-top: 0.875rem;
+  }
+
+  .picker-row.is-chosen {
+    background: var(--bg-region);
+  }
+
+  .picker-row.is-active {
+    background: var(--bg-main);
+  }
+
+  .picker-row:focus-visible {
+    outline: 1px solid var(--cursor);
+  }
+
+  .mark {
+    width: 1.125rem;
+    color: var(--cursor);
+  }
+
+  .is-chosen .mark::before {
+    content: "✓";
+  }
+
+  .swatch {
+    display: flex;
+    flex: none;
+  }
+
+  .swatch span {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+  }
+
+  .swatch span:first-child {
+    border: 1px solid var(--border);
+  }
+
+  .swatch span + span {
+    margin-left: -5px;
+  }
+
+  .row-id {
+    min-width: 10.25rem;
+  }
+
+  .picker-auto .row-id {
+    min-width: 12.5rem;
+  }
+
+  .row-polarity {
+    width: 3rem;
+    color: var(--fg-dim);
+  }
+
+  .row-desc {
+    flex: 1 1 17.5rem;
+    color: var(--fg-dim);
+  }
+
+  [hidden] {
+    display: none;
+  }
+
+  @media (max-width: 47.99em) {
+    .picker-inner {
+      padding: 1rem 0.75rem 1.5rem;
+    }
+
+    .picker-list {
+      max-height: 60vh;
+    }
+
+    .row-id,
+    .picker-auto .row-id {
+      min-width: 0;
+    }
+
+    .row-desc {
+      padding-left: 2rem;
+      font-size: 0.75rem;
+    }
+  }
+</style>
+
+<script is:inline>
+  (function () {
+    var picker = document.getElementById("theme-picker");
+    var query = document.getElementById("picker-query");
+    var count = picker.querySelector("[data-picker-count]");
+    var rows = Array.prototype.slice.call(picker.querySelectorAll(".picker-row"));
+    var total = rows.length - 1;
+    var active = null;
+
+    function visible() {
+      return rows.filter(function (row) {
+        return !row.hidden && !row.parentElement.hidden;
+      });
+    }
+
+    function mark() {
+      var choice = window.auTheme.get();
+      rows.forEach(function (row) {
+        row.classList.toggle("is-chosen", row.dataset.choice === choice);
+      });
+    }
+
+    function activate(row) {
+      if (active) active.classList.remove("is-active");
+      active = row;
+      if (!row) {
+        window.auTheme.preview();
+        return;
+      }
+      row.classList.add("is-active");
+      row.scrollIntoView({ block: "nearest" });
+      window.auTheme.preview(window.auTheme.resolve(row.dataset.choice));
+    }
+
+    function filter() {
+      var q = query.value.trim().toLowerCase();
+      var shown = 0;
+      picker.querySelectorAll(".picker-group").forEach(function (group) {
+        var any = false;
+        group.querySelectorAll(".picker-row").forEach(function (row) {
+          var match = !q || row.dataset.search.indexOf(q) !== -1;
+          row.hidden = !match;
+          if (match) any = true;
+          if (match) shown++;
+        });
+        group.hidden = !any;
+      });
+      count.textContent = shown + "/" + total;
+      activate(null);
+    }
+
+    function pick(row) {
+      window.auTheme.set(row.dataset.choice);
+      picker.close();
+    }
+
+    function open() {
+      var menu = document.getElementById("menu-sheet");
+      if (menu && menu.open) menu.close();
+      query.value = "";
+      filter();
+      mark();
+      picker.showModal();
+      query.focus();
+    }
+
+    rows.forEach(function (row) {
+      row.addEventListener("click", function () {
+        pick(row);
+      });
+      row.addEventListener("mouseenter", function () {
+        activate(row);
+      });
+    });
+
+    picker.querySelector(".picker-inner").addEventListener("mouseleave", function () {
+      activate(null);
+    });
+
+    query.addEventListener("input", filter);
+
+    picker.addEventListener("keydown", function (e) {
+      var list = visible();
+      var i = list.indexOf(active);
+      if (e.key === "ArrowDown" || (e.ctrlKey && e.key === "n")) {
+        e.preventDefault();
+        activate(list[(i + 1) % list.length]);
+      } else if (e.key === "ArrowUp" || (e.ctrlKey && e.key === "p")) {
+        e.preventDefault();
+        activate(list[(i - 1 + list.length) % list.length]);
+      } else if (e.key === "Enter" && e.target === query) {
+        e.preventDefault();
+        var target = active || list[1] || list[0];
+        if (target) pick(target);
+      }
+    });
+
+    // closing without a pick (esc, click outside) drops the preview
+    picker.addEventListener("close", function () {
+      activate(null);
+    });
+
+    picker.addEventListener("click", function (e) {
+      if (e.target === picker) picker.close();
+    });
+
+    document.addEventListener("click", function (e) {
+      if (e.target.closest && e.target.closest("[data-theme-open]")) open();
+    });
+
+    window.auTheme.openPicker = open;
+  })();
+</script>
