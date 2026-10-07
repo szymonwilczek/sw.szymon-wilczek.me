@@ -273,6 +273,9 @@ function rehypeOrgEnhancements() {
 
       // Headings and Anchor Links
       if (/^h[1-6]$/.test(node.tagName)) {
+        const level = Number(node.tagName[1]);
+        if (level < 6) node.tagName = `h${level + 1}`;
+
         const id = node.properties?.id;
         if (id) {
           node.children = node.children || [];
