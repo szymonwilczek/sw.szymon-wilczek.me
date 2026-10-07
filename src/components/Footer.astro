@@ -1,80 +1,72 @@
 ---
 const currentYear = new Date().getFullYear();
+
+const links = [
+  { href: "/contact/", label: "contact" },
+  { href: "/credits/", label: "credits" },
+  { href: "/rss.xml", label: "rss" },
+  { href: "/vault/", label: "vault" },
+];
 ---
 
 <footer class="site-footer">
-  <div class="footer-line">
-    <span class="footer-copy">(C) {currentYear} Szymon Wilczek</span>
-    <span class="footer-sep">&middot;</span>
-    <button
-      type="button"
-      id="footer-keys-btn"
-      class="footer-keys-btn"
-      aria-label="Show keybindings cheat sheet"
-    >
-      Press <kbd>?</kbd> for keys &middot; <kbd>M-x</kbd> for commands
-    </button>
-  </div>
+  <nav aria-label="Secondary" class="footer-nav">
+    {links.map((link) => <a href={link.href}>{link.label}</a>)}
+  </nav>
+  <span>
+    © {currentYear} Szymon Wilczek · written in Org, built with Astro ·
+    <span data-theme-id>au-aurum-night</span>
+  </span>
 </footer>
 
-<style is:global>
-  footer.site-footer {
-    font-family: "Typus Mono 95", "Typus Mono", monospace !important;
-    font-size: 0.84rem !important;
-    color: var(--fg-dim) !important;
-    line-height: 1.5 !important;
+<style>
+  .site-footer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem 1.5rem;
+    margin-top: 6rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    line-height: 1.5;
+    color: var(--fg-dim);
   }
 
-  footer.site-footer .footer-line {
-    display: flex !important;
-    align-items: center !important;
-    gap: 0.65rem !important;
-    flex-wrap: wrap !important;
-    margin: 0 !important;
-    font-family: "Typus Mono 95", "Typus Mono", monospace !important;
-    font-size: 0.84rem !important;
+  .footer-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.25rem;
   }
 
-  footer.site-footer .footer-copy {
-    font-family: "Typus Mono 95", "Typus Mono", monospace !important;
-    color: var(--fg-dim) !important;
-    font-size: 0.84rem !important;
-    font-weight: 400 !important;
+  .footer-nav a {
+    color: inherit;
+    text-decoration: none;
   }
 
-  footer.site-footer .footer-sep {
-    color: var(--fg-dim) !important;
-    opacity: 0.5 !important;
+  .footer-nav a:hover {
+    color: var(--fg-main);
   }
 
-  footer.site-footer .footer-keys-btn {
-    background: transparent !important;
-    border: none !important;
-    padding: 0 !important;
-    color: var(--fg-dim) !important;
-    font-family: "Typus Mono 95", "Typus Mono", monospace !important;
-    font-size: 0.84rem !important;
-    font-weight: 400 !important;
-    cursor: pointer !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    gap: 0.35rem !important;
-    transition: color 0.15s ease !important;
-  }
-
-  footer.site-footer .footer-keys-btn:hover {
-    color: var(--fg-link-hover) !important;
-  }
-
-  footer.site-footer .footer-keys-btn kbd {
-    background-color: var(--bg-dim) !important;
-    border: 1px solid var(--border) !important;
-    color: var(--fg-link) !important;
-    font-family: "Typus Mono 95", "Typus Mono", monospace !important;
-    font-size: 0.82em !important;
-    font-weight: 700 !important;
-    padding: 0.12em 0.45em !important;
-    border-radius: 2px !important;
-    margin: 0 0.1em !important;
+  @media (max-width: 47.99em) {
+    .site-footer {
+      margin-top: 4rem;
+    }
   }
 </style>
+
+<script is:inline>
+  (function () {
+    function show() {
+      var id = window.auTheme.resolve(window.auTheme.get());
+      document.querySelectorAll("[data-theme-id]").forEach(function (el) {
+        el.textContent = "au-" + id;
+      });
+    }
+
+    document.addEventListener("au-theme-change", show);
+    show();
+  })();
+</script>
