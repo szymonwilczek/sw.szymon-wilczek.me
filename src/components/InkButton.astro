@@ -1,0 +1,70 @@
+---
+// Button (or link) circled by hand in the cursor colour.
+import type { HTMLAttributes } from "astro/types";
+
+type Props = HTMLAttributes<"button"> & HTMLAttributes<"a"> & { href?: string };
+
+const { href, class: className, type = "button", ...rest } = Astro.props;
+const Tag = href ? "a" : "button";
+---
+
+<Tag class:list={["ink-button", className]} href={href} type={href ? undefined : type} {...rest}>
+  <svg viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M8 6 C 30 2, 70 3, 94 7 C 99 14, 99 28, 93 34 C 66 39, 32 38, 7 35 C 1 28, 1 13, 9 4" />
+  </svg>
+  <slot />
+</Tag>
+
+<style>
+  .ink-button {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    min-height: 3rem;
+    padding: 0 1.625rem;
+    border: 0;
+    background: none;
+    color: var(--fg-main);
+    font-family: var(--font-hand);
+    font-size: 1.25rem;
+    line-height: 1;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .ink-button:hover,
+  .ink-button:visited {
+    color: var(--fg-main);
+  }
+
+  .ink-button:disabled {
+    color: var(--fg-dim);
+    cursor: progress;
+  }
+
+  svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+
+  path {
+    fill: none;
+    stroke: var(--cursor);
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    vector-effect: non-scaling-stroke;
+    transition: stroke-width 0.15s ease;
+  }
+
+  .ink-button:hover path,
+  .ink-button:focus-visible path {
+    stroke-width: 2.4;
+  }
+
+  .ink-button:focus-visible {
+    outline: none;
+  }
+</style>
