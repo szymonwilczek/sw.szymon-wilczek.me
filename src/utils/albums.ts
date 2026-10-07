@@ -37,6 +37,9 @@ export interface PhotoAlbum {
   title: string;
   description?: string;
   location?: string;
+  country?: string;
+  terrain: string[];
+  stampNum: string;
   date: Date;
   dateFormatted: string;
   coverImage: string;
@@ -116,6 +119,8 @@ export async function getAllAlbums(): Promise<PhotoAlbum[]> {
       title?: string;
       description?: string;
       location?: string;
+      country?: string;
+      terrain?: string[];
       cover?: string;
       photos?: Record<string, string>;
     } = {};
@@ -380,6 +385,9 @@ export async function getAllAlbums(): Promise<PhotoAlbum[]> {
       title: albumMetadata.title || derivedTitle,
       description: albumMetadata.description,
       location: albumMetadata.location,
+      country: albumMetadata.country,
+      terrain: albumMetadata.terrain ?? [],
+      stampNum: "",
       date: albumDate,
       dateFormatted,
       coverImage,
@@ -397,6 +405,11 @@ export async function getAllAlbums(): Promise<PhotoAlbum[]> {
       b.date.getTime() - a.date.getTime() ||
       (b.photos[0]?.date.getTime() ?? 0) - (a.photos[0]?.date.getTime() ?? 0),
   );
+
+  // stamps are numbered in the order the trips happened, oldest first
+  albums.forEach((album, i) => {
+    album.stampNum = String(albums.length - i).padStart(2, "0");
+  });
 
   albumsCache = albums;
   return albums;

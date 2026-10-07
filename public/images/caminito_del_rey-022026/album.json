@@ -1,0 +1,9 @@
+{
+  "location": "Caminito del Rey",
+  "country": "ESPAÑA",
+  "terrain": [
+    "gorge",
+    "river",
+    "walkway"
+  ]
+}

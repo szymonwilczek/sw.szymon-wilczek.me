@@ -1,0 +1,9 @@
+{
+  "location": "Málaga",
+  "country": "ESPAÑA",
+  "terrain": [
+    "coast",
+    "palm",
+    "city"
+  ]
+}

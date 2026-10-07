@@ -1,0 +1,9 @@
+{
+  "location": "Budva",
+  "country": "CRNA GORA",
+  "terrain": [
+    "mountains",
+    "bay",
+    "boat"
+  ]
+}
