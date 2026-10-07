@@ -12,14 +12,11 @@ export async function GET(context: APIContext) {
     link: `/writings/${item.id.replace(/\.(org|md|mdx)$/, "")}/`,
   }));
 
-  const allItems = writingItems.sort(
-    (a, b) => b.pubDate.valueOf() - a.pubDate.valueOf(),
-  );
+  const allItems = writingItems.sort((a, b) => b.pubDate.valueOf() - a.pubDate.valueOf());
 
   return rss({
     title: "Szymon Wilczek",
-    description:
-      "Personal writings, essays, manifestos, and tools by Szymon Wilczek.",
+    description: "Personal writings, essays, manifestos, and tools by Szymon Wilczek.",
     site: context.site ?? "https://sw.szymon-wilczek.me",
     items: allItems,
     customData: `<language>en-us</language>`,

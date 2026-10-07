@@ -29,7 +29,8 @@ const menu = [...links, { href: "/contact/", label: "contact" }];
     aria-expanded="false"
   >
     <svg width="28" height="20" viewBox="0 0 28 20" aria-hidden="true">
-      <path d="M2 3 C 9 2, 18 4, 26 2.5 M3 10 C 10 9, 17 11, 24 9.5 M2 17 C 8 16, 14 18, 19 16.5" />
+      <path d="M2 3 C 9 2, 18 4, 26 2.5 M3 10 C 10 9, 17 11, 24 9.5 M2 17 C 8 16, 14 18, 19 16.5"
+      ></path>
     </svg>
   </button>
 </header>
@@ -42,7 +43,7 @@ const menu = [...links, { href: "/contact/", label: "contact" }];
     </a>
     <button id="menu-close" type="button" class="icon-button" aria-label="Close menu">
       <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true">
-        <path d="M3 3 C 8 8, 13 13, 19 19.5 M19 2.5 C 14 8, 9 13, 2.5 19" />
+        <path d="M3 3 C 8 8, 13 13, 19 19.5 M19 2.5 C 14 8, 9 13, 2.5 19"></path>
       </svg>
     </button>
   </div>
@@ -95,10 +96,7 @@ const menu = [...links, { href: "/contact/", label: "contact" }];
           {link.label}
           {isActive(link.href) && (
             <svg class="brush" viewBox="0 0 70 12" preserveAspectRatio="none" aria-hidden="true">
-              <path
-                d="M2 6 C 16 4, 34 9, 50 6 S 64 5, 68 4"
-                vector-effect="non-scaling-stroke"
-              />
+              <path d="M2 6 C 16 4, 34 9, 50 6 S 64 5, 68 4" vector-effect="non-scaling-stroke" />
             </svg>
           )}
         </a>

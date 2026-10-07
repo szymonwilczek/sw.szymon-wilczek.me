@@ -57,8 +57,8 @@ const RADII = ["3px 7px 4px 8px", "6px 3px 7px 4px", "4px 6px 3px 7px", "7px 4px
 >
   <a href="/photos/" class="back hand">
     <svg width="40" height="18" viewBox="0 0 40 18" aria-hidden="true">
-      <path d="M38 10 C 28 8, 18 11, 4 9" />
-      <path d="M11 3 L 3 9 L 11 15" />
+      <path d="M38 10 C 28 8, 18 11, 4 9"></path>
+      <path d="M11 3 L 3 9 L 11 15"></path>
     </svg>
     all albums
   </a>
@@ -76,8 +76,10 @@ const RADII = ["3px 7px 4px 8px", "6px 3px 7px 4px", "4px 6px 3px 7px", "7px 4px
       </div>
       {camera && (
         <div>
-          <dt>camera</dt>
-          <dd>{camera}</dd>
+          <>
+            <dt>camera</dt>
+            <dd>{camera}</dd>
+          </>
         </div>
       )}
     </dl>
@@ -198,7 +200,7 @@ const RADII = ["3px 7px 4px 8px", "6px 3px 7px 4px", "4px 6px 3px 7px", "7px 4px
     <form method="dialog">
       <button class="lightbox-close" aria-label="Close">
         <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true">
-          <path d="M4 4.5 C 8 8, 12 12, 16 15.5 M 15.5 4 C 12 8, 8 12, 4.5 16" />
+          <path d="M4 4.5 C 8 8, 12 12, 16 15.5 M 15.5 4 C 12 8, 8 12, 4.5 16"></path>
         </svg>
       </button>
     </form>
