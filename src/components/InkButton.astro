@@ -2,13 +2,18 @@
 // Button (or link) circled by hand in the cursor colour.
 import type { HTMLAttributes } from "astro/types";
 
-type Props = HTMLAttributes<"button"> & HTMLAttributes<"a"> & { href?: string };
+type Props = HTMLAttributes<"button"> & HTMLAttributes<"a"> & { href?: string; quiet?: boolean };
 
-const { href, class: className, type = "button", ...rest } = Astro.props;
+const { href, quiet, class: className, type = "button", ...rest } = Astro.props;
 const Tag = href ? "a" : "button";
 ---
 
-<Tag class:list={["ink-button", className]} href={href} type={href ? undefined : type} {...rest}>
+<Tag
+  class:list={["ink-button", { quiet }, className]}
+  href={href}
+  type={href ? undefined : type}
+  {...rest}
+>
   <svg viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true">
     <path d="M8 6 C 30 2, 70 3, 94 7 C 99 14, 99 28, 93 34 C 66 39, 32 38, 7 35 C 1 28, 1 13, 9 4" />
   </svg>
@@ -66,5 +71,20 @@ const Tag = href ? "a" : "button";
 
   .ink-button:focus-visible {
     outline: none;
+  }
+
+  .quiet {
+    font-size: 1.1875rem;
+  }
+
+  .quiet path {
+    stroke: var(--border);
+    stroke-width: 1.4;
+  }
+
+  .quiet:hover path,
+  .quiet:focus-visible path {
+    stroke: var(--cursor);
+    stroke-width: 1.6;
   }
 </style>
