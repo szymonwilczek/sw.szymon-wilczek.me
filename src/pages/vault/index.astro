@@ -1,121 +1,237 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import VaultUnlock from "../../components/VaultUnlock.astro";
-import Pagination from "../../components/Pagination.astro";
+import Divider from "../../components/Divider.astro";
 import SearchFilter from "../../components/SearchFilter.astro";
-import FormattedDate from "../../components/FormattedDate.astro";
+import VaultUnlock from "../../components/VaultUnlock.astro";
+import WaxSeal from "../../components/WaxSeal.astro";
 import { getCollection } from "astro:content";
+import { dottedDate } from "../../utils/format";
 
-const PAGE_SIZE = 10;
-const allVaultItems = (await getCollection("vault")).sort(
+const items = (await getCollection("vault")).sort(
   (a, b) => (b.data.date?.valueOf() || 0) - (a.data.date?.valueOf() || 0),
 );
 
-const totalPages = Math.ceil(allVaultItems.length / PAGE_SIZE);
-const vaultItems = allVaultItems.slice(0, PAGE_SIZE);
+const TILTS = [-0.5, 0.6, 0.3, -0.4];
+const SEAL_TILTS = [-8, 6, -4, 10];
 ---
 
-<BaseLayout
-  title="Vault"
-  description="Encrypted cryptographic vault document store."
-  noindex={true}
->
-  <article>
-    <h1>Cryptographic Vault</h1>
-
-    <p>This is a private document store. All contents on this page are encrypted.</p>
-
+<BaseLayout title="Vault" description="A private, encrypted document store." noindex={true}>
+  <header class="vault-head">
+    <div>
+      <h1>Vault</h1>
+      <p class="lede">
+        A private document store. Everything on this page is encrypted; it opens only in your
+        browser, with the right word.
+      </p>
+    </div>
     <SearchFilter
-      placeholder="Filter by title, description, or keyword..."
-      targetSelector=".vault-card"
-      containerSelector=".vault-items"
+      placeholder="title, description or hint…"
+      targetSelector=".envelope-item"
+      containerSelector=".envelopes"
     />
+  </header>
 
-    <div class="vault-items">
-      {
-        vaultItems.map((item) => (
-          <section
-            class="vault-card"
-            data-search={`${item.data.title} ${item.data.description || ""} ${item.data.hint || ""}`}
-          >
-            <header class="vault-header">
+  <Divider from={260} to={480} />
+
+  <ol class="envelopes">
+    {items.map((item, i) => (
+      <li
+        class="envelope-item"
+        style={`--tilt: ${TILTS[i % TILTS.length]}deg; --seal-tilt: ${SEAL_TILTS[i % SEAL_TILTS.length]}deg`}
+        data-search={`${item.data.title} ${item.data.description || ""} ${item.data.hint || ""}`}
+      >
+        <article class="envelope">
+          <svg class="flap" viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true">
+            <path
+              class="flap-fill"
+              d="M0 0 L 100 0 L 100 2 C 80 14, 64 26, 50 38 C 36 26, 20 14, 0 2 Z"
+            />
+            <path class="flap-edge" d="M0.5 1.5 C 18 13, 34 25, 50 38 C 64 26, 82 13, 99.5 1.5" />
+          </svg>
+          <span class="seal">
+            <WaxSeal size={52} />
+          </span>
+
+          <div class="letter">
+            <div class="letter-head">
               <h2>{item.data.title}</h2>
-              {item.data.date && (
-                <span class="vault-date">
-                  <FormattedDate date={item.data.date} />
-                </span>
-              )}
-            </header>
-
-            {item.data.description && <p class="vault-desc">{item.data.description}</p>}
+              {item.data.date && <span class="letter-date">{dottedDate(item.data.date)}</span>}
+            </div>
+            {item.data.description && <p class="letter-desc">{item.data.description}</p>}
+            {item.data.hint && <p class="hint hand">hint — {item.data.hint}</p>}
 
             <VaultUnlock
               ciphertext={item.data.ciphertext}
               encryptedUrl={item.data.encryptedUrl}
-              filename={item.data.filename || item.id.replace(/\.(json|org|md)$/, "") + ".org"}
+              filename={item.data.filename || `${item.id.replace(/\.(json|org|md)$/, "")}.org`}
               filesize={item.data.filesize}
               iv={item.data.iv}
               salt={item.data.salt}
-              hint={item.data.hint}
             />
-          </section>
-        ))
-      }
+          </div>
+        </article>
+      </li>
+    ))}
+  </ol>
 
-      {vaultItems.length === 0 && <p>No encrypted vault documents stored at this moment.</p>}
-    </div>
-
-    <Pagination
-      currentPage={1}
-      lastPage={totalPages}
-      nextUrl={totalPages > 1 ? "/vault/page/2/" : undefined}
-      baseUrl="/vault/"
-    />
-  </article>
+  {items.length === 0 && <p class="empty hand">the vault is empty, for now.</p>}
 </BaseLayout>
 
 <style>
-  .vault-items {
-    margin-top: 1.5rem;
+  .vault-head {
     display: flex;
-    flex-direction: column;
-    gap: 2.25rem;
-  }
-
-  .vault-card {
-    border-left: 2px solid var(--border);
-    padding-left: 1.25rem;
-    transition: border-color 0.2s ease;
-  }
-
-  .vault-card:hover {
-    border-left-color: var(--fg-link);
-  }
-
-  .vault-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
     flex-wrap: wrap;
-    gap: 0.5rem;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1.5rem 3rem;
   }
 
-  .vault-header h2 {
+  .vault-head > div {
+    flex: 999 1 30rem;
+    min-width: 0;
+    max-width: 40rem;
+  }
+
+  .vault-head h1 {
     margin: 0;
-    font-size: 1.35rem;
-    border-bottom: none;
-    padding-bottom: 0;
   }
 
-  .vault-date {
-    font-family: "Typus Mono 95", "Typus Mono", monospace;
-    font-size: 0.88rem;
+  .lede {
+    margin: 1.25rem 0 0;
     color: var(--fg-dim);
   }
 
-  .vault-desc {
-    margin: 0.4rem 0 0.75rem 0;
-    font-size: 0.92rem;
-    color: var(--fg-main);
+  .envelopes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3.5rem 2.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .envelope-item {
+    flex: 1 1 26.25rem;
+    min-width: 0;
+    transform: rotate(var(--tilt));
+  }
+
+  .envelope {
+    position: relative;
+    background: var(--paper);
+    border-radius: 3px 5px 4px 6px;
+    box-shadow:
+      0 1px 0 var(--border),
+      0 18px 30px -24px rgba(0, 0, 0, 0.65);
+  }
+
+  .flap {
+    display: block;
+    width: 100%;
+    height: 5.5rem;
+    transition: height 0.6s ease;
+  }
+
+  .flap-fill {
+    fill: var(--bg-alt);
+  }
+
+  .flap-edge {
+    fill: none;
+    stroke: var(--border);
+    vector-effect: non-scaling-stroke;
+  }
+
+  .seal {
+    position: absolute;
+    left: 50%;
+    top: 3.75rem;
+    margin-left: -26px;
+    transform: rotate(var(--seal-tilt));
+    transition:
+      opacity 0.4s ease,
+      transform 0.4s ease;
+  }
+
+  .is-open .seal {
+    opacity: 0;
+    transform: rotate(var(--seal-tilt)) translateY(-0.75rem) scale(0.8);
+  }
+
+  .is-open .flap {
+    height: 1.25rem;
+  }
+
+  .letter {
+    padding: 2rem 2.25rem 1.75rem;
+  }
+
+  .letter-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 6px 1rem;
+  }
+
+  .letter-head h2 {
+    margin: 0;
+    font-size: 1.5rem;
+  }
+
+  .letter-date {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--fg-dim);
+  }
+
+  .letter-desc {
+    margin: 0.5rem 0 0;
+    color: var(--fg-dim);
+  }
+
+  .hint {
+    margin: 0.5rem 0 0;
+    font-size: 1.125rem;
+  }
+
+  .empty {
+    margin: 2rem 0 0;
+    font-size: 1.1875rem;
+    text-align: center;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .flap,
+    .seal {
+      transition: none;
+    }
+  }
+
+  @media (max-width: 47.99em) {
+    .envelopes {
+      gap: 2.5rem;
+    }
+
+    .envelope-item {
+      flex-basis: 100%;
+      transform: none;
+    }
+
+    .flap {
+      height: 4rem;
+    }
+
+    .seal {
+      top: 2.5rem;
+    }
+
+    .letter {
+      padding: 1.75rem 1.25rem 1.5rem;
+    }
+
+    .letter-head h2 {
+      font-size: 1.3125rem;
+    }
   }
 </style>
