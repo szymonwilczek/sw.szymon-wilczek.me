@@ -1,140 +1,158 @@
 ---
 interface Props {
   placeholder?: string;
+  label?: string;
   targetSelector: string;
   containerSelector?: string;
+  class?: string;
 }
 
 const {
-  placeholder = "Filter by keyword, title, or tag...",
+  placeholder = "filter by title or tag…",
+  label = "Filter entries",
   targetSelector,
   containerSelector = "",
+  class: className,
 } = Astro.props;
 ---
 
-<div class="search-filter-box" data-target={targetSelector} data-container={containerSelector}>
-  <div class="search-input-wrapper">
-    <span class="search-icon" aria-hidden="true">&gt;</span>
+<div
+  class:list={["search-filter-box", className]}
+  data-target={targetSelector}
+  data-container={containerSelector}
+>
+  <label class="search-field">
+    <svg class="search-lens" width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
+      <path
+        d="M7.6 2.2 C 11 2, 13.2 4.6, 13 7.6 C 12.8 10.8, 10.2 13, 7.2 12.8 C 4.2 12.6, 2.2 10.2, 2.4 7.2 C 2.6 4.4, 4.8 2.4, 7.6 2.2 Z M 11.6 11.8 L 16 16.2"
+      ></path>
+    </svg>
+    <span class="visually-hidden">{label}</span>
     <input
-      type="text"
+      type="search"
       class="live-search-input"
       placeholder={placeholder}
-      aria-label="Filter entries"
       autocomplete="off"
+      spellcheck="false"
     />
-    <button type="button" class="clear-search-btn" style="display: none;" aria-label="Clear filter"
-      >&times;</button
-    >
-  </div>
-  <div class="no-results" style="display: none;">
-    <p>No entries match the filter term.</p>
-  </div>
+    <svg class="search-line" viewBox="0 0 100 8" preserveAspectRatio="none" aria-hidden="true">
+      <path d="M0 4.6 C 18 3.2, 40 5.4, 62 3.8 S 90 4.8, 100 3.4" vector-effect="non-scaling-stroke"
+      ></path>
+    </svg>
+  </label>
+  <p class="no-results" hidden>nothing here matches that.</p>
 </div>
 
 <script>
   (function () {
-    function setupSearchFilters() {
-      document.querySelectorAll(".search-filter-box").forEach(function (box) {
-        var input = box.querySelector(".live-search-input");
-        var clearBtn = box.querySelector(".clear-search-btn");
-        var noResults = box.querySelector(".no-results");
-        var targetSelector = box.dataset.target;
-        var containerSelector = box.dataset.container;
+    document.querySelectorAll<HTMLElement>(".search-filter-box").forEach(function (box) {
+      var input = box.querySelector<HTMLInputElement>(".live-search-input");
+      var noResults = box.querySelector<HTMLElement>(".no-results");
+      var targetSelector = box.dataset.target;
+      var containerSelector = box.dataset.container;
+      if (!input || !targetSelector) return;
 
-        if (!input || !targetSelector) return;
+      var container = containerSelector ? document.querySelector(containerSelector) : document;
+      if (!container) return;
 
-        var container = containerSelector ? document.querySelector(containerSelector) : document;
+      function applyFilter() {
+        var query = input!.value.trim().toLowerCase();
+        var items = container!.querySelectorAll<HTMLElement>(targetSelector!);
+        var matchCount = 0;
 
-        function applyFilter() {
-          var query = input.value.trim().toLowerCase();
-          clearBtn.style.display = query ? "inline-block" : "none";
-
-          var items = container.querySelectorAll(targetSelector);
-          var matchCount = 0;
-
-          items.forEach(function (item) {
-            var searchData = (item.dataset.search || item.textContent || "").toLowerCase();
-            var matches = !query || searchData.includes(query);
-            item.style.display = matches ? "" : "none";
-            if (matches) matchCount++;
-          });
-
-          if (noResults) {
-            noResults.style.display = items.length > 0 && matchCount === 0 ? "block" : "none";
-          }
-        }
-
-        input.addEventListener("input", applyFilter);
-
-        clearBtn.addEventListener("click", function () {
-          input.value = "";
-          applyFilter();
-          input.focus();
+        items.forEach(function (item) {
+          var searchData = (item.dataset.search || item.textContent || "").toLowerCase();
+          var matches = !query || searchData.includes(query);
+          item.style.display = matches ? "" : "none";
+          if (matches) matchCount++;
         });
-      });
-    }
 
-    setupSearchFilters();
+        if (noResults) noResults.hidden = !(items.length > 0 && matchCount === 0);
+        box.dispatchEvent(new CustomEvent("filter-change", { detail: { query: query } }));
+      }
+
+      input.addEventListener("input", applyFilter);
+    });
   })();
 </script>
 
 <style>
   .search-filter-box {
-    margin: 1.5rem 0 2rem 0;
+    flex: 1 1 17.5rem;
+    max-width: 22.5rem;
   }
 
-  .search-input-wrapper {
+  .search-field {
+    position: relative;
     display: flex;
     align-items: center;
-    background-color: var(--bg-dim);
-    border: 1px solid var(--border);
-    padding: 0.45rem 0.85rem;
-    border-radius: 2px;
-    transition: border-color 0.15s ease;
+    gap: 0.625rem;
+    min-height: 48px;
   }
 
-  .search-input-wrapper:focus-within {
-    border-color: var(--fg-link);
-    outline: 1px solid var(--fg-link);
+  .search-lens {
+    flex: none;
   }
 
-  .search-icon {
-    font-family: "Typus Mono 95", "Typus Mono", monospace;
-    font-weight: 700;
-    color: var(--fg-dim);
-    margin-right: 0.5rem;
-    user-select: none;
+  .search-lens path,
+  .search-line path {
+    fill: none;
+    stroke-linecap: round;
+  }
+
+  .search-lens path {
+    stroke: var(--fg-dim);
+    stroke-width: 1.5;
+  }
+
+  .search-line {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 8px;
+  }
+
+  .search-line path {
+    stroke: var(--border);
+    stroke-width: 1.3;
+  }
+
+  .search-field:focus-within .search-line path {
+    stroke: var(--cursor);
   }
 
   .live-search-input {
     flex: 1;
+    min-width: 0;
+    min-height: 44px;
+    padding: 0;
+    border: 0;
     background: transparent;
-    border: none;
-    outline: none;
     color: var(--fg-main);
-    font-family: "Typus Mono 95", "Typus Mono", monospace;
-    font-size: 0.95rem;
+    font-family: var(--font-hand);
+    font-size: 1.1875rem;
+    outline: none;
   }
 
-  .clear-search-btn {
-    background: transparent;
-    border: none;
+  .live-search-input::placeholder {
     color: var(--fg-dim);
-    font-family: "Typus Mono 95", "Typus Mono", monospace;
-    font-size: 1.1rem;
-    cursor: pointer;
-    padding: 0 0.25rem;
-    line-height: 1;
+    opacity: 0.8;
   }
 
-  .clear-search-btn:hover {
-    color: var(--red-warmer);
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
   }
 
   .no-results {
-    padding: 1.5rem 0;
+    margin: 1rem 0 0;
+    font-family: var(--font-hand);
+    font-weight: 300;
     color: var(--fg-dim);
-    font-family: "Typus Mono 95", "Typus Mono", monospace;
-    font-style: italic;
   }
 </style>
