@@ -1,19 +1,23 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import Divider from "../../components/Divider.astro";
+import Seal from "../../components/Seal.astro";
 import { getCollection } from "astro:content";
-import FormattedDate from "../../components/FormattedDate.astro";
 import { renderContentEntry } from "../../utils/org";
 import { calculateReadingStats } from "../../utils/reading-time";
+import { dottedDate, writingSlug } from "../../utils/format";
 
 export async function getStaticPaths() {
-  const writings = await getCollection("writings");
-  return writings.map((post) => ({
-    params: { slug: post.id.replace(/\.(org|md|mdx)$/, "") },
-    props: { post },
+  const writings = (await getCollection("writings")).sort(
+    (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+  );
+  return writings.map((post, i) => ({
+    params: { slug: writingSlug(post.id) },
+    props: { post, newer: writings[i - 1], older: writings[i + 1] },
   }));
 }
 
-const { post } = Astro.props;
+const { post, newer, older } = Astro.props;
 const { slug } = Astro.params;
 const { html, Content } = await renderContentEntry(post);
 const stats = calculateReadingStats(post.body);
@@ -36,67 +40,69 @@ const postImage = imageMatch ? imageMatch[1] : `/og/${slug}.png`;
   image={postImage}
   imageAlt={post.data.title}
 >
-  <article class="writing-article">
-    <header class="writing-header">
-      <div class="back-link">
-        <a href="/writings/">&larr; All writings</a>
-      </div>
-      <h1>{post.data.title}</h1>
-      <div class="writing-meta">
-        <span>Published: <FormattedDate date={post.data.pubDate} /></span>
-        <span>Reading Time: <code>{stats.text}</code></span>
-        <span>Category: <code>{post.data.category}</code></span>
-        {
-          post.data.tags.length > 0 && (
-            <span>
-              Tags: <code class="tag-list">{post.data.tags.join(", ")}</code>
-            </span>
-          )
-        }
-      </div>
-    </header>
+  <header class="article-head">
+    <p class="crumbs">
+      <a href="/writings/">writings</a> / {post.data.category.toLowerCase()}
+    </p>
+    <h1>{post.data.title}</h1>
+    <p class="article-meta">
+      <span>{dottedDate(post.data.pubDate)}</span>
+      <span>{stats.minutes} min read</span>
+      {post.data.tags.length > 0 && <span class="article-tags">{post.data.tags.join(" · ")}</span>}
+    </p>
+  </header>
 
-    <div class="writing-content">
-      {Content ? <Content /> : <div class="org-content" set:html={html} />}
+  <Divider from={140} to={372} />
+
+  <article class="article">
+    <div class="article-body">
+      <div class="prose">{Content ? <Content /> : <div class="org-content" set:html={html} />}</div>
+
+      <Seal glyph="終" size={52} tilt={3} label="end" class="end-seal" />
+
+      {(older || newer) && (
+        <nav class="adjacent" aria-label="Adjacent writings">
+          {older ? (
+            <a href={`/writings/${writingSlug(older.id)}/`}>
+              <span class="adjacent-dir">← older</span>
+              <span>{older.data.title}</span>
+            </a>
+          ) : (
+            <span />
+          )}
+          {newer && (
+            <a href={`/writings/${writingSlug(newer.id)}/`} class="adjacent-newer">
+              <span class="adjacent-dir">newer →</span>
+              <span>{newer.data.title}</span>
+            </a>
+          )}
+        </nav>
+      )}
+
+      <footer class="source">
+        <p class="source-line">
+          <span>
+            plain text: <code>{post.id}</code> · {rawLines} lines · {stats.words} words
+          </span>
+          <span class="source-actions">
+            <button type="button" id="toggle-raw-btn">
+              view source
+            </button>
+            <a href={`/writings/${slug}.org`} download={`${slug}.org`}>
+              download .org
+            </a>
+          </span>
+        </p>
+        <div id="raw-code-drawer" class="raw-code-drawer" hidden>
+          <button type="button" id="copy-raw-btn">
+            copy buffer
+          </button>
+          <pre class="raw-code-pre"><code>{post.body}</code></pre>
+        </div>
+      </footer>
     </div>
 
-    <footer class="raw-source-container">
-      <hr />
-      <div class="raw-source-bar">
-        <div class="raw-source-info">
-          <span class="raw-label">Plain Text Source:</span>
-          <code>{post.id}</code>
-        </div>
-        <div class="raw-source-actions">
-          <button type="button" id="toggle-raw-btn" class="btn-action raw-action-btn"
-            >View raw .org source</button
-          >
-          <a
-            href={`/writings/${slug}.org`}
-            class="btn-action raw-action-btn"
-            target="_blank"
-            rel="noopener">Open raw buffer</a
-          >
-          <a
-            href={`/writings/${slug}.org`}
-            download={`${slug}.org`}
-            class="btn-action raw-action-btn">Download .org</a
-          >
-        </div>
-      </div>
-
-      <div id="raw-code-drawer" class="raw-code-drawer" style="display: none;">
-        <div class="raw-drawer-header">
-          <span>
-            Buffer: <code>{post.id}</code> ({rawLines} lines &middot; {stats.words} words)
-          </span>
-          <button type="button" id="copy-raw-btn" class="btn-action raw-copy-btn"
-            >Copy buffer</button
-          >
-        </div>
-        <pre class="raw-code-pre"><code>{post.body}</code></pre>
-      </div>
-    </footer>
+    <aside class="margin-notes hand" aria-label="Margin notes"></aside>
   </article>
 </BaseLayout>
 
@@ -108,181 +114,305 @@ const postImage = imageMatch ? imageMatch[1] : `/og/${slug}.png`;
 
     if (toggleBtn && drawer) {
       toggleBtn.addEventListener("click", function () {
-        var isOpen = drawer.style.display !== "none";
-        drawer.style.display = isOpen ? "none" : "block";
-        toggleBtn.textContent = isOpen ? "View raw .org source" : "Hide raw source";
+        drawer!.hidden = !drawer!.hidden;
+        toggleBtn!.textContent = drawer!.hidden ? "view source" : "hide source";
       });
     }
 
     if (copyBtn) {
       copyBtn.addEventListener("click", function () {
-        var pre = document.querySelector(".raw-code-pre code");
-        if (pre) {
-          navigator.clipboard.writeText(pre.textContent || "").then(function () {
-            copyBtn.textContent = "Copied";
-            setTimeout(function () {
-              copyBtn.textContent = "Copy buffer";
-            }, 2000);
-          });
-        }
+        var code = document.querySelector(".raw-code-pre code");
+        if (!code) return;
+        navigator.clipboard.writeText(code.textContent || "").then(function () {
+          copyBtn!.textContent = "copied";
+          setTimeout(function () {
+            copyBtn!.textContent = "copy buffer";
+          }, 2000);
+        });
       });
     }
+  })();
+
+  // on wide screens Org footnotes move into the margin beside their reference
+  (function () {
+    var article = document.querySelector<HTMLElement>(".article");
+    var aside = document.querySelector<HTMLElement>(".margin-notes");
+    var defs = document.querySelectorAll<HTMLElement>(".prose .footnote-definition");
+    if (!article || !aside || defs.length === 0) return;
+
+    var wide = window.matchMedia("(min-width: 64em)");
+
+    function place() {
+      aside!.replaceChildren();
+      article!.classList.toggle("notes-in-margin", wide.matches);
+      if (!wide.matches) return;
+
+      var floor = 0;
+      var base = aside!.getBoundingClientRect().top;
+      defs.forEach(function (def) {
+        var num = def.querySelector(".footnum")?.textContent?.trim();
+        var body = def.querySelector(".footdef");
+        var ref = num ? document.getElementById("fnr." + num) : null;
+        if (!num || !body || !ref) return;
+
+        var note = document.createElement("div");
+        note.className = "margin-note";
+        var mark = document.createElement("span");
+        mark.className = "note-num";
+        mark.textContent = num;
+        note.append(mark, ...Array.from(body.cloneNode(true).childNodes));
+        aside!.append(note);
+
+        var top = Math.max(ref.getBoundingClientRect().top - base - 8, floor);
+        note.style.top = top + "px";
+        floor = top + note.offsetHeight + 24;
+      });
+      aside!.style.minHeight = floor + "px";
+    }
+
+    wide.addEventListener("change", place);
+    window.addEventListener("resize", place);
+    document.fonts.ready.then(place);
+    place();
   })();
 </script>
 
 <style>
-  .writing-header {
-    margin-bottom: 2.25rem;
-    padding-bottom: 1.25rem;
-    border-bottom: 1px solid var(--border);
+  .article-head,
+  .article {
+    margin-left: 8.75rem;
   }
 
-  .back-link {
-    font-family: "Typus Mono 95", "Typus Mono", monospace;
-    font-size: 0.9rem;
-    margin-bottom: 1rem;
+  .article-head {
+    max-width: 42.5rem;
   }
 
-  .writing-header h1 {
-    margin-top: 0.25rem;
-    margin-bottom: 0.75rem;
-    line-height: 1.25;
-  }
-
-  .writing-meta {
-    font-family: "Typus Mono 95", "Typus Mono", monospace;
-    font-size: 0.9rem;
+  .crumbs,
+  .article-meta {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
     color: var(--fg-dim);
+  }
+
+  .crumbs {
+    margin: 0;
+  }
+
+  .crumbs a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .crumbs a:hover {
+    color: var(--cursor);
+  }
+
+  .article-head h1 {
+    margin: 1rem 0 0;
+    font-size: clamp(2.25rem, 1.6rem + 2.2vw, 3.125rem);
+    line-height: 1.12;
+    letter-spacing: -0.01em;
+  }
+
+  .article-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1.25rem;
+    margin: 1.5rem 0 0;
+  }
+
+  .article-tags {
+    color: var(--accent-0);
+  }
+
+  .article {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3.5rem;
+  }
+
+  .article-body {
+    flex: 999 1 35rem;
+    min-width: 0;
+    max-width: 42.5rem;
+    font-size: 1.1875rem;
+  }
+
+  .prose :global(h2) {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    margin: 3.5rem 0 1.5rem;
+  }
+
+  .prose :global(h2::before) {
+    content: "";
+    flex: none;
+    width: 14px;
+    height: 14px;
+    background: var(--cursor);
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M7 1.5 C 11 2, 13 5, 12.5 8 C 12 11.5, 8 13, 5 12 C 2 11, 1 8, 2 5 C 3 3, 5 1.6, 7 1.5 Z'/%3E%3C/svg%3E")
+      no-repeat center / contain;
+  }
+
+  .prose :global(> :first-child),
+  .prose :global(.org-content > :first-child) {
+    margin-top: 0;
+  }
+
+  .prose :global(img) {
+    display: block;
+    margin: 2.5rem auto;
+    border-radius: var(--radius-soft);
+  }
+
+  :global(.end-seal) {
+    margin: 5rem auto 0;
+  }
+
+  .adjacent {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 1.5rem;
+    margin-top: 3.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px dashed var(--border);
+    font-size: 1.0625rem;
+  }
+
+  .adjacent a {
     display: flex;
     flex-direction: column;
-    gap: 0.4rem;
+    gap: 0.25rem;
+    text-decoration: none;
   }
 
-  .writing-content {
-    margin-top: 2.5rem;
-    line-height: 1.85;
+  .adjacent-newer {
+    text-align: right;
+    margin-left: auto;
   }
 
-  .raw-source-container {
-    margin-top: 4rem;
-    margin-bottom: 2rem;
-  }
-
-  .raw-source-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 1rem;
-    margin-top: 1.5rem;
-  }
-
-  .raw-source-info {
-    font-family: "Typus Mono 95", "Typus Mono", monospace;
-    font-size: 0.88rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-  }
-
-  .raw-label {
+  .adjacent-dir {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
     color: var(--fg-dim);
   }
 
-  .raw-source-actions {
+  .source {
+    margin-top: 3rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--fg-dim);
+  }
+
+  .source-line {
     display: flex;
-    gap: 0.65rem;
-    align-items: center;
     flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.5rem 1.5rem;
+    margin: 0;
   }
 
-  .btn-action,
-  .raw-action-btn {
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    background: transparent !important;
-    border: 1px solid var(--border) !important;
-    color: var(--fg-main) !important;
-    font-family: "Typus Mono 95", "Typus Mono", monospace !important;
-    font-size: 0.84rem !important;
-    font-weight: 500 !important;
-    padding: 0.3rem 0.75rem !important;
-    border-radius: 0 !important;
-    cursor: pointer !important;
-    text-decoration: none !important;
-    line-height: 1.4 !important;
-    white-space: nowrap !important;
-    transition:
-      background-color 0.12s ease,
-      color 0.12s ease,
-      border-color 0.12s ease !important;
+  .source code {
+    padding: 0;
+    background: none;
+    font-size: inherit;
   }
 
-  .btn-action:hover,
-  .raw-action-btn:hover {
-    background-color: var(--fg-main) !important;
-    color: var(--bg-main) !important;
-    border-color: var(--fg-main) !important;
+  .source-actions {
+    display: flex;
+    gap: 1.25rem;
   }
 
-  .btn-action:active,
-  .raw-action-btn:active {
-    background-color: var(--fg-link) !important;
-    color: var(--bg-main) !important;
-    border-color: var(--fg-link) !important;
+  .source button,
+  .source a {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--fg-link);
+    font: inherit;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .source button:hover,
+  .source a:hover {
+    color: var(--cursor);
   }
 
   .raw-code-drawer {
-    margin-top: 1.25rem;
-    border: 1px solid var(--border);
-    background-color: var(--bg-dim);
-    border-radius: 2px;
+    position: relative;
+    margin-top: 1rem;
   }
 
-  .raw-drawer-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.6rem 1rem;
-    background-color: var(--bg-main);
-    border-bottom: 1px solid var(--border);
-    font-family: "Typus Mono 95", "Typus Mono", monospace;
-    font-size: 0.82rem;
-    color: var(--fg-dim);
-  }
-
-  .raw-copy-btn {
-    background: transparent !important;
-    border: none !important;
-    color: var(--fg-link) !important;
-    font-family: "Typus Mono 95", "Typus Mono", monospace !important;
-    font-size: 0.82rem !important;
-    font-weight: 400 !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    cursor: pointer !important;
-    text-decoration: underline !important;
-    text-underline-offset: 3px !important;
-    transition: color 0.15s ease !important;
-  }
-
-  .raw-copy-btn:hover {
-    color: var(--fg-link-hover) !important;
-    background: transparent !important;
+  #copy-raw-btn {
+    position: absolute;
+    top: 0.75rem;
+    right: 1rem;
   }
 
   .raw-code-pre {
-    margin: 0 !important;
-    padding: 1.25rem !important;
-    background: transparent !important;
-    border: none !important;
-    font-family: "Typus Mono 95", "Typus Mono", monospace !important;
-    font-size: 0.88rem !important;
-    line-height: 1.6 !important;
-    overflow-x: auto !important;
-    white-space: pre-wrap !important;
-    word-break: break-word !important;
+    margin: 0;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .margin-notes {
+    flex: 1 1 10rem;
+    position: relative;
+    display: none;
+    font-size: 1.0625rem;
+  }
+
+  .notes-in-margin .margin-notes {
+    display: block;
+  }
+
+  .notes-in-margin :global(.footnotes-section) {
+    display: none;
+  }
+
+  .margin-notes :global(.margin-note) {
+    position: absolute;
+    left: 0;
+    right: 0;
+  }
+
+  .margin-notes :global(.margin-note:nth-child(odd)) {
+    transform: rotate(-1.5deg);
+  }
+
+  .margin-notes :global(.margin-note:nth-child(even)) {
+    transform: rotate(1deg);
+  }
+
+  .margin-notes :global(.margin-note p) {
+    display: inline;
+    margin: 0;
+  }
+
+  .margin-notes :global(.note-num) {
+    margin-right: 0.375rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--cursor);
+  }
+
+  @media (max-width: 63.99em) {
+    .article-head,
+    .article {
+      margin-left: 0;
+    }
+  }
+
+  @media (max-width: 47.99em) {
+    .article-body {
+      font-size: 1.125rem;
+    }
+
+    .prose :global(h2) {
+      margin-top: 2.5rem;
+    }
   }
 </style>
