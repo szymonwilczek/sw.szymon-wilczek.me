@@ -1,5 +1,8 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import Divider from "../components/Divider.astro";
+import InkButton from "../components/InkButton.astro";
+import WaxSeal from "../components/WaxSeal.astro";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -7,315 +10,355 @@ const gpgPath = path.join(process.cwd(), "public", "szymon-wilczek.asc");
 let asciiArmoredKey = "";
 try {
   asciiArmoredKey = fs.readFileSync(gpgPath, "utf-8");
-} catch (e) {
+} catch {
   asciiArmoredKey = "-----BEGIN PGP PUBLIC KEY BLOCK-----\n...\n-----END PGP PUBLIC KEY BLOCK-----";
 }
 
 const keyId = "B8E9 4407 1CB7 EB8A";
-const rawKeyId = "B8E944071CB7EB8A";
-const fingerprint = "3EE5 3281 2DF0 F36A B7A1  F178 B8E9 4407 1CB7 EB8A";
+const fingerprint = "3EE5 3281 2DF0 F36A B7A1 F178 B8E9 4407 1CB7 EB8A";
+const groups = fingerprint.split(" ");
+
+const links = [
+  { label: "portfolio", url: "https://szymon-wilczek.me" },
+  { label: "github", url: "https://github.com/szymonwilczek" },
+  {
+    label: "this garden’s source",
+    url: "https://github.com/szymonwilczek/sw.szymon-wilczek.me",
+  },
+];
 ---
 
 <BaseLayout
   title="Contact"
   description="Verified communication endpoints, email, and cryptographic GPG public key."
 >
-  <article>
-    <h1>Contact &amp; Identity</h1>
-
-    <p>
-      The most reliable method of contacting me is via traditional electronic mail. <br /> For sensitive
-      correspondence, security disclosures, or cryptographic identity verification, please encrypt your
-      message with my PGP/GPG public key.
+  <header class="contact-head">
+    <h1>Contact &amp; identity</h1>
+    <p class="lede">
+      The most reliable way to reach me is plain electronic mail. For sensitive correspondence,
+      security disclosures, or identity verification, please encrypt your message with my public
+      key.
     </p>
+  </header>
 
-    <h2>Electronic Mail</h2>
-    <ul>
-      <li>
-        <strong>Personal -</strong>
-        <a href="mailto:swilczek.lx@gmail.com"><code>swilczek.lx@gmail.com</code></a>
-      </li>
-    </ul>
+  <Divider from={60} to={260} />
 
-    <h2>Cryptographic PGP / GPG Identity</h2>
-    <p>All git commits and software releases are cryptographically signed with the key below.</p>
-
-    <section class="pgp-card">
-      <header class="pgp-card-header">
-        <span class="pgp-badge">GPG Key ID: <code>{keyId}</code></span>
-        <span class="pgp-algo">RSA 4096-bit</span>
-      </header>
-
-      <div class="pgp-details">
-        <div class="pgp-row">
-          <span class="pgp-label">UID:</span>
-          <span class="pgp-val">Szymon Wilczek &lt;swilczek.lx@gmail.com&gt;</span>
-        </div>
-        <div class="pgp-row">
-          <span class="pgp-label">Key ID:</span>
-          <span class="pgp-val"><code>{rawKeyId}</code></span>
-        </div>
-        <div class="pgp-row">
-          <span class="pgp-label">Fingerprint:</span>
-          <code class="pgp-fingerprint">{fingerprint}</code>
-        </div>
-      </div>
-
-      <div class="pgp-actions">
-        <button
-          type="button"
-          id="copy-fingerprint-btn"
-          class="btn-action"
-          data-fingerprint={fingerprint}>Copy Fingerprint</button
-        >
-        <a href="/szymon-wilczek.asc" download="szymon-wilczek.asc" class="btn-action"
-          >Download .asc</a
-        >
-        <button type="button" id="toggle-armored-btn" class="btn-action">View Public Key</button>
-      </div>
-
-      <div id="armored-key-drawer" class="armored-drawer" style="display: none;">
-        <pre class="armored-pre"><code>{asciiArmoredKey}</code></pre>
+  <div class="sections">
+    <section>
+      <p class="num" aria-hidden="true">01</p>
+      <div class="body">
+        <h2 class="hand">write to me</h2>
+        <a href="mailto:swilczek.lx@gmail.com" class="mail">
+          swilczek.lx@gmail.com
+          <svg viewBox="0 0 100 14" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M1 8 C 20 5, 44 10, 66 7 S 92 6, 99 4" />
+          </svg>
+        </a>
       </div>
     </section>
 
-    <h2>Web Presence &amp; Source Repositories</h2>
-    <ul>
-      <li>
-        <strong>Main Portfolio -</strong>
-        <a href="https://szymon-wilczek.me" target="_blank" rel="noopener">szymon-wilczek.me</a>
-      </li>
-      <li>
-        <strong>GitHub Profile -</strong>
-        <a href="https://github.com/szymonwilczek" target="_blank" rel="noopener"
-          >github.com/szymonwilczek</a
-        >
-      </li>
-      <li>
-        <strong>Website Source Code -</strong>
-        <a
-          href="https://github.com/szymonwilczek/sw.szymon-wilczek.me"
-          target="_blank"
-          rel="noopener"
-        >
-          github.com/szymonwilczek/sw.szymon-wilczek.me
-        </a>
-      </li>
-    </ul>
-  </article>
+    <section>
+      <p class="num" aria-hidden="true">02</p>
+      <div class="body">
+        <h2 class="hand">verify me</h2>
+        <p class="note">All git commits and software releases are signed with the key below.</p>
+
+        <div class="key paper">
+          <span class="tape key-tape" aria-hidden="true"></span>
+          <div class="key-id">
+            <WaxSeal glyph="鍵" size={52} />
+            <div>
+              <span>Szymon Wilczek &lt;swilczek.lx@gmail.com&gt;</span>
+              <span class="dim">RSA 4096 · key id <span class="accent">{keyId}</span></span>
+            </div>
+          </div>
+
+          <p class="fp-label hand">fingerprint</p>
+          <p class="fp">
+            {groups.map((g, i) => <span class:list={{ accent: i >= 6 }}>{g}</span>)}
+          </p>
+
+          <div class="key-actions">
+            <InkButton quiet id="copy-fingerprint" data-fingerprint={fingerprint}>
+              copy fingerprint
+            </InkButton>
+            <InkButton quiet href="/szymon-wilczek.asc" download="szymon-wilczek.asc">
+              download .asc
+            </InkButton>
+            <InkButton quiet id="toggle-key" aria-expanded="false" aria-controls="armored-key">
+              view public key
+            </InkButton>
+          </div>
+
+          <div id="armored-key" class="armored" hidden>
+            <pre><code>{asciiArmoredKey}</code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <p class="num" aria-hidden="true">03</p>
+      <div class="body">
+        <h2 class="hand">elsewhere</h2>
+        <ul class="links">
+          {
+            links.map((l) => (
+              <li>
+                <span>{l.label}</span>
+                <a href={l.url} rel="noopener">
+                  {l.url.replace("https://", "")} ↗
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </section>
+  </div>
 </BaseLayout>
 
 <script>
-  (function () {
-    function initContactPage() {
-      var copyFpBtn = document.getElementById("copy-fingerprint-btn");
-      var toggleArmoredBtn = document.getElementById("toggle-armored-btn");
-      var armoredDrawer = document.getElementById("armored-key-drawer");
+  const copy = document.getElementById("copy-fingerprint");
+  copy?.addEventListener("click", () => {
+    navigator.clipboard.writeText(copy.dataset.fingerprint || "").then(() => {
+      const label = copy.lastChild!;
+      const before = label.textContent;
+      label.textContent = " copied ";
+      setTimeout(() => (label.textContent = before), 2000);
+    });
+  });
 
-      if (copyFpBtn) {
-        copyFpBtn.onclick = function () {
-          var fp = copyFpBtn.dataset.fingerprint || "";
-          navigator.clipboard.writeText(fp).then(function () {
-            copyFpBtn.textContent = "Copied";
-            setTimeout(function () {
-              copyFpBtn.textContent = "Copy Fingerprint";
-            }, 2000);
-          });
-        };
-      }
-
-      if (toggleArmoredBtn && armoredDrawer) {
-        toggleArmoredBtn.onclick = function () {
-          var isOpen = armoredDrawer.style.display !== "none";
-          armoredDrawer.style.display = isOpen ? "none" : "block";
-          toggleArmoredBtn.textContent = isOpen ? "View Public Key" : "Hide Public Key";
-        };
-      }
-    }
-
-    initContactPage();
-  })();
+  const toggle = document.getElementById("toggle-key");
+  const key = document.getElementById("armored-key");
+  toggle?.addEventListener("click", () => {
+    if (!key) return;
+    key.hidden = !key.hidden;
+    toggle.setAttribute("aria-expanded", String(!key.hidden));
+    toggle.lastChild!.textContent = key.hidden ? " view public key " : " hide public key ";
+  });
 </script>
 
 <style>
-  .pgp-card {
-    background-color: var(--bg-dim);
-    border: 1px solid var(--border);
-    border-radius: 2px;
-    padding: 1.25rem 1.5rem;
-    margin: 1.75rem 0 2.5rem 0;
-    font-family: "Typus Mono 95", "Typus Mono", monospace;
+  .contact-head {
+    max-width: 45rem;
   }
 
-  .pgp-card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-bottom: 0.75rem;
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 1rem;
-    flex-wrap: wrap;
-    gap: 0.5rem;
+  .contact-head h1 {
+    margin: 0;
   }
 
-  .pgp-badge {
-    font-size: 0.95rem;
-    font-weight: 700;
-    color: var(--fg-link);
-  }
-
-  .pgp-algo {
-    font-size: 0.82rem;
+  .lede {
+    margin: 1.25rem 0 0;
     color: var(--fg-dim);
   }
 
-  .pgp-details {
+  .sections {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
-    font-size: 0.88rem;
-    margin-bottom: 1.25rem;
+    gap: 5rem;
   }
 
-  .pgp-row {
+  section {
     display: flex;
-    gap: 0.75rem;
     flex-wrap: wrap;
+    gap: 0.5rem 3rem;
   }
 
-  .pgp-label {
+  .num {
+    flex: 0 0 6rem;
+    margin: 0;
+    font-size: 3rem;
+    font-weight: 300;
+    font-style: italic;
+    line-height: 1;
+    color: var(--cursor);
+  }
+
+  .body {
+    flex: 999 1 35rem;
+    min-width: 0;
+  }
+
+  .body h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 300;
     color: var(--fg-dim);
-    min-width: 95px;
   }
 
-  .pgp-val {
+  .mail {
+    position: relative;
+    display: inline-block;
+    margin-top: 0.375rem;
+    font-size: 2.75rem;
+    font-weight: 300;
+    font-style: italic;
+    line-height: 1.2;
+    word-break: break-all;
+    color: var(--fg-main);
+    text-decoration: none;
+  }
+
+  .mail:hover,
+  .mail:visited {
     color: var(--fg-main);
   }
 
-  .pgp-fingerprint {
-    color: var(--fg-link-hover);
-    word-break: break-all;
-    font-size: 0.85em;
-    background: transparent;
-    border: none;
-    padding: 0;
+  .mail svg {
+    position: absolute;
+    left: -2%;
+    bottom: -10px;
+    width: 104%;
+    height: 14px;
   }
 
-  .pgp-actions {
+  .mail path {
+    fill: none;
+    stroke: var(--cursor);
+    stroke-width: 2.4;
+    stroke-linecap: round;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .note {
+    max-width: 38.75rem;
+    margin: 0.375rem 0 0;
+  }
+
+  .key {
+    position: relative;
+    margin-top: 1.75rem;
+    padding: 2.125rem 2.5rem 1.875rem;
+    border-radius: 3px 6px 4px 7px;
+    transform: rotate(-0.4deg);
+  }
+
+  .key-tape {
+    top: -10px;
+    right: 3rem;
+    width: 84px;
+    height: 22px;
+    transform: rotate(4deg);
+  }
+
+  .key-id {
     display: flex;
-    gap: 0.75rem;
-    align-items: center;
     flex-wrap: wrap;
-    margin-top: 0.75rem;
+    align-items: center;
+    gap: 0.875rem 1.25rem;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
   }
 
-  .btn-action {
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    background: transparent !important;
-    border: 1px solid var(--border) !important;
-    color: var(--fg-main) !important;
-    font-family: "Typus Mono 95", "Typus Mono", monospace !important;
-    font-size: 0.85rem !important;
-    font-weight: 500 !important;
-    padding: 0.35rem 0.85rem !important;
-    border-radius: 0 !important;
-    cursor: pointer !important;
-    text-decoration: none !important;
-    line-height: 1.4 !important;
-    white-space: nowrap !important;
-    transition:
-      background-color 0.12s ease,
-      color 0.12s ease,
-      border-color 0.12s ease !important;
-  }
-
-  .btn-action:hover {
-    background-color: var(--fg-main) !important;
-    color: var(--bg-main) !important;
-    border-color: var(--fg-main) !important;
-  }
-
-  .btn-action:active {
-    background-color: var(--fg-link) !important;
-    color: var(--bg-main) !important;
-    border-color: var(--fg-link) !important;
-  }
-
-  .armored-drawer {
-    margin-top: 1.25rem;
-    border: 1px solid var(--border);
-    background-color: var(--bg-main);
-    border-radius: 2px;
-  }
-
-  .armored-pre {
-    margin: 0 !important;
-    padding: 1.25rem !important;
-    background: transparent !important;
-    border: none !important;
-    font-family: "Typus Mono 95", "Typus Mono", monospace !important;
-    font-size: 0.78rem !important;
-    line-height: 1.45;
-    overflow-x: auto;
-    max-height: 340px;
-    color: var(--fg-alt) !important;
-    max-width: 100%;
-  }
-
-  article ul li {
-    word-break: break-word;
+  .key-id div {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
     overflow-wrap: anywhere;
   }
 
-  article a {
-    word-break: break-word;
+  .dim {
+    color: var(--fg-dim);
+  }
+
+  .accent {
+    color: var(--cursor);
+  }
+
+  .fp-label {
+    margin: 1.625rem 0 0.5rem;
+    font-size: 1.0625rem;
+  }
+
+  .fp {
+    display: grid;
+    grid-template-columns: repeat(5, auto);
+    justify-content: start;
+    gap: 0.375rem 1.375rem;
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 1.5rem;
+    letter-spacing: 0.06em;
+    line-height: 1.3;
+  }
+
+  .key-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1.375rem;
+    margin-top: 1.875rem;
+  }
+
+  .armored {
+    margin-top: 1.5rem;
+  }
+
+  .armored :global(.code-block-wrapper),
+  .armored pre {
+    margin: 0;
+  }
+
+  .armored pre {
+    max-height: 21.25rem;
+    background: var(--bg-main);
+    font-size: 0.75rem;
+  }
+
+  .links {
+    margin: 0.625rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .links li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 1.25rem;
+    margin: 0;
+    padding: 0.875rem 0;
+    border-bottom: 1px dashed var(--border);
+  }
+
+  .links span {
+    flex: 0 0 8.75rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--fg-dim);
+  }
+
+  .links a {
+    min-width: 0;
     overflow-wrap: anywhere;
   }
 
-  @media (max-width: 63.99em) {
-    .pgp-card {
-      padding: 1rem;
-      margin: 1.25rem 0 2rem 0;
-      max-width: 100%;
+  @media (max-width: 47.99em) {
+    .sections {
+      gap: 3.5rem;
     }
 
-    .pgp-row {
-      flex-direction: column;
-      gap: 0.25rem;
-      min-width: 0;
+    .num {
+      flex-basis: 100%;
+      font-size: 2rem;
     }
 
-    .pgp-label {
-      min-width: 0;
+    .mail {
+      font-size: 1.6875rem;
     }
 
-    .pgp-val {
-      min-width: 0;
-      word-break: break-word;
-      overflow-wrap: anywhere;
+    .key {
+      padding: 1.625rem 1.25rem 1.5rem;
     }
 
-    .pgp-fingerprint {
-      min-width: 0;
-      word-break: break-all;
-      white-space: normal;
-      overflow-wrap: anywhere;
-      font-size: 0.8em;
+    .fp {
+      grid-template-columns: repeat(2, auto);
+      font-size: 1.1875rem;
     }
 
-    .pgp-actions {
-      flex-direction: column;
-      align-items: stretch;
-      gap: 0.5rem;
-    }
-
-    .btn-action {
-      width: 100%;
-      justify-content: center;
-      white-space: normal !important;
-      text-align: center;
+    .links span {
+      flex-basis: 100%;
     }
   }
 </style>
