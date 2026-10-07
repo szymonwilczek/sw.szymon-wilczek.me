@@ -1,0 +1,143 @@
+---
+// Woodblock postage stamp for a photo album.
+
+import { hash, makeStamp } from "../utils/stamp";
+
+interface Props {
+  slug: string;
+  terrain: string[];
+  country: string;
+  num: string;
+  label?: string;
+  size?: number;
+  class?: string;
+}
+
+const { slug, terrain, country, num, label, size = 132, class: className } = Astro.props;
+const stamp = makeStamp({ slug, terrain });
+const id = `stamp-${stamp.seed.toString(36)}`;
+const noise = stamp.seed % 1000;
+const tilt = ((hash(id) % 7) - 3) * 0.5;
+
+const fills = {
+  sun: "var(--red)",
+  far: "var(--bg-alt)",
+  near: "var(--cursor)",
+  sea: "var(--sea)",
+  sand: "var(--tape)",
+  motif: "none",
+};
+---
+
+<svg
+  class:list={["stamp", className]}
+  width={size}
+  height={size}
+  viewBox="-2 -2 104 104"
+  role="img"
+  aria-label={label ?? `${country} stamp`}
+  style={`--tilt: ${tilt}deg`}
+>
+  <defs>
+    <filter id={`w-${id}`} x="-10%" y="-10%" width="120%" height="120%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.06" numOctaves="2" seed={noise} />
+      <feDisplacementMap in="SourceGraphic" scale="1.4" />
+    </filter>
+    <filter id={`t-${id}`}>
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed={noise} />
+      <feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -1.4 1.1" />
+    </filter>
+    <clipPath id={`c-${id}`}>
+      <rect x="8" y="8" width="84" height="78" />
+    </clipPath>
+  </defs>
+
+  <rect width="100" height="100" style="fill: var(--paper)" />
+  <g clip-path={`url(#c-${id})`}>
+    <rect x="8" y="8" width="84" height="78" style="fill: var(--tape)" />
+    {stamp.layers.map((layer) => (
+      <path
+        d={layer.d}
+        style={`fill: ${fills[layer.kind]}`}
+        fill-opacity={layer.kind === "motif" ? 0 : layer.kind === "near" ? 0.55 : 1}
+        stroke-width="1.1"
+        filter={`url(#w-${id})`}
+        class="ink"
+      />
+    ))}
+    {stamp.waves && (
+      <path d={stamp.waves} fill="none" stroke-width="0.45" stroke-opacity="0.6" class="ink" />
+    )}
+    <rect
+      x="8"
+      y="8"
+      width="84"
+      height="78"
+      filter={`url(#t-${id})`}
+      opacity="0.07"
+      class="grain"
+    />
+  </g>
+  <rect
+    x="8"
+    y="8"
+    width="84"
+    height="78"
+    fill="none"
+    stroke-width="0.7"
+    filter={`url(#w-${id})`}
+    class="ink"
+  />
+  <text x="9" y="94" class="stamp-country">
+    {country}
+  </text>
+  <text x="91" y="94.6" text-anchor="end" class="stamp-num">
+    {num}
+  </text>
+  <rect
+    width="100"
+    height="100"
+    fill="none"
+    stroke-width="5.2"
+    stroke-dasharray="0 5.55"
+    stroke-linecap="round"
+    class="perforation"
+  />
+</svg>
+
+<style>
+  .stamp {
+    display: block;
+    flex: none;
+    transform: rotate(var(--tilt));
+    filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.18));
+  }
+
+  .ink {
+    stroke: var(--fg-main);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .grain {
+    fill: var(--fg-main);
+  }
+
+  .perforation {
+    stroke: var(--bg-main);
+  }
+
+  .stamp-country {
+    font-family: var(--font-mono);
+    font-size: 5px;
+    letter-spacing: 0.5px;
+    fill: var(--fg-main);
+  }
+
+  .stamp-num {
+    font-family: var(--font-body);
+    font-size: 8px;
+    font-style: italic;
+    fill: var(--red);
+  }
+</style>
