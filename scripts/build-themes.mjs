@@ -9,6 +9,7 @@ const JSON_OUT = "src/data/au-themes.json";
 
 const FAMILY_ORDER = ["aurum"];
 const VARIANT_ORDER = ["morning", "day", "evening", "twilight", "night"];
+const DEFAULT_THEMES = { light: "aurum-day", dark: "aurum-night" };
 
 function parseTheme(file) {
   const source = fs.readFileSync(file, "utf8");
@@ -74,6 +75,23 @@ function renderCss(themes) {
       "}",
     ].join("\n");
   });
+
+  // Without the boot script (no JS), follow the system with the aurum pair.
+  const byId = new Map(themes.map((theme) => [theme.id, theme]));
+  const fallback = (id, indent) => {
+    const theme = byId.get(id);
+    const pad = " ".repeat(indent);
+    return [
+      `${pad}:root:not([data-theme]) {`,
+      `${pad}  color-scheme: ${theme.polarity};`,
+      ...[...theme.colors].map(([key, hex]) => `${pad}  --${key}: ${hex};`),
+      `${pad}}`,
+    ].join("\n");
+  };
+  blocks.push(fallback(DEFAULT_THEMES.dark, 0));
+  blocks.push(
+    ["@media (prefers-color-scheme: light) {", fallback(DEFAULT_THEMES.light, 2), "}"].join("\n"),
+  );
   return header + blocks.join("\n\n") + "\n";
 }
 
