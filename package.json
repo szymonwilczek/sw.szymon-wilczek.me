@@ -11,6 +11,7 @@
     "astro": "astro",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "themes:build": "node scripts/build-themes.mjs",
     "media:compress": "node scripts/compress-media.mjs",
     "media:audit": "node scripts/audit-media.mjs",
     "vault:add": "node scripts/manage-encrypted.mjs vault",
