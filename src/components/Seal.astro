@@ -1,0 +1,58 @@
+---
+interface Props {
+  glyph: string;
+  size?: number;
+  tilt?: number;
+  ring?: boolean;
+  label?: string;
+  class?: string;
+}
+
+const { glyph, size = 46, tilt = -4, ring = false, label, class: className } = Astro.props;
+---
+
+<svg
+  class:list={["seal", className]}
+  width={size}
+  height={size}
+  viewBox="0 0 46 46"
+  style={`transform: rotate(${tilt}deg)`}
+  role={label ? "img" : undefined}
+  aria-label={label}
+  aria-hidden={label ? undefined : "true"}
+>
+  <path d="M4 5 Q23 2 42 4 Q45 23 43 42 Q23 45 3 43 Q1 23 4 5 Z" class="seal-ink"></path>
+  {ring && (
+    <path
+      d="M8 9 Q23 7 38 8 Q40 23 38 38 Q23 40 8 38 Q6 23 8 9 Z"
+      class="seal-ring"
+      fill="none"
+      stroke-width="1.2"
+    />
+  )}
+  <text x="23" y="31" text-anchor="middle" class="seal-glyph">
+    {glyph}
+  </text>
+</svg>
+
+<style>
+  .seal {
+    flex: none;
+    display: block;
+  }
+
+  .seal-ink {
+    fill: var(--red);
+  }
+
+  .seal-ring {
+    stroke: var(--bg-main);
+    opacity: 0.7;
+  }
+
+  .seal-glyph {
+    fill: var(--bg-main);
+    font-family: var(--font-seal);
+    font-size: 22px;
+  }
+</style>
