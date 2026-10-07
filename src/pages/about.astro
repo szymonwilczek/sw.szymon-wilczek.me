@@ -1,5 +1,13 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import Divider from "../components/Divider.astro";
+import Seal from "../components/Seal.astro";
+
+const TICKS = [
+  "M1.5 6.5 C 3 7.5, 4.5 9, 6 10.5 C 8.5 6.5, 11 3.5, 14.5 1.5",
+  "M1.5 6 C 3 7.2, 4.6 8.8, 6.2 10.6 C 8.8 6.8, 11.2 3.8, 14.6 1.8",
+  "M1.6 6.8 C 3.2 7.6, 4.4 9.2, 5.8 10.4 C 8.6 6.4, 11 3.2, 14.4 1.6",
+];
 ---
 
 <BaseLayout
@@ -7,151 +15,286 @@ import BaseLayout from "../layouts/BaseLayout.astro";
   description="Biographical context, dualist editor philosophy, systems background, and open source contributions of Szymon Wilczek."
   type="profile"
 >
-  <article class="about-article">
-    <header class="about-header">
+  <header class="about-head">
+    <div>
       <h1>About me</h1>
-      <p class="about-tagline">
-        Software engineer, dualist editor enthusiast, and open-source contributor.
-      </p>
-    </header>
+      <p class="lede">Software engineer, dualist editor enthusiast, and open-source contributor.</p>
+    </div>
+    <p class="aside hand">
+      projects moved to<br />
+      <a href="https://szymon-wilczek.me" rel="noopener">szymon-wilczek.me</a> ↗
+    </p>
+  </header>
 
-    <hr />
+  <Divider from={90} to={300} />
 
-    <section class="about-section">
-      <h2>Background & Origins</h2>
-      <p>
-        I am a software engineer with academic and practical roots at the
-        <strong>Silesian University of Technology</strong> (Faculty of Automatic Control, Electronics
-        and Computer Science - AEI). <br /> My engineering interests lie at the intersection of low-level
-        operating systems, kernel internals, and sovereign computing tools.
-      </p>
-      <p>
-        My main portfolio and showcase can be found at
-        <a href="https://szymon-wilczek.me" target="_blank" rel="noopener">szymon-wilczek.me</a>,
-        while this website serves as my independent hypermedia space for tools, personal archives,
-        and technical explorations.
-      </p>
+  <div class="sections">
+    <section>
+      <p class="num" aria-hidden="true">01</p>
+      <div class="body">
+        <h2>Background &amp; origins</h2>
+        <p>
+          I am a software engineer with academic and practical roots at the
+          <strong>Silesian University of Technology</strong> (Faculty of Automatic Control, Electronics
+          and Computer Science — AEI). My engineering interests lie at the intersection of low-level
+          operating systems, kernel internals, and sovereign computing tools.
+        </p>
+        <p>
+          My main portfolio and showcase can be found at
+          <a href="https://szymon-wilczek.me" rel="noopener">szymon-wilczek.me</a>, while this website
+          serves as my independent hypermedia space for tools, personal archives, and technical
+          explorations.
+        </p>
+      </div>
     </section>
 
-    <section class="about-section">
-      <h2>The Dualist Philosophy (Neovim + Emacs)</h2>
-      <p>
-        Well, maybe some people would hang me for it, but in the long-standing text editor
-        discourse, I belong firmly to the camp of the
-        <strong>Dualists</strong>:
-      </p>
-      <ul>
-        <li>
-          <strong>Neovim</strong>
-          is my primary code-writing weapon and high-speed editing environment. I rely on it for the majority
-          of my daily programming, build custom Lua plugins, and actively contribute to
-          <a
-            href="https://github.com/neovim/neovim/issues?q=involves:szymonwilczek"
-            target="_blank"
-            rel="noopener"
-          >
-            Neovim upstream
-          </a> to help make the editor even faster and more extensible.
-        </li>
-        <li>
-          <strong>GNU Emacs</strong> serves as my mission control and operational headquarters. Powered
-          by Org-mode, it drives my digital garden, agenda, and literate programming workflows, along
-          with occasional Lisp hacking.
-        </li>
-      </ul>
-      <p>
-        Rather than treating these tools as mutually exclusive (which most people do), I use the raw
-        modal editing speed of Neovim alongside the limitless extensibility of Emacs to create
-        perfect balance in the force.
-      </p>
+    <section>
+      <p class="num" aria-hidden="true">02</p>
+      <div class="body">
+        <h2>The dualist philosophy</h2>
+        <p>
+          Well, maybe some people would hang me for it, but in the long-standing text editor
+          discourse, I belong firmly to the camp of the <strong>Dualists</strong>:
+        </p>
+        <div class="editors">
+          <div class="editor paper">
+            <p class="editor-name hand nvim">Neovim</p>
+            <p>
+              My primary code-writing weapon and high-speed editing environment. I rely on it for
+              most daily programming, build custom Lua plugins, and contribute to
+              <a href="https://github.com/neovim/neovim/issues?q=involves:szymonwilczek" rel="noopener"
+                >Neovim upstream</a
+              >.
+            </p>
+          </div>
+          <div class="editor paper">
+            <p class="editor-name hand emacs">GNU Emacs</p>
+            <p>
+              Mission control and operational headquarters. Powered by Org-mode, it drives my digital
+              garden, agenda, and literate programming, with occasional Lisp hacking.
+            </p>
+          </div>
+        </div>
+        <p>
+          Rather than treating these tools as mutually exclusive (which most people do), I use the
+          raw modal editing speed of Neovim alongside the limitless extensibility of Emacs to create
+          perfect balance in the force.
+        </p>
+      </div>
     </section>
 
-    <section class="about-section">
-      <h2>Upstream Contributions & Free Software</h2>
-      <p>
-        I believe deeply (really deeply) in the ethos of Free and Open Source Software (FOSS). As a
-        matter of principle, I contribute back to the projects and tools I use:
-      </p>
-      <ul>
-        <li>
-          <strong>
-            <a
-              href="https://lore.kernel.org/all/?q=swilczek.lx@gmail.com"
-              target="_blank"
-              rel="noopener">Linux Kernel</a
-            >
-          </strong>
-        </li>
-        <li>
-          <strong>
-            <a
-              href="https://github.com/neovim/neovim/issues?q=involves:szymonwilczek"
-              target="_blank"
-              rel="noopener"
-            >
-              Neovim
-            </a>
-          </strong>
-        </li>
-        <li>
-          <strong>Independent Open Source</strong> - I am author of many tools, and editor packages, including
-          <a href="https://github.com/szymonwilczek/typus-fonts" target="_blank" rel="noopener"
-            >fonts</a
-          >,
-          <a
-            href="https://github.com/szymonwilczek?tab=repositories&q=nvim"
-            target="_blank"
-            rel="noopener">Neovim plugins</a
-          >,
-          <a
-            href="https://github.com/szymonwilczek?tab=repositories&q=emacs"
-            target="_blank"
-            rel="noopener">Emacs utilities</a
-          >, and
-          <a href="https://szymon-wilczek.me/projects" target="_blank" rel="noopener">more</a> suites.
-        </li>
-      </ul>
+    <section>
+      <p class="num" aria-hidden="true">03</p>
+      <div class="body">
+        <h2>Upstream contributions &amp; free software</h2>
+        <p>
+          I believe deeply (really deeply) in the ethos of Free and Open Source Software. As a matter
+          of principle, I contribute back to the projects and tools I use:
+        </p>
+        <ul class="ticks">
+          <li>
+            <svg width="16" height="12" viewBox="0 0 16 12" aria-hidden="true"><path d={TICKS[0]} /></svg>
+            <span><a href="https://lore.kernel.org/all/?q=swilczek.lx@gmail.com" rel="noopener">Linux Kernel</a></span>
+          </li>
+          <li>
+            <svg width="16" height="12" viewBox="0 0 16 12" aria-hidden="true"><path d={TICKS[1]} /></svg>
+            <span><a href="https://github.com/neovim/neovim/issues?q=involves:szymonwilczek" rel="noopener">Neovim</a></span>
+          </li>
+          <li>
+            <svg width="16" height="12" viewBox="0 0 16 12" aria-hidden="true"><path d={TICKS[2]} /></svg>
+            <span>
+              <strong>Independent open source</strong> — author of many tools and editor packages,
+              including
+              <a href="https://github.com/szymonwilczek/typus-fonts" rel="noopener">fonts</a>,
+              <a href="https://github.com/szymonwilczek?tab=repositories&q=nvim" rel="noopener">Neovim plugins</a>,
+              <a href="https://github.com/szymonwilczek?tab=repositories&q=emacs" rel="noopener">Emacs utilities</a>, and
+              <a href="https://szymon-wilczek.me/projects" rel="noopener">more</a>.
+            </span>
+          </li>
+        </ul>
+      </div>
     </section>
 
-    <section class="about-section">
-      <h2>Bespoke Projects & Repositories</h2>
-      <p>
-        All of my independent experiments, and configurations are hosted on my
-        <a href="https://github.com/szymonwilczek" target="_blank" rel="noopener">GitHub profile</a
-        >. <br />I&apos;m still very depenent on GitHub infrastructure, maybe one day I&apos;ll
-        transition to something else.
-      </p>
+    <section>
+      <p class="num" aria-hidden="true">04</p>
+      <div class="body">
+        <h2>Bespoke projects &amp; repositories</h2>
+        <p>
+          All of my independent experiments and configurations are hosted on my
+          <a href="https://github.com/szymonwilczek" rel="noopener">GitHub profile</a>. I’m still very
+          dependent on GitHub infrastructure — maybe one day I’ll transition to something else.
+        </p>
+      </div>
     </section>
-  </article>
+  </div>
+
+  <Seal glyph="終" size={48} tilt={3} label="end" class="about-end" />
 </BaseLayout>
 
 <style>
-  .about-header {
-    margin-bottom: 2rem;
+  .about-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 2rem 4rem;
   }
 
-  .about-tagline {
-    font-family: "Typus Mono 95", "Typus Mono", monospace;
-    font-size: 1.05rem;
-    color: var(--fg-dim);
-    margin-top: 0.5rem;
+  .about-head > div {
+    flex: 999 1 32.5rem;
+    min-width: 0;
+    max-width: 42.5rem;
+  }
+
+  .about-head h1 {
+    margin: 0;
+  }
+
+  .lede {
+    margin: 1.25rem 0 0;
+    font-size: 1.4375rem;
+    font-style: italic;
+    font-weight: 300;
     line-height: 1.5;
+    color: var(--fg-dim);
   }
 
-  .about-section {
-    margin-top: 2.25rem;
+  .aside {
+    flex: 1 1 12.5rem;
+    margin: 0 0 0.5rem;
+    font-size: 1.1875rem;
+    line-height: 1.35;
+    transform: rotate(-2deg);
   }
 
-  .about-section h2 {
-    margin-top: 1.75rem;
+  .sections {
+    display: flex;
+    flex-direction: column;
+    gap: 5.5rem;
   }
 
-  .about-section ul {
-    margin-top: 0.75rem;
-    padding-left: 2rem;
+  section {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 3rem;
   }
 
-  .about-section li {
-    margin-bottom: 0.75rem;
+  .num {
+    flex: 0 0 7.5rem;
+    margin: 0;
+    font-size: 3.5rem;
+    font-weight: 300;
+    font-style: italic;
+    line-height: 1;
+    color: var(--cursor);
+  }
+
+  .body {
+    flex: 999 1 32.5rem;
+    min-width: 0;
+    max-width: 42.5rem;
+  }
+
+  .body h2 {
+    margin: 0 0 1.125rem;
+    font-size: 1.875rem;
+    line-height: 1.25;
+  }
+
+  .body p {
+    margin: 0 0 1rem;
+  }
+
+  strong {
+    font-weight: 600;
+  }
+
+  .editors {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+    margin: 1.5rem 0;
+  }
+
+  .editor {
+    flex: 1 1 16.25rem;
+    padding: 1.375rem 1.375rem 1.25rem;
+    font-size: 1rem;
+    line-height: 1.6;
+    transform: rotate(-0.6deg);
+  }
+
+  .editor + .editor {
+    border-radius: 6px 3px 7px 4px;
+    transform: rotate(0.8deg);
+  }
+
+  .editor p {
+    margin: 0;
+  }
+
+  .body .editor-name {
+    margin: 0 0 0.75rem;
+    font-size: 1.5rem;
+    font-weight: 400;
+    line-height: 1;
+  }
+
+  .nvim {
+    color: var(--accent-0);
+  }
+
+  .emacs {
+    color: var(--red);
+  }
+
+  .ticks {
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+    margin: 1.25rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .ticks li {
+    display: flex;
+    align-items: baseline;
+    gap: 0.875rem;
+    margin: 0;
+  }
+
+  .ticks svg {
+    flex: none;
+  }
+
+  .ticks path {
+    fill: none;
+    stroke: var(--cursor);
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  :global(.about-end) {
+    margin: 5.5rem auto 0;
+  }
+
+  @media (max-width: 47.99em) {
+    .lede {
+      font-size: 1.25rem;
+    }
+
+    .sections {
+      gap: 3.5rem;
+    }
+
+    .num {
+      flex-basis: 100%;
+      font-size: 2.25rem;
+    }
+
+    .body h2 {
+      font-size: 1.5rem;
+    }
   }
 </style>
