@@ -1,0 +1,274 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Divider from "../../components/Divider.astro";
+import Stamp from "../../components/Stamp.astro";
+import { getAllAlbums } from "../../utils/albums";
+
+// hinged by date: the oldest stamp first, the newest with the highest number
+const albums = (await getAllAlbums()).slice().reverse();
+
+const ROMAN = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
+const since = albums[0]
+  ? `${ROMAN[albums[0].date.getMonth()]}·${albums[0].date.getFullYear()}`
+  : null;
+
+const rows: Array<{ country: string; albums: typeof albums }> = [];
+for (const album of albums) {
+  const country = album.country ?? "[COUNTRY]";
+  let row = rows.find((r) => r.country === country);
+  if (!row) rows.push((row = { country, albums: [] }));
+  row.albums.push(album);
+}
+---
+
+<BaseLayout
+  title="Stamp album"
+  description="One stamp for every place the camera went, cut from that album's own terrain."
+>
+  <a class="back hand" href="/photos/">
+    <svg width="40" height="18" viewBox="0 0 44 20" aria-hidden="true">
+      <path d="M42 11 C 30 9, 18 12, 4 10 M 12 3 L 3 10 L 12 17"></path>
+    </svg>
+    postcards
+  </a>
+
+  <header class="klaser-head">
+    <div>
+      <h1>Stamp album</h1>
+      <p class="lede">
+        One stamp for every place the camera went, cut from that album’s own terrain. No two come
+        out alike, and none of them were ever posted.
+      </p>
+    </div>
+    <p class="tally">
+      {albums.length}
+      {albums.length === 1 ? "stamp" : "stamps"} · {rows.length}
+      {rows.length === 1 ? "country" : "countries"}
+      {since && ` · since ${since}`}
+    </p>
+  </header>
+
+  <Divider from={520} to={760} />
+
+  <section class="page" aria-label="Album page">
+    {rows.map((row, r) => (
+      <div class="row">
+        <p class="row-head hand">
+          {row.country} <span>· {row.albums.length}</span>
+        </p>
+        <div class="strip">
+          {row.albums.map((album) => (
+            <a
+              class="hinge"
+              href={`/photos/${album.slug}/`}
+              aria-label={`${album.title}, stamp ${album.stampNum}`}
+            >
+              <Stamp
+                slug={album.slug}
+                terrain={album.terrain}
+                country={row.country}
+                num={album.stampNum}
+                size={128}
+              />
+              <span class="hinge-title hand">{album.title}</span>
+            </a>
+          ))}
+          {r === rows.length - 1 && (
+            <span class="next hand">
+              next?
+              <br />
+              [PLACE]
+            </span>
+          )}
+        </div>
+      </div>
+    ))}
+  </section>
+
+  <p class="foot hand">stamps are hinged by date; the newest gets the highest number.</p>
+</BaseLayout>
+
+<style>
+  .back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: 44px;
+    font-weight: 300;
+    font-size: 1.1875rem;
+    color: var(--fg-dim);
+    text-decoration: none;
+  }
+
+  .back path {
+    fill: none;
+    stroke: var(--cursor);
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: transform 0.25s;
+  }
+
+  .back:hover path {
+    transform: translateX(-3px);
+  }
+
+  .klaser-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem 3rem;
+    margin-top: 1.5rem;
+  }
+
+  .klaser-head > div {
+    flex: 999 1 30rem;
+    max-width: 40rem;
+  }
+
+  .klaser-head h1 {
+    margin: 0;
+  }
+
+  .lede {
+    margin: 1.25rem 0 0;
+    color: var(--fg-dim);
+  }
+
+  .tally {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--fg-dim);
+  }
+
+  .page {
+    padding: 2.5rem 2.25rem 2rem;
+    background: var(--bg-alt);
+    border-radius: 3px 6px 4px 5px;
+    box-shadow:
+      inset 0 0 0 1px var(--border),
+      0 26px 40px -30px rgba(0, 0, 0, 0.6);
+  }
+
+  .row + .row {
+    margin-top: 2.5rem;
+  }
+
+  .row-head {
+    margin: 0 0 0.625rem 0.375rem;
+    font-size: 1.25rem;
+  }
+
+  .row-head span {
+    font-weight: 300;
+    font-size: 1rem;
+    color: var(--fg-dim);
+  }
+
+  .strip {
+    --stamp: 128px;
+    --gap: 1.75rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 1rem var(--gap);
+    padding: 18px 18px 0;
+  }
+
+  .hinge,
+  .next {
+    position: relative;
+    width: var(--stamp);
+  }
+
+  .hinge {
+    display: block;
+    text-decoration: none;
+  }
+
+  .hinge :global(.stamp) {
+    width: var(--stamp);
+    height: var(--stamp);
+    transition: translate 0.25s;
+  }
+
+  .hinge:hover :global(.stamp) {
+    translate: 0 -4px;
+  }
+
+  .hinge::after,
+  .next::after {
+    content: "";
+    position: absolute;
+    top: calc(var(--stamp) / 2);
+    left: calc(var(--gap) / -2);
+    right: calc(var(--gap) / -2);
+    height: calc(var(--stamp) / 2);
+    background: var(--paper);
+    opacity: 0.38;
+    border-top: 1px solid var(--border);
+    pointer-events: none;
+  }
+
+  .page :global(.perforation) {
+    stroke: var(--bg-alt);
+  }
+
+  .hinge-title {
+    display: block;
+    margin-top: 0.5rem;
+    font-weight: 300;
+    font-size: 0.9375rem;
+    line-height: 1.3;
+    color: var(--fg-dim);
+    text-align: center;
+  }
+
+  .next {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: var(--stamp);
+    border: 1.5px dashed var(--border);
+    border-radius: 2px;
+    font-weight: 300;
+    font-size: 1.0625rem;
+    line-height: 1.3;
+    color: var(--fg-dim);
+    text-align: center;
+    transform: rotate(1deg);
+  }
+
+  .foot {
+    margin: 0.5rem 0 0 0.375rem;
+    font-weight: 300;
+    font-size: 1.0625rem;
+    color: var(--fg-dim);
+    transform: rotate(-1deg);
+  }
+
+  @media (max-width: 40rem) {
+    .page {
+      padding: 1.5rem 0.5rem 1.25rem;
+    }
+
+    .row + .row {
+      margin-top: 1.75rem;
+    }
+
+    .strip {
+      --stamp: 92px;
+      --gap: 0.875rem;
+      padding: 18px 10px 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hinge :global(.stamp),
+    .back path {
+      transition: none;
+    }
+  }
+</style>
