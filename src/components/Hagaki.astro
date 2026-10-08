@@ -464,7 +464,7 @@ const EDGE = perforated(96, 116, 2.6, 8);
     const quiet = "nothing goes through this site.";
     const write = () => {
       const sign = from.value.trim() ? `\n\n-- \n${from.value.trim()}` : "";
-      const body = (msg.value + sign).replace(/\r?\n/g, "\r\n");
+      const body = (msg.value + sign).replace(/\r\n?/g, "\n");
       post.href =
         `mailto:${mail}?subject=${encodeURIComponent(`a postcard from the garden (${now})`)}` +
         `&body=${encodeURIComponent(body)}`;
