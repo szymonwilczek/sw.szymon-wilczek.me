@@ -2,117 +2,37 @@
 // A strip of still water at the end of the photo pages and /about
 // Carry the maple leaf to the far bank with waves alone to earn seal.
 
-import { smooth } from "../utils/sand";
-import { MOMIJI } from "../utils/momiji";
-import { LAYOUTS, makeWater } from "../utils/water";
+import { artUrl } from "../utils/art";
+import { LAYOUTS } from "../utils/water";
 
-const layouts = (["wide", "tall"] as const).map((name) => ({
-  name,
-  L: LAYOUTS[name],
-  water: makeWater(LAYOUTS[name]),
-}));
+// drawings live in /art/; only the one this screen shows is fetched up front
+const layouts = [
+  { name: "wide", L: LAYOUTS.wide, media: "(min-width: 48em)" },
+  { name: "tall", L: LAYOUTS.tall, media: "(max-width: 47.99em)" },
+] as const;
 ---
 
 <figure class="still-water">
-  {layouts.map(({ name, L, water }) => (
-    <svg
-      class={`water water-${name}`}
-      viewBox={`0 0 ${L.W} ${L.H}`}
-      role="img"
-      aria-label="Still water with stones and a maple leaf. Move across it and the surface bends; tap to drop a pebble."
-      data-layout={name}
-      data-lines={JSON.stringify(water.lines.map((l) => l.pts))}
-      data-calm={JSON.stringify(water.calm)}
-    >
-      <path class="water-bank" d={water.bank} />
-      <path class="water-bed" d={water.edge} />
-      <path class="water-edge" d={water.edge} />
-      <g class="water-lines">
-        {water.lines.map((l) => (
-          <path d={smooth(l.pts, false)} stroke-width={l.w} opacity={l.o} />
-        ))}
-      </g>
-      <g class="water-glints">
-        {water.calm.map(([x, y, len]) => (
-          <path d={`M${x} ${y} q${len / 2} -1.2 ${len} 0`} />
-        ))}
-      </g>
-      <g class="water-rings" />
-      {water.pads.map((p) => (
-        <g class="pad" transform={`translate(${p.x} ${p.y})`}>
-          <path class="pad-leaf" d={p.d} />
-          <path class="pad-vein" d={p.vein} />
-        </g>
-      ))}
-      {water.stones.map((s) => (
-        <g class="stone">
-          <path class="stone-shadow" d={s.shadow} />
-          <path class="stone-body" d={s.d} />
-          <path class="stone-facet" d={s.facet} />
-          {s.moss && <path class="stone-moss" d={s.moss} />}
-        </g>
-      ))}
-      <g class="water-leaf" transform={`translate(${L.leaf[0]} ${L.leaf[1]}) rotate(-23)`}>
-        <g transform="scale(0.13)">
-          <path class="leaf-stem" d={MOMIJI.stem} />
-          <path class="leaf-blade" d={MOMIJI.outline} />
-          <path class="leaf-ink" d={MOMIJI.outline} transform="translate(5 -4)" />
-        </g>
-      </g>
-      <g
-        class="water-seal"
-        transform={`translate(${name === "wide" ? 900 : 300} ${name === "wide" ? 30 : 20}) rotate(-6) scale(0.8)`}
-      >
-        <path class="water-bank" d={water.bank} />
-        <path class="water-bed" d={water.edge} />
-        <path class="water-edge" d={water.edge} />
-        <g class="water-lines">
-          {water.lines.map((l) => (
-            <path d={smooth(l.pts, false)} stroke-width={l.w} opacity={l.o} />
-          ))}
-        </g>
-        <g class="water-glints">
-          {water.calm.map(([x, y, len]) => (
-            <path d={`M${x} ${y} q${len / 2} -1.2 ${len} 0`} />
-          ))}
-        </g>
-        <clipPath id={`pond-${name}`}>
-          <path d={water.edge} />
-        </clipPath>
-        <g class="water-rings" clip-path={`url(#pond-${name})`} />
-        {water.pads.map((p) => (
-          <g class="pad" transform={`translate(${p.x} ${p.y})`}>
-            <path class="pad-leaf" d={p.d} />
-            <path class="pad-vein" d={p.vein} />
-          </g>
-        ))}
-        {water.stones.map((s) => (
-          <g class="stone">
-            <path class="stone-shadow" d={s.shadow} />
-            <path class="stone-body" d={s.d} />
-            <path class="stone-facet" d={s.facet} />
-            {s.moss && <path class="stone-moss" d={s.moss} />}
-          </g>
-        ))}
-        <g class="water-leaf" transform={`translate(${L.leaf[0]} ${L.leaf[1]}) rotate(-23)`}>
-          <g transform="scale(0.13)">
-            <path class="leaf-stem" d={MOMIJI.stem} />
-            <path class="leaf-blade" d={MOMIJI.outline} />
-            <path class="leaf-ink" d={MOMIJI.outline} transform="translate(5 -4)" />
-          </g>
-        </g>
-        <g
-          class="water-seal"
-          transform={`translate(${name === "wide" ? 900 : 300} ${name === "wide" ? 30 : 20}) rotate(-6) scale(0.8)`}
-        >
-          <path d="M4 5 Q23 2 42 4 Q45 23 43 42 Q23 45 3 43 Q1 23 4 5 Z" />
-          <text x="23" y="31" text-anchor="middle">
-            波
-          </text>
-        </g>
-      </svg>
-    ))
-  }
+  {layouts.map(({ name, L, media }) => (
+    <>
+      <link
+        rel="preload"
+        href={artUrl(`water-${name}`)}
+        as="fetch"
+        crossorigin="anonymous"
+        media={media}
+      />
+      <svg
+        class={`water water-${name}`}
+        viewBox={`0 0 ${L.W} ${L.H}`}
+        role="img"
+        aria-label="Still water with stones and a maple leaf. Move across it and the surface bends; tap to drop a pebble."
+        data-layout={name}
+        data-art={artUrl(`water-${name}`)}
+        data-media={media}
+      />
+    </>
+  ))}
   <figcaption class="hand">the water was here before you.</figcaption>
 </figure>
 
@@ -136,29 +56,29 @@ const layouts = (["wide", "tall"] as const).map((name) => ({
     display: none;
   }
 
-  .water-bank {
+  .water :global(.water-bank) {
     fill: var(--bg-dim);
   }
 
-  .water-bed {
+  .water :global(.water-bed) {
     fill: var(--sea);
   }
 
-  .water-edge {
+  .water :global(.water-edge) {
     fill: none;
     stroke: var(--border);
     stroke-width: 1.2;
     opacity: 0.7;
   }
 
-  .water-lines {
+  .water :global(.water-lines) {
     fill: none;
     stroke: var(--fg-dim);
     stroke-linecap: round;
     stroke-linejoin: round;
   }
 
-  .water-glints {
+  .water :global(.water-glints) {
     fill: none;
     stroke: var(--bg-main);
     stroke-width: 1.1;
@@ -166,40 +86,40 @@ const layouts = (["wide", "tall"] as const).map((name) => ({
     opacity: 0.45;
   }
 
-  .water-rings {
+  .water :global(.water-rings) {
     fill: none;
     stroke: var(--fg-dim);
     stroke-width: 0.9;
     opacity: 0.6;
   }
 
-  .pad-leaf {
+  .water :global(.pad-leaf) {
     fill: var(--leaf);
     stroke: var(--fg-dim);
     stroke-width: 0.9;
     stroke-linejoin: round;
   }
 
-  .pad-vein {
+  .water :global(.pad-vein) {
     fill: none;
     stroke: var(--fg-dim);
     stroke-width: 0.6;
     opacity: 0.6;
   }
 
-  .stone-shadow {
+  .water :global(.stone-shadow) {
     fill: var(--fg-dim);
     opacity: 0.14;
   }
 
-  .stone-body {
+  .water :global(.stone-body) {
     fill: var(--bg-alt);
     stroke: var(--fg-main);
     stroke-width: 1.3;
     stroke-linejoin: round;
   }
 
-  .stone-facet {
+  .water :global(.stone-facet) {
     fill: none;
     stroke: var(--fg-dim);
     stroke-width: 0.9;
@@ -207,20 +127,20 @@ const layouts = (["wide", "tall"] as const).map((name) => ({
     opacity: 0.6;
   }
 
-  .stone-moss {
+  .water :global(.stone-moss) {
     fill: var(--leaf);
     stroke: var(--fg-dim);
     stroke-width: 0.6;
     opacity: 0.9;
   }
 
-  .leaf-blade {
+  .water :global(.leaf-blade) {
     fill: var(--red);
     opacity: 0.9;
   }
 
-  .leaf-ink,
-  .leaf-stem {
+  .water :global(.leaf-ink),
+  .water :global(.leaf-stem) {
     fill: none;
     stroke: var(--red-warmer);
     stroke-width: 6;
@@ -229,7 +149,7 @@ const layouts = (["wide", "tall"] as const).map((name) => ({
     opacity: 0.65;
   }
 
-  .water-seal {
+  .water :global(.water-seal) {
     opacity: 0;
     visibility: hidden;
     transition:
@@ -237,17 +157,17 @@ const layouts = (["wide", "tall"] as const).map((name) => ({
       visibility 1.2s;
   }
 
-  .water-seal.on {
+  .water :global(.water-seal.on) {
     opacity: 1;
     visibility: visible;
   }
 
-  .water-seal path {
+  .water :global(.water-seal path) {
     fill: var(--red);
     opacity: 0.92;
   }
 
-  .water-seal text {
+  .water :global(.water-seal text) {
     font-family: var(--font-seal);
     font-size: 22px;
     fill: var(--bg-main);
@@ -282,6 +202,7 @@ const layouts = (["wide", "tall"] as const).map((name) => ({
   import { earn, load } from "../utils/garden";
   import { smooth } from "../utils/sand";
   import { LAYOUTS, inPond, inStone } from "../utils/water";
+  import { fillArt } from "../scripts/art";
 
   type Point = [number, number];
   type Ring = { x: number; y: number; born: number; a: number };
@@ -296,7 +217,7 @@ const layouts = (["wide", "tall"] as const).map((name) => ({
   const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
   const f = (n: number) => n.toFixed(1);
 
-  document.querySelectorAll<SVGSVGElement>(".still-water .water").forEach((svg) => {
+  function setup(svg: SVGSVGElement) {
     const L = LAYOUTS[svg.dataset.layout as "wide" | "tall"];
     const lines: Point[][] = JSON.parse(svg.dataset.lines ?? "[]");
     const linePaths = [...svg.querySelectorAll<SVGPathElement>(".water-lines path")];
@@ -474,5 +395,17 @@ const layouts = (["wide", "tall"] as const).map((name) => ({
     svg.addEventListener("pointerleave", leave);
     svg.addEventListener("pointerup", (e) => e.pointerType !== "mouse" && leave());
     svg.addEventListener("pointercancel", leave);
+  }
+
+  document.querySelectorAll<SVGSVGElement>(".still-water .water").forEach((svg) => {
+    const mq = matchMedia(svg.dataset.media!);
+    let filled = false;
+    const fill = () => {
+      if (filled || !mq.matches) return;
+      filled = true;
+      fillArt(svg).then(() => setup(svg));
+    };
+    fill();
+    mq.addEventListener("change", fill);
   });
 </script>
