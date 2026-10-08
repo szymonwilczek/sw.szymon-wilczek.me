@@ -3,6 +3,7 @@ import SiteHeader from "../components/SiteHeader.astro";
 import Footer from "../components/Footer.astro";
 import EmacsMinibuffer from "../components/EmacsMinibuffer.astro";
 import ThemePicker from "../components/ThemePicker.astro";
+import Pebble from "../components/Pebble.astro";
 import SEO from "../components/SEO.astro";
 import auThemes from "../data/au-themes.json";
 import "../styles/global.css";
@@ -196,6 +197,7 @@ const {
       <main id="main-content">
         <slot />
       </main>
+      <Pebble />
       <Footer />
     </div>
 

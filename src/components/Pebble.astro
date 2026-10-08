@@ -1,0 +1,119 @@
+---
+// At the end of long pages, a pebble.
+---
+
+<div class="pebble-row" hidden>
+  <button type="button" class="pebble" aria-label="Back to the top of the page">
+    <svg class="pebble-arrow" width="16" height="30" viewBox="0 0 16 30" aria-hidden="true">
+      <path d="M8 28 C 7 20, 9 12, 8 3 M 2 9 L 8 2 L 14 9"></path>
+    </svg>
+    <svg class="pebble-stone" width="48" height="34" viewBox="0 0 48 34" aria-hidden="true">
+      <path d="M22 32 C 8 32, 2 22, 9 13 C 16 4, 34 3, 41 12 C 48 22, 40 32, 22 32 Z"></path>
+      <path d="M14 14 C 18 10, 24 9, 28 10" class="pebble-shine"></path>
+    </svg>
+    <span class="pebble-label hand">back to the gate</span>
+  </button>
+</div>
+
+<script>
+  const row = document.querySelector<HTMLElement>(".pebble-row");
+  const pebble = row?.querySelector<HTMLButtonElement>(".pebble");
+
+  // only long pages get one: more than two and a half screens of scrolling
+  function measure() {
+    if (row) row.hidden = document.documentElement.scrollHeight < innerHeight * 2.5;
+  }
+
+  pebble?.addEventListener("click", () => {
+    const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    pebble.classList.remove("is-rolling");
+    void pebble.offsetWidth;
+    if (!still) pebble.classList.add("is-rolling");
+    window.scrollTo({ top: 0, behavior: still ? "auto" : "smooth" });
+  });
+
+  measure();
+  window.addEventListener("load", measure);
+</script>
+
+<style>
+  .pebble-row {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 5rem;
+  }
+
+  .pebble-row[hidden] {
+    display: none;
+  }
+
+  .pebble {
+    display: grid;
+    grid-template-columns: auto auto;
+    grid-template-rows: auto auto;
+    align-items: end;
+    column-gap: 0.75rem;
+    padding: 0.25rem;
+    border: 0;
+    background: none;
+    color: var(--fg-dim);
+    cursor: pointer;
+  }
+
+  .pebble-arrow {
+    grid-column: 1;
+    justify-self: center;
+    margin-bottom: 0.375rem;
+  }
+
+  .pebble-arrow path {
+    fill: none;
+    stroke: var(--cursor);
+    stroke-width: 1.4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: transform 0.3s ease;
+  }
+
+  .pebble:hover .pebble-arrow path {
+    transform: translateY(-3px);
+  }
+
+  .pebble-stone {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .pebble-stone path {
+    fill: var(--bg-alt);
+    stroke: var(--fg-dim);
+    stroke-width: 1.3;
+  }
+
+  .pebble-stone .pebble-shine {
+    fill: none;
+    stroke: var(--border);
+    stroke-linecap: round;
+  }
+
+  .pebble-label {
+    grid-column: 2;
+    grid-row: 2;
+    padding-bottom: 0.375rem;
+    font-size: 1.0625rem;
+  }
+
+  .pebble:hover .pebble-label {
+    color: var(--fg-main);
+  }
+
+  .is-rolling .pebble-stone {
+    animation: pebble-roll 0.9s cubic-bezier(0.3, 0.6, 0.4, 1);
+  }
+
+  @keyframes pebble-roll {
+    to {
+      transform: translateX(-28px) rotate(-200deg);
+    }
+  }
+</style>
