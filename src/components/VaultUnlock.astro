@@ -60,6 +60,8 @@ const isFile = Boolean(encryptedUrl);
 </div>
 
 <script>
+  import { earn } from "../utils/garden";
+
   function bytes(b64: string) {
     return Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
   }
@@ -141,6 +143,7 @@ const isFile = Boolean(encryptedUrl);
       form.hidden = true;
       unlocked.hidden = false;
       container.closest(".envelope")?.classList.add("is-open");
+      earn("封");
     } catch {
       status.textContent = "that isn’t the word.";
       input.select();

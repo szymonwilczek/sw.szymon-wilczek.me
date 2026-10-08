@@ -119,6 +119,12 @@ const links = [
 </BaseLayout>
 
 <script>
+  import { earn } from "../utils/garden";
+
+  document
+    .querySelectorAll('a[href^="mailto:"]')
+    .forEach((a) => a.addEventListener("click", () => earn("文")));
+
   const copy = document.getElementById("copy-fingerprint");
   copy?.addEventListener("click", () => {
     navigator.clipboard.writeText(copy.dataset.fingerprint || "").then(() => {

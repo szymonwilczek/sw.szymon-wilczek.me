@@ -107,6 +107,26 @@ const postImage = imageMatch ? imageMatch[1] : `/og/${slug}.png`;
 </BaseLayout>
 
 <script>
+  import { earn, update } from "../../utils/garden";
+
+  // Opening an essay earns seal
+  // Reaching the seal marks it read and earns another one
+  (function () {
+    earn("書");
+    var end = document.querySelector(".end-seal");
+    var slug = location.pathname.replace(/^\/writings\/|\/$/g, "");
+    if (!end) return;
+    var seen = new IntersectionObserver(function (entries) {
+      if (!entries[0].isIntersecting) return;
+      seen.disconnect();
+      update(function (state) {
+        if (!state.read.includes(slug)) state.read.push(slug);
+      });
+      earn("終");
+    });
+    seen.observe(end);
+  })();
+
   (function () {
     var toggleBtn = document.getElementById("toggle-raw-btn");
     var drawer = document.getElementById("raw-code-drawer");

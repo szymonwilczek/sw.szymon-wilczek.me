@@ -236,6 +236,19 @@ const RADII = ["3px 7px 4px 8px", "6px 3px 7px 4px", "4px 6px 3px 7px", "7px 4px
 </BaseLayout>
 
 <script>
+  import { earn } from "../../utils/garden";
+
+  // walking down to the last frame earns a seal
+  const lastFrame = document.querySelector(".frames > li:last-child");
+  if (lastFrame) {
+    const walked = new IntersectionObserver((entries) => {
+      if (!entries[0].isIntersecting) return;
+      walked.disconnect();
+      earn("写");
+    });
+    walked.observe(lastFrame);
+  }
+
   function setupLightbox() {
     const dialog = document.getElementById("lightbox") as HTMLDialogElement | null;
     const track = document.getElementById("lb-track");
