@@ -1,0 +1,428 @@
+---
+// Tree sparrow that rewards the pause.
+// The third time it stays with you it leaves a seal.
+---
+
+<div class="suzume" aria-hidden="true">
+  <div class="sz-x">
+    <div class="sz-y">
+      <svg class="sz-bird" width="104" height="88" viewBox="-40 -64 80 68">
+        <g class="sz-face">
+          <g class="sz-pitch">
+            <g class="sz-sit">
+              <g class="sz-tail">
+                <path
+                  class="sz-wash"
+                  d="M-12 -15 L -29 -10 C -31 -8, -30 -6, -27 -5.5 L -11 -9 Z"
+                ></path>
+              </g>
+              <path
+                class="sz-body"
+                d="M-16 -16 C -14 -24, -4 -28, 6 -27 C 6 -34, 12 -38, 17 -37 C 23 -36, 25 -31, 24 -27 C 25 -22, 22 -17, 18 -13 C 14 -6, 4 -3, -4 -5 C -10 -7, -14 -11, -16 -16 Z"
+              ></path>
+              <path
+                class="sz-belly"
+                d="M-14 -13 C -8 -6, 4 -3, 14 -8 C 8 -10, -4 -9, -14 -13 Z"
+              ></path>
+              <path
+                class="sz-back"
+                d="M-14 -18 C -8 -25, 0 -27, 6 -26 C 4 -22, -6 -19, -14 -18 Z"
+              ></path>
+              <path
+                class="sz-wing"
+                d="M-11 -19 C -4 -25, 6 -25, 11 -19 C 8 -14, 0 -11, -9 -12 C -14 -13, -14 -17, -11 -19 Z"
+              ></path>
+              <path
+                class="sz-streaks"
+                d="M-8 -20 l 5 -1 M -5 -17 l 6 -1.5 M -1 -14 l 6 -1.5 M -10 -15 l 4 0"
+              ></path>
+              <path class="sz-bar" d="M-6 -21.5 C -1 -23, 4 -22.5, 8 -20.5"></path>
+              <g class="sz-head">
+                <path
+                  class="sz-cap"
+                  d="M7 -30 C 8 -35, 13 -38, 18 -37 C 22 -36.5, 24 -34, 24 -31 C 21 -32.5, 17 -33, 13 -32 C 11 -31.5, 9 -30.5, 7 -30 Z"
+                ></path>
+                <ellipse class="sz-ink" cx="13" cy="-26.5" rx="2.4" ry="1.8"></ellipse>
+                <path class="sz-lore" d="M18.5 -31 C 20 -31.5, 22 -31, 24 -29.5"></path>
+                <circle class="sz-ink" cx="19.2" cy="-31" r="1.3"></circle>
+                <path class="sz-ink" d="M23.6 -30.6 L 29 -28.6 L 23.8 -27 Z"></path>
+                <path
+                  class="sz-ink"
+                  d="M22 -25.5 C 23.5 -23, 22.5 -20, 19.5 -19.5 C 18.5 -21.5, 19.5 -24, 22 -25.5 Z"
+                ></path>
+              </g>
+              <path
+                class="sz-legs"
+                d="M1 -4.5 L 0 0 M 7 -4.5 L 8 0 M -3 0 l 5 0 M 5 0 l 5.5 0"
+              ></path>
+            </g>
+            <g class="sz-fly">
+              <g class="sz-far">
+                <path
+                  class="sz-far-wing"
+                  d="M6 -21 C -4 -30, -18 -32, -30 -29 C -24 -24, -12 -20, 2 -19 Z"
+                ></path>
+              </g>
+              <path
+                class="sz-wash"
+                d="M-12 -18 L -28 -16 C -30 -14, -28 -12, -26 -12 L -12 -14 Z"
+              ></path>
+              <path
+                class="sz-body"
+                d="M-14 -16 C -10 -22, 2 -24, 12 -22 C 14 -27, 20 -29, 24 -26 C 27 -24, 27 -20, 24 -18 C 20 -12, 6 -10, -4 -12 C -9 -13, -13 -14, -14 -16 Z"
+              ></path>
+              <path
+                class="sz-cap"
+                d="M13 -24 C 15 -27.5, 20 -29, 24 -26.5 C 21 -26.5, 17 -26, 13 -24 Z"
+              ></path>
+              <ellipse class="sz-ink" cx="17" cy="-21.5" rx="2" ry="1.5"></ellipse>
+              <circle class="sz-ink" cx="22" cy="-24.5" r="1.1"></circle>
+              <path class="sz-ink" d="M26 -23.5 L 30.5 -22 L 26 -20.5 Z"></path>
+              <path class="sz-legs sz-landing-legs" d="M2 -11 L 3 -5 M 7 -11 L 9 -5"></path>
+              <g class="sz-near">
+                <path
+                  class="sz-wing"
+                  d="M6 -19 C -4 -28, -18 -31, -32 -27 C -28 -24, -26 -22, -24 -21 C -18 -18, -8 -16, 2 -16 Z"
+                ></path>
+                <path
+                  class="sz-streaks"
+                  d="M-30 -26.5 C -27 -24, -24 -22.5, -20 -21.5 M -24 -28 C -20 -25, -16 -23, -12 -21.5 M -16 -29 C -12 -25.5, -8 -23, -3 -21"
+                ></path>
+              </g>
+            </g>
+          </g>
+        </g>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<style>
+  .suzume {
+    position: fixed;
+    inset: 0 auto auto 0;
+    z-index: 5;
+    pointer-events: none;
+    visibility: hidden;
+  }
+
+  .suzume.here {
+    visibility: visible;
+  }
+
+  .sz-bird {
+    position: absolute;
+    left: -52px;
+    top: -83px;
+    width: 104px;
+    max-width: none;
+    height: 88px;
+    overflow: visible;
+  }
+
+  .sz-face,
+  .sz-pitch,
+  .sz-tail,
+  .sz-head,
+  .sz-near,
+  .sz-far {
+    transform-box: view-box;
+  }
+
+  .sz-face {
+    transform-origin: 0 0;
+    transition: transform 0.45s ease-in-out;
+  }
+
+  .sz-pitch {
+    transform-origin: 0 -16px;
+    transition: transform 0.6s ease-in-out;
+  }
+
+  .sz-tail {
+    transform-origin: -14px -12px;
+    transition: transform 0.35s ease-in-out;
+  }
+
+  .sz-head {
+    transform-origin: 14px -24px;
+    transition: transform 0.8s ease-in-out;
+  }
+
+  .sz-near {
+    transform-origin: 4px -19px;
+    transition: transform var(--flap, 130ms) ease-in-out;
+  }
+
+  .sz-far {
+    transform-origin: 4px -21px;
+    transition: transform var(--flap, 130ms) ease-in-out;
+  }
+
+  .sz-fly,
+  .suzume.flying .sz-sit,
+  .sz-landing-legs {
+    display: none;
+  }
+
+  .suzume.flying .sz-fly,
+  .suzume.landing .sz-landing-legs {
+    display: inline;
+  }
+
+  .sz-body {
+    fill: var(--bg-main);
+    stroke: var(--fg-main);
+    stroke-width: 0.75;
+    stroke-linejoin: round;
+  }
+
+  .sz-belly {
+    fill: var(--fg-dim);
+    opacity: 0.18;
+  }
+
+  .sz-back {
+    fill: var(--red);
+    opacity: 0.3;
+  }
+
+  .sz-wing {
+    fill: var(--red);
+    fill-opacity: 0.45;
+    stroke: var(--fg-main);
+    stroke-width: 0.7;
+    stroke-linejoin: round;
+  }
+
+  .sz-far-wing {
+    fill: var(--fg-dim);
+    opacity: 0.3;
+  }
+
+  .sz-wash {
+    fill: var(--fg-dim);
+    fill-opacity: 0.55;
+    stroke: var(--fg-main);
+    stroke-width: 0.75;
+    stroke-linejoin: round;
+  }
+
+  .sz-streaks {
+    fill: none;
+    stroke: var(--fg-main);
+    stroke-width: 0.8;
+    stroke-linecap: round;
+    opacity: 0.65;
+  }
+
+  .sz-bar {
+    fill: none;
+    stroke: var(--bg-main);
+    stroke-width: 1.3;
+    stroke-linecap: round;
+  }
+
+  .sz-cap {
+    fill: var(--red);
+    opacity: 0.6;
+  }
+
+  .sz-ink {
+    fill: var(--fg-main);
+  }
+
+  .sz-lore,
+  .sz-legs {
+    fill: none;
+    stroke: var(--fg-main);
+    stroke-width: 1.1;
+    stroke-linecap: round;
+  }
+
+  .sz-lore {
+    stroke-width: 1.6;
+  }
+
+  @media print {
+    .suzume {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  import { earn, update } from "../utils/garden";
+
+  const root = document.querySelector<HTMLElement>(".suzume");
+
+  if (root) {
+    const IDLE = 25_000;
+    const FLAP = 130;
+    const still = matchMedia("(prefers-reduced-motion: reduce)");
+    const sx = root.querySelector<HTMLElement>(".sz-x")!;
+    const sy = root.querySelector<HTMLElement>(".sz-y")!;
+    const face = root.querySelector<SVGGElement>(".sz-face")!;
+    const pitch = root.querySelector<SVGGElement>(".sz-pitch")!;
+    const tail = root.querySelector<SVGGElement>(".sz-tail")!;
+    const head = root.querySelector<SVGGElement>(".sz-head")!;
+    const near = root.querySelector<SVGGElement>(".sz-near")!;
+    const far = root.querySelector<SVGGElement>(".sz-far")!;
+
+    type Phase = "away" | "gliding" | "landing" | "sitting" | "leaving";
+    let phase: Phase = "away";
+    let look = -1;
+    let idle = 0;
+    let step = 0;
+    let life = 0;
+    let flapping = 0;
+    let wingDown = false;
+
+    const at = (x: number, y: number, tx: string, ty: string) => {
+      sx.style.transition = `transform ${tx}`;
+      sy.style.transition = `transform ${ty}, opacity 0.5s ease`;
+      sx.style.transform = `translateX(${x}px)`;
+      sy.style.transform = `translateY(${y}px)`;
+    };
+
+    const wings = (deg: number) => {
+      near.style.transform = `rotate(${deg}deg)`;
+      far.style.transform = `rotate(${deg * 0.8 - 6}deg)`;
+    };
+
+    const flap = (on: boolean) => {
+      clearInterval(flapping);
+      root.style.setProperty("--flap", `${FLAP}ms`);
+      if (!on) return;
+      flapping = window.setInterval(() => {
+        wingDown = !wingDown;
+        wings(wingDown ? 18 : -62);
+      }, FLAP);
+    };
+
+    const pose = (p: Phase) => {
+      phase = p;
+      root.classList.toggle("flying", p !== "sitting");
+      root.classList.toggle("landing", p === "landing");
+      const lean = { away: 0, gliding: 6, landing: -14, sitting: 0, leaving: -18 }[p];
+      pitch.style.transform = `rotate(${lean}deg)`;
+      face.style.transform = `scaleX(${p === "sitting" ? look : -1})`;
+    };
+
+    function perch(): [number, number] | null {
+      const h = innerHeight;
+      for (const d of document.querySelectorAll<HTMLElement>(".divider")) {
+        const r = d.getBoundingClientRect();
+        if (r.top > h * 0.15 && r.bottom < h * 0.9 && r.width > 200) {
+          return [r.left + r.width * (0.56 + Math.random() * 0.14), r.top + 14];
+        }
+      }
+      return null;
+    }
+
+    function arrive() {
+      const spot = perch();
+      // no divider in view: keep waiting, as long as the reader keeps still
+      if (!spot) {
+        idle = window.setTimeout(arrive, 3000);
+        return;
+      }
+      const [px, py] = spot;
+      look = -1;
+      root.classList.add("here");
+      if (still.matches) {
+        at(px, py, "0s", "0s");
+        sy.style.opacity = "1";
+        pose("sitting");
+        sat();
+        return;
+      }
+
+      sy.style.opacity = "0";
+      at(innerWidth + 80, Math.max(-60, py - 260), "0s", "0s");
+      pose("gliding");
+      requestAnimationFrame(() =>
+        requestAnimationFrame(() => {
+          sy.style.opacity = "1";
+          at(px, py, "1.7s cubic-bezier(.15,.55,.35,1)", "1.7s cubic-bezier(.45,0,.55,1)");
+          flap(true);
+          step = window.setTimeout(() => {
+            flap(false);
+            wings(18);
+            step = window.setTimeout(() => {
+              root.style.setProperty("--flap", "0.4s");
+              wings(-38);
+              pose("landing");
+              step = window.setTimeout(() => {
+                pose("sitting");
+                sat();
+              }, 420);
+            }, 1100);
+          }, 600);
+        }),
+      );
+    }
+
+    function sat() {
+      const state = update((s) => {
+        s.sparrow = (s.sparrow || 0) + 1;
+      });
+      if (state.sparrow >= 3) earn("雀");
+      if (!still.matches) gesture();
+    }
+
+    function gesture() {
+      life = window.setTimeout(
+        () => {
+          if (phase !== "sitting") return;
+          const r = Math.random();
+          if (r < 0.4) {
+            look = -look;
+            face.style.transform = `scaleX(${look})`;
+          } else if (r < 0.75) head.style.transform = `rotate(${Math.random() < 0.5 ? -9 : 7}deg)`;
+          else tail.style.transform = "rotate(-22deg)";
+          life = window.setTimeout(() => {
+            head.style.transform = "";
+            tail.style.transform = "";
+            gesture();
+          }, 900);
+        },
+        4000 + Math.random() * 3000,
+      );
+    }
+
+    function leave() {
+      clearTimeout(step);
+      clearTimeout(life);
+      head.style.transform = "";
+      tail.style.transform = "";
+      if (phase === "away" || phase === "leaving") return;
+      if (still.matches) {
+        root.classList.remove("here");
+        phase = "away";
+        return;
+      }
+      const x = parseFloat(sx.style.transform.slice(11)) || 0;
+      pose("leaving");
+      flap(true);
+      at(x - 520, -240, "1.8s cubic-bezier(.55,0,.8,.6)", "1.8s cubic-bezier(.2,.5,.4,1)");
+      sy.style.transition += ", opacity 0.9s ease 0.9s";
+      sy.style.opacity = "0";
+      step = window.setTimeout(() => {
+        flap(false);
+        root.classList.remove("here");
+        phase = "away";
+      }, 1900);
+    }
+
+    // any sign of the reader sends it off and starts the wait over
+    const stir = () => {
+      leave();
+      clearTimeout(idle);
+      idle = window.setTimeout(arrive, IDLE);
+    };
+    for (const type of ["pointermove", "pointerdown", "keydown", "wheel", "scroll", "touchstart"])
+      addEventListener(type, stir, { passive: true });
+    stir();
+  }
+</script>

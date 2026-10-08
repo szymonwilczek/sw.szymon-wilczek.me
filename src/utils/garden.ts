@@ -41,12 +41,13 @@ export interface GardenState {
   read: string[];
   stops: Record<string, { at: number; when: number }>;
   doors: Door[];
+  sparrow: number;
 }
 
 const KEY = "garden";
 
 function empty(): GardenState {
-  return { seals: {}, paths: [], read: [], stops: {}, doors: [] };
+  return { seals: {}, paths: [], read: [], stops: {}, doors: [], sparrow: 0 };
 }
 
 export function load(): GardenState {
