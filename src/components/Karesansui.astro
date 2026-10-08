@@ -2,59 +2,18 @@
 // A strip of dry garden above the home footer.
 // Drag across it and the lines part like sand; leave it and the rake comes back
 // and smooths them.
-import { makeSand, smooth } from "../utils/sand";
-import { MOMIJI } from "../utils/momiji";
-
-const sand = makeSand();
+import { artUrl } from "../utils/art";
 ---
 
 <figure class="karesansui">
+  <link rel="preload" href={artUrl("sand")} as="fetch" crossorigin="anonymous" />
   <svg
     class="sand"
     viewBox="0 0 1000 190"
     role="img"
     aria-label="Raked sand garden with three stones"
-    data-lines={JSON.stringify([...sand.lines, ...sand.rings].map((l) => l.pts))}
-  >
-    <defs>
-      <clipPath id="sand-clip">
-        <path d={sand.edge}></path>
-      </clipPath>
-    </defs>
-    <path class="sand-bed" d={sand.edge}></path>
-    <g class="sand-grains">
-      {sand.grains.map((g) => (
-        <circle cx={g.x} cy={g.y} r={g.r} />
-      ))}
-    </g>
-    <g class="sand-lines">
-      {sand.lines.map((l) => (
-        <path d={smooth(l.pts, false)} stroke-width={l.w} opacity={l.o} />
-      ))}
-      {sand.rings.map((r) => (
-        <path d={smooth(r.pts, false)} stroke-width={r.w} opacity={r.o} />
-      ))}
-    </g>
-    <g class="sand-kept" clip-path="url(#sand-clip)"></g>
-    {sand.stones.map((s) => (
-      <g class="stone">
-        <path class="stone-shadow" d={s.shadow} />
-        <path class="stone-body" d={s.d} />
-        <path class="stone-facet" d={s.facet} />
-        {s.moss && <path class="stone-moss" d={s.moss} />}
-      </g>
-    ))}
-    <g class="sand-rake" aria-hidden="true">
-      {[0, 1, 2, 3, 4].map(() => (
-        <circle r="1.8" />
-      ))}
-    </g>
-    <g class="sand-leaf" transform="translate(806 97) rotate(-28) scale(0.14)">
-      <path class="sand-leaf-stem" d={MOMIJI.stem}></path>
-      <path class="sand-leaf-blade" d={MOMIJI.outline}></path>
-      <path class="sand-leaf-ink" d={MOMIJI.outline} transform="translate(5 -4)"></path>
-    </g>
-  </svg>
+    data-art={artUrl("sand")}
+  ></svg>
   <figcaption class="hand">rake it. it remembers nothing.</figcaption>
 </figure>
 
@@ -74,41 +33,41 @@ const sand = makeSand();
     -webkit-user-select: none;
   }
 
-  .sand-bed {
+  .sand :global(.sand-bed) {
     fill: var(--bg-dim);
   }
 
-  .sand-grains {
+  .sand :global(.sand-grains) {
     fill: var(--border);
     opacity: 0.5;
   }
 
-  .sand-lines,
-  .sand-kept {
+  .sand :global(.sand-lines),
+  .sand :global(.sand-kept) {
     fill: none;
     stroke: var(--fg-dim);
     stroke-linecap: round;
     stroke-linejoin: round;
   }
 
-  .sand-kept {
+  .sand :global(.sand-kept) {
     stroke-width: 1.3;
     opacity: 0.75;
   }
 
-  .stone-shadow {
+  .sand :global(.stone-shadow) {
     fill: var(--fg-dim);
     opacity: 0.14;
   }
 
-  .stone-body {
+  .sand :global(.stone-body) {
     fill: var(--bg-alt);
     stroke: var(--fg-main);
     stroke-width: 1.4;
     stroke-linejoin: round;
   }
 
-  .stone-facet {
+  .sand :global(.stone-facet) {
     fill: none;
     stroke: var(--fg-dim);
     stroke-width: 0.9;
@@ -116,30 +75,30 @@ const sand = makeSand();
     opacity: 0.6;
   }
 
-  .stone-moss {
+  .sand :global(.stone-moss) {
     fill: var(--leaf);
     stroke: var(--fg-dim);
     stroke-width: 0.6;
     opacity: 0.9;
   }
 
-  .sand-rake {
+  .sand :global(.sand-rake) {
     fill: var(--fg-main);
     opacity: 0;
     transition: opacity 0.4s ease;
   }
 
-  .sand-rake.on {
+  .sand :global(.sand-rake.on) {
     opacity: 0.55;
   }
 
-  .sand-leaf-blade {
+  .sand :global(.sand-leaf-blade) {
     fill: var(--red);
     opacity: 0.9;
   }
 
-  .sand-leaf-ink,
-  .sand-leaf-stem {
+  .sand :global(.sand-leaf-ink),
+  .sand :global(.sand-leaf-stem) {
     fill: none;
     stroke: var(--red-warmer);
     stroke-width: 6;
@@ -168,12 +127,23 @@ const sand = makeSand();
 <script>
   import { earn } from "../utils/garden";
   import { smooth, SMALL_STONE, STONE_SHAPES } from "../utils/sand";
+  import { fillArt } from "../scripts/art";
 
   type Point = [number, number];
 
   const svg = document.querySelector<SVGSVGElement>(".sand");
+  const narrow = matchMedia("(max-width: 47.99em)");
 
+  // on a phone the strip shows the stones closer, so there is sand to rake
   if (svg) {
+    const frame = () =>
+      svg.setAttribute("viewBox", narrow.matches ? "180 0 660 190" : "0 0 1000 190");
+    frame();
+    narrow.addEventListener("change", frame);
+    fillArt(svg).then(() => setup(svg));
+  }
+
+  function setup(svg: SVGSVGElement) {
     const base: Point[][] = JSON.parse(svg.dataset.lines ?? "[]");
     const paths = Array.from(svg.querySelectorAll<SVGPathElement>(".sand-lines path")).slice(
       0,
@@ -184,14 +154,7 @@ const sand = makeSand();
     const kept = svg.querySelector<SVGGElement>(".sand-kept")!;
     const teeth = svg.querySelector<SVGGElement>(".sand-rake")!;
     const still = matchMedia("(prefers-reduced-motion: reduce)");
-    const narrow = matchMedia("(max-width: 47.99em)");
     const KEY = "sand-ring-pts";
-
-    // on a phone the strip shows the stones closer, so there is sand to rake
-    const frame = () =>
-      svg.setAttribute("viewBox", narrow.matches ? "180 0 660 190" : "0 0 1000 190");
-    frame();
-    narrow.addEventListener("change", frame);
 
     const toSand = (e: PointerEvent): Point => {
       const p = new DOMPoint(e.clientX, e.clientY).matrixTransform(svg.getScreenCTM()!.inverse());
