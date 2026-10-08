@@ -6,6 +6,7 @@ import { getCollection } from "astro:content";
 import { renderContentEntry } from "../../utils/org";
 import { calculateReadingStats } from "../../utils/reading-time";
 import { dottedDate, writingSlug } from "../../utils/format";
+import { mendsOf } from "../../utils/mended";
 
 export async function getStaticPaths() {
   const writings = (await getCollection("writings")).sort(
@@ -21,7 +22,7 @@ const { post, newer, older } = Astro.props;
 const { slug } = Astro.params;
 const { html, Content } = await renderContentEntry(post);
 const stats = calculateReadingStats(post.body);
-const rawLines = post.body ? post.body.split("\n").length : 0;
+const mends = post.filePath ? mendsOf(post.filePath) : [];
 
 // First image from org body if present for rich OpenGraph preview,
 // otherwise fall back to the build-time generated OG card for this article
@@ -54,52 +55,80 @@ const postImage = imageMatch ? imageMatch[1] : `/og/${slug}.png`;
 
   <Divider from={140} to={372} />
 
-  <article class="article">
+  <article class="article" data-minutes={stats.minutes} data-mends={JSON.stringify(mends)}>
+    <aside class="progress" aria-hidden="true">
+      <div class="progress-inner">
+        <svg width="24" height="320" viewBox="0 0 24 320">
+          <path d="M12 4 C 9 50, 15 96, 11 142 S 13 236, 12 316" class="progress-track"></path>
+          <path
+            d="M12 4 C 9 50, 15 96, 11 142 S 13 236, 12 316"
+            class="progress-ink"
+            pathLength="1"
+          ></path>
+          <circle r="3.2" cx="12" cy="4" class="progress-drop"></circle>
+        </svg>
+        <span class="progress-left hand"></span>
+      </div>
+    </aside>
+
     <div class="article-body">
       <div class="prose">{Content ? <Content /> : <div class="org-content" set:html={html} />}</div>
 
-      <Seal glyph="終" size={52} tilt={3} label="end" class="end-seal" />
+      <Divider from={140} to={372} />
+
+      <section class="colophon paper" aria-label="Colophon">
+        <span class="tape colophon-tape" aria-hidden="true"></span>
+        <div>
+          <p class="colophon-title">colophon</p>
+          <dl>
+            <dt>words</dt>
+            <dd>{stats.words}</dd>
+            <dt>written in</dt>
+            <dd>Org mode, GNU Emacs</dd>
+            <dt>set in</dt>
+            <dd>Literata &amp; Typus Mono 95</dd>
+            <dt>mended</dt>
+            <dd>{mends.length > 0 ? `${mends.length}× · last ${mends[0].date}` : "not yet"}</dd>
+            <dt>source</dt>
+            <dd class="colophon-source">
+              <a href={`/writings/${slug}.org`} download={`${slug}.org`}>
+                {slug}.org ↓
+              </a>
+              <button type="button" id="toggle-raw-btn">
+                view
+              </button>
+            </dd>
+          </dl>
+        </div>
+        <Seal glyph="終" size={52} tilt={3} label="end" class="end-seal" />
+      </section>
+
+      <div id="raw-code-drawer" class="raw-code-drawer" hidden>
+        <button type="button" id="copy-raw-btn">
+          copy buffer
+        </button>
+        <pre class="raw-code-pre"><code>{post.body}</code></pre>
+      </div>
 
       {(older || newer) && (
         <nav class="adjacent" aria-label="Adjacent writings">
-          {older ? (
-            <a href={`/writings/${writingSlug(older.id)}/`}>
-              <span class="adjacent-dir">← older</span>
+          {older && (
+            <a href={`/writings/${writingSlug(older.id)}/`} class="adjacent-card paper">
+              <span class="adjacent-dir hand">← before this</span>
               <span>{older.data.title}</span>
             </a>
-          ) : (
-            <span />
           )}
           {newer && (
-            <a href={`/writings/${writingSlug(newer.id)}/`} class="adjacent-newer">
-              <span class="adjacent-dir">newer →</span>
+            <a
+              href={`/writings/${writingSlug(newer.id)}/`}
+              class="adjacent-card adjacent-newer paper"
+            >
+              <span class="adjacent-dir hand">after this →</span>
               <span>{newer.data.title}</span>
             </a>
           )}
         </nav>
       )}
-
-      <footer class="source">
-        <p class="source-line">
-          <span>
-            plain text: <code>{post.id}</code> · {rawLines} lines · {stats.words} words
-          </span>
-          <span class="source-actions">
-            <button type="button" id="toggle-raw-btn">
-              view source
-            </button>
-            <a href={`/writings/${slug}.org`} download={`${slug}.org`}>
-              download .org
-            </a>
-          </span>
-        </p>
-        <div id="raw-code-drawer" class="raw-code-drawer" hidden>
-          <button type="button" id="copy-raw-btn">
-            copy buffer
-          </button>
-          <pre class="raw-code-pre"><code>{post.body}</code></pre>
-        </div>
-      </footer>
     </div>
 
     <aside class="margin-notes hand" aria-label="Margin notes"></aside>
@@ -137,7 +166,7 @@ const postImage = imageMatch ? imageMatch[1] : `/og/${slug}.png`;
     if (toggleBtn && drawer) {
       toggleBtn.addEventListener("click", function () {
         drawer!.hidden = !drawer!.hidden;
-        toggleBtn!.textContent = drawer!.hidden ? "view source" : "hide source";
+        toggleBtn!.textContent = drawer!.hidden ? "view" : "hide";
       });
     }
 
@@ -160,7 +189,7 @@ const postImage = imageMatch ? imageMatch[1] : `/og/${slug}.png`;
     var article = document.querySelector<HTMLElement>(".article");
     var aside = document.querySelector<HTMLElement>(".margin-notes");
     var defs = document.querySelectorAll<HTMLElement>(".prose .footnote-definition");
-    if (!article || !aside || defs.length === 0) return;
+    if (!article || !aside) return;
 
     var wide = window.matchMedia("(min-width: 64em)");
     var thread = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -262,13 +291,42 @@ const postImage = imageMatch ? imageMatch[1] : `/og/${slug}.png`;
       });
     }
 
+    // mends from git log, each matched to the paragraph its added text is in
+    var mended: { el: HTMLElement; date: string; subject: string }[] = [];
+    var blocks = Array.from(document.querySelectorAll<HTMLElement>(".prose :is(p, li, pre)"));
+    var squash = function (s: string) {
+      return s.replace(/\s+/g, " ");
+    };
+    JSON.parse(article.dataset.mends || "[]").forEach(function (m: {
+      date: string;
+      subject: string;
+      hint: string | null;
+    }) {
+      if (!m.hint) return;
+      var hint = squash(m.hint);
+      var block = blocks.find(function (b) {
+        return squash(b.textContent || "").includes(hint);
+      });
+      if (!block) return;
+      var el = (block.closest(".code-block-wrapper") as HTMLElement) || block;
+      if (!el.classList.contains("mended")) {
+        el.classList.add("mended");
+        el.insertAdjacentHTML(
+          "beforeend",
+          '<svg class="mend-seam" viewBox="0 0 30 100" preserveAspectRatio="none" aria-hidden="true">' +
+            '<path d="M14 0 L 18 14 L 11 26 L 17 40 L 12 55 L 18 70 L 13 84 L 16 100" stroke-width="2.4" vector-effect="non-scaling-stroke"/>' +
+            '<path d="M17 40 L 26 36 M 18 70 L 27 73" stroke-width="1.4" vector-effect="non-scaling-stroke"/></svg>',
+        );
+      }
+      mended.push({ el: el, date: m.date, subject: m.subject });
+    });
+
     function place() {
       aside!.replaceChildren();
       article!.classList.toggle("notes-in-margin", wide.matches);
       if (!wide.matches) return;
 
-      var floor = 0;
-      var base = aside!.getBoundingClientRect().top;
+      var items: { at: Element; note: HTMLElement }[] = [];
       defs.forEach(function (def) {
         var num = def.querySelector(".footnum")?.textContent?.trim();
         var body = def.querySelector(".footdef");
@@ -281,13 +339,31 @@ const postImage = imageMatch ? imageMatch[1] : `/og/${slug}.png`;
         mark.className = "note-num";
         mark.textContent = num;
         note.append(mark, ...Array.from(body.cloneNode(true).childNodes));
-        aside!.append(note);
-        link(note, ref);
-
-        var top = Math.max(ref.getBoundingClientRect().top - base - 8, floor);
-        note.style.top = top + "px";
-        floor = top + note.offsetHeight + 24;
+        items.push({ at: ref, note: note });
       });
+      mended.forEach(function (m) {
+        var note = document.createElement("div");
+        note.className = "margin-note mend-note";
+        var date = document.createElement("span");
+        date.className = "mend-date";
+        date.textContent = "mended " + m.date;
+        note.append(date, document.createElement("br"), m.subject);
+        items.push({ at: m.el, note: note });
+      });
+
+      var floor = 0;
+      var base = aside!.getBoundingClientRect().top;
+      items
+        .sort(function (a, b) {
+          return a.at.getBoundingClientRect().top - b.at.getBoundingClientRect().top;
+        })
+        .forEach(function (item) {
+          aside!.append(item.note);
+          if (item.at.id.startsWith("fnr.")) link(item.note, item.at as HTMLElement);
+          var top = Math.max(item.at.getBoundingClientRect().top - base - 8, floor);
+          item.note.style.top = top + "px";
+          floor = top + item.note.offsetHeight + 24;
+        });
       aside!.style.minHeight = floor + "px";
     }
 
@@ -295,6 +371,34 @@ const postImage = imageMatch ? imageMatch[1] : `/og/${slug}.png`;
     window.addEventListener("resize", place);
     document.fonts.ready.then(place);
     place();
+  })();
+
+  // reading progress
+  (function () {
+    var article = document.querySelector<HTMLElement>(".article");
+    var prose = document.querySelector<HTMLElement>(".prose");
+    var ink = document.querySelector<SVGPathElement>(".progress-ink");
+    var drop = document.querySelector<SVGCircleElement>(".progress-drop");
+    var left = document.querySelector<HTMLElement>(".progress-left");
+    if (!article || !prose || !ink || !drop || !left) return;
+    var minutes = Number(article.dataset.minutes) || 1;
+    var length = ink.getTotalLength();
+
+    function draw() {
+      var box = prose!.getBoundingClientRect();
+      var read = (innerHeight * 0.4 - box.top) / box.height;
+      var p = Math.min(1, Math.max(0, read));
+      ink!.style.strokeDashoffset = String(1 - p);
+      var tip = ink!.getPointAtLength(p * length);
+      drop!.setAttribute("cx", String(tip.x));
+      drop!.setAttribute("cy", String(tip.y));
+      var rest = Math.ceil(minutes * (1 - p));
+      left!.textContent = p >= 0.98 ? "the end" : `about ${rest} min left`;
+    }
+
+    window.addEventListener("scroll", draw, { passive: true });
+    window.addEventListener("resize", draw);
+    draw();
   })();
 </script>
 
@@ -389,67 +493,60 @@ const postImage = imageMatch ? imageMatch[1] : `/og/${slug}.png`;
     border-radius: var(--radius-soft);
   }
 
-  :global(.end-seal) {
-    margin: 5rem auto 0;
-  }
-
-  .adjacent {
+  .colophon {
+    position: relative;
     display: flex;
     flex-wrap: wrap;
+    align-items: flex-start;
     justify-content: space-between;
-    gap: 1.5rem;
-    margin-top: 3.5rem;
-    padding-top: 1.5rem;
-    border-top: 1px dashed var(--border);
-    font-size: 1.0625rem;
+    gap: 1.25rem;
+    padding: 2rem 2.25rem 1.75rem;
+    transform: rotate(0.5deg);
   }
 
-  .adjacent a {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-    text-decoration: none;
+  .colophon-tape {
+    top: -13px;
+    right: 4rem;
+    width: 84px;
+    height: 26px;
+    opacity: 0.85;
+    transform: rotate(-4deg);
   }
 
-  .adjacent-newer {
-    text-align: right;
-    margin-left: auto;
+  .colophon-title {
+    margin: 0;
+    font-family: var(--font-hand);
+    font-size: 1.375rem;
+    line-height: 1.2;
   }
 
-  .adjacent-dir {
+  .colophon dl {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.25rem 1.25rem;
+    margin: 0.75rem 0 0;
     font-family: var(--font-mono);
     font-size: 0.75rem;
     color: var(--fg-dim);
   }
 
-  .source {
-    margin-top: 3rem;
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    color: var(--fg-dim);
-  }
-
-  .source-line {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    gap: 0.5rem 1.5rem;
+  .colophon dt,
+  .colophon dd {
     margin: 0;
   }
 
-  .source code {
-    padding: 0;
-    background: none;
-    font-size: inherit;
+  .colophon dd {
+    color: var(--fg-main);
   }
 
-  .source-actions {
+  .colophon-source {
     display: flex;
-    gap: 1.25rem;
+    flex-wrap: wrap;
+    gap: 0 1rem;
   }
 
-  .source button,
-  .source a {
+  .colophon-source a,
+  .colophon-source button {
     padding: 0;
     border: 0;
     background: none;
@@ -459,8 +556,127 @@ const postImage = imageMatch ? imageMatch[1] : `/og/${slug}.png`;
     cursor: pointer;
   }
 
-  .source button:hover,
-  .source a:hover {
+  .colophon-source a:hover,
+  .colophon-source button:hover {
+    color: var(--cursor);
+  }
+
+  .adjacent {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.75rem;
+    margin-top: 3.5rem;
+  }
+
+  .adjacent-card {
+    flex: 1 1 16rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 1.25rem 1.375rem;
+    background: var(--bg-dim);
+    color: var(--fg-main);
+    font-size: 1.1875rem;
+    line-height: 1.35;
+    text-decoration: none;
+    transform: rotate(-1deg);
+    transition: transform 0.2s ease;
+  }
+
+  .adjacent-newer {
+    text-align: right;
+    transform: rotate(0.8deg);
+  }
+
+  .adjacent-card:hover {
+    transform: rotate(0deg) translateY(-2px);
+  }
+
+  .adjacent-dir {
+    font-size: 1rem;
+  }
+
+  .progress {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: -7.5rem;
+    width: 5rem;
+    display: none;
+  }
+
+  .notes-in-margin .progress {
+    display: block;
+  }
+
+  .progress-inner {
+    position: sticky;
+    top: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.625rem;
+  }
+
+  .progress svg {
+    display: block;
+    overflow: visible;
+  }
+
+  .progress-track,
+  .progress-ink {
+    fill: none;
+    stroke-linecap: round;
+  }
+
+  .progress-track {
+    stroke: var(--border);
+    stroke-width: 1;
+    stroke-dasharray: 2 6;
+  }
+
+  .progress-ink {
+    stroke: var(--cursor);
+    stroke-width: 3.2;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+  }
+
+  .progress-drop {
+    fill: var(--cursor);
+  }
+
+  .progress-left {
+    font-size: 1rem;
+    line-height: 1.3;
+    text-align: center;
+  }
+
+  .prose :global(.mended) {
+    position: relative;
+  }
+
+  .prose :global(.mend-seam) {
+    position: absolute;
+    top: 0.25rem;
+    bottom: 0.25rem;
+    right: -2.25rem;
+    width: 30px;
+    overflow: visible;
+  }
+
+  .prose :global(.mend-seam path) {
+    fill: none;
+    stroke: var(--cursor);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .article:not(.notes-in-margin) :global(.mend-seam) {
+    display: none;
+  }
+
+  .margin-notes :global(.mend-note .mend-date) {
     color: var(--cursor);
   }
 
