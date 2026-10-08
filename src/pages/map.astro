@@ -67,14 +67,26 @@ const KIGO = [
 
 // paths between places; a path is inked once its place has been walked
 const PATHS = [
-  { to: "/writings", d: "M156 846 C 168 790, 210 760, 238 712" },
-  { to: "/photos", d: "M380 640 C 430 580, 500 560, 560 520 C 600 494, 610 470, 620 456" },
-  { to: "/files", d: "M812 452 C 850 500, 830 560, 880 590 C 906 606, 920 620, 930 636" },
-  { to: "/files/verify", d: "M156 846 C 230 812, 300 806, 380 800 C 520 792, 700 806, 806 784" },
-  { to: "/about", d: "M560 520 C 500 420, 420 320, 330 270" },
-  { to: "/vault", d: "M820 330 C 860 280, 880 240, 892 208" },
-  { to: "/contact", d: "M238 712 C 180 660, 120 640, 96 612" },
-  { to: "/projects", d: "M560 520 C 500 500, 440 470, 400 440" },
+  { to: "/writings", d: "M156 846 C 168 790, 210 760, 238 712", via: [] },
+  {
+    to: "/photos",
+    d: "M380 640 C 430 580, 500 560, 560 520 C 600 494, 610 470, 620 456",
+    via: ["/writings"],
+  },
+  {
+    to: "/files",
+    d: "M812 452 C 850 500, 830 560, 880 590 C 906 606, 920 620, 930 636",
+    via: ["/writings", "/photos"],
+  },
+  {
+    to: "/files/verify",
+    d: "M156 846 C 230 812, 300 806, 380 800 C 520 792, 700 806, 806 784",
+    via: [],
+  },
+  { to: "/about", d: "M560 520 C 500 420, 420 320, 330 270", via: ["/writings", "/photos"] },
+  { to: "/vault", d: "M820 330 C 860 280, 880 240, 892 208", via: ["/writings", "/photos"] },
+  { to: "/contact", d: "M238 712 C 180 660, 120 640, 96 612", via: ["/writings"] },
+  { to: "/projects", d: "M560 520 C 500 500, 440 470, 400 440", via: ["/writings", "/photos"] },
 ];
 
 // trees in their seasons
@@ -158,8 +170,7 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
       <p class="lede">
         Everything here, drawn as the place it pretends to be. Touch anything on the map to walk
         there. Plants grow as tall as the essay is long; the places you have not been yet stay grey,
-        and the way you walked is one brush line, in the order you walked it. The sheet keeps your
-        hour and your season.
+        and the paths you have walked are inked in brush. The sheet keeps your hour and your season.
       </p>
     </div>
     <p class="aside hand">
@@ -230,8 +241,12 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
           the gate
         </text>
 
+        <!-- the paths walked -->
         {PATHS.map((path) => (
-          <path class="walk" data-path={path.to} d={path.d} />
+          <path class="brush" data-path={path.to} data-via={path.via.join(" ")} d={path.d} />
+        ))}
+        {PATHS.map((path) => (
+          <path class="walk" d={path.d} />
         ))}
 
         <circle class="here" cx="156" cy="840" r="7"></circle>
@@ -698,11 +713,6 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
 
         <path class="glint" d=""></path>
 
-        <!-- the way the reader walked, in the order they walked it -->
-        <path class="brush" d=""></path>
-        <path class="brush-dry" d=""></path>
-        <path class="brush brush-last" d="" pathLength="1"></path>
-
         {SEALS_HERE.map(({ glyph, at: [x, y], r }) => (
           <g class="seal-here" data-glyph={glyph} transform={`translate(${x} ${y}) rotate(${r})`}>
             <path
@@ -735,7 +745,7 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
       <svg width="44" height="8" viewBox="0 0 44 8" aria-hidden="true">
         <path class="legend-walked" d="M2 4 C 14 2, 28 6, 42 4"></path>
       </svg>
-      the way you walked, in order
+      the paths you have walked
     </span>
     <span>
       <svg width="20" height="14" viewBox="0 0 20 14" aria-hidden="true">
@@ -813,65 +823,17 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
     el.classList.toggle("is-earned", Boolean(state.seals[el.dataset.glyph!]));
   });
 
-  // the way the reader walked
-  type Pt = [number, number];
-  const ANCHORS: [string, Pt][] = [
-    ["/writings", [362, 640]],
-    ["/projects", [376, 400]],
-    ["/photos/stamps", [520, 418]],
-    ["/photos", [700, 392]],
-    ["/about", [300, 214]],
-    ["/contact", [92, 584]],
-    ["/files/verify", [830, 772]],
-    ["/files", [912, 742]],
-    ["/vault", [900, 206]],
-  ];
-  const order: Pt[] = [];
-  const seen = new Set<string>();
-  for (const path of state.paths) {
-    const hit = ANCHORS.find(([to]) => path === to || path.startsWith(`${to}/`));
-    if (hit && !seen.has(hit[0])) {
-      seen.add(hit[0]);
-      order.push(hit[1]);
-    }
-  }
-
-  function smooth(pts: Pt[]) {
-    const f = (n: number) => Math.round(n * 10) / 10;
-    let d = `M${f(pts[0][0])} ${f(pts[0][1])}`;
-    for (let i = 0; i < pts.length - 1; i++) {
-      const [p0, p1, p2, p3] = [pts[i - 1] ?? pts[i], pts[i], pts[i + 1], pts[i + 2] ?? pts[i + 1]];
-      d +=
-        ` C ${f(p1[0] + (p2[0] - p0[0]) / 6)} ${f(p1[1] + (p2[1] - p0[1]) / 6)},` +
-        ` ${f(p2[0] - (p3[0] - p1[0]) / 6)} ${f(p2[1] - (p3[1] - p1[1]) / 6)},` +
-        ` ${f(p2[0])} ${f(p2[1])}`;
-    }
-    return d;
-  }
-
-  if (order.length) {
-    let seed = 5;
-    const wobble = () => {
-      seed = (seed * 16807) % 2147483647;
-      return (seed / 2147483647) * 52 - 26;
-    };
-    const stops: Pt[] = [[156, 840], ...order];
-    const pts: Pt[] = [stops[0]];
-    for (let i = 1; i < stops.length; i++) {
-      const [a, b] = [stops[i - 1], stops[i]];
-      pts.push([(a[0] + b[0]) / 2 + wobble(), (a[1] + b[1]) / 2 + wobble()], b);
-    }
-    const head = pts.slice(0, -2);
-    const tail = pts.slice(-3);
-    if (head.length > 1) {
-      svg.querySelector(".brush")!.setAttribute("d", smooth(head));
-      const dry = head.map(([x, y], i): Pt => [x + 3 + (i % 2), y + 2]).slice(0, -1);
-      if (dry.length > 1) svg.querySelector(".brush-dry")!.setAttribute("d", smooth(dry));
-    }
-    const last = svg.querySelector<SVGPathElement>(".brush-last")!;
-    last.setAttribute("d", smooth(tail));
-    requestAnimationFrame(() => requestAnimationFrame(() => last.classList.add("drawn")));
-  }
+  // paths walked are inked, and so is the way to them from the gate
+  svg.querySelectorAll<SVGPathElement>(".brush").forEach((brush) => {
+    if (!walked(brush.dataset.path!)) return;
+    brush.classList.add("is-walked");
+    brush.dataset
+      .via!.split(" ")
+      .filter(Boolean)
+      .forEach((to) => {
+        svg.querySelector(`.brush[data-path="${to}"]`)!.classList.add("is-walked");
+      });
+  });
 
   // an essay read to the end flowers
   svg.querySelectorAll<SVGElement>(".plant").forEach((plant) => {
@@ -1208,33 +1170,19 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
     color: var(--fg-dim);
   }
 
-  .brush,
-  .brush-dry {
+  .brush {
+    display: none;
     fill: none;
     stroke: var(--fg-main);
+    stroke-width: 3;
     stroke-linecap: round;
     stroke-linejoin: round;
+    opacity: 0.45;
     pointer-events: none;
   }
 
-  .brush {
-    stroke-width: 2.6;
-    opacity: 0.72;
-  }
-
-  .brush-dry {
-    stroke-width: 0.9;
-    opacity: 0.5;
-  }
-
-  .brush-last {
-    stroke-dasharray: 1 1;
-    stroke-dashoffset: 1;
-    transition: stroke-dashoffset 1.6s ease-out;
-  }
-
-  .brush-last.drawn {
-    stroke-dashoffset: 0;
+  .brush.is-walked {
+    display: inline;
   }
 
   .seal-here {
