@@ -185,7 +185,7 @@ const sand = makeSand();
     const teeth = svg.querySelector<SVGGElement>(".sand-rake")!;
     const still = matchMedia("(prefers-reduced-motion: reduce)");
     const narrow = matchMedia("(max-width: 47.99em)");
-    const KEY = "sand-ring";
+    const KEY = "sand-ring-pts";
 
     // on a phone the strip shows the stones closer, so there is sand to rake
     const frame = () =>
@@ -210,9 +210,24 @@ const sand = makeSand();
       kept.append(ring);
     }
 
+    const nearSmall = ([px, py]: Point) => {
+      const { x, y, rx, ry } = SMALL_STONE;
+      const r = Math.hypot((px - x) / rx, (py - y) / ry);
+      return r >= 1 && r <= 5;
+    };
+
     try {
-      const saved = sessionStorage.getItem(KEY);
-      if (saved) keepRing(saved);
+      sessionStorage.removeItem("sand-ring");
+      const saved: unknown = JSON.parse(sessionStorage.getItem(KEY) ?? "null");
+      const isPoint = (q: unknown): q is Point =>
+        Array.isArray(q) && q.length === 2 && q.every(Number.isFinite);
+      if (
+        Array.isArray(saved) &&
+        saved.length > 2 &&
+        saved.every((q) => isPoint(q) && nearSmall(q))
+      )
+        keepRing(ringPath(saved));
+      else sessionStorage.removeItem(KEY);
     } catch {
       // the ring is only for this visit anyway
     }
@@ -329,8 +344,7 @@ const sand = makeSand();
         const [px, py] = stroke[i];
         const nx = (px - x) / rx;
         const ny = (py - y) / ry;
-        const r = Math.hypot(nx, ny);
-        if (r < 1 || r > 5) {
+        if (!nearSmall([px, py])) {
           prev = null;
           sweep = 0;
           continue;
@@ -368,7 +382,10 @@ const sand = makeSand();
         const d = ringPath(loop);
         keepRing(d);
         try {
-          sessionStorage.setItem(KEY, d);
+          sessionStorage.setItem(
+            KEY,
+            JSON.stringify(loop.map(([x, y]) => [+x.toFixed(1), +y.toFixed(1)])),
+          );
         } catch {
           // kept on the page, at least
         }
