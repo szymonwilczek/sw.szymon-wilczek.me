@@ -16,9 +16,9 @@
   --bg-button-hover: var(--bg-active);
   --fg-button-hover: var(--cursor);
 
-  --font-body: "Literata", Georgia, serif;
+  --font-body: "Literata", serif;
   --font-mono: "Typus Mono 95", "Typus Mono", monospace;
-  --font-hand: "Kalam", "Segoe Print", cursive;
+  --font-hand: "Kalam", serif;
   --font-seal: "Yuji Syuku", serif;
 
   --radius-paper: 2px 3px 2px 4px;
