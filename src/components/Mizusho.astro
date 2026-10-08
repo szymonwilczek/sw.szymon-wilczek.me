@@ -147,11 +147,15 @@ const slabs = (["wide", "tall"] as const).map((name) => ({ name, s: makeSlab(nam
 
   .stone-seal {
     opacity: 0;
-    transition: opacity 1.2s ease;
+    visibility: hidden;
+    transition:
+      opacity 1.2s ease,
+      visibility 1.2s;
   }
 
   .mizusho.found .stone-seal {
     opacity: 1;
+    visibility: visible;
   }
 
   .stone-seal path {

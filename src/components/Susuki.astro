@@ -111,11 +111,15 @@ const fields = (["wide", "tall"] as const).map((name) => {
 
   .grass-seal {
     opacity: 0;
-    transition: opacity 1.2s ease;
+    visibility: hidden;
+    transition:
+      opacity 1.2s ease,
+      visibility 1.2s;
   }
 
   .susuki.found .grass-seal {
     opacity: 1;
+    visibility: visible;
   }
 
   .grass-seal path {

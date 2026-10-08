@@ -19,21 +19,33 @@ const GLOSSARY: Record<string, [string, string, number, string?]> = {
   文: ["fumi", "a letter", 4],
   石: ["ishi", "stone", 5],
   違: ["chigau", "to differ, to be wrong", 13],
+  波: ["nami", "a wave", 8],
+  兎: ["usagi", "hare, rabbit", 7],
+  寂: ["sabi", "quiet, the beauty of age", 11],
 };
 
 let slip: HTMLElement | null = null;
 let owner: Element | null = null;
+
+/** A seal-sized drawing holding exactly one kanji from the glossary */
+function sealOf(el: Element): string | null {
+  const texts = el.querySelectorAll("text");
+  const r = el.getBoundingClientRect();
+  if (texts.length !== 1 || r.width > 120 || r.height > 120) return null;
+  const ch = texts[0].textContent?.trim() ?? "";
+  return GLOSSARY[ch] ? ch : null;
+}
 
 /** The element that carries a kanji: a seal's <svg>, or a lone glyph in text */
 function kanjiOf(el: Element | null): [Element, string] | null {
   if (!el || el.closest(".kanji-slip, .minibuffer")) return null;
   const svg = el.closest("svg");
   if (svg) {
-    for (const text of svg.querySelectorAll("text")) {
-      const ch = text.textContent?.trim() ?? "";
-      if (GLOSSARY[ch]) return [svg, ch];
-    }
-    return null;
+    const ch = sealOf(svg);
+    if (ch) return [svg, ch];
+    const group = el.closest("g");
+    const inner = group && svg.contains(group) ? sealOf(group) : null;
+    return inner ? [group!, inner] : null;
   }
   const ch = el.textContent?.trim() ?? "";
   if (el.children.length === 0 && GLOSSARY[ch]) return [el, ch];

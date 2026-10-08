@@ -195,11 +195,15 @@ const layouts = (["wide", "tall"] as const).map((name) => ({
 
   .water-seal {
     opacity: 0;
-    transition: opacity 1.2s ease;
+    visibility: hidden;
+    transition:
+      opacity 1.2s ease,
+      visibility 1.2s;
   }
 
   .water-seal.on {
     opacity: 1;
+    visibility: visible;
   }
 
   .water-seal path {
