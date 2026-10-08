@@ -30,7 +30,15 @@ ink(strokes());
 document.querySelectorAll<SVGSVGElement>(".site-brand .seal").forEach((seal) =>
   seal.addEventListener("click", (event) => {
     const n = strokes();
-    if (n >= STROKES) return;
+    if (n >= STROKES) {
+      // the link take the reader to the map, and wash the seal
+      try {
+        sessionStorage.removeItem(KEY);
+      } catch {
+        // it stays for this visit
+      }
+      return;
+    }
     try {
       sessionStorage.setItem(KEY, String(n + 1));
     } catch {
