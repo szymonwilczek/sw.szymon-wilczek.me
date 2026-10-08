@@ -177,8 +177,8 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
     <span class="tape too-small-tape" aria-hidden="true"></span>
     <p class="too-small-head hand">this map is drawn on a sheet too wide to unfold here.</p>
     <p>
-      This is the corner that shows. Open it on a large screen for the whole garden, paths and all;
-      until then the rest is below, as a plain list.
+      Some walks wait for a bigger table. Open it on a large screen and the garden will still be
+      here, paths and all. Until then it is below, as a plain list.
     </p>
   </div>
 
@@ -898,13 +898,6 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
     lamp();
   }
 
-  // on a phone only the corner with the sky and the lantern shows
-  const narrow = matchMedia("(max-width: 47.99em)");
-  const fold = () =>
-    svg.setAttribute("viewBox", narrow.matches ? "180 -150 640 640" : "0 -150 1100 1030");
-  fold();
-  narrow.addEventListener("change", fold);
-
   // lantern is lit at dusk, at night, and in a dark theme
   let dark = false;
   function lamp() {
@@ -1527,17 +1520,9 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
       display: block;
     }
 
-    .map-scroll {
-      margin: 0 -0.5rem;
-      overflow: hidden;
-    }
-
-    .map {
-      aspect-ratio: 1;
-    }
-
-    .plain-link {
-      margin-left: 0;
+    .map-scroll,
+    .legend {
+      display: none;
     }
   }
 </style>
