@@ -17,7 +17,7 @@ export interface Sand {
   edge: string;
   grains: Array<{ x: number; y: number; r: number }>;
   lines: Array<{ pts: Point[]; w: number; o: number }>;
-  rings: Array<{ d: string; w: number; o: number }>;
+  rings: Array<{ pts: Point[]; w: number; o: number }>;
   stones: SandStone[];
 }
 
@@ -43,6 +43,9 @@ const STONES = [
   { x: 604, y: 66, rx: 19, ry: 13, rings: [10, 17, 27] },
   { x: 790, y: 112, rx: 27, ry: 20, rings: [12, 22, 30, 39] },
 ];
+
+/** Every stone, for keeping raked points out of them */
+export const STONE_SHAPES = STONES.map(({ x, y, rx, ry }) => ({ x, y, rx, ry }));
 
 /** The smallest stone: a full ring drawn round it is the one mark the garden keeps */
 export const SMALL_STONE = STONES[1];
@@ -79,7 +82,7 @@ export function makeSand(): Sand {
       const start = -6 + jit(6);
       const end = 1006 + jit(6);
       let seg: Point[] = [];
-      for (let x = start; x <= end; x += 22 + jit(5)) {
+      for (let x = start; x <= end; x += 11 + jit(2.5)) {
         const yy = y + tilt * (x / 1000) + Math.sin(x / 170 + y * 0.3) * 1.1 + jit(0.45);
         const hit = STONES.some((s) => {
           const R = s.rx + s.rings[s.rings.length - 1] + 6 + jit(3);
@@ -101,7 +104,7 @@ export function makeSand(): Sand {
   const rings: Sand["rings"] = [];
   for (const s of STONES) {
     for (const g of s.rings) {
-      const n = 14;
+      const n = 40;
       const ox = jit(1.6);
       const oy = jit(1.2);
       const pts: Point[] = [];
@@ -109,13 +112,13 @@ export function makeSand(): Sand {
       const sweep = Math.PI * 2 * (0.94 + rnd() * 0.1);
       for (let i = 0; i <= n; i++) {
         const a = a0 + (i / n) * sweep;
-        const r = 1 + jit(0.03);
+        const r = 1 + jit(0.015);
         pts.push([
-          s.x + ox + Math.cos(a) * (s.rx + g) * r,
-          s.y + oy + Math.sin(a) * (s.ry + g * 0.78) * r,
+          f(s.x + ox + Math.cos(a) * (s.rx + g) * r),
+          f(s.y + oy + Math.sin(a) * (s.ry + g * 0.78) * r),
         ]);
       }
-      rings.push({ d: smooth(pts, false), w: f(0.9 + rnd() * 0.5), o: f(0.5 + rnd() * 0.25) });
+      rings.push({ pts, w: f(0.9 + rnd() * 0.5), o: f(0.5 + rnd() * 0.25) });
     }
   }
 

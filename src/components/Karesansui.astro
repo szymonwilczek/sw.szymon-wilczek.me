@@ -14,7 +14,7 @@ const sand = makeSand();
     viewBox="0 0 1000 190"
     role="img"
     aria-label="Raked sand garden with three stones"
-    data-lines={JSON.stringify(sand.lines.map((l) => l.pts))}
+    data-lines={JSON.stringify([...sand.lines, ...sand.rings].map((l) => l.pts))}
   >
     <path class="sand-bed" d={sand.edge}></path>
     <g class="sand-grains">
@@ -27,7 +27,7 @@ const sand = makeSand();
         <path d={smooth(l.pts, false)} stroke-width={l.w} opacity={l.o} />
       ))}
       {sand.rings.map((r) => (
-        <path d={r.d} stroke-width={r.w} opacity={r.o} />
+        <path d={smooth(r.pts, false)} stroke-width={r.w} opacity={r.o} />
       ))}
     </g>
     <g class="sand-kept"></g>
@@ -39,6 +39,11 @@ const sand = makeSand();
         {s.moss && <path class="stone-moss" d={s.moss} />}
       </g>
     ))}
+    <g class="sand-rake" aria-hidden="true">
+      {[0, 1, 2, 3, 4].map(() => (
+        <circle r="1.8" />
+      ))}
+    </g>
     <g class="sand-leaf" transform="translate(806 97) rotate(-28) scale(0.14)">
       <path class="sand-leaf-stem" d={MOMIJI.stem}></path>
       <path class="sand-leaf-blade" d={MOMIJI.outline}></path>
@@ -113,6 +118,16 @@ const sand = makeSand();
     opacity: 0.9;
   }
 
+  .sand-rake {
+    fill: var(--fg-main);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+
+  .sand-rake.on {
+    opacity: 0.55;
+  }
+
   .sand-leaf-blade {
     fill: var(--red);
     opacity: 0.9;
@@ -147,7 +162,7 @@ const sand = makeSand();
 
 <script>
   import { earn } from "../utils/garden";
-  import { smooth, SMALL_STONE } from "../utils/sand";
+  import { smooth, SMALL_STONE, STONE_SHAPES } from "../utils/sand";
 
   type Point = [number, number];
 
@@ -159,9 +174,10 @@ const sand = makeSand();
       0,
       base.length,
     );
-    const now = base.map((line) => line.map(() => 0));
-    const want = base.map((line) => line.map(() => 0));
+    const now = base.map((line) => line.map((): Point => [0, 0]));
+    const want = base.map((line) => line.map((): Point => [0, 0]));
     const kept = svg.querySelector<SVGGElement>(".sand-kept")!;
+    const teeth = svg.querySelector<SVGGElement>(".sand-rake")!;
     const still = matchMedia("(prefers-reduced-motion: reduce)");
     const narrow = matchMedia("(max-width: 47.99em)");
     const KEY = "sand-ring";
@@ -196,18 +212,52 @@ const sand = makeSand();
       // the ring is only for this visit anyway
     }
 
-    // rake: points near it part away from its path, a little behind it
-    const REACH = 26;
-    function rake([px, py]: Point) {
+    // nothing is pushed into a stone
+    function aroundStones(x: number, y: number, o: Point) {
+      for (const s of STONE_SHAPES) {
+        const ex = (x + o[0] - s.x) / (s.rx + 4);
+        const ey = (y + o[1] - s.y) / (s.ry + 4);
+        const e = Math.hypot(ex, ey);
+        if (e < 1 && e > 0.001) {
+          o[0] = s.x + (x + o[0] - s.x) / e - x;
+          o[1] = s.y + (y + o[1] - s.y) / e - y;
+        }
+      }
+    }
+
+    // rake drags every line and ring near it the way it moves
+    const REACH = 30;
+    let last: Point | null = null;
+    function rake(p: Point) {
+      const [px, py] = p;
+      const [vx, vy] = last ? [px - last[0], py - last[1]] : [0, 0];
+      last = p;
+      const len = Math.hypot(vx, vy);
+      if (len > 0.5) {
+        const ux = vx / len;
+        const uy = vy / len;
+        teeth.querySelectorAll("circle").forEach((c, k) => {
+          c.setAttribute("cx", (px - uy * (k - 2) * 6).toFixed(1));
+          c.setAttribute("cy", (py + ux * (k - 2) * 6).toFixed(1));
+        });
+        teeth.classList.add("on");
+      }
       base.forEach((line, l) => {
         line.forEach(([x, y], i) => {
-          const dx = x - px;
+          const o = want[l][i];
+          const dx = x + o[0] - px;
           if (Math.abs(dx) > REACH) return;
-          const dy = y + want[l][i] - py;
-          const dist = Math.hypot(dx, dy);
+          const dist = Math.hypot(dx, y + o[1] - py);
           if (dist > REACH) return;
-          const push = (1 - dist / REACH) * 9 * (dy >= 0 ? 1 : -1);
-          want[l][i] = Math.max(-14, Math.min(14, want[l][i] + push * 0.35));
+          const fall = (1 - dist / REACH) ** 2;
+          o[0] += vx * fall * 0.6;
+          o[1] += vy * fall * 0.6;
+          const m = Math.hypot(o[0], o[1]);
+          if (m > 16) {
+            o[0] *= 16 / m;
+            o[1] *= 16 / m;
+          }
+          aroundStones(x, y, o);
         });
       });
       wake();
@@ -223,25 +273,36 @@ const sand = makeSand();
       if (t - lastMove > 3000) {
         if (!settleFrom) settleFrom = t;
         const k = still.matches ? 1 : Math.min(1, ((t - settleFrom) / 2600) ** 3);
-        for (const line of want) line.forEach((v, i) => (line[i] = v * (1 - k)));
+        for (const line of want) {
+          for (const o of line) {
+            o[0] *= 1 - k;
+            o[1] *= 1 - k;
+          }
+        }
       }
       let moving = false;
       base.forEach((line, l) => {
         let changed = false;
         const pts = line.map(([x, y], i) => {
-          const d = want[l][i] - now[l][i];
-          if (Math.abs(d) > 0.05) {
-            now[l][i] += still.matches ? d : d * 0.3;
-            changed = true;
-          } else now[l][i] = want[l][i];
-          return [x, y + now[l][i]] as Point;
+          const n = now[l][i];
+          const w = want[l][i];
+          for (const a of [0, 1]) {
+            const d = w[a] - n[a];
+            if (Math.abs(d) > 0.05) {
+              n[a] += still.matches ? d : d * 0.3;
+              changed = true;
+            } else n[a] = w[a];
+          }
+          return [x + n[0], y + n[1]] as Point;
         });
         if (changed) {
           moving = true;
           paths[l].setAttribute("d", smooth(pts, false));
         }
       });
-      const resting = want.every((line) => line.every((v) => Math.abs(v) < 0.05));
+      const resting = want.every((line) =>
+        line.every((o) => Math.abs(o[0]) < 0.05 && Math.abs(o[1]) < 0.05),
+      );
       if (moving || !resting) frameId = requestAnimationFrame(draw);
       else frameId = 0;
     }
@@ -276,6 +337,7 @@ const sand = makeSand();
     let down = false;
     svg.addEventListener("pointerdown", (e) => {
       down = true;
+      last = null;
       stroke = [toSand(e)];
       svg.setPointerCapture(e.pointerId);
       rake(stroke[0]);
@@ -289,6 +351,8 @@ const sand = makeSand();
     const lift = () => {
       if (!down) return;
       down = false;
+      last = null;
+      teeth.classList.remove("on");
       if (ringed() && !kept.childElementCount) {
         const d = ringPath(stroke);
         keepRing(d);
