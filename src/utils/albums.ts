@@ -10,6 +10,7 @@ export interface PhotoItem {
   filename: string;
   src: string;
   thumbSrc: string;
+  sheetSrc: string;
   sizeBytes: number;
   sizeFormatted: string;
   sha256: string;
@@ -330,12 +331,16 @@ export async function getAllAlbums(): Promise<PhotoAlbum[]> {
       const thumbSrc = fs.existsSync(thumbFsPath)
         ? `/images/${folderName}/thumbs/${photoId}.webp`
         : `/images/${folderName}/${file}`;
+      const sheetSrc = fs.existsSync(path.join(albumPath, "thumbs", `${photoId}-600.webp`))
+        ? `/images/${folderName}/thumbs/${photoId}-600.webp`
+        : thumbSrc;
 
       photos.push({
         id: photoId,
         filename: file,
         src: `/images/${folderName}/${file}`,
         thumbSrc,
+        sheetSrc,
         sizeBytes,
         sizeFormatted: formatBytes(sizeBytes),
         sha256,

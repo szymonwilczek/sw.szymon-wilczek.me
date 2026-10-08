@@ -219,7 +219,7 @@ const RADII = ["3px 7px 4px 8px", "6px 3px 7px 4px", "4px 6px 3px 7px", "7px 4px
                 data-exif={[light(photo).join(" · "), photo.iso].filter(Boolean).join(" · ")}
                 aria-label={`Frame ${pad(i + 1)}, ${photo.filename}`}
               >
-                <img src={photo.thumbSrc || photo.src} alt="" loading="lazy" decoding="async" />
+                <img src={photo.sheetSrc} alt="" loading="lazy" decoding="async" />
               </a>
               <span class="edge" aria-hidden="true">
                 ▸ {pad(i + 1)}
