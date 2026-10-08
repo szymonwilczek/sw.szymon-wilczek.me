@@ -21,36 +21,50 @@ const TICKS = [
       <h1>About me</h1>
       <p class="lede">Software engineer, dualist editor enthusiast, and open-source contributor.</p>
     </div>
-    <p class="aside hand">
-      projects moved to<br />
-      <a href="https://szymon-wilczek.me" rel="noopener">szymon-wilczek.me</a>
-    </p>
+    <a class="say hand" href="/contact">
+      <Seal glyph="文" size={40} tilt={-6} />
+      <span>
+        <span class="say-title">
+          contact &amp; key →
+          <svg viewBox="0 0 100 8" preserveAspectRatio="none" aria-hidden="true">
+            <path
+              d="M1 5 C 20 3, 45 6.5, 70 4 S 92 4.5, 99 3.4"
+              vector-effect="non-scaling-stroke"
+            ></path>
+          </svg>
+        </span>
+        <span class="say-sub">mail, gpg, a postcard</span>
+      </span>
+    </a>
   </header>
 
   <Divider from={90} to={300} />
 
   <div class="sections">
     <section>
-      <p class="num" aria-hidden="true">01</p>
+      <p class="num" aria-hidden="true">
+        01
+      </p>
       <div class="body">
         <h2>Background &amp; origins</h2>
         <p>
           I am a software engineer with academic and practical roots at the
-          <strong>Silesian University of Technology</strong> (Faculty of Automatic Control, Electronics
-          and Computer Science — AEI). My engineering interests lie at the intersection of low-level operating
-          systems, kernel internals, and sovereign computing tools.
+          <strong>Silesian University of Technology</strong> (Faculty of Automatic Control,
+          Electronics and Computer Science — AEI). My engineering interests lie at the intersection
+          of low-level operating systems, kernel internals, and sovereign computing tools.
         </p>
         <p>
-          My main portfolio and showcase can be found at
-          <a href="https://szymon-wilczek.me" rel="noopener">szymon-wilczek.me</a>, while this
-          website serves as my independent hypermedia space for tools, personal archives, and
+          Everything I build is pressed and labelled in <a href="/projects">projects</a>; the rest
+          of this website is my independent hypermedia space for tools, personal archives, and
           technical explorations.
         </p>
       </div>
     </section>
 
     <section>
-      <p class="num" aria-hidden="true">02</p>
+      <p class="num" aria-hidden="true">
+        02
+      </p>
       <div class="body">
         <h2>The dualist philosophy</h2>
         <p>
@@ -72,8 +86,11 @@ const TICKS = [
               most daily programming, build custom Lua plugins, and contribute to
               <a
                 href="https://github.com/neovim/neovim/issues?q=involves:szymonwilczek"
-                rel="noopener">Neovim upstream</a
-              >.
+                rel="noopener"
+              >
+                Neovim upstream
+              </a>
+              .
             </p>
           </div>
         </div>
@@ -86,7 +103,9 @@ const TICKS = [
     </section>
 
     <section>
-      <p class="num" aria-hidden="true">03</p>
+      <p class="num" aria-hidden="true">
+        03
+      </p>
       <div class="body">
         <h2>Upstream contributions &amp; free software</h2>
         <p>
@@ -95,40 +114,48 @@ const TICKS = [
         </p>
         <ul class="ticks">
           <li>
-            <svg width="16" height="12" viewBox="0 0 16 12" aria-hidden="true"
-              ><path d={TICKS[0]}></path></svg
-            >
-            <span
-              ><a href="https://lore.kernel.org/all/?q=swilczek.lx@gmail.com" rel="noopener"
-                >Linux Kernel</a
-              ></span
-            >
-          </li>
-          <li>
-            <svg width="16" height="12" viewBox="0 0 16 12" aria-hidden="true"
-              ><path d={TICKS[1]}></path></svg
-            >
-            <span
-              ><a
-                href="https://github.com/neovim/neovim/issues?q=involves:szymonwilczek"
-                rel="noopener">Neovim</a
-              ></span
-            >
-          </li>
-          <li>
-            <svg width="16" height="12" viewBox="0 0 16 12" aria-hidden="true"
-              ><path d={TICKS[2]}></path></svg
-            >
+            <svg width="16" height="12" viewBox="0 0 16 12" aria-hidden="true">
+              <path d={TICKS[0]}></path>
+            </svg>
             <span>
-              <strong>Independent open source</strong> — author of many tools and editor packages, including
-              <a href="https://github.com/szymonwilczek/typus-fonts" rel="noopener">fonts</a>,
-              <a href="https://github.com/szymonwilczek?tab=repositories&q=nvim" rel="noopener"
-                >Neovim plugins</a
-              >,
-              <a href="https://github.com/szymonwilczek?tab=repositories&q=emacs" rel="noopener"
-                >Emacs utilities</a
-              >, and
-              <a href="https://szymon-wilczek.me/projects" rel="noopener">more</a>.
+              <a href="https://lore.kernel.org/all/?q=swilczek.lx@gmail.com" rel="noopener">
+                Linux Kernel
+              </a>
+            </span>
+          </li>
+          <li>
+            <svg width="16" height="12" viewBox="0 0 16 12" aria-hidden="true">
+              <path d={TICKS[1]}></path>
+            </svg>
+            <span>
+              <a
+                href="https://github.com/neovim/neovim/issues?q=involves:szymonwilczek"
+                rel="noopener"
+              >
+                Neovim
+              </a>
+            </span>
+          </li>
+          <li>
+            <svg width="16" height="12" viewBox="0 0 16 12" aria-hidden="true">
+              <path d={TICKS[2]}></path>
+            </svg>
+            <span>
+              <strong>Independent open source</strong> — author of many tools and editor packages,
+              including
+              <a href="https://github.com/szymonwilczek/typus-fonts" rel="noopener">
+                fonts
+              </a>
+              ,
+              <a href="https://github.com/szymonwilczek?tab=repositories&q=nvim" rel="noopener">
+                Neovim plugins
+              </a>
+              ,
+              <a href="https://github.com/szymonwilczek?tab=repositories&q=emacs" rel="noopener">
+                Emacs utilities
+              </a>
+              , and
+              <a href="/projects">more</a>.
             </span>
           </li>
         </ul>
@@ -136,13 +163,18 @@ const TICKS = [
     </section>
 
     <section>
-      <p class="num" aria-hidden="true">04</p>
+      <p class="num" aria-hidden="true">
+        04
+      </p>
       <div class="body">
         <h2>Bespoke projects &amp; repositories</h2>
         <p>
           All of my independent experiments and configurations are hosted on my
-          <a href="https://github.com/szymonwilczek" rel="noopener">GitHub profile</a>. I’m still
-          very dependent on GitHub infrastructure — maybe one day I’ll transition to something else.
+          <a href="https://github.com/szymonwilczek" rel="noopener">
+            GitHub profile
+          </a>
+          . I’m still very dependent on GitHub infrastructure — maybe one day I’ll transition to
+          something else.
         </p>
       </div>
     </section>
@@ -181,12 +213,63 @@ const TICKS = [
     color: var(--fg-dim);
   }
 
-  .aside {
-    flex: 1 1 12.5rem;
+  .say {
+    flex: 1 1 14rem;
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
     margin: 0 0 0.5rem;
-    font-size: 1.1875rem;
-    line-height: 1.35;
+    color: var(--fg-main);
+    text-decoration: none;
     transform: rotate(-2deg);
+  }
+
+  .say > span {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .say-title {
+    position: relative;
+    width: fit-content;
+    font-size: 1.75rem;
+    font-weight: 400;
+    line-height: 1.1;
+  }
+
+  .say-title svg {
+    position: absolute;
+    left: -2px;
+    bottom: -0.3rem;
+    width: calc(100% + 4px);
+    height: 0.5rem;
+    overflow: visible;
+  }
+
+  .say-title path {
+    fill: none;
+    stroke: var(--red);
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    opacity: 0.75;
+    transition: opacity 0.2s ease;
+  }
+
+  .say:hover .say-title path,
+  .say:focus-visible .say-title path {
+    opacity: 1;
+  }
+
+  .say-sub {
+    font-size: 1.0625rem;
+    font-weight: 300;
+    color: var(--fg-dim);
+  }
+
+  .say:focus-visible {
+    outline: 2px solid var(--cursor);
+    outline-offset: 4px;
   }
 
   .clue {
