@@ -8,6 +8,7 @@ import { getAllAlbums } from "../utils/albums";
 import { calculateReadingStats } from "../utils/reading-time";
 import { writingSlug } from "../utils/format";
 import { HANKO_EDGE } from "../utils/hanko";
+import { PROJECTS } from "../utils/projects";
 
 const writings = (await getCollection("writings"))
   .sort((a, b) => a.data.pubDate.valueOf() - b.data.pubDate.valueOf())
@@ -73,6 +74,43 @@ const PATHS = [
   { to: "/about", d: "M560 520 C 500 420, 420 320, 330 270" },
   { to: "/vault", d: "M820 330 C 860 280, 880 240, 892 208" },
   { to: "/contact", d: "M238 712 C 180 660, 120 640, 96 612" },
+  { to: "/projects", d: "M560 520 C 500 500, 440 470, 400 440" },
+];
+
+// trees in their seasons
+let seed = 17;
+const rnd = () => {
+  seed = (seed * 16807) % 2147483647;
+  return seed / 2147483647;
+};
+const jit = (n: number) => (rnd() * 2 - 1) * n;
+const CROWNS = [
+  [152, 96, 26, 22],
+  [992, 432, 24, 20],
+  [710, 196, 24, 20],
+];
+const BLOSSOMS = CROWNS.flatMap(([x, y, rx, ry]) =>
+  Array.from({ length: 9 }, () => [Math.round(x + jit(rx * 0.8)), Math.round(y + jit(ry * 0.7))]),
+);
+const FALLING = CROWNS.flatMap(([x, y, rx, ry]) =>
+  Array.from({ length: 4 }, (_, i) => [
+    Math.round(x + jit(rx * 1.4)),
+    Math.round(y + ry + 10 + i * 12 + jit(4)),
+  ]),
+);
+
+// sun and moon walk this arc over the top edge of the sheet
+const ARC = Array.from({ length: 13 }, (_, i) => {
+  const t = i / 12;
+  return `${Math.round(80 + 940 * t)} ${Math.round(20 - 140 * Math.sin(Math.PI * t))}`;
+});
+
+const SEALS_HERE = [
+  { glyph: "書", at: [504, 578], r: -6 },
+  { glyph: "写", at: [832, 318], r: 4 },
+  { glyph: "文", at: [128, 520], r: -2 },
+  { glyph: "波", at: [340, 146], r: 6 },
+  { glyph: "迷", at: [776, 100], r: -4 },
 ];
 
 const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
@@ -85,6 +123,11 @@ const PLACES = [
   },
   { href: "/photos/", title: "photos · the pond", sub: plural(albums.length, "album", "albums") },
   { href: "/photos/stamps/", title: "the jetty", sub: "stamp album" },
+  {
+    href: "/projects/",
+    title: "projects · the drying line",
+    sub: plural(PROJECTS.length, "project", "projects"),
+  },
   { href: "/files/", title: "files · the shed", sub: plural(files.length, "file", "files") },
   { href: "/files/verify/", title: "the bench", sub: "check a file against its tag" },
   { href: "/vault/", title: "the well, sealed", sub: "vault" },
@@ -114,11 +157,15 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
       <h1>A map of the garden</h1>
       <p class="lede">
         Everything here, drawn as the place it pretends to be. Touch anything on the map to walk
-        there. Plants grow as tall as the essay is long; the paths you have already walked are inked
-        in.
+        there. Plants grow as tall as the essay is long; the places you have not been yet stay grey,
+        and the way you walked is one brush line, in the order you walked it. The sheet keeps your
+        hour and your season.
       </p>
     </div>
-    <p class="aside hand">not to scale. nothing here is.</p>
+    <p class="aside hand">
+      not to scale. nothing here is.
+      <span class="clock"></span>
+    </p>
   </header>
 
   <Divider from={300} to={520} />
@@ -127,14 +174,41 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
     <span class="tape too-small-tape" aria-hidden="true"></span>
     <p class="too-small-head hand">this map is drawn on a sheet too wide to unfold here.</p>
     <p>
-      Some walks wait for a bigger table. Open it on a large screen and the garden will still be
-      here, paths and all. Until then it is below, as a plain list.
+      This is the corner that shows. Open it on a large screen for the whole garden, paths and all;
+      until then the rest is below, as a plain list.
     </p>
   </div>
 
   <div class="map-scroll">
     <div class="map-inner">
-      <svg class="map" viewBox="0 0 1100 880" role="img" aria-label="Hand-drawn map of the site">
+      <svg
+        class="map"
+        viewBox="0 -150 1100 1030"
+        role="img"
+        aria-label="Hand-drawn map of the site"
+      >
+        <!-- the sky over the top edge -->
+        <path
+          class="dusk-sky"
+          d="M-10 6 C 200 -30, 420 -8, 620 -26 C 800 -40, 980 -14, 1110 -24 C 1112 0, 1112 20, 1110 30 C 800 36, 300 34, -10 30 Z"
+        ></path>
+        <path class="arc" d={`M${ARC.join(" L ")}`}></path>
+        <g class="sun">
+          <path d="M0 -22 C 13 -22, 23 -12, 22 1 C 21 14, 10 23, -2 22 C -14 21, -23 11, -22 -1 C -21 -13, -12 -21, 2 -22"></path>
+          <circle r="15"></circle>
+        </g>
+        <g class="moon">
+          <circle r="18"></circle>
+          <path></path>
+        </g>
+
+        <!-- shadows -->
+        <g class="shadows">
+          <path data-at="300 240 18"></path>
+          <path data-at="900 228 60"></path>
+          <path data-at="945 768 70"></path>
+          <path data-at="375 432 160"></path>
+        </g>
 
         <!-- the wall -->
         <path
@@ -170,6 +244,7 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
         <a
           href="/writings/"
           class="place"
+          data-area="/writings"
           data-title={place("/writings/").title}
           data-sub={place("/writings/").sub}
         >
@@ -191,6 +266,7 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
           <a
             href={`/writings/${p.slug}/`}
             class="place plant"
+            data-area="/writings"
             data-slug={p.slug}
             data-title={p.title}
             data-sub={`${p.minutes} min`}
@@ -212,11 +288,12 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
         <a
           href="/photos/"
           class="place"
+          data-area="/photos"
           data-title={place("/photos/").title}
           data-sub={place("/photos/").sub}
         >
           <path
-            class="line fill-sea"
+            class="line fill-sea pond"
             d="M586 320 C 656 286, 776 300, 816 340 C 852 380, 826 450, 756 462 C 686 474, 606 470, 582 420 C 564 384, 556 340, 586 320 Z"
             stroke-width="1.4"
           ></path>
@@ -233,6 +310,7 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
           <a
             href={`/photos/${lily.slug}/`}
             class="place lily"
+            data-area="/photos"
             data-title={`${lily.stampNum} · ${lily.title}`}
             data-sub={`${lily.date.getFullYear()} · ${lily.photoCount} frames`}
           >
@@ -250,6 +328,7 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
         <a
           href="/photos/stamps/"
           class="place"
+          data-area="/photos/stamps"
           data-title={place("/photos/stamps/").title}
           data-sub={place("/photos/stamps/").sub}
         >
@@ -264,10 +343,85 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
           </text>
         </a>
 
+        <!-- projects -->
+        <a
+          href="/projects/"
+          class="place"
+          data-area="/projects"
+          data-title={place("/projects/").title}
+          data-sub={place("/projects/").sub}
+        >
+          <rect class="hit" x="284" y="312" width="182" height="124"></rect>
+          <path class="line" d="M294 352 C 344 346, 404 350, 456 346" stroke-width="1.2"></path>
+          <path
+            class="line"
+            d="M298 350 C 297 380, 299 410, 298 432 M 452 347 C 453 380, 451 410, 452 432"
+            stroke-width="1.8"
+          ></path>
+          <g transform="translate(312 356) rotate(-3)">
+            <path
+              class="line fill-paper sheet"
+              d="M0 0 C 12 -1, 24 1, 36 0 C 37 16, 36 30, 37 46 C 24 47, 12 46, 1 47 C -1 30, 1 16, 0 0 Z"
+              stroke-width="0.9"
+            ></path>
+            <path
+              class="stem"
+              d="M18 40 C 17 30, 20 20, 18 11 M 18 27 c -6 -3, -8 -7, -9 -10 M 18 21 c 6 -3, 8 -7, 9 -10"
+              stroke-width="1"
+            ></path>
+          </g>
+          <g transform="translate(358 354) rotate(2)">
+            <path
+              class="line fill-paper sheet"
+              d="M0 0 C 12 -1, 24 1, 36 0 C 37 16, 36 30, 37 46 C 24 47, 12 46, 1 47 C -1 30, 1 16, 0 0 Z"
+              stroke-width="0.9"
+            ></path>
+            <circle class="line" cx="18" cy="20" r="8" stroke-width="1"></circle>
+            <circle class="fill-ink" cx="18" cy="20" r="2"></circle>
+          </g>
+          <g transform="translate(404 357) rotate(-1)">
+            <path
+              class="line fill-paper sheet"
+              d="M0 0 C 12 -1, 24 1, 36 0 C 37 16, 36 30, 37 46 C 24 47, 12 46, 1 47 C -1 30, 1 16, 0 0 Z"
+              stroke-width="0.9"
+            ></path>
+            <path class="line" d="M7 32 l 6 -10 l 6 6 l 8 -14" stroke-width="1"></path>
+          </g>
+          <path
+            class="flag"
+            d="M314 352 l 6 4 M 362 350 l 6 4 M 406 352 l 6 4"
+            stroke-width="1.4"
+          ></path>
+          <text class="label" x="290" y="334" font-size="18">
+            projects · the drying line
+          </text>
+        </a>
+
+        <!-- the lost corner -->
+        <a
+          href="/somewhere-else/"
+          class="place"
+          data-seal-area="迷"
+          data-title="the lost corner"
+          data-sub="404 · a page that isn't"
+        >
+          <rect class="hit" x="604" y="82" width="170" height="80"></rect>
+          <path
+            class="line"
+            d="M610 120 C 630 100, 670 96, 696 112 C 710 92, 750 96, 756 120"
+            stroke-width="1.2"
+            stroke-dasharray="3 6"
+          ></path>
+          <text class="label dim" x="618" y="150" font-size="16">
+            the lost corner · 404
+          </text>
+        </a>
+
         <!-- files -->
         <a
           href="/files/"
           class="place"
+          data-area="/files"
           data-title={place("/files/").title}
           data-sub={place("/files/").sub}
         >
@@ -295,7 +449,7 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
           <circle class="fill-ink" cx="952" cy="740" r="1.8"></circle>
           <path class="line" d="M976 680 C 975 690, 976 696, 975 702" stroke-width="0.9"></path>
           <path
-            class="line fill-paper"
+            class="line fill-paper window"
             d="M967 702 C 974 700, 980 701, 986 703 C 987 712, 985 720, 986 728 C 980 730, 973 729, 967 728 C 966 720, 968 710, 967 702 Z"
             stroke-width="1"
           ></path>
@@ -306,6 +460,7 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
         <a
           href="/files/verify/"
           class="place"
+          data-area="/files/verify"
           data-title={place("/files/verify/").title}
           data-sub={place("/files/verify/").sub}
         >
@@ -334,6 +489,7 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
         <a
           href="/vault/"
           class="place"
+          data-area="/vault"
           data-title={place("/vault/").title}
           data-sub={place("/vault/").sub}
         >
@@ -371,6 +527,7 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
         <a
           href="/about/"
           class="place"
+          data-area="/about"
           data-title={place("/about/").title}
           data-sub={place("/about/").sub}
         >
@@ -406,6 +563,7 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
         <a
           href="/contact/"
           class="place"
+          data-area="/contact"
           data-title={place("/contact/").title}
           data-sub={place("/contact/").sub}
         >
@@ -490,35 +648,72 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
 
         <!-- trees -->
         <path
-          class="leafy"
+          class="leafy crown"
           d="M128 96 C 120 84, 128 70, 140 72 C 144 60, 162 60, 166 72 C 180 70, 186 86, 176 96 C 184 104, 176 118, 162 114 C 156 124, 138 124, 134 114 C 120 116, 116 102, 128 96 Z"
           stroke-width="1.2"
         ></path>
         <path class="line" d="M152 116 C 151 126, 153 136, 152 146" stroke-width="2"></path>
         <path
-          class="leafy"
+          class="leafy crown"
           d="M972 432 C 966 422, 972 410, 982 412 C 986 402, 1000 402, 1004 412 C 1016 410, 1020 424, 1012 432 C 1018 440, 1010 450, 1000 448 C 994 456, 980 456, 978 448 C 968 450, 964 438, 972 432 Z"
           stroke-width="1.2"
         ></path>
         <path class="line" d="M992 450 C 991 460, 993 468, 992 476" stroke-width="2"></path>
         <path
-          class="leafy"
+          class="leafy crown"
           d="M690 196 C 684 186, 690 174, 700 176 C 704 166, 718 166, 722 176 C 734 174, 738 188, 730 196 C 736 204, 728 214, 718 212 C 712 220, 698 220, 696 212 C 686 214, 682 202, 690 196 Z"
           stroke-width="1.2"
         ></path>
         <path class="line" d="M710 214 C 709 224, 711 232, 710 240" stroke-width="2"></path>
 
         <!-- the season -->
-        {
-          KIGO.map(([x, y, r, s]) => (
-            <g transform={`translate(${x} ${y}) rotate(${r}) scale(${s})`} class="kigo-map">
-              <path class="kigo-autumn" d={GOOSE} />
-              <path class="kigo-spring" d="M0 -6 C 5 -6, 7 0, 0 7 C -7 0, -5 -6, 0 -6 Z" />
-              <circle class="kigo-winter" r="3.4" />
-              <circle class="kigo-summer" r="2.2" />
-            </g>
-          ))
-        }
+        {KIGO.map(([x, y, r, s]) => (
+          <g transform={`translate(${x} ${y}) rotate(${r}) scale(${s})`} class="kigo-map">
+            <path class="kigo-autumn" d={GOOSE} />
+            <path class="kigo-spring" d="M0 -6 C 5 -6, 7 0, 0 7 C -7 0, -5 -6, 0 -6 Z" />
+            <circle class="kigo-winter" r="3.4" />
+            <circle class="kigo-summer" r="2.2" />
+          </g>
+        ))}
+
+        <g class="blossom">
+          {BLOSSOMS.map(([x, y]) => (
+            <circle cx={x} cy={y} r="2.6" />
+          ))}
+        </g>
+        <g class="falling">
+          {FALLING.map(([x, y], i) => (
+            <circle class={i % 3 ? "" : "gold"} cx={x} cy={y} r="3" />
+          ))}
+        </g>
+
+        <!-- winter -->
+        <g class="snow">
+          <path d="M868 670 C 890 650, 918 630, 944 614 C 972 632, 998 652, 1022 672 C 1000 664, 990 668, 976 660 C 960 666, 948 656, 934 662 C 918 656, 900 668, 868 670 Z"></path>
+          <path d="M843 170 C 860 150, 940 150, 957 170 C 940 162, 920 166, 900 160 C 880 166, 860 162, 843 170 Z"></path>
+          <path d="M278 158 C 284 148, 316 148, 322 158 C 314 156, 306 157, 300 154 C 292 157, 286 156, 278 158 Z"></path>
+          <path d="M72 540 C 76 530, 84 527, 90 527 C 98 527, 104 531, 107 539 C 100 535, 96 538, 90 535 C 84 538, 78 535, 72 540 Z"></path>
+          <path d="M212 562 C 290 552, 430 557, 518 563 C 500 570, 470 566, 440 569 C 380 565, 300 568, 212 566 Z"></path>
+        </g>
+
+        <path class="glint" d=""></path>
+
+        <!-- the way the reader walked, in the order they walked it -->
+        <path class="brush" d=""></path>
+        <path class="brush-dry" d=""></path>
+        <path class="brush brush-last" d="" pathLength="1"></path>
+
+        {SEALS_HERE.map(({ glyph, at: [x, y], r }) => (
+          <g class="seal-here" data-glyph={glyph} transform={`translate(${x} ${y}) rotate(${r})`}>
+            <path
+              class="fill-red"
+              d="M-11 -11 Q0 -13 11 -11 Q13 0 11 11 Q0 13 -11 11 Q-13 0 -11 -11 Z"
+            />
+            <text class="seal-glyph" x="0" y="5" text-anchor="middle" font-size="14">
+              {glyph}
+            </text>
+          </g>
+        ))}
 
         <g class="fireflies">
           <circle cx="232" cy="120" r="2"></circle>
@@ -540,13 +735,13 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
       <svg width="44" height="8" viewBox="0 0 44 8" aria-hidden="true">
         <path class="legend-walked" d="M2 4 C 14 2, 28 6, 42 4"></path>
       </svg>
-      paths you have walked
+      the way you walked, in order
     </span>
     <span>
-      <svg width="44" height="8" viewBox="0 0 44 8" aria-hidden="true">
-        <path class="legend-not" d="M2 4 C 14 2, 28 6, 42 4"></path>
+      <svg width="20" height="14" viewBox="0 0 20 14" aria-hidden="true">
+        <rect class="legend-not" x="2" y="2" width="16" height="10" rx="2"></rect>
       </svg>
-      not yet
+      grey: not been yet
     </span>
     <span>
       <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
@@ -554,6 +749,7 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
       </svg>
       an essay you have read flowers
     </span>
+    <span class="sky-note">sun and moon from your own clock · nothing is fetched</span>
     <a href="#plain" class="plain-link">
       the same, as a plain list ↓
     </a>
@@ -564,7 +760,10 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
     <ul>
       {PLACES.map((p) => (
         <li>
-          <a href={p.href}>{p.title}</a> <span>— {p.sub}</span>
+          <a href={p.href} data-area={p.href === "/seals/" ? undefined : p.href.replace(/\/$/, "")}>
+            {p.title}
+          </a>{" "}
+          <span>— {p.sub}</span>
           {p.href === "/writings/" && (
             <ul>
               {writings.map((w) => (
@@ -593,7 +792,7 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
 </BaseLayout>
 
 <script>
-  import { earn, load } from "../utils/garden";
+  import { earn, load, season, type Season } from "../utils/garden";
 
   const svg = document.querySelector<SVGSVGElement>(".map")!;
   const inner = document.querySelector<HTMLElement>(".map-inner")!;
@@ -602,11 +801,77 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
 
   earn("北");
 
-  // paths walked are inked; the rest stay dotted
+  // places not walked yet stay grey; the lost corner only counts once you got lost
   const walked = (to: string) => state.paths.some((p) => p === to || p.startsWith(`${to}/`));
-  svg.querySelectorAll<SVGPathElement>(".walk").forEach((path) => {
-    path.classList.toggle("is-walked", walked(path.dataset.path!));
+  document.querySelectorAll<HTMLElement | SVGElement>("[data-area]").forEach((el) => {
+    el.classList.toggle("unseen", !walked(el.dataset.area!));
   });
+  svg.querySelectorAll<SVGElement>("[data-seal-area]").forEach((el) => {
+    el.classList.toggle("unseen", !state.seals[el.dataset.sealArea!]);
+  });
+  svg.querySelectorAll<SVGElement>(".seal-here").forEach((el) => {
+    el.classList.toggle("is-earned", Boolean(state.seals[el.dataset.glyph!]));
+  });
+
+  // the way the reader walked
+  type Pt = [number, number];
+  const ANCHORS: [string, Pt][] = [
+    ["/writings", [362, 640]],
+    ["/projects", [376, 400]],
+    ["/photos/stamps", [520, 418]],
+    ["/photos", [700, 392]],
+    ["/about", [300, 214]],
+    ["/contact", [92, 584]],
+    ["/files/verify", [830, 772]],
+    ["/files", [912, 742]],
+    ["/vault", [900, 206]],
+  ];
+  const order: Pt[] = [];
+  const seen = new Set<string>();
+  for (const path of state.paths) {
+    const hit = ANCHORS.find(([to]) => path === to || path.startsWith(`${to}/`));
+    if (hit && !seen.has(hit[0])) {
+      seen.add(hit[0]);
+      order.push(hit[1]);
+    }
+  }
+
+  function smooth(pts: Pt[]) {
+    const f = (n: number) => Math.round(n * 10) / 10;
+    let d = `M${f(pts[0][0])} ${f(pts[0][1])}`;
+    for (let i = 0; i < pts.length - 1; i++) {
+      const [p0, p1, p2, p3] = [pts[i - 1] ?? pts[i], pts[i], pts[i + 1], pts[i + 2] ?? pts[i + 1]];
+      d +=
+        ` C ${f(p1[0] + (p2[0] - p0[0]) / 6)} ${f(p1[1] + (p2[1] - p0[1]) / 6)},` +
+        ` ${f(p2[0] - (p3[0] - p1[0]) / 6)} ${f(p2[1] - (p3[1] - p1[1]) / 6)},` +
+        ` ${f(p2[0])} ${f(p2[1])}`;
+    }
+    return d;
+  }
+
+  if (order.length) {
+    let seed = 5;
+    const wobble = () => {
+      seed = (seed * 16807) % 2147483647;
+      return (seed / 2147483647) * 52 - 26;
+    };
+    const stops: Pt[] = [[156, 840], ...order];
+    const pts: Pt[] = [stops[0]];
+    for (let i = 1; i < stops.length; i++) {
+      const [a, b] = [stops[i - 1], stops[i]];
+      pts.push([(a[0] + b[0]) / 2 + wobble(), (a[1] + b[1]) / 2 + wobble()], b);
+    }
+    const head = pts.slice(0, -2);
+    const tail = pts.slice(-3);
+    if (head.length > 1) {
+      svg.querySelector(".brush")!.setAttribute("d", smooth(head));
+      const dry = head.map(([x, y], i): Pt => [x + 3 + (i % 2), y + 2]).slice(0, -1);
+      if (dry.length > 1) svg.querySelector(".brush-dry")!.setAttribute("d", smooth(dry));
+    }
+    const last = svg.querySelector<SVGPathElement>(".brush-last")!;
+    last.setAttribute("d", smooth(tail));
+    requestAnimationFrame(() => requestAnimationFrame(() => last.classList.add("drawn")));
+  }
 
   // an essay read to the end flowers
   svg.querySelectorAll<SVGElement>(".plant").forEach((plant) => {
@@ -628,15 +893,97 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
     // keep the gate
   }
 
+  // sheet keeps the reader's hour
+  const DAYLIGHT: Record<Season, [number, number]> = {
+    spring: [6, 19.25],
+    summer: [4.75, 21],
+    autumn: [7, 18],
+    winter: [7.75, 15.75],
+  };
+  const NEW_MOON = Date.UTC(2000, 0, 6, 18, 14);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const clock = document.querySelector(".clock")!;
+  let night = false;
+
+  function moonPath(p: number, r: number) {
+    const k = Math.cos(2 * Math.PI * p);
+    const rx = Math.abs(k) * r;
+    const [outer, inner] = p < 0.5 ? [1, k > 0 ? 0 : 1] : [0, k > 0 ? 1 : 0];
+    return `M0 ${-r} A ${r} ${r} 0 0 ${outer} 0 ${r} A ${rx} ${r} 0 0 ${inner} 0 ${-r} Z`;
+  }
+
+  function sky() {
+    const now = new Date();
+    const asked = new URLSearchParams(location.search).get("hour");
+    const h = asked !== null ? Number(asked) % 24 : now.getHours() + now.getMinutes() / 60;
+    const s = season(now);
+    const [rise, set] = DAYLIGHT[s];
+    const day = h >= rise && h <= set;
+    const t = day
+      ? (h - rise) / (set - rise)
+      : (h > set ? h - set : h + 24 - set) / (24 - set + rise);
+    const lift = Math.sin(Math.PI * t);
+    const sx = 80 + 940 * t;
+    const sy = 20 - 140 * lift;
+    const dusk = Math.abs(h - rise) < 1 || Math.abs(h - set) < 1;
+    const phase = ((((now.getTime() - NEW_MOON) / 86400000 / 29.530588853) % 1) + 1) % 1;
+    const light = (1 - Math.cos(2 * Math.PI * phase)) / 2;
+
+    svg.querySelector(".sun")!.setAttribute("transform", `translate(${sx} ${sy})`);
+    const moon = svg.querySelector(".moon")!;
+    moon.setAttribute("transform", `translate(${sx} ${sy}) rotate(-20)`);
+    moon.querySelector("path")!.setAttribute("d", moonPath(phase, 14));
+    svg.classList.toggle("is-day", day);
+    svg.classList.toggle("is-dusk", dusk);
+    night = !day;
+
+    const len = day ? 18 + (1 - lift) * 120 : 40 + (1 - lift) * 60;
+    const shade = day ? 0.06 + 0.06 * lift : 0.05 * light;
+    svg.querySelectorAll<SVGPathElement>(".shadows path").forEach((path) => {
+      const [bx, by, w] = path.dataset.at!.split(" ").map(Number);
+      const l = w > 100 ? len * 0.5 : len;
+      const tx = bx + Math.max(-l, Math.min(l, (bx - sx) * 0.45));
+      const ty = by + l;
+      path.setAttribute(
+        "d",
+        `M${bx - w / 2} ${by} Q ${tx - w * 0.4} ${ty} ${tx} ${ty + 2} Q ${tx + w * 0.4} ${ty} ${bx + w / 2} ${by} Z`,
+      );
+      path.style.opacity = String(shade);
+    });
+
+    const kx = Math.max(610, Math.min(790, sx));
+    svg
+      .querySelector(".glint")!
+      .setAttribute("d", `M${kx - 8} 384 q 8 -2 16 0 M ${kx - 2} 398 q 6 -2 12 0`);
+    clock.textContent = `${pad(Math.floor(h))}:${pad(Math.floor((h % 1) * 60))} · ${s}${day ? (dusk ? " · dusk" : "") : " · night"}`;
+    lamp();
+  }
+
+  // on a phone only the corner with the sky and the lantern shows
+  const narrow = matchMedia("(max-width: 47.99em)");
+  const fold = () =>
+    svg.setAttribute("viewBox", narrow.matches ? "180 -150 640 640" : "0 -150 1100 1030");
+  fold();
+  narrow.addEventListener("change", fold);
+
+  // lantern is lit at dusk, at night, and in a dark theme
+  let dark = false;
+  function lamp() {
+    svg.classList.toggle("is-lit", dark || night || svg.classList.contains("is-dusk"));
+  }
+
   function dusk() {
     const bg = getComputedStyle(document.documentElement).getPropertyValue("--bg-main").trim();
     const probe = document.createElement("canvas").getContext("2d")!;
     probe.fillStyle = bg;
     const hex = probe.fillStyle.startsWith("#") ? probe.fillStyle : "#ffffff";
     const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
-    svg.classList.toggle("is-dark", 0.299 * r + 0.587 * g + 0.114 * b < 96);
+    dark = 0.299 * r + 0.587 * g + 0.114 * b < 96;
+    lamp();
   }
   dusk();
+  sky();
+  setInterval(sky, 60_000);
   document.addEventListener("au-theme-change", dusk);
 
   let shown: Element | null = null;
@@ -845,10 +1192,171 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
     stroke-linecap: round;
   }
 
-  .walk.is-walked {
-    stroke-width: 2.2;
-    stroke-dasharray: none;
+  .unseen {
+    filter: grayscale(1);
+    opacity: 0.4;
+    transition:
+      opacity 0.3s,
+      filter 0.3s;
+  }
+
+  .unseen:is(:hover, :focus-visible) {
     opacity: 0.75;
+  }
+
+  .plain a.unseen {
+    color: var(--fg-dim);
+  }
+
+  .brush,
+  .brush-dry {
+    fill: none;
+    stroke: var(--fg-main);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    pointer-events: none;
+  }
+
+  .brush {
+    stroke-width: 2.6;
+    opacity: 0.72;
+  }
+
+  .brush-dry {
+    stroke-width: 0.9;
+    opacity: 0.5;
+  }
+
+  .brush-last {
+    stroke-dasharray: 1 1;
+    stroke-dashoffset: 1;
+    transition: stroke-dashoffset 1.6s ease-out;
+  }
+
+  .brush-last.drawn {
+    stroke-dashoffset: 0;
+  }
+
+  .seal-here {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .seal-here.is-earned {
+    opacity: 1;
+  }
+
+  .dusk-sky {
+    display: none;
+    fill: var(--bg-region);
+    opacity: 0.32;
+  }
+
+  .is-dusk .dusk-sky {
+    display: inline;
+  }
+
+  .arc {
+    fill: none;
+    stroke: var(--border);
+    stroke-width: 1;
+    stroke-dasharray: 2 8;
+    stroke-linecap: round;
+  }
+
+  .sun,
+  .moon {
+    display: none;
+  }
+
+  .is-day .sun,
+  .map:not(.is-day) .moon {
+    display: inline;
+  }
+
+  .sun path {
+    fill: none;
+    stroke: var(--red);
+    stroke-width: 3.2;
+    stroke-linecap: round;
+  }
+
+  .sun circle {
+    fill: var(--red);
+    opacity: 0.82;
+  }
+
+  .moon circle {
+    fill: var(--bg-alt);
+    opacity: 0.5;
+  }
+
+  .moon path {
+    fill: var(--fg-main);
+    opacity: 0.85;
+  }
+
+  .shadows path {
+    fill: var(--fg-main);
+    pointer-events: none;
+  }
+
+  .glint {
+    display: none;
+    fill: none;
+    stroke: var(--fg-main);
+    stroke-width: 1.2;
+    stroke-linecap: round;
+    opacity: 0.5;
+  }
+
+  .map:not(.is-day) .glint {
+    display: inline;
+  }
+
+  .blossom,
+  .falling,
+  .snow {
+    display: none;
+    pointer-events: none;
+  }
+
+  .blossom circle {
+    fill: var(--red);
+    opacity: 0.55;
+  }
+
+  .falling circle {
+    fill: var(--red);
+    opacity: 0.7;
+  }
+
+  .falling .gold {
+    fill: var(--cursor);
+  }
+
+  .snow path {
+    fill: var(--paper);
+    stroke: var(--border);
+    stroke-width: 0.8;
+  }
+
+  :global([data-season="spring"]) .blossom,
+  :global([data-season="autumn"]) .falling,
+  :global([data-season="winter"]) .snow {
+    display: inline;
+  }
+
+  :global([data-season="winter"]) .pond {
+    fill: var(--bg-alt);
+  }
+
+  :global([data-season="winter"]) .crown {
+    fill: var(--paper);
+  }
+
+  :global([data-season="autumn"]) .leafy {
+    fill: var(--bg-region);
   }
 
   .hit {
@@ -933,13 +1441,20 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
     fill: var(--cursor);
   }
 
-  .is-dark .glow,
-  .is-dark .fireflies {
+  .is-lit .glow {
     display: inline;
   }
 
-  .is-dark .flame {
+  .is-lit .flame {
     opacity: 1;
+  }
+
+  .is-lit .window {
+    fill: var(--tape);
+  }
+
+  :global([data-season="summer"]) .is-lit .fireflies {
+    display: inline;
   }
 
   .place {
@@ -1048,8 +1563,19 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
   }
 
   .legend-not {
-    stroke-width: 1.5;
-    stroke-dasharray: 2 7;
+    fill: var(--fg-dim);
+    opacity: 0.35;
+  }
+
+  .sky-note {
+    font-size: 0.9375rem;
+  }
+
+  .clock {
+    display: block;
+    margin-top: 0.25rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
   }
 
   .legend-read {
@@ -1085,9 +1611,17 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
       display: block;
     }
 
-    .map-scroll,
-    .legend {
-      display: none;
+    .map-scroll {
+      margin: 0 -0.5rem;
+      overflow: hidden;
+    }
+
+    .map {
+      aspect-ratio: 1;
+    }
+
+    .plain-link {
+      margin-left: 0;
     }
   }
 </style>
