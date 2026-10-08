@@ -1,6 +1,8 @@
 // The repositories kept on /projects
 
 import data from "../data/projects.json";
+import { smooth } from "./sand";
+import { hash, rng } from "./stamp";
 
 export interface Project {
   title: string;
@@ -48,6 +50,18 @@ export function repoPath(url: string): { path: string; site: boolean } {
 export function since(date: string): string {
   const [y, m] = date.split("-");
   return `since ${y}·${m}`;
+}
+
+/** A small seven-point blot of ink */
+export function blot(seed: string, r = 5.2): string {
+  const rand = rng(hash(seed));
+  const pts: Array<[number, number]> = [];
+  for (let i = 0; i < 7; i++) {
+    const a = (i / 7) * Math.PI * 2;
+    const k = 1 + (rand() - 0.5) * 0.3;
+    pts.push([7 + Math.cos(a) * r * k, 7 + Math.sin(a) * r * k]);
+  }
+  return smooth(pts, true);
 }
 
 /** languages with how many projects use each, most used first */

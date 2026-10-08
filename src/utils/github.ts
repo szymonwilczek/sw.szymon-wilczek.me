@@ -132,3 +132,14 @@ export function inkStroke(days: number[][], w: number, h: number): string {
 export function commitCount(days: number[][]): number {
   return days.slice(-52).reduce((sum, week) => sum + week.reduce((a, b) => a + b, 0), 0);
 }
+
+/** Every repository's year added up, day by day: 52 weeks of 7 days, the newest week last */
+export function yearOfInk(all: number[][][]): number[][] {
+  const year = Array.from({ length: 52 }, () => Array<number>(7).fill(0));
+  for (const days of all) {
+    const recent = days.slice(-52);
+    const offset = 52 - recent.length;
+    recent.forEach((week, w) => week.forEach((n, d) => (year[w + offset][d] += n)));
+  }
+  return year;
+}
