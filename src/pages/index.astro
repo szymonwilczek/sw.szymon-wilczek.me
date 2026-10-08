@@ -37,6 +37,7 @@ const recentFiles = files.slice(0, 3);
       <p>
         Projects live in my <a href="https://szymon-wilczek.me">portfolio</a>.
       </p>
+      <p class="enso-hint hand">the garden is round</p>
     </div>
 
     <aside class="now paper" aria-label="Now">
@@ -122,8 +123,13 @@ const recentFiles = files.slice(0, 3);
   </div>
 </BaseLayout>
 
+<script>
+  import "../scripts/enso";
+</script>
+
 <style>
   .hero {
+    position: relative;
     display: flex;
     flex-wrap: wrap;
     gap: 3rem;
@@ -163,6 +169,87 @@ const recentFiles = files.slice(0, 3);
     color: var(--fg-link);
     text-decoration: none;
     border-bottom: 1px solid var(--border);
+  }
+
+  .enso-hint {
+    margin: 2rem 0 0;
+    font-weight: 300;
+    font-size: 1rem;
+    color: var(--fg-dim);
+    opacity: 0.55;
+    transform: rotate(-1deg);
+  }
+
+  .hero :global(.enso-canvas) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    pointer-events: none;
+  }
+
+  .hero :global(.enso-stroke) {
+    fill: none;
+    stroke: var(--fg-main);
+    stroke-width: 5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    opacity: 0.8;
+    transition: opacity 0.9s ease;
+  }
+
+  .hero :global(.enso-stroke.is-fading) {
+    opacity: 0;
+  }
+
+  .hero :global(.enso-stroke.is-kept) {
+    stroke: var(--red);
+    opacity: 0.85;
+  }
+
+  .hero :global(.enso-trail) {
+    fill: none;
+    stroke: var(--fg-dim);
+    stroke-width: 1.6;
+    stroke-dasharray: 2 8;
+    stroke-linecap: round;
+    animation: enso-walk 1.2s ease-out both;
+  }
+
+  .hero :global(.enso-link) {
+    position: absolute;
+    z-index: 1;
+    font-size: 1.125rem;
+    white-space: nowrap;
+    animation: enso-arrive 0.4s 1s ease-out both;
+  }
+
+  @keyframes enso-walk {
+    from {
+      stroke-dashoffset: 200;
+      opacity: 0;
+    }
+    to {
+      stroke-dashoffset: 0;
+      opacity: 1;
+    }
+  }
+
+  @keyframes enso-arrive {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero :global(.enso-stroke) {
+      transition: none;
+    }
+
+    .hero :global(:is(.enso-trail, .enso-link)) {
+      animation: none;
+    }
   }
 
   .now :global(.compass) {
