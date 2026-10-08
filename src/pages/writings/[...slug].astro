@@ -161,6 +161,104 @@ const postImage = imageMatch ? imageMatch[1] : `/og/${slug}.png`;
     if (!article || !aside || defs.length === 0) return;
 
     var wide = window.matchMedia("(min-width: 64em)");
+    var thread = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    thread.classList.add("note-thread");
+    thread.setAttribute("aria-hidden", "true");
+    thread.append(document.createElementNS("http://www.w3.org/2000/svg", "path"));
+    article.append(thread);
+
+    // the words a note belongs to
+    function anchorOf(ref: HTMLElement) {
+      var sup = ref.closest("sup") || ref;
+      var prev = sup.previousSibling;
+      if (prev && prev.nodeType === Node.TEXT_NODE && !prev.textContent!.trim()) {
+        prev = prev.previousSibling;
+      }
+      if (prev instanceof HTMLElement) {
+        if (prev.classList.contains("note-anchor")) return prev;
+        var wrap = document.createElement("span");
+        wrap.className = "note-anchor";
+        prev.before(wrap);
+        wrap.append(prev);
+        return wrap;
+      }
+      if (!prev || prev.nodeType !== Node.TEXT_NODE) return null;
+      var text = prev.textContent || "";
+      var tail = text.replace(/\s+$/, "");
+      var cut = tail.search(/[^,.;:!?()—]*$/);
+      var words = tail.slice(cut).trim().split(/\s+/).slice(-4).join(" ");
+      if (!words) return null;
+      var at = tail.lastIndexOf(words);
+      var span = document.createElement("span");
+      span.className = "note-anchor";
+      span.textContent = text.slice(at, tail.length);
+      prev.textContent = text.slice(0, at);
+      sup.before(span, text.slice(tail.length));
+      return span;
+    }
+
+    var notes = new Map<HTMLElement, HTMLElement>();
+
+    function ink() {
+      var color = getComputedStyle(document.documentElement).getPropertyValue("--cursor").trim();
+      var svg =
+        "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 4' preserveAspectRatio='none'>" +
+        "<path d='M1 2.6 C 25 3.4, 50 1.4, 75 2.4 S 96 2, 99 1.8' fill='none' stroke='" +
+        color +
+        "' stroke-width='1.6' stroke-linecap='round'/></svg>";
+      article!.style.setProperty(
+        "--note-ink",
+        `url("data:image/svg+xml,${encodeURIComponent(svg)}")`,
+      );
+    }
+
+    ink();
+    document.addEventListener("au-theme-change", ink);
+
+    function on(anchor: HTMLElement) {
+      var note = notes.get(anchor);
+      if (!note || !note.isConnected) return;
+      note.classList.add("is-linked");
+      anchor.classList.add("is-linked");
+      var box = article!.getBoundingClientRect();
+      var rects = anchor.getClientRects();
+      var last = rects[rects.length - 1];
+      var n = note.getBoundingClientRect();
+      var x1 = last.right - box.left + 4;
+      var y1 = last.bottom - box.top;
+      var x2 = n.left - box.left - 8;
+      var y2 = n.top - box.top + 14;
+      thread.firstElementChild!.setAttribute(
+        "d",
+        `M${x1} ${y1} C ${x1 + (x2 - x1) * 0.4} ${y1 + 6}, ${x2 - (x2 - x1) * 0.3} ${y2 - 4}, ${x2} ${y2}`,
+      );
+      thread.classList.add("is-shown");
+    }
+
+    function off(anchor: HTMLElement) {
+      notes.get(anchor)?.classList.remove("is-linked");
+      anchor.classList.remove("is-linked");
+      thread.classList.remove("is-shown");
+    }
+
+    function link(note: HTMLElement, ref: HTMLElement) {
+      var anchor = anchorOf(ref);
+      if (!anchor) return;
+      notes.set(anchor, note);
+      var targets: HTMLElement[] = [note];
+      if (!anchor.dataset.linked) {
+        anchor.dataset.linked = "";
+        targets.push(anchor, ref);
+      }
+      targets.forEach(function (el) {
+        el.addEventListener("mouseenter", function () {
+          on(anchor!);
+        });
+        el.addEventListener("mouseleave", function () {
+          off(anchor!);
+        });
+      });
+    }
 
     function place() {
       aside!.replaceChildren();
@@ -182,6 +280,7 @@ const postImage = imageMatch ? imageMatch[1] : `/og/${slug}.png`;
         mark.textContent = num;
         note.append(mark, ...Array.from(body.cloneNode(true).childNodes));
         aside!.append(note);
+        link(note, ref);
 
         var top = Math.max(ref.getBoundingClientRect().top - base - 8, floor);
         note.style.top = top + "px";
@@ -246,6 +345,7 @@ const postImage = imageMatch ? imageMatch[1] : `/og/${slug}.png`;
   }
 
   .article {
+    position: relative;
     display: flex;
     flex-wrap: wrap;
     gap: 3.5rem;
@@ -410,6 +510,47 @@ const postImage = imageMatch ? imageMatch[1] : `/og/${slug}.png`;
   .margin-notes :global(.margin-note p) {
     display: inline;
     margin: 0;
+  }
+
+  .margin-notes :global(.margin-note) {
+    transition: color 0.2s ease;
+  }
+
+  .margin-notes :global(.margin-note.is-linked) {
+    color: var(--fg-main);
+  }
+
+  .prose :global(.note-anchor) {
+    background: var(--note-ink) no-repeat left bottom / 0 0.3em;
+    transition: background-size 0.35s ease;
+  }
+
+  .notes-in-margin .prose :global(.note-anchor.is-linked) {
+    background-size: 100% 0.3em;
+  }
+
+  :global(.note-thread) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+
+  :global(.note-thread.is-shown) {
+    opacity: 1;
+  }
+
+  :global(.note-thread path) {
+    fill: none;
+    stroke: var(--cursor);
+    stroke-width: 1;
+    stroke-dasharray: 1 4;
+    stroke-linecap: round;
+    opacity: 0.7;
   }
 
   .margin-notes :global(.note-num) {
