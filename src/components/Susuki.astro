@@ -1,0 +1,263 @@
+---
+// Pampas grass under the moon at the end of an essay.
+// Hold them open in front of the hare and it earns a seal.
+import { bladePath, makeField } from "../utils/susuki";
+
+const fields = (["wide", "tall"] as const).map((name) => {
+  const field = makeField(name === "tall");
+  return { name, field, rest: field.blades.map((b) => bladePath(b, 0)) };
+});
+---
+
+<figure class="susuki">
+  {fields.map(({ name, field, rest }) => (
+    <svg
+      class={`grass grass-${name}`}
+      viewBox={`0 0 ${field.W} ${field.H}`}
+      role="img"
+      aria-label="Pampas grass under the moon. Move through it and it parts, then springs back."
+      data-layout={name}
+    >
+      <circle class="moon" cx={field.moon.x} cy={field.moon.y} r={field.moon.r} />
+      <path class="moon-shade" d={field.moon.shade} />
+      <g class="hare">
+        <path d={field.hare.body} />
+        <path d={field.hare.head} />
+        <path d={field.hare.ears} />
+      </g>
+      <circle class="hare-eye" cx={field.hare.eye[0]} cy={field.hare.eye[1]} r="1.3" />
+      <g class="blades">
+        {field.blades.map((b, i) => (
+          <path d={rest[i].d} stroke-width={b.w} opacity={b.o} />
+        ))}
+      </g>
+      <g class="plumes">{rest.map((r) => r.plume && <path d={r.plume} />)}</g>
+      <path class="ground" d={field.ground} />
+      <g
+        class="grass-seal"
+        transform={`translate(${field.hare.x - 24} ${field.gy - 128}) rotate(-6) scale(0.8)`}
+      >
+        <path d="M4 5 Q23 2 42 4 Q45 23 43 42 Q23 45 3 43 Q1 23 4 5 Z" />
+        <text x="23" y="31" text-anchor="middle">
+          兎
+        </text>
+      </g>
+    </svg>
+  ))}
+  <figcaption class="hand">
+    <span class="said-before">something is sitting very still in there.</span>
+    <span class="said-after">it was watching the moon the whole time.</span>
+  </figcaption>
+</figure>
+
+<style>
+  .susuki {
+    margin: 4rem 0 0;
+  }
+
+  .grass {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .grass-tall {
+    display: none;
+  }
+
+  .moon {
+    fill: var(--paper);
+    stroke: var(--border);
+  }
+
+  .moon-shade {
+    fill: var(--border);
+    opacity: 0.18;
+  }
+
+  .hare {
+    fill: var(--fg-dim);
+    opacity: 0.62;
+  }
+
+  .hare-eye {
+    fill: var(--bg-main);
+  }
+
+  .blades {
+    fill: none;
+    stroke: var(--fg-dim);
+    stroke-linecap: round;
+  }
+
+  .plumes {
+    fill: none;
+    stroke: var(--cursor);
+    stroke-width: 0.9;
+    stroke-linecap: round;
+    opacity: 0.62;
+  }
+
+  .ground {
+    fill: none;
+    stroke: var(--border);
+    stroke-width: 1.4;
+    stroke-linecap: round;
+  }
+
+  .grass-seal {
+    opacity: 0;
+    transition: opacity 1.2s ease;
+  }
+
+  .susuki.found .grass-seal {
+    opacity: 1;
+  }
+
+  .grass-seal path {
+    fill: var(--red);
+    opacity: 0.92;
+  }
+
+  .grass-seal text {
+    font-family: var(--font-seal);
+    font-size: 22px;
+    fill: var(--bg-main);
+  }
+
+  figcaption {
+    margin: 0.5rem 0.25rem 0 auto;
+    width: fit-content;
+    font-weight: 300;
+    font-size: 1rem;
+    color: var(--fg-dim);
+    opacity: 0.7;
+    transform: rotate(-1deg);
+  }
+
+  .said-after,
+  .susuki.found .said-before {
+    display: none;
+  }
+
+  .susuki.found .said-after {
+    display: inline;
+  }
+
+  @media (max-width: 47.99em) {
+    .susuki {
+      margin-top: 3rem;
+    }
+
+    .grass-wide {
+      display: none;
+    }
+
+    .grass-tall {
+      display: block;
+    }
+  }
+</style>
+
+<script>
+  import { earn, load } from "../utils/garden";
+  import { bladePath, makeField } from "../utils/susuki";
+
+  const figure = document.querySelector<HTMLElement>(".susuki");
+  const still = matchMedia("(prefers-reduced-motion: reduce)");
+  const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
+
+  if (figure && load().seals["兎"]) figure.classList.add("found");
+
+  figure?.querySelectorAll<SVGSVGElement>(".grass").forEach((svg) => {
+    const tall = svg.dataset.layout === "tall";
+    const field = makeField(tall);
+    const blades = field.blades.map((b) => ({ ...b, th: 0, om: 0 }));
+    const paths = [...svg.querySelectorAll<SVGPathElement>(".blades path")];
+    const plumes = [...svg.querySelectorAll<SVGPathElement>(".plumes path")];
+    const R = tall ? 52 : 62;
+    let held = 0;
+
+    function watch() {
+      let open = 0;
+      let count = 0;
+      for (const b of blades) {
+        if (Math.abs(b.x - field.hare.x - 6) < 36) {
+          open += Math.abs(b.th);
+          count++;
+        }
+      }
+
+      if (count) held += (open / count - held) * 0.05;
+      if (held > 0.18 && !figure!.classList.contains("found")) {
+        figure!.classList.add("found");
+        earn("兎");
+      }
+    }
+
+    function draw() {
+      let p = 0;
+      blades.forEach((b, i) => {
+        const shape = bladePath(b, b.th);
+        paths[i].setAttribute("d", shape.d);
+        if (b.plume) plumes[p++].setAttribute("d", shape.plume);
+      });
+    }
+
+    let frame = 0;
+    function loop() {
+      frame = 0;
+      let busy = 0;
+      for (const b of blades) {
+        b.om += -0.032 * b.th - 0.075 * b.om;
+        b.th = clamp(b.th + b.om, -1.15, 1.15);
+        busy = Math.max(busy, Math.abs(b.om) * 60, Math.abs(b.th));
+      }
+      watch();
+      draw();
+      if (busy > 0.004) frame = requestAnimationFrame(loop);
+    }
+
+    const toField = (e: PointerEvent): [number, number] => {
+      const p = new DOMPoint(e.clientX, e.clientY).matrixTransform(svg.getScreenCTM()!.inverse());
+      return [p.x, p.y];
+    };
+
+    let last: [number, number] | null = null;
+    svg.addEventListener("pointermove", (e) => {
+      const q = toField(e);
+      if (last) {
+        const vx = q[0] - last[0];
+        for (const b of blades) {
+          const ang = b.lean + b.th;
+          const bx = b.x + Math.sin(ang) * b.L * 0.6;
+          const by = b.y - Math.cos(ang) * b.L * 0.6;
+          if (q[1] < b.y - b.L * 1.05) continue;
+          const d = Math.hypot(bx - q[0], (by - q[1]) * 0.5);
+          if (d > R) continue;
+          const fall = 1 - d / R;
+          if (still.matches) b.th = Math.sign(b.x - q[0]) * 0.6 * fall;
+          else b.om += (clamp(vx, -40, 40) * 0.0016 + Math.sign(b.x - q[0]) * 0.016) * fall;
+        }
+      }
+      last = q;
+      if (still.matches) {
+        watch();
+        draw();
+      } else if (!frame) frame = requestAnimationFrame(loop);
+    });
+
+    const leave = () => {
+      last = null;
+      if (!still.matches) return;
+      for (const b of blades) b.th = 0;
+      draw();
+    };
+    svg.addEventListener("pointerleave", leave);
+    svg.addEventListener("pointercancel", leave);
+  });
+</script>
