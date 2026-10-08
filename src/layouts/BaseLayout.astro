@@ -182,6 +182,19 @@ const {
 
     <script>
       (function () {
+        function pressHanko(wrapper: HTMLElement) {
+          wrapper.querySelector(".copy-hanko")?.remove();
+          var hanko = document.createElement("span");
+          hanko.className = "copy-hanko";
+          hanko.setAttribute("aria-hidden", "true");
+          hanko.innerHTML =
+            '<svg viewBox="0 0 46 46" width="40" height="40"><path d="M4 5 Q23 2 42 4 Q45 23 43 42 Q23 45 3 43 Q1 23 4 5 Z"/><text x="23" y="31" text-anchor="middle">写</text></svg>';
+          wrapper.append(hanko);
+          hanko.addEventListener("animationend", function () {
+            hanko.remove();
+          });
+        }
+
         function initCodeCopy() {
           var pres = document.querySelectorAll("pre");
           pres.forEach(function (pre) {
@@ -204,10 +217,11 @@ const {
               var code = pre.querySelector("code") || pre;
               var text = code.innerText || code.textContent || "";
               navigator.clipboard.writeText(text.trim()).then(function () {
-                btn.textContent = "Copied";
+                pressHanko(wrapper);
+                btn.setAttribute("aria-label", "Copied");
                 btn.classList.add("is-copied");
                 setTimeout(function () {
-                  btn.textContent = "Copy";
+                  btn.setAttribute("aria-label", "Copy code to clipboard");
                   btn.classList.remove("is-copied");
                 }, 2000);
               });

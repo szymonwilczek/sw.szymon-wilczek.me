@@ -23,3 +23,60 @@
   line-height: 1.35;
   color: var(--fg-dim);
 }
+
+/* hanko pressed onto a code block when it is copied */
+.copy-hanko {
+  position: absolute;
+  top: -0.875rem;
+  right: 4.75rem;
+  pointer-events: none;
+  animation: hanko-press 2.2s ease-out both;
+}
+
+.copy-hanko svg {
+  display: block;
+  transform: rotate(12deg);
+}
+
+.copy-hanko path {
+  fill: var(--red);
+}
+
+.copy-hanko text {
+  fill: var(--bg-main);
+  font-family: var(--font-seal);
+  font-size: 22px;
+}
+
+@keyframes hanko-press {
+  0% {
+    opacity: 0;
+    transform: scale(1.35);
+  }
+  10% {
+    opacity: 0.95;
+    transform: scale(1);
+  }
+  55% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .copy-hanko {
+    animation-name: hanko-fade;
+  }
+
+  @keyframes hanko-fade {
+    0%,
+    55% {
+      opacity: 0.9;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+}
