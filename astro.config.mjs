@@ -1,5 +1,26 @@
 import { defineConfig } from "astro/config";
 import sitemap from "@astrojs/sitemap";
+import { readdir, readFile, writeFile } from "node:fs/promises";
+import { join } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const preloadGarden = {
+  name: "preload-garden",
+  hooks: {
+    "astro:build:done": async ({ dir }) => {
+      const root = fileURLToPath(dir);
+      const chunk = (await readdir(join(root, "_astro"))).find((f) => /^garden\..*\.js$/.test(f));
+      if (!chunk) return;
+      const link = `<link rel="modulepreload" href="/_astro/${chunk}">`;
+      const files = (await readdir(root, { recursive: true })).filter((f) => f.endsWith(".html"));
+      for (const f of files) {
+        const html = await readFile(join(root, f), "utf8");
+        if (!html.includes('<script type="module"')) continue;
+        await writeFile(join(root, f), html.replace("</head>", `${link}</head>`));
+      }
+    },
+  },
+};
 
 // https://astro.build/config
 export default defineConfig({
@@ -29,6 +50,7 @@ export default defineConfig({
     },
   },
   integrations: [
+    preloadGarden,
     sitemap({
       filter: (page) =>
         !page.includes("/vault") &&
