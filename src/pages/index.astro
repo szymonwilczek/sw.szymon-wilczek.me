@@ -1,12 +1,11 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import Compass from "../components/Compass.astro";
 import Divider from "../components/Divider.astro";
 import Karesansui from "../components/Karesansui.astro";
+import NowPaper from "../components/NowPaper.astro";
 import { getCollection } from "astro:content";
 import { getAllAlbums } from "../utils/albums";
 import { dottedDate, writingSlug } from "../utils/format";
-import now from "../data/now.json";
 
 const posts = (await getCollection("writings"))
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
@@ -41,20 +40,7 @@ const recentFiles = files.slice(0, 3);
       <p class="enso-hint hand">the garden is round</p>
     </div>
 
-    <aside class="now paper" aria-label="Now">
-      <span class="tape now-tape" aria-hidden="true"></span>
-      <p class="now-title">now —</p>
-      <dl>
-        {now.items.map((item) => (
-          <div>
-            <dt>{item.label}</dt>
-            <dd>{item.value}</dd>
-          </div>
-        ))}
-      </dl>
-      <p class="now-updated">updated {now.updated}</p>
-      <Compass />
-    </aside>
+    <NowPaper />
   </section>
 
   <Divider from={300} to={540} />
@@ -255,78 +241,6 @@ const recentFiles = files.slice(0, 3);
     }
   }
 
-  .now :global(.compass) {
-    position: absolute;
-    right: -6.5rem;
-    bottom: -1.5rem;
-    rotate: -2deg;
-  }
-
-  .now {
-    flex: 1 1 16.25rem;
-    max-width: 18.75rem;
-    position: relative;
-    margin-top: 0.75rem;
-    padding: 1.875rem 1.5rem 1.25rem;
-    transform: rotate(2deg);
-  }
-
-  .now-tape {
-    top: -11px;
-    left: 50%;
-    width: 92px;
-    height: 24px;
-    margin-left: -46px;
-    opacity: 0.9;
-    transform: rotate(-3deg);
-  }
-
-  .now-title {
-    margin: 0;
-    font-family: var(--font-hand);
-    font-size: 1.625rem;
-    line-height: 1;
-    color: var(--cursor);
-  }
-
-  .now dl {
-    margin: 0.875rem 0 0;
-    font-family: var(--font-hand);
-    font-weight: 300;
-    font-size: 1.125rem;
-    line-height: 1.35;
-  }
-
-  .now dl div {
-    display: flex;
-    gap: 0.625rem;
-    padding: 0.4375rem 0;
-    border-bottom: 1px dotted var(--border);
-  }
-
-  .now dl div:last-child {
-    border-bottom: 0;
-  }
-
-  .now dt,
-  .now dd {
-    margin: 0;
-    font: inherit;
-  }
-
-  .now dt {
-    flex: none;
-    width: 5.25rem;
-    color: var(--fg-dim);
-  }
-
-  .now-updated {
-    margin: 0.625rem 0 0;
-    font-family: var(--font-mono);
-    font-size: 0.6875rem;
-    color: var(--fg-dim);
-  }
-
   .home-grid {
     display: flex;
     flex-wrap: wrap;
@@ -470,19 +384,9 @@ const recentFiles = files.slice(0, 3);
     color: var(--fg-dim);
   }
 
-  @media (max-width: 79.99em), (pointer: coarse) {
-    .now :global(.compass) {
-      display: none;
-    }
-  }
-
   @media (max-width: 47.99em) {
     .hero {
       gap: 2.5rem;
-    }
-
-    .now {
-      display: none;
     }
 
     .writings h2 {

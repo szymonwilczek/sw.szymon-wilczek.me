@@ -1,0 +1,502 @@
+---
+// The paper beside the hero
+
+import { execSync } from "node:child_process";
+import { getCollection } from "astro:content";
+import Compass from "./Compass.astro";
+import { getAllAlbums } from "../utils/albums";
+import { writingSlug } from "../utils/format";
+import { MONTHS, cardFor, koOf, moonOf, moonPath } from "../utils/koyomi";
+import place from "../data/window.json";
+
+const today = new Date();
+
+function lastCommit(): { when: Date; what: string } {
+  try {
+    const [when, subject] = execSync("git log -1 --format=%cI%x09%s").toString().trim().split("\t");
+    return { when: new Date(when), what: subject.replace(/^[^:]+:\s*/, "") };
+  } catch {
+    return { when: today, what: "" };
+  }
+}
+
+const ink = lastCommit();
+const writing = (await getCollection("writings")).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+)[0];
+const album = (await getAllAlbums()).sort((a, b) => b.date.valueOf() - a.date.valueOf())[0];
+
+const card = cardFor(today, ink.when);
+const moon = moonOf(today);
+const month = MONTHS[today.getMonth()];
+const season = koOf(today);
+const dayMonth = (d: Date) => d.toLocaleDateString("en-GB", { day: "numeric", month: "long" });
+const span = (from: Date, to: Date) =>
+  from.getMonth() === to.getMonth()
+    ? `${from.getDate()} – ${dayMonth(to)}`
+    : `${dayMonth(from)} – ${dayMonth(to)}`;
+
+// divider's skein of geese, flying the same way
+const GEESE = [
+  "M-1 -24.2 Q3.1 -22.8 6 -22 Q8.8 -24.1 13.1 -25.9",
+  "M11 -18.4 Q14.5 -17.2 17 -16.5 Q19.4 -18.3 23.1 -19.8",
+  "M21.6 -13.7 Q24.7 -12.6 27 -12 Q29.2 -13.6 32.5 -15",
+  "M-10.6 -16.8 Q-7.4 -15.7 -5 -15 Q-2.8 -16.7 0.7 -18.1",
+];
+---
+
+<aside
+  class="now paper"
+  aria-label="Now"
+  data-ink={ink.when.toISOString()}
+  data-tz={place.timeZone}
+  data-lat={place.latitude ?? ""}
+  data-lon={place.longitude ?? ""}
+>
+  <span class="tape now-tape" aria-hidden="true"></span>
+
+  <section class="card" data-card="moon" hidden={card !== "moon"}>
+    <div class="head">
+      <p class="title">tonight —</p>
+      <span class="kanji">月</span>
+    </div>
+    <svg class="moon" viewBox="0 0 240 112" aria-hidden="true">
+      <circle class="moon-dark" cx="120" cy="56" r="42"></circle>
+      <path class="moon-lit" d={moonPath(moon, 120, 56, 42)}></path>
+      <circle class="moon-edge" cx="121.2" cy="55" r="42"></circle>
+    </svg>
+    <p class="line hand moon-words">{moon.words}</p>
+    <p class="sub">
+      <span class="kanji-ink month-kanji">{month.kanji}</span> ·{" "}
+      <span class="month-name">
+        {month.name}, {month.gloss}
+      </span>
+    </p>
+    <p class="foot">drawn from the date · nothing to update</p>
+  </section>
+
+  <section class="card" data-card="season" hidden={card !== "season"}>
+    <div class="head">
+      <p class="title">this week —</p>
+      <span class="kanji">候</span>
+    </div>
+    <div class="ko">
+      <p class="ko-kanji">{season.ko.kanji}</p>
+      <div>
+        <p class="ko-gloss hand">{season.ko.gloss}</p>
+        <p class="mono">
+          <span class="ko-reading">{season.ko.reading}</span> ·{" "}
+          <span class="ko-n">{season.ko.n}</span> of 72
+        </p>
+        <p class="mono ko-dates">
+          {span(new Date(today.getTime() - season.day * 86400000), season.until)} · {season.sekki}
+        </p>
+        <svg
+          class="geese"
+          viewBox="-14 -30 50 22"
+          aria-hidden="true"
+          hidden={![14, 49].includes(season.ko.n)}
+        >
+          {GEESE.map((d, i) => (
+            <path d={d} style={`opacity: ${0.85 - i * 0.1}`} />
+          ))}
+        </svg>
+      </div>
+    </div>
+    <p class="foot">one of 72 small seasons · each turns in five days</p>
+  </section>
+
+  <section class="card" data-card="window" hidden={card !== "window"}>
+    <div class="head">
+      <p class="title">out the window —</p>
+      <span class="kanji">窓</span>
+    </div>
+    <svg class="window" viewBox="0 0 240 140" aria-hidden="true">
+      <clipPath id="marumado">
+        <circle cx="120" cy="70" r="58"></circle>
+      </clipPath>
+      <g clip-path="url(#marumado)">
+        <rect class="sky" x="50" y="0" width="140" height="140"></rect>
+        <path class="arc" d="M60 70 Q 120 22 180 70"></path>
+        <circle class="sun" cx="150" cy="44" r="9"></circle>
+        <path
+          class="hill-far"
+          d="M50 100 C 80 86, 104 94, 128 88 S 170 80, 200 92 L 200 140 L 50 140 Z"
+        ></path>
+        <path
+          class="hill-near"
+          d="M50 112 C 86 104, 120 112, 150 106 S 182 104, 200 108 L 200 140 L 50 140 Z"
+        ></path>
+        <path class="lattice" d="M120 12 L 120 128 M 62 70 L 178 70"></path>
+      </g>
+      <circle class="frame" cx="120" cy="70" r="58"></circle>
+      <circle class="frame-ink" cx="121.5" cy="69" r="63"></circle>
+    </svg>
+    <p class="line hand">
+      <span class="window-time">[LOCAL TIME]</span> in {place.city}
+    </p>
+    <p class="sub window-sun">the sun sets at [SUNSET]</p>
+    <p class="foot">the sky where I am, right now</p>
+  </section>
+
+  <section class="card" data-card="ink" hidden={card !== "ink"}>
+    <div class="head">
+      <p class="title">last ink —</p>
+      <span class="kanji">墨</span>
+    </div>
+    <dl>
+      {ink.what && (
+        <div>
+          <dt>tended</dt>
+          <dd>
+            <span class="ink-age">{dayMonth(ink.when)}</span> — “{ink.what}”
+          </dd>
+        </div>
+      )}
+      {writing && (
+        <div>
+          <dt>wrote</dt>
+          <dd>
+            <a href={`/writings/${writingSlug(writing.id)}/`}>{writing.data.title}</a>
+          </dd>
+        </div>
+      )}
+      {album && (
+        <div>
+          <dt>walked</dt>
+          <dd>
+            <a href={`/photos/${album.slug}/`}>{album.title}</a>,{" "}
+            {album.date.toLocaleDateString("en-GB", { month: "long" })}
+          </dd>
+        </div>
+      )}
+    </dl>
+    <p class="foot">from git and the content, on every build</p>
+  </section>
+
+  <Compass />
+</aside>
+
+<script>
+  import { MONTHS, cardFor, koOf, moonOf, moonPath, sunOf } from "../utils/koyomi";
+
+  const paper = document.querySelector<HTMLElement>(".now")!;
+  const $ = <T extends Element = HTMLElement>(s: string) => paper.querySelector<T>(s)!;
+  const now = new Date();
+  const DAY = 86_400_000;
+  const dayMonth = (d: Date) => d.toLocaleDateString("en-GB", { day: "numeric", month: "long" });
+  const span = (from: Date, to: Date) =>
+    from.getMonth() === to.getMonth()
+      ? `${from.getDate()} – ${dayMonth(to)}`
+      : `${dayMonth(from)} – ${dayMonth(to)}`;
+
+  const moon = moonOf(now);
+  const month = MONTHS[now.getMonth()];
+  $("path.moon-lit").setAttribute("d", moonPath(moon, 120, 56, 42));
+  $(".moon-words").textContent = moon.words;
+  $(".month-kanji").textContent = month.kanji;
+  $(".month-name").textContent = `${month.name}, ${month.gloss}`;
+
+  const season = koOf(now);
+  $(".ko-kanji").textContent = season.ko.kanji;
+  $(".ko-gloss").textContent = season.ko.gloss;
+  $(".ko-reading").textContent = season.ko.reading;
+  $(".ko-n").textContent = String(season.ko.n);
+  $(".ko-dates").textContent =
+    `${span(new Date(now.getTime() - season.day * DAY), season.until)} · ${season.sekki}`;
+  $<SVGElement>(".geese").toggleAttribute("hidden", ![14, 49].includes(season.ko.n));
+
+  // local time where I am, the sun (or moon) along its arc
+  const tz = paper.dataset.tz!;
+  const clock = (d: Date) =>
+    d.toLocaleTimeString("en-GB", { timeZone: tz, hour: "2-digit", minute: "2-digit" });
+  const [h, m] = clock(now).split(":").map(Number);
+  const hours = h + m / 60;
+  const lat = parseFloat(paper.dataset.lat!);
+  const lon = parseFloat(paper.dataset.lon!);
+  const sun = Number.isFinite(lat) && Number.isFinite(lon) ? sunOf(now, lat, lon) : null;
+  const local = (d: Date) => {
+    const [a, b] = clock(d).split(":").map(Number);
+    return a + b / 60;
+  };
+  const rise = sun ? local(sun.rise) : 6;
+  const set = sun ? local(sun.set) : 18;
+  const day = hours >= rise && hours < set;
+  const t = day ? (hours - rise) / (set - rise) : ((hours - set + 24) % 24) / (24 - set + rise);
+  const body = $(".window .sun");
+  body.setAttribute("cx", (60 + t * 120).toFixed(1));
+  body.setAttribute("cy", (70 - Math.sin(Math.PI * t) * 48).toFixed(1));
+  $(".window").classList.toggle("night", !day);
+  $(".window-time").textContent = clock(now);
+  const low = day && (hours - rise < 1.5 || set - hours < 1.5);
+  $(".window-sun").textContent = day
+    ? `the sun is ${low ? "low" : "up"}; it sets at ${sun ? clock(sun.set) : "[SUNSET]"}`
+    : `the sun is down; it rises at ${sun ? clock(sun.rise) : "[SUNRISE]"}`;
+
+  // last ink
+  const inkAt = new Date(paper.dataset.ink!);
+  const age = Math.round(
+    (new Date(now.toDateString()).getTime() - new Date(inkAt.toDateString()).getTime()) / DAY,
+  );
+  const ageEl = paper.querySelector(".ink-age");
+  if (ageEl) ageEl.textContent = age <= 0 ? "today" : age === 1 ? "yesterday" : `${age} days ago`;
+
+  const card = cardFor(now, inkAt);
+  paper.querySelectorAll<HTMLElement>(".card").forEach((c) => {
+    c.hidden = c.dataset.card !== card;
+  });
+</script>
+
+<style>
+  .now :global(.compass) {
+    position: absolute;
+    right: -6.5rem;
+    bottom: -1.5rem;
+    rotate: -2deg;
+  }
+
+  .now {
+    --font-koyomi: "Noto Serif JP", "Noto Serif CJK JP", "Hiragino Mincho ProN", "Yu Mincho", serif;
+    flex: 1 1 16.25rem;
+    max-width: 18.75rem;
+    position: relative;
+    margin-top: 0.75rem;
+    padding: 1.875rem 1.5rem 1.25rem;
+    transform: rotate(2deg);
+  }
+
+  .now-tape {
+    top: -11px;
+    left: 50%;
+    width: 92px;
+    height: 24px;
+    margin-left: -46px;
+    opacity: 0.9;
+    transform: rotate(-3deg);
+  }
+
+  .card[hidden],
+  [hidden] {
+    display: none;
+  }
+
+  p {
+    margin: 0;
+  }
+
+  .head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  .title {
+    font-family: var(--font-hand);
+    font-size: 1.625rem;
+    line-height: 1;
+    color: var(--cursor);
+  }
+
+  .kanji {
+    font-family: var(--font-koyomi);
+    font-size: 1.25rem;
+    color: var(--red);
+  }
+
+  .kanji-ink {
+    font-family: var(--font-koyomi);
+  }
+
+  .line {
+    margin-top: 0.375rem;
+    font-size: 1.1875rem;
+    text-align: center;
+  }
+
+  .sub {
+    margin-top: 0.125rem;
+    font-size: 0.9375rem;
+    line-height: 1.45;
+    text-align: center;
+    color: var(--fg-dim);
+  }
+
+  .mono,
+  .foot {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    color: var(--fg-dim);
+  }
+
+  .foot {
+    margin-top: 1rem;
+    font-size: 0.65625rem;
+  }
+
+  .moon,
+  .window {
+    display: block;
+    width: 100%;
+    margin-top: 0.625rem;
+  }
+
+  .moon-dark {
+    fill: var(--bg-dim);
+  }
+
+  .moon-lit {
+    fill: var(--tape);
+  }
+
+  .moon-edge {
+    fill: none;
+    stroke: var(--fg-dim);
+    stroke-width: 1;
+    opacity: 0.7;
+  }
+
+  .ko {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.125rem;
+    margin-top: 0.875rem;
+  }
+
+  .ko > div {
+    flex: 1;
+    min-width: 0;
+    padding-top: 0.25rem;
+  }
+
+  .ko-kanji {
+    writing-mode: vertical-rl;
+    font-family: var(--font-koyomi);
+    font-size: 2.5rem;
+    line-height: 1.1;
+    letter-spacing: 0.06em;
+  }
+
+  .ko-gloss {
+    font-size: 1.3125rem;
+    line-height: 1.2;
+  }
+
+  .ko .mono {
+    margin-top: 0.25rem;
+  }
+
+  .ko .ko-dates {
+    margin-top: 0.5rem;
+  }
+
+  .geese {
+    display: block;
+    width: 5.5rem;
+    margin-top: 0.625rem;
+    overflow: visible;
+  }
+
+  .geese[hidden] {
+    display: none;
+  }
+
+  .geese path {
+    fill: none;
+    stroke: var(--fg-main);
+    stroke-width: 1.3;
+    stroke-linecap: round;
+  }
+
+  .sky {
+    fill: var(--sky);
+  }
+
+  .arc {
+    fill: none;
+    stroke: var(--border);
+    stroke-dasharray: 1 4;
+  }
+
+  .sun {
+    fill: var(--cursor);
+    opacity: 0.85;
+  }
+
+  .hill-far {
+    fill: var(--bg-alt);
+  }
+
+  .hill-near {
+    fill: var(--bg-dim);
+  }
+
+  .lattice {
+    stroke: var(--fg-dim);
+    stroke-width: 0.8;
+    opacity: 0.35;
+  }
+
+  .frame {
+    fill: none;
+    stroke: var(--fg-main);
+    stroke-width: 3;
+  }
+
+  .frame-ink {
+    fill: none;
+    stroke: var(--fg-dim);
+    opacity: 0.6;
+  }
+
+  .night .sky {
+    fill: var(--fg-dim);
+    opacity: 0.55;
+  }
+
+  .night .sun {
+    fill: var(--tape);
+    opacity: 1;
+  }
+
+  dl {
+    margin: 0.875rem 0 0;
+    font-family: var(--font-hand);
+    font-weight: 300;
+    font-size: 1rem;
+    line-height: 1.35;
+  }
+
+  dl div {
+    display: grid;
+    grid-template-columns: 4.625rem minmax(0, 1fr);
+    gap: 0.5rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px dotted var(--border);
+  }
+
+  dl div:last-child {
+    border-bottom: 0;
+  }
+
+  dt,
+  dd {
+    margin: 0;
+  }
+
+  dt {
+    color: var(--fg-dim);
+  }
+
+  @media (max-width: 79.99em), (pointer: coarse) {
+    .now :global(.compass) {
+      display: none;
+    }
+  }
+
+  @media (max-width: 47.99em) {
+    .now {
+      display: none;
+    }
+  }
+</style>

@@ -284,3 +284,17 @@ export function cardFor(date: Date, lastInk: Date): Card {
   const yesterday = best(new Date(date.getTime() - DAY), ink);
   return best(date, ink, yesterday);
 }
+
+/** Sunrise and sunset for a day at a place, to within a few minutes */
+export function sunOf(date: Date, lat: number, lon: number): { rise: Date; set: Date } | null {
+  const n = Math.round((dayOf(date) - Date.UTC(date.getFullYear(), 0, 0)) / DAY);
+  const rad = Math.PI / 180;
+  const decl = -23.44 * rad * Math.cos((2 * Math.PI * (n + 10)) / 365);
+  const cosH = -Math.tan(lat * rad) * Math.tan(decl);
+  if (cosH < -1 || cosH > 1) return null;
+  const b = (2 * Math.PI * (n - 81)) / 364;
+  const eot = 9.87 * Math.sin(2 * b) - 7.53 * Math.cos(b) - 1.5 * Math.sin(b);
+  const noon = dayOf(date) + (12 - lon / 15 - eot / 60) * 3_600_000;
+  const half = (Math.acos(cosH) / rad / 15) * 3_600_000;
+  return { rise: new Date(noon - half), set: new Date(noon + half) };
+}
