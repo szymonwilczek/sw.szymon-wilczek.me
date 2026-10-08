@@ -191,3 +191,8 @@
   color: var(--cursor);
   rotate: -3deg;
 }
+
+.site-brand .seal.is-inked .seal-ink {
+  fill: color-mix(in oklab, var(--red), var(--fg-main) calc(var(--strokes) * 6%));
+  transition: fill 0.3s;
+}

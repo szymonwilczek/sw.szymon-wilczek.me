@@ -147,6 +147,7 @@ const TICKS = [
     </section>
   </div>
 
+  <p class="clue hand">the wolf has ten strokes.</p>
   <Seal glyph="終" size={48} tilt={3} label="end" class="about-end" />
 </BaseLayout>
 
@@ -183,6 +184,15 @@ const TICKS = [
     font-size: 1.1875rem;
     line-height: 1.35;
     transform: rotate(-2deg);
+  }
+
+  .clue {
+    margin: 4rem 0 0;
+    font-weight: 300;
+    font-size: 1rem;
+    color: var(--fg-dim);
+    opacity: 0.7;
+    transform: rotate(-1.5deg);
   }
 
   .sections {
