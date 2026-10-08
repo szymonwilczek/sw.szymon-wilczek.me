@@ -3,6 +3,7 @@
 // Drag across it and the lines part like sand; leave it and the rake comes back
 // and smooths them.
 import { makeSand, smooth } from "../utils/sand";
+import { MOMIJI } from "../utils/momiji";
 
 const sand = makeSand();
 ---
@@ -38,10 +39,11 @@ const sand = makeSand();
         {s.moss && <path class="stone-moss" d={s.moss} />}
       </g>
     ))}
-    <path
-      class="sand-leaf"
-      d="M796 100 C 801 95, 807 93, 813 95 C 811 101, 804 103, 796 100 Z M 804 99 C 807 98, 810 97, 812 95.5"
-    ></path>
+    <g class="sand-leaf" transform="translate(806 97) rotate(-28) scale(0.14)">
+      <path class="sand-leaf-stem" d={MOMIJI.stem}></path>
+      <path class="sand-leaf-blade" d={MOMIJI.outline}></path>
+      <path class="sand-leaf-ink" d={MOMIJI.outline} transform="translate(5 -4)"></path>
+    </g>
   </svg>
   <figcaption class="hand">rake it. it remembers nothing.</figcaption>
 </figure>
@@ -111,11 +113,19 @@ const sand = makeSand();
     opacity: 0.9;
   }
 
-  .sand-leaf {
+  .sand-leaf-blade {
     fill: var(--red);
+    opacity: 0.9;
+  }
+
+  .sand-leaf-ink,
+  .sand-leaf-stem {
+    fill: none;
     stroke: var(--red-warmer);
-    stroke-width: 0.6;
-    opacity: 0.85;
+    stroke-width: 6;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+    opacity: 0.65;
   }
 
   figcaption {

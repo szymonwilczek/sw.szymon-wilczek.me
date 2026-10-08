@@ -3,11 +3,16 @@
 // one click takes you there, and the leaf blows away once you pass it.
 
 import { load, update } from "../utils/garden";
+import { MOMIJI, MOMIJI_VIEWBOX } from "../utils/momiji";
 
 const LEAF =
-  '<svg viewBox="0 0 40 20" width="36" height="18" aria-hidden="true">' +
-  '<path class="stop-leaf-blade" d="M6 8 C 14 4, 26 3, 34 9 C 26 14, 14 16, 6 14 C 2 12, 2 10, 6 8 Z"/>' +
-  '<path class="stop-leaf-vein" d="M5 11 C 14 11, 24 10, 34 9"/></svg>';
+  `<svg viewBox="${MOMIJI_VIEWBOX}" width="30" height="30" aria-hidden="true">` +
+  `<g transform="rotate(-24)">` +
+  `<path class="stop-leaf-stem" d="${MOMIJI.stem}"/>` +
+  `<path class="stop-leaf-blade" d="${MOMIJI.outline}"/>` +
+  `<path class="stop-leaf-vein" d="${MOMIJI.veins}"/>` +
+  `<path class="stop-leaf-ink" d="${MOMIJI.outline}" transform="translate(5 -4)"/>` +
+  `</g></svg>`;
 
 const slug = location.pathname.replace(/^\/writings\/|\/$/g, "");
 const paragraphs = Array.from(

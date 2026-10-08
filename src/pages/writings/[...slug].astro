@@ -759,15 +759,36 @@ const postImage = imageMatch ? imageMatch[1] : `/og/${slug}.png`;
     transform: rotate(-3deg);
   }
 
+  :global(.stop-leaf svg) {
+    overflow: visible;
+  }
+
   :global(.stop-leaf-blade) {
     fill: var(--red);
-    opacity: 0.85;
+    opacity: 0.9;
   }
 
   :global(.stop-leaf-vein) {
     fill: none;
+    stroke: var(--bg-main);
+    stroke-width: 4;
+    stroke-linecap: round;
+    opacity: 0.5;
+  }
+
+  :global(.stop-leaf-ink) {
+    fill: none;
     stroke: var(--red-warmer);
-    stroke-width: 0.8;
+    stroke-width: 6;
+    stroke-linejoin: round;
+    opacity: 0.6;
+  }
+
+  :global(.stop-leaf-stem) {
+    fill: none;
+    stroke: var(--red-warmer);
+    stroke-width: 7;
+    stroke-linecap: round;
   }
 
   :global(.stop-leaf.is-gone) {
