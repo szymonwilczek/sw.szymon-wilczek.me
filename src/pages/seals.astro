@@ -1,0 +1,388 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Divider from "../components/Divider.astro";
+import { SEALS } from "../utils/garden";
+import { HANKO_EDGE, HANKO_INNER } from "../utils/hanko";
+
+const TILTS = [-6, 4, -2, 7, -4, 3, -7, 5, -3, 6, -5, 2, -6, 4, -1];
+---
+
+<BaseLayout
+  title="Seal book"
+  description="A folding book of seals that fills as you walk the garden. It lives only in your browser."
+>
+  <header class="seals-head">
+    <div>
+      <h1>Seal book</h1>
+      <p class="lede">
+        Pilgrims in Japan carry a goshuinchō, a folding book that every temple stamps and signs.
+        This one fills as you walk the garden. It lives only in your browser; I never see it.
+      </p>
+    </div>
+    <p class="tally hand">
+      <span class="tally-n">0</span> of {SEALS.length} · <span>some take a year</span>
+    </p>
+  </header>
+
+  <Divider from={180} to={400} />
+
+  <ol class="book">
+    {
+      SEALS.map((seal, i) => (
+        <li class="page" data-glyph={seal.glyph} style={`--tilt: ${TILTS[i]}deg`}>
+          <span class="page-n">{String(i + 1).padStart(2, "0")}</span>
+          <svg class="page-seal" viewBox="0 0 46 46" aria-hidden="true">
+            <path class="seal-edge" d={HANKO_EDGE} />
+            <path class="seal-inner" d={HANKO_INNER} />
+            <text x="23" y="31" text-anchor="middle">
+              {seal.glyph}
+            </text>
+          </svg>
+          <span class="page-date">····</span>
+          <span class="page-note hand" data-note={seal.note}>
+            {seal.hint}
+          </span>
+          {seal.glyph === "北" && <span class="page-doors hand" />}
+        </li>
+      ))
+    }
+  </ol>
+
+  <div class="book-foot">
+    <p>
+      Seals are stamped where they are earned: a small hanko presses onto the corner of the page for
+      a second, then flies down to the footer counter. Hints for the missing ones are written in
+      pencil, never more than half an answer.
+    </p>
+    <div class="book-actions">
+      <button type="button" class="save">save the book as an image ↓</button>
+      <button type="button" class="start-over">start over</button>
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  import { DOORS, load, reset, SEALS } from "../utils/garden";
+  import { HANKO_EDGE, HANKO_INNER } from "../utils/hanko";
+
+  const book = document.querySelector<HTMLElement>(".book")!;
+
+  function fill() {
+    const state = load();
+    let earned = 0;
+    book.querySelectorAll<HTMLElement>(".page").forEach((page) => {
+      const date = state.seals[page.dataset.glyph!];
+      const note = page.querySelector<HTMLElement>(".page-note")!;
+      page.classList.toggle("is-earned", Boolean(date));
+      page.querySelector(".page-date")!.textContent = date ?? "····";
+      if (date) {
+        earned++;
+        note.textContent = note.dataset.note!;
+      }
+      page.setAttribute(
+        "aria-label",
+        date
+          ? `${page.dataset.glyph}, ${note.dataset.note}, ${date}`
+          : `empty: ${note.textContent}`,
+      );
+    });
+    const doors = book.querySelector(".page-doors");
+    if (doors) doors.textContent = `${state.doors.length} of ${DOORS.length} ways in`;
+    document.querySelector(".tally-n")!.textContent = String(earned);
+    return state;
+  }
+
+  fill();
+  window.addEventListener("garden-seal", () => setTimeout(fill, 2600));
+
+  document.querySelector(".start-over")!.addEventListener("click", () => {
+    if (!confirm("Start the seal book over? Every seal and path will be forgotten.")) return;
+    reset();
+    location.reload();
+  });
+
+  // book as one image
+  document.querySelector(".save")!.addEventListener("click", async () => {
+    const state = fill();
+    const css = getComputedStyle(document.documentElement);
+    const ink = (name: string) => css.getPropertyValue(name).trim();
+    const cols = 5;
+    const rows = Math.ceil(SEALS.length / cols);
+    const W = 180;
+    const H = 260;
+    const pad = 40;
+    const scale = 2;
+    const canvas = document.createElement("canvas");
+    canvas.width = (cols * W + pad * 2) * scale;
+    canvas.height = (rows * H + pad * 2 + 40) * scale;
+    const ctx = canvas.getContext("2d")!;
+    ctx.scale(scale, scale);
+    await document.fonts.ready;
+
+    ctx.fillStyle = ink("--bg-main");
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    const seal = { edge: new Path2D(HANKO_EDGE), inner: new Path2D(HANKO_INNER) };
+
+    SEALS.forEach((page, i) => {
+      const x = pad + (i % cols) * W;
+      const y = pad + Math.floor(i / cols) * H;
+      const date = state.seals[page.glyph];
+      ctx.fillStyle = i % 2 ? ink("--bg-main") : ink("--paper");
+      ctx.fillRect(x, y, W, H);
+      ctx.strokeStyle = ink("--border");
+      ctx.strokeRect(x + 0.5, y + 0.5, W, H);
+
+      ctx.fillStyle = ink("--fg-dim");
+      ctx.font = "10px 'Typus Mono 95', monospace";
+      ctx.textAlign = "center";
+      ctx.fillText(String(i + 1).padStart(2, "0"), x + W / 2, y + 22);
+
+      ctx.save();
+      ctx.translate(x + W / 2, y + 92);
+      ctx.scale(72 / 46, 72 / 46);
+      ctx.translate(-23, -23);
+      if (date) {
+        ctx.fillStyle = ink("--red");
+        ctx.fill(seal.edge);
+        ctx.globalAlpha = 0.6;
+        ctx.strokeStyle = ink("--paper");
+        ctx.stroke(seal.inner);
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = ink("--paper");
+        ctx.font = "22px 'Yuji Syuku', serif";
+        ctx.fillText(page.glyph, 23, 31);
+      } else {
+        ctx.setLineDash([2, 4]);
+        ctx.strokeStyle = ink("--border");
+        ctx.stroke(seal.edge);
+      }
+      ctx.restore();
+
+      ctx.fillStyle = date ? ink("--fg-dim") : ink("--border");
+      ctx.font = "10px 'Typus Mono 95', monospace";
+      ctx.fillText(date ?? "····", x + W / 2, y + 170);
+      ctx.fillStyle = date ? ink("--fg-dim") : ink("--cursor");
+      ctx.font = "300 15px Kalam, cursive";
+      ctx.fillText(date ? page.note : page.hint, x + W / 2, y + 220);
+    });
+
+    const earned = Object.keys(state.seals).length;
+    ctx.textAlign = "left";
+    ctx.fillStyle = ink("--fg-dim");
+    ctx.font = "11px 'Typus Mono 95', monospace";
+    ctx.fillText(
+      `seal book · ${earned} of ${SEALS.length} · sw.szymon-wilczek.me/seals`,
+      pad,
+      pad + rows * H + 28,
+    );
+
+    const link = document.createElement("a");
+    link.download = "seal-book.png";
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+  });
+</script>
+
+<style>
+  .seals-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem 3rem;
+  }
+
+  .seals-head > div {
+    max-width: 38.75rem;
+  }
+
+  .seals-head h1 {
+    margin: 0;
+  }
+
+  .lede {
+    margin: 1.125rem 0 0;
+    color: var(--fg-dim);
+  }
+
+  .tally {
+    margin: 0;
+    font-weight: 300;
+    font-size: 1.25rem;
+    color: var(--fg-dim);
+    transform: rotate(-2deg);
+  }
+
+  .tally span:last-child {
+    color: var(--cursor);
+  }
+
+  .book {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    background: var(--paper);
+    border-radius: 2px 4px 3px 5px;
+    box-shadow:
+      0 1px 0 var(--border),
+      0 26px 40px -30px rgba(0, 0, 0, 0.6);
+  }
+
+  .page {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    min-height: 250px;
+    padding: 18px 10px 16px;
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .page:nth-child(even) {
+    background: var(--bg-main);
+  }
+
+  .page-n,
+  .page-date {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--fg-dim);
+  }
+
+  .page-date {
+    writing-mode: vertical-rl;
+    letter-spacing: 0.06em;
+    color: var(--border);
+  }
+
+  .page-seal {
+    width: 72px;
+    height: 72px;
+    overflow: visible;
+  }
+
+  .seal-edge {
+    fill: none;
+    stroke: var(--border);
+    stroke-width: 1;
+    stroke-dasharray: 2 4;
+    stroke-linecap: round;
+  }
+
+  .seal-inner,
+  .page-seal text {
+    display: none;
+  }
+
+  .page-note {
+    font-weight: 300;
+    font-size: 0.9375rem;
+    line-height: 1.25;
+    text-align: center;
+    color: var(--cursor);
+  }
+
+  .page-doors {
+    margin-top: -0.375rem;
+    font-weight: 300;
+    font-size: 0.8125rem;
+    color: var(--fg-dim);
+  }
+
+  .is-earned .page-seal {
+    rotate: var(--tilt);
+  }
+
+  .is-earned .seal-edge {
+    fill: var(--red);
+    stroke: none;
+    opacity: 0.88;
+  }
+
+  .is-earned .seal-inner {
+    display: inline;
+    fill: none;
+    stroke: var(--paper);
+    stroke-width: 1;
+    opacity: 0.6;
+  }
+
+  .is-earned .page-seal text {
+    display: inline;
+    fill: var(--paper);
+    font-family: var(--font-seal);
+    font-size: 22px;
+  }
+
+  .is-earned .page-date,
+  .is-earned .page-note {
+    color: var(--fg-dim);
+  }
+
+  .book-foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.125rem 2.5rem;
+    margin-top: 1.875rem;
+  }
+
+  .book-foot p {
+    max-width: 38.75rem;
+    margin: 0;
+    font-size: 1rem;
+    color: var(--fg-dim);
+  }
+
+  .book-actions {
+    display: flex;
+    gap: 1.25rem;
+  }
+
+  .book-actions button {
+    min-height: 44px;
+    padding: 0;
+    border: 0;
+    background: none;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--fg-link);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+  }
+
+  .book-actions .start-over {
+    color: var(--fg-dim);
+  }
+
+  @media (max-width: 47.99em) {
+    .book {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .page {
+      min-height: 210px;
+    }
+
+    .page:nth-child(even) {
+      background: none;
+    }
+
+    .page:nth-child(4n + 2),
+    .page:nth-child(4n + 3) {
+      background: var(--bg-main);
+    }
+
+    .page-seal {
+      width: 64px;
+      height: 64px;
+    }
+  }
+</style>
