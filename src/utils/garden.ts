@@ -90,8 +90,12 @@ export function earn(glyph: string): boolean {
     state.seals[glyph] = stampDate();
     fresh = true;
   });
-  if (fresh) window.dispatchEvent(new CustomEvent("garden-seal", { detail: { glyph } }));
-  return fresh;
+  if (!fresh) return false;
+  // wait for every script on the page, so the stamping is listening
+  const tell = () => window.dispatchEvent(new CustomEvent("garden-seal", { detail: { glyph } }));
+  if (document.readyState === "complete") tell();
+  else window.addEventListener("load", tell, { once: true });
+  return true;
 }
 
 export function walk(path: string) {

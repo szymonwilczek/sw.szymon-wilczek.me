@@ -149,3 +149,45 @@
   font-size: 0.6875rem;
   color: var(--fg-dim);
 }
+
+.hanko-edge {
+  fill: var(--red);
+}
+
+.hanko-inner {
+  fill: none;
+  stroke: var(--paper);
+  stroke-width: 1;
+  opacity: 0.6;
+}
+
+.hanko text {
+  fill: var(--paper);
+  font-family: var(--font-seal);
+  font-size: 22px;
+}
+
+.stamp-press {
+  position: fixed;
+  top: 5.5rem;
+  right: clamp(1rem, 4vw, 3rem);
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  pointer-events: none;
+}
+
+.stamp-press .hanko {
+  rotate: -9deg;
+  filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.2));
+}
+
+.stamp-press-note {
+  order: -1;
+  font-family: var(--font-hand);
+  font-weight: 300;
+  font-size: 1rem;
+  color: var(--cursor);
+  rotate: -3deg;
+}

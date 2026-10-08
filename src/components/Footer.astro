@@ -1,4 +1,6 @@
 ---
+import { HANKO_EDGE } from "../utils/hanko";
+
 const currentYear = new Date().getFullYear();
 
 const links = [
@@ -14,6 +16,15 @@ const links = [
     {links.map((link) => (
       <a href={link.href}>{link.label}</a>
     ))}
+    <a href="/seals/" class="seal-count" aria-label="seal book" hidden>
+      <svg width="14" height="14" viewBox="0 0 46 46" aria-hidden="true">
+        <path d={HANKO_EDGE}></path>
+        <text x="23" y="31" text-anchor="middle">
+          狼
+        </text>
+      </svg>
+      <span class="seal-count-n"></span>
+    </a>
   </nav>
   <span>
     © {currentYear} Szymon Wilczek · written in Org, built with Astro ·
@@ -53,6 +64,30 @@ const links = [
   }
 
   .footer-nav a:hover {
+    color: var(--fg-main);
+  }
+
+  .seal-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+
+  .seal-count[hidden] {
+    display: none;
+  }
+
+  .seal-count path {
+    fill: var(--red);
+  }
+
+  .seal-count text {
+    fill: var(--paper);
+    font-family: var(--font-seal);
+    font-size: 26px;
+  }
+
+  .seal-count-n {
     color: var(--fg-main);
   }
 
