@@ -17,6 +17,7 @@ for (const p of PROJECTS) {
 // Without stats from GitHub, "last touched" falls back to when work started
 const touched = (p: (typeof PROJECTS)[number]) => stats.get(p.title)?.pushed ?? p.date;
 const hasStats = stats.size > 0;
+const sampled = [...stats.values()].some((s) => s.sample);
 
 const pinned = PROJECTS.filter((p) => p.pinned);
 const rest = PROJECTS.filter((p) => !p.pinned).sort((a, b) =>
@@ -51,7 +52,14 @@ const search = (p: (typeof PROJECTS)[number]) =>
         line, a language and the way to its code.
       </p>
     </div>
-    {hasStats && <p class="aside hand">the ink is thickest where I worked.</p>}
+    {
+      hasStats && (
+        <p class="aside hand">
+          the ink is thickest where I worked.
+          {sampled && <span class="sampled">sample ink · no GITHUB_TOKEN here</span>}
+        </p>
+      )
+    }
   </header>
 
   <Divider from={640} to={860} />
@@ -265,6 +273,15 @@ const search = (p: (typeof PROJECTS)[number]) =>
   .lede {
     margin: 1.125rem 0 0;
     color: var(--fg-dim);
+  }
+
+  .sampled {
+    display: block;
+    margin-top: 0.25rem;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--red);
+    transform: none;
   }
 
   .aside {

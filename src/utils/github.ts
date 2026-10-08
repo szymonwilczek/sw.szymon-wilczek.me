@@ -9,6 +9,7 @@ export interface RepoStats {
   pushed: string;
   days: number[][];
   last: { subject: string; date: string } | null;
+  sample?: boolean;
 }
 
 const API = "https://api.github.com/repos/";
@@ -63,10 +64,46 @@ async function load(repo: string, token: string): Promise<RepoStats | null> {
   }
 }
 
-/** Stats for "owner/repo", or null without a token or when GitHub fails */
+const SUBJECTS = [
+  "fix: keep the cursor inside the frame",
+  "docs: say what the flags do",
+  "refactor: split the parser in two",
+  "feat: read the config once",
+  "chore: bump dependencies",
+  "test: cover the empty input",
+];
+
+// seeded by the repository
+function sample(repo: string): RepoStats {
+  let seed = 7;
+  for (const ch of repo) seed = (seed * 31 + ch.charCodeAt(0)) % 2147483647;
+  const rnd = () => {
+    seed = (seed * 16807) % 2147483647;
+    return (seed - 1) / 2147483646;
+  };
+  const start = Math.floor(rnd() * 30);
+  let level = rnd() * 0.5;
+  const days = Array.from({ length: 52 }, (_, week) => {
+    level = Math.min(1, Math.max(0, level + (rnd() - 0.5) * 0.7));
+    const rest = week < start || rnd() < 0.18;
+    return Array.from({ length: 7 }, () => (rest ? 0 : Math.round(level * rnd() * 6)));
+  });
+  const ago = Math.floor(rnd() * 40);
+  const date = new Date(Date.now() - ago * 86400000).toISOString();
+  return {
+    stars: Math.floor(rnd() * rnd() * 60),
+    forks: Math.floor(rnd() * rnd() * 8),
+    pushed: date,
+    days,
+    last: { subject: SUBJECTS[Math.floor(rnd() * SUBJECTS.length)], date },
+    sample: true,
+  };
+}
+
+/** Stats for "owner/repo": from GitHub with a token, a sample locally without one, else null */
 export function repoStats(repo: string): Promise<RepoStats | null> {
   const token = process.env.GITHUB_TOKEN;
-  if (!token) return Promise.resolve(null);
+  if (!token) return Promise.resolve(process.env.CI ? null : sample(repo));
   if (!cache.has(repo)) cache.set(repo, load(repo, token));
   return cache.get(repo)!;
 }
