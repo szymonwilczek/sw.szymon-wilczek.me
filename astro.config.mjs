@@ -22,6 +22,7 @@ export default defineConfig({
       filter: (page) =>
         !page.includes("/vault") &&
         !page.includes("/404") &&
+        !page.includes("/map/") &&
         !page.endsWith(".org") &&
         !page.endsWith(".asc"),
       changefreq: "weekly",

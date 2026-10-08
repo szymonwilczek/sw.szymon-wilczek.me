@@ -1,0 +1,1077 @@
+---
+// Hidden map: the whole site drawn as a garden.
+// Not linked from any page and left out of the sitemap; the riddle doors lead here.
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Divider from "../components/Divider.astro";
+import { getCollection } from "astro:content";
+import { getAllAlbums } from "../utils/albums";
+import { calculateReadingStats } from "../utils/reading-time";
+import { writingSlug } from "../utils/format";
+import { HANKO_EDGE } from "../utils/hanko";
+
+const writings = (await getCollection("writings"))
+  .sort((a, b) => a.data.pubDate.valueOf() - b.data.pubDate.valueOf())
+  .map((post) => ({
+    slug: writingSlug(post.id),
+    title: post.data.title,
+    minutes: calculateReadingStats(post.body).minutes,
+  }));
+const albums = (await getAllAlbums()).slice().reverse();
+const files = await getCollection("files");
+
+// plants grow as tall as the essay is long
+const step = Math.min(50, 260 / Math.max(writings.length - 1, 1));
+const plants = writings.map((w, i) => {
+  const x = Math.round(240 + i * step);
+  const top = 676 - 40 - Math.min(w.minutes, 40) * 8;
+  const mid = Math.round((676 + top) / 2);
+  return { ...w, x, x1: x + (i % 2 ? 8 : -8), top, mid };
+});
+
+// lilies on the pond, one per album
+const PADS = [
+  [626, 400, -8],
+  [684, 372, 6],
+  [740, 410, -3],
+  [786, 368, 10],
+  [706, 438, -12],
+];
+const lilies = albums.map((album, i) => {
+  const [x, y, r] = PADS[i] ?? [
+    610 + ((i * 47) % 190),
+    340 + ((i * 31) % 110),
+    ((i * 7) % 20) - 10,
+  ];
+  return { ...album, x, y, r };
+});
+
+const STONES = [0, 1, 2, 3, 4].map((i) => ({ x: 340 + i * 92, y: 806 + (i % 2 ? -10 : 4) }));
+
+const PAWS = [
+  [1050, 600, -20],
+  [1040, 572, -14],
+  [1030, 546, -22],
+  [1018, 514, -10],
+  [1012, 380, -16],
+  [1000, 350, -24],
+  [984, 318, -30],
+];
+
+const LEAF =
+  "M0 6 Q -4 5 -6 6 Q -9 5 -8 2 Q -11 0 -10 -2 Q -8 -3 -6 -2 Q -7 -6 -5 -7 Q -3 -6 -2 -4 Q -1 -8 0 -10 Q 1 -8 2 -4 Q 3 -6 5 -7 Q 7 -6 6 -2 Q 8 -3 10 -2 Q 11 0 8 2 Q 9 5 6 6 Q 4 5 0 6 Z";
+const KIGO = [
+  [744, 232, 24, 1],
+  [186, 150, -40, 0.8],
+  [1010, 494, 70, 0.9],
+];
+
+// paths between places; a path is inked once its place has been walked
+const PATHS = [
+  { to: "/writings", d: "M156 846 C 168 790, 210 760, 238 712" },
+  { to: "/photos", d: "M380 640 C 430 580, 500 560, 560 520 C 600 494, 610 470, 620 456" },
+  { to: "/files", d: "M812 452 C 850 500, 830 560, 880 590 C 906 606, 920 620, 930 636" },
+  { to: "/files/verify", d: "M156 846 C 230 812, 300 806, 380 800 C 520 792, 700 806, 806 784" },
+  { to: "/about", d: "M560 520 C 500 420, 420 320, 330 270" },
+  { to: "/vault", d: "M820 330 C 860 280, 880 240, 892 208" },
+  { to: "/contact", d: "M238 712 C 180 660, 120 640, 96 612" },
+];
+
+const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
+
+const PLACES = [
+  {
+    href: "/writings/",
+    title: "writings · the bed",
+    sub: plural(writings.length, "essay", "essays"),
+  },
+  { href: "/photos/", title: "photos · the pond", sub: plural(albums.length, "album", "albums") },
+  { href: "/photos/stamps/", title: "the jetty", sub: "stamp album" },
+  { href: "/files/", title: "files · the shed", sub: plural(files.length, "file", "files") },
+  { href: "/files/verify/", title: "the bench", sub: "check a file against its tag" },
+  { href: "/vault/", title: "the well, sealed", sub: "vault" },
+  { href: "/about/", title: "stone lantern", sub: "about" },
+  { href: "/contact/", title: "the mailbox", sub: "contact" },
+  { href: "/seals/", title: "tracks?", sub: "the seal book" },
+];
+const place = (href: string) => PLACES.find((p) => p.href === href)!;
+---
+
+<BaseLayout
+  title="A map of the garden"
+  description="Everything here, drawn as the place it pretends to be."
+  noindex
+>
+  <header class="map-head">
+    <div>
+      <p class="found hand">
+        <svg class="hanko" width="26" height="26" viewBox="0 0 46 46" aria-hidden="true">
+          <path class="hanko-edge" d={HANKO_EDGE}></path>
+          <text x="23" y="31" text-anchor="middle">
+            北
+          </text>
+        </svg>
+        you found it.
+      </p>
+      <h1>A map of the garden</h1>
+      <p class="lede">
+        Everything here, drawn as the place it pretends to be. Touch anything on the map to walk
+        there. Plants grow as tall as the essay is long; the paths you have already walked are inked
+        in.
+      </p>
+    </div>
+    <p class="aside hand">not to scale. nothing here is.</p>
+  </header>
+
+  <Divider from={300} to={520} />
+
+  <p class="touch-hint hand">drag to wander → · tap a place to read its tag, tap again to go</p>
+
+  <div class="map-scroll">
+    <div class="map-inner">
+      <svg class="map" viewBox="0 0 1100 880" role="img" aria-labelledby="map-title">
+        <title id="map-title">Hand-drawn map of the site</title>
+
+        <!-- the wall -->
+        <path
+          class="line"
+          d="M196 846 C 420 852, 760 840, 1062 848 C 1070 610, 1064 300, 1068 34 C 760 28, 420 38, 36 30 C 30 300, 38 610, 32 846 L 118 844"
+          stroke-width="1.6"
+        ></path>
+        <path
+          class="line fill-dim"
+          d="M1068 34 C 1052 52, 1040 48, 1030 62 C 1046 66, 1058 60, 1068 72"
+          stroke-width="1.2"
+        ></path>
+        <path
+          class="line"
+          d="M118 844 C 117 836, 119 828, 118 820 M 196 846 C 197 838, 195 830, 196 822"
+          stroke-width="1.6"
+        ></path>
+        <text class="label dim" x="128" y="872" font-size="15">
+          the gate
+        </text>
+
+        {PATHS.map((path) => (
+          <path class="walk" data-path={path.to} d={path.d} />
+        ))}
+
+        <circle class="here" cx="156" cy="840" r="7"></circle>
+        <circle class="here-ring" cx="156" cy="840" r="14"></circle>
+        <text class="label came" x="40" y="812" font-size="16">
+          you came in by the gate
+        </text>
+
+        <!-- writings -->
+        <a
+          href="/writings/"
+          class="place"
+          data-title={place("/writings/").title}
+          data-sub={place("/writings/").sub}
+        >
+          <path
+            class="soil"
+            d="M210 560 C 290 550, 430 556, 520 562 C 528 610, 524 650, 520 690 C 430 698, 290 694, 214 690 C 206 650, 210 600, 210 560 Z"
+            stroke-width="1.3"
+          ></path>
+          <path
+            class="line faint"
+            d="M226 684 C 300 680, 420 682, 504 680"
+            stroke-dasharray="1 5"
+          ></path>
+          <text class="label" x="216" y="720" font-size="20">
+            writings · {writings.length} essays
+          </text>
+        </a>
+        {plants.map((p) => (
+          <a
+            href={`/writings/${p.slug}/`}
+            class="place plant"
+            data-slug={p.slug}
+            data-title={p.title}
+            data-sub={`${p.minutes} min`}
+          >
+            <rect class="hit" x={p.x - 18} y={p.top - 10} width="36" height={676 - p.top + 10} />
+            <path
+              class="stem"
+              d={`M${p.x} 676 C ${p.x1} ${p.mid}, ${p.x} ${p.mid}, ${p.x} ${p.top}`}
+            />
+            <path
+              class="leafy"
+              d={`M${p.x} ${p.mid + 10} c -10 -4, -16 -12, -16 -18 c 8 2, 14 8, 16 18 Z M ${p.x} ${p.mid - 14} c 10 -4, 16 -12, 16 -18 c -8 2, -14 8, -16 18 Z`}
+            />
+            <circle class="bud" cx={p.x} cy={p.top} r="3" />
+          </a>
+        ))}
+
+        <!-- photos -->
+        <a
+          href="/photos/"
+          class="place"
+          data-title={place("/photos/").title}
+          data-sub={place("/photos/").sub}
+        >
+          <path
+            class="line fill-sea"
+            d="M586 320 C 656 286, 776 300, 816 340 C 852 380, 826 450, 756 462 C 686 474, 606 470, 582 420 C 564 384, 556 340, 586 320 Z"
+            stroke-width="1.4"
+          ></path>
+          <path
+            class="line"
+            d="M616 360 q 5 -3 10 0 M 706 340 q 5 -3 10 0 M 776 420 q 5 -3 10 0 M 656 440 q 5 -3 10 0"
+            stroke-width="1"
+          ></path>
+          <text class="label" x="656" y="500" font-size="20">
+            photos · {albums.length} albums
+          </text>
+        </a>
+        {lilies.map((lily) => (
+          <a
+            href={`/photos/${lily.slug}/`}
+            class="place lily"
+            data-title={`${lily.stampNum} · ${lily.title}`}
+            data-sub={`${lily.date.getFullYear()} · ${lily.photoCount} frames`}
+          >
+            <g transform={`translate(${lily.x} ${lily.y}) rotate(${lily.r})`}>
+              <rect class="fill-paper ink-thin" x="-13" y="-15" width="26" height="30" />
+              <rect class="fill-tape" x="-10" y="-12" width="20" height="18" />
+              <text class="lily-n" x="0" y="13" text-anchor="middle">
+                {lily.stampNum}
+              </text>
+            </g>
+          </a>
+        ))}
+        <circle class="ripple" cx="786" cy="368" r="24" stroke-width="0.9" opacity="0.6"></circle>
+        <circle class="ripple" cx="786" cy="368" r="34" stroke-width="0.7" opacity="0.35"></circle>
+        <a
+          href="/photos/stamps/"
+          class="place"
+          data-title={place("/photos/stamps/").title}
+          data-sub={place("/photos/stamps/").sub}
+        >
+          <rect class="hit" x="448" y="396" width="126" height="64"></rect>
+          <path
+            class="line"
+            d="M570 404 C 548 406, 530 408, 508 410 M 570 418 C 548 420, 530 422, 508 424 M 520 404 L 518 430 M 540 404 L 540 428 M 560 404 L 560 426"
+            stroke-width="1.3"
+          ></path>
+          <text class="label dim" x="452" y="452" font-size="15">
+            the jetty · stamp album
+          </text>
+        </a>
+
+        <!-- files -->
+        <a
+          href="/files/"
+          class="place"
+          data-title={place("/files/").title}
+          data-sub={place("/files/").sub}
+        >
+          <path
+            class="line fill-alt"
+            d="M866 672 C 890 650, 918 628, 944 612 C 972 630, 998 650, 1024 674 C 990 679, 900 679, 866 672 Z"
+            stroke-width="1.5"
+          ></path>
+          <path
+            class="line"
+            d="M896 652 C 902 656, 906 662, 908 668 M 924 636 C 928 644, 930 654, 932 666 M 952 630 C 956 640, 960 652, 962 666 M 980 644 C 984 652, 988 660, 990 670"
+            stroke-width="1"
+            opacity="0.7"
+          ></path>
+          <path
+            class="line fill-dim"
+            d="M884 677 C 881 706, 886 736, 883 764 C 920 767, 972 763, 1006 766 C 1008 736, 1003 706, 1006 677"
+            stroke-width="1.5"
+          ></path>
+          <path
+            class="line fill-alt"
+            d="M930 765 C 929 748, 931 730, 930 714 C 939 710, 951 711, 958 714 C 960 732, 957 748, 959 765"
+            stroke-width="1.3"
+          ></path>
+          <circle class="fill-ink" cx="952" cy="740" r="1.8"></circle>
+          <path class="line" d="M976 680 C 975 690, 976 696, 975 702" stroke-width="0.9"></path>
+          <path
+            class="line fill-paper"
+            d="M967 702 C 974 700, 980 701, 986 703 C 987 712, 985 720, 986 728 C 980 730, 973 729, 967 728 C 966 720, 968 710, 967 702 Z"
+            stroke-width="1"
+          ></path>
+          <text class="label" x="872" y="792" font-size="18">
+            files · the shed
+          </text>
+        </a>
+        <a
+          href="/files/verify/"
+          class="place"
+          data-title={place("/files/verify/").title}
+          data-sub={place("/files/verify/").sub}
+        >
+          <rect class="hit" x="766" y="726" width="100" height="94"></rect>
+          <path
+            class="line"
+            d="M800 760 C 818 756, 840 758, 858 762 M 806 762 C 806 772, 808 778, 806 784 M 852 763 C 853 772, 851 778, 852 784"
+            stroke-width="2"
+          ></path>
+          <g transform="translate(830 744) rotate(-8)">
+            <path
+              class="fill-red"
+              d="M-9 -9 Q0 -11 9 -9 Q11 0 9 9 Q0 11 -9 9 Q-11 0 -9 -9 Z"
+              opacity="0.9"
+            ></path>
+            <text class="seal-glyph" x="0" y="5" text-anchor="middle" font-size="12">
+              合
+            </text>
+          </g>
+          <text class="label dim" x="770" y="812" font-size="14">
+            the bench · verify
+          </text>
+        </a>
+
+        <!-- vault -->
+        <a
+          href="/vault/"
+          class="place"
+          data-title={place("/vault/").title}
+          data-sub={place("/vault/").sub}
+        >
+          <ellipse
+            class="line fill-alt"
+            cx="900"
+            cy="172"
+            rx="58"
+            ry="22"
+            stroke-width="1.5"
+          ></ellipse>
+          <path
+            class="line fill-dim"
+            d="M842 172 C 841 188, 843 202, 842 216 C 870 234, 930 234, 958 216 C 957 202, 959 188, 958 172"
+            stroke-width="1.5"
+          ></path>
+          <path
+            class="line faint"
+            d="M850 198 C 858 199, 864 199, 870 200 M 884 208 C 892 207, 902 208, 910 208 M 924 202 C 934 201, 942 199, 950 198"
+            stroke-width="1.2"
+          ></path>
+          <path
+            class="fill-red"
+            d="M900 152 C 908 151, 913 156, 914 162 C 917 169, 913 176, 906 179 C 898 182, 889 179, 886 172 C 883 165, 887 156, 894 153 C 896 152, 898 152, 900 152 Z"
+          ></path>
+          <text class="seal-glyph" x="900" y="171" text-anchor="middle" font-size="13">
+            封
+          </text>
+          <text class="label" x="850" y="264" font-size="18">
+            vault · the well, sealed
+          </text>
+        </a>
+
+        <!-- about -->
+        <a
+          href="/about/"
+          class="place"
+          data-title={place("/about/").title}
+          data-sub={place("/about/").sub}
+        >
+          <g class="glow">
+            <circle cx="300" cy="186" r="46" opacity="0.1"></circle>
+            <circle cx="300" cy="186" r="24" opacity="0.16"></circle>
+          </g>
+          <path
+            class="line fill-dim"
+            d="M300 150 C 300 146, 301 142, 300 138 M 280 160 C 286 152, 314 152, 320 160 C 312 163, 288 163, 280 160 Z"
+            stroke-width="1.4"
+          ></path>
+          <path
+            class="line fill-dim"
+            d="M287 163 C 286 172, 288 184, 287 196 C 296 198, 304 198, 313 196 C 312 184, 314 172, 313 163"
+            stroke-width="1.4"
+          ></path>
+          <path
+            class="flame"
+            d="M294 172 C 298 171, 302 171, 306 172 C 307 178, 306 184, 306 188 C 302 189, 298 189, 294 188 C 293 182, 294 177, 294 172 Z"
+          ></path>
+          <path
+            class="line fill-dim"
+            d="M276 200 C 288 194, 312 194, 324 200 C 312 204, 288 204, 276 200 Z M 293 204 C 292 216, 294 228, 292 238 M 307 204 C 308 216, 306 228, 308 238 M 282 240 C 294 236, 306 236, 318 240"
+            stroke-width="1.4"
+          ></path>
+          <text class="label" x="252" y="268" font-size="18">
+            about · stone lantern
+          </text>
+        </a>
+
+        <!-- contact -->
+        <a
+          href="/contact/"
+          class="place"
+          data-title={place("/contact/").title}
+          data-sub={place("/contact/").sub}
+        >
+          <rect class="hit" x="52" y="490" width="80" height="124"></rect>
+          <path class="line" d="M90 610 C 89 590, 91 572, 90 552" stroke-width="1.6"></path>
+          <path
+            class="line fill-dim"
+            d="M72 552 C 72 538, 78 530, 90 529 C 102 530, 108 538, 108 552 C 96 554, 84 554, 72 552 Z"
+            stroke-width="1.4"
+          ></path>
+          <path
+            class="flag"
+            d="M108 538 C 113 537, 117 538, 120 539 C 121 543, 120 546, 121 549"
+          ></path>
+          <text class="label" x="58" y="512" font-size="17">
+            contact
+          </text>
+        </a>
+
+        <!-- the years so far -->
+        <g
+          class="place years"
+          tabindex="0"
+          data-title="stepping stones"
+          data-sub="the years so far · [PLACEHOLDER] CV"
+        >
+          {STONES.map((s) => (
+            <>
+              <path
+                class="line fill-alt"
+                d={`M${s.x} ${s.y} c 10 -9, 30 -9, 38 -1 c 6 7, -2 15, -18 15 c -16 0, -28 -6, -20 -14 Z`}
+                stroke-width="1.1"
+              />
+              <text class="stone-year" x={s.x + 18} y={s.y + 4} text-anchor="middle">
+                20[YY]
+              </text>
+            </>
+          ))}
+          <text class="label dim" x="330" y="842" font-size="16">
+            stepping stones · the years so far
+          </text>
+        </g>
+
+        <!-- a wolf passed through -->
+        <a
+          href="/seals/"
+          class="place"
+          data-title={place("/seals/").title}
+          data-sub={place("/seals/").sub}
+        >
+          <rect class="hit" x="970" y="300" width="96" height="320"></rect>
+          <g class="paws">
+            {PAWS.map(([x, y, r]) => (
+              <g transform={`translate(${x} ${y}) rotate(${r})`}>
+                <ellipse cx="0" cy="2" rx="2.6" ry="2.2" />
+                <circle cx="-2.6" cy="-2.4" r="1" />
+                <circle cx="0" cy="-3.4" r="1" />
+                <circle cx="2.6" cy="-2.4" r="1" />
+              </g>
+            ))}
+          </g>
+          <text class="label dim" x="1034" y="680" font-size="14" transform="rotate(-72 1034 680)">
+            tracks?
+          </text>
+        </a>
+
+        <!-- 北 -->
+        <g transform="translate(560 120)">
+          <path
+            class="fill-red"
+            d="M0 -34 C 3 -24, 5 -14, 6 -6 L 0 0 L -6 -6 C -5 -14, -3 -24, 0 -34 Z"
+          ></path>
+          <path
+            class="line"
+            d="M0 34 C 3 24, 5 14, 6 6 L 0 0 L -6 6 C -5 14, -3 24, 0 34 Z M -34 0 C -24 3, -14 5, -6 6 L 0 0 L -6 -6 C -14 -5, -24 -3, -34 0 Z M 34 0 C 24 3, 14 5, 6 6 L 0 0 L 6 -6 C 14 -5, 24 -3, 34 0 Z"
+            stroke-width="1.1"
+          ></path>
+          <text class="north" x="0" y="-42" text-anchor="middle">
+            北
+          </text>
+        </g>
+
+        <!-- trees -->
+        <path
+          class="leafy"
+          d="M128 96 C 120 84, 128 70, 140 72 C 144 60, 162 60, 166 72 C 180 70, 186 86, 176 96 C 184 104, 176 118, 162 114 C 156 124, 138 124, 134 114 C 120 116, 116 102, 128 96 Z"
+          stroke-width="1.2"
+        ></path>
+        <path class="line" d="M152 116 C 151 126, 153 136, 152 146" stroke-width="2"></path>
+        <path
+          class="leafy"
+          d="M972 432 C 966 422, 972 410, 982 412 C 986 402, 1000 402, 1004 412 C 1016 410, 1020 424, 1012 432 C 1018 440, 1010 450, 1000 448 C 994 456, 980 456, 978 448 C 968 450, 964 438, 972 432 Z"
+          stroke-width="1.2"
+        ></path>
+        <path class="line" d="M992 450 C 991 460, 993 468, 992 476" stroke-width="2"></path>
+        <path
+          class="leafy"
+          d="M690 196 C 684 186, 690 174, 700 176 C 704 166, 718 166, 722 176 C 734 174, 738 188, 730 196 C 736 204, 728 214, 718 212 C 712 220, 698 220, 696 212 C 686 214, 682 202, 690 196 Z"
+          stroke-width="1.2"
+        ></path>
+        <path class="line" d="M710 214 C 709 224, 711 232, 710 240" stroke-width="2"></path>
+
+        <!-- the season -->
+        {KIGO.map(([x, y, r, s]) => (
+          <g transform={`translate(${x} ${y}) rotate(${r}) scale(${s})`} class="kigo-map">
+            <path class="kigo-autumn" d={LEAF} />
+            <path class="kigo-spring" d="M0 -6 C 5 -6, 7 0, 0 7 C -7 0, -5 -6, 0 -6 Z" />
+            <circle class="kigo-winter" r="3.4" />
+            <circle class="kigo-summer" r="2.2" />
+          </g>
+        ))}
+
+        <g class="fireflies">
+          <circle cx="232" cy="120" r="2"></circle>
+          <circle cx="376" cy="212" r="1.6" opacity="0.7"></circle>
+          <circle cx="660" cy="270" r="1.8"></circle>
+          <circle cx="540" cy="620" r="1.4" opacity="0.6"></circle>
+        </g>
+      </svg>
+
+      <div class="map-tag paper" role="status" hidden>
+        <span class="map-tag-title"></span>
+        <span class="map-tag-sub"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="legend hand">
+    <span>
+      <svg width="44" height="8" viewBox="0 0 44 8" aria-hidden="true">
+        <path class="legend-walked" d="M2 4 C 14 2, 28 6, 42 4"></path>
+      </svg>
+      paths you have walked
+    </span>
+    <span>
+      <svg width="44" height="8" viewBox="0 0 44 8" aria-hidden="true">
+        <path class="legend-not" d="M2 4 C 14 2, 28 6, 42 4"></path>
+      </svg>
+      not yet
+    </span>
+    <span>
+      <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
+        <circle class="legend-read" cx="7" cy="7" r="4"></circle>
+      </svg>
+      an essay you have read flowers
+    </span>
+    <a href="#plain" class="plain-link">
+      the same, as a plain list ↓
+    </a>
+  </div>
+
+  <section id="plain" class="plain" aria-label="The map as a list">
+    <h2>The same, as a plain list</h2>
+    <ul>
+      {PLACES.map((p) => (
+        <li>
+          <a href={p.href}>{p.title}</a> <span>— {p.sub}</span>
+          {p.href === "/writings/" && (
+            <ul>
+              {writings.map((w) => (
+                <li>
+                  <a href={`/writings/${w.slug}/`}>{w.title}</a> <span>— {w.minutes} min</span>
+                </li>
+              ))}
+            </ul>
+          )}
+          {p.href === "/photos/" && (
+            <ul>
+              {albums.map((a) => (
+                <li>
+                  <a href={`/photos/${a.slug}/`}>{a.title}</a> <span>— {a.photoCount} frames</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </li>
+      ))}
+      <li>
+        stepping stones <span>— the years so far · [PLACEHOLDER] CV</span>
+      </li>
+    </ul>
+  </section>
+</BaseLayout>
+
+<script>
+  import { earn, load } from "../utils/garden";
+
+  const svg = document.querySelector<SVGSVGElement>(".map")!;
+  const inner = document.querySelector<HTMLElement>(".map-inner")!;
+  const tag = document.querySelector<HTMLElement>(".map-tag")!;
+  const state = load();
+
+  earn("北");
+
+  // paths walked are inked; the rest stay dotted
+  const walked = (to: string) => state.paths.some((p) => p === to || p.startsWith(`${to}/`));
+  svg.querySelectorAll<SVGPathElement>(".walk").forEach((path) => {
+    path.classList.toggle("is-walked", walked(path.dataset.path!));
+  });
+
+  // an essay read to the end flowers
+  svg.querySelectorAll<SVGElement>(".plant").forEach((plant) => {
+    if (!state.read.includes(plant.dataset.slug!)) return;
+    plant.classList.add("is-read");
+    plant.dataset.sub += " · already read ✓";
+  });
+
+  // where the reader came in from
+  const came = svg.querySelector(".came")!;
+  try {
+    const from = document.referrer ? new URL(document.referrer) : null;
+    if (from && from.origin === location.origin && from.pathname !== location.pathname) {
+      came.textContent = `you came in from ${decodeURI(from.pathname).replace(/(.)\/$/, "$1")}`;
+    } else if (from && from.origin !== location.origin) {
+      came.textContent = "you came in from outside";
+    }
+  } catch {
+    // keep the gate
+  }
+
+  function dusk() {
+    const bg = getComputedStyle(document.documentElement).getPropertyValue("--bg-main").trim();
+    const probe = document.createElement("canvas").getContext("2d")!;
+    probe.fillStyle = bg;
+    const hex = probe.fillStyle.startsWith("#") ? probe.fillStyle : "#ffffff";
+    const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+    svg.classList.toggle("is-dark", 0.299 * r + 0.587 * g + 0.114 * b < 96);
+  }
+  dusk();
+  document.addEventListener("au-theme-change", dusk);
+
+  let shown: Element | null = null;
+  let touch = false;
+
+  function show(place: Element) {
+    const el = place as HTMLElement;
+    tag.querySelector(".map-tag-title")!.textContent = el.dataset.title ?? "";
+    tag.querySelector(".map-tag-sub")!.textContent = el.dataset.sub ?? "";
+    tag.hidden = false;
+    const box = place.getBoundingClientRect();
+    const frame = inner.getBoundingClientRect();
+    const left = box.left - frame.left + box.width / 2 - tag.offsetWidth / 2;
+    tag.style.left = `${Math.max(4, Math.min(left, frame.width - tag.offsetWidth - 4))}px`;
+    tag.style.top = `${Math.max(0, box.top - frame.top - tag.offsetHeight - 8)}px`;
+    shown = place;
+  }
+
+  function hide() {
+    tag.hidden = true;
+    shown = null;
+  }
+
+  svg.querySelectorAll(".place").forEach((place) => {
+    place.addEventListener("pointerenter", (e) => {
+      if ((e as PointerEvent).pointerType === "mouse") show(place);
+    });
+    place.addEventListener("pointerleave", (e) => {
+      if ((e as PointerEvent).pointerType === "mouse") hide();
+    });
+    place.addEventListener("focus", () => show(place));
+    place.addEventListener("blur", hide);
+    place.addEventListener("pointerdown", (e) => {
+      touch = (e as PointerEvent).pointerType !== "mouse";
+    });
+    place.addEventListener("click", (e) => {
+      if (touch && shown !== place) {
+        e.preventDefault();
+        show(place);
+      }
+    });
+  });
+
+  document.addEventListener("pointerdown", (e) => {
+    if (!(e.target as Element).closest(".place")) hide();
+  });
+</script>
+
+<style>
+  .map-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem 3rem;
+  }
+
+  .map-head > div {
+    max-width: 37.5rem;
+  }
+
+  .found {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    margin: 0 0 0.625rem;
+    font-weight: 300;
+    font-size: 1.125rem;
+    color: var(--cursor);
+  }
+
+  .found .hanko {
+    rotate: -6deg;
+  }
+
+  .map-head h1 {
+    margin: 0;
+  }
+
+  .lede {
+    margin: 1.125rem 0 0;
+    color: var(--fg-dim);
+  }
+
+  .aside {
+    margin: 0;
+    font-weight: 300;
+    font-size: 1.1875rem;
+    color: var(--fg-dim);
+    transform: rotate(-2deg);
+  }
+
+  .touch-hint {
+    display: none;
+    margin: 0 0 0.625rem;
+    font-weight: 300;
+    font-size: 1.0625rem;
+    color: var(--fg-dim);
+  }
+
+  .map-inner {
+    position: relative;
+  }
+
+  .map {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+    font-family: var(--font-hand);
+  }
+
+  .line {
+    fill: none;
+    stroke: var(--fg-dim);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .faint {
+    stroke: var(--border);
+  }
+
+  .fill-dim {
+    fill: var(--bg-dim);
+  }
+
+  .fill-alt {
+    fill: var(--bg-alt);
+  }
+
+  .fill-sea {
+    fill: var(--sea);
+  }
+
+  .fill-paper {
+    fill: var(--paper);
+  }
+
+  .fill-tape {
+    fill: var(--tape);
+  }
+
+  .fill-red {
+    fill: var(--red);
+  }
+
+  .fill-ink {
+    fill: var(--fg-dim);
+  }
+
+  .ink-thin {
+    stroke: var(--fg-main);
+    stroke-width: 0.8;
+  }
+
+  .soil {
+    fill: var(--bg-dim);
+    stroke: var(--border);
+  }
+
+  .label {
+    fill: var(--fg-main);
+  }
+
+  .label.dim {
+    fill: var(--fg-dim);
+  }
+
+  .came {
+    fill: var(--cursor);
+  }
+
+  .here {
+    fill: var(--cursor);
+  }
+
+  .here-ring {
+    fill: none;
+    stroke: var(--cursor);
+    stroke-width: 1;
+    opacity: 0.5;
+  }
+
+  .walk {
+    fill: none;
+    stroke: var(--fg-dim);
+    stroke-width: 1.5;
+    stroke-dasharray: 2 9;
+    stroke-linecap: round;
+  }
+
+  .walk.is-walked {
+    stroke-width: 2.2;
+    stroke-dasharray: none;
+    opacity: 0.75;
+  }
+
+  .hit {
+    fill: transparent;
+  }
+
+  .stem {
+    fill: none;
+    stroke: var(--accent-0);
+    stroke-width: 1.6;
+    stroke-linecap: round;
+  }
+
+  .leafy {
+    fill: var(--leaf);
+    stroke: var(--accent-0);
+    stroke-width: 1;
+  }
+
+  .bud {
+    fill: var(--cursor);
+  }
+
+  .plant.is-read .bud {
+    fill: var(--red);
+    r: 5;
+  }
+
+  .plant:is(:hover, :focus-visible) .stem {
+    stroke-width: 2.4;
+  }
+
+  .lily-n {
+    fill: var(--red);
+    font-family: var(--font-serif, Literata, serif);
+    font-style: italic;
+    font-size: 8px;
+  }
+
+  .ripple {
+    fill: none;
+    stroke: var(--fg-dim);
+  }
+
+  .seal-glyph {
+    fill: var(--bg-main);
+    font-family: var(--font-seal);
+  }
+
+  .north {
+    fill: var(--fg-main);
+    font-family: var(--font-seal);
+    font-size: 16px;
+  }
+
+  .stone-year {
+    fill: var(--fg-dim);
+    font-family: var(--font-mono);
+    font-size: 10px;
+  }
+
+  .paws {
+    fill: var(--fg-dim);
+    opacity: 0.55;
+  }
+
+  .flag {
+    fill: none;
+    stroke: var(--red);
+    stroke-width: 1.6;
+    stroke-linecap: round;
+  }
+
+  .flame {
+    fill: var(--tape);
+    opacity: 0.35;
+  }
+
+  .glow,
+  .fireflies {
+    display: none;
+    fill: var(--cursor);
+  }
+
+  .is-dark .glow,
+  .is-dark .fireflies {
+    display: inline;
+  }
+
+  .is-dark .flame {
+    opacity: 1;
+  }
+
+  .place {
+    cursor: pointer;
+    outline: none;
+    text-decoration: none;
+  }
+
+  .place:is(:hover, :focus-visible) .label {
+    fill: var(--fg-link);
+  }
+
+  .place:focus-visible :is(.line, .soil) {
+    stroke: var(--cursor);
+  }
+
+  .years {
+    cursor: default;
+  }
+
+  .kigo-map > * {
+    display: none;
+  }
+
+  .kigo-autumn {
+    fill: var(--red);
+    opacity: 0.7;
+  }
+
+  .kigo-spring {
+    fill: var(--red);
+    opacity: 0.35;
+  }
+
+  .kigo-winter {
+    fill: var(--paper);
+    stroke: var(--border);
+  }
+
+  .kigo-summer {
+    fill: var(--cursor);
+  }
+
+  :global([data-season="autumn"]) .kigo-autumn,
+  :global([data-season="spring"]) .kigo-spring,
+  :global([data-season="winter"]) .kigo-winter,
+  :global([data-season="summer"]) .kigo-summer {
+    display: inline;
+  }
+
+  .map-tag {
+    position: absolute;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    max-width: 16rem;
+    padding: 0.625rem 0.875rem 0.5rem;
+    pointer-events: none;
+    transform: rotate(-1.5deg);
+  }
+
+  .map-tag[hidden] {
+    display: none;
+  }
+
+  .map-tag-title {
+    font-size: 0.9375rem;
+    line-height: 1.3;
+  }
+
+  .map-tag-sub {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    color: var(--fg-dim);
+  }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.875rem 2.25rem;
+    margin-top: 1.75rem;
+    font-weight: 300;
+    font-size: 1.0625rem;
+    color: var(--fg-dim);
+  }
+
+  .legend > span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+  }
+
+  .legend path {
+    fill: none;
+    stroke: var(--fg-dim);
+    stroke-linecap: round;
+  }
+
+  .legend-walked {
+    stroke-width: 2.2;
+  }
+
+  .legend-not {
+    stroke-width: 1.5;
+    stroke-dasharray: 2 7;
+  }
+
+  .legend-read {
+    fill: var(--red);
+  }
+
+  .plain-link {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+  }
+
+  .plain {
+    margin-top: 4rem;
+  }
+
+  .plain h2 {
+    font-size: 1.25rem;
+  }
+
+  .plain ul {
+    margin: 0;
+    padding-left: 1.25rem;
+    line-height: 1.9;
+  }
+
+  .plain span {
+    color: var(--fg-dim);
+  }
+
+  @media (max-width: 47.99em) {
+    .touch-hint {
+      display: block;
+    }
+
+    .map-scroll {
+      overflow-x: auto;
+      margin: 0 -1.25rem;
+      padding: 0 1.25rem 0.5rem;
+      overscroll-behavior-x: contain;
+    }
+
+    .map-inner {
+      width: 820px;
+    }
+
+    .plain-link {
+      margin-left: 0;
+    }
+  }
+</style>
