@@ -24,11 +24,6 @@ const snowEdge =
   `M${s + 3} 15 C ${s + 5} 11, ${s + 12} 9, ${s + 22} 8.6 C ${s + 32} 7.4, ${s + 42} 7.8, ${s + 52} 9.2 ` +
   `C ${s + 64} 8.8, ${s + 76} 9.4, ${s + 86} 10.8 C ${s + 94} 11, ${s + 101} 12, ${s + 105} 15`;
 
-// leaf with rounded lobes
-const leaf =
-  "M0 6 Q -4 5 -6 6 Q -9 5 -8 2 Q -11 0 -10 -2 Q -8 -3 -6 -2 Q -7 -6 -5 -7 Q -3 -6 -2 -4 " +
-  "Q -1 -8 0 -10 Q 1 -8 2 -4 Q 3 -6 5 -7 Q 7 -6 6 -2 Q 8 -3 10 -2 Q 11 0 8 2 Q 9 5 6 6 Q 4 5 0 6 Z";
-
 // ornaments sit in an unstretched layer anchored at the end of the crack
 const anchor = `left: calc(${to / 10}% - 105px)`;
 ---
@@ -80,11 +75,20 @@ const anchor = `left: calc(${to / 10}% - 105px)`;
     </g>
 
     <g class="kigo-autumn">
-      <g class="leaf-fall">
-        <g transform="translate(34 -4) rotate(-22) scale(1.1)">
-          <path d={leaf} class="leaf"></path>
-          <path d="M0 6 C 0.5 8, 1.5 9.5, 3 10.5" class="stem"></path>
-        </g>
+      <g class="geese">
+        <path d="M-1 -24.2 Q3.1 -22.8 6 -22 Q8.8 -24.1 13.1 -25.9" style="--w: 1.3; opacity: 0.9"
+        ></path>
+        <path
+          d="M11 -18.4 Q14.5 -17.2 17 -16.5 Q19.4 -18.3 23.1 -19.8"
+          style="--w: 1.15; opacity: 0.8"></path>
+        <path
+          d="M21.6 -13.7 Q24.7 -12.6 27 -12 Q29.2 -13.6 32.5 -15"
+          style="--w: 1.05; opacity: 0.7"></path>
+        <path
+          d="M-10.6 -16.8 Q-7.4 -15.7 -5 -15 Q-2.8 -16.7 0.7 -18.1"
+          style="--w: 1.05; opacity: 0.65"></path>
+        <path d="M33.6 -9.4 Q36.2 -8.5 38 -8 Q39.8 -9.3 42.5 -10.4" style="--w: 0.9; opacity: 0.5"
+        ></path>
       </g>
     </g>
 
@@ -190,42 +194,25 @@ const anchor = `left: calc(${to / 10}% - 105px)`;
     }
   }
 
-  .divider .leaf {
-    fill: var(--red);
-    stroke: var(--red-warmer);
-    stroke-width: 0.4;
-    stroke-linejoin: round;
-  }
-
-  .divider .stem {
-    stroke: var(--red-warmer);
-    stroke-width: 0.8;
+  .geese path {
+    stroke: var(--fg-main);
+    stroke-width: var(--w);
     stroke-linecap: round;
   }
 
-  :global(.kigo-drift) .leaf-fall {
-    animation: leaf-fall 3.4s cubic-bezier(0.3, 0.1, 0.3, 1) both;
+  :global(.kigo-drift) .geese {
+    animation: geese-in 4.2s cubic-bezier(0.2, 0.6, 0.3, 1) both;
   }
 
-  @keyframes leaf-fall {
+  @keyframes geese-in {
     0% {
       opacity: 0;
-      transform: translate(-40px, -90px) rotate(50deg);
+      transform: translate(-70px, 10px);
     }
-    15% {
+    25% {
       opacity: 1;
-    }
-    40% {
-      transform: translate(-6px, -58px) rotate(-18deg);
-    }
-    65% {
-      transform: translate(-30px, -26px) rotate(26deg);
-    }
-    85% {
-      transform: translate(-8px, -6px) rotate(-6deg);
     }
     100% {
-      opacity: 1;
       transform: none;
     }
   }
@@ -253,7 +240,7 @@ const anchor = `left: calc(${to / 10}% - 105px)`;
 
   @media (prefers-reduced-motion: reduce) {
     .flies circle,
-    :global(.kigo-drift) .leaf-fall {
+    :global(.kigo-drift) .geese {
       animation: none;
     }
   }

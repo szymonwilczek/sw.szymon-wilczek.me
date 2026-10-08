@@ -57,8 +57,7 @@ const PAWS = [
   [984, 318, -30],
 ];
 
-const LEAF =
-  "M0 6 Q -4 5 -6 6 Q -9 5 -8 2 Q -11 0 -10 -2 Q -8 -3 -6 -2 Q -7 -6 -5 -7 Q -3 -6 -2 -4 Q -1 -8 0 -10 Q 1 -8 2 -4 Q 3 -6 5 -7 Q 7 -6 6 -2 Q 8 -3 10 -2 Q 11 0 8 2 Q 9 5 6 6 Q 4 5 0 6 Z";
+const GOOSE = "M-9 -2.9 Q-3.8 -1.1 0 0 Q3.6 -2.7 9.2 -5";
 const KIGO = [
   [744, 232, 24, 1],
   [186, 150, -40, 0.8],
@@ -504,14 +503,16 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
         <path class="line" d="M710 214 C 709 224, 711 232, 710 240" stroke-width="2"></path>
 
         <!-- the season -->
-        {KIGO.map(([x, y, r, s]) => (
-          <g transform={`translate(${x} ${y}) rotate(${r}) scale(${s})`} class="kigo-map">
-            <path class="kigo-autumn" d={LEAF} />
-            <path class="kigo-spring" d="M0 -6 C 5 -6, 7 0, 0 7 C -7 0, -5 -6, 0 -6 Z" />
-            <circle class="kigo-winter" r="3.4" />
-            <circle class="kigo-summer" r="2.2" />
-          </g>
-        ))}
+        {
+          KIGO.map(([x, y, r, s]) => (
+            <g transform={`translate(${x} ${y}) rotate(${r}) scale(${s})`} class="kigo-map">
+              <path class="kigo-autumn" d={GOOSE} />
+              <path class="kigo-spring" d="M0 -6 C 5 -6, 7 0, 0 7 C -7 0, -5 -6, 0 -6 Z" />
+              <circle class="kigo-winter" r="3.4" />
+              <circle class="kigo-summer" r="2.2" />
+            </g>
+          ))
+        }
 
         <g class="fireflies">
           <circle cx="232" cy="120" r="2"></circle>
@@ -942,8 +943,11 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
   }
 
   .kigo-autumn {
-    fill: var(--red);
-    opacity: 0.7;
+    fill: none;
+    stroke: var(--fg-main);
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    opacity: 0.75;
   }
 
   .kigo-spring {
