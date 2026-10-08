@@ -450,3 +450,25 @@ sup a {
     border-radius: 0;
   }
 }
+
+main
+  :is(p, li, dd, td, figcaption, blockquote)
+  > a[href^="http"]:not([href*="//sw.szymon-wilczek.me"])::after {
+  content: "";
+  display: inline-block;
+  width: 0.55em;
+  height: 0.55em;
+  margin-left: 0.3em;
+  vertical-align: 0.35em;
+  background: currentColor;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 23 21'%3E%3Cpath d='M2 19 C 8 13, 14 9, 20 3 M 10 3 C 14 2, 18 2, 21 2 C 21 6, 21 9, 20 13' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+    no-repeat center / contain;
+  opacity: 0.85;
+  transition: transform 0.2s ease;
+}
+
+main
+  :is(p, li, dd, td, figcaption, blockquote)
+  > a[href^="http"]:not([href*="//sw.szymon-wilczek.me"]):hover::after {
+  transform: translate(0.15em, -0.15em);
+}
