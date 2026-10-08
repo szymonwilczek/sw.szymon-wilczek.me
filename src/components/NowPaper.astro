@@ -35,6 +35,40 @@ const span = (from: Date, to: Date) =>
     ? `${from.getDate()} – ${dayMonth(to)}`
     : `${dayMonth(from)} – ${dayMonth(to)}`;
 
+function offsets(zone: string): Array<[number, number]> {
+  const fmt = new Intl.DateTimeFormat("en-GB", {
+    timeZone: zone,
+    hourCycle: "h23",
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+    hour: "numeric",
+    minute: "numeric",
+  });
+  const at = (t: number) => {
+    const p = Object.fromEntries(fmt.formatToParts(t).map((x) => [x.type, +x.value]));
+    return (
+      (Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute) - Math.floor(t / 60_000) * 60_000) /
+      60_000
+    );
+  };
+  const HOUR = 3_600_000;
+  const from = Math.floor(today.getTime() / HOUR) * HOUR;
+  const list: Array<[number, number]> = [[from, at(from)]];
+  for (let t = from + HOUR; t <= from + 2 * 366 * 24 * HOUR; t += HOUR) {
+    if (at(t) === list.at(-1)![1]) continue;
+    let lo = t - HOUR;
+    let hi = t;
+    while (hi - lo > 60_000) {
+      const mid = lo + Math.floor((hi - lo) / 120_000) * 60_000;
+      if (at(mid) === list.at(-1)![1]) lo = mid;
+      else hi = mid;
+    }
+    list.push([hi, at(hi)]);
+  }
+  return list;
+}
+
 // divider's skein of geese, flying the same way
 const GEESE = [
   "M-1 -24.2 Q3.1 -22.8 6 -22 Q8.8 -24.1 13.1 -25.9",
@@ -49,6 +83,7 @@ const GEESE = [
   aria-label="Now"
   data-ink={ink.when.toISOString()}
   data-tz={place.timeZone}
+  data-tz-offsets={JSON.stringify(offsets(place.timeZone))}
   data-lat={place.latitude ?? ""}
   data-lon={place.longitude ?? ""}
 >
@@ -181,7 +216,21 @@ const GEESE = [
   const $ = <T extends Element = HTMLElement>(s: string) => paper.querySelector<T>(s)!;
   const now = new Date();
   const DAY = 86_400_000;
-  const dayMonth = (d: Date) => d.toLocaleDateString("en-GB", { day: "numeric", month: "long" });
+  const MONTH_NAMES = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+  const dayMonth = (d: Date) => `${d.getDate()} ${MONTH_NAMES[d.getMonth()]}`;
   const span = (from: Date, to: Date) =>
     from.getMonth() === to.getMonth()
       ? `${from.getDate()} – ${dayMonth(to)}`
@@ -205,8 +254,18 @@ const GEESE = [
 
   // local time where I am, the sun (or moon) along its arc
   const tz = paper.dataset.tz!;
-  const clock = (d: Date) =>
-    d.toLocaleTimeString("en-GB", { timeZone: tz, hour: "2-digit", minute: "2-digit" });
+  const zone: Array<[number, number]> = JSON.parse(paper.dataset.tzOffsets ?? "[]");
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const clock = (d: Date) => {
+    const t = d.getTime();
+    const known = zone.length > 0 && t >= zone[0][0] && t < zone[0][0] + 2 * 366 * DAY;
+    if (!known)
+      return d.toLocaleTimeString("en-GB", { timeZone: tz, hour: "2-digit", minute: "2-digit" });
+    let offset = 0;
+    for (const [from, minutes] of zone) if (from <= t) offset = minutes;
+    const there = new Date(t + offset * 60_000);
+    return `${pad(there.getUTCHours())}:${pad(there.getUTCMinutes())}`;
+  };
   const [h, m] = clock(now).split(":").map(Number);
   const hours = h + m / 60;
   const lat = parseFloat(paper.dataset.lat!);
