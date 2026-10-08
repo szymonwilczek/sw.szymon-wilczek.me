@@ -135,7 +135,8 @@ const RADII = ["3px 7px 4px 8px", "6px 3px 7px 4px", "4px 6px 3px 7px", "7px 4px
               alt={`${album.title}, photo ${i + 1}`}
               width={photo.width || undefined}
               height={photo.height || undefined}
-              loading={i < 2 ? "eager" : "lazy"}
+              loading={i === 0 ? "eager" : "lazy"}
+              fetchpriority={i === 0 ? "high" : undefined}
               decoding="async"
               style={`border-radius: ${RADII[i % RADII.length]}`}
             />
