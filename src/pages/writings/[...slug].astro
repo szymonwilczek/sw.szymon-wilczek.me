@@ -108,6 +108,7 @@ const postImage = imageMatch ? imageMatch[1] : `/og/${slug}.png`;
 
 <script>
   import { earn, update } from "../../utils/garden";
+  import "../../scripts/stopped";
 
   // Opening an essay earns seal
   // Reaching the seal marks it read and earns another one
@@ -121,6 +122,7 @@ const postImage = imageMatch ? imageMatch[1] : `/og/${slug}.png`;
       seen.disconnect();
       update(function (state) {
         if (!state.read.includes(slug)) state.read.push(slug);
+        delete state.stops[slug];
       });
       earn("終");
     });
@@ -352,6 +354,7 @@ const postImage = imageMatch ? imageMatch[1] : `/og/${slug}.png`;
   }
 
   .article-body {
+    position: relative;
     flex: 999 1 35rem;
     min-width: 0;
     max-width: 42.5rem;
@@ -518,6 +521,84 @@ const postImage = imageMatch ? imageMatch[1] : `/og/${slug}.png`;
 
   .margin-notes :global(.margin-note.is-linked) {
     color: var(--fg-main);
+  }
+
+  :global(.stop-leaf) {
+    position: absolute;
+    left: -3.25rem;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.25rem;
+    width: 2.75rem;
+    pointer-events: none;
+  }
+
+  :global(.stop-note) {
+    width: 6.5rem;
+    font-size: 0.9375rem;
+    line-height: 1.2;
+    text-align: right;
+    color: var(--cursor);
+    transform: rotate(-3deg);
+  }
+
+  :global(.stop-leaf-blade) {
+    fill: var(--red);
+    opacity: 0.85;
+  }
+
+  :global(.stop-leaf-vein) {
+    fill: none;
+    stroke: var(--red-warmer);
+    stroke-width: 0.8;
+  }
+
+  :global(.stop-leaf.is-gone) {
+    animation: leaf-blown 1.2s ease-in forwards;
+  }
+
+  @keyframes leaf-blown {
+    to {
+      opacity: 0;
+      transform: translate(-60px, -30px) rotate(-40deg);
+    }
+  }
+
+  :global(.stop-go) {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    font-size: 1.0625rem;
+    color: var(--cursor);
+    cursor: pointer;
+  }
+
+  :global(.stop-go:hover span) {
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+
+  @media (max-width: 63.99em) {
+    :global(.stop-leaf) {
+      left: auto;
+      right: 0;
+      margin-top: -1.25rem;
+    }
+
+    :global(.stop-note) {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :global(.stop-leaf.is-gone) {
+      animation-duration: 0.01s;
+    }
   }
 
   .prose :global(.note-anchor) {
