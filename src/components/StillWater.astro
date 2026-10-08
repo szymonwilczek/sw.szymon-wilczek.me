@@ -63,13 +63,56 @@ const layouts = (["wide", "tall"] as const).map((name) => ({
         class="water-seal"
         transform={`translate(${name === "wide" ? 900 : 300} ${name === "wide" ? 30 : 20}) rotate(-6) scale(0.8)`}
       >
-        <path d="M4 5 Q23 2 42 4 Q45 23 43 42 Q23 45 3 43 Q1 23 4 5 Z" />
-        <text x="23" y="31" text-anchor="middle">
-          波
-        </text>
-      </g>
-    </svg>
-  ))}
+        <path class="water-bank" d={water.bank} />
+        <path class="water-bed" d={water.edge} />
+        <path class="water-edge" d={water.edge} />
+        <g class="water-lines">
+          {water.lines.map((l) => (
+            <path d={smooth(l.pts, false)} stroke-width={l.w} opacity={l.o} />
+          ))}
+        </g>
+        <g class="water-glints">
+          {water.calm.map(([x, y, len]) => (
+            <path d={`M${x} ${y} q${len / 2} -1.2 ${len} 0`} />
+          ))}
+        </g>
+        <clipPath id={`pond-${name}`}>
+          <path d={water.edge} />
+        </clipPath>
+        <g class="water-rings" clip-path={`url(#pond-${name})`} />
+        {water.pads.map((p) => (
+          <g class="pad" transform={`translate(${p.x} ${p.y})`}>
+            <path class="pad-leaf" d={p.d} />
+            <path class="pad-vein" d={p.vein} />
+          </g>
+        ))}
+        {water.stones.map((s) => (
+          <g class="stone">
+            <path class="stone-shadow" d={s.shadow} />
+            <path class="stone-body" d={s.d} />
+            <path class="stone-facet" d={s.facet} />
+            {s.moss && <path class="stone-moss" d={s.moss} />}
+          </g>
+        ))}
+        <g class="water-leaf" transform={`translate(${L.leaf[0]} ${L.leaf[1]}) rotate(-23)`}>
+          <g transform="scale(0.13)">
+            <path class="leaf-stem" d={MOMIJI.stem} />
+            <path class="leaf-blade" d={MOMIJI.outline} />
+            <path class="leaf-ink" d={MOMIJI.outline} transform="translate(5 -4)" />
+          </g>
+        </g>
+        <g
+          class="water-seal"
+          transform={`translate(${name === "wide" ? 900 : 300} ${name === "wide" ? 30 : 20}) rotate(-6) scale(0.8)`}
+        >
+          <path d="M4 5 Q23 2 42 4 Q45 23 43 42 Q23 45 3 43 Q1 23 4 5 Z" />
+          <text x="23" y="31" text-anchor="middle">
+            波
+          </text>
+        </g>
+      </svg>
+    ))
+  }
   <figcaption class="hand">the water was here before you.</figcaption>
 </figure>
 
@@ -125,16 +168,9 @@ const layouts = (["wide", "tall"] as const).map((name) => ({
 
   .water-rings {
     fill: none;
-    stroke: var(--bg-main);
-    stroke-width: 1.2;
+    stroke: var(--fg-dim);
+    stroke-width: 0.9;
     opacity: 0.6;
-  }
-
-  .water :global(.glint) {
-    fill: none;
-    stroke: var(--bg-main);
-    stroke-width: 1.4;
-    stroke-linecap: round;
   }
 
   .pad-leaf {
@@ -248,11 +284,13 @@ const layouts = (["wide", "tall"] as const).map((name) => ({
   import { LAYOUTS, inPond, inStone } from "../utils/water";
 
   type Point = [number, number];
+  type Ring = { x: number; y: number; born: number; a: number };
 
-  const CELL = 10;
-  const GAIN = 1.5;
-  const C2 = 0.2;
-  const DAMP = 0.962;
+  const FLAT = 0.42;
+  const SPEED = 0.075; // px per ms
+  const LIFE = 3600;
+  const WAVE = 36; // crest to crest
+  const BAND = 26; // how wide the train of crests is
   const NS = "http://www.w3.org/2000/svg";
   const still = matchMedia("(prefers-reduced-motion: reduce)");
   const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
@@ -260,90 +298,58 @@ const layouts = (["wide", "tall"] as const).map((name) => ({
 
   document.querySelectorAll<SVGSVGElement>(".still-water .water").forEach((svg) => {
     const L = LAYOUTS[svg.dataset.layout as "wide" | "tall"];
-    const NX = L.W / CELL + 1;
-    const NY = L.H / CELL + 1;
-    let cur = new Float32Array(NX * NY);
-    let prev = new Float32Array(NX * NY);
-    const mask = new Uint8Array(NX * NY);
-    for (let j = 0; j < NY; j++) {
-      for (let i = 0; i < NX; i++) {
-        const x = i * CELL;
-        const y = j * CELL;
-        const edge = i === 0 || j === 0 || i === NX - 1 || j === NY - 1;
-        if (edge || !inPond(L, x, y) || inStone(L, x, y, 2)) mask[j * NX + i] = 1;
-      }
-    }
-
     const lines: Point[][] = JSON.parse(svg.dataset.lines ?? "[]");
     const linePaths = [...svg.querySelectorAll<SVGPathElement>(".water-lines path")];
     const calm: Array<[number, number, number]> = JSON.parse(svg.dataset.calm ?? "[]");
     const calmPaths = [...svg.querySelectorAll<SVGPathElement>(".water-glints path")];
-    const glints = svg.querySelector<SVGGElement>(".water-glints")!;
-    const rings = svg.querySelector<SVGGElement>(".water-rings")!;
+    const ringLayer = svg.querySelector<SVGGElement>(".water-rings")!;
     const pads = [...svg.querySelectorAll<SVGGElement>(".pad")];
     const padAt = L.pads.map(([x, y]) => [x, y]);
     const leafEl = svg.querySelector<SVGGElement>(".water-leaf")!;
     const seal = svg.querySelector<SVGGElement>(".water-seal")!;
     const leaf = { x: L.leaf[0], y: L.leaf[1], vx: 0, vy: 0, a: -0.4 };
+    let rings: Ring[] = [];
+    let now = 0;
 
     if (load().seals["波"]) seal.classList.add("on");
 
-    // height under a point, between the two rows of the grid it sits on
-    const hAt = (x: number, y: number) => {
-      const i = clamp(Math.round(x / CELL), 1, NX - 2);
-      const j0 = clamp(Math.floor(y / CELL), 1, NY - 2);
-      const fy = clamp(y / CELL - j0, 0, 1);
-      const k = j0 * NX + i;
-      return cur[k] * (1 - fy) + cur[k + NX] * fy;
+    function swell(r: Ring, x: number, y: number) {
+      const age = now - r.born;
+      const d = Math.hypot(x - r.x, (y - r.y) / FLAT);
+      const off = d - age * SPEED;
+      if (Math.abs(off) > BAND * 1.6) return 0;
+      const fade = (1 - age / LIFE) ** 2;
+      const front = Math.exp(-((off / BAND) ** 2));
+      return (r.a * fade * front) / Math.sqrt(1 + (age * SPEED) / 40);
+    }
+
+    const lift = (x: number, y: number) => {
+      let h = 0;
+      for (const r of rings) {
+        const s = swell(r, x, y);
+        if (s) {
+          const d = Math.hypot(x - r.x, (y - r.y) / FLAT);
+          h += s * Math.sin(((d - (now - r.born) * SPEED) / WAVE) * Math.PI * 2);
+        }
+      }
+      return clamp(h, -2.5, 2.5);
     };
 
-    function splash(x: number, y: number, amp: number, r: number) {
-      const ci = Math.round(x / CELL);
-      const cj = Math.round(y / CELL);
-      for (let dj = -r; dj <= r; dj++) {
-        for (let di = -r; di <= r; di++) {
-          const i = ci + di;
-          const j = cj + dj;
-          if (i < 1 || j < 1 || i >= NX - 1 || j >= NY - 1) continue;
-          const k = j * NX + i;
-          if (mask[k]) continue;
-          const fall = 1 - Math.hypot(di, dj) / (r + 1);
-          if (fall > 0) cur[k] += amp * fall;
-        }
-      }
-    }
-
-    function step() {
-      let peak = 0;
-      for (let j = 1; j < NY - 1; j++) {
-        for (let i = 1; i < NX - 1; i++) {
-          const k = j * NX + i;
-          if (mask[k]) {
-            prev[k] = 0;
-            continue;
-          }
-          const h = cur[k];
-          const v =
-            (2 * h - prev[k] + C2 * (cur[k - 1] + cur[k + 1] + cur[k - NX] + cur[k + NX] - 4 * h)) *
-            DAMP;
-          prev[k] = v;
-          peak = Math.max(peak, Math.abs(v));
-        }
-      }
-      [cur, prev] = [prev, cur];
-      return peak;
-    }
-
-    // leaf slides down the slope of the surface
     function drift() {
-      const i = clamp(Math.round(leaf.x / CELL), 1, NX - 2);
-      const j = clamp(Math.round(leaf.y / CELL), 1, NY - 2);
-      const k = j * NX + i;
-      leaf.vx = leaf.vx * 0.965 - (cur[k + 1] - cur[k - 1]) * 0.16;
-      leaf.vy = leaf.vy * 0.965 - (cur[k + NX] - cur[k - NX]) * 0.16;
+      for (const r of rings) {
+        const s = swell(r, leaf.x, leaf.y);
+        if (!s) continue;
+        const dx = leaf.x - r.x;
+        const dy = (leaf.y - r.y) / FLAT;
+        const d = Math.hypot(dx, dy) || 1;
+        leaf.vx += (dx / d) * s * 0.05;
+        leaf.vy += (dy / d) * s * 0.05 * FLAT;
+      }
+      leaf.vx *= 0.975;
+      leaf.vy *= 0.975;
       move(leaf.x + leaf.vx, leaf.y + leaf.vy);
-      leaf.a += leaf.vx * 0.012;
-      return Math.abs(leaf.vx) + Math.abs(leaf.vy) > 0.02;
+      leaf.a += leaf.vx * 0.004;
+      return Math.abs(leaf.vx) + Math.abs(leaf.vy) > 0.01;
     }
 
     function move(nx: number, ny: number) {
@@ -351,14 +357,13 @@ const layouts = (["wide", "tall"] as const).map((name) => ({
         leaf.x = nx;
         leaf.y = ny;
       } else {
-        leaf.vx *= -0.4;
-        leaf.vy *= -0.4;
+        leaf.vx *= -0.3;
+        leaf.vy *= -0.3;
       }
       if (leaf.x > L.goal.x && leaf.y < L.goal.y && earn("波")) seal.classList.add("on");
     }
 
     function draw() {
-      const lift = (x: number, y: number) => clamp(hAt(x, y) * GAIN, -6, 6);
       lines.forEach((pts, l) => {
         linePaths[l].setAttribute(
           "d",
@@ -376,46 +381,52 @@ const layouts = (["wide", "tall"] as const).map((name) => ({
         );
       });
 
-      glints.querySelectorAll(".glint").forEach((g) => g.remove());
-      for (let j = 2; j < NY - 2; j += 2) {
-        for (let i = 2; i < NX - 2; i += 2) {
-          const v = cur[j * NX + i];
-          if (v < 0.9) continue;
-          const g = document.createElementNS(NS, "path");
-          g.setAttribute("class", "glint");
-          g.setAttribute(
-            "d",
-            `M${i * CELL - 6} ${f(j * CELL + clamp(v * GAIN, -6, 6))} q6 -2 12 0`,
-          );
-          g.setAttribute("opacity", Math.min(0.8, 0.3 + (v - 0.9) / 3).toFixed(2));
-          glints.append(g);
-        }
-      }
-      const bob = (x: number, y: number) => clamp(hAt(x, y) * GAIN, -5, 5);
+      ringLayer.replaceChildren(
+        ...rings.flatMap((r) => {
+          const age = now - r.born;
+          const rx = age * SPEED;
+          const fade = (1 - age / LIFE) ** 2;
+          return [0, WAVE].flatMap((back) => {
+            if (rx - back < 2) return [];
+            const e = document.createElementNS(NS, "ellipse");
+            e.setAttribute("cx", f(r.x));
+            e.setAttribute("cy", f(r.y));
+            e.setAttribute("rx", f(rx - back));
+            e.setAttribute("ry", f((rx - back) * FLAT));
+            e.setAttribute(
+              "opacity",
+              (fade * Math.min(1, r.a / 1.6) * (back ? 0.45 : 0.9)).toFixed(2),
+            );
+            return [e];
+          });
+        }),
+      );
+
       pads.forEach((p, n) => {
         const [x, y] = padAt[n];
-        p.setAttribute("transform", `translate(${x} ${f(y + bob(x, y) * 0.7)})`);
+        p.setAttribute("transform", `translate(${x} ${f(y + lift(x, y) * 0.6)})`);
       });
       leafEl.setAttribute(
         "transform",
-        `translate(${f(leaf.x)} ${f(leaf.y + bob(leaf.x, leaf.y) * 0.6)}) rotate(${f((leaf.a * 180) / Math.PI)})`,
+        `translate(${f(leaf.x)} ${f(leaf.y + lift(leaf.x, leaf.y) * 0.5)}) rotate(${f((leaf.a * 180) / Math.PI)})`,
       );
     }
 
     let frame = 0;
-    function loop() {
+    function loop(t: number) {
       frame = 0;
-      const peak = step();
+      now = t;
+      rings = rings.filter((r) => t - r.born < LIFE);
       const moving = drift();
-      if (peak < 0.03 && !moving) {
-        cur.fill(0);
-        prev.fill(0);
-      } else frame = requestAnimationFrame(loop);
       draw();
+      if (rings.length || moving) frame = requestAnimationFrame(loop);
     }
-    const kick = () => {
+
+    function drop(x: number, y: number, a: number) {
+      rings.push({ x, y, born: performance.now(), a });
+      if (rings.length > 40) rings.shift();
       if (!frame) frame = requestAnimationFrame(loop);
-    };
+    }
 
     const toWater = (e: PointerEvent): Point => {
       const p = new DOMPoint(e.clientX, e.clientY).matrixTransform(svg.getScreenCTM()!.inverse());
@@ -428,7 +439,7 @@ const layouts = (["wide", "tall"] as const).map((name) => ({
       r.setAttribute("cy", f(y));
       r.setAttribute("rx", "18");
       r.setAttribute("ry", "8");
-      rings.append(r);
+      ringLayer.append(r);
       setTimeout(() => r.remove(), 1200);
       const d = Math.hypot(leaf.x - x, leaf.y - y);
       if (d < 70 && d > 0.1) {
@@ -441,24 +452,23 @@ const layouts = (["wide", "tall"] as const).map((name) => ({
     svg.addEventListener("pointermove", (e) => {
       if (still.matches) return;
       const q = toWater(e);
-      if (last) {
-        const dx = q[0] - last[0];
-        const dy = q[1] - last[1];
-        const d = Math.hypot(dx, dy);
-        const amp = d < 2 ? 0 : Math.min(d * 0.045, 1.1);
-        const n = Math.max(1, Math.ceil(d / 8));
-        for (let s = 1; s <= n; s++)
-          splash(last[0] + (dx * s) / n, last[1] + (dy * s) / n, amp / Math.sqrt(n), 1);
+      if (!last) {
+        last = q;
+        return;
       }
+      const d = Math.hypot(q[0] - last[0], q[1] - last[1]);
+      if (d < 28) return;
+      if (inPond(L, q[0], q[1])) drop(q[0], q[1], Math.min(0.5 + d * 0.012, 1.1));
       last = q;
-      kick();
     });
     svg.addEventListener("pointerdown", (e) => {
       const q = toWater(e);
       if (still.matches) return stillRing(q);
-      splash(q[0], q[1], 8, 1);
+      if (inPond(L, q[0], q[1])) {
+        drop(q[0], q[1], 2.4);
+        setTimeout(() => drop(q[0], q[1], 1), 220);
+      }
       last = e.pointerType === "mouse" ? q : null;
-      kick();
     });
     const leave = () => (last = null);
     svg.addEventListener("pointerleave", leave);
