@@ -1,0 +1,207 @@
+.print-only,
+.print-ref,
+.print-stamp {
+  display: none;
+}
+
+@page {
+  size: A4;
+  margin: 22mm 20mm 20mm;
+
+  @bottom-right {
+    content: counter(page) " / " counter(pages);
+    font-family: "Typus Mono 95", monospace;
+    font-size: 7.5pt;
+    color: #6c655a;
+  }
+}
+
+@media print {
+  :root,
+  :root[data-theme] {
+    --bg-main: #fff;
+    --bg-dim: #f4f1ea;
+    --fg-main: #1f1c18;
+    --fg-dim: #6c655a;
+    --fg-link: #1f1c18;
+    --border: #cfc8bb;
+    --cursor: #1f1c18;
+    --red: #a54b32;
+    --red-warmer: #a54b32;
+    --accent-0: #6c655a;
+    --paper: #fff;
+  }
+
+  html,
+  body {
+    background: #fff !important;
+    color: #1f1c18;
+  }
+
+  body {
+    font-size: 10.5pt;
+    line-height: 1.55;
+  }
+
+  .site-header,
+  .mobile-header,
+  .site-footer,
+  .pebble-row,
+  .theme-picker,
+  .emacs-dialog,
+  .margin-notes,
+  .note-thread,
+  .kigo,
+  .copy-code-btn,
+  .copy-hanko,
+  .kanji-slip,
+  .focus-loop,
+  .stop-go,
+  .stop-leaf,
+  .adjacent,
+  .source,
+  .divider-crack,
+  dialog {
+    display: none !important;
+  }
+
+  .site-page,
+  #main-content {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .article-head,
+  .article {
+    margin-left: 0 !important;
+  }
+
+  .article-body {
+    max-width: none;
+    font-size: 10.5pt;
+  }
+
+  .crumbs {
+    font-size: 7.5pt;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .crumbs::before {
+    content: "sw.szymon-wilczek.me · ";
+  }
+
+  .article-head h1 {
+    font-size: 25pt;
+    font-weight: 300;
+  }
+
+  .article-meta {
+    font-size: 7.5pt;
+  }
+
+  .divider {
+    margin: 10pt 0 12pt !important;
+    height: 10px;
+  }
+
+  h2,
+  h3 {
+    break-after: avoid;
+  }
+
+  p,
+  li,
+  blockquote {
+    orphans: 3;
+    widows: 3;
+  }
+
+  a {
+    color: inherit !important;
+    text-decoration: none !important;
+    border: 0 !important;
+  }
+
+  a::after {
+    display: none !important;
+  }
+
+  .print-ref {
+    display: inline !important;
+    font-size: 0.65em;
+    vertical-align: super;
+    line-height: 0;
+  }
+
+  .footnotes-section {
+    display: block !important;
+  }
+
+  pre,
+  code {
+    white-space: pre-wrap !important;
+    word-break: break-word;
+    background: none !important;
+  }
+
+  pre {
+    border: 0.5pt solid #cfc8bb;
+    break-inside: avoid;
+  }
+
+  .prose img,
+  .article img {
+    width: 50% !important;
+    filter: grayscale(1);
+    break-inside: avoid;
+  }
+
+  .end-seal {
+    margin: 18pt 0 6pt auto !important;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+
+  .print-links {
+    break-before: avoid;
+    margin-top: 18pt;
+    font-family: "Typus Mono 95", monospace;
+    font-size: 8pt;
+    line-height: 1.8;
+    color: #3b362f;
+  }
+
+  .print-links h2 {
+    margin: 0 0 6pt;
+    font-family: Literata, serif;
+    font-size: 13pt;
+    font-weight: 400;
+  }
+
+  .print-links h2::before {
+    display: none !important;
+  }
+
+  .print-links ol {
+    margin: 0;
+    padding-left: 16pt;
+  }
+
+  .print-stamp {
+    display: flex !important;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 14pt;
+    margin-top: 24pt;
+    padding-top: 8pt;
+    border-top: 0.5pt solid #cfc8bb;
+    font-family: "Typus Mono 95", monospace;
+    font-size: 7.5pt;
+    color: #6c655a;
+    break-inside: avoid;
+  }
+}
