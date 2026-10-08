@@ -17,6 +17,17 @@ export default defineConfig({
   build: {
     inlineStylesheets: "never",
   },
+  vite: {
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (/\/src\/(utils\/(garden|sand|hanko)|scripts\/art)\.ts$/.test(id)) return "garden";
+          },
+        },
+      },
+    },
+  },
   integrations: [
     sitemap({
       filter: (page) =>
