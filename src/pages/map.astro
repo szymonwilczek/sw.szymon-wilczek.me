@@ -123,7 +123,14 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
 
   <Divider from={300} to={520} />
 
-  <p class="touch-hint hand">drag to wander → · tap a place to read its tag, tap again to go</p>
+  <div class="too-small paper">
+    <span class="tape too-small-tape" aria-hidden="true"></span>
+    <p class="too-small-head hand">this map is drawn on a sheet too wide to unfold here.</p>
+    <p>
+      Some walks wait for a bigger table. Open it on a large screen and the garden will still be
+      here, paths and all. Until then it is below, as a plain list.
+    </p>
+  </div>
 
   <div class="map-scroll">
     <div class="map-inner">
@@ -722,11 +729,27 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
     transform: rotate(-2deg);
   }
 
-  .touch-hint {
+  .too-small {
     display: none;
-    margin: 0 0 0.625rem;
-    font-weight: 300;
-    font-size: 1.0625rem;
+    position: relative;
+    margin: 0 0 2.5rem;
+    padding: 1.5rem 1.25rem 1.25rem;
+    transform: rotate(-0.6deg);
+  }
+
+  .too-small-tape {
+    top: -0.6rem;
+    left: 42%;
+  }
+
+  .too-small-head {
+    margin: 0 0 0.5rem;
+    font-size: 1.25rem;
+    color: var(--fg-main);
+  }
+
+  .too-small p:last-child {
+    margin: 0;
     color: var(--fg-dim);
   }
 
@@ -1058,23 +1081,13 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
   }
 
   @media (max-width: 47.99em) {
-    .touch-hint {
+    .too-small {
       display: block;
     }
 
-    .map-scroll {
-      overflow-x: auto;
-      margin: 0 -1.25rem;
-      padding: 0 1.25rem 0.5rem;
-      overscroll-behavior-x: contain;
-    }
-
-    .map-inner {
-      width: 820px;
-    }
-
-    .plain-link {
-      margin-left: 0;
+    .map-scroll,
+    .legend {
+      display: none;
     }
   }
 </style>
