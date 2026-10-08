@@ -7,7 +7,7 @@ export async function fillArt(svg: SVGSVGElement) {
   if (!cache.has(url))
     cache.set(
       url,
-      fetch(url)
+      fetch(url, { priority: "low" })
         .then((r) => r.text())
         .then((t) => new DOMParser().parseFromString(t, "image/svg+xml").documentElement),
     );

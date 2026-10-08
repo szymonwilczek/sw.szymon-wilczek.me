@@ -6,7 +6,13 @@ import { artUrl } from "../utils/art";
 ---
 
 <figure class="karesansui">
-  <link rel="preload" href={artUrl("sand")} as="fetch" crossorigin="anonymous" />
+  <link
+    rel="preload"
+    href={artUrl("sand")}
+    as="fetch"
+    crossorigin="anonymous"
+    fetchpriority="low"
+  />
   <svg
     class="sand"
     viewBox="0 0 1000 190"
