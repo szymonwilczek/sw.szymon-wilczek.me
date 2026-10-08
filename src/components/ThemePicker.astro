@@ -293,11 +293,16 @@ for (const theme of auThemes) {
       activate(null);
     }
 
-    // closing first drops the preview,
-    // so the new theme can flood in over the old one
     function pick(row) {
+      var choice = row.dataset.choice;
+      var shown = document.documentElement.getAttribute("data-theme");
+      if (shown === window.auTheme.resolve(choice)) {
+        window.auTheme.set(choice);
+        picker.close();
+        return;
+      }
       picker.close();
-      window.auTheme.flood(row.dataset.choice);
+      window.auTheme.flood(choice);
     }
 
     function open() {
@@ -314,8 +319,10 @@ for (const theme of auThemes) {
       row.addEventListener("click", function () {
         pick(row);
       });
-      row.addEventListener("mouseenter", function () {
-        activate(row);
+
+      // only a real mouse previews: a tap goes straight to the flood
+      row.addEventListener("pointerenter", function (e) {
+        if (e.pointerType === "mouse") activate(row);
       });
     });
 

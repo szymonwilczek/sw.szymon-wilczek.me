@@ -119,6 +119,9 @@ const {
           root.setAttribute("data-theme-choice", choice);
         }
 
+        var fading = 0;
+        var floods = 0;
+
         window.auTheme = {
           ids: themeIds,
           get: read,
@@ -135,8 +138,18 @@ const {
               }),
             );
           },
+
           preview: function (id) {
-            root.setAttribute("data-theme", id || resolve(read()));
+            var theme = id || resolve(read());
+            if (root.getAttribute("data-theme") === theme) return;
+            if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+              root.classList.add("theme-fade");
+              clearTimeout(fading);
+              fading = setTimeout(function () {
+                root.classList.remove("theme-fade");
+              }, 600);
+            }
+            root.setAttribute("data-theme", theme);
           },
           flood: function (choice) {
             var set = window.auTheme.set;
@@ -152,13 +165,15 @@ const {
             );
             root.style.setProperty("--ink-y", (visible ? r.top + r.height / 2 : 40) + "px");
             root.classList.add("ink-flood");
-            document
-              .startViewTransition(function () {
-                set(choice);
-              })
-              .finished.finally(function () {
-                root.classList.remove("ink-flood");
-              });
+
+            var mine = ++floods;
+            var flow = document.startViewTransition(function () {
+              set(choice);
+            });
+            flow.ready.catch(function () {});
+            flow.finished.finally(function () {
+              if (mine === floods) root.classList.remove("ink-flood");
+            });
           },
         };
 
