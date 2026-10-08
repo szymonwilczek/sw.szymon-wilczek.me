@@ -1,0 +1,464 @@
+---
+// A strip of still water at the end of the photo pages and /about
+// Carry the maple leaf to the far bank with waves alone to earn seal.
+
+import { smooth } from "../utils/sand";
+import { MOMIJI } from "../utils/momiji";
+import { LAYOUTS, makeWater } from "../utils/water";
+
+const layouts = (["wide", "tall"] as const).map((name) => ({
+  name,
+  L: LAYOUTS[name],
+  water: makeWater(LAYOUTS[name]),
+}));
+---
+
+<figure class="still-water">
+  {layouts.map(({ name, L, water }) => (
+    <svg
+      class={`water water-${name}`}
+      viewBox={`0 0 ${L.W} ${L.H}`}
+      role="img"
+      aria-label="Still water with stones and a maple leaf. Move across it and the surface bends; tap to drop a pebble."
+      data-layout={name}
+      data-lines={JSON.stringify(water.lines.map((l) => l.pts))}
+      data-calm={JSON.stringify(water.calm)}
+    >
+      <path class="water-bank" d={water.bank} />
+      <path class="water-bed" d={water.edge} />
+      <path class="water-edge" d={water.edge} />
+      <g class="water-lines">
+        {water.lines.map((l) => (
+          <path d={smooth(l.pts, false)} stroke-width={l.w} opacity={l.o} />
+        ))}
+      </g>
+      <g class="water-glints">
+        {water.calm.map(([x, y, len]) => (
+          <path d={`M${x} ${y} q${len / 2} -1.2 ${len} 0`} />
+        ))}
+      </g>
+      <g class="water-rings" />
+      {water.pads.map((p) => (
+        <g class="pad" transform={`translate(${p.x} ${p.y})`}>
+          <path class="pad-leaf" d={p.d} />
+          <path class="pad-vein" d={p.vein} />
+        </g>
+      ))}
+      {water.stones.map((s) => (
+        <g class="stone">
+          <path class="stone-shadow" d={s.shadow} />
+          <path class="stone-body" d={s.d} />
+          <path class="stone-facet" d={s.facet} />
+          {s.moss && <path class="stone-moss" d={s.moss} />}
+        </g>
+      ))}
+      <g class="water-leaf" transform={`translate(${L.leaf[0]} ${L.leaf[1]}) rotate(-23)`}>
+        <g transform="scale(0.13)">
+          <path class="leaf-stem" d={MOMIJI.stem} />
+          <path class="leaf-blade" d={MOMIJI.outline} />
+          <path class="leaf-ink" d={MOMIJI.outline} transform="translate(5 -4)" />
+        </g>
+      </g>
+      <g
+        class="water-seal"
+        transform={`translate(${name === "wide" ? 900 : 300} ${name === "wide" ? 30 : 20}) rotate(-6) scale(0.8)`}
+      >
+        <path d="M4 5 Q23 2 42 4 Q45 23 43 42 Q23 45 3 43 Q1 23 4 5 Z" />
+        <text x="23" y="31" text-anchor="middle">
+          波
+        </text>
+      </g>
+    </svg>
+  ))}
+  <figcaption class="hand">the water was here before you.</figcaption>
+</figure>
+
+<style>
+  .still-water {
+    margin: 5rem 0 0;
+  }
+
+  .water {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+    touch-action: none;
+    cursor: crosshair;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .water-tall {
+    display: none;
+  }
+
+  .water-bank {
+    fill: var(--bg-dim);
+  }
+
+  .water-bed {
+    fill: var(--sea);
+  }
+
+  .water-edge {
+    fill: none;
+    stroke: var(--border);
+    stroke-width: 1.2;
+    opacity: 0.7;
+  }
+
+  .water-lines {
+    fill: none;
+    stroke: var(--fg-dim);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .water-glints {
+    fill: none;
+    stroke: var(--bg-main);
+    stroke-width: 1.1;
+    stroke-linecap: round;
+    opacity: 0.45;
+  }
+
+  .water-rings {
+    fill: none;
+    stroke: var(--bg-main);
+    stroke-width: 1.2;
+    opacity: 0.6;
+  }
+
+  .water :global(.glint) {
+    fill: none;
+    stroke: var(--bg-main);
+    stroke-width: 1.4;
+    stroke-linecap: round;
+  }
+
+  .pad-leaf {
+    fill: var(--leaf);
+    stroke: var(--fg-dim);
+    stroke-width: 0.9;
+    stroke-linejoin: round;
+  }
+
+  .pad-vein {
+    fill: none;
+    stroke: var(--fg-dim);
+    stroke-width: 0.6;
+    opacity: 0.6;
+  }
+
+  .stone-shadow {
+    fill: var(--fg-dim);
+    opacity: 0.14;
+  }
+
+  .stone-body {
+    fill: var(--bg-alt);
+    stroke: var(--fg-main);
+    stroke-width: 1.3;
+    stroke-linejoin: round;
+  }
+
+  .stone-facet {
+    fill: none;
+    stroke: var(--fg-dim);
+    stroke-width: 0.9;
+    stroke-linecap: round;
+    opacity: 0.6;
+  }
+
+  .stone-moss {
+    fill: var(--leaf);
+    stroke: var(--fg-dim);
+    stroke-width: 0.6;
+    opacity: 0.9;
+  }
+
+  .leaf-blade {
+    fill: var(--red);
+    opacity: 0.9;
+  }
+
+  .leaf-ink,
+  .leaf-stem {
+    fill: none;
+    stroke: var(--red-warmer);
+    stroke-width: 6;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+    opacity: 0.65;
+  }
+
+  .water-seal {
+    opacity: 0;
+    transition: opacity 1.2s ease;
+  }
+
+  .water-seal.on {
+    opacity: 1;
+  }
+
+  .water-seal path {
+    fill: var(--red);
+    opacity: 0.92;
+  }
+
+  .water-seal text {
+    font-family: var(--font-seal);
+    font-size: 22px;
+    fill: var(--bg-main);
+  }
+
+  figcaption {
+    margin: 0.5rem 0.25rem 0 auto;
+    width: fit-content;
+    font-weight: 300;
+    font-size: 1rem;
+    color: var(--fg-dim);
+    opacity: 0.7;
+    transform: rotate(-1deg);
+  }
+
+  @media (max-width: 47.99em) {
+    .still-water {
+      margin-top: 3.5rem;
+    }
+
+    .water-wide {
+      display: none;
+    }
+
+    .water-tall {
+      display: block;
+    }
+  }
+</style>
+
+<script>
+  import { earn, load } from "../utils/garden";
+  import { smooth } from "../utils/sand";
+  import { LAYOUTS, inPond, inStone } from "../utils/water";
+
+  type Point = [number, number];
+
+  const CELL = 10;
+  const GAIN = 1.5;
+  const C2 = 0.2;
+  const DAMP = 0.962;
+  const NS = "http://www.w3.org/2000/svg";
+  const still = matchMedia("(prefers-reduced-motion: reduce)");
+  const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
+  const f = (n: number) => n.toFixed(1);
+
+  document.querySelectorAll<SVGSVGElement>(".still-water .water").forEach((svg) => {
+    const L = LAYOUTS[svg.dataset.layout as "wide" | "tall"];
+    const NX = L.W / CELL + 1;
+    const NY = L.H / CELL + 1;
+    let cur = new Float32Array(NX * NY);
+    let prev = new Float32Array(NX * NY);
+    const mask = new Uint8Array(NX * NY);
+    for (let j = 0; j < NY; j++) {
+      for (let i = 0; i < NX; i++) {
+        const x = i * CELL;
+        const y = j * CELL;
+        const edge = i === 0 || j === 0 || i === NX - 1 || j === NY - 1;
+        if (edge || !inPond(L, x, y) || inStone(L, x, y, 2)) mask[j * NX + i] = 1;
+      }
+    }
+
+    const lines: Point[][] = JSON.parse(svg.dataset.lines ?? "[]");
+    const linePaths = [...svg.querySelectorAll<SVGPathElement>(".water-lines path")];
+    const calm: Array<[number, number, number]> = JSON.parse(svg.dataset.calm ?? "[]");
+    const calmPaths = [...svg.querySelectorAll<SVGPathElement>(".water-glints path")];
+    const glints = svg.querySelector<SVGGElement>(".water-glints")!;
+    const rings = svg.querySelector<SVGGElement>(".water-rings")!;
+    const pads = [...svg.querySelectorAll<SVGGElement>(".pad")];
+    const padAt = L.pads.map(([x, y]) => [x, y]);
+    const leafEl = svg.querySelector<SVGGElement>(".water-leaf")!;
+    const seal = svg.querySelector<SVGGElement>(".water-seal")!;
+    const leaf = { x: L.leaf[0], y: L.leaf[1], vx: 0, vy: 0, a: -0.4 };
+
+    if (load().seals["波"]) seal.classList.add("on");
+
+    // height under a point, between the two rows of the grid it sits on
+    const hAt = (x: number, y: number) => {
+      const i = clamp(Math.round(x / CELL), 1, NX - 2);
+      const j0 = clamp(Math.floor(y / CELL), 1, NY - 2);
+      const fy = clamp(y / CELL - j0, 0, 1);
+      const k = j0 * NX + i;
+      return cur[k] * (1 - fy) + cur[k + NX] * fy;
+    };
+
+    function splash(x: number, y: number, amp: number, r: number) {
+      const ci = Math.round(x / CELL);
+      const cj = Math.round(y / CELL);
+      for (let dj = -r; dj <= r; dj++) {
+        for (let di = -r; di <= r; di++) {
+          const i = ci + di;
+          const j = cj + dj;
+          if (i < 1 || j < 1 || i >= NX - 1 || j >= NY - 1) continue;
+          const k = j * NX + i;
+          if (mask[k]) continue;
+          const fall = 1 - Math.hypot(di, dj) / (r + 1);
+          if (fall > 0) cur[k] += amp * fall;
+        }
+      }
+    }
+
+    function step() {
+      let peak = 0;
+      for (let j = 1; j < NY - 1; j++) {
+        for (let i = 1; i < NX - 1; i++) {
+          const k = j * NX + i;
+          if (mask[k]) {
+            prev[k] = 0;
+            continue;
+          }
+          const h = cur[k];
+          const v =
+            (2 * h - prev[k] + C2 * (cur[k - 1] + cur[k + 1] + cur[k - NX] + cur[k + NX] - 4 * h)) *
+            DAMP;
+          prev[k] = v;
+          peak = Math.max(peak, Math.abs(v));
+        }
+      }
+      [cur, prev] = [prev, cur];
+      return peak;
+    }
+
+    // leaf slides down the slope of the surface
+    function drift() {
+      const i = clamp(Math.round(leaf.x / CELL), 1, NX - 2);
+      const j = clamp(Math.round(leaf.y / CELL), 1, NY - 2);
+      const k = j * NX + i;
+      leaf.vx = leaf.vx * 0.965 - (cur[k + 1] - cur[k - 1]) * 0.16;
+      leaf.vy = leaf.vy * 0.965 - (cur[k + NX] - cur[k - NX]) * 0.16;
+      move(leaf.x + leaf.vx, leaf.y + leaf.vy);
+      leaf.a += leaf.vx * 0.012;
+      return Math.abs(leaf.vx) + Math.abs(leaf.vy) > 0.02;
+    }
+
+    function move(nx: number, ny: number) {
+      if (inPond(L, nx, ny) && inPond(L, nx + 16, ny) && !inStone(L, nx, ny, 6)) {
+        leaf.x = nx;
+        leaf.y = ny;
+      } else {
+        leaf.vx *= -0.4;
+        leaf.vy *= -0.4;
+      }
+      if (leaf.x > L.goal.x && leaf.y < L.goal.y && earn("波")) seal.classList.add("on");
+    }
+
+    function draw() {
+      const lift = (x: number, y: number) => clamp(hAt(x, y) * GAIN, -6, 6);
+      lines.forEach((pts, l) => {
+        linePaths[l].setAttribute(
+          "d",
+          smooth(
+            pts.map(([x, y]): Point => [x, y + lift(x, y)]),
+            false,
+          ),
+        );
+      });
+
+      calm.forEach(([x, y, len], c) => {
+        calmPaths[c].setAttribute(
+          "d",
+          `M${f(x)} ${f(y + lift(x, y))} q${f(len / 2)} -1.2 ${f(len)} 0`,
+        );
+      });
+
+      glints.querySelectorAll(".glint").forEach((g) => g.remove());
+      for (let j = 2; j < NY - 2; j += 2) {
+        for (let i = 2; i < NX - 2; i += 2) {
+          const v = cur[j * NX + i];
+          if (v < 0.9) continue;
+          const g = document.createElementNS(NS, "path");
+          g.setAttribute("class", "glint");
+          g.setAttribute(
+            "d",
+            `M${i * CELL - 6} ${f(j * CELL + clamp(v * GAIN, -6, 6))} q6 -2 12 0`,
+          );
+          g.setAttribute("opacity", Math.min(0.8, 0.3 + (v - 0.9) / 3).toFixed(2));
+          glints.append(g);
+        }
+      }
+      const bob = (x: number, y: number) => clamp(hAt(x, y) * GAIN, -5, 5);
+      pads.forEach((p, n) => {
+        const [x, y] = padAt[n];
+        p.setAttribute("transform", `translate(${x} ${f(y + bob(x, y) * 0.7)})`);
+      });
+      leafEl.setAttribute(
+        "transform",
+        `translate(${f(leaf.x)} ${f(leaf.y + bob(leaf.x, leaf.y) * 0.6)}) rotate(${f((leaf.a * 180) / Math.PI)})`,
+      );
+    }
+
+    let frame = 0;
+    function loop() {
+      frame = 0;
+      const peak = step();
+      const moving = drift();
+      if (peak < 0.03 && !moving) {
+        cur.fill(0);
+        prev.fill(0);
+      } else frame = requestAnimationFrame(loop);
+      draw();
+    }
+    const kick = () => {
+      if (!frame) frame = requestAnimationFrame(loop);
+    };
+
+    const toWater = (e: PointerEvent): Point => {
+      const p = new DOMPoint(e.clientX, e.clientY).matrixTransform(svg.getScreenCTM()!.inverse());
+      return [p.x, p.y];
+    };
+
+    function stillRing([x, y]: Point) {
+      const r = document.createElementNS(NS, "ellipse");
+      r.setAttribute("cx", f(x));
+      r.setAttribute("cy", f(y));
+      r.setAttribute("rx", "18");
+      r.setAttribute("ry", "8");
+      rings.append(r);
+      setTimeout(() => r.remove(), 1200);
+      const d = Math.hypot(leaf.x - x, leaf.y - y);
+      if (d < 70 && d > 0.1) {
+        move(leaf.x + ((leaf.x - x) / d) * 30, leaf.y + ((leaf.y - y) / d) * 30);
+        draw();
+      }
+    }
+
+    let last: Point | null = null;
+    svg.addEventListener("pointermove", (e) => {
+      if (still.matches) return;
+      const q = toWater(e);
+      if (last) {
+        const dx = q[0] - last[0];
+        const dy = q[1] - last[1];
+        const d = Math.hypot(dx, dy);
+        const amp = d < 2 ? 0 : Math.min(d * 0.045, 1.1);
+        const n = Math.max(1, Math.ceil(d / 8));
+        for (let s = 1; s <= n; s++)
+          splash(last[0] + (dx * s) / n, last[1] + (dy * s) / n, amp / Math.sqrt(n), 1);
+      }
+      last = q;
+      kick();
+    });
+    svg.addEventListener("pointerdown", (e) => {
+      const q = toWater(e);
+      if (still.matches) return stillRing(q);
+      splash(q[0], q[1], 8, 1);
+      last = e.pointerType === "mouse" ? q : null;
+      kick();
+    });
+    const leave = () => (last = null);
+    svg.addEventListener("pointerleave", leave);
+    svg.addEventListener("pointerup", (e) => e.pointerType !== "mouse" && leave());
+    svg.addEventListener("pointercancel", leave);
+  });
+</script>
