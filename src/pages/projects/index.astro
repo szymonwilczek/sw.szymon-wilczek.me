@@ -2,10 +2,9 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Divider from "../../components/Divider.astro";
 import SearchFilter from "../../components/SearchFilter.astro";
-import ProjectMeta from "../../components/ProjectMeta.astro";
-import LangSeal from "../../components/LangSeal.astro";
+import Specimen from "../../components/Specimen.astro";
 import { PROJECTS, blot, inkOf, languages, repoPath } from "../../utils/projects";
-import { commitCount, inkStroke, repoStats, yearOfInk, type RepoStats } from "../../utils/github";
+import { repoStats, yearOfInk, type RepoStats } from "../../utils/github";
 import { hash, rng } from "../../utils/stamp";
 
 const stats = new Map<string, RepoStats>();
@@ -43,16 +42,9 @@ const dots = year.flatMap((week, w) =>
 const RING =
   "M8 6 C 40 1, 80 2, 95 12 C 101 26, 84 38, 50 38 C 18 39, 1 32, 3 18 C 4 10, 14 4, 30 3";
 
-// A year of commits as one stroke; empty when GitHub gave nothing
-const ink = (p: (typeof PROJECTS)[number], h: number) => {
-  const days = stats.get(p.title)?.days;
-  return days?.length ? inkStroke(days, 300, h) : "";
-};
-const when = (iso: string) =>
-  new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
-
-const CARD_TILTS = [-0.4, 0.3, -0.2, 0.4, -0.3, 0.2];
-const STAMP_TILTS = [-4, 3, -2, 5, -3, 2];
+// each sheet keeps its number in the herbarium and lies a little crooked
+const no = (p: (typeof PROJECTS)[number]) => PROJECTS.indexOf(p) + 1;
+const tilt = (p: (typeof PROJECTS)[number]) => (((no(p) * 29) % 9) - 4) / 10;
 
 const search = (p: (typeof PROJECTS)[number]) =>
   `${p.title} ${p.language} ${p.excerpt} ${p.badge ?? ""} ${repoPath(p.url).path}`;
@@ -121,68 +113,17 @@ const search = (p: (typeof PROJECTS)[number]) =>
   </div>
 
   <div class="projects">
-    <p class="section hand">pinned —</p>
+    <p class="section hand">pressed and kept —</p>
     <div class="pinned">
-      {pinned.map((p, i) => {
-        const repo = repoPath(p.url);
-        const s = stats.get(p.title);
-        const stroke = ink(p, 26);
-        return (
-          <article
-            class="project card"
-            data-lang={p.language}
-            data-search={search(p)}
-            style={`--tilt: ${CARD_TILTS[i % CARD_TILTS.length]}deg`}
-          >
-            <div class="card-head">
-              <LangSeal language={p.language} size={34} tilt={-5} />
-              <div class="title">
-                <div class="title-line">
-                  <h2>
-                    <a class="name" href={p.url}>
-                      {p.title}
-                    </a>
-                  </h2>
-                  {p.badge && (
-                    <span class="stamp" style={`--tilt: ${STAMP_TILTS[i % STAMP_TILTS.length]}deg`}>
-                      {p.badge}
-                    </span>
-                  )}
-                </div>
-                <p class="repo">
-                  {repo.path}
-                  {repo.site && " · site"}
-                </p>
-              </div>
-            </div>
-            <p class="excerpt">{p.excerpt}</p>
-            {stroke && s && (
-              <figure class="stroke">
-                <svg viewBox="0 0 300 26" preserveAspectRatio="none" aria-hidden="true">
-                  <path d={stroke} />
-                </svg>
-                <figcaption>
-                  <span>a year ago</span>
-                  <span>{commitCount(s.days)} commits</span>
-                  <span>now</span>
-                </figcaption>
-              </figure>
-            )}
-            <div class="card-foot">
-              {s?.last && (
-                <p class="last hand">
-                  last: {s.last.subject} · <time datetime={s.last.date}>{when(s.last.date)}</time>
-                </p>
-              )}
-              <ProjectMeta project={p} stats={s} />
-            </div>
-          </article>
-        );
-      })}
+      {pinned.map((p) => (
+        <article class="project" data-lang={p.language} data-search={search(p)}>
+          <Specimen project={p} stats={stats.get(p.title)} no={no(p)} tilt={tilt(p)} />
+        </article>
+      ))}
     </div>
 
     <div class="rest-head">
-      <p class="section hand">everything else —</p>
+      <p class="section hand">the rest of the herbarium —</p>
       <p class="sort hand" role="group" aria-label="Order">
         by{" "}
         {hasStats && (
@@ -197,7 +138,7 @@ const search = (p: (typeof PROJECTS)[number]) =>
           </>
         )}
         <button type="button" data-sort="started" aria-pressed={String(!hasStats)}>
-          started
+          collected
           <svg viewBox="0 0 100 8" preserveAspectRatio="none" aria-hidden="true">
             <path d="M2 4 C 30 2, 60 6, 98 3" vector-effect="non-scaling-stroke"></path>
           </svg>
@@ -213,46 +154,18 @@ const search = (p: (typeof PROJECTS)[number]) =>
     </div>
 
     <ul class="rest">
-      {rest.map((p, i) => {
-        const stroke = ink(p, 14);
-        return (
-          <li
-            class:list={["project", "row", { archived: p.archived }]}
-            data-lang={p.language}
-            data-search={search(p)}
-            data-started={p.date}
-            data-name={p.title.toLowerCase()}
-            data-touched={touched(p)}
-          >
-            <div class="row-head">
-              <LangSeal language={p.language} size={22} />
-              <h2>
-                <a class="name" href={p.url}>
-                  {p.title}
-                </a>
-              </h2>
-              {p.badge && (
-                <span class="stamp" style={`--tilt: ${-3 + (i % 3) * 3}deg`}>
-                  {p.badge}
-                </span>
-              )}
-            </div>
-            {p.archived && <p class="moss hand">archived — kept, not tended</p>}
-            <p class="excerpt">{p.excerpt}</p>
-            {stroke && (
-              <svg
-                class="stroke-small"
-                viewBox="0 0 300 14"
-                preserveAspectRatio="none"
-                aria-hidden="true"
-              >
-                <path d={stroke} />
-              </svg>
-            )}
-            <ProjectMeta project={p} stats={stats.get(p.title)} compact />
-          </li>
-        );
-      })}
+      {rest.map((p) => (
+        <li
+          class="project row"
+          data-lang={p.language}
+          data-search={search(p)}
+          data-started={p.date}
+          data-name={p.title.toLowerCase()}
+          data-touched={touched(p)}
+        >
+          <Specimen project={p} stats={stats.get(p.title)} no={no(p)} tilt={tilt(p)} small />
+        </li>
+      ))}
     </ul>
   </div>
 </BaseLayout>
@@ -427,136 +340,7 @@ const search = (p: (typeof PROJECTS)[number]) =>
   .pinned {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1.75rem;
-  }
-
-  .card {
-    display: flex;
-    flex-direction: column;
-    padding: 1.375rem 1.5rem 1.125rem;
-    background: var(--paper);
-    border-radius: 3px 5px 4px 6px;
-    box-shadow:
-      0 1px 0 var(--border),
-      0 18px 28px -24px rgba(0, 0, 0, 0.55);
-    transform: rotate(var(--tilt));
-  }
-
-  .card-head {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.875rem;
-  }
-
-  .title {
-    flex: 1;
-    min-width: 0;
-  }
-
-  .title-line,
-  .row-head {
-    display: flex;
-    align-items: center;
-    gap: 0.625rem;
-  }
-
-  h2 {
-    flex: 1;
-    min-width: 0;
-    margin: 0;
-    font-size: 1.0625rem;
-    line-height: 1.4;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .row h2 {
-    font-size: 0.9375rem;
-  }
-
-  .name {
-    font-family: var(--font-mono);
-    font-weight: 600;
-    color: var(--fg-link);
-  }
-
-  .stamp {
-    flex: none;
-    display: inline-block;
-    padding: 1px 7px 0;
-    border: 1.4px solid var(--red);
-    border-radius: 3px 2px 4px 2px;
-    font-family: var(--font-mono);
-    font-size: 0.625rem;
-    letter-spacing: 0.06em;
-    color: var(--red);
-    opacity: 0.85;
-    transform: rotate(var(--tilt));
-  }
-
-  .repo {
-    margin: 0.125rem 0 0;
-    font-family: var(--font-mono);
-    font-size: 0.6875rem;
-    color: var(--fg-dim);
-    overflow-wrap: anywhere;
-  }
-
-  .excerpt {
-    flex: 1;
-    margin: 0.875rem 0 1rem;
-    font-size: 1rem;
-    line-height: 1.55;
-    color: var(--fg-dim);
-  }
-
-  .stroke {
-    margin: 0;
-  }
-
-  .stroke svg,
-  .stroke-small {
-    display: block;
-    width: 100%;
-  }
-
-  .stroke svg {
-    height: 26px;
-  }
-
-  .stroke path,
-  .stroke-small path {
-    fill: var(--fg-main);
-    opacity: 0.62;
-  }
-
-  .stroke figcaption {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 0.25rem;
-    font-family: var(--font-mono);
-    font-size: 0.65625rem;
-    color: var(--fg-dim);
-  }
-
-  .card-foot {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 0.375rem 1.125rem;
-    margin-top: 0.875rem;
-    padding-top: 0.75rem;
-    border-top: 1px dashed var(--border);
-  }
-
-  .last {
-    min-width: 0;
-    margin: 0;
-    font-size: 1rem;
-    color: var(--fg-dim);
-    overflow-wrap: anywhere;
+    gap: 2.25rem 2rem;
   }
 
   .rest-head {
@@ -565,7 +349,7 @@ const search = (p: (typeof PROJECTS)[number]) =>
     align-items: baseline;
     justify-content: space-between;
     gap: 0.5rem 1.5rem;
-    margin: 4rem 0 1.25rem;
+    margin: 4rem 0 1.375rem;
   }
 
   .rest-head .section {
@@ -615,48 +399,10 @@ const search = (p: (typeof PROJECTS)[number]) =>
   .rest {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
-    gap: 1.25rem 1.5rem;
+    gap: 1.75rem 1.625rem;
     margin: 0;
     padding: 0;
     list-style: none;
-  }
-
-  .row {
-    display: flex;
-    flex-direction: column;
-    padding: 1rem 1.125rem 0.875rem;
-    border: 1px solid var(--border);
-    border-radius: 4px 6px 5px 3px;
-  }
-
-  .row .excerpt {
-    margin: 0.625rem 0 0.75rem;
-    font-size: 0.90625rem;
-    line-height: 1.5;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-
-  .stroke-small {
-    height: 14px;
-    margin-bottom: 0.5rem;
-  }
-
-  .stroke-small path {
-    opacity: 0.5;
-  }
-
-  .archived {
-    opacity: 0.62;
-  }
-
-  .moss {
-    margin: 0.375rem 0 0;
-    font-size: 0.9375rem;
-    color: var(--accent-0);
-    transform: rotate(-2deg);
   }
 
   @media (max-width: 47.99em) {
@@ -667,10 +413,6 @@ const search = (p: (typeof PROJECTS)[number]) =>
 
     .pinned {
       grid-template-columns: minmax(0, 1fr);
-    }
-
-    .card {
-      transform: none;
     }
   }
 </style>

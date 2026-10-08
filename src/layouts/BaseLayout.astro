@@ -50,7 +50,9 @@ const {
   <head>
     <meta charset="utf-8" />
     <Fragment
-      set:html={"<!-- you look under stones. M-x knows one command it never lists: show-me-the-... -->"}
+      set:html={
+        "<!-- you look under stones. M-x knows one command it never lists: show-me-the-... -->"
+      }
     />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
@@ -119,60 +121,86 @@ const {
           root.setAttribute("data-theme-choice", choice);
         }
 
-        var fading = 0;
-        var floods = 0;
+        var pouring = false;
+        var waiting = null;
+
+        function pour(job) {
+          var still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+          if (!document.startViewTransition || still) return job.apply();
+          if (pouring) {
+            waiting = job;
+            return;
+          }
+          if (root.getAttribute("data-theme") === job.theme) {
+            job.apply();
+            return;
+          }
+          pouring = true;
+          var button = document.getElementById("theme-toggle");
+          var r = button && button.getBoundingClientRect();
+          var visible = r && r.width > 0;
+          root.style.setProperty(
+            "--ink-x",
+            (visible ? r.left + r.width / 2 : innerWidth - 40) + "px",
+          );
+          root.style.setProperty("--ink-y", (visible ? r.top + r.height / 2 : 40) + "px");
+          root.classList.add("ink-flood");
+          root.classList.toggle("ink-quick", job.quick);
+          var flow = document.startViewTransition(job.apply);
+          flow.ready.catch(function () {});
+          flow.finished.finally(function () {
+            pouring = false;
+            var next = waiting;
+            waiting = null;
+            if (next) pour(next);
+            else root.classList.remove("ink-flood", "ink-quick");
+          });
+        }
+
+        function store(choice) {
+          try {
+            if (choice === "auto") localStorage.removeItem(KEY);
+            else localStorage.setItem(KEY, choice);
+          } catch (e) {}
+        }
+
+        function show(choice) {
+          apply(choice);
+          document.dispatchEvent(
+            new CustomEvent("au-theme-change", {
+              detail: { choice: choice, theme: resolve(choice) },
+            }),
+          );
+        }
 
         window.auTheme = {
           ids: themeIds,
           get: read,
           resolve: resolve,
           set: function (choice) {
-            try {
-              if (choice === "auto") localStorage.removeItem(KEY);
-              else localStorage.setItem(KEY, choice);
-            } catch (e) {}
-            apply(choice);
-            document.dispatchEvent(
-              new CustomEvent("au-theme-change", {
-                detail: { choice: choice, theme: resolve(choice) },
-              }),
-            );
+            store(choice);
+            show(choice);
           },
 
           preview: function (id) {
             var theme = id || resolve(read());
-            if (root.getAttribute("data-theme") === theme) return;
-            if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-              root.classList.add("theme-fade");
-              clearTimeout(fading);
-              fading = setTimeout(function () {
-                root.classList.remove("theme-fade");
-              }, 600);
-            }
-            root.setAttribute("data-theme", theme);
+            if (waiting && waiting.theme === theme) return;
+            pour({
+              theme: theme,
+              quick: true,
+              apply: function () {
+                root.setAttribute("data-theme", theme);
+              },
+            });
           },
           flood: function (choice) {
-            var set = window.auTheme.set;
-            var still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-            if (!document.startViewTransition || still) return set(choice);
-
-            var button = document.getElementById("theme-toggle");
-            var r = button && button.getBoundingClientRect();
-            var visible = r && r.width > 0;
-            root.style.setProperty(
-              "--ink-x",
-              (visible ? r.left + r.width / 2 : innerWidth - 40) + "px",
-            );
-            root.style.setProperty("--ink-y", (visible ? r.top + r.height / 2 : 40) + "px");
-            root.classList.add("ink-flood");
-
-            var mine = ++floods;
-            var flow = document.startViewTransition(function () {
-              set(choice);
-            });
-            flow.ready.catch(function () {});
-            flow.finished.finally(function () {
-              if (mine === floods) root.classList.remove("ink-flood");
+            store(choice);
+            pour({
+              theme: resolve(choice),
+              quick: false,
+              apply: function () {
+                show(choice);
+              },
             });
           },
         };

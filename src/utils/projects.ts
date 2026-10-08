@@ -1,4 +1,5 @@
-// The repositories kept on /projects
+// The repositories kept on /projects: one line each, a language and the way
+// to the code.
 
 import data from "../data/projects.json";
 import { smooth } from "./sand";
@@ -32,24 +33,12 @@ export function inkOf(language: string): string {
   return INK[language] ?? "var(--fg-dim)";
 }
 
-// what a language seal says
-const ABBR: Record<string, string> = { Rust: "Rs", Java: "Jv", TypeScript: "TS", JavaScript: "JS" };
-
-export function abbrOf(language: string): string {
-  return ABBR[language] ?? language;
-}
-
 /** "owner/repo" for GitHub, otherwise the bare host of the site */
 export function repoPath(url: string): { path: string; site: boolean } {
   const u = new URL(url);
   const path = u.pathname.replace(/^\/|\/$/g, "");
   if (u.hostname === "github.com") return { path, site: false };
   return { path: u.hostname, site: true };
-}
-
-export function since(date: string): string {
-  const [y, m] = date.split("-");
-  return `since ${y}·${m}`;
 }
 
 /** A small seven-point blot of ink */

@@ -294,15 +294,8 @@ for (const theme of auThemes) {
     }
 
     function pick(row) {
-      var choice = row.dataset.choice;
-      var shown = document.documentElement.getAttribute("data-theme");
-      if (shown === window.auTheme.resolve(choice)) {
-        window.auTheme.set(choice);
-        picker.close();
-        return;
-      }
+      window.auTheme.flood(row.dataset.choice);
       picker.close();
-      window.auTheme.flood(choice);
     }
 
     function open() {
