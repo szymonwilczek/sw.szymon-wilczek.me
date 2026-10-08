@@ -1,0 +1,327 @@
+---
+// A slab of stone at the end of /contact, for writing with water.
+// Bring it out enough and it earns a seal.
+import { makeSlab } from "../utils/mizusho";
+
+const slabs = (["wide", "tall"] as const).map((name) => ({ name, s: makeSlab(name === "tall") }));
+---
+
+<figure class="mizusho">
+  <p class="mizusho-hint hand">
+    <span class="hint-wide">press and drag to write on the stone</span>
+    <span class="hint-tall">write on the stone with a finger</span>
+  </p>
+  {slabs.map(({ name, s }) => (
+    <svg
+      class={`stone stone-${name}`}
+      viewBox={`0 0 ${s.W} ${s.H}`}
+      role="img"
+      aria-label="A slab of stone. Press and drag to write on it with water; the writing dries away."
+      data-layout={name}
+    >
+      <defs>
+        <filter id={`mz-edge-${name}`} x="-5%" y="-5%" width="110%" height="110%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.045" numOctaves="2" seed="4" />
+          <feDisplacementMap in="SourceGraphic" scale="6" />
+        </filter>
+        <mask id={`mz-wet-${name}`} maskUnits="userSpaceOnUse" x="0" y="0" width={s.W} height={s.H}>
+          <g class="wet-mask" />
+        </mask>
+      </defs>
+      <path class="slab-shadow" d={s.shadow} />
+      <path class="slab" d={s.d} />
+      <g class="slab-grains">
+        {s.grains.map(([x, y, r]) => (
+          <circle cx={x} cy={y} r={r} />
+        ))}
+      </g>
+      <path class="slab-crack" d={s.crack} />
+      <path class="slab-moss" d={s.moss} />
+      <g class="wet" filter={`url(#mz-edge-${name})`} />
+      <text
+        class="old-glyph"
+        x={s.glyph.x}
+        y={s.glyph.y}
+        font-size={s.glyph.size}
+        text-anchor="middle"
+        mask={`url(#mz-wet-${name})`}
+      >
+        寂
+      </text>
+      <g
+        class="stone-seal"
+        transform={`translate(${s.seal[0]} ${s.seal[1]}) rotate(-6) scale(0.8)`}
+      >
+        <path d="M4 5 Q23 2 42 4 Q45 23 43 42 Q23 45 3 43 Q1 23 4 5 Z" />
+        <text x="23" y="31" text-anchor="middle">
+          寂
+        </text>
+      </g>
+    </svg>
+  ))}
+  <figcaption class="hand">
+    <span class="said-dry">the stone is dry.</span>
+    <span class="said-wet">it is already drying.</span>
+    <span class="said-found">someone wrote this here a long time ago.</span>
+  </figcaption>
+</figure>
+
+<style>
+  .mizusho {
+    margin: 5rem 0 0;
+  }
+
+  .mizusho-hint {
+    margin: 0 0 0.75rem;
+    font-weight: 300;
+    font-size: 1.1rem;
+    color: var(--cursor);
+  }
+
+  .stone {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+    touch-action: none;
+    cursor: crosshair;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .hint-tall,
+  .stone-tall {
+    display: none;
+  }
+
+  .slab-shadow {
+    fill: var(--fg-dim);
+    opacity: 0.16;
+  }
+
+  .slab {
+    fill: var(--bg-alt);
+    stroke: var(--fg-main);
+    stroke-width: 1.3;
+    stroke-linejoin: round;
+  }
+
+  .slab-grains {
+    fill: var(--fg-dim);
+    opacity: 0.32;
+  }
+
+  .slab-crack {
+    fill: none;
+    stroke: var(--fg-dim);
+    stroke-linecap: round;
+    opacity: 0.55;
+  }
+
+  .slab-moss {
+    fill: var(--leaf);
+    stroke: var(--fg-dim);
+    stroke-width: 0.6;
+    opacity: 0.9;
+  }
+
+  .wet {
+    fill: none;
+    stroke: var(--fg-main);
+    stroke-linecap: round;
+    opacity: 0.32;
+  }
+
+  .wet-mask {
+    fill: none;
+    stroke: #fff;
+    stroke-linecap: round;
+  }
+
+  .old-glyph {
+    font-family: var(--font-seal);
+    fill: var(--fg-main);
+    opacity: 0.6;
+    pointer-events: none;
+  }
+
+  .stone-seal {
+    opacity: 0;
+    transition: opacity 1.2s ease;
+  }
+
+  .mizusho.found .stone-seal {
+    opacity: 1;
+  }
+
+  .stone-seal path {
+    fill: var(--red);
+    opacity: 0.92;
+  }
+
+  .stone-seal text {
+    font-family: var(--font-seal);
+    font-size: 22px;
+    fill: var(--bg-main);
+  }
+
+  figcaption {
+    margin: 0.5rem 0.25rem 0 auto;
+    width: fit-content;
+    font-weight: 300;
+    font-size: 1rem;
+    color: var(--fg-dim);
+    opacity: 0.7;
+    transform: rotate(-1deg);
+  }
+
+  .said-wet,
+  .said-found,
+  .mizusho.wet .said-dry,
+  .mizusho.found .said-dry,
+  .mizusho.found .said-wet {
+    display: none;
+  }
+
+  .mizusho.wet .said-wet,
+  .mizusho.found .said-found {
+    display: inline;
+  }
+
+  @media (max-width: 47.99em) {
+    .mizusho {
+      margin-top: 3.5rem;
+    }
+
+    .hint-wide,
+    .stone-wide {
+      display: none;
+    }
+
+    .hint-tall {
+      display: inline;
+    }
+
+    .stone-tall {
+      display: block;
+    }
+  }
+</style>
+
+<script>
+  import { earn, load } from "../utils/garden";
+  import { makeSlab } from "../utils/mizusho";
+
+  const NS = "http://www.w3.org/2000/svg";
+  const WET_MS = 2600;
+  const DRY_MS = 5200;
+  const still = matchMedia("(prefers-reduced-motion: reduce)");
+  const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
+  const wetness = (age: number) =>
+    still.matches ? (age < WET_MS + DRY_MS / 2 ? 1 : 0) : clamp(1 - (age - WET_MS) / DRY_MS, 0, 1);
+
+  interface Dab {
+    x: number;
+    y: number;
+    w: number;
+    t: number;
+  }
+  interface Seg {
+    a: Dab;
+    b: Dab;
+    ink: SVGLineElement;
+    mask: SVGLineElement;
+  }
+
+  const figure = document.querySelector<HTMLElement>(".mizusho");
+  if (figure && load().seals["寂"]) figure.classList.add("found");
+
+  figure?.querySelectorAll<SVGSVGElement>(".stone").forEach((svg) => {
+    const slab = makeSlab(svg.dataset.layout === "tall");
+    const wet = svg.querySelector<SVGGElement>(".wet")!;
+    const wetMask = svg.querySelector<SVGGElement>(".wet-mask")!;
+    const segs: Seg[] = [];
+    let painted = 0;
+    let drawing = false;
+    let last: Dab | null = null;
+
+    const line = (parent: SVGGElement, a: Dab, b: Dab) => {
+      const l = document.createElementNS(NS, "line");
+      l.setAttribute("x1", a.x.toFixed(1));
+      l.setAttribute("y1", a.y.toFixed(1));
+      l.setAttribute("x2", b.x.toFixed(1));
+      l.setAttribute("y2", b.y.toFixed(1));
+      parent.append(l);
+      return l;
+    };
+
+    let frame = 0;
+    function loop() {
+      frame = 0;
+      const now = performance.now();
+      for (let k = segs.length - 1; k >= 0; k--) {
+        const s = segs[k];
+        const w = wetness(now - s.b.t);
+        if (w <= 0) {
+          s.ink.remove();
+          s.mask.remove();
+          segs.splice(k, 1);
+          continue;
+        }
+        const width = (((s.a.w + s.b.w) / 2) * (0.15 + 0.85 * w)).toFixed(1);
+        s.ink.setAttribute("stroke-width", width);
+        s.mask.setAttribute("stroke-width", width);
+        s.mask.setAttribute("opacity", Math.min(1, w * 1.4).toFixed(2));
+      }
+      figure!.classList.toggle("wet", segs.length > 0);
+      if (segs.length || drawing) frame = requestAnimationFrame(loop);
+    }
+    const kick = () => {
+      if (!frame) frame = requestAnimationFrame(loop);
+    };
+
+    const toStone = (e: PointerEvent): [number, number] => {
+      const p = new DOMPoint(e.clientX, e.clientY).matrixTransform(svg.getScreenCTM()!.inverse());
+      return [p.x, p.y];
+    };
+
+    // slow is thick and quick is thin, eased so the brush never jumps
+    function add(x: number, y: number, t: number) {
+      if (!last) return;
+      const d = Math.hypot(x - last.x, y - last.y);
+      if (d < 3) return;
+      const target = clamp(24 - (d / Math.max(t - last.t, 8)) * 14, 5, 24);
+      const dab = { x, y, w: last.w * 0.6 + target * 0.4, t };
+      segs.push({ a: last, b: dab, ink: line(wet, last, dab), mask: line(wetMask, last, dab) });
+      last = dab;
+      const [bx0, by0, bx1, by1] = slab.box;
+      if (x > bx0 && x < bx1 && y > by0 && y < by1) painted += d * dab.w;
+      if (painted > 30000 && !figure!.classList.contains("found")) {
+        figure!.classList.add("found");
+        earn("寂");
+      }
+    }
+
+    svg.addEventListener("pointerdown", (e) => {
+      const [x, y] = toStone(e);
+      const t = performance.now();
+      svg.setPointerCapture(e.pointerId);
+      drawing = true;
+      last = { x, y, w: 16, t };
+      add(x + 3, y + 3, t);
+      kick();
+    });
+    svg.addEventListener("pointermove", (e) => {
+      if (!drawing) return;
+      const [x, y] = toStone(e);
+      add(x, y, performance.now());
+    });
+    const lift = () => {
+      drawing = false;
+      last = null;
+    };
+    svg.addEventListener("pointerup", lift);
+    svg.addEventListener("pointercancel", lift);
+    svg.addEventListener("pointerleave", lift);
+  });
+</script>
