@@ -8,6 +8,7 @@ export interface RepoStats {
   forks: number;
   pushed: string;
   days: number[][];
+  last: { subject: string; date: string } | null;
 }
 
 const API = "https://api.github.com/repos/";
@@ -37,6 +38,14 @@ async function activity(repo: string, token: string): Promise<number[][]> {
   return [];
 }
 
+async function lastCommit(repo: string, token: string): Promise<RepoStats["last"]> {
+  const res = await get(`${API}${repo}/commits?per_page=1`, token);
+  if (!res.ok) return null;
+  const [newest] = await res.json();
+  if (!newest) return null;
+  return { subject: newest.commit.message.split("\n")[0], date: newest.commit.committer.date };
+}
+
 async function load(repo: string, token: string): Promise<RepoStats | null> {
   try {
     const res = await get(API + repo, token);
@@ -47,6 +56,7 @@ async function load(repo: string, token: string): Promise<RepoStats | null> {
       forks: info.forks_count,
       pushed: info.pushed_at,
       days: await activity(repo, token),
+      last: await lastCommit(repo, token),
     };
   } catch {
     return null;
@@ -61,27 +71,27 @@ export function repoStats(repo: string): Promise<RepoStats | null> {
   return cache.get(repo)!;
 }
 
-/** Weekly commit totals drawn as a soft line */
-export function sparkline(days: number[][]): string {
-  const weeks = days.map((d) => d.reduce((a, b) => a + b, 0));
-  if (weeks.length < 2 || Math.max(...weeks) === 0) return "";
-  const buckets: number[] = [];
-  for (let i = 0; i < weeks.length; i += 2) buckets.push(weeks[i] + (weeks[i + 1] ?? 0));
-  const top = Math.max(...buckets);
-  const step = 104 / (buckets.length - 1);
-  return smooth(
-    buckets.map((v, i): [number, number] => [i * step, 16 - (v / top) * 14]),
-    false,
-  );
+/**
+ * A year of commits as one brush stroke: a thread where the work rested,
+ * thick where it ran. Weekly totals, the newest week on the right.
+ */
+export function inkStroke(days: number[][], w: number, h: number): string {
+  const weeks = days.slice(-52).map((d) => d.reduce((a, b) => a + b, 0));
+  const top = Math.max(...weeks, 0);
+  if (weeks.length < 2 || top === 0) return "";
+  const step = w / (weeks.length - 1);
+  const upper: Array<[number, number]> = [];
+  const lower: Array<[number, number]> = [];
+  weeks.forEach((n, i) => {
+    const thick = 0.7 + Math.sqrt(n / top) * h * 0.62;
+    const mid = h / 2 + Math.sin(i / 5) * 1.2;
+    upper.push([i * step, mid - thick / 2]);
+    lower.unshift([i * step, mid + thick / 2]);
+  });
+  return smooth([...upper, ...lower], true) + " Z";
 }
 
-/** Every repository's days added together, 52 weeks of 7 */
-export function yearOfInk(all: number[][][]): number[][] {
-  const year = Array.from({ length: 52 }, () => Array<number>(7).fill(0));
-  for (const days of all) {
-    const recent = days.slice(-52);
-    const offset = 52 - recent.length;
-    recent.forEach((week, w) => week.forEach((n, d) => (year[w + offset][d] += n)));
-  }
-  return year;
+/** Commits in the last 52 weeks */
+export function commitCount(days: number[][]): number {
+  return days.slice(-52).reduce((sum, week) => sum + week.reduce((a, b) => a + b, 0), 0);
 }

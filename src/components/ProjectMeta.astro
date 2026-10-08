@@ -1,22 +1,18 @@
 ---
 import type { RepoStats } from "../utils/github";
-import { blot, inkOf, since, type Project } from "../utils/projects";
+import { since, type Project } from "../utils/projects";
 
 interface Props {
   project: Project;
   stats?: RepoStats;
+  compact?: boolean;
 }
 
-const { project, stats } = Astro.props;
+// language is on the seal, so the meta line is only numbers and time
+const { project, stats, compact = false } = Astro.props;
 ---
 
 <p class="meta">
-  <span>
-    <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
-      <path d={blot(project.title)} fill={inkOf(project.language)}></path>
-    </svg>
-    {project.language}
-  </span>
   {
     stats && (
       <>
@@ -27,16 +23,18 @@ const { project, stats } = Astro.props;
           {stats.stars}
           <span class="visually-hidden">stars</span>
         </span>
-        <span title="forks">
-          <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true">
-            <path d="M4.5 4.6 C 4.4 7.4, 5 8.6, 8 9 C 11 8.6, 11.6 7.4, 11.5 4.6 M 8 9 L 8 11.3" />
-            <circle cx="4.5" cy="3.2" r="1.6" />
-            <circle cx="11.5" cy="3.2" r="1.6" />
-            <circle cx="8" cy="12.9" r="1.6" />
-          </svg>
-          {stats.forks}
-          <span class="visually-hidden">forks</span>
-        </span>
+        {!compact && (
+          <span title="forks">
+            <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M4.5 4.6 C 4.4 7.4, 5 8.6, 8 9 C 11 8.6, 11.6 7.4, 11.5 4.6 M 8 9 L 8 11.3" />
+              <circle cx="4.5" cy="3.2" r="1.6" />
+              <circle cx="11.5" cy="3.2" r="1.6" />
+              <circle cx="8" cy="12.9" r="1.6" />
+            </svg>
+            {stats.forks}
+            <span class="visually-hidden">forks</span>
+          </span>
+        )}
       </>
     )
   }
