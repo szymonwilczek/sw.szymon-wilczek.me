@@ -24,6 +24,41 @@
   color: var(--fg-dim);
 }
 
+/* keyboard focus: a pencil loop that never quite closes */
+.has-focus-loop :focus-visible:not(input, textarea, select) {
+  outline: none;
+}
+
+.focus-loop {
+  position: fixed;
+  z-index: 60;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.focus-loop path {
+  fill: none;
+  stroke: var(--cursor);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  animation: focus-loop-draw 0.28s ease-out both;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+
+@keyframes focus-loop-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .focus-loop path {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+}
+
 /* hanko pressed onto a code block when it is copied */
 .copy-hanko {
   position: absolute;
