@@ -1,0 +1,297 @@
+---
+// A strip of dry garden above the home footer.
+// Drag across it and the lines part like sand; leave it and the rake comes back
+// and smooths them.
+import { makeSand, smooth } from "../utils/sand";
+
+const sand = makeSand();
+---
+
+<figure class="karesansui">
+  <svg
+    class="sand"
+    viewBox="0 0 1000 190"
+    role="img"
+    aria-label="Raked sand garden with three stones"
+    data-lines={JSON.stringify(sand.lines.map((l) => l.pts))}
+  >
+    <path class="sand-bed" d={sand.edge}></path>
+    <g class="sand-grains">
+      {sand.grains.map((g) => (
+        <circle cx={g.x} cy={g.y} r={g.r} />
+      ))}
+    </g>
+    <g class="sand-lines">
+      {sand.lines.map((l) => (
+        <path d={smooth(l.pts, false)} stroke-width={l.w} opacity={l.o} />
+      ))}
+      {sand.rings.map((r) => (
+        <path d={r.d} stroke-width={r.w} opacity={r.o} />
+      ))}
+    </g>
+    <g class="sand-kept"></g>
+    {sand.stones.map((s) => (
+      <g class="stone">
+        <path class="stone-shadow" d={s.shadow} />
+        <path class="stone-body" d={s.d} />
+        <path class="stone-facet" d={s.facet} />
+        {s.moss && <path class="stone-moss" d={s.moss} />}
+      </g>
+    ))}
+    <path
+      class="sand-leaf"
+      d="M796 100 C 801 95, 807 93, 813 95 C 811 101, 804 103, 796 100 Z M 804 99 C 807 98, 810 97, 812 95.5"
+    ></path>
+  </svg>
+  <figcaption class="hand">rake it. it remembers nothing.</figcaption>
+</figure>
+
+<style>
+  .karesansui {
+    margin: 5rem 0 0;
+  }
+
+  .sand {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+    touch-action: none;
+    cursor: crosshair;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .sand-bed {
+    fill: var(--bg-dim);
+  }
+
+  .sand-grains {
+    fill: var(--border);
+    opacity: 0.5;
+  }
+
+  .sand-lines,
+  .sand-kept {
+    fill: none;
+    stroke: var(--fg-dim);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .sand-kept {
+    stroke-width: 1.3;
+    opacity: 0.75;
+  }
+
+  .stone-shadow {
+    fill: var(--fg-dim);
+    opacity: 0.14;
+  }
+
+  .stone-body {
+    fill: var(--bg-alt);
+    stroke: var(--fg-main);
+    stroke-width: 1.4;
+    stroke-linejoin: round;
+  }
+
+  .stone-facet {
+    fill: none;
+    stroke: var(--fg-dim);
+    stroke-width: 0.9;
+    stroke-linecap: round;
+    opacity: 0.6;
+  }
+
+  .stone-moss {
+    fill: var(--leaf);
+    stroke: var(--fg-dim);
+    stroke-width: 0.6;
+    opacity: 0.9;
+  }
+
+  .sand-leaf {
+    fill: var(--red);
+    stroke: var(--red-warmer);
+    stroke-width: 0.6;
+    opacity: 0.85;
+  }
+
+  figcaption {
+    margin: 0.5rem 0.25rem 0 auto;
+    width: fit-content;
+    font-weight: 300;
+    font-size: 1rem;
+    color: var(--fg-dim);
+    opacity: 0.7;
+    transform: rotate(-1deg);
+  }
+
+  @media (max-width: 47.99em) {
+    .karesansui {
+      margin-top: 3.5rem;
+    }
+  }
+</style>
+
+<script>
+  import { earn } from "../utils/garden";
+  import { smooth, SMALL_STONE } from "../utils/sand";
+
+  type Point = [number, number];
+
+  const svg = document.querySelector<SVGSVGElement>(".sand");
+
+  if (svg) {
+    const base: Point[][] = JSON.parse(svg.dataset.lines ?? "[]");
+    const paths = Array.from(svg.querySelectorAll<SVGPathElement>(".sand-lines path")).slice(
+      0,
+      base.length,
+    );
+    const now = base.map((line) => line.map(() => 0));
+    const want = base.map((line) => line.map(() => 0));
+    const kept = svg.querySelector<SVGGElement>(".sand-kept")!;
+    const still = matchMedia("(prefers-reduced-motion: reduce)");
+    const narrow = matchMedia("(max-width: 47.99em)");
+    const KEY = "sand-ring";
+
+    // on a phone the strip shows the stones closer, so there is sand to rake
+    const frame = () =>
+      svg.setAttribute("viewBox", narrow.matches ? "180 0 660 190" : "0 0 1000 190");
+    frame();
+    narrow.addEventListener("change", frame);
+
+    const toSand = (e: PointerEvent): Point => {
+      const p = new DOMPoint(e.clientX, e.clientY).matrixTransform(svg.getScreenCTM()!.inverse());
+      return [p.x, p.y];
+    };
+
+    const ringPath = (stroke: Point[]) =>
+      smooth(
+        stroke.filter((_, i) => i % 2 === 0),
+        false,
+      );
+
+    function keepRing(d: string) {
+      const ring = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      ring.setAttribute("d", d);
+      kept.append(ring);
+    }
+
+    try {
+      const saved = sessionStorage.getItem(KEY);
+      if (saved) keepRing(saved);
+    } catch {
+      // the ring is only for this visit anyway
+    }
+
+    // rake: points near it part away from its path, a little behind it
+    const REACH = 26;
+    function rake([px, py]: Point) {
+      base.forEach((line, l) => {
+        line.forEach(([x, y], i) => {
+          const dx = x - px;
+          if (Math.abs(dx) > REACH) return;
+          const dy = y + want[l][i] - py;
+          const dist = Math.hypot(dx, dy);
+          if (dist > REACH) return;
+          const push = (1 - dist / REACH) * 9 * (dy >= 0 ? 1 : -1);
+          want[l][i] = Math.max(-14, Math.min(14, want[l][i] + push * 0.35));
+        });
+      });
+      wake();
+    }
+
+    let frameId = 0;
+    let lastMove = 0;
+    let settleFrom = 0;
+
+    function draw() {
+      const t = performance.now();
+      // after a few still seconds the rake comes back: slow, then all at once
+      if (t - lastMove > 3000) {
+        if (!settleFrom) settleFrom = t;
+        const k = still.matches ? 1 : Math.min(1, ((t - settleFrom) / 2600) ** 3);
+        for (const line of want) line.forEach((v, i) => (line[i] = v * (1 - k)));
+      }
+      let moving = false;
+      base.forEach((line, l) => {
+        let changed = false;
+        const pts = line.map(([x, y], i) => {
+          const d = want[l][i] - now[l][i];
+          if (Math.abs(d) > 0.05) {
+            now[l][i] += still.matches ? d : d * 0.3;
+            changed = true;
+          } else now[l][i] = want[l][i];
+          return [x, y + now[l][i]] as Point;
+        });
+        if (changed) {
+          moving = true;
+          paths[l].setAttribute("d", smooth(pts, false));
+        }
+      });
+      const resting = want.every((line) => line.every((v) => Math.abs(v) < 0.05));
+      if (moving || !resting) frameId = requestAnimationFrame(draw);
+      else frameId = 0;
+    }
+
+    function wake() {
+      lastMove = performance.now();
+      settleFrom = 0;
+      if (!frameId) frameId = requestAnimationFrame(draw);
+    }
+
+    // full ring round the smallest stone, in one stroke, earns seal
+    let stroke: Point[] = [];
+    function ringed(): boolean {
+      const { x, y, rx, ry } = SMALL_STONE;
+      let sweep = 0;
+      let prev: number | null = null;
+      for (const [px, py] of stroke) {
+        const nx = (px - x) / rx;
+        const ny = (py - y) / ry;
+        const r = Math.hypot(nx, ny);
+        if (r < 1 || r > 5) {
+          prev = null;
+          continue;
+        }
+        const a = Math.atan2(ny, nx);
+        if (prev !== null) sweep += ((a - prev + 3 * Math.PI) % (2 * Math.PI)) - Math.PI;
+        prev = a;
+      }
+      return Math.abs(sweep) > (345 * Math.PI) / 180;
+    }
+
+    let down = false;
+    svg.addEventListener("pointerdown", (e) => {
+      down = true;
+      stroke = [toSand(e)];
+      svg.setPointerCapture(e.pointerId);
+      rake(stroke[0]);
+    });
+    svg.addEventListener("pointermove", (e) => {
+      if (!down) return;
+      const p = toSand(e);
+      stroke.push(p);
+      rake(p);
+    });
+    const lift = () => {
+      if (!down) return;
+      down = false;
+      if (ringed() && !kept.childElementCount) {
+        const d = ringPath(stroke);
+        keepRing(d);
+        try {
+          sessionStorage.setItem(KEY, d);
+        } catch {
+          // kept on the page, at least
+        }
+        earn("石");
+      }
+      stroke = [];
+    };
+    svg.addEventListener("pointerup", lift);
+    svg.addEventListener("pointercancel", lift);
+  }
+</script>
