@@ -36,7 +36,7 @@ export default defineConfig({
     enabled: false,
   },
   build: {
-    inlineStylesheets: "never",
+    inlineStylesheets: "always",
   },
   vite: {
     build: {
