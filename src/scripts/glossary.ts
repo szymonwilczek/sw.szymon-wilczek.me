@@ -22,6 +22,10 @@ const GLOSSARY: Record<string, [string, string, number, string?]> = {
   波: ["nami", "a wave", 8],
   兎: ["usagi", "hare, rabbit", 7],
   寂: ["sabi", "quiet, the beauty of age", 11],
+  継: ["tsugu", "to join, to mend", 13],
+  雀: ["suzume", "sparrow", 11],
+  流: ["nagasu", "to let flow", 10],
+  庭: ["niwa", "garden", 10],
 };
 
 let slip: HTMLElement | null = null;
