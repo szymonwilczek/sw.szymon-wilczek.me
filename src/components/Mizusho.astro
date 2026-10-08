@@ -46,14 +46,45 @@ const slabs = (["wide", "tall"] as const).map((name) => ({ name, s: makeSlab(nam
         text-anchor="middle"
         mask={`url(#mz-wet-${name})`}
       >
-        寂
-      </text>
-      <g
-        class="stone-seal"
-        transform={`translate(${s.seal[0]} ${s.seal[1]}) rotate(-6) scale(0.8)`}
-      >
-        <path d="M4 5 Q23 2 42 4 Q45 23 43 42 Q23 45 3 43 Q1 23 4 5 Z" />
-        <text x="23" y="31" text-anchor="middle">
+        <defs>
+          <filter id={`mz-edge-${name}`} x="-5%" y="-5%" width="110%" height="110%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.045" numOctaves="2" seed="4" />
+            <feDisplacementMap in="SourceGraphic" scale="6" />
+          </filter>
+          <clipPath id={`mz-clip-${name}`}>
+            <path d={s.d} />
+          </clipPath>
+          <mask
+            id={`mz-wet-${name}`}
+            maskUnits="userSpaceOnUse"
+            x="0"
+            y="0"
+            width={s.W}
+            height={s.H}
+          >
+            <g class="wet-mask" />
+          </mask>
+        </defs>
+        <path class="slab-shadow" d={s.shadow} />
+        <path class="slab" d={s.d} />
+        <g class="slab-grains">
+          {s.grains.map(([x, y, r]) => (
+            <circle cx={x} cy={y} r={r} />
+          ))}
+        </g>
+        <path class="slab-crack" d={s.crack} />
+        <path class="slab-moss" d={s.moss} />
+        <g clip-path={`url(#mz-clip-${name})`}>
+          <g class="wet" filter={`url(#mz-edge-${name})`} />
+        </g>
+        <text
+          class="old-glyph"
+          x={s.glyph.x}
+          y={s.glyph.y}
+          font-size={s.glyph.size}
+          text-anchor="middle"
+          mask={`url(#mz-wet-${name})`}
+        >
           寂
         </text>
       </g>
@@ -244,6 +275,7 @@ const slabs = (["wide", "tall"] as const).map((name) => ({ name, s: makeSlab(nam
     const slab = makeSlab(svg.dataset.layout === "tall");
     const wet = svg.querySelector<SVGGElement>(".wet")!;
     const wetMask = svg.querySelector<SVGGElement>(".wet-mask")!;
+    const stone = svg.querySelector<SVGPathElement>(".slab")!;
     const segs: Seg[] = [];
     let painted = 0;
     let drawing = false;
@@ -288,6 +320,7 @@ const slabs = (["wide", "tall"] as const).map((name) => ({ name, s: makeSlab(nam
       const p = new DOMPoint(e.clientX, e.clientY).matrixTransform(svg.getScreenCTM()!.inverse());
       return [p.x, p.y];
     };
+    const onStone = (x: number, y: number) => stone.isPointInFill(new DOMPoint(x, y));
 
     // slow is thick and quick is thin, eased so the brush never jumps
     function add(x: number, y: number, t: number) {
@@ -308,6 +341,7 @@ const slabs = (["wide", "tall"] as const).map((name) => ({ name, s: makeSlab(nam
 
     svg.addEventListener("pointerdown", (e) => {
       const [x, y] = toStone(e);
+      if (!onStone(x, y)) return;
       const t = performance.now();
       svg.setPointerCapture(e.pointerId);
       drawing = true;
@@ -318,7 +352,11 @@ const slabs = (["wide", "tall"] as const).map((name) => ({ name, s: makeSlab(nam
     svg.addEventListener("pointermove", (e) => {
       if (!drawing) return;
       const [x, y] = toStone(e);
-      add(x, y, performance.now());
+      const t = performance.now();
+
+      if (!onStone(x, y)) last = null;
+      else if (!last) last = { x, y, w: 16, t };
+      else add(x, y, t);
     });
     const lift = () => {
       drawing = false;
