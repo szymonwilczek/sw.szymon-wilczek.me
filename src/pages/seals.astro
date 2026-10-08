@@ -87,7 +87,8 @@ const TILTS = [-6, 4, -2, 7, -4, 3, -7, 5, -3, 6, -5, 2, -6, 4, -1];
       );
     });
     const doors = book.querySelector(".page-doors");
-    if (doors) doors.textContent = `${state.doors.length} of ${DOORS.length} ways in`;
+    if (doors)
+      doors.textContent = `${state.doors.filter((d) => DOORS.includes(d)).length} of ${DOORS.length} ways in`;
     document.querySelector(".tally-n")!.textContent = String(earned);
     return state;
   }

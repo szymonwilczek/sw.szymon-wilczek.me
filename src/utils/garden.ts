@@ -29,7 +29,7 @@ export const SEALS: SealPage[] = [
   { glyph: "寂", note: "an old word on the stone", hint: "wet the middle of the stone" },
 ];
 
-export const DOORS = ["enso", "compass", "minibuffer", "seal"] as const;
+export const DOORS = ["enso", "minibuffer", "seal"] as const;
 export type Door = (typeof DOORS)[number];
 
 export interface GardenState {
