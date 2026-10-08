@@ -11,11 +11,17 @@ const links = [
 
 <footer class="site-footer">
   <nav aria-label="Secondary" class="footer-nav">
-    {links.map((link) => <a href={link.href}>{link.label}</a>)}
+    {links.map((link) => (
+      <a href={link.href}>{link.label}</a>
+    ))}
   </nav>
   <span>
     © {currentYear} Szymon Wilczek · written in Org, built with Astro ·
     <span data-theme-id>au-aurum-night</span>
+    <span class="kigo-word" hidden>
+      · <span class="kigo-glyph"></span>
+      <span class="kigo-romaji"></span>
+    </span>
   </span>
 </footer>
 
@@ -50,12 +56,36 @@ const links = [
     color: var(--fg-main);
   }
 
+  .kigo-word {
+    cursor: help;
+  }
+
+  .kigo-glyph {
+    font-family: var(--font-seal);
+    font-size: 0.9375rem;
+    color: var(--red);
+  }
+
   @media (max-width: 47.99em) {
     .site-footer {
       margin-top: 4rem;
     }
   }
 </style>
+
+<script>
+  import { season, SEASONS } from "../utils/garden";
+
+  // season word: glyph and romaji
+  const now = season();
+  const word = document.querySelector<HTMLElement>(".kigo-word");
+  if (word) {
+    word.querySelector(".kigo-glyph")!.textContent = SEASONS[now].glyph;
+    word.querySelector(".kigo-romaji")!.textContent = SEASONS[now].romaji;
+    word.title = `${now}, then ${SEASONS[now].next}`;
+    word.hidden = false;
+  }
+</script>
 
 <script is:inline>
   (function () {

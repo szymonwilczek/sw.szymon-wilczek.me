@@ -229,6 +229,17 @@ const {
       earn("狼");
       earn(SEASONS[season()].glyph);
 
+      // season's ornament shows on the dividers
+      document.documentElement.dataset.season = season();
+      try {
+        if (season() === "autumn" && !sessionStorage.getItem("kigo-fell")) {
+          sessionStorage.setItem("kigo-fell", "1");
+          document.querySelector(".divider")?.classList.add("kigo-drift");
+        }
+      } catch {
+        // without session storage the leaf simply lies there
+      }
+
       // staying a full minute late at night earns seal
       var hour = new Date().getHours();
       if (hour >= 21 || hour < 5) {
