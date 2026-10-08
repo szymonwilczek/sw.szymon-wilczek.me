@@ -9,6 +9,12 @@
       <svg class="sz-bird" width="104" height="88" viewBox="-40 -64 80 68">
         <g class="sz-face">
           <g class="sz-pitch">
+            <g class="sz-far">
+              <path
+                class="sz-far-wing"
+                d="M6 -24 C -4 -33, -18 -35, -30 -32 C -24 -27, -12 -23, 2 -22 Z"
+              ></path>
+            </g>
             <g class="sz-sit">
               <path
                 class="sz-wash"
@@ -26,15 +32,17 @@
                 class="sz-back"
                 d="M-14 -18 C -8 -25, 0 -27, 6 -26 C 4 -22, -6 -19, -14 -18 Z"
               ></path>
-              <path
-                class="sz-wing"
-                d="M-11 -19 C -4 -25, 6 -25, 11 -19 C 8 -14, 0 -11, -9 -12 C -14 -13, -14 -17, -11 -19 Z"
-              ></path>
-              <path
-                class="sz-streaks"
-                d="M-8 -20 l 5 -1 M -5 -17 l 6 -1.5 M -1 -14 l 6 -1.5 M -10 -15 l 4 0"
-              ></path>
-              <path class="sz-bar" d="M-6 -21.5 C -1 -23, 4 -22.5, 8 -20.5"></path>
+              <g class="sz-fold">
+                <path
+                  class="sz-wing"
+                  d="M-11 -19 C -4 -25, 6 -25, 11 -19 C 8 -14, 0 -11, -9 -12 C -14 -13, -14 -17, -11 -19 Z"
+                ></path>
+                <path
+                  class="sz-streaks"
+                  d="M-8 -20 l 5 -1 M -5 -17 l 6 -1.5 M -1 -14 l 6 -1.5 M -10 -15 l 4 0"
+                ></path>
+                <path class="sz-bar" d="M-6 -21.5 C -1 -23, 4 -22.5, 8 -20.5"></path>
+              </g>
               <g class="sz-head">
                 <path
                   class="sz-cap"
@@ -54,43 +62,15 @@
                 d="M1 -4.5 L 0 0 M 7 -4.5 L 8 0 M -3 0 l 5 0 M 5 0 l 5.5 0"
               ></path>
             </g>
-            <!-- drawn smaller than the sitting bird; scaled so the two are one size -->
-            <g
-              class="sz-fly"
-              transform="translate(-4 0) translate(2 -16) scale(1.32) translate(-2 16)"
-            >
-              <g class="sz-far">
-                <path
-                  class="sz-far-wing"
-                  d="M6 -21 C -4 -30, -18 -32, -30 -29 C -24 -24, -12 -20, 2 -19 Z"
-                ></path>
-              </g>
+            <g class="sz-near">
               <path
-                class="sz-wash"
-                d="M-12 -18 L -28 -16 C -30 -14, -28 -12, -26 -12 L -12 -14 Z"
+                class="sz-wing"
+                d="M6 -22 C -4 -31, -18 -34, -32 -30 C -28 -27, -26 -25, -24 -24 C -18 -21, -8 -19, 2 -19 Z"
               ></path>
               <path
-                class="sz-body"
-                d="M-14 -16 C -10 -22, 2 -24, 12 -22 C 14 -27, 20 -29, 24 -26 C 27 -24, 27 -20, 24 -18 C 20 -12, 6 -10, -4 -12 C -9 -13, -13 -14, -14 -16 Z"
+                class="sz-streaks"
+                d="M-30 -29.5 C -27 -27, -24 -25.5, -20 -24.5 M -24 -31 C -20 -28, -16 -26, -12 -24.5 M -16 -32 C -12 -28.5, -8 -26, -3 -24"
               ></path>
-              <path
-                class="sz-cap"
-                d="M13 -24 C 15 -27.5, 20 -29, 24 -26.5 C 21 -26.5, 17 -26, 13 -24 Z"
-              ></path>
-              <ellipse class="sz-ink" cx="17" cy="-21.5" rx="2" ry="1.5"></ellipse>
-              <circle class="sz-ink" cx="22" cy="-24.5" r="1.1"></circle>
-              <path class="sz-ink" d="M26 -23.5 L 30.5 -22 L 26 -20.5 Z"></path>
-              <path class="sz-legs sz-landing-legs" d="M2 -11 L 3 -5 M 7 -11 L 9 -5"></path>
-              <g class="sz-near">
-                <path
-                  class="sz-wing"
-                  d="M6 -19 C -4 -28, -18 -31, -32 -27 C -28 -24, -26 -22, -24 -21 C -18 -18, -8 -16, 2 -16 Z"
-                ></path>
-                <path
-                  class="sz-streaks"
-                  d="M-30 -26.5 C -27 -24, -24 -22.5, -20 -21.5 M -24 -28 C -20 -25, -16 -23, -12 -21.5 M -16 -29 C -12 -25.5, -8 -23, -3 -21"
-                ></path>
-              </g>
             </g>
           </g>
         </g>
@@ -139,17 +119,17 @@
 
   .sz-pitch {
     transform-origin: 0 -16px;
-    transition: transform 0.6s ease-in-out;
+    transition: transform 0.4s ease-out;
   }
 
   .sz-head {
     transform-origin: 14px -24px;
-    transition: transform 0.8s ease-in-out;
+    transition: transform 1.4s ease-in-out;
   }
 
   .sz-eye {
     transform-origin: 19.2px -31px;
-    transition: transform 0.07s ease-in-out;
+    transition: transform 0.08s ease-in-out;
   }
 
   .sz-sit {
@@ -157,45 +137,47 @@
   }
 
   .suzume:not(.flying) .sz-sit {
-    animation: sz-breathe 2.8s ease-in-out infinite;
+    animation: sz-breathe 4.2s ease-in-out infinite;
+  }
+
+  .suzume.settling .sz-sit {
+    animation: sz-settle 0.45s ease-out;
   }
 
   @keyframes sz-breathe {
     50% {
-      transform: scale(1.012, 1.03);
+      transform: scale(1.006, 1.015);
     }
   }
 
-  .sz-near {
-    transform-origin: 4px -19px;
-    transition: transform var(--flap, 130ms) ease-in-out;
+  @keyframes sz-settle {
+    35% {
+      transform: scale(1.04, 0.93);
+    }
   }
 
+  .sz-near,
   .sz-far {
-    transform-origin: 4px -21px;
-    transition: transform var(--flap, 130ms) ease-in-out;
-  }
-
-  .sz-sit,
-  .sz-fly {
-    transition: opacity 0.3s ease-in-out;
-  }
-
-  .sz-fly,
-  .suzume.flying .sz-sit {
+    transform-origin: 5px -21px;
     opacity: 0;
+    transition:
+      transform var(--flap, 130ms) ease-in-out,
+      opacity 0.22s ease-in-out;
   }
 
-  .suzume.flying .sz-fly {
+  .sz-fold,
+  .sz-legs {
+    transition: opacity 0.22s ease-in-out;
+  }
+
+  .suzume.flying .sz-near,
+  .suzume.flying .sz-far {
     opacity: 1;
   }
 
-  .sz-landing-legs {
-    display: none;
-  }
-
-  .suzume.landing .sz-landing-legs {
-    display: inline;
+  .suzume.flying .sz-fold,
+  .suzume.flying:not(.landing) .sz-legs {
+    opacity: 0;
   }
 
   .sz-body {
@@ -273,7 +255,8 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .suzume:not(.flying) .sz-sit {
+    .suzume:not(.flying) .sz-sit,
+    .suzume.settling .sz-sit {
       animation: none;
     }
   }
@@ -337,7 +320,7 @@
       phase = p;
       root.classList.toggle("flying", p !== "sitting");
       root.classList.toggle("landing", p === "landing");
-      const lean = { away: 0, gliding: 6, landing: -14, sitting: 0, leaving: -18 }[p];
+      const lean = { away: 0, gliding: 6, landing: -12, sitting: 0, leaving: -18 }[p];
       pitch.style.transform = `rotate(${lean}deg)`;
       face.style.transform = "scaleX(-1)";
     };
@@ -376,21 +359,25 @@
       requestAnimationFrame(() =>
         requestAnimationFrame(() => {
           sy.style.opacity = "1";
-          at(px, py, "1.7s cubic-bezier(.15,.55,.35,1)", "1.7s cubic-bezier(.45,0,.55,1)");
+          at(px, py, "1.5s cubic-bezier(.15,.55,.35,1)", "1.5s cubic-bezier(.45,0,.55,1)");
           flap(true);
           step = window.setTimeout(() => {
             flap(false);
-            wings(18);
+            wings(-8);
             step = window.setTimeout(() => {
-              root.style.setProperty("--flap", "0.4s");
-              wings(-38);
+              root.style.setProperty("--flap", "0.3s");
+              wings(40);
               pose("landing");
               step = window.setTimeout(() => {
+                root.style.setProperty("--flap", "0.25s");
+                wings(-20);
                 pose("sitting");
+                root.classList.add("settling");
+                step = window.setTimeout(() => root.classList.remove("settling"), 450);
                 sat();
-              }, 420);
-            }, 1100);
-          }, 600);
+              }, 300);
+            }, 550);
+          }, 500);
         }),
       );
     }
@@ -415,19 +402,20 @@
             }, 140);
             return;
           }
-          head.style.transform = `rotate(${Math.random() < 0.5 ? -5 : 4}deg)`;
+          head.style.transform = `rotate(${Math.random() < 0.5 ? -3 : 3}deg)`;
           life = window.setTimeout(() => {
             head.style.transform = "";
             gesture();
-          }, 1400);
+          }, 2600);
         },
-        2500 + Math.random() * 3500,
+        8000 + Math.random() * 9000,
       );
     }
 
     function leave() {
       clearTimeout(step);
       clearTimeout(life);
+      root.classList.remove("settling");
       head.style.transform = "";
       eye.style.transform = "";
       if (phase === "away" || phase === "leaving") return;
