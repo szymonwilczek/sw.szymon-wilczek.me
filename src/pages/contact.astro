@@ -4,6 +4,7 @@ import Divider from "../components/Divider.astro";
 import InkButton from "../components/InkButton.astro";
 import WaxSeal from "../components/WaxSeal.astro";
 import Mizusho from "../components/Mizusho.astro";
+import Hagaki from "../components/Hagaki.astro";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -55,6 +56,8 @@ const links = [
             <path d="M1 8 C 20 5, 44 10, 66 7 S 92 6, 99 4"></path>
           </svg>
         </a>
+        <p class="or hand">or turn over a postcard:</p>
+        <Hagaki />
       </div>
     </section>
 
@@ -220,6 +223,12 @@ const links = [
     bottom: -10px;
     width: 104%;
     height: 14px;
+  }
+
+  .or {
+    margin: 2.5rem 0 0;
+    font-size: 1.25rem;
+    color: var(--fg-dim);
   }
 
   .mail path {
