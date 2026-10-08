@@ -16,6 +16,11 @@ const sand = makeSand();
     aria-label="Raked sand garden with three stones"
     data-lines={JSON.stringify([...sand.lines, ...sand.rings].map((l) => l.pts))}
   >
+    <defs>
+      <clipPath id="sand-clip">
+        <path d={sand.edge}></path>
+      </clipPath>
+    </defs>
     <path class="sand-bed" d={sand.edge}></path>
     <g class="sand-grains">
       {sand.grains.map((g) => (
@@ -30,7 +35,7 @@ const sand = makeSand();
         <path d={smooth(r.pts, false)} stroke-width={r.w} opacity={r.o} />
       ))}
     </g>
-    <g class="sand-kept"></g>
+    <g class="sand-kept" clip-path="url(#sand-clip)"></g>
     {sand.stones.map((s) => (
       <g class="stone">
         <path class="stone-shadow" d={s.shadow} />
@@ -315,23 +320,28 @@ const sand = makeSand();
 
     // full ring round the smallest stone, in one stroke, earns seal
     let stroke: Point[] = [];
-    function ringed(): boolean {
+    function ring(): Point[] | null {
       const { x, y, rx, ry } = SMALL_STONE;
       let sweep = 0;
+      let from = 0;
       let prev: number | null = null;
-      for (const [px, py] of stroke) {
+      for (let i = 0; i < stroke.length; i++) {
+        const [px, py] = stroke[i];
         const nx = (px - x) / rx;
         const ny = (py - y) / ry;
         const r = Math.hypot(nx, ny);
         if (r < 1 || r > 5) {
           prev = null;
+          sweep = 0;
           continue;
         }
         const a = Math.atan2(ny, nx);
-        if (prev !== null) sweep += ((a - prev + 3 * Math.PI) % (2 * Math.PI)) - Math.PI;
+        if (prev === null) from = i;
+        else sweep += ((a - prev + 3 * Math.PI) % (2 * Math.PI)) - Math.PI;
         prev = a;
+        if (Math.abs(sweep) > (345 * Math.PI) / 180) return stroke.slice(from, i + 1);
       }
-      return Math.abs(sweep) > (345 * Math.PI) / 180;
+      return null;
     }
 
     let down = false;
@@ -353,8 +363,9 @@ const sand = makeSand();
       down = false;
       last = null;
       teeth.classList.remove("on");
-      if (ringed() && !kept.childElementCount) {
-        const d = ringPath(stroke);
+      const loop = ring();
+      if (loop && !kept.childElementCount) {
+        const d = ringPath(loop);
         keepRing(d);
         try {
           sessionStorage.setItem(KEY, d);
