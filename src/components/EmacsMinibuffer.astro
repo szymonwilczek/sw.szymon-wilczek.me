@@ -127,6 +127,8 @@
 </dialog>
 
 <script>
+  import { findDoor } from "../utils/garden";
+
   (function () {
     var commands = [
       {
@@ -469,6 +471,14 @@
     }
 
     function executeSelected() {
+      // riddle door: command the list never shows
+      var typed = getElements().input;
+      if (typed && typed.value.trim().toLowerCase() === "show-me-the-way") {
+        closeMinibuffer();
+        findDoor("minibuffer");
+        window.location.href = "/map/";
+        return;
+      }
       if (filtered.length > 0 && filtered[selectedIndex]) {
         var action = filtered[selectedIndex].action;
         closeMinibuffer();
