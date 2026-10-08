@@ -23,10 +23,26 @@
   }
 }
 
+/* new theme floods out from the theme button */
 ::view-transition-old(root),
-::view-transition-new(root),
-::view-transition-group(root),
-::view-transition-image-pair(root) {
-  animation: none !important;
-  mix-blend-mode: normal !important;
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+:root.ink-flood::view-transition-new(root) {
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M97 46Q96 50 94 53Q93 57 94 61Q95 65 93 68Q91 71 88 73Q85 75 83 78Q81 81 78 83Q75 85 72 87Q70 88 67 90Q64 92 61 95Q58 98 54 94Q50 89 47 90Q44 91 40 90Q37 90 33 90Q29 91 26 89Q24 86 22 83Q21 79 16 79Q11 78 9 75Q8 72 6 68Q5 65 6 61Q6 57 8 53Q10 50 10 47Q9 44 9 40Q9 37 12 35Q16 32 15 29Q15 25 18 23Q21 21 24 20Q27 19 28 14Q29 9 33 10Q37 10 40 7Q43 4 46 4Q50 4 53 5Q57 6 60 8Q63 9 67 8Q72 8 73 12Q75 16 77 18Q79 21 85 21Q91 20 92 24Q93 28 93 32Q94 36 96 39Q97 42 97 46Z'/%3E%3C/svg%3E")
+    no-repeat;
+  animation: ink-flood 0.9s cubic-bezier(0.5, 0, 0.75, 0.4) both;
+}
+
+@keyframes ink-flood {
+  from {
+    mask-size: 0 0;
+    mask-position: var(--ink-x) var(--ink-y);
+  }
+  to {
+    mask-size: 320vmax 320vmax;
+    mask-position: calc(var(--ink-x) - 160vmax) calc(var(--ink-y) - 160vmax);
+  }
 }

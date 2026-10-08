@@ -293,9 +293,11 @@ for (const theme of auThemes) {
       activate(null);
     }
 
+    // closing first drops the preview,
+    // so the new theme can flood in over the old one
     function pick(row) {
-      window.auTheme.set(row.dataset.choice);
       picker.close();
+      window.auTheme.flood(row.dataset.choice);
     }
 
     function open() {

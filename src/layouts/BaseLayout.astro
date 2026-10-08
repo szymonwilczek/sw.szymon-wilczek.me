@@ -134,6 +134,28 @@ const {
           preview: function (id) {
             root.setAttribute("data-theme", id || resolve(read()));
           },
+          flood: function (choice) {
+            var set = window.auTheme.set;
+            var still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+            if (!document.startViewTransition || still) return set(choice);
+
+            var button = document.getElementById("theme-toggle");
+            var r = button && button.getBoundingClientRect();
+            var visible = r && r.width > 0;
+            root.style.setProperty(
+              "--ink-x",
+              (visible ? r.left + r.width / 2 : innerWidth - 40) + "px",
+            );
+            root.style.setProperty("--ink-y", (visible ? r.top + r.height / 2 : 40) + "px");
+            root.classList.add("ink-flood");
+            document
+              .startViewTransition(function () {
+                set(choice);
+              })
+              .finished.finally(function () {
+                root.classList.remove("ink-flood");
+              });
+          },
         };
 
         try {

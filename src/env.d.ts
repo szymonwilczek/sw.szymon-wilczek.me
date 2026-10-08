@@ -4,6 +4,7 @@ interface AuTheme {
   resolve(choice: string): string;
   set(choice: string): void;
   preview(id?: string): void;
+  flood(choice: string): void;
   openPicker?: () => void;
 }
 
