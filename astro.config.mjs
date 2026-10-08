@@ -15,7 +15,7 @@ export default defineConfig({
     enabled: false,
   },
   build: {
-    inlineStylesheets: "always",
+    inlineStylesheets: "never",
   },
   integrations: [
     sitemap({
