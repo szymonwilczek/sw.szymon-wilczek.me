@@ -21,8 +21,7 @@ export interface Field {
   H: number;
   gy: number;
   blades: Blade[];
-  moon: { x: number; y: number; r: number; shade: string };
-  hare: { x: number; body: string; head: string; ears: string; eye: Point };
+  moon: { x: number; y: number; r: number; rabbit: string };
   ground: string;
 }
 
@@ -64,66 +63,34 @@ export function makeField(tall: boolean): Field {
     });
   }
 
-  const hx = W * (tall ? 0.36 : 0.62);
-  for (let k = 0; k < 46; k++) {
-    blades.push({
-      x: hx - 34 + (k / 45) * 80 + jit(2.5),
-      y: gy + jit(2),
-      L: 78 + rnd() * 60,
-      lean: jit(0.22),
-      w: f(1.1 + rnd() * 0.8),
-      o: f(0.62 + rnd() * 0.3),
-      plume: rnd() < 0.25,
-      side: rnd() < 0.5 ? -1 : 1,
-    });
-  }
-
   const mx = W * (tall ? 0.72 : 0.8);
   const my = H * (tall ? 0.2 : 0.25);
   const moon = {
     x: f(mx),
     y: f(my),
     r: tall ? 40 : 38,
-    shade: [
-      blob(mx - 9, my + 6, 9, 7, 0.2, 7, 1),
-      blob(mx + 12, my - 10, 6, 5, 0.2, 7, 2),
-      blob(mx + 6, my + 16, 4, 3, 0.2, 6, 3),
-    ].join(" "),
-  };
-
-  const hare = {
-    x: hx,
-    body: blob(hx, gy - 15, 18, 15, 0.06, 9, 0.3),
-    head: blob(hx + 15, gy - 33, 9.5, 8, 0.06, 8, 0.2),
-    ears:
+    rabbit: [
+      blob(mx + 6, my + 7, 11, 9, 0.08, 9, 0.4),
+      blob(mx - 5, my - 3, 6.5, 5.5, 0.08, 8, 0.2),
       smooth(
         [
-          [hx + 10, gy - 38],
-          [hx + 4, gy - 56],
-          [hx + 1, gy - 64],
-          [hx + 5, gy - 62],
-          [hx + 14, gy - 40],
-        ],
-        true,
-      ) +
-      " " +
-      smooth(
-        [
-          [hx + 15, gy - 40],
-          [hx + 14, gy - 60],
-          [hx + 16, gy - 67],
-          [hx + 19, gy - 61],
-          [hx + 19, gy - 40],
+          [mx - 3, my - 7],
+          [mx + 2, my - 19],
+          [mx + 8, my - 24],
+          [mx + 6, my - 17],
+          [mx + 1, my - 6],
         ],
         true,
       ),
-    eye: [f(hx + 19), f(gy - 35)] as Point,
+      blob(mx - 16, my + 15, 7, 4.5, 0.1, 8, 0),
+      `M${f(mx - 4)} ${f(my + 4)} L ${f(mx - 15)} ${f(my + 9)}`,
+    ].join(" "),
   };
 
   const pts: Point[] = [];
   for (let x = -4; x <= W + 4; x += 25) pts.push([x, gy + jit(1.6)]);
 
-  return { W, H, gy, blades, moon, hare, ground: smooth(pts, false) };
+  return { W, H, gy, blades, moon, ground: smooth(pts, false) };
 }
 
 /** A blade bent by `th` from its lean, and the plume at its tip if it has one */

@@ -15,17 +15,11 @@ const fields = (["wide", "tall"] as const).map((name) => {
       class={`grass grass-${name}`}
       viewBox={`0 0 ${field.W} ${field.H}`}
       role="img"
-      aria-label="Pampas grass under the moon. Move through it and it parts, then springs back."
+      aria-label="Pampas grass under the moon. Move through it and it parts, then eases back."
       data-layout={name}
     >
       <circle class="moon" cx={field.moon.x} cy={field.moon.y} r={field.moon.r} />
-      <path class="moon-shade" d={field.moon.shade} />
-      <g class="hare">
-        <path d={field.hare.body} />
-        <path d={field.hare.head} />
-        <path d={field.hare.ears} />
-      </g>
-      <circle class="hare-eye" cx={field.hare.eye[0]} cy={field.hare.eye[1]} r="1.3" />
+      <path class="moon-rabbit" d={field.moon.rabbit} />
       <g class="blades">
         {field.blades.map((b, i) => (
           <path d={rest[i].d} stroke-width={b.w} opacity={b.o} />
@@ -35,7 +29,7 @@ const fields = (["wide", "tall"] as const).map((name) => {
       <path class="ground" d={field.ground} />
       <g
         class="grass-seal"
-        transform={`translate(${field.hare.x - 24} ${field.gy - 128}) rotate(-6) scale(0.8)`}
+        transform={`translate(${field.moon.x - field.moon.r - 52} ${field.moon.y - 22}) rotate(-6) scale(0.8)`}
       >
         <path d="M4 5 Q23 2 42 4 Q45 23 43 42 Q23 45 3 43 Q1 23 4 5 Z" />
         <text x="23" y="31" text-anchor="middle">
@@ -45,8 +39,8 @@ const fields = (["wide", "tall"] as const).map((name) => {
     </svg>
   ))}
   <figcaption class="hand">
-    <span class="said-before">something is sitting very still in there.</span>
-    <span class="said-after">it was watching the moon the whole time.</span>
+    <span class="said-before">the grass hides half the moon.</span>
+    <span class="said-after">someone up there has been pounding mochi all along.</span>
   </figcaption>
 </figure>
 
@@ -74,18 +68,17 @@ const fields = (["wide", "tall"] as const).map((name) => {
     stroke: var(--border);
   }
 
-  .moon-shade {
+  .moon-rabbit {
     fill: var(--border);
-    opacity: 0.18;
+    stroke: var(--border);
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    opacity: 0.22;
+    transition: opacity 2.4s ease;
   }
 
-  .hare {
-    fill: var(--fg-dim);
-    opacity: 0.62;
-  }
-
-  .hare-eye {
-    fill: var(--bg-main);
+  .susuki.found .moon-rabbit {
+    opacity: 0.42;
   }
 
   .blades {
@@ -190,14 +183,14 @@ const fields = (["wide", "tall"] as const).map((name) => {
       let open = 0;
       let count = 0;
       for (const b of blades) {
-        if (Math.abs(b.x - field.hare.x - 6) < 36) {
+        if (Math.abs(b.x - field.moon.x) < field.moon.r) {
           open += Math.abs(b.th);
           count++;
         }
       }
 
       if (count) held += (open / count - held) * 0.05;
-      if (held > 0.18 && !figure!.classList.contains("found")) {
+      if (held > 0.12 && !figure!.classList.contains("found")) {
         figure!.classList.add("found");
         earn("兎");
       }
@@ -217,8 +210,8 @@ const fields = (["wide", "tall"] as const).map((name) => {
       frame = 0;
       let busy = 0;
       for (const b of blades) {
-        b.om += -0.032 * b.th - 0.075 * b.om;
-        b.th = clamp(b.th + b.om, -1.15, 1.15);
+        b.om += -0.01 * b.th - 0.17 * b.om;
+        b.th = clamp(b.th + b.om, -0.9, 0.9);
         busy = Math.max(busy, Math.abs(b.om) * 60, Math.abs(b.th));
       }
       watch();
@@ -245,7 +238,7 @@ const fields = (["wide", "tall"] as const).map((name) => {
           if (d > R) continue;
           const fall = 1 - d / R;
           if (still.matches) b.th = Math.sign(b.x - q[0]) * 0.6 * fall;
-          else b.om += (clamp(vx, -40, 40) * 0.0016 + Math.sign(b.x - q[0]) * 0.016) * fall;
+          else b.om += (clamp(vx, -40, 40) * 0.0011 + Math.sign(b.x - q[0]) * 0.009) * fall;
         }
       }
       last = q;
