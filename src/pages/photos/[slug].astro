@@ -43,6 +43,12 @@ const camera = cameras.sort(
 const light = (p: PhotoItem) =>
   [p.focalLength, p.aperture, p.shutterSpeed].filter(Boolean) as string[];
 
+// contact sheet
+const strips = Array.from({ length: Math.ceil(photos.length / 4) }, (_, s) =>
+  photos.slice(s * 4, s * 4 + 4).map((photo, k) => ({ photo, i: s * 4 + k })),
+);
+const edge = `SW·${String(album.date.getFullYear()).slice(2)}${pad(album.date.getMonth() + 1)}`;
+
 const RADII = ["3px 7px 4px 8px", "6px 3px 7px 4px", "4px 6px 3px 7px", "7px 4px 6px 3px"];
 ---
 
@@ -83,6 +89,28 @@ const RADII = ["3px 7px 4px 8px", "6px 3px 7px 4px", "4px 6px 3px 7px", "7px 4px
         </div>
       )}
     </dl>
+    <div class="views hand" role="group" aria-label="View">
+      <button type="button" data-view="story" aria-pressed="true">
+        <svg viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true">
+          <path
+            d="M8 5 C 30 2, 70 4, 94 6 C 99 14, 98 28, 93 35 C 66 39, 30 37, 6 35 C 1 27, 2 12, 9 3"
+            pathLength="1"
+            vector-effect="non-scaling-stroke"
+          ></path>
+        </svg>
+        story
+      </button>
+      <button type="button" data-view="sheet" aria-pressed="false">
+        <svg viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true">
+          <path
+            d="M8 5 C 30 2, 70 4, 94 6 C 99 14, 98 28, 93 35 C 66 39, 30 37, 6 35 C 1 27, 2 12, 9 3"
+            pathLength="1"
+            vector-effect="non-scaling-stroke"
+          ></path>
+        </svg>
+        contact sheet
+      </button>
+    </div>
   </header>
 
   {album.description && <p class="lede">{album.description}</p>}
@@ -175,6 +203,69 @@ const RADII = ["3px 7px 4px 8px", "6px 3px 7px 4px", "4px 6px 3px 7px", "7px 4px
       </li>
     ))}
   </ol>
+
+  <section class="sheet" aria-label="Contact sheet" hidden>
+    {strips.map((strip, s) => (
+      <div class="strip" style={`--tilt: ${s % 2 ? -0.5 : 0.3}deg`}>
+        <ol>
+          {strip.map(({ photo, i }) => (
+            <li class:list={["cell", photo.mark && `is-${photo.mark}`]}>
+              <a
+                href={`#${photo.id}`}
+                data-frame={i}
+                data-loupe={photo.src}
+                data-exif={[light(photo).join(" · "), photo.iso].filter(Boolean).join(" · ")}
+                aria-label={`Frame ${pad(i + 1)}, ${photo.filename}`}
+              >
+                <img src={photo.thumbSrc || photo.src} alt="" loading="lazy" decoding="async" />
+              </a>
+              <span class="edge" aria-hidden="true">
+                ▸ {pad(i + 1)}
+                {"  "}
+                {edge}
+              </span>
+              {photo.mark === "circled" && (
+                <svg
+                  class="pencil circle"
+                  viewBox="0 0 100 100"
+                  preserveAspectRatio="none"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M12 8 C 40 1, 80 3, 94 14 C 101 38, 99 70, 90 92 C 62 99, 26 98, 8 90 C 1 64, 2 32, 14 5 L 20 2"
+                    vector-effect="non-scaling-stroke"
+                  />
+                </svg>
+              )}
+              {photo.mark === "crossed" && (
+                <svg
+                  class="pencil cross"
+                  viewBox="0 0 100 100"
+                  preserveAspectRatio="none"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M14 16 C 40 42, 62 62, 88 86 M 86 14 C 62 40, 40 62, 12 88"
+                    vector-effect="non-scaling-stroke"
+                  />
+                </svg>
+              )}
+            </li>
+          ))}
+        </ol>
+      </div>
+    ))}
+    <p class="sheet-note hand">
+      circled in grease pencil: the frames that made the story. crossed out: kept anyway.
+    </p>
+  </section>
+  <div class="loupe" aria-hidden="true">
+    <span class="loupe-lens"></span>
+    <span class="loupe-text">
+      <span class="loupe-num"></span>
+      <span class="loupe-exif"></span>
+    </span>
+  </div>
 
   <nav class="adjacent" aria-label="Adjacent albums">
     {older ? (
@@ -325,6 +416,70 @@ const RADII = ["3px 7px 4px 8px", "6px 3px 7px 4px", "4px 6px 3px 7px", "7px 4px
 
   setupLightbox();
   document.addEventListener("astro:after-swap", setupLightbox);
+
+  // story or contact sheet: the story is the album; the sheet is the roll
+  function setupViews() {
+    const buttons = document.querySelectorAll<HTMLButtonElement>(".views button");
+    const frames = document.querySelector<HTMLElement>(".frames");
+    const sheet = document.querySelector<HTMLElement>(".sheet");
+    if (!frames || !sheet) return;
+
+    buttons.forEach((button) =>
+      button.addEventListener("click", () => {
+        const view = button.dataset.view;
+        buttons.forEach((b) => b.setAttribute("aria-pressed", String(b === button)));
+        frames.hidden = view === "sheet";
+        sheet.hidden = view !== "sheet";
+      }),
+    );
+
+    // frame on the sheet opens the same lightbox as the story
+    const shots = document.querySelectorAll<HTMLAnchorElement>(".frames .shot");
+    sheet.querySelectorAll<HTMLAnchorElement>("[data-frame]").forEach((a) =>
+      a.addEventListener("click", (e) => {
+        e.preventDefault();
+        shots[Number(a.dataset.frame)]?.click();
+      }),
+    );
+
+    // loupe follows a mouse over the sheet and reads the frame's EXIF
+    const loupe = document.querySelector<HTMLElement>(".loupe")!;
+    const lens = loupe.querySelector<HTMLElement>(".loupe-lens")!;
+    const ZOOM = 2.5;
+
+    sheet.addEventListener("pointermove", (e) => {
+      const a = (e.target as Element).closest<HTMLAnchorElement>("[data-loupe]");
+      if (e.pointerType !== "mouse" || !a) {
+        loupe.classList.remove("is-on");
+        return;
+      }
+      const box = a.getBoundingClientRect();
+      const x = (e.clientX - box.left) / box.width;
+      const y = (e.clientY - box.top) / box.height;
+      const img = a.querySelector("img")!;
+
+      const scale = Math.max(box.width / img.naturalWidth, box.height / img.naturalHeight) * ZOOM;
+      const w = img.naturalWidth * scale;
+      const h = img.naturalHeight * scale;
+      const size = lens.offsetWidth;
+      const offX = (w - box.width * ZOOM) / 2;
+      const offY = (h - box.height * ZOOM) / 2;
+      lens.style.backgroundImage = `url("${a.dataset.loupe}"), url("${img.currentSrc}")`;
+      lens.style.backgroundSize = `${w}px ${h}px`;
+      lens.style.backgroundPosition = `${size / 2 - offX - x * box.width * ZOOM}px ${size / 2 - offY - y * box.height * ZOOM}px`;
+      loupe.querySelector(".loupe-num")!.textContent =
+        `▸ ${String(Number(a.dataset.frame) + 1).padStart(2, "0")} · ${a.getAttribute("aria-label")!.split(", ").pop()}`;
+      loupe.querySelector(".loupe-exif")!.textContent = a.dataset.exif ?? "";
+      const right = e.clientX + 24 + loupe.offsetWidth < innerWidth;
+      const left = right ? e.clientX + 24 : e.clientX - 24 - loupe.offsetWidth;
+      loupe.classList.toggle("is-left", !right);
+      loupe.style.translate = `${left}px ${e.clientY - size / 2}px`;
+      loupe.classList.add("is-on");
+    });
+    sheet.addEventListener("pointerleave", () => loupe.classList.remove("is-on"));
+  }
+
+  setupViews();
 </script>
 
 <style>
@@ -798,6 +953,222 @@ const RADII = ["3px 7px 4px 8px", "6px 3px 7px 4px", "4px 6px 3px 7px", "7px 4px
     color: var(--fg-main);
   }
 
+  .views {
+    display: flex;
+    gap: 0.5rem;
+    margin-left: auto;
+    padding-bottom: 0.25rem;
+    font-size: 1.1875rem;
+  }
+
+  .views button {
+    position: relative;
+    min-height: 44px;
+    padding: 0 1rem;
+    border: 0;
+    background: none;
+    color: var(--fg-dim);
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .views button[aria-pressed="true"] {
+    color: var(--fg-main);
+  }
+
+  .views svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+
+  .views path {
+    fill: none;
+    stroke: var(--cursor);
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    transition: stroke-dashoffset 0.4s ease;
+  }
+
+  .views [aria-pressed="true"] path {
+    stroke-dashoffset: 0;
+  }
+
+  .frames[hidden],
+  .sheet[hidden] {
+    display: none;
+  }
+
+  .sheet {
+    padding: 2.25rem 2rem 1.75rem;
+    background: var(--paper);
+    border-radius: 2px 4px 3px 5px;
+    box-shadow:
+      0 1px 0 var(--border),
+      0 26px 40px -30px rgba(0, 0, 0, 0.55);
+    transform: rotate(-0.4deg);
+  }
+
+  .strip {
+    position: relative;
+    margin-bottom: 1.875rem;
+    padding: 22px 14px 30px;
+    background: #191613;
+    border-radius: 2px;
+    transform: rotate(var(--tilt));
+  }
+
+  .strip::before,
+  .strip::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 8px;
+    background: linear-gradient(90deg, transparent 6px, var(--paper) 6px 16px, transparent 16px) 0
+      0 / 22px 8px repeat-x;
+    -webkit-mask: radial-gradient(5px 4px at 11px 4px, #000 92%, transparent) 0 0 / 22px 8px;
+    mask: radial-gradient(5px 4px at 11px 4px, #000 92%, transparent) 0 0 / 22px 8px;
+  }
+
+  .strip::before {
+    top: 7px;
+  }
+
+  .strip::after {
+    bottom: 7px;
+  }
+
+  .strip ol {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 26px 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .cell {
+    position: relative;
+  }
+
+  .cell a {
+    display: block;
+    cursor: zoom-in;
+  }
+
+  .cell img {
+    display: block;
+    width: 100%;
+    height: 176px;
+    object-fit: cover;
+  }
+
+  .cell.is-crossed img {
+    filter: saturate(0.5) brightness(0.8);
+  }
+
+  .edge {
+    position: absolute;
+    left: 4px;
+    bottom: -19px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    white-space: pre;
+    color: #c8913a;
+  }
+
+  .pencil {
+    position: absolute;
+    overflow: visible;
+    pointer-events: none;
+  }
+
+  .pencil path {
+    fill: none;
+    stroke: var(--red);
+    stroke-width: 3;
+    stroke-linecap: round;
+  }
+
+  .circle {
+    inset: -10px;
+    width: calc(100% + 20px);
+    height: calc(100% + 20px);
+  }
+
+  .cross {
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.85;
+  }
+
+  .sheet-note {
+    max-width: 32.5rem;
+    margin: 0.75rem 0 0;
+    font-weight: 300;
+    font-size: 1.1875rem;
+    color: var(--fg-dim);
+  }
+
+  .loupe {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    gap: 1.125rem;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+
+  .loupe.is-on {
+    opacity: 1;
+  }
+
+  .loupe.is-left {
+    flex-direction: row-reverse;
+    text-align: right;
+  }
+
+  .loupe-lens {
+    flex: none;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background-color: #191613;
+    background-repeat: no-repeat;
+    box-shadow:
+      0 0 0 6px var(--bg-alt),
+      0 0 0 7px var(--border),
+      0 18px 26px -16px rgba(0, 0, 0, 0.6);
+  }
+
+  .loupe-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 0.375rem 0.625rem;
+    background: var(--bg-main);
+    border-radius: 3px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    white-space: nowrap;
+    color: var(--fg-dim);
+  }
+
+  .loupe-num {
+    color: var(--fg-main);
+  }
+
   @media (max-width: 47.99em) {
     .frames {
       gap: 4.5rem;
@@ -832,6 +1203,33 @@ const RADII = ["3px 7px 4px 8px", "6px 3px 7px 4px", "4px 6px 3px 7px", "7px 4px
 
     .lb-nav {
       display: none;
+    }
+
+    .views {
+      margin-left: -1rem;
+    }
+
+    .sheet {
+      padding: 1.5rem 0.75rem 1.25rem;
+    }
+
+    .strip {
+      padding: 22px 10px 30px;
+    }
+
+    .strip ol {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .cell img {
+      height: 120px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .views path,
+    .loupe {
+      transition: none;
     }
   }
 </style>
