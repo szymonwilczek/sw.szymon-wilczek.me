@@ -6,6 +6,7 @@ import ThemePicker from "../components/ThemePicker.astro";
 import Pebble from "../components/Pebble.astro";
 import SEO from "../components/SEO.astro";
 import auThemes from "../data/au-themes.json";
+import moreThemes from "../styles/au-themes-more.css?url";
 import "../styles/global.css";
 
 const themeIds = auThemes.map((theme) => theme.id);
@@ -97,7 +98,7 @@ const {
       nextUrl={nextUrl}
     />
 
-    <script is:inline define:vars={{ themeIds }}>
+    <script is:inline define:vars={{ themeIds, moreThemes }}>
       (function () {
         var KEY = "au-theme";
         var DEFAULTS = { light: "aurum-day", dark: "aurum-night" };
@@ -118,6 +119,43 @@ const {
           return light.matches ? DEFAULTS.light : DEFAULTS.dark;
         }
 
+        var sheet = null;
+        var loaded = false;
+        var afterLoad = null;
+
+        function ready(theme) {
+          return loaded || theme === DEFAULTS.light || theme === DEFAULTS.dark;
+        }
+
+        function fetchThemes() {
+          if (sheet) return;
+          sheet = document.createElement("link");
+          sheet.rel = "stylesheet";
+          sheet.href = moreThemes;
+          sheet.onload = function () {
+            loaded = true;
+            var next = afterLoad;
+            afterLoad = null;
+            if (next) next();
+          };
+          sheet.onerror = function () {
+            sheet.remove();
+            sheet = null;
+            afterLoad = null;
+          };
+          document.head.insertBefore(sheet, document.querySelector("style"));
+        }
+
+        function whenReady(theme, fn) {
+          if (!ready(theme)) {
+            afterLoad = fn;
+            fetchThemes();
+            return;
+          }
+          afterLoad = null;
+          fn();
+        }
+
         function apply(choice) {
           root.setAttribute("data-theme", resolve(choice));
           root.setAttribute("data-theme-choice", choice);
@@ -127,6 +165,13 @@ const {
         var waiting = null;
 
         function pour(job) {
+          if (!ready(job.theme)) {
+            whenReady(job.theme, function () {
+              pour(job);
+            });
+            return;
+          }
+          afterLoad = null;
           var still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
           if (!document.startViewTransition || still) return job.apply();
           if (pouring) {
@@ -181,9 +226,11 @@ const {
           resolve: resolve,
           set: function (choice) {
             store(choice);
-            show(choice);
+            whenReady(resolve(choice), function () {
+              show(choice);
+            });
           },
-
+          warm: fetchThemes,
           preview: function (id) {
             var theme = id || resolve(read());
             if (waiting && waiting.theme === theme) return;
@@ -215,12 +262,24 @@ const {
         light.addEventListener("change", function () {
           if (read() === "auto") apply("auto");
         });
+
+        var first = resolve(read());
+        if (!ready(first)) {
+          document.write(
+            '<link rel="stylesheet" href="' +
+              moreThemes +
+              "\" onerror=\"document.documentElement.setAttribute('data-theme', '" +
+              resolve("auto") +
+              "')\">",
+          );
+          sheet = true;
+          loaded = true;
+        }
         apply(read());
       })();
     </script>
     <script type="speculationrules">
       {
-
         "prerender": [
           {
             "where": {
