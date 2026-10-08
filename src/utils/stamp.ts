@@ -25,7 +25,7 @@ export function hash(s: string): number {
   return h >>> 0;
 }
 
-function rng(seed: number): () => number {
+export function rng(seed: number): () => number {
   let a = seed;
   return () => {
     a |= 0;

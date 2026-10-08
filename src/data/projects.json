@@ -1,0 +1,134 @@
+[
+  {
+    "title": "LOTA",
+    "url": "https://github.com/szymonwilczek/lota",
+    "excerpt": "Transparent system integrity framework for Linux.",
+    "language": "C",
+    "date": "2026-02-01",
+    "pinned": true
+  },
+  {
+    "title": "alloyctl",
+    "url": "https://github.com/szymonwilczek/alloyctl",
+    "excerpt": "Control utility & interactive TUI for SteelSeries mice on Linux.",
+    "language": "C",
+    "date": "2026-07-17",
+    "pinned": true
+  },
+  {
+    "title": "Talos 7",
+    "url": "https://github.com/szymonwilczek/talos-7",
+    "excerpt": "Hardware and software ecosystem for custom programmable keyboard.",
+    "language": "C",
+    "date": "2025-12-01",
+    "pinned": true
+  },
+  {
+    "title": "Skręcior",
+    "url": "https://skrecior-bot.vercel.app/",
+    "excerpt": "Personal DJ for Discord servers serving as free friend for 1M+ users.",
+    "language": "Java",
+    "date": "2021-09-19",
+    "badge": "maintained",
+    "pinned": true
+  },
+  {
+    "title": "Asmodeus",
+    "url": "https://github.com/asmod-lang/asmodeus",
+    "excerpt": "Programming language ecosystem built in Rust. Custom bytecode Virtual Machine, Macro Assembler, Debugger, & LSP.",
+    "language": "Rust",
+    "date": "2025-07-04",
+    "pinned": true
+  },
+  {
+    "title": "Eikon",
+    "url": "https://github.com/szymonwilczek/2026_tab_5_wilczek",
+    "excerpt": "Self-hosted photo management with AI auto-tagging and secure sharing. Your memories, your rules.",
+    "language": "Java",
+    "date": "2026-04-21",
+    "badge": "academic",
+    "pinned": true
+  },
+  {
+    "title": "This Portfolio",
+    "url": "https://github.com/szymonwilczek/wolfie-portfolio",
+    "excerpt": "You're looking at it right now. Yes, this one. The very website you're reading this on. Meta, isn't it?",
+    "language": "TypeScript",
+    "date": "2025-12-13"
+  },
+  {
+    "title": "Hati",
+    "url": "https://github.com/szymonwilczek/hati",
+    "excerpt": "Cursor highlighter for GNOME that defies Wayland isolation. Powered by GLSL shaders.",
+    "language": "JavaScript",
+    "date": "2026-01-28"
+  },
+  {
+    "title": "Carmenta",
+    "url": "https://github.com/szymonwilczek/carmenta",
+    "excerpt": "Emoji picker for Linux that actually works on Wayland. Written in Rust, extremely efficient.",
+    "language": "Rust",
+    "date": "2026-01-17"
+  },
+  {
+    "title": "SLAB",
+    "url": "https://github.com/szymonwilczek/slab",
+    "excerpt": "High-performance tiling window manager for GNOME. Actor-First philosophy, zero latency.",
+    "language": "TypeScript",
+    "date": "2026-01-17",
+    "badge": "experiment"
+  },
+  {
+    "title": "Prometheus",
+    "url": "https://github.com/szymonwilczek/prometheus-canvas",
+    "excerpt": "3D physical oil paint simulator running on the client.",
+    "language": "C",
+    "date": "2026-07-14",
+    "badge": "manifest"
+  },
+  {
+    "title": "Palaemon",
+    "url": "https://github.com/szymonwilczek/palaemon",
+    "excerpt": "RS-232 and Modbus ASCII communication project",
+    "language": "C",
+    "date": "2026-04-22",
+    "badge": "academic"
+  },
+  {
+    "title": "arete.nvim",
+    "url": "https://github.com/szymonwilczek/arete.nvim",
+    "excerpt": "Neovim plugin that ports Protesilaos GNU Emacs themes.",
+    "language": "Lua",
+    "date": "2026-05-22"
+  },
+  {
+    "title": "Maturator",
+    "url": "https://github.com/wolfie-university/maturator",
+    "excerpt": "Educational platform for the Polish Matura Exam. Infinite, unique mathematical problems.",
+    "language": "TypeScript",
+    "date": "2025-12-10"
+  },
+  {
+    "title": "Instant Book Exchange",
+    "url": "https://github.com/szymonwilczek/instant-book-exchange",
+    "excerpt": "Social platform for book enthusiasts enabling seamless book swaps.",
+    "language": "TypeScript",
+    "date": "2025-11-01",
+    "badge": "academic"
+  },
+  {
+    "title": "Vim Be Better",
+    "url": "https://github.com/szymonwilczek/vim-be-better",
+    "excerpt": "Gamified training plugin for Neovim written in Lua. Train Vim grammar, registers, macros, and code formatting patterns.",
+    "language": "Lua",
+    "date": "2025-06-21"
+  },
+  {
+    "title": "Wavelength",
+    "url": "https://github.com/szymonwilczek/wavelength",
+    "excerpt": "High-performance desktop communication platform built with C++ and Qt 5. OpenGL rendering engine & real-time WebSockets.",
+    "language": "C++",
+    "date": "2023-06-14",
+    "archived": true
+  }
+]
