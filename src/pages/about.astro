@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Divider from "../components/Divider.astro";
+import KoiPond from "../components/KoiPond.astro";
 import Seal from "../components/Seal.astro";
 
 const TICKS = [
@@ -146,6 +147,8 @@ const TICKS = [
       </div>
     </section>
   </div>
+
+  <KoiPond />
 
   <p class="clue hand">the wolf has ten strokes.</p>
   <Seal glyph="終" size={48} tilt={3} label="end" class="about-end" />

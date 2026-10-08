@@ -1,0 +1,534 @@
+---
+// A strip of pond at the end of the photo pages and /about
+
+import { KINDS, SUMI, koi } from "../utils/koi";
+import { MOMIJI } from "../utils/momiji";
+import { POND_H, POND_W, makePond } from "../utils/pond";
+
+const pond = makePond();
+
+// where each fish starts: kind, length, place, heading, bend
+const FISH = [
+  { kind: "kohaku", L: 150, x: 300, y: 120, rot: -10, bend: 0.5, seed: 1 },
+  { kind: "ogon", L: 128, x: 640, y: 168, rot: 168, bend: 0.3, seed: 2 },
+  { kind: "showa", L: 136, x: 800, y: 82, rot: 200, bend: 0.25, seed: 3 },
+];
+const fish = FISH.map((f) => ({ ...f, shape: koi(KINDS[f.kind], f.L, f.bend, f.seed) }));
+---
+
+<figure class="pond">
+  <svg
+    class="water"
+    viewBox={`0 0 ${POND_W} ${POND_H}`}
+    role="img"
+    aria-label="A pond with three koi"
+    data-fish={JSON.stringify(FISH)}
+  >
+    <clipPath id="pond-water">
+      <path d={pond.edge}></path>
+    </clipPath>
+    <path class="pond-bed" d={pond.edge}></path>
+    <g clip-path="url(#pond-water)">
+      <path class="pond-depth" d={pond.depth}></path>
+      <path class="pond-glints" d={pond.glints}></path>
+      <circle class="pond-shadow" cx="-100" cy="-100" r="22"></circle>
+      <g class="pond-crumbs"></g>
+      {fish.map((f, i) => (
+        <g
+          class="koi"
+          data-kind={f.kind}
+          transform={`translate(${f.x} ${f.y}) rotate(${f.rot})`}
+          style={`--base: ${KINDS[f.kind].base}`}
+        >
+          <g class="koi-shadow" transform="translate(5 9)">
+            <path class="k-body" d={f.shape.body} />
+            <path class="k-tail" d={f.shape.tail} />
+          </g>
+          <path class="k-fins koi-fins" d={f.shape.fins} />
+          <path class="k-fins koi-fins-ink" d={f.shape.fins} />
+          <path class="k-tail koi-tail" d={f.shape.tail} />
+          <path class="k-rays koi-rays" d={f.shape.rays} />
+          <clipPath id={`koi-skin-${i}`}>
+            <path class="k-body" d={f.shape.body} />
+          </clipPath>
+          <path class="k-body koi-body" d={f.shape.body} />
+          <g clip-path={`url(#koi-skin-${i})`}>
+            {f.shape.patches.map((d, p) => (
+              <path class="k-patch" d={d} style={`fill: ${KINDS[f.kind].patches[p][3]}`} />
+            ))}
+          </g>
+          <path class="k-dorsal koi-dorsal" d={f.shape.dorsal} />
+          <path class="k-body koi-ink" d={f.shape.body} transform="translate(1.2 -0.9)" />
+          <path class="k-tail koi-ink-tail" d={f.shape.tail} transform="translate(1.2 -0.9)" />
+          {f.shape.eyes.map(([x, y]) => (
+            <circle class="k-eye" cx={x} cy={y} r={f.L * 0.011} fill={SUMI} />
+          ))}
+        </g>
+      ))}
+      <g class="pond-pads">
+        {pond.pads.map((p) => (
+          <g>
+            <path class="pad" d={p.d} />
+            <path class="pad-veins" d={p.veins} />
+            <path class="pad-ink" d={p.d} transform="translate(1 -0.8)" />
+          </g>
+        ))}
+      </g>
+      <g class="pond-leaf" transform="translate(470 150) rotate(-20) scale(0.16)">
+        <path class="pond-leaf-blade" d={MOMIJI.outline}></path>
+        <path class="pond-leaf-ink" d={MOMIJI.outline} transform="translate(3 -2.4)"></path>
+      </g>
+      <g class="pond-ripples"></g>
+    </g>
+    {pond.stones.map((s) => (
+      <g class="rim-stone">
+        <path class={`stone-${s.tone}`} d={s.d} />
+        <path class="stone-ink" d={s.d} transform="translate(0.8 -0.6)" />
+      </g>
+    ))}
+  </svg>
+  <figcaption class="hand">they were here before you.</figcaption>
+</figure>
+
+<script>
+  import { earn } from "../utils/garden";
+  import { KINDS, koi } from "../utils/koi";
+  import { WATER } from "../utils/pond";
+
+  interface Fish {
+    el: SVGGElement;
+    kind: string;
+    L: number;
+    seed: number;
+    x: number;
+    y: number;
+    a: number;
+    turn: number;
+    speed: number;
+    phase: number;
+    tx: number;
+    ty: number;
+    fed: boolean;
+  }
+
+  const svg = document.querySelector<SVGSVGElement>(".pond .water");
+  if (svg) {
+    const NS = "http://www.w3.org/2000/svg";
+    const still = matchMedia("(prefers-reduced-motion: reduce)");
+    const shadow = svg.querySelector<SVGCircleElement>(".pond-shadow")!;
+    const crumbs = svg.querySelector<SVGGElement>(".pond-crumbs")!;
+    const ripples = svg.querySelector<SVGGElement>(".pond-ripples")!;
+    const M = 46;
+    const inside = (x: number, y: number) =>
+      x > WATER.x0 + M && x < WATER.x1 - M && y > WATER.y0 + M * 0.8 && y < WATER.y1 - M * 0.8;
+    const somewhere = (): [number, number] => [
+      WATER.x0 + M + Math.random() * (WATER.x1 - WATER.x0 - 2 * M),
+      WATER.y0 + M + Math.random() * (WATER.y1 - WATER.y0 - 2 * M),
+    ];
+
+    const start: Array<{
+      kind: string;
+      L: number;
+      x: number;
+      y: number;
+      rot: number;
+      seed: number;
+    }> = JSON.parse(svg.dataset.fish!);
+    const fish: Fish[] = [...svg.querySelectorAll<SVGGElement>(".koi")].map((el, i) => {
+      const s = start[i];
+      const [tx, ty] = somewhere();
+      return {
+        el,
+        kind: s.kind,
+        L: s.L,
+        seed: s.seed,
+        x: s.x,
+        y: s.y,
+        a: (s.rot * Math.PI) / 180,
+        turn: 0,
+        speed: 22,
+        phase: Math.random() * 6,
+        tx,
+        ty,
+        fed: false,
+      };
+    });
+
+    const draw = (f: Fish, bend: number) => {
+      const shape = koi(KINDS[f.kind], f.L, bend, f.seed);
+      f.el.setAttribute(
+        "transform",
+        `translate(${f.x.toFixed(1)} ${f.y.toFixed(1)}) rotate(${((f.a * 180) / Math.PI).toFixed(1)})`,
+      );
+      f.el.querySelectorAll(".k-body").forEach((p) => p.setAttribute("d", shape.body));
+      f.el.querySelectorAll(".k-tail").forEach((p) => p.setAttribute("d", shape.tail));
+      f.el.querySelectorAll(".k-fins").forEach((p) => p.setAttribute("d", shape.fins));
+      f.el.querySelector(".k-rays")!.setAttribute("d", shape.rays);
+      f.el.querySelector(".k-dorsal")!.setAttribute("d", shape.dorsal);
+      f.el.querySelectorAll(".k-patch").forEach((p, i) => p.setAttribute("d", shape.patches[i]));
+      f.el.querySelectorAll(".k-eye").forEach((c, i) => {
+        c.setAttribute("cx", String(shape.eyes[i][0]));
+        c.setAttribute("cy", String(shape.eyes[i][1]));
+      });
+    };
+
+    let pointer: { x: number; y: number } | null = null;
+    let movedAt = 0;
+    const toPond = (e: PointerEvent) => {
+      const pt = new DOMPoint(e.clientX, e.clientY).matrixTransform(svg.getScreenCTM()!.inverse());
+      return { x: pt.x, y: pt.y };
+    };
+
+    const ripple = (x: number, y: number, r: number) => {
+      const g = document.createElementNS(NS, "g");
+      g.setAttribute("class", "ripple");
+      g.setAttribute("transform", `translate(${x.toFixed(1)} ${y.toFixed(1)})`);
+      [1, 1.7, 2.5].forEach((k, i) => {
+        const e = document.createElementNS(NS, "ellipse");
+        e.setAttribute("rx", String(r * k));
+        e.setAttribute("ry", String(r * k * 0.42));
+        e.style.setProperty("--i", String(i));
+        g.append(e);
+      });
+      ripples.append(g);
+      setTimeout(() => g.remove(), 2400);
+    };
+
+    interface Crumb {
+      el: SVGCircleElement;
+      x: number;
+      y: number;
+    }
+    const food: Crumb[] = [];
+
+    const eat = (f: Fish, c: Crumb) => {
+      food.splice(food.indexOf(c), 1);
+      c.el.remove();
+      ripple(c.x, c.y, 4);
+      f.fed = true;
+      if (fish.every((k) => k.fed)) earn("鯉");
+    };
+
+    svg.addEventListener("pointermove", (e) => {
+      pointer = toPond(e);
+      movedAt = performance.now();
+      shadow.setAttribute("cx", pointer.x.toFixed(1));
+      shadow.setAttribute("cy", pointer.y.toFixed(1));
+    });
+    svg.addEventListener("pointerleave", () => {
+      pointer = null;
+      shadow.setAttribute("cx", "-100");
+    });
+
+    svg.addEventListener("pointerdown", (e) => {
+      const p = toPond(e);
+      if (p.x < WATER.x0 + 20 || p.x > WATER.x1 - 20 || p.y < WATER.y0 + 16 || p.y > WATER.y1 - 16)
+        return;
+      ripple(p.x, p.y, 8);
+      const el = document.createElementNS(NS, "circle");
+      el.setAttribute("class", "crumb");
+      el.setAttribute("cx", p.x.toFixed(1));
+      el.setAttribute("cy", p.y.toFixed(1));
+      el.setAttribute("r", "2.4");
+      crumbs.append(el);
+      const crumb = { el, x: p.x, y: p.y };
+      food.push(crumb);
+
+      // without motion the fish cannot swim over, so a crumb near one is taken where it lies
+      if (still.matches) {
+        const near = fish.find((f) => Math.hypot(f.x - p.x, f.y - p.y) < f.L * 0.6);
+        if (near) setTimeout(() => eat(near, crumb), 500);
+      }
+    });
+
+    const head = (f: Fish): [number, number] => [
+      f.x + Math.cos(f.a) * f.L * 0.42,
+      f.y + Math.sin(f.a) * f.L * 0.42,
+    ];
+
+    let last = 0;
+    let running = false;
+    let visible = true;
+    let nextBubble = 0;
+
+    const step = (now: number) => {
+      const dt = Math.min(0.05, (now - last) / 1000);
+      last = now;
+      const quiet = pointer && now - movedAt > 3000;
+
+      // each crumb draws the fish nearest to it; a fish goes for its closest one
+      const meal = new Map<Fish, Crumb>();
+      for (const c of food) {
+        const dist = (k: Fish) => Math.hypot(c.x - k.x, c.y - k.y);
+        const f = fish.reduce((b, k) => (dist(k) < dist(b) ? k : b));
+        const had = meal.get(f);
+        if (!had || dist(f) < Math.hypot(had.x - f.x, had.y - f.y)) meal.set(f, c);
+      }
+
+      for (const f of fish) {
+        let speed = 22;
+        const crumb = meal.get(f);
+
+        if (crumb) {
+          [f.tx, f.ty] = [crumb.x, crumb.y];
+          speed = 46;
+          const [hx, hy] = head(f);
+          if (Math.hypot(crumb.x - hx, crumb.y - hy) < 12) eat(f, crumb);
+        } else if (pointer && Math.hypot(pointer.x - f.x, pointer.y - f.y) < 140 && !quiet) {
+          // slip away from the shadow
+          const away = Math.atan2(f.y - pointer.y, f.x - pointer.x);
+          f.tx = f.x + Math.cos(away) * 200;
+          f.ty = f.y + Math.sin(away) * 200;
+          speed = 70;
+        } else if (quiet && pointer) {
+          // come up to look, stopping a little short
+          const d = Math.hypot(pointer.x - f.x, pointer.y - f.y);
+          [f.tx, f.ty] = [pointer.x, pointer.y];
+          speed = d > f.L * 0.7 ? 26 : 0;
+        } else if (Math.hypot(f.tx - f.x, f.ty - f.y) < 40) {
+          [f.tx, f.ty] = somewhere();
+        }
+
+        // keep to the water: edge turns the target back to the middle
+        const [hx, hy] = head(f);
+        if (!inside(hx, hy)) [f.tx, f.ty] = [(WATER.x0 + WATER.x1) / 2, (WATER.y0 + WATER.y1) / 2];
+
+        const want = Math.atan2(f.ty - f.y, f.tx - f.x);
+        let diff = want - f.a;
+        diff = Math.atan2(Math.sin(diff), Math.cos(diff));
+        const turn = Math.max(-1.6, Math.min(1.6, diff * 1.8));
+        f.turn += (turn - f.turn) * Math.min(1, dt * 3);
+        f.a += f.turn * dt;
+        f.speed += (speed - f.speed) * Math.min(1, dt * 1.5);
+        f.x += Math.cos(f.a) * f.speed * dt;
+        f.y += Math.sin(f.a) * f.speed * dt;
+        f.phase += dt * (2 + f.speed / 12);
+
+        draw(f, -f.turn * 0.45 + Math.sin(f.phase) * 0.12);
+      }
+
+      // mouths break the surface while they look
+      if (quiet && pointer && now > nextBubble) {
+        const f = fish[Math.floor(Math.random() * fish.length)];
+        const [hx, hy] = head(f);
+        if (Math.hypot(pointer.x - hx, pointer.y - hy) < f.L) ripple(hx, hy, 3);
+        nextBubble = now + 1400;
+      }
+
+      if (running) requestAnimationFrame(step);
+    };
+
+    const run = () => {
+      const go = visible && !document.hidden && !still.matches;
+      if (go && !running) {
+        running = true;
+        last = performance.now();
+        requestAnimationFrame(step);
+      } else if (!go) {
+        running = false;
+      }
+    };
+
+    new IntersectionObserver(([entry]) => {
+      visible = entry.isIntersecting;
+      run();
+    }).observe(svg);
+    document.addEventListener("visibilitychange", run);
+    still.addEventListener("change", run);
+  }
+</script>
+
+<style>
+  .pond {
+    margin: 5rem 0 0;
+  }
+
+  .water {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+    touch-action: manipulation;
+    cursor: crosshair;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .pond-bed {
+    fill: var(--sea);
+  }
+
+  .pond-depth {
+    fill: var(--fg-main);
+    opacity: 0.05;
+  }
+
+  .pond-glints {
+    fill: none;
+    stroke: var(--bg-main);
+    stroke-width: 1.1;
+    stroke-linecap: round;
+    opacity: 0.45;
+  }
+
+  .pond-shadow {
+    fill: var(--fg-main);
+    opacity: 0.1;
+    pointer-events: none;
+  }
+
+  .koi-shadow {
+    fill: var(--fg-main);
+    opacity: 0.1;
+  }
+
+  .koi-fins {
+    fill: var(--base);
+    opacity: 0.55;
+  }
+
+  .koi-fins-ink {
+    fill: none;
+    stroke: #2a2622;
+    stroke-width: 0.6;
+    opacity: 0.35;
+  }
+
+  .koi-tail {
+    fill: var(--base);
+    opacity: 0.6;
+  }
+
+  .koi-rays {
+    fill: none;
+    stroke: #2a2622;
+    stroke-width: 0.5;
+    opacity: 0.25;
+  }
+
+  .koi-body {
+    fill: var(--base);
+  }
+
+  .k-patch {
+    opacity: 0.92;
+  }
+
+  .koi-dorsal {
+    fill: none;
+    stroke: #2a2622;
+    stroke-width: 0.8;
+    stroke-linecap: round;
+    opacity: 0.3;
+  }
+
+  .koi-ink {
+    fill: none;
+    stroke: #2a2622;
+    stroke-width: 0.9;
+    opacity: 0.55;
+  }
+
+  .koi-ink-tail {
+    fill: none;
+    stroke: #2a2622;
+    stroke-width: 0.7;
+    opacity: 0.4;
+  }
+
+  .pad {
+    fill: var(--leaf);
+  }
+
+  .pad-veins {
+    fill: none;
+    stroke: var(--accent-0);
+    stroke-width: 0.6;
+    opacity: 0.35;
+  }
+
+  .pad-ink {
+    fill: none;
+    stroke: var(--accent-0);
+    opacity: 0.6;
+  }
+
+  .pond-leaf-blade {
+    fill: var(--red);
+    opacity: 0.9;
+  }
+
+  .pond-leaf-ink {
+    fill: none;
+    stroke: var(--red-warmer);
+    stroke-width: 3;
+    opacity: 0.6;
+  }
+
+  .stone-alt {
+    fill: var(--bg-alt);
+  }
+
+  .stone-dim {
+    fill: var(--bg-dim);
+  }
+
+  .stone-border {
+    fill: var(--border);
+  }
+
+  .stone-ink {
+    fill: none;
+    stroke: var(--fg-dim);
+    stroke-width: 0.9;
+    opacity: 0.65;
+  }
+
+  .pond :global(.crumb) {
+    fill: #cf9a3a;
+  }
+
+  .pond :global(.ripple ellipse) {
+    fill: none;
+    stroke: var(--bg-main);
+    stroke-width: 1.2;
+    opacity: 0;
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: ripple 2.2s ease-out calc(var(--i) * 0.18s) both;
+  }
+
+  @keyframes ripple {
+    0% {
+      opacity: 0.7;
+      transform: scale(0.3);
+    }
+    100% {
+      opacity: 0;
+      transform: scale(1.4);
+    }
+  }
+
+  figcaption {
+    margin: 0.5rem 0.25rem 0 auto;
+    width: fit-content;
+    font-weight: 300;
+    font-size: 1rem;
+    color: var(--fg-dim);
+    opacity: 0.7;
+    transform: rotate(-1deg);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pond :global(.ripple ellipse) {
+      animation: none;
+      opacity: 0.5;
+    }
+  }
+
+  @media (max-width: 47.99em) {
+    .pond {
+      margin-top: 3.5rem;
+    }
+  }
+</style>

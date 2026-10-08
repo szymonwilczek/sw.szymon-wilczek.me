@@ -24,6 +24,7 @@ export const SEALS: SealPage[] = [
   { glyph: "夏", note: "when it is warm", hint: "come back in summer" },
   { glyph: "文", note: "write me a letter", hint: "the mailbox" },
   { glyph: "石", note: "a ring in the sand", hint: "the smallest stone" },
+  { glyph: "鯉", note: "fed the koi", hint: "three mouths in the pond" },
 ];
 
 export const DOORS = ["enso", "compass", "minibuffer", "seal"] as const;

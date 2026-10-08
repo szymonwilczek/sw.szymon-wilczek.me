@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import KoiPond from "../../components/KoiPond.astro";
 import Stamp from "../../components/Stamp.astro";
 import { getAllAlbums } from "../../utils/albums";
 
@@ -94,6 +95,8 @@ const DROPS = ["0", "4rem", "0", "3rem", "0"];
       </li>
     ))}
   </ol>
+
+  <KoiPond />
 </BaseLayout>
 
 <style>
