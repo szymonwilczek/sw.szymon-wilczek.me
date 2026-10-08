@@ -1,5 +1,4 @@
 ---
-
 ---
 
 <dialog id="emacs-minibuffer" class="emacs-dialog minibuffer-dialog">
@@ -14,7 +13,9 @@
         autocomplete="off"
         spellcheck="false"
       />
-      <span id="minibuffer-count" class="minibuffer-count">0/0</span>
+      <span id="minibuffer-count" class="minibuffer-count">
+        0/0
+      </span>
     </div>
 
     <ul id="minibuffer-candidates" class="minibuffer-candidates" role="listbox">
@@ -22,9 +23,16 @@
     </ul>
 
     <footer class="minibuffer-hints">
-      <span><kbd>&uarr;</kbd><kbd>&darr;</kbd> navigate</span>
-      <span><kbd>Enter</kbd> execute</span>
-      <span><kbd>Esc</kbd> / <kbd>C-g</kbd> quit</span>
+      <span>
+        <kbd>&uarr;</kbd>
+        <kbd>&darr;</kbd> navigate
+      </span>
+      <span>
+        <kbd>Enter</kbd> execute
+      </span>
+      <span>
+        <kbd>Esc</kbd> / <kbd>C-g</kbd> quit
+      </span>
     </footer>
   </div>
 </dialog>
@@ -37,51 +45,79 @@
         type="button"
         id="close-keybindings-btn"
         class="keybindings-close-btn"
-        aria-label="Close keybindings">&times;</button
+        aria-label="Close keybindings"
       >
+        &times;
+      </button>
     </header>
 
     <div class="keybindings-table-wrapper">
       <table class="keybindings-table">
         <tbody>
           <tr>
-            <td><kbd>M-x</kbd> / <kbd>Alt+x</kbd></td>
+            <td>
+              <kbd>M-x</kbd> / <kbd>Alt+x</kbd>
+            </td>
             <td>Open Emacs command runner</td>
           </tr>
           <tr>
-            <td><kbd>Shift + W</kbd></td>
-            <td>Jump to writings &amp; essays (<code>/writings</code>)</td>
+            <td>
+              <kbd>Shift + W</kbd>
+            </td>
+            <td>
+              Jump to writings &amp; essays (<code>/writings</code>)
+            </td>
           </tr>
           <tr>
-            <td><kbd>Shift + F</kbd></td>
-            <td>Jump to files &amp; archives (<code>/files</code>)</td>
+            <td>
+              <kbd>Shift + F</kbd>
+            </td>
+            <td>
+              Jump to files &amp; archives (<code>/files</code>)
+            </td>
           </tr>
           <tr>
-            <td><kbd>Shift + T</kbd></td>
-            <td>Choose colour theme (<code>au-themes-select</code>)</td>
+            <td>
+              <kbd>Shift + T</kbd>
+            </td>
+            <td>
+              Choose colour theme (<code>au-themes-select</code>)
+            </td>
           </tr>
           <tr>
-            <td><kbd>Shift + B</kbd></td>
+            <td>
+              <kbd>Shift + B</kbd>
+            </td>
             <td>Cycle serif font</td>
           </tr>
           <tr>
-            <td><kbd>j</kbd> / <kbd>k</kbd></td>
+            <td>
+              <kbd>j</kbd> / <kbd>k</kbd>
+            </td>
             <td>Scroll down / up</td>
           </tr>
           <tr>
-            <td><kbd>g</kbd> <kbd>g</kbd></td>
+            <td>
+              <kbd>g</kbd> <kbd>g</kbd>
+            </td>
             <td>Scroll to the top of page</td>
           </tr>
           <tr>
-            <td><kbd>Shift + G</kbd></td>
+            <td>
+              <kbd>Shift + G</kbd>
+            </td>
             <td>Scroll to the bottom of page</td>
           </tr>
           <tr>
-            <td><kbd>?</kbd></td>
+            <td>
+              <kbd>?</kbd>
+            </td>
             <td>Toggle this keybindings help cheat sheet</td>
           </tr>
           <tr>
-            <td><kbd>Esc</kbd> / <kbd>C-g</kbd></td>
+            <td>
+              <kbd>Esc</kbd> / <kbd>C-g</kbd>
+            </td>
             <td>Dismiss modal or close active menu</td>
           </tr>
         </tbody>
@@ -766,12 +802,44 @@
   .keybindings-dialog {
     width: calc(100vw - 2 * var(--gutter));
     max-width: 36rem;
-    margin: auto;
-    background: var(--paper);
-    border-radius: var(--radius-soft);
-    box-shadow:
-      0 1px 0 var(--border),
-      0 24px 40px -24px rgb(0 0 0 / 0.6);
+    margin: 0 auto auto;
+    padding-bottom: 10px;
+    background:
+      repeating-linear-gradient(0deg, transparent 0 3px, rgb(0 0 0 / 0.025) 3px 4px),
+      repeating-linear-gradient(90deg, transparent 0 3px, rgb(0 0 0 / 0.02) 3px 4px), var(--paper);
+    mask:
+      linear-gradient(#000, #000) top / 100% calc(100% - 9px) no-repeat,
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 10'%3E%3Cpath d='M0 0 H26 V3 C 22 7, 18 9, 13 6 C 8 3, 4 9, 0 5 Z'/%3E%3C/svg%3E")
+        bottom / 26px 10px repeat-x;
+  }
+
+  .keybindings-dialog[open] {
+    animation: tenugui-unroll 0.55s cubic-bezier(0.3, 0.7, 0.4, 1);
+  }
+
+  @keyframes tenugui-unroll {
+    from {
+      clip-path: inset(0 0 100% 0);
+    }
+    to {
+      clip-path: inset(0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .keybindings-dialog[open] {
+      animation: none;
+    }
+  }
+
+  .keybindings-dialog::before {
+    content: "";
+    display: block;
+    height: 8px;
+    background: var(--red);
+    opacity: 0.7;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 260 6' preserveAspectRatio='none'%3E%3Cpath d='M0 1 C 90 0, 180 3, 260 0 V 4 C 180 6, 90 3, 0 5 Z'/%3E%3C/svg%3E")
+      no-repeat center / 100% 100%;
   }
 
   .keybindings-dialog::backdrop {
@@ -779,7 +847,7 @@
   }
 
   .keybindings-card {
-    padding: 1.5rem 1.75rem 1.75rem;
+    padding: 1.25rem 1.75rem 1.5rem;
   }
 
   .keybindings-header {
@@ -832,13 +900,17 @@
     vertical-align: middle;
   }
 
+  .keybindings-table tr:first-child td {
+    border-top: 0;
+  }
+
   .keybindings-table td:first-child {
     width: 9rem;
     white-space: nowrap;
   }
 
   .keybindings-table td:last-child {
-    color: var(--fg-dim);
+    color: var(--fg-main);
   }
 
   .emacs-dialog kbd {
@@ -851,6 +923,14 @@
     color: var(--fg-main);
     font-family: var(--font-mono);
     font-size: 0.85em;
+  }
+
+  .keybindings-table kbd {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--cursor);
   }
 
   .emacs-dialog code {
