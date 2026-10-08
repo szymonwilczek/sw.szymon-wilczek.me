@@ -10,12 +10,10 @@
         <g class="sz-face">
           <g class="sz-pitch">
             <g class="sz-sit">
-              <g class="sz-tail">
-                <path
-                  class="sz-wash"
-                  d="M-12 -15 L -29 -10 C -31 -8, -30 -6, -27 -5.5 L -11 -9 Z"
-                ></path>
-              </g>
+              <path
+                class="sz-wash"
+                d="M-12 -15 L -29 -10 C -31 -8, -30 -6, -27 -5.5 L -11 -9 Z"
+              ></path>
               <path
                 class="sz-body"
                 d="M-16 -16 C -14 -24, -4 -28, 6 -27 C 6 -34, 12 -38, 17 -37 C 23 -36, 25 -31, 24 -27 C 25 -22, 22 -17, 18 -13 C 14 -6, 4 -3, -4 -5 C -10 -7, -14 -11, -16 -16 Z"
@@ -44,7 +42,7 @@
                 ></path>
                 <ellipse class="sz-ink" cx="13" cy="-26.5" rx="2.4" ry="1.8"></ellipse>
                 <path class="sz-lore" d="M18.5 -31 C 20 -31.5, 22 -31, 24 -29.5"></path>
-                <circle class="sz-ink" cx="19.2" cy="-31" r="1.3"></circle>
+                <circle class="sz-ink sz-eye" cx="19.2" cy="-31" r="1.3"></circle>
                 <path class="sz-ink" d="M23.6 -30.6 L 29 -28.6 L 23.8 -27 Z"></path>
                 <path
                   class="sz-ink"
@@ -56,7 +54,11 @@
                 d="M1 -4.5 L 0 0 M 7 -4.5 L 8 0 M -3 0 l 5 0 M 5 0 l 5.5 0"
               ></path>
             </g>
-            <g class="sz-fly">
+            <!-- drawn smaller than the sitting bird; scaled so the two are one size -->
+            <g
+              class="sz-fly"
+              transform="translate(-4 0) translate(2 -16) scale(1.32) translate(-2 16)"
+            >
               <g class="sz-far">
                 <path
                   class="sz-far-wing"
@@ -122,7 +124,8 @@
 
   .sz-face,
   .sz-pitch,
-  .sz-tail,
+  .sz-sit,
+  .sz-eye,
   .sz-head,
   .sz-near,
   .sz-far {
@@ -139,14 +142,28 @@
     transition: transform 0.6s ease-in-out;
   }
 
-  .sz-tail {
-    transform-origin: -14px -12px;
-    transition: transform 0.35s ease-in-out;
-  }
-
   .sz-head {
     transform-origin: 14px -24px;
     transition: transform 0.8s ease-in-out;
+  }
+
+  .sz-eye {
+    transform-origin: 19.2px -31px;
+    transition: transform 0.07s ease-in-out;
+  }
+
+  .sz-sit {
+    transform-origin: 0 0;
+  }
+
+  .suzume:not(.flying) .sz-sit {
+    animation: sz-breathe 2.8s ease-in-out infinite;
+  }
+
+  @keyframes sz-breathe {
+    50% {
+      transform: scale(1.012, 1.03);
+    }
   }
 
   .sz-near {
@@ -159,13 +176,24 @@
     transition: transform var(--flap, 130ms) ease-in-out;
   }
 
+  .sz-sit,
+  .sz-fly {
+    transition: opacity 0.3s ease-in-out;
+  }
+
   .sz-fly,
-  .suzume.flying .sz-sit,
+  .suzume.flying .sz-sit {
+    opacity: 0;
+  }
+
+  .suzume.flying .sz-fly {
+    opacity: 1;
+  }
+
   .sz-landing-legs {
     display: none;
   }
 
-  .suzume.flying .sz-fly,
   .suzume.landing .sz-landing-legs {
     display: inline;
   }
@@ -244,6 +272,12 @@
     stroke-width: 1.6;
   }
 
+  @media (prefers-reduced-motion: reduce) {
+    .suzume:not(.flying) .sz-sit {
+      animation: none;
+    }
+  }
+
   @media print {
     .suzume {
       display: none;
@@ -264,14 +298,13 @@
     const sy = root.querySelector<HTMLElement>(".sz-y")!;
     const face = root.querySelector<SVGGElement>(".sz-face")!;
     const pitch = root.querySelector<SVGGElement>(".sz-pitch")!;
-    const tail = root.querySelector<SVGGElement>(".sz-tail")!;
+    const eye = root.querySelector<SVGCircleElement>(".sz-eye")!;
     const head = root.querySelector<SVGGElement>(".sz-head")!;
     const near = root.querySelector<SVGGElement>(".sz-near")!;
     const far = root.querySelector<SVGGElement>(".sz-far")!;
 
     type Phase = "away" | "gliding" | "landing" | "sitting" | "leaving";
     let phase: Phase = "away";
-    let look = -1;
     let idle = 0;
     let step = 0;
     let life = 0;
@@ -306,7 +339,7 @@
       root.classList.toggle("landing", p === "landing");
       const lean = { away: 0, gliding: 6, landing: -14, sitting: 0, leaving: -18 }[p];
       pitch.style.transform = `rotate(${lean}deg)`;
-      face.style.transform = `scaleX(${p === "sitting" ? look : -1})`;
+      face.style.transform = "scaleX(-1)";
     };
 
     function perch(): [number, number] | null {
@@ -328,7 +361,6 @@
         return;
       }
       const [px, py] = spot;
-      look = -1;
       root.classList.add("here");
       if (still.matches) {
         at(px, py, "0s", "0s");
@@ -375,19 +407,21 @@
       life = window.setTimeout(
         () => {
           if (phase !== "sitting") return;
-          const r = Math.random();
-          if (r < 0.4) {
-            look = -look;
-            face.style.transform = `scaleX(${look})`;
-          } else if (r < 0.75) head.style.transform = `rotate(${Math.random() < 0.5 ? -9 : 7}deg)`;
-          else tail.style.transform = "rotate(-22deg)";
+          if (Math.random() < 0.55) {
+            eye.style.transform = "scaleY(0.15)";
+            life = window.setTimeout(() => {
+              eye.style.transform = "";
+              gesture();
+            }, 140);
+            return;
+          }
+          head.style.transform = `rotate(${Math.random() < 0.5 ? -5 : 4}deg)`;
           life = window.setTimeout(() => {
             head.style.transform = "";
-            tail.style.transform = "";
             gesture();
-          }, 900);
+          }, 1400);
         },
-        4000 + Math.random() * 3000,
+        2500 + Math.random() * 3500,
       );
     }
 
@@ -395,7 +429,7 @@
       clearTimeout(step);
       clearTimeout(life);
       head.style.transform = "";
-      tail.style.transform = "";
+      eye.style.transform = "";
       if (phase === "away" || phase === "leaving") return;
       if (still.matches) {
         root.classList.remove("here");
