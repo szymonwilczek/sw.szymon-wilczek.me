@@ -43,14 +43,14 @@
                 ></path>
                 <path class="sz-bar" d="M-6 -21.5 C -1 -23, 4 -22.5, 8 -20.5"></path>
               </g>
-              <g class="sz-head">
+              <g>
                 <path
                   class="sz-cap"
                   d="M7 -30 C 8 -35, 13 -38, 18 -37 C 22 -36.5, 24 -34, 24 -31 C 21 -32.5, 17 -33, 13 -32 C 11 -31.5, 9 -30.5, 7 -30 Z"
                 ></path>
                 <ellipse class="sz-ink" cx="13" cy="-26.5" rx="2.4" ry="1.8"></ellipse>
                 <path class="sz-lore" d="M18.5 -31 C 20 -31.5, 22 -31, 24 -29.5"></path>
-                <circle class="sz-ink sz-eye" cx="19.2" cy="-31" r="1.3"></circle>
+                <circle class="sz-ink" cx="19.2" cy="-31" r="1.3"></circle>
                 <path class="sz-ink" d="M23.6 -30.6 L 29 -28.6 L 23.8 -27 Z"></path>
                 <path
                   class="sz-ink"
@@ -105,8 +105,6 @@
   .sz-face,
   .sz-pitch,
   .sz-sit,
-  .sz-eye,
-  .sz-head,
   .sz-near,
   .sz-far {
     transform-box: view-box;
@@ -122,32 +120,12 @@
     transition: transform 0.4s ease-out;
   }
 
-  .sz-head {
-    transform-origin: 14px -24px;
-    transition: transform 1.4s ease-in-out;
-  }
-
-  .sz-eye {
-    transform-origin: 19.2px -31px;
-    transition: transform 0.08s ease-in-out;
-  }
-
   .sz-sit {
     transform-origin: 0 0;
   }
 
-  .suzume:not(.flying) .sz-sit {
-    animation: sz-breathe 4.2s ease-in-out infinite;
-  }
-
   .suzume.settling .sz-sit {
     animation: sz-settle 0.45s ease-out;
-  }
-
-  @keyframes sz-breathe {
-    50% {
-      transform: scale(1.006, 1.015);
-    }
   }
 
   @keyframes sz-settle {
@@ -255,7 +233,6 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .suzume:not(.flying) .sz-sit,
     .suzume.settling .sz-sit {
       animation: none;
     }
@@ -281,8 +258,6 @@
     const sy = root.querySelector<HTMLElement>(".sz-y")!;
     const face = root.querySelector<SVGGElement>(".sz-face")!;
     const pitch = root.querySelector<SVGGElement>(".sz-pitch")!;
-    const eye = root.querySelector<SVGCircleElement>(".sz-eye")!;
-    const head = root.querySelector<SVGGElement>(".sz-head")!;
     const near = root.querySelector<SVGGElement>(".sz-near")!;
     const far = root.querySelector<SVGGElement>(".sz-far")!;
 
@@ -290,7 +265,6 @@
     let phase: Phase = "away";
     let idle = 0;
     let step = 0;
-    let life = 0;
     let flapping = 0;
     let wingDown = false;
 
@@ -387,37 +361,11 @@
         s.sparrow = (s.sparrow || 0) + 1;
       });
       if (state.sparrow >= 3) earn("雀");
-      if (!still.matches) gesture();
-    }
-
-    function gesture() {
-      life = window.setTimeout(
-        () => {
-          if (phase !== "sitting") return;
-          if (Math.random() < 0.55) {
-            eye.style.transform = "scaleY(0.15)";
-            life = window.setTimeout(() => {
-              eye.style.transform = "";
-              gesture();
-            }, 140);
-            return;
-          }
-          head.style.transform = `rotate(${Math.random() < 0.5 ? -3 : 3}deg)`;
-          life = window.setTimeout(() => {
-            head.style.transform = "";
-            gesture();
-          }, 2600);
-        },
-        8000 + Math.random() * 9000,
-      );
     }
 
     function leave() {
       clearTimeout(step);
-      clearTimeout(life);
       root.classList.remove("settling");
-      head.style.transform = "";
-      eye.style.transform = "";
       if (phase === "away" || phase === "leaving") return;
       if (still.matches) {
         root.classList.remove("here");
