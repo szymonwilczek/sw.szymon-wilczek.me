@@ -222,5 +222,20 @@ const {
         initCodeCopy();
       })();
     </script>
+    <script>
+      import { earn, season, SEASONS, walk } from "../utils/garden";
+
+      walk(location.pathname);
+      earn("狼");
+      earn(SEASONS[season()].glyph);
+
+      // staying a full minute late at night earns seal
+      var hour = new Date().getHours();
+      if (hour >= 21 || hour < 5) {
+        setTimeout(function () {
+          earn("夜");
+        }, 60000);
+      }
+    </script>
   </body>
 </html>

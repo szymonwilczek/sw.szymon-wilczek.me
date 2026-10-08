@@ -1,0 +1,129 @@
+// What the reader has done in the garden: paths walked, essays read, seals earned.
+// It lives in localStorage only, so it never leaves the browser.
+
+export interface SealPage {
+  glyph: string;
+  note: string;
+  hint: string;
+}
+
+// Seal book, in the order its pages are bound
+export const SEALS: SealPage[] = [
+  { glyph: "狼", note: "first visit", hint: "come in" },
+  { glyph: "書", note: "opened an essay", hint: "pick something to read" },
+  { glyph: "終", note: "read one to the end", hint: "all the way down" },
+  { glyph: "写", note: "walked an album", hint: "look at every photo" },
+  { glyph: "合", note: "checked a file", hint: "a file and its tag" },
+  { glyph: "秋", note: "came in autumn", hint: "when the maples turn" },
+  { glyph: "北", note: "the garden is round", hint: "there is a map" },
+  { glyph: "封", note: "what the well keeps", hint: "something is sealed" },
+  { glyph: "迷", note: "get properly lost", hint: "a page that isn't" },
+  { glyph: "夜", note: "stay after dark", hint: "late, and a while" },
+  { glyph: "冬", note: "snow on the crack", hint: "come back in winter" },
+  { glyph: "春", note: "first blossom", hint: "come back in spring" },
+  { glyph: "夏", note: "when it is warm", hint: "come back in summer" },
+  { glyph: "文", note: "write me a letter", hint: "the mailbox" },
+  { glyph: "石", note: "a ring in the sand", hint: "the smallest stone" },
+];
+
+export const DOORS = ["enso", "compass", "minibuffer", "seal"] as const;
+export type Door = (typeof DOORS)[number];
+
+export interface GardenState {
+  seals: Record<string, string>;
+  paths: string[];
+  read: string[];
+  stops: Record<string, { at: number; when: number }>;
+  doors: Door[];
+}
+
+const KEY = "garden";
+
+function empty(): GardenState {
+  return { seals: {}, paths: [], read: [], stops: {}, doors: [] };
+}
+
+export function load(): GardenState {
+  try {
+    const raw = localStorage.getItem(KEY);
+    return raw ? { ...empty(), ...JSON.parse(raw) } : empty();
+  } catch {
+    return empty();
+  }
+}
+
+function save(state: GardenState) {
+  try {
+    localStorage.setItem(KEY, JSON.stringify(state));
+  } catch {
+    // private window or blocked storage: the garden simply forgets
+  }
+}
+
+export function update(change: (state: GardenState) => void): GardenState {
+  const state = load();
+  change(state);
+  save(state);
+  return state;
+}
+
+export function reset() {
+  try {
+    localStorage.removeItem(KEY);
+  } catch {
+    // nothing to forget
+  }
+}
+
+/** Date as the seal book writes it */
+export function stampDate(date = new Date()): string {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${date.getFullYear()}·${pad(date.getMonth() + 1)}·${pad(date.getDate())}`;
+}
+
+/** Stamps a seal once */
+export function earn(glyph: string): boolean {
+  if (!SEALS.some((s) => s.glyph === glyph)) return false;
+  let fresh = false;
+  update((state) => {
+    if (state.seals[glyph]) return;
+    state.seals[glyph] = stampDate();
+    fresh = true;
+  });
+  if (fresh) window.dispatchEvent(new CustomEvent("garden-seal", { detail: { glyph } }));
+  return fresh;
+}
+
+export function walk(path: string) {
+  const clean = path.replace(/\/+$/, "") || "/";
+  update((state) => {
+    if (!state.paths.includes(clean)) state.paths.push(clean);
+  });
+}
+
+export function findDoor(door: Door) {
+  update((state) => {
+    if (!state.doors.includes(door)) state.doors.push(door);
+  });
+  earn("北");
+}
+
+export type Season = "spring" | "summer" | "autumn" | "winter";
+
+export const SEASONS: Record<Season, { glyph: string; romaji: string; next: Season }> = {
+  spring: { glyph: "春", romaji: "haru", next: "summer" },
+  summer: { glyph: "夏", romaji: "natsu", next: "autumn" },
+  autumn: { glyph: "秋", romaji: "aki", next: "winter" },
+  winter: { glyph: "冬", romaji: "fuyu", next: "spring" },
+};
+
+/** The reader's season, from their own calendar */
+export function season(date = new Date()): Season {
+  const asked = new URLSearchParams(location.search).get("season");
+  if (asked && asked in SEASONS) return asked as Season;
+  const month = date.getMonth();
+  if (month >= 2 && month <= 4) return "spring";
+  if (month >= 5 && month <= 7) return "summer";
+  if (month >= 8 && month <= 10) return "autumn";
+  return "winter";
+}
