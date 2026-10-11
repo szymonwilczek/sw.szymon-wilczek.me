@@ -6,6 +6,7 @@ import { clean, turned } from "../utils/tea/pottery";
 import pieces from "../data/pieces.json";
 
 const shelf = (pieces as unknown[]).map(clean).filter((p) => p !== null);
+const STONE = { left: (640 / 1100) * 100, top: (504 / 690) * 100 };
 const garden = sceneGarden16(tones2(), "start", {
   shelf: (i: number) => (shelf[i] ? turned(shelf[i]) : null),
 });
@@ -33,23 +34,51 @@ const garden = sceneGarden16(tones2(), "start", {
     <span class="hint-touch">swipe across the bamboo to cut it.</span>
   </p>
 
-  <figure class="roji" style={TONE_CSS}>
+  <figure class="roji" style={TONE_CSS} data-shelf={JSON.stringify(shelf)}>
     <svg
       viewBox={`0 0 ${garden.W} ${garden.H}`}
       role="img"
       aria-label="An ink drawing of a tea garden: stepping stones, a clump of bamboo, a small waiting room with shelves, a thatched workshop with a stone on the path before it, and a kiln climbing the slope behind."
       set:html={toSvg(garden, true)}
     />
+    <button
+      type="button"
+      class="stone"
+      style={`left:${STONE.left}%;top:${STONE.top}%`}
+      aria-label="The stone on the path"
+      aria-expanded="false"
+      aria-controls="roji-key"
+    ></button>
+    <form id="roji-key" class="key hand" style={`left:${STONE.left}%;top:${STONE.top}%`} hidden>
+      <label for="roji-key-in">a stone tied with rope. the key from the books moves it.</label>
+      <span class="key-row">
+        <input id="roji-key-in" name="key" autocomplete="off" spellcheck="false" />
+        <button type="submit">roll it</button>
+      </span>
+      <output aria-live="polite"></output>
+    </form>
   </figure>
 </BaseLayout>
 
 <script>
-  import { bambooClump, groupSvg, tones2, rng, hash } from "../utils/tea/ink.js";
+  import {
+    bambooClump,
+    groupSvg,
+    tones2,
+    rng,
+    hash,
+    sceneGarden16,
+    toSvg,
+  } from "../utils/tea/ink.js";
+  import { turned, type PieceSpec } from "../utils/tea/pottery";
+  import { fits } from "../utils/tea/key";
 
   type P = [number, number];
   type Cut = { line: [P, P]; phase: "fall" | "down" };
 
-  const svg = document.querySelector<SVGSVGElement>(".roji svg")!;
+  const fig = document.querySelector<HTMLElement>(".roji")!;
+  const svg = fig.querySelector<SVGSVGElement>("svg")!;
+  const still = matchMedia("(prefers-reduced-motion: reduce)");
   const KEY = "roji:bamboo";
   const CLUMP = { x: 250, y: 404, half: 60, top: 150 };
 
@@ -72,14 +101,58 @@ const garden = sceneGarden16(tones2(), "start", {
 
   const saved = localStorage.getItem(KEY);
   let done = false;
+  let cut: Cut | undefined;
   if (saved) {
     try {
-      draw({ line: JSON.parse(saved), phase: "down" }, true);
+      cut = { line: JSON.parse(saved), phase: "down" };
+      draw(cut, true);
       done = true;
     } catch {
       localStorage.removeItem(KEY);
     }
   }
+
+  const STONE_KEY = "roji:key";
+  const stone = fig.querySelector<HTMLButtonElement>(".stone")!;
+  const form = fig.querySelector<HTMLFormElement>(".key")!;
+  const said = form.querySelector("output")!;
+
+  async function open(slowly: boolean) {
+    if (slowly && !still.matches) {
+      svg.querySelector(".roji-stone")?.classList.add("rolling");
+      svg.querySelector(".roji-roof")?.classList.add("lifting");
+      await new Promise((r) => setTimeout(r, 1400));
+    }
+    const shelf: PieceSpec[] = JSON.parse(fig.dataset.shelf || "[]");
+    const garden = sceneGarden16(tones2(), "open", {
+      shelf: (i: number) => (shelf[i] ? turned(shelf[i]) : null),
+      cut,
+    });
+    svg.innerHTML = toSvg(garden, true);
+    fig.classList.add("open");
+  }
+
+  stone.addEventListener("click", () => {
+    form.hidden = !form.hidden;
+    stone.setAttribute("aria-expanded", String(!form.hidden));
+    if (!form.hidden) form.key.focus();
+  });
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const key = String(form.key.value);
+    if (!(await fits(key))) {
+      said.textContent = "the stone does not move.";
+      form.classList.remove("nope");
+      void form.offsetWidth;
+      form.classList.add("nope");
+      return;
+    }
+    localStorage.setItem(STONE_KEY, key);
+    form.hidden = true;
+    open(true);
+  });
+  const kept = localStorage.getItem(STONE_KEY);
+  if (kept) fits(kept).then((yes) => yes && open(false));
 
   const at = (e: PointerEvent): P => {
     const p = new DOMPoint(e.clientX, e.clientY).matrixTransform(svg.getScreenCTM()!.inverse());
@@ -163,6 +236,109 @@ const garden = sceneGarden16(tones2(), "start", {
     height: auto;
     touch-action: pan-y pinch-zoom;
     user-select: none;
+  }
+
+  .roji {
+    position: relative;
+  }
+
+  .stone {
+    position: absolute;
+    width: 5%;
+    aspect-ratio: 1.4;
+    translate: -50% -75%;
+    border: 0;
+    border-radius: 50%;
+    background: none;
+    cursor: pointer;
+  }
+
+  .stone:focus-visible {
+    outline: 1px dashed var(--fg-dim);
+    outline-offset: 4px;
+  }
+
+  .open .stone,
+  .open .key {
+    display: none;
+  }
+
+  .key {
+    position: absolute;
+    translate: -50% 1.5rem;
+    width: min(20rem, 80vw);
+    padding: 0.75rem 1rem;
+    background: var(--bg-main);
+    border: 1px solid color-mix(in oklab, var(--fg-main), transparent 80%);
+    border-radius: 3px;
+    font-size: 1.0625rem;
+    rotate: -0.4deg;
+  }
+
+  .key-row {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+
+  .key input {
+    flex: 1;
+    min-width: 0;
+    font: inherit;
+    background: none;
+    border: 0;
+    border-bottom: 1px solid var(--fg-dim);
+    color: var(--fg-main);
+  }
+
+  .key button {
+    font: inherit;
+    background: none;
+    border: 0;
+    color: var(--fg-link);
+    cursor: pointer;
+  }
+
+  .key output {
+    display: block;
+    min-height: 1.4em;
+    color: var(--fg-dim);
+  }
+
+  .key.nope {
+    animation: roji-nope 0.4s;
+  }
+
+  @keyframes roji-nope {
+    25% {
+      translate: calc(-50% - 4px) 1.5rem;
+    }
+    75% {
+      translate: calc(-50% + 4px) 1.5rem;
+    }
+  }
+
+  .roji :global(.roji-stone) {
+    transform-origin: 640px 504px;
+    transition:
+      transform 1.2s cubic-bezier(0.3, 0, 0.3, 1),
+      opacity 1.2s;
+  }
+
+  .roji :global(.roji-stone.rolling) {
+    transform: translate(26px, 3px) rotate(80deg);
+    opacity: 0.6;
+  }
+
+  .roji :global(.roji-roof) {
+    transition:
+      transform 1.3s cubic-bezier(0.5, 0, 0.6, 1),
+      opacity 1.3s;
+  }
+
+  .roji :global(.roji-roof.lifting) {
+    transform: translateY(-140px);
+    opacity: 0;
   }
 
   .roji :global(.cutting .fall) {
