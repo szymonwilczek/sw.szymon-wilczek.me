@@ -19,18 +19,18 @@ export const GROUPS: { name: Group; kanji: string }[] = [
 const WHY = "[WHY I KEEP IT · SINCE WHEN]";
 
 export const TOOLS: Tool[] = [
-  { name: "Emacs", graphic: "bowl", group: "writing", why: WHY },
-  { name: "Org", graphic: "caddy", group: "writing", why: WHY },
+  { name: "Emacs", graphic: "kettle", group: "writing", why: WHY },
+  { name: "Org", graphic: "abacus", group: "writing", why: WHY },
   { name: "Typus Mono 95", graphic: "brush", group: "writing", why: WHY },
-  { name: "au-themes", graphic: "fan", group: "writing", why: WHY },
+  { name: "au-themes", graphic: "umbrella", group: "writing", why: WHY },
   { name: "[NOTES]", graphic: "scroll", group: "writing", why: WHY },
-  { name: "[OS]", graphic: "kettle", group: "the machine", why: WHY },
-  { name: "[TERMINAL]", graphic: "ironpot", group: "the machine", why: WHY },
+  { name: "[OS]", graphic: "jar", group: "the machine", why: WHY },
+  { name: "[TERMINAL]", graphic: "ladle", group: "the machine", why: WHY },
   { name: "[KEYBOARD]", graphic: "whisk", group: "the machine", why: WHY },
   { name: "[BROWSER]", graphic: "lantern", group: "the machine", why: WHY },
-  { name: "Astro", graphic: "jar", group: "the site", why: WHY },
+  { name: "Astro", graphic: "boxes", group: "the site", why: WHY },
   { name: "git", graphic: "seal", group: "the site", why: WHY },
-  { name: "[HOSTING]", graphic: "boxes", group: "the site", why: WHY },
-  { name: "[CAMERA]", graphic: "candle", group: "off the screen", why: WHY },
+  { name: "[HOSTING]", graphic: "vase", group: "the site", why: WHY },
+  { name: "[CAMERA]", graphic: "shears", group: "off the screen", why: WHY },
   { name: "[HEADPHONES]", graphic: "bell", group: "off the screen", why: WHY },
 ];
