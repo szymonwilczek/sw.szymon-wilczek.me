@@ -109,6 +109,9 @@ const tags = [...tagCounts.entries()]
   ) : (
     <p class="hand closing">that’s all, for now</p>
   )}
+  <p class="hand seeds-link">
+    <a href="/seeds/">not written yet →</a>
+  </p>
 </BaseLayout>
 
 <script>
@@ -290,6 +293,17 @@ const tags = [...tagCounts.entries()]
     text-align: center;
     font-size: 1.1875rem;
     transform: rotate(-1deg);
+  }
+
+  .seeds-link {
+    margin: 0.75rem 0 0;
+    text-align: center;
+    font-size: 1rem;
+    transform: rotate(0.6deg);
+  }
+
+  .seeds-link a {
+    color: var(--fg-dim);
   }
 
   @media (max-width: 47.99em) {
