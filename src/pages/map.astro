@@ -10,7 +10,7 @@ import { writingSlug } from "../utils/format";
 import { HANKO_EDGE } from "../utils/hanko";
 import { PROJECTS } from "../utils/projects";
 import { readBooks } from "../utils/books";
-import { TOOLS } from "../utils/dogu";
+import { TOOLS } from "../data/uses";
 import { weeks } from "../utils/nenrin";
 import { LINKS } from "../data/links";
 
@@ -167,7 +167,7 @@ const PLACES = [
   {
     href: "/uses/",
     title: "uses · the tea hut",
-    sub: plural(TOOLS.length, "piece on a tray", "pieces on a tray"),
+    sub: plural(TOOLS.length, "tool in ink", "tools in ink"),
   },
   { href: "/contact/", title: "the mailbox", sub: "contact" },
   {
