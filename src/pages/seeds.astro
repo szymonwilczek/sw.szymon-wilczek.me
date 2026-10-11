@@ -1,0 +1,494 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Divider from "../components/Divider.astro";
+import { monthOf } from "../utils/books";
+import { writingSlug } from "../utils/format";
+import { packet, plant, readSeeds, STAGES, type Stage } from "../utils/seeds";
+
+const titles = new Map(
+  (await getCollection("writings")).map((w) => [writingSlug(w.id), w.data.title]),
+);
+
+const packets = readSeeds().map((s) => ({
+  ...s,
+  ...packet(s),
+  ...STAGES[s.stage],
+  title: (s.writing && titles.get(s.writing)) || s.title,
+  href: s.stage === "bloom" && s.writing ? `/writings/${s.writing}/` : null,
+  picture: plant(s.stage, `${s.title}/${s.id}`),
+}));
+
+const legend = (Object.keys(STAGES) as Stage[]).map((k) => ({
+  ...STAGES[k],
+  picture: plant(k, "legend"),
+}));
+
+const flowered = packets.filter((p) => p.stage === "bloom").length;
+---
+
+<BaseLayout
+  title="Seeds"
+  description="Essays I have not written yet, kept like seed in paper packets."
+>
+  <header class="seeds-head">
+    <div>
+      <h1>Seeds</h1>
+      <p class="lede">
+        Essays I have not written yet, kept the way a gardener keeps seed: in paper packets, each
+        with what it has grown into so far printed on the front.
+      </p>
+    </div>
+    <p class="tally">
+      {packets.length} packets · {flowered} in flower
+    </p>
+  </header>
+
+  <Divider from={480} to={700} />
+
+  <!-- the brush and the bleed -->
+  <svg class="defs" aria-hidden="true" focusable="false">
+    <filter id="sd-tremble">
+      <feTurbulence type="fractalNoise" baseFrequency="0.09" numOctaves="2" seed="3"></feTurbulence>
+      <feDisplacementMap in="SourceGraphic" scale="1.2"></feDisplacementMap>
+    </filter>
+    <filter id="sd-wash" x="-20%" y="-20%" width="140%" height="140%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="3" seed="7"></feTurbulence>
+      <feDisplacementMap in="SourceGraphic" scale="5"></feDisplacementMap>
+      <feGaussianBlur stdDeviation="0.7"></feGaussianBlur>
+    </filter>
+  </svg>
+
+  <section class="legend" aria-label="How a seed grows">
+    {legend.map((l) => (
+      <div class="stage">
+        <svg viewBox="0 10 100 90" aria-hidden="true">
+          <g class="wash" transform="translate(3 2.4)" filter="url(#sd-wash)">
+            {l.picture.forms.map((f) => (
+              <path d={f.d} class={`t-${f.tone}`} />
+            ))}
+          </g>
+          <g filter="url(#sd-tremble)">
+            {l.picture.forms.map((f) => (
+              <path d={f.d} class={f.bare ? "edge bare" : "edge"} />
+            ))}
+            {l.picture.lines.map((m) => (
+              <path d={m.d} class={m.gold ? "heart" : "line"} stroke-width={m.w} />
+            ))}
+          </g>
+        </svg>
+        <p>
+          <span class="stage-kanji" aria-hidden="true">
+            {l.kanji}
+          </span>
+          {l.word}
+        </p>
+      </div>
+    ))}
+  </section>
+
+  <p class="hint hand">open a packet and the idea slides out.</p>
+
+  <ul class="packets" aria-label="Seed packets">
+    {packets.map((p) => (
+      <li style={`--rot: ${p.rot}deg; --tint: var(${p.paper})`}>
+        <div class="slip" id={`slip-${p.id}`} style={`--slip-rot: ${p.slipRot}deg`}>
+          {p.note && <p>{p.note}</p>}
+          {p.href && (
+            <a class="hand" href={p.href}>
+              read it →
+            </a>
+          )}
+        </div>
+        <button
+          type="button"
+          class="packet"
+          aria-expanded="false"
+          aria-controls={`slip-${p.id}`}
+          aria-label={`${p.title}, ${p.name}. Open the packet.`}
+        >
+          <svg viewBox="0 0 160 230" aria-hidden="true">
+            <rect class="shade" x="12" y="38" width="144" height="190" filter="url(#sd-wash)" />
+            <path
+              class="envelope"
+              d="M8 30 L 152 30 L 152 224 L 8 224 Z"
+              filter="url(#sd-tremble)"
+            />
+            <path class="fold" d="M8 224 L 80 196 L 152 224" />
+            <rect class="window" x="18" y="50" width="124" height="112" />
+            <g transform="translate(24 46) scale(1.12)">
+              <g class="wash" transform="translate(3 2.4)" filter="url(#sd-wash)">
+                {p.picture.forms.map((f) => (
+                  <path d={f.d} class={`t-${f.tone}`} />
+                ))}
+              </g>
+              <g filter="url(#sd-tremble)">
+                {p.picture.forms.map((f) => (
+                  <path d={f.d} class={f.bare ? "edge bare" : "edge"} />
+                ))}
+                {p.picture.lines.map((m) => (
+                  <path d={m.d} class={m.gold ? "heart" : "line"} stroke-width={m.w} />
+                ))}
+              </g>
+            </g>
+            <rect
+              class="label"
+              x="124"
+              y="56"
+              width="18"
+              height="26"
+              transform="rotate(3 133 69)"
+            />
+            <text class="label-kanji" x="133" y="75" text-anchor="middle">
+              {p.kanji}
+            </text>
+            <path
+              class="flap shut"
+              d="M8 30 L 152 30 L 148 46 L 12 46 Z"
+              filter="url(#sd-tremble)"
+            />
+            <path
+              class="flap lifted"
+              d="M8 30 L 152 30 L 146 16 L 14 16 Z"
+              filter="url(#sd-tremble)"
+            />
+          </svg>
+          <span class="front">
+            <span class="title">{p.title}</span>
+            <span class="sown">
+              {p.word}
+              {p.sown && ` · sown ${monthOf(p.sown)}`}
+            </span>
+          </span>
+        </button>
+      </li>
+    ))}
+  </ul>
+</BaseLayout>
+
+<script>
+  for (const button of document.querySelectorAll<HTMLButtonElement>(".packet")) {
+    button.addEventListener("click", () => {
+      const open = button.ariaExpanded !== "true";
+      button.setAttribute("aria-expanded", String(open));
+      button.setAttribute(
+        "aria-label",
+        button.ariaLabel!.replace(
+          /(Open|Close) the packet\.$/,
+          open ? "Close the packet." : "Open the packet.",
+        ),
+      );
+      button.closest("li")!.classList.toggle("open", open);
+    });
+  }
+</script>
+
+<style>
+  .seeds-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem 3rem;
+    margin-top: 1.5rem;
+  }
+
+  .seeds-head > div {
+    flex: 999 1 30rem;
+    max-width: 40rem;
+  }
+
+  .seeds-head h1 {
+    margin: 0;
+  }
+
+  .lede {
+    margin: 1.25rem 0 0;
+    color: var(--fg-dim);
+  }
+
+  .tally {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--fg-dim);
+  }
+
+  .defs {
+    position: absolute;
+    width: 0;
+    height: 0;
+  }
+
+  .legend,
+  .packets {
+    --t-earth: color-mix(in oklab, var(--tape), var(--fg-dim) 38%);
+    --t-husk: color-mix(in oklab, var(--cursor), var(--tape) 35%);
+    --t-leaf: color-mix(in oklab, var(--leaf), var(--fg-main) 22%);
+    --t-petal: color-mix(in oklab, var(--red), var(--paper) 30%);
+  }
+
+  .t-earth {
+    fill: var(--t-earth);
+  }
+
+  .t-husk {
+    fill: var(--t-husk);
+  }
+
+  .t-leaf {
+    fill: var(--t-leaf);
+  }
+
+  .t-petal {
+    fill: var(--t-petal);
+  }
+
+  .wash {
+    opacity: 0.8;
+  }
+
+  .edge {
+    fill: none;
+    stroke: var(--fg-main);
+    stroke-width: 0.9;
+    stroke-linejoin: round;
+  }
+
+  .edge.bare {
+    stroke: none;
+  }
+
+  .line {
+    fill: none;
+    stroke: var(--fg-main);
+    stroke-linecap: round;
+    opacity: 0.75;
+  }
+
+  .heart {
+    fill: var(--cursor);
+    stroke: var(--cursor);
+    stroke-width: 1.2;
+  }
+
+  .legend {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.5rem;
+    max-width: 35rem;
+    margin-top: 2.5rem;
+  }
+
+  .stage {
+    text-align: center;
+  }
+
+  .stage svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+
+  .stage p {
+    margin: 0.125rem 0 0;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    color: var(--fg-dim);
+  }
+
+  .stage-kanji {
+    font-family: var(--font-seal);
+    font-size: 0.9375rem;
+    color: var(--red);
+  }
+
+  .hint {
+    margin: 1.75rem 0 0 0.375rem;
+    font-weight: 300;
+    font-size: 1.125rem;
+    color: var(--fg-dim);
+    transform: rotate(-1deg);
+  }
+
+  .packets {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 7rem 1.75rem;
+    margin: 4.5rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  @media (max-width: 960px) {
+    .packets {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 560px) {
+    .packets {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 6rem 1rem;
+    }
+  }
+
+  .packets li {
+    position: relative;
+    transform: rotate(var(--rot));
+  }
+
+  .packets li.open {
+    z-index: 1;
+  }
+
+  .packet {
+    position: relative;
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    --paper-tint: color-mix(in oklab, var(--paper), var(--tint) 45%);
+  }
+
+  .packet:focus-visible {
+    outline: 2px solid var(--fg-main);
+    outline-offset: 4px;
+  }
+
+  .packet svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+
+  .shade {
+    fill: var(--fg-main);
+    opacity: 0.1;
+  }
+
+  .envelope {
+    fill: var(--paper-tint);
+    stroke: var(--fg-main);
+    stroke-width: 0.8;
+  }
+
+  .fold {
+    fill: none;
+    stroke: var(--fg-main);
+    stroke-width: 0.5;
+    opacity: 0.45;
+  }
+
+  .window {
+    fill: color-mix(in oklab, var(--paper-tint), var(--bg-main) 50%);
+    opacity: 0.55;
+  }
+
+  .label {
+    fill: var(--red);
+  }
+
+  .label-kanji {
+    font-family: var(--font-seal);
+    font-size: 14px;
+    fill: var(--paper);
+  }
+
+  .flap {
+    fill: color-mix(in oklab, var(--paper-tint), var(--fg-main) 8%);
+    stroke: var(--fg-main);
+    stroke-width: 0.8;
+  }
+
+  .flap.lifted,
+  .open .flap.shut {
+    display: none;
+  }
+
+  .open .flap.lifted {
+    display: inline;
+  }
+
+  .front {
+    position: absolute;
+    right: 9%;
+    bottom: 15%;
+    left: 9%;
+  }
+
+  .title {
+    display: block;
+    overflow-wrap: break-word;
+    hyphens: auto;
+    font-size: 0.9375rem;
+    line-height: 1.25;
+  }
+
+  .sown {
+    display: block;
+    margin-top: 0.25rem;
+    font-family: var(--font-mono);
+    font-size: 0.59375rem;
+    color: var(--fg-dim);
+  }
+
+  .slip {
+    position: absolute;
+    top: 0;
+    right: 12%;
+    left: 12%;
+    min-height: 7.5rem;
+    padding: 0.75rem 0.75rem 1rem;
+    background: var(--paper);
+    border: 1px solid var(--border);
+    box-shadow: 0 2px 6px rgb(0 0 0 / 0.12);
+    font-family: var(--font-mono);
+    font-size: 0.65625rem;
+    line-height: 1.5;
+    transform: translateY(3.75rem) rotate(var(--slip-rot));
+    visibility: hidden;
+    transition:
+      transform 0.45s cubic-bezier(0.2, 0.8, 0.3, 1),
+      visibility 0s linear 0.45s;
+  }
+
+  .open .slip {
+    transform: translateY(calc(-100% + 2.5rem)) rotate(var(--slip-rot));
+    visibility: visible;
+    transition:
+      transform 0.45s cubic-bezier(0.2, 0.8, 0.3, 1),
+      visibility 0s;
+  }
+
+  .slip p {
+    margin: 0;
+  }
+
+  .slip a {
+    display: inline-block;
+    margin-top: 0.375rem;
+    font-family: var(--font-hand);
+    font-size: 0.9375rem;
+  }
+
+  @media (max-width: 560px) {
+    .title {
+      font-size: 0.8125rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .slip,
+    .open .slip {
+      transition: none;
+    }
+  }
+</style>

@@ -1,0 +1,78 @@
+#+title: Seeds
+#+todo: IDEA NOTES DRAFT | DONE
+
+# One heading per essay not written yet, read by src/utils/seeds.ts for /seeds
+# The TODO keyword is how far it has grown:
+#
+#   IDEA   種  a seed
+#   NOTES  芽  a sprout
+#   DRAFT  葉  in leaf
+#   DONE   花  in flower: written, the packet stays and leads to the essay
+#
+# :SOWN:    when the idea came
+# :WRITING: slug of the essay, once it is DONE
+#
+# Under the properties: one line on what it would say.
+#
+# Everything below is a placeholder packet except the one in flower.
+
+* IDEA [IDEA]
+:PROPERTIES:
+:SOWN:     [2026-01-01]
+:END:
+[ONE LINE ON WHAT IT WOULD SAY]
+
+* NOTES [IDEA]
+:PROPERTIES:
+:SOWN:     [2026-01-01]
+:END:
+[ONE LINE ON WHAT IT WOULD SAY]
+
+* IDEA [IDEA]
+:PROPERTIES:
+:SOWN:     [2026-01-01]
+:END:
+[ONE LINE ON WHAT IT WOULD SAY]
+
+* DRAFT [IDEA]
+:PROPERTIES:
+:SOWN:     [2026-01-01]
+:END:
+[ONE LINE ON WHAT IT WOULD SAY]
+
+* DONE The Sins of Low-Level Bootstrapping
+:PROPERTIES:
+:SOWN:     [2026-01-01]
+:WRITING:  code-silence-and-boot-sectors
+:END:
+written; the seed is spent.
+
+* NOTES [IDEA]
+:PROPERTIES:
+:SOWN:     [2026-01-01]
+:END:
+[ONE LINE ON WHAT IT WOULD SAY]
+
+* IDEA [IDEA]
+:PROPERTIES:
+:SOWN:     [2026-01-01]
+:END:
+[ONE LINE ON WHAT IT WOULD SAY]
+
+* IDEA [IDEA]
+:PROPERTIES:
+:SOWN:     [2026-01-01]
+:END:
+[ONE LINE ON WHAT IT WOULD SAY]
+
+* DRAFT [IDEA]
+:PROPERTIES:
+:SOWN:     [2026-01-01]
+:END:
+[ONE LINE ON WHAT IT WOULD SAY]
+
+* IDEA [IDEA]
+:PROPERTIES:
+:SOWN:     [2026-01-01]
+:END:
+[ONE LINE ON WHAT IT WOULD SAY]
