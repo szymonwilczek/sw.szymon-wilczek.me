@@ -12,6 +12,7 @@ import { PROJECTS } from "../utils/projects";
 import { readBooks } from "../utils/books";
 import { TOOLS } from "../utils/dogu";
 import { weeks } from "../utils/nenrin";
+import { LINKS } from "../data/links";
 
 const writings = (await getCollection("writings"))
   .sort((a, b) => a.data.pubDate.valueOf() - b.data.pubDate.valueOf())
@@ -90,6 +91,11 @@ const PATHS = [
   },
   { to: "/about", d: "M560 520 C 500 420, 420 320, 330 270", via: ["/writings", "/photos"] },
   { to: "/vault", d: "M820 330 C 860 280, 880 240, 892 208", via: ["/writings", "/photos"] },
+  {
+    to: "/links",
+    d: "M962 202 C 978 198, 992 198, 1010 200",
+    via: ["/writings", "/photos", "/vault"],
+  },
   { to: "/contact", d: "M238 712 C 180 660, 120 640, 96 612", via: ["/writings"] },
   { to: "/projects", d: "M560 520 C 500 500, 440 470, 400 440", via: ["/writings", "/photos"] },
   { to: "/books", d: "M522 650 C 570 656, 620 690, 676 708", via: ["/writings"] },
@@ -152,6 +158,11 @@ const PLACES = [
   { href: "/files/", title: "files · the shed", sub: plural(files.length, "file", "files") },
   { href: "/files/verify/", title: "the bench", sub: "check a file against its tag" },
   { href: "/vault/", title: "the well, sealed", sub: "vault" },
+  {
+    href: "/links/",
+    title: "links · the back gate",
+    sub: plural(LINKS.length, "thread out", "threads out"),
+  },
   { href: "/about/", title: "stone lantern", sub: "about" },
   {
     href: "/uses/",
@@ -564,6 +575,39 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
           </g>
           <text class="label dim" x="764" y="822" font-size="14">
             the bench · verify
+          </text>
+        </a>
+
+        <a
+          href="/links/"
+          class="place"
+          data-area="/links"
+          data-title={place("/links/").title}
+          data-sub={place("/links/").sub}
+        >
+          <path
+            class="line fill-alt"
+            d="M1016 204 L 1016 146 L 1054 146 L 1054 204 Z"
+            stroke-width="1"
+          ></path>
+          <path
+            class="line"
+            d="M1016 165 L 1054 165 M 1016 185 L 1054 185 M 1029 146 L 1029 204 M 1042 146 L 1042 204"
+            stroke-width="0.8"
+            opacity="0.7"
+          ></path>
+          <path
+            class="line"
+            d="M1010 208 L 1011 128 M 1060 208 L 1059 128"
+            stroke-width="3.5"
+          ></path>
+          <path class="line" d="M1000 136 C 1020 128, 1050 128, 1070 136" stroke-width="2.6"></path>
+          <path
+            class="gate-threads"
+            d="M1060 150 c 6 -2, 9 4, 4 7 c 14 6, 24 2, 36 10 M 1064 157 c 10 18, 22 26, 34 30 M 1064 157 c 6 26, 18 40, 32 54"
+          ></path>
+          <text class="label" x="1056" y="112" font-size="17" text-anchor="end">
+            links · the back gate
           </text>
         </a>
 
@@ -1499,6 +1543,14 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
     stroke: var(--cursor);
     stroke-width: 1.6;
     stroke-linecap: round;
+  }
+
+  .gate-threads {
+    fill: none;
+    stroke: var(--red);
+    stroke-width: 1.4;
+    stroke-linecap: round;
+    opacity: 0.9;
   }
 
   .kura-dark {
