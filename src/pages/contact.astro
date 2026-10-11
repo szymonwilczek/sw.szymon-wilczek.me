@@ -47,7 +47,9 @@ const links = [
 
   <div class="sections">
     <section>
-      <p class="num" aria-hidden="true">01</p>
+      <p class="num" aria-hidden="true">
+        01
+      </p>
       <div class="body">
         <h2 class="hand">write to me</h2>
         <a href="mailto:swilczek.lx@gmail.com" class="mail">
@@ -62,7 +64,9 @@ const links = [
     </section>
 
     <section>
-      <p class="num" aria-hidden="true">02</p>
+      <p class="num" aria-hidden="true">
+        02
+      </p>
       <div class="body">
         <h2 class="hand">verify me</h2>
         <p class="note">All git commits and software releases are signed with the key below.</p>
@@ -73,13 +77,17 @@ const links = [
             <WaxSeal glyph="鍵" size={52} />
             <div>
               <span>Szymon Wilczek &lt;swilczek.lx@gmail.com&gt;</span>
-              <span class="dim">RSA 4096 · key id <span class="accent">{keyId}</span></span>
+              <span class="dim">
+                RSA 4096 · key id <span class="accent">{keyId}</span>
+              </span>
             </div>
           </div>
 
           <p class="fp-label hand">fingerprint</p>
           <p class="fp">
-            {groups.map((g, i) => <span class:list={{ accent: i >= 6 }}>{g}</span>)}
+            {groups.map((g, i) => (
+              <span class:list={{ accent: i >= 6 }}>{g}</span>
+            ))}
           </p>
 
           <div class="key-actions">
@@ -102,21 +110,24 @@ const links = [
     </section>
 
     <section>
-      <p class="num" aria-hidden="true">03</p>
+      <p class="num" aria-hidden="true">
+        03
+      </p>
       <div class="body">
         <h2 class="hand">elsewhere</h2>
         <ul class="links">
-          {
-            links.map((l) => (
-              <li>
-                <span>{l.label}</span>
-                <a href={l.url} rel="noopener">
-                  {l.url.replace("https://", "")}
-                </a>
-              </li>
-            ))
-          }
+          {links.map((l) => (
+            <li>
+              <span>{l.label}</span>
+              <a href={l.url} rel="noopener">
+                {l.url.replace("https://", "")}
+              </a>
+            </li>
+          ))}
         </ul>
+        <p class="threads">
+          Sites I keep going back to hang on <a href="/links">red threads</a>.
+        </p>
       </div>
     </section>
   </div>
@@ -328,6 +339,11 @@ const links = [
     margin: 0.625rem 0 0;
     padding: 0;
     list-style: none;
+  }
+
+  .threads {
+    margin: 1rem 0 0;
+    color: var(--fg-dim);
   }
 
   .links li {
