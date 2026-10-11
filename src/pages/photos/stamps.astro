@@ -209,12 +209,19 @@ const sketch =
   if (rack && nav) {
     const [back, on] = nav.querySelectorAll<HTMLButtonElement>(".rack-step");
 
+    const soak =
+      !matchMedia("(prefers-reduced-motion: reduce)").matches &&
+      !sessionStorage.getItem("shiori-soaked");
+    sessionStorage.setItem("shiori-soaked", "1");
+
     const seen = new IntersectionObserver(
       (entries) => {
         for (const e of entries) {
           if (!e.isIntersecting) continue;
           seen.unobserve(e.target);
-          fillArt(e.target as SVGSVGElement);
+          fillArt(e.target as SVGSVGElement).then(() => {
+            if (soak) e.target.classList.add("soak");
+          });
         }
       },
       { root: rack, rootMargin: "0px 640px" },
@@ -669,6 +676,25 @@ const sketch =
     width: calc(100% - 18px);
     height: calc(var(--h) - 136px);
     border-radius: 1px;
+  }
+
+  /* wet paint: blurred and pale at first, the colour comes up as it soaks in */
+  .art.soak {
+    animation: soak 1.8s cubic-bezier(0.3, 0.6, 0.4, 1) calc((var(--give) - 0.7) * 0.6s) backwards;
+  }
+
+  @keyframes soak {
+    from {
+      opacity: 0;
+      filter: blur(4px) saturate(0.3) brightness(1.12);
+    }
+    35% {
+      opacity: 0.9;
+    }
+    to {
+      opacity: 1;
+      filter: none;
+    }
   }
 
   .art :global(.shiori-wash path) {
