@@ -21,8 +21,41 @@
   transition: opacity 40s ease-in;
 }
 
+.zw {
+  display: inline-block;
+  transition:
+    transform 4s ease-in-out,
+    opacity 4s ease-in-out;
+}
+
+.zone-off .zw {
+  transition:
+    transform 0.5s ease-out,
+    opacity 0.5s ease-out;
+  transition-delay: 0s !important;
+}
+
+.echo {
+  position: fixed;
+  left: 1rem;
+  bottom: 0.75rem;
+  z-index: 41;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--fg-dim);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+.echo.is-on {
+  opacity: 1;
+  transition: none;
+}
+
 @media print {
-  .dusk {
+  .dusk,
+  .echo {
     display: none;
   }
 }

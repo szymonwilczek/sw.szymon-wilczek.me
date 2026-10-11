@@ -266,6 +266,14 @@
         },
       },
       {
+        id: "zone",
+        name: "zone",
+        desc: "Let the words on screen wander until you touch something",
+        action: function () {
+          window.dispatchEvent(new Event("zone"));
+        },
+      },
+      {
         id: "describe-bindings",
         name: "describe-bindings",
         desc: "Display keybindings help cheat sheet (?)",
