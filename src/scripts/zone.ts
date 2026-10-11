@@ -74,8 +74,12 @@ function wander() {
   timer = window.setTimeout(wander, ROUND);
 }
 
-function zone() {
+function zone(asked = false) {
   if (zoning || document.querySelector("dialog[open]")) return;
+  if (document.querySelector("article.article")) {
+    if (asked) echo("zone: not while you read");
+    return;
+  }
   if (still.matches) {
     echo("zone: the words keep still");
     return;
@@ -109,6 +113,6 @@ function quit() {
   }, 550);
 }
 
-onIdle(WAIT, zone, quit);
+onIdle(WAIT, () => zone(), quit);
 
-addEventListener("zone", () => window.setTimeout(zone, 400));
+addEventListener("zone", () => window.setTimeout(() => zone(true), 400));
