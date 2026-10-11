@@ -1,6 +1,4 @@
 ---
-// Hidden map: the whole site drawn as a garden.
-// Not linked from any page and left out of the sitemap; the riddle doors lead here.
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Divider from "../components/Divider.astro";
 import { getCollection } from "astro:content";
@@ -187,7 +185,6 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
 <BaseLayout
   title="A map of the garden"
   description="Everything here, drawn as the place it pretends to be."
-  noindex
 >
   <header class="map-head">
     <div>
