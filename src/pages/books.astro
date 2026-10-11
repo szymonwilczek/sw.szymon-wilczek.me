@@ -1,0 +1,930 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Divider from "../components/Divider.astro";
+import { HANKO_EDGE } from "../utils/hanko";
+import { monthOf, readBooks, shelves } from "../utils/books";
+import { smooth } from "../utils/stamp";
+
+const now = new Date();
+const books = readBooks();
+const planks = shelves(books, now);
+const waiting = books.filter((b) => b.state === "waiting");
+const reading = books.filter((b) => b.state === "reading");
+const read = books.filter((b) => b.state === "read");
+const onShelf = planks.flatMap((p) => p.books);
+
+// the book lying open below: the one being read, else the last one closed
+const opened = reading[0] ?? onShelf.filter((b) => b.state === "read").at(-1);
+
+const post = "M2 0 C 3 30, 1 60, 2 100 L8 100 C 9 60, 7 30, 8 0 Z";
+const topPlank = "M0 2 C 300 2, 700 2, 1000 2 L1000 20 C 700 22, 300 22, 0 20 Z";
+const PILE = ["--sea", "--cursor", "--red", "--leaf", "--sky"];
+
+const label = (b: (typeof onShelf)[number]) =>
+  b.state === "reading"
+    ? `${b.title} by ${b.author}, reading now`
+    : `${b.title} by ${b.author}, read ${monthOf(b.finished!)}`;
+---
+
+<BaseLayout
+  title="Bookshelf"
+  description="What I have read, a plank for every year, and what I am reading now."
+>
+  <header class="shelf-head">
+    <div>
+      <h1>Bookshelf</h1>
+      <p class="lede">
+        What I have read, a plank for every year, and what I am reading now with the ribbon still in
+        it. The longer a book has stood here, the more the sun has taken out of its spine.
+      </p>
+    </div>
+    <p class="tally">
+      {read.length} read · {reading.length} open · {waiting.length} waiting
+    </p>
+  </header>
+
+  <Divider from={480} to={700} />
+
+  <p class="hint hand">
+    <span class="hint-point">point at a spine to tip it out; click to open it below.</span>
+    <span class="hint-touch">swipe along a plank; tap a spine to open it.</span>
+  </p>
+
+  <section class="case" aria-label="Bookshelf">
+    <svg class="post post-l" viewBox="0 0 10 100" preserveAspectRatio="none" aria-hidden="true">
+      <path d={post}></path>
+    </svg>
+    <svg class="post post-r" viewBox="0 0 10 100" preserveAspectRatio="none" aria-hidden="true">
+      <path d={post}></path>
+    </svg>
+    <div class="sun" aria-hidden="true"></div>
+
+    <div class="top">
+      {waiting.length > 0 && (
+        <div class="pile" role="img" aria-label={`${waiting.length} books waiting`}>
+          {waiting.slice(0, 5).map((b, i) => (
+            <span
+              style={`width: ${Math.round(120 - i * 14 + (b.pages % 10))}px; height: ${9 + (b.pages % 6)}px; margin-left: ${b.pages % 11}px; --ink: var(${PILE[i]})`}
+            />
+          ))}
+        </div>
+      )}
+      <span class="next hand">next up · {waiting.length} waiting</span>
+      <svg class="bowl" width="70" height="44" viewBox="0 0 70 44" aria-hidden="true">
+        <path d="M8 18 C 10 36, 26 42, 35 42 C 46 42, 60 36, 62 18 Z"></path>
+        <path class="gold" d="M24 19 C 26 26, 22 30, 27 36 L 30 41"></path>
+      </svg>
+    </div>
+    <svg
+      class="plank top-plank"
+      viewBox="0 0 1000 20"
+      preserveAspectRatio="none"
+      aria-hidden="true"
+    >
+      <path d={topPlank}></path>
+    </svg>
+
+    {planks.map((sh) => (
+      <div class="shelf">
+        <div class="row">
+          {sh.books.map((b) => (
+            <button
+              type="button"
+              class="spine"
+              data-book={b.id}
+              aria-label={label(b)}
+              aria-pressed={b.id === opened?.id ? "true" : "false"}
+              style={`--w: ${b.w}px; --h: ${b.h}px; --col: ${b.color}; --radius: ${b.radius}; --gap: ${b.gap}px; --dip: ${b.dip}px; --rot: ${b.rot}deg`}
+            >
+              <svg viewBox="0 0 10 100" preserveAspectRatio="none" aria-hidden="true">
+                <path d={b.bands} />
+                <rect class="shade" width="1.4" height="100" />
+                <rect class="shine" x="8.8" width="1.2" height="100" />
+              </svg>
+              <span class="daisen" aria-hidden="true">
+                {b.title}
+              </span>
+              <span class="mark" aria-hidden="true">
+                {b.state === "reading" ? "·" : monthOf(b.finished!).split("·")[0]}
+              </span>
+              {b.state === "reading" && (
+                <span
+                  class="ribbon"
+                  aria-hidden="true"
+                  style={`--len: ${Math.round(14 + ((b.page ?? 0) / b.pages) * 54)}px; --rr: ${b.ribbonRot}deg`}
+                />
+              )}
+              <span class="slip" aria-hidden="true" style={`--sr: ${b.slipRot}deg`}>
+                <span class="slip-title">{b.title}</span>
+                <span class="slip-author">{b.author}</span>
+                <span class:list={["slip-when", { now: b.state === "reading" }]}>
+                  {b.state === "reading"
+                    ? `reading · p. ${b.page ?? "?"} of ${b.pages}`
+                    : `finished ${monthOf(b.finished!)}`}
+                </span>
+              </span>
+            </button>
+          ))}
+          <span
+            class="lean"
+            aria-hidden="true"
+            style={`--w: ${sh.lean.w}px; --h: ${sh.lean.h}px`}
+          />
+          <svg class="stone" width="64" height="48" viewBox="0 0 64 48" aria-hidden="true">
+            <path d={smooth(sh.stone, true)} />
+            <path class="vein" d="M14 26 C 24 22, 38 24, 50 30" />
+          </svg>
+        </div>
+        <svg class="plank" viewBox="0 0 1000 24" preserveAspectRatio="none" aria-hidden="true">
+          <path d={sh.plank} />
+          <path class="grain" d={sh.grain} />
+        </svg>
+        <span class="year hand" style={`--tr: ${sh.tagRot}deg`}>
+          {sh.year}{" "}
+          <span>
+            · {sh.read} read{sh.open > 0 && ` · ${sh.open} open`}
+          </span>
+        </span>
+      </div>
+    ))}
+    <div class="floor"></div>
+  </section>
+
+  <section class="spread" aria-label="The open book" aria-live="polite">
+    {onShelf.map((b) => (
+      <article class="book" data-book={b.id} hidden={b.id !== opened?.id}>
+        <div class="page page-l">
+          <div class="cover" style={`--col: ${b.color}`}>
+            <p class="cover-title">{b.title}</p>
+            <p class="cover-author">{b.author}</p>
+          </div>
+          <svg class="ex-libris" width="66" height="66" viewBox="0 0 46 46" aria-hidden="true">
+            <path d={HANKO_EDGE} />
+            <text x="23" y="21" text-anchor="middle">
+              蔵書
+            </text>
+            <text x="23" y="37" text-anchor="middle">
+              狼
+            </text>
+          </svg>
+          <p class="ex-note hand">ex libris, stamped on the inside cover</p>
+        </div>
+        <div class="page page-r">
+          <p class="state">
+            {b.state === "reading" ? "READING NOW" : `READ · ${monthOf(b.finished!)}`}
+          </p>
+          <h2>{b.title}</h2>
+          <p class="byline">
+            {b.author} · {b.pages} pages
+          </p>
+          {b.state === "reading" && (
+            <>
+              <div
+                class="progress"
+                style={`--pct: ${Math.round(((b.page ?? 0) / b.pages) * 100)}%`}
+                aria-hidden="true"
+              >
+                <svg viewBox="0 0 300 10" preserveAspectRatio="none">
+                  <path d="M2 5 C 80 4, 200 6, 298 5" />
+                </svg>
+                <span class="done" />
+                <span class="tip" />
+              </div>
+              <p class="at">
+                the ribbon is at p. {b.page ?? "?"} of {b.pages}
+              </p>
+            </>
+          )}
+          {b.quote && <blockquote>{b.quote}</blockquote>}
+          {b.note && <p class="margin hand">{b.note}</p>}
+          <p class="facts">
+            <span>
+              {b.started && `started ${monthOf(b.started)}`}
+              {b.finished && ` · finished ${monthOf(b.finished)}`}
+            </span>
+            {b.place &&
+              (b.album ? (
+                <a href={`/photos/${b.album}/`}>read in {b.place} → its album</a>
+              ) : (
+                <span>read in {b.place}</span>
+              ))}
+            {b.writing && <a href={`/writings/${b.writing}/`}>what I wrote about it</a>}
+          </p>
+        </div>
+      </article>
+    ))}
+  </section>
+</BaseLayout>
+
+<script>
+  const spines = [...document.querySelectorAll<HTMLButtonElement>(".spine")];
+  const pages = [...document.querySelectorAll<HTMLElement>(".book")];
+  const spread = document.querySelector<HTMLElement>(".spread")!;
+  const still = matchMedia("(prefers-reduced-motion: reduce)");
+
+  // window light crosses the case with the hour
+  const hour = new Date().getHours() + new Date().getMinutes() / 60;
+  document
+    .querySelector<HTMLElement>(".case")!
+    .style.setProperty("--sun", `${Math.round(8 + (hour / 24) * 70)}%`);
+
+  // on a narrow plank, slide the open book into view
+  for (const spine of spines) {
+    const row = spine.parentElement!;
+    if (spine.ariaPressed === "true" && row.scrollWidth > row.clientWidth)
+      row.scrollLeft = spine.offsetLeft - row.clientWidth / 2;
+  }
+
+  for (const spine of spines) {
+    spine.addEventListener("click", () => {
+      const id = spine.dataset.book;
+      for (const s of spines) s.setAttribute("aria-pressed", String(s === spine));
+      for (const page of pages) {
+        page.hidden = page.dataset.book !== id;
+        if (!page.hidden) {
+          // open it again, even if it was the one lying open
+          page.classList.remove("opening");
+          void page.offsetWidth;
+          page.classList.add("opening");
+        }
+      }
+      const box = spread.getBoundingClientRect();
+      if (box.top > innerHeight - 120 || box.bottom < 0)
+        spread.scrollIntoView({ behavior: still.matches ? "auto" : "smooth", block: "start" });
+    });
+  }
+</script>
+
+<style>
+  .shelf-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem 3rem;
+    margin-top: 1.5rem;
+  }
+
+  .shelf-head > div {
+    flex: 999 1 30rem;
+    max-width: 40rem;
+  }
+
+  .shelf-head h1 {
+    margin: 0;
+  }
+
+  .lede {
+    margin: 1.25rem 0 0;
+    color: var(--fg-dim);
+  }
+
+  .tally {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--fg-dim);
+  }
+
+  .hint {
+    margin: 1rem 0 0 0.375rem;
+    font-weight: 300;
+    font-size: 1.125rem;
+    color: var(--fg-dim);
+    transform: rotate(-1deg);
+  }
+
+  .hint-touch {
+    display: none;
+  }
+
+  @media (hover: none) {
+    .hint-point {
+      display: none;
+    }
+
+    .hint-touch {
+      display: inline;
+    }
+  }
+
+  .case {
+    --wood: color-mix(in oklab, var(--tape), var(--cursor) 38%);
+    --wood-dark: color-mix(in oklab, var(--wood), var(--fg-main) 45%);
+    position: relative;
+    margin-top: 0.75rem;
+    padding: 0 1.375rem;
+    background: color-mix(in oklab, var(--bg-main), var(--fg-main) 5%);
+    border-radius: 3px;
+  }
+
+  .post {
+    position: absolute;
+    top: 0;
+    width: 14px;
+    height: 100%;
+  }
+
+  .post-l {
+    left: -6px;
+  }
+
+  .post-r {
+    right: -6px;
+  }
+
+  .post path,
+  .plank path,
+  .top-plank path {
+    fill: var(--wood);
+    stroke: var(--wood-dark);
+    stroke-width: 0.8;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .plank .grain {
+    fill: none;
+    stroke-width: 0.5;
+    opacity: 0.5;
+  }
+
+  .sun {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    pointer-events: none;
+    --sun: 40%;
+    background: linear-gradient(
+      103deg,
+      transparent 0 var(--sun),
+      light-dark(rgb(255 255 255 / 0.12), color-mix(in srgb, var(--tape) 8%, transparent))
+        var(--sun) calc(var(--sun) + 16%),
+      transparent calc(var(--sun) + 16%)
+    );
+  }
+
+  .top {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    gap: 1.75rem;
+    height: 70px;
+    padding: 0 1.125rem;
+  }
+
+  .pile {
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: flex-start;
+  }
+
+  .pile span {
+    display: block;
+    background: color-mix(in oklab, var(--ink), var(--paper) 25%);
+    border-radius: 1px 3px 3px 1px;
+    box-shadow: inset 0 -1px 0 rgb(0 0 0 / 0.15);
+  }
+
+  .next {
+    padding-bottom: 2px;
+    font-weight: 300;
+    font-size: 0.9375rem;
+    color: var(--fg-dim);
+  }
+
+  .bowl {
+    margin-left: auto;
+  }
+
+  .bowl path {
+    fill: var(--bg-alt);
+    stroke: var(--fg-dim);
+  }
+
+  .bowl .gold {
+    fill: none;
+    stroke: var(--cursor);
+    stroke-width: 1.6;
+    stroke-linecap: round;
+  }
+
+  .top-plank {
+    display: block;
+    width: 100%;
+    height: 16px;
+  }
+
+  .shelf {
+    position: relative;
+    height: 268px;
+  }
+
+  .row {
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    bottom: 20px;
+    z-index: 2;
+    display: flex;
+    align-items: flex-end;
+    gap: 1px;
+    padding: 0 6px;
+  }
+
+  .shelf > .plank {
+    position: absolute;
+    left: -6px;
+    bottom: 0;
+    z-index: 1;
+    width: calc(100% + 12px);
+    height: 22px;
+  }
+
+  .year {
+    position: absolute;
+    left: 22px;
+    bottom: -32px;
+    z-index: 4;
+    padding: 3px 12px 2px;
+    background: var(--paper);
+    font-size: 1.0625rem;
+    transform: rotate(var(--tr));
+    box-shadow: 0 2px 5px -2px rgb(0 0 0 / 0.3);
+  }
+
+  .year span {
+    font-weight: 300;
+    font-size: 0.875rem;
+    color: var(--fg-dim);
+  }
+
+  .floor {
+    height: 36px;
+  }
+
+  .spine {
+    position: relative;
+    flex: none;
+    width: var(--w);
+    height: var(--h);
+    margin: 0 var(--gap) 0 0;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius);
+    background: var(--col);
+    color: var(--fg-main);
+    box-shadow: 1px 0 0 rgb(0 0 0 / 0.08);
+    transform: translateY(var(--dip)) rotate(var(--rot));
+    transform-origin: 0 100%;
+    transition:
+      transform 0.45s cubic-bezier(0.2, 0.7, 0.3, 1),
+      box-shadow 0.45s ease;
+    cursor: pointer;
+  }
+
+  .spine[aria-pressed="true"] {
+    transform: translateY(calc(var(--dip) - 8px)) rotate(var(--rot));
+  }
+
+  .spine svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .spine svg path {
+    fill: none;
+    stroke: var(--fg-main);
+    stroke-width: 0.8;
+    opacity: 0.4;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .spine .shade {
+    fill: #000;
+    opacity: 0.1;
+  }
+
+  .spine .shine {
+    fill: #fff;
+    opacity: 0.08;
+  }
+
+  .daisen {
+    position: absolute;
+    top: 14%;
+    left: 50%;
+    max-height: 58%;
+    overflow: hidden;
+    padding: 6px 2px;
+    background: color-mix(in oklab, var(--paper), var(--col) 12%);
+    font-size: clamp(8px, calc(var(--w) - 16px), 12px);
+    line-height: 1;
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+    writing-mode: vertical-rl;
+    translate: -50% 0;
+    box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.12);
+  }
+
+  .mark {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 8px;
+    font-family: var(--font-mono);
+    font-size: 7px;
+    text-align: center;
+    color: var(--paper);
+    mix-blend-mode: luminosity;
+  }
+
+  .ribbon {
+    position: absolute;
+    left: 34%;
+    top: calc(100% - 4px);
+    width: 5px;
+    height: var(--len);
+    background: var(--red);
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 86%, 0 100%);
+    transform: rotate(var(--rr));
+    transform-origin: top;
+  }
+
+  .slip {
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 14px);
+    z-index: 5;
+    display: block;
+    width: 168px;
+    margin-left: -84px;
+    padding: 10px 12px 9px;
+    background: var(--paper);
+    color: var(--fg-main);
+    text-align: left;
+    box-shadow: 0 6px 14px -6px rgb(0 0 0 / 0.35);
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(6px) rotate(var(--sr));
+    transition:
+      opacity 0.25s ease,
+      transform 0.35s ease;
+  }
+
+  .slip > span {
+    display: block;
+  }
+
+  .slip-title {
+    font-size: 0.9375rem;
+    line-height: 1.25;
+  }
+
+  .slip-author {
+    font-style: italic;
+    font-size: 0.8125rem;
+    color: var(--fg-dim);
+  }
+
+  .slip-when {
+    margin-top: 6px;
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    letter-spacing: 0.1em;
+    color: var(--fg-dim);
+  }
+
+  .slip-when.now {
+    color: var(--red);
+  }
+
+  @media (hover: hover) {
+    .row:has(.spine:hover, .spine:focus-visible) {
+      z-index: 5;
+    }
+
+    .spine:hover,
+    .spine:focus-visible {
+      z-index: 6;
+      transform: translateY(calc(var(--dip) - 18px)) rotate(-4deg);
+      box-shadow: 6px 14px 16px -8px rgb(0 0 0 / 0.5);
+    }
+
+    .spine:hover .slip,
+    .spine:focus-visible .slip {
+      opacity: 1;
+      transform: rotate(var(--sr));
+    }
+  }
+
+  .spine:focus-visible {
+    outline: 2px solid var(--cursor);
+    outline-offset: 2px;
+  }
+
+  .lean {
+    flex: none;
+    width: var(--w);
+    height: var(--h);
+    margin-left: 6px;
+    background: color-mix(in oklab, var(--border), var(--paper) 30%);
+    border-radius: 2px 2px 1px 1px;
+    transform: rotate(-11deg);
+    transform-origin: 0 100%;
+    box-shadow: 0 0 0 1px rgb(0 0 0 / 0.06);
+  }
+
+  .stone {
+    flex: none;
+    margin-left: auto;
+  }
+
+  .stone path {
+    fill: var(--bg-alt);
+    stroke: var(--fg-dim);
+  }
+
+  .stone .vein {
+    fill: none;
+    stroke-width: 0.6;
+    opacity: 0.6;
+  }
+
+  .spread {
+    margin-top: 5.5rem;
+    scroll-margin-top: 2rem;
+  }
+
+  .book {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    perspective: 1600px;
+  }
+
+  .book[hidden] {
+    display: none;
+  }
+
+  .page {
+    position: relative;
+    min-height: 420px;
+    background: var(--paper);
+  }
+
+  .page-l {
+    padding: 2.125rem 2.125rem 1.75rem;
+    border-radius: 4px 0 0 4px;
+    box-shadow:
+      inset -26px 0 30px -24px rgb(0 0 0 / 0.35),
+      0 10px 22px -16px rgb(0 0 0 / 0.4);
+  }
+
+  .page-r {
+    padding: 2.125rem 2.375rem 1.75rem;
+    border-radius: 0 4px 4px 0;
+    box-shadow:
+      inset 26px 0 30px -24px rgb(0 0 0 / 0.3),
+      0 10px 22px -16px rgb(0 0 0 / 0.4);
+    transform-origin: 0 50%;
+  }
+
+  .book.opening .page-r {
+    animation: open-book 0.7s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+  }
+
+  @keyframes open-book {
+    from {
+      opacity: 0.2;
+      transform: rotateY(-70deg);
+    }
+  }
+
+  .cover {
+    position: relative;
+    width: 220px;
+    height: 300px;
+    margin: 0 auto;
+    padding: 1.875rem 1rem 0 1.375rem;
+    background: var(--col);
+    border-radius: 2px 4px 4px 2px;
+    box-shadow: 0 8px 16px -10px rgb(0 0 0 / 0.45);
+  }
+
+  .cover::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 10px;
+    background: rgb(0 0 0 / 0.1);
+  }
+
+  .cover p {
+    margin: 0;
+    padding: 0.25rem 0.5rem;
+    background: color-mix(in oklab, var(--paper), var(--col) 12%);
+    width: fit-content;
+    max-width: 100%;
+  }
+
+  .cover-title {
+    font-size: 1.375rem;
+    line-height: 1.2;
+    letter-spacing: 0.06em;
+  }
+
+  .cover-author {
+    margin-top: 0.5rem !important;
+    font-style: italic;
+    font-size: 0.9375rem;
+  }
+
+  .ex-libris {
+    position: absolute;
+    right: 28px;
+    bottom: 26px;
+    transform: rotate(-7deg);
+    opacity: 0.88;
+  }
+
+  .ex-libris path {
+    fill: none;
+    stroke: var(--red);
+    stroke-width: 2.4;
+  }
+
+  .ex-libris text {
+    font-family: var(--font-seal);
+    font-size: 13px;
+    fill: var(--red);
+  }
+
+  .ex-note {
+    margin: 1.375rem 0 0;
+    font-weight: 300;
+    font-size: 0.9375rem;
+    color: var(--fg-dim);
+  }
+
+  .state {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.14em;
+    color: var(--fg-dim);
+  }
+
+  .page-r h2 {
+    margin: 0.625rem 0 0;
+    font-weight: 400;
+    font-size: 1.875rem;
+    line-height: 1.15;
+  }
+
+  .byline {
+    margin: 0.25rem 0 0;
+    font-style: italic;
+    color: var(--fg-dim);
+  }
+
+  .progress {
+    position: relative;
+    height: 10px;
+    margin-top: 1.375rem;
+  }
+
+  .progress svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .progress path {
+    fill: none;
+    stroke: var(--border);
+    stroke-dasharray: 2 5;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .progress .done {
+    position: absolute;
+    left: 0;
+    top: 4px;
+    width: var(--pct);
+    height: 2px;
+    background: var(--red);
+  }
+
+  .progress .tip {
+    position: absolute;
+    left: calc(var(--pct) - 3px);
+    top: -6px;
+    width: 6px;
+    height: 20px;
+    background: var(--red);
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 82%, 0 100%);
+  }
+
+  .at {
+    margin: 0.5rem 0 0;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    color: var(--fg-dim);
+  }
+
+  blockquote {
+    margin: 1.5rem 0 0;
+    padding: 0.25rem 0 0 2.75rem;
+    font-size: 1.125rem;
+  }
+
+  blockquote::before {
+    width: 36px;
+    height: 36px;
+  }
+
+  .margin {
+    margin: 1.125rem 0 0;
+    font-size: 1.1875rem;
+    line-height: 1.4;
+    transform: rotate(-0.5deg);
+  }
+
+  .facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.375rem;
+    margin: 1.375rem 0 0;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--fg-dim);
+  }
+
+  @media (max-width: 47.99em) {
+    .case {
+      margin-inline: calc(var(--gutter) * -1 + 6px);
+      padding: 0 0.625rem;
+    }
+
+    .shelf {
+      height: 250px;
+    }
+
+    .row {
+      bottom: -60px;
+      padding: 12px 6px 80px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .stone {
+      margin-left: 12px;
+    }
+
+    .book {
+      grid-template-columns: 1fr;
+    }
+
+    .page {
+      min-height: 0;
+    }
+
+    .page-l {
+      border-radius: 4px 4px 0 0;
+      box-shadow:
+        inset 0 -26px 30px -24px rgb(0 0 0 / 0.35),
+        0 10px 22px -16px rgb(0 0 0 / 0.4);
+    }
+
+    .page-r {
+      border-radius: 0 0 4px 4px;
+      box-shadow:
+        inset 0 26px 30px -24px rgb(0 0 0 / 0.3),
+        0 10px 22px -16px rgb(0 0 0 / 0.4);
+      transform-origin: 50% 0;
+    }
+
+    .cover {
+      width: 180px;
+      height: 250px;
+    }
+
+    .ex-libris {
+      width: 52px;
+      height: 52px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .spine,
+    .slip {
+      transition: none;
+    }
+
+    .book.opening .page-r {
+      animation: none;
+    }
+  }
+</style>
