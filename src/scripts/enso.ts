@@ -101,7 +101,7 @@ if (area) {
     canvas.append(trail);
 
     const link = document.createElement("a");
-    link.href = "/map/";
+    link.href = "/map/?found";
     link.className = "enso-link hand";
     link.textContent = "the map →";
     link.style.left = `${end[0]}px`;

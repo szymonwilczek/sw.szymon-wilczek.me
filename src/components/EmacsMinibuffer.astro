@@ -432,7 +432,7 @@
       if (typed && typed.value.trim().toLowerCase() === "show-me-the-way") {
         closeMinibuffer();
         findDoor("minibuffer");
-        window.location.href = "/map/";
+        window.location.href = "/map/?found";
         return;
       }
       if (filtered.length > 0 && filtered[selectedIndex]) {

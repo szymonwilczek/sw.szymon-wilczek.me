@@ -188,7 +188,7 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
 >
   <header class="map-head">
     <div>
-      <p class="found hand">
+      <p class="found hand" hidden>
         <svg class="hanko" width="26" height="26" viewBox="0 0 46 46" aria-hidden="true">
           <path class="hanko-edge" d={HANKO_EDGE}></path>
           <text x="23" y="31" text-anchor="middle">
@@ -197,6 +197,12 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
         </svg>
         you found it.
       </p>
+      <script is:inline>
+        if (new URLSearchParams(location.search).has("found")) {
+          document.currentScript.previousElementSibling.hidden = false;
+          history.replaceState(null, "", location.pathname + location.hash);
+        }
+      </script>
       <h1>A map of the garden</h1>
       <p class="lede">
         Everything here, drawn as the place it pretends to be. Touch anything on the map to walk
@@ -1158,6 +1164,10 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
 
   .map-head > div {
     max-width: 37.5rem;
+  }
+
+  .found[hidden] {
+    display: none;
   }
 
   .found {

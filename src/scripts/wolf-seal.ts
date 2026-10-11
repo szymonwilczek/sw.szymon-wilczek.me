@@ -20,7 +20,7 @@ function ink(n: number) {
     const brand = seal.closest<HTMLAnchorElement>(".site-brand")!;
     if (n < STROKES) return;
     seal.querySelector(".seal-glyph")!.textContent = "北";
-    brand.href = "/map/";
+    brand.href = "/map/?found";
     brand.setAttribute("aria-label", "the map");
   });
 }
