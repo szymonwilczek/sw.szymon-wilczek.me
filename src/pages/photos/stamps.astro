@@ -6,7 +6,7 @@ import { getAllAlbums } from "../../utils/albums";
 import { shioriUrl } from "../../utils/shiori";
 import { hash, rng } from "../../utils/stamp";
 
-// hinged by date: the oldest stamp first, the newest with the highest number
+// hung by date: the oldest bookmark first, the newest with the highest number
 const albums = (await getAllAlbums()).slice().reverse();
 
 const ROMAN = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
@@ -62,8 +62,8 @@ const gables =
 ---
 
 <BaseLayout
-  title="Stamp album"
-  description="One stamp for every place the camera went, cut from that album's own terrain."
+  title="Bookmarks"
+  description="One bookmark for every place the camera went, painted from that album's own terrain."
 >
   <a class="back hand" href="/photos/">
     <svg width="40" height="18" viewBox="0 0 44 20" aria-hidden="true">
@@ -74,15 +74,16 @@ const gables =
 
   <header class="klaser-head">
     <div>
-      <h1>Stamp album</h1>
+      <h1>Bookmarks</h1>
       <p class="lede">
-        One stamp for every place the camera went, cut from that album’s own terrain. No two come
-        out alike, and none of them were ever posted.
+        One 栞 for every place the camera went: a tall bookmark painted from that album’s own
+        terrain, with its stamp hinged at the foot. No two come out alike, and each one keeps the
+        page where that trip is.
       </p>
     </div>
     <p class="tally">
       {albums.length}
-      {albums.length === 1 ? "stamp" : "stamps"} · {rows.length}
+      {albums.length === 1 ? "bookmark" : "bookmarks"} · {rows.length}
       {rows.length === 1 ? "country" : "countries"}
       {since && ` · since ${since}`}
     </p>
@@ -112,7 +113,7 @@ const gables =
     </div>
   </div>
 
-  <section class="rack" aria-label="Album page" tabindex="0">
+  <section class="rack" aria-label="Bookmarks" tabindex="0">
     {rows.map((row, ri) => (
       <div class="shelf">
         <div class="shelf-row">
@@ -125,7 +126,7 @@ const gables =
               <a
                 class="open"
                 href={`/photos/${album.slug}/`}
-                aria-label={`${album.title}, stamp ${album.stampNum}`}
+                aria-label={`${album.title}, bookmark ${album.stampNum}`}
               />
               <svg class="cord" width="40" height="70" viewBox="0 0 40 70" aria-hidden="true">
                 <path d={album.cord} />
@@ -201,7 +202,7 @@ const gables =
     ))}
   </section>
 
-  <p class="foot hand">stamps are hinged by date; the newest gets the highest number.</p>
+  <p class="foot hand">bookmarks hang by date; the newest gets the highest number.</p>
 </BaseLayout>
 
 <script>
