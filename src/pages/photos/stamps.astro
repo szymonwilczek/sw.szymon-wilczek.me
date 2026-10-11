@@ -54,9 +54,11 @@ const next = {
   ...bookmark("next", "[PLACE]"),
   num: String(albums.length + 1).padStart(2, "0"),
 };
+
 // empty bookmark's under-drawing
-const sketch =
-  "M0 100 H100 M0 200 H100 M50 0 V300 M8 210 L8 150 L22 132 L36 150 L36 210 M36 210 L36 160 H64 V210 M64 210 L64 140 L78 126 L92 140 L92 210";
+const grid = "M0 100 H100 M0 200 H100 M50 0 V300";
+const gables =
+  "M8 210 L8 150 L22 132 L36 150 L36 210 M36 210 L36 160 H64 V210 M64 210 L64 140 L78 126 L92 140 L92 210";
 ---
 
 <BaseLayout
@@ -177,7 +179,8 @@ const sketch =
               <span class="hole" aria-hidden="true" />
               <span class="art sketch">
                 <svg viewBox="0 0 100 300" preserveAspectRatio="none" aria-hidden="true">
-                  <path d={sketch} vector-effect="non-scaling-stroke" />
+                  <path d={grid} vector-effect="non-scaling-stroke" />
+                  <path class="subject" d={gables} vector-effect="non-scaling-stroke" />
                 </svg>
                 <span class="hand">next?</span>
               </span>
@@ -320,6 +323,81 @@ const sketch =
         m.style.removeProperty("--pull");
       }
     });
+
+    // empty bookmark keeps trying out the next place
+    const subject = rack.querySelector<SVGPathElement>(".blank .subject");
+    if (subject && !still.matches) {
+      const ri = (a: number, b: number) => a + Math.random() * (b - a);
+      const f = (n: number) => Math.round(n * 10) / 10;
+      const sketches = [
+        // row of houses
+        () => {
+          let d = "";
+          for (let x = ri(4, 10); x < 86; ) {
+            const w = ri(18, 28);
+            const top = ri(130, 165);
+            d += `M${f(x)} 210 V${f(top)} `;
+            d +=
+              Math.random() < 0.6
+                ? `L${f(x + w / 2)} ${f(top - ri(10, 18))} L${f(x + w)} ${f(top)} `
+                : `H${f(x + w)} `;
+            d += "V210 ";
+            x += w + ri(0, 4);
+          }
+          return d;
+        },
+        // ridge and its sun
+        () => {
+          let d = `M0 ${f(ri(170, 190))}`;
+          for (let x = ri(8, 14); x < 100; x += ri(10, 18)) d += ` L${f(x)} ${f(ri(110, 190))}`;
+          const cx = ri(20, 80);
+          const cy = ri(55, 90);
+          return `${d} L100 ${f(ri(150, 190))} M${f(cx - 7)} ${f(cy)} a7 7 0 1 0 14 0 a7 7 0 1 0 -14 0`;
+        },
+        // horizon, few waves and sail
+        () => {
+          const y = ri(150, 175);
+          let d = `M0 ${f(y)} H100`;
+          for (let i = 0; i < 4; i++)
+            d += ` M${f(ri(6, 70))} ${f(y + ri(15, 90))} q4 -4 8 0 q4 -4 8 0`;
+          const bx = ri(20, 70);
+          return `${d} M${f(bx)} ${f(y - 2)} h14 l-3 5 h-8 z M${f(bx + 7)} ${f(y - 2)} V${f(y - 28)} L${f(bx + 17)} ${f(y - 6)}`;
+        },
+        // cliff with small white town
+        () => {
+          const e = ri(48, 62);
+          let d = `M${f(e)} 300`;
+          for (let y = 280; y > 130; y -= 15) d += ` L${f(e + ri(-6, 6))} ${y}`;
+          d += ` L${f(e)} 130 H100`;
+          for (let x = e + 2; x < 90; x += ri(9, 12))
+            d += ` M${f(x)} 130 v-${f(ri(8, 15))} h${f(ri(6, 8))} V130`;
+          return d;
+        },
+      ];
+
+      let shown = false;
+      new IntersectionObserver(([e]) => (shown = e.isIntersecting), { threshold: 0.3 }).observe(
+        subject.closest(".shiori")!,
+      );
+
+      const pause = (ms: number) => new Promise((r) => setTimeout(r, ms));
+      (async () => {
+        for (let k = 1; ; k = (k + 1) % sketches.length) {
+          await pause(4000);
+          while (!shown || document.hidden) await pause(500);
+          await subject.animate([{ opacity: 0 }], { duration: 700, fill: "forwards" }).finished;
+          subject.setAttribute("d", sketches[k]());
+          subject.getAnimations().forEach((a) => a.cancel());
+          await subject.animate(
+            [{ clipPath: "inset(-5% 100% -5% -5%)" }, { clipPath: "inset(-5% -5% -5% -5%)" }],
+            {
+              duration: 2600,
+              easing: "ease-in-out",
+            },
+          ).finished;
+        }
+      })();
+    }
 
     // terrain tag sifts the shelf
     const sift = document.querySelector<HTMLButtonElement>(".sift")!;
