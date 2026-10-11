@@ -103,6 +103,11 @@ const PATHS = [
     d: "M328 222 C 362 224, 404 216, 440 198",
     via: ["/writings", "/photos", "/about"],
   },
+  {
+    to: "/roji",
+    d: "M398 188 C 380 178, 360 156, 352 126",
+    via: ["/writings", "/photos", "/about", "/uses"],
+  },
 ];
 
 // trees in their seasons
@@ -167,6 +172,7 @@ const PLACES = [
     title: "uses · the tea hut",
     sub: plural(TOOLS.length, "tool in ink", "tools in ink"),
   },
+  { href: "/roji/", title: "roji · the potter's jar", sub: "a workshop behind a stone" },
   { href: "/contact/", title: "the mailbox", sub: "contact" },
   {
     href: "/changelog/",
@@ -689,6 +695,36 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
           <path class="line" d="M384 196 C 420 198, 462 198, 498 195" stroke-width="1.2"></path>
           <text class="label" x="458" y="226" font-size="17">
             uses · the tea hut
+          </text>
+        </a>
+
+        <a
+          href="/roji/"
+          class="place"
+          data-area="/roji"
+          data-title={place("/roji/").title}
+          data-sub={place("/roji/").sub}
+        >
+          <rect class="hit" x="300" y="40" width="96" height="86"></rect>
+          <path
+            class="line fill-paper"
+            d="M333 120 C 322 118, 318 106, 320 96 C 322 86, 330 80, 336 78 L 336 72 C 342 70, 348 70, 354 72 L 354 78 C 360 80, 368 86, 370 96 C 372 106, 368 118, 357 120 C 349 121, 341 121, 333 120 Z"
+            stroke-width="1.3"
+          ></path>
+          <path
+            class="line fill-alt"
+            d="M321 93 C 332 97, 358 97, 369 93 C 367 87, 361 82, 354 79 C 348 80, 342 80, 336 79 C 329 82, 323 87, 321 93 Z M 341 96 C 341 100, 343 102, 342 105"
+            stroke-width="0.9"
+          ></path>
+          <path class="line" d="M335 73 C 341 75, 349 75, 355 73" stroke-width="0.8"></path>
+          <path
+            class="line fill-tape"
+            d="M377 109 C 381 108, 386 108, 390 109 C 390 115, 388 120, 384 120 L 382 120 C 378 120, 377 115, 377 109 Z"
+            stroke-width="1"
+          ></path>
+          <path class="line" d="M308 121 C 330 123, 362 123, 396 120" stroke-width="1.2"></path>
+          <text class="label" x="330" y="56" font-size="17" text-anchor="end">
+            roji · the potter's jar
           </text>
         </a>
 
