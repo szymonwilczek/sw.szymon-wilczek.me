@@ -125,11 +125,6 @@ const label = (b: (typeof onShelf)[number]) =>
               </span>
             </button>
           ))}
-          <span
-            class="lean"
-            aria-hidden="true"
-            style={`--w: ${sh.lean.w}px; --h: ${sh.lean.h}px`}
-          />
           <svg class="stone" width="64" height="48" viewBox="0 0 64 48" aria-hidden="true">
             <path d={smooth(sh.stone, true)} />
             <path class="vein" d="M14 26 C 24 22, 38 24, 50 30" />
@@ -138,6 +133,7 @@ const label = (b: (typeof onShelf)[number]) =>
         <svg class="plank" viewBox="0 0 1000 24" preserveAspectRatio="none" aria-hidden="true">
           <path d={sh.plank} />
           <path class="grain" d={sh.grain} />
+          <path class="knot" d={sh.knot} />
         </svg>
         <span class="year hand" style={`--tr: ${sh.tagRot}deg`}>
           {sh.year}{" "}
@@ -309,12 +305,19 @@ const label = (b: (typeof onShelf)[number]) =>
   }
 
   .case {
-    --wood: color-mix(in oklab, var(--tape), var(--cursor) 38%);
-    --wood-dark: color-mix(in oklab, var(--wood), var(--fg-main) 45%);
+    --wood: color-mix(
+      in oklab,
+      color-mix(in oklab, var(--tape), var(--cursor) 18%),
+      var(--fg-dim) 30%
+    );
+    --wood-dark: color-mix(in oklab, var(--wood), var(--fg-main) 40%);
     position: relative;
     margin-top: 0.75rem;
     padding: 0 1.375rem;
-    background: color-mix(in oklab, var(--bg-main), var(--fg-main) 5%);
+    background: linear-gradient(
+      color-mix(in oklab, var(--bg-main), var(--fg-main) 6%),
+      color-mix(in oklab, var(--bg-main), var(--fg-main) 3%)
+    );
     border-radius: 3px;
   }
 
@@ -342,10 +345,15 @@ const label = (b: (typeof onShelf)[number]) =>
     vector-effect: non-scaling-stroke;
   }
 
-  .plank .grain {
+  .plank .grain,
+  .plank .knot {
     fill: none;
     stroke-width: 0.5;
     opacity: 0.5;
+  }
+
+  .plank .knot {
+    opacity: 0.7;
   }
 
   .sun {
@@ -357,9 +365,9 @@ const label = (b: (typeof onShelf)[number]) =>
     background: linear-gradient(
       103deg,
       transparent 0 var(--sun),
-      light-dark(rgb(255 255 255 / 0.12), color-mix(in srgb, var(--tape) 8%, transparent))
-        var(--sun) calc(var(--sun) + 16%),
-      transparent calc(var(--sun) + 16%)
+      light-dark(rgb(255 255 255 / 0.1), color-mix(in srgb, var(--tape) 6%, transparent))
+        calc(var(--sun) + 6%) calc(var(--sun) + 14%),
+      transparent calc(var(--sun) + 20%)
     );
   }
 
@@ -624,26 +632,15 @@ const label = (b: (typeof onShelf)[number]) =>
     outline-offset: 2px;
   }
 
-  .lean {
-    flex: none;
-    width: var(--w);
-    height: var(--h);
-    margin-left: 6px;
-    background: color-mix(in oklab, var(--border), var(--paper) 30%);
-    border-radius: 2px 2px 1px 1px;
-    transform: rotate(-11deg);
-    transform-origin: 0 100%;
-    box-shadow: 0 0 0 1px rgb(0 0 0 / 0.06);
-  }
-
   .stone {
     flex: none;
-    margin-left: auto;
+    margin-left: -6px;
   }
 
   .stone path {
-    fill: var(--bg-alt);
+    fill: color-mix(in oklab, var(--bg-alt), var(--fg-dim) 14%);
     stroke: var(--fg-dim);
+    stroke-width: 0.8;
   }
 
   .stone .vein {

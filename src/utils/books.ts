@@ -118,8 +118,8 @@ export interface Shelf {
   plank: string;
   grain: string;
   tagRot: number;
+  knot: string;
   stone: Array<[number, number]>;
-  lean: { w: number; h: number };
 }
 
 // one plank per year, newest on top
@@ -144,12 +144,15 @@ export function shelves(books: Book[], now: Date): Shelf[] {
       return { ...b, ...look, dip: f1(Math.sin(Math.PI * at) * sag * 0.8) };
     });
     const r = rng(hash(`shelf/${y}`));
-    const plank = `M0 2 C 300 ${f1(2 + sag)}, 700 ${f1(2 + sag)}, 1000 2 L1000 ${f1(20 + r())} C 700 ${f1(22 + sag)}, 300 ${f1(22 + sag)}, 0 ${f1(20 + r())} Z`;
+    const end = () => f1((r() - 0.5) * 6);
+    const plank = `M${f1(r() * 3)} 2 C 300 ${f1(2 + sag)}, 700 ${f1(2 + sag)}, ${f1(1000 - r() * 3)} 2 L${f1(997 + end())} ${f1(12 + end())} L1000 ${f1(20 + r())} C 700 ${f1(22 + sag)}, 300 ${f1(22 + sag)}, ${f1(r() * 3)} ${f1(20 + r())} L${f1(2 + end())} ${f1(11 + end())} Z`;
     let grain = "";
     for (let k = 0; k < 4; k++) {
       const gy = 6 + k * 3.5;
       grain += `M${f1(r() * 200)} ${f1(gy)} C ${f1(300 + r() * 100)} ${f1(gy + r() * 2)}, ${f1(600 + r() * 100)} ${f1(gy - r() * 2)}, ${f1(800 + r() * 200)} ${f1(gy)} `;
     }
+    const kx = f1(150 + r() * 700);
+    const knot = `M${kx} 10 c 6 -4, 16 -3, 18 1 c 2 4, -8 6, -14 4 c -4 -1, -6 -3, -4 -5 Z`;
     const stone = Array.from({ length: 9 }, (_, k): [number, number] => {
       const a = (k / 9) * Math.PI * 2;
       return [32 + Math.cos(a) * (26 + r() * 4), 30 + Math.sin(a) * (16 + r() * 3)];
@@ -162,8 +165,8 @@ export function shelves(books: Book[], now: Date): Shelf[] {
       plank,
       grain: grain.trim(),
       tagRot: f1((r() - 0.5) * 5),
+      knot,
       stone,
-      lean: { w: Math.round(20 + r() * 14), h: Math.round(160 + r() * 40) },
     };
   });
 }
