@@ -163,6 +163,9 @@ const {
 
         var pouring = false;
         var waiting = null;
+        var desk = window.matchMedia(
+          "(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)",
+        );
 
         function pour(job) {
           if (!ready(job.theme)) {
@@ -172,7 +175,7 @@ const {
             return;
           }
           afterLoad = null;
-          var still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+          var still = !desk.matches || navigator.maxTouchPoints > 0;
           if (!document.startViewTransition || still) return job.apply();
           if (pouring) {
             waiting = job;
@@ -186,13 +189,16 @@ const {
           var button = document.getElementById("theme-toggle");
           var r = button && button.getBoundingClientRect();
           var visible = r && r.width > 0;
-          root.style.setProperty(
-            "--ink-x",
-            (visible ? r.left + r.width / 2 : innerWidth - 40) + "px",
-          );
-          root.style.setProperty("--ink-y", (visible ? r.top + r.height / 2 : 40) + "px");
+          var x = visible ? r.left + r.width / 2 : innerWidth - 40;
+          var y = visible ? r.top + r.height / 2 : 40;
+          var far = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+
+          root.style.setProperty("--ink-x", x + "px");
+          root.style.setProperty("--ink-y", y + "px");
+          root.style.setProperty("--ink-size", Math.ceil(far * 2.7) + "px");
           root.classList.add("ink-flood");
           root.classList.toggle("ink-quick", job.quick);
+
           var flow = document.startViewTransition(job.apply);
           flow.ready.catch(function () {});
           flow.finished.finally(function () {

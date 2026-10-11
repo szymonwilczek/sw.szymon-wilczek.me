@@ -33,11 +33,12 @@
 :root.ink-flood::view-transition-new(root) {
   mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M97 46Q96 50 94 53Q93 57 94 61Q95 65 93 68Q91 71 88 73Q85 75 83 78Q81 81 78 83Q75 85 72 87Q70 88 67 90Q64 92 61 95Q58 98 54 94Q50 89 47 90Q44 91 40 90Q37 90 33 90Q29 91 26 89Q24 86 22 83Q21 79 16 79Q11 78 9 75Q8 72 6 68Q5 65 6 61Q6 57 8 53Q10 50 10 47Q9 44 9 40Q9 37 12 35Q16 32 15 29Q15 25 18 23Q21 21 24 20Q27 19 28 14Q29 9 33 10Q37 10 40 7Q43 4 46 4Q50 4 53 5Q57 6 60 8Q63 9 67 8Q72 8 73 12Q75 16 77 18Q79 21 85 21Q91 20 92 24Q93 28 93 32Q94 36 96 39Q97 42 97 46Z'/%3E%3C/svg%3E")
     no-repeat;
-  animation: ink-flood 0.9s cubic-bezier(0.5, 0, 0.75, 0.4) both;
+  animation: ink-flood 1s cubic-bezier(0.45, 0.1, 0.25, 1) both;
 }
 
 :root.ink-flood.ink-quick::view-transition-new(root) {
   animation-duration: 0.6s;
+  animation-timing-function: cubic-bezier(0.3, 0.2, 0.2, 1);
 }
 
 ::view-transition {
@@ -50,7 +51,7 @@
     mask-position: var(--ink-x) var(--ink-y);
   }
   to {
-    mask-size: 320vmax 320vmax;
-    mask-position: calc(var(--ink-x) - 160vmax) calc(var(--ink-y) - 160vmax);
+    mask-size: var(--ink-size) var(--ink-size);
+    mask-position: calc(var(--ink-x) - var(--ink-size) / 2) calc(var(--ink-y) - var(--ink-size) / 2);
   }
 }
