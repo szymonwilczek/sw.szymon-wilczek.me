@@ -9,6 +9,7 @@ import { calculateReadingStats } from "../utils/reading-time";
 import { writingSlug } from "../utils/format";
 import { HANKO_EDGE } from "../utils/hanko";
 import { PROJECTS } from "../utils/projects";
+import { readBooks } from "../utils/books";
 
 const writings = (await getCollection("writings"))
   .sort((a, b) => a.data.pubDate.valueOf() - b.data.pubDate.valueOf())
@@ -19,6 +20,7 @@ const writings = (await getCollection("writings"))
   }));
 const albums = (await getAllAlbums()).slice().reverse();
 const files = await getCollection("files");
+const booksRead = readBooks().filter((b) => b.state === "read").length;
 
 // plants grow as tall as the essay is long
 const step = Math.min(50, 260 / Math.max(writings.length - 1, 1));
@@ -87,6 +89,7 @@ const PATHS = [
   { to: "/vault", d: "M820 330 C 860 280, 880 240, 892 208", via: ["/writings", "/photos"] },
   { to: "/contact", d: "M238 712 C 180 660, 120 640, 96 612", via: ["/writings"] },
   { to: "/projects", d: "M560 520 C 500 500, 440 470, 400 440", via: ["/writings", "/photos"] },
+  { to: "/books", d: "M522 650 C 570 656, 620 690, 676 708", via: ["/writings"] },
 ];
 
 // trees in their seasons
@@ -131,6 +134,11 @@ const PLACES = [
     href: "/projects/",
     title: "projects · the drying line",
     sub: plural(PROJECTS.length, "project", "projects"),
+  },
+  {
+    href: "/books/",
+    title: "books · the storehouse",
+    sub: plural(booksRead, "book read", "books read"),
   },
   { href: "/files/", title: "files · the shed", sub: plural(files.length, "file", "files") },
   { href: "/files/verify/", title: "the bench", sub: "check a file against its tag" },
@@ -247,7 +255,6 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
           you came in by the gate
         </text>
 
-        <!-- writings -->
         <a
           href="/writings/"
           class="place"
@@ -286,7 +293,6 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
           </a>
         ))}
 
-        <!-- photos -->
         <a
           href="/photos/"
           class="place"
@@ -346,7 +352,6 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
           </text>
         </a>
 
-        <!-- projects -->
         <a
           href="/projects/"
           class="place"
@@ -400,7 +405,59 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
           </text>
         </a>
 
-        <!-- the lost corner -->
+        <a
+          href="/books/"
+          class="place"
+          data-area="/books"
+          data-title={place("/books/").title}
+          data-sub={place("/books/").sub}
+        >
+          <path
+            class="line fill-paper"
+            d="M616 628 C 664 627, 712 629, 756 627 C 757 654, 755 682, 757 710 C 710 712, 664 710, 614 711 C 615 684, 613 656, 616 628 Z"
+            stroke-width="1.4"
+          ></path>
+          <path
+            class="line"
+            d="M616 676 C 664 675, 712 677, 756 676 M 622 676 L 650 710 M 646 676 L 674 710 M 702 676 L 730 710 M 726 676 L 752 708 M 646 676 L 616 704 M 670 676 L 640 710 M 726 676 L 698 710 M 750 676 L 722 710"
+            stroke-width="0.8"
+            opacity="0.6"
+          ></path>
+          <path
+            class="line fill-alt"
+            d="M600 630 C 640 606, 730 604, 772 628 C 760 632, 752 628, 740 624 C 700 614, 664 614, 630 624 C 618 628, 610 632, 600 630 Z"
+            stroke-width="1.5"
+          ></path>
+          <path
+            class="line"
+            d="M628 610 C 668 598, 708 598, 744 608 M 618 604 C 622 608, 626 610, 630 610 M 752 602 C 750 606, 746 608, 742 608"
+            stroke-width="1.6"
+          ></path>
+          <path class="kura-dark" d="M676 710 L 676 660 L 704 660 L 704 710 Z"></path>
+          <path
+            class="kura-spines"
+            d="M680 708 v -22 M 685 708 v -30 M 690 708 v -18 M 695 708 v -26 M 700 708 v -21"
+          ></path>
+          <path
+            class="line fill-tape"
+            d="M704 710 L 704 660 L 720 664 L 720 706 Z"
+            stroke-width="1.1"
+          ></path>
+          <path
+            class="line fill-alt"
+            d="M630 642 h 16 v 16 h -16 Z M 728 642 h 16 v 16 h -16 Z"
+            stroke-width="1"
+          ></path>
+          <path
+            class="line"
+            d="M635 642 v 16 M 641 642 v 16 M 733 642 v 16 M 739 642 v 16"
+            stroke-width="0.8"
+          ></path>
+          <text class="label" x="600" y="748" font-size="18">
+            books · the storehouse
+          </text>
+        </a>
+
         <a
           href="/somewhere-else/"
           class="place"
@@ -420,7 +477,6 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
           </text>
         </a>
 
-        <!-- files -->
         <a
           href="/files/"
           class="place"
@@ -488,7 +544,6 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
           </text>
         </a>
 
-        <!-- vault -->
         <a
           href="/vault/"
           class="place"
@@ -526,7 +581,6 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
           </text>
         </a>
 
-        <!-- about -->
         <a
           href="/about/"
           class="place"
@@ -562,7 +616,6 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
           </text>
         </a>
 
-        <!-- contact -->
         <a
           href="/contact/"
           class="place"
@@ -1322,6 +1375,17 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
   .paws {
     fill: var(--fg-dim);
     opacity: 0.55;
+  }
+
+  .kura-dark {
+    fill: var(--bg-dim);
+  }
+
+  .kura-spines {
+    fill: none;
+    stroke: var(--red);
+    stroke-width: 3;
+    opacity: 0.75;
   }
 
   .flag {
