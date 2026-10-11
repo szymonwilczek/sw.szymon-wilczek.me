@@ -4,6 +4,7 @@ import { hash, rng, smooth } from "./stamp";
 
 export interface Book {
   id: string;
+  no: number | null; // the number on its spine, set by hand so it never moves
   title: string;
   author: string;
   pages: number;
@@ -33,35 +34,36 @@ export function readBooks(file = "src/data/books.org"): Book[] {
     .split(/^\* /m)
     .slice(1)
     .map((entry, i) => {
-      const [head, ...rest] = entry.split("\n");
-      const props: Record<string, string> = {};
-      for (const [, key, value] of entry.matchAll(/^:([A-Z]+):[ \t]*(.*)$/gm))
-        props[key] = value.trim();
-      const body = rest.join("\n").replace(/:PROPERTIES:[\s\S]*?:END:/, "");
-      const quote = body.match(/#\+begin_quote\s*([\s\S]*?)#\+end_quote/i)?.[1].trim() || null;
-      const note =
-        body
-          .replace(/#\+begin_quote[\s\S]*?#\+end_quote/i, "")
-          .replace(/^#.*$/gm, "")
-          .trim() || null;
-      const started = orgDate(props.STARTED);
-      const finished = orgDate(props.FINISHED);
-      return {
-        id: `b${i}`,
-        title: head.trim(),
-        author: props.AUTHOR || "",
-        pages: +props.PAGES || 240,
-        started,
-        finished,
-        page: props.PAGE ? +props.PAGE : null,
-        place: props.PLACE || null,
-        album: props.ALBUM || null,
-        writing: props.WRITING || null,
-        quote,
-        note,
-        state: finished ? "read" : started ? "reading" : "waiting",
-      } satisfies Book;
-    });
+    const [head, ...rest] = entry.split("\n");
+    const props: Record<string, string> = {};
+    for (const [, key, value] of entry.matchAll(/^:([A-Z]+):[ \t]*(.*)$/gm))
+      props[key] = value.trim();
+    const body = rest.join("\n").replace(/:PROPERTIES:[\s\S]*?:END:/, "");
+    const quote = body.match(/#\+begin_quote\s*([\s\S]*?)#\+end_quote/i)?.[1].trim() || null;
+    const note =
+      body
+        .replace(/#\+begin_quote[\s\S]*?#\+end_quote/i, "")
+        .replace(/^#.*$/gm, "")
+        .trim() || null;
+    const started = orgDate(props.STARTED);
+    const finished = orgDate(props.FINISHED);
+    return {
+      id: `b${i}`,
+      no: /^\d+$/.test(props.NO ?? "") ? +props.NO : null,
+      title: head.trim(),
+      author: props.AUTHOR || "",
+      pages: +props.PAGES || 240,
+      started,
+      finished,
+      page: props.PAGE ? +props.PAGE : null,
+      place: props.PLACE || null,
+      album: props.ALBUM || null,
+      writing: props.WRITING || null,
+      quote,
+      note,
+      state: finished ? "read" : started ? "reading" : "waiting",
+    } satisfies Book;
+  });
 }
 
 export const monthOf = (date: Date) => `${MONTHS[date.getUTCMonth()]}·${date.getUTCFullYear()}`;
@@ -129,6 +131,8 @@ export interface Spine {
   lines: string;
   dots: string;
   titles: Title[];
+  tag: string; // the paper sticker its number is on
+  no: string;
   wash: string;
 }
 
@@ -177,6 +181,16 @@ export function look(b: Book, now: Date, lying = false): Spine {
     lines += wave(top) + wave(bot);
     top += 3;
     bot -= 3;
+  }
+
+  // library sticker near the foot
+  let tag = "";
+  let tagY = 0;
+  if (b.no !== null) {
+    tagY = bot - 7;
+    const tw = Math.min(w - 5, 9 + String(b.no).length * 5);
+    tag = `M${f1(w / 2 - tw / 2)} ${f1(tagY - 5.5)} Q ${f1(w / 2)} ${f1(tagY - 6.3)}, ${f1(w / 2 + tw / 2)} ${f1(tagY - 5.5)} L ${f1(w / 2 + tw / 2 + 0.3)} ${f1(tagY + 5.5)} Q ${f1(w / 2)} ${f1(tagY + 6.2)}, ${f1(w / 2 - tw / 2)} ${f1(tagY + 5.5)} Z`;
+    bot -= 15;
   }
 
   // the title, in one of the faces
@@ -250,6 +264,8 @@ export function look(b: Book, now: Date, lying = false): Spine {
     lines: lines.trim() || "M0 0",
     dots: dots || "M0 0",
     titles,
+    tag: tag || "M0 0",
+    no: b.no === null ? "" : `translate(${f1(w / 2)} ${f1(tagY)})`,
     wash: `translate(${f1(1.5 + r() * 2)} ${f1(1 + r() * 2)})`,
   };
 }
@@ -286,10 +302,10 @@ export function ribbon(seed: string, L: number, wd: number, amp: number) {
     b = Math.min(n - 1, mid + 2);
   const fold =
     "M" +
-    [...lft.slice(a, b + 1), ...rgt.slice(a, b + 1).reverse()]
-      .map(([x, y]) => `${f1(x)} ${f1(y)}`)
-      .join(" L ") +
-    " Z";
+      [...lft.slice(a, b + 1), ...rgt.slice(a, b + 1).reverse()]
+        .map(([x, y]) => `${f1(x)} ${f1(y)}`)
+        .join(" L ") +
+      " Z";
   let threads = "";
   for (let k = 0; k < 3; k++) {
     const tx = ex - h + (k + 0.5) * (wd / 3);
@@ -301,9 +317,10 @@ export function ribbon(seed: string, L: number, wd: number, amp: number) {
 export type Ribbon = ReturnType<typeof ribbon>;
 
 const label = (b: Book) =>
-  b.state === "reading"
-    ? `${b.title} by ${b.author}, reading now`
-    : `${b.title} by ${b.author}, read ${monthOf(b.finished!)}`;
+  (b.no === null ? "" : `no. ${b.no}: `) +
+    (b.state === "reading"
+      ? `${b.title} by ${b.author}, reading now`
+      : `${b.title} by ${b.author}, read ${monthOf(b.finished!)}`);
 
 const whisper = (b: Book) =>
   b.state === "reading"
@@ -325,13 +342,13 @@ export interface Placed {
 export type Item =
   | { kind: "book"; width: number; book: Placed }
   | {
-      kind: "pile";
-      width: number;
-      ml: number;
-      books: Placed[];
-      candle: Candle | null;
-      candleX: number;
-    };
+    kind: "pile";
+    width: number;
+    ml: number;
+    books: Placed[];
+    candle: Candle | null;
+    candleX: number;
+  };
 
 export interface Candle {
   width: number;
@@ -445,19 +462,17 @@ export function shelves(books: Book[], now: Date): Shelf[] {
     for (let i = 0; i < n; i++) {
       const size = piles.get(i);
       if (size) {
-        const lying = list.slice(i, i + size).map(
-          (b): Placed => ({
-            book: b,
-            spine: look(b, now, true),
-            label: label(b),
-            whisper: whisper(b),
-            rot: f1((sr() - 0.5) * 1.2),
-            lean: 0,
-            gap: 0,
-            x: f1((sr() - 0.5) * 10),
-            ribbon: null,
-          }),
-        );
+        const lying = list.slice(i, i + size).map((b): Placed => ({
+          book: b,
+          spine: look(b, now, true),
+          label: label(b),
+          whisper: whisper(b),
+          rot: f1((sr() - 0.5) * 1.2),
+          lean: 0,
+          gap: 0,
+          x: f1((sr() - 0.5) * 10),
+          ribbon: null,
+        }));
         lying.reverse();
         const wid = Math.max(...lying.map((p) => p.spine.width + Math.abs(p.x)));
 
@@ -503,15 +518,15 @@ export function shelves(books: Book[], now: Date): Shelf[] {
           ribbon:
             b.state === "reading"
               ? {
-                  ...ribbon(`rib/${b.id}/${b.title}`, len, 4.6, 2.4),
-                  len,
-                  left: f1(spine.w * (0.5 + r() * 0.2) - 15),
-                  rot: f1((r() - 0.5) * 4),
-                }
+                ...ribbon(`rib/${b.id}/${b.title}`, len, 4.6, 2.4),
+                len,
+                left: f1(spine.w * (0.5 + r() * 0.2) - 15),
+                rot: f1((r() - 0.5) * 4),
+            }
               : null,
         },
       });
-    }
+      }
 
     const rows: Item[][] = [[]];
     let run = 0;
@@ -522,15 +537,15 @@ export function shelves(books: Book[], now: Date): Shelf[] {
       }
       rows.at(-1)!.push(it);
       run += it.width;
-    }
+      }
     const open = list.filter((b) => b.state === "reading").length;
     return {
       year,
       kanji: year === now.getUTCFullYear() ? "今" : "昔",
       count: open ? `${n - open} read · ${open} open` : `${n} read`,
       planks: rows.map((row, k) => plank(`${year}/${k}`, row)),
-    };
-  });
+};
+});
 }
 
 export const PAGE = { w: 500, h: 620 };
@@ -589,17 +604,17 @@ export interface Para {
 
 // n paragraphs from the filler
 export function paras(from: number, n: number, quote: string | null, cap: boolean): Para[] {
-  return Array.from({ length: n }, (_, k) => {
-    let t = FILLER[(from + k) % FILLER.length];
-    let first = "";
-    if (cap && k === 0) {
-      first = t[0];
-      t = t.slice(1);
-    }
-    if (quote && k === 1) {
-      const cut = t.indexOf(",") + 1;
-      return { cap: first, a: t.slice(0, cut) + " ", mark: quote, b: " " + t.slice(cut).trim() };
-    }
-    return { cap: first, a: t, mark: "", b: "" };
-  });
-}
+    return Array.from({ length: n }, (_, k) => {
+      let t = FILLER[(from + k) % FILLER.length];
+      let first = "";
+      if (cap && k === 0) {
+        first = t[0];
+        t = t.slice(1);
+      }
+      if (quote && k === 1) {
+        const cut = t.indexOf(",") + 1;
+        return { cap: first, a: t.slice(0, cut) + " ", mark: quote, b: " " + t.slice(cut).trim() };
+      }
+      return { cap: first, a: t, mark: "", b: "" };
+    });
+  }
