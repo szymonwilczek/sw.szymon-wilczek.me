@@ -90,8 +90,8 @@ const sketch =
 
   <div class="rack-bar">
     <p class="hint hand">
-      <span class="hint-point">point at one and it slides up out of the rack.</span>
-      <span class="hint-touch">swipe along the shelf; tap one to open it.</span>
+      <span class="hint-point">point at one and it rises; pull its cord to take it out.</span>
+      <span class="hint-touch">swipe along the shelf; tap one, or pull it out by the cord.</span>
     </p>
     <button type="button" class="sift hand" hidden>
       only <span class="sift-tag"></span> · show all
@@ -272,6 +272,47 @@ const sketch =
         { passive: true },
       );
     }
+
+    // pull a bookmark up by its cord
+    rack.addEventListener("pointerdown", (e) => {
+      const cord = (e.target as Element).closest<SVGSVGElement>(".shiori:not(.blank) .cord");
+      if (!cord) return;
+      const mark = cord.closest<HTMLElement>(".shiori")!;
+      const href = mark.querySelector<HTMLAnchorElement>(".open")!.href;
+      e.preventDefault();
+      cord.setPointerCapture(e.pointerId);
+      mark.classList.add("pulling");
+      const y0 = e.clientY;
+      let pull = 0;
+      let moved = 0;
+      const move = (ev: PointerEvent) => {
+        const d = Math.max(0, y0 - ev.clientY);
+        moved = Math.max(moved, Math.abs(y0 - ev.clientY));
+        pull = 90 * (1 - Math.exp(-d / 90));
+        mark.style.setProperty("--pull", `${pull.toFixed(1)}px`);
+      };
+      const release = (ev: PointerEvent) => {
+        cord.removeEventListener("pointermove", move);
+        cord.removeEventListener("pointerup", release);
+        cord.removeEventListener("pointercancel", release);
+        mark.classList.remove("pulling");
+        if (ev.type === "pointerup" && (pull > 60 || moved < 4)) {
+          mark.classList.add("leaving");
+          setTimeout(() => location.assign(href), still.matches ? 0 : 280);
+        } else mark.style.removeProperty("--pull");
+      };
+      cord.addEventListener("pointermove", move);
+      cord.addEventListener("pointerup", release);
+      cord.addEventListener("pointercancel", release);
+    });
+
+    // coming back to the page puts it back in the rack
+    addEventListener("pageshow", () => {
+      for (const m of rack.querySelectorAll<HTMLElement>(".leaving")) {
+        m.classList.remove("leaving");
+        m.style.removeProperty("--pull");
+      }
+    });
 
     // terrain tag sifts the shelf
     const sift = document.querySelector<HTMLButtonElement>(".sift")!;
@@ -461,7 +502,7 @@ const sketch =
     align-items: flex-start;
     gap: 28px;
     margin: 0.25rem calc(var(--gutter) * -1) 0;
-    padding: 96px var(--gutter) 1rem;
+    padding: 150px var(--gutter) 1rem;
     overflow-x: auto;
     overscroll-behavior-x: contain;
     scroll-snap-type: x proximity;
@@ -531,11 +572,27 @@ const sketch =
     transform: rotate(var(--rot));
     transform-origin: 50% 100%;
     rotate: calc(var(--sway, 0deg) * var(--give));
+    translate: 0 calc(var(--pull, 0px) * -1);
     transition:
       transform 0.4s cubic-bezier(0.2, 0.7, 0.3, 1),
+      translate 0.5s cubic-bezier(0.3, 1.5, 0.5, 1),
       box-shadow 0.4s ease,
       opacity 0.4s ease,
       filter 0.4s ease;
+  }
+
+  .shiori.pulling {
+    transition:
+      transform 0.4s cubic-bezier(0.2, 0.7, 0.3, 1),
+      box-shadow 0.4s ease;
+  }
+
+  .shiori.leaving {
+    translate: 0 calc(var(--pull, 0px) * -1 - 70px);
+    opacity: 0;
+    transition:
+      translate 0.28s ease-in,
+      opacity 0.28s ease-in;
   }
 
   .shiori:not(.blank):hover,
@@ -561,6 +618,16 @@ const sketch =
   .rack[data-sifting] .shiori:not(.match) {
     opacity: 0.3;
     filter: saturate(0.3);
+  }
+
+  .shiori:not(.blank) .cord {
+    z-index: 2;
+    cursor: grab;
+    touch-action: none;
+  }
+
+  .shiori.pulling .cord {
+    cursor: grabbing;
   }
 
   .cord {
