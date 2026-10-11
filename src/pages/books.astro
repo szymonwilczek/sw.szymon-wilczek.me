@@ -1,41 +1,91 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Divider from "../components/Divider.astro";
-import { HANKO_EDGE } from "../utils/hanko";
-import { monthOf, readBooks, shelves } from "../utils/books";
-import { smooth } from "../utils/stamp";
+import {
+  PAGE,
+  monthOf,
+  page,
+  paras,
+  progress,
+  readBooks,
+  ribbon,
+  shelves,
+  spanOf,
+  type Placed,
+} from "../utils/books";
+import { hash } from "../utils/stamp";
 
 const now = new Date();
 const books = readBooks();
-const planks = shelves(books, now);
+const cases = shelves(books, now);
 const waiting = books.filter((b) => b.state === "waiting");
 const reading = books.filter((b) => b.state === "reading");
 const read = books.filter((b) => b.state === "read");
-const onShelf = planks.flatMap((p) => p.books);
+const placed: Placed[] = cases.flatMap((c) =>
+  c.planks.flatMap((p) => p.items.flatMap((it) => (it.kind === "book" ? [it.book] : it.books))),
+);
 
-// the book lying open below: the one being read, else the last one closed
-const opened = reading[0] ?? onShelf.filter((b) => b.state === "read").at(-1);
+// the book lying open below
+const latest = (key: "started" | "finished") => (a: Placed, b: Placed) =>
+  (b.book[key]?.valueOf() ?? 0) - (a.book[key]?.valueOf() ?? 0);
+const opened =
+  placed.filter((p) => p.book.state === "reading").sort(latest("started"))[0] ??
+  placed.toSorted(latest("finished"))[0];
 
-const post = "M2 0 C 3 30, 1 60, 2 100 L8 100 C 9 60, 7 30, 8 0 Z";
-const topPlank = "M0 2 C 300 2, 700 2, 1000 2 L1000 20 C 700 22, 300 22, 0 20 Z";
-const PILE = ["--sea", "--cursor", "--red", "--leaf", "--sky"];
-
-const label = (b: (typeof onShelf)[number]) =>
-  b.state === "reading"
-    ? `${b.title} by ${b.author}, reading now`
-    : `${b.title} by ${b.author}, read ${monthOf(b.finished!)}`;
+const spreads = placed.map(({ book: b, spine }) => {
+  const open = b.state === "reading";
+  const done = Math.round(10 * progress(b));
+  const at = open ? b.page : b.pages;
+  const from = hash(`filler/${b.title}`) % 5;
+  const pr = ribbon(`pagerib/${b.id}/${b.title}`, PAGE.h + 50, 7.5, 9);
+  const colophon = [
+    { k: "title", v: b.title },
+    { k: "by", v: b.author },
+    { k: "pages", v: String(b.pages) },
+    b.started && { k: "opened", v: monthOf(b.started) },
+    b.finished && { k: "closed", v: monthOf(b.finished) },
+    b.place && { k: "read in", v: b.place, href: b.album ? `/photos/${b.album}/` : undefined },
+    b.writing && { k: "wrote", v: "what I made of it", href: `/writings/${b.writing}/` },
+  ].filter(Boolean) as { k: string; v: string; href?: string }[];
+  return {
+    b,
+    open,
+    tone: spine.tone,
+    kicker: open
+      ? at
+        ? `open at p. ${at} of ${b.pages}, where the ribbon is`
+        : "open where the ribbon is"
+      : "closed · the last page",
+    when: open
+      ? `reading since ${b.started ? monthOf(b.started) : "a while"}`
+      : `read ${spanOf(b.started, b.finished!)}`,
+    left: {
+      ...page("L", Math.max(2, done), `page/L/${b.id}/${b.title}`),
+      heads: [at ? String(open ? at - 1 : at) : "", b.title.toLowerCase()],
+      paras: open ? paras(from, 4, b.quote, true) : paras(from + 2, 3, b.quote, false),
+    },
+    right: {
+      ...page("R", Math.max(2, 10 - done), `page/R/${b.id}/${b.title}`),
+      heads: [b.author.toLowerCase(), open && at ? String(at) : ""],
+      paras: paras(from + 3, 4, null, false),
+    },
+    ribbon: { ...pr, h: PAGE.h + 60, vb: `-20 0 40 ${PAGE.h + 60}` },
+    colophon,
+  };
+});
 ---
 
 <BaseLayout
   title="Bookshelf"
-  description="What I have read, a plank for every year, and what I am reading now."
+  description="What I have read, a shelf for every year, and what I am reading now."
 >
   <header class="shelf-head">
     <div>
       <h1>Bookshelf</h1>
       <p class="lede">
-        What I have read, a plank for every year, and what I am reading now with the ribbon still in
-        it. The longer a book has stood here, the more the sun has taken out of its spine.
+        Painted in ink like the tools, and kept the way books really are at home: some standing,
+        some lying in piles where I put them down, a candle stub on one of them. The longer a book
+        has stood here, the more the sun has taken out of its cloth.
       </p>
     </div>
     <p class="tally">
@@ -46,202 +96,429 @@ const label = (b: (typeof onShelf)[number]) =>
   <Divider from={480} to={700} />
 
   <p class="hint hand">
-    <span class="hint-point">point at a spine to tip it out; click to open it below.</span>
-    <span class="hint-touch">swipe along a plank; tap a spine to open it.</span>
+    <span class="hint-point">point at a spine to tip it out; click it to open the book below.</span>
+    <span class="hint-touch">swipe along a shelf; tap a spine to open it.</span>
   </p>
 
-  <section class="case" aria-label="Bookshelf">
-    <svg class="post post-l" viewBox="0 0 10 100" preserveAspectRatio="none" aria-hidden="true">
-      <path d={post}></path>
-    </svg>
-    <svg class="post post-r" viewBox="0 0 10 100" preserveAspectRatio="none" aria-hidden="true">
-      <path d={post}></path>
-    </svg>
-    <div class="sun" aria-hidden="true"></div>
+  <!-- the brush, the bleed, the pool and the paper fibres -->
+  <svg class="defs" aria-hidden="true" focusable="false">
+    <filter id="bk-tremble" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.09" numOctaves="2" seed="7"></feTurbulence>
+      <feDisplacementMap in="SourceGraphic" scale="1.6"></feDisplacementMap>
+    </filter>
+    <filter id="bk-wash" x="-15%" y="-15%" width="130%" height="130%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="3" seed="5"></feTurbulence>
+      <feDisplacementMap in="SourceGraphic" scale="6"></feDisplacementMap>
+      <feGaussianBlur stdDeviation="0.9"></feGaussianBlur>
+    </filter>
+    <filter id="bk-pool" x="-30%" y="-80%" width="160%" height="260%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="3"></feTurbulence>
+      <feDisplacementMap in="SourceGraphic" scale="14"></feDisplacementMap>
+      <feGaussianBlur stdDeviation="4"></feGaussianBlur>
+    </filter>
+    <filter id="bk-fibre" x="0" y="0" width="100%" height="100%">
+      <feTurbulence
+        type="fractalNoise"
+        baseFrequency="0.02 0.35"
+        numOctaves="2"
+        seed="11"
+      ></feTurbulence>
+      <feColorMatrix
+        type="matrix"
+        values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -1.3 0.85"
+      ></feColorMatrix>
+      <feComposite in2="SourceGraphic" operator="in"></feComposite>
+    </filter>
+  </svg>
 
-    <div class="top">
-      {waiting.length > 0 && (
-        <div class="pile" role="img" aria-label={`${waiting.length} books waiting`}>
-          {waiting.slice(0, 5).map((b, i) => (
-            <span
-              style={`width: ${Math.round(120 - i * 14 + (b.pages % 10))}px; height: ${9 + (b.pages % 6)}px; margin-left: ${b.pages % 11}px; --ink: var(${PILE[i]})`}
-            />
-          ))}
-        </div>
-      )}
-      <span class="next hand">next up · {waiting.length} waiting</span>
-      <svg class="bowl" width="70" height="44" viewBox="0 0 70 44" aria-hidden="true">
-        <path d="M8 18 C 10 36, 26 42, 35 42 C 46 42, 60 36, 62 18 Z"></path>
-        <path class="gold" d="M24 19 C 26 26, 22 30, 27 36 L 30 41"></path>
-      </svg>
-    </div>
-    <svg
-      class="plank top-plank"
-      viewBox="0 0 1000 20"
-      preserveAspectRatio="none"
-      aria-hidden="true"
-    >
-      <path d={topPlank}></path>
-    </svg>
-
-    {planks.map((sh) => (
-      <div class="shelf">
-        <div class="row">
-          {sh.books.map((b) => (
-            <button
-              type="button"
-              class="spine"
-              data-book={b.id}
-              aria-label={label(b)}
-              aria-pressed={b.id === opened?.id ? "true" : "false"}
-              style={`--w: ${b.w}px; --h: ${b.h}px; --col: ${b.color}; --radius: ${b.radius}; --gap: ${b.gap}px; --dip: ${b.dip}px; --rot: ${b.rot}deg`}
-            >
-              <svg viewBox="0 0 10 100" preserveAspectRatio="none" aria-hidden="true">
-                <path d={b.bands} />
-                <rect class="shade" width="1.4" height="100" />
-                <rect class="shine" x="8.8" width="1.2" height="100" />
-              </svg>
-              <span class="daisen" aria-hidden="true">
-                {b.title}
-              </span>
-              <span class="mark" aria-hidden="true">
-                {b.state === "reading" ? "·" : monthOf(b.finished!).split("·")[0]}
-              </span>
-              {b.state === "reading" && (
-                <span
-                  class="ribbon"
-                  aria-hidden="true"
-                  style={`--len: ${Math.round(14 + ((b.page ?? 0) / b.pages) * 54)}px; --rr: ${b.ribbonRot}deg`}
-                />
-              )}
-              <span class="slip" aria-hidden="true" style={`--sr: ${b.slipRot}deg`}>
-                <span class="slip-title">{b.title}</span>
-                <span class="slip-author">{b.author}</span>
-                <span class:list={["slip-when", { now: b.state === "reading" }]}>
-                  {b.state === "reading"
-                    ? `reading · p. ${b.page ?? "?"} of ${b.pages}`
-                    : `finished ${monthOf(b.finished!)}`}
-                </span>
-              </span>
-            </button>
-          ))}
-          <svg class="stone" width="64" height="48" viewBox="0 0 64 48" aria-hidden="true">
-            <path d={smooth(sh.stone, true)} />
-            <path class="vein" d="M14 26 C 24 22, 38 24, 50 30" />
-          </svg>
-        </div>
-        <svg class="plank" viewBox="0 0 1000 24" preserveAspectRatio="none" aria-hidden="true">
-          <path d={sh.plank} />
-          <path class="grain" d={sh.grain} />
-          <path class="knot" d={sh.knot} />
-        </svg>
-        <span class="year hand" style={`--tr: ${sh.tagRot}deg`}>
-          {sh.year}{" "}
-          <span>
-            · {sh.read} read{sh.open > 0 && ` · ${sh.open} open`}
-          </span>
-        </span>
-      </div>
-    ))}
-    <div class="floor"></div>
-  </section>
-
-  <section class="spread" aria-label="The open book" aria-live="polite">
-    {onShelf.map((b) => (
-      <article class="book" data-book={b.id} hidden={b.id !== opened?.id}>
-        <div class="page page-l">
-          <div class="cover" style={`--col: ${b.color}`}>
-            <p class="cover-title">{b.title}</p>
-            <p class="cover-author">{b.author}</p>
-          </div>
-          <svg class="ex-libris" width="66" height="66" viewBox="0 0 46 46" aria-hidden="true">
-            <path d={HANKO_EDGE} />
-            <text x="23" y="21" text-anchor="middle">
-              蔵書
-            </text>
-            <text x="23" y="37" text-anchor="middle">
-              狼
-            </text>
-          </svg>
-          <p class="ex-note hand">ex libris, stamped on the inside cover</p>
-        </div>
-        <div class="page page-r">
-          <p class="state">
-            {b.state === "reading" ? "READING NOW" : `READ · ${monthOf(b.finished!)}`}
-          </p>
-          <h2>{b.title}</h2>
-          <p class="byline">
-            {b.author} · {b.pages} pages
-          </p>
-          {b.state === "reading" && (
-            <>
-              <div
-                class="progress"
-                style={`--pct: ${Math.round(((b.page ?? 0) / b.pages) * 100)}%`}
-                aria-hidden="true"
-              >
-                <svg viewBox="0 0 300 10" preserveAspectRatio="none">
-                  <path d="M2 5 C 80 4, 200 6, 298 5" />
-                </svg>
-                <span class="done" />
-                <span class="tip" />
-              </div>
-              <p class="at">
-                the ribbon is at p. {b.page ?? "?"} of {b.pages}
-              </p>
-            </>
-          )}
-          {b.quote && <blockquote>{b.quote}</blockquote>}
-          {b.note && <p class="margin hand">{b.note}</p>}
-          <p class="facts">
-            <span>
-              {b.started && `started ${monthOf(b.started)}`}
-              {b.finished && ` · finished ${monthOf(b.finished)}`}
+  <div class="ink-room">
+    <section class="case" aria-label="Bookshelf">
+      {cases.map((c, ci) => (
+        <section class="year" aria-labelledby={`bk-y-${c.year}`}>
+          <h2 class="group-head" id={`bk-y-${c.year}`}>
+            <span class="group-kanji" aria-hidden="true">
+              {c.kanji}
             </span>
-            {b.place &&
-              (b.album ? (
-                <a href={`/photos/${b.album}/`}>read in {b.place} → its album</a>
+            {c.year}
+            <span class="group-rule" aria-hidden="true" />
+            <span class="group-n">{c.count}</span>
+          </h2>
+          {c.planks.map((pl) => (
+            <div class="scroll">
+              <div class:list={["row", { older: ci > 0 }]} style={`--row: ${pl.width}px`}>
+                <div class="books">
+                  {pl.items.map((it) =>
+                    it.kind === "book" ? (
+                      <Fragment>
+                        {[it.book].map((p) => (
+                          <button
+                            type="button"
+                            class:list={["bk", { leans: p.lean > 0 }]}
+                            data-book={p.book.id}
+                            aria-label={p.label}
+                            aria-pressed={p.book.id === opened?.book.id ? "true" : "false"}
+                            style={`--rot: ${p.rot}deg; margin: 0 ${p.gap}px 0 ${p.lean}px`}
+                          >
+                            <svg
+                              class="spine"
+                              width={p.spine.width}
+                              height={p.spine.height}
+                              viewBox={p.spine.vb}
+                              aria-hidden="true"
+                            >
+                              <g class="wash">
+                                <path
+                                  d={p.spine.body}
+                                  fill={p.spine.tone}
+                                  transform={p.spine.wash}
+                                  filter="url(#bk-wash)"
+                                />
+                                <path
+                                  d={p.spine.caps}
+                                  fill={p.spine.tone2}
+                                  transform={p.spine.wash}
+                                  filter="url(#bk-wash)"
+                                />
+                              </g>
+                              <path class="rules" d={p.spine.lines} filter="url(#bk-tremble)" />
+                              <path class="orn" d={p.spine.dots} />
+                              {p.spine.titles.map((t) => (
+                                <text
+                                  transform={t.transform}
+                                  text-anchor="middle"
+                                  dominant-baseline="central"
+                                  opacity={t.o}
+                                  style={t.style}
+                                >
+                                  {t.t}
+                                </text>
+                              ))}
+                              <path class="ink" d={p.spine.body} filter="url(#bk-tremble)" />
+                            </svg>
+                            {p.ribbon && (
+                              <svg
+                                class="rib"
+                                width="30"
+                                height={p.ribbon.len + 12}
+                                viewBox={`-15 0 30 ${p.ribbon.len + 12}`}
+                                aria-hidden="true"
+                                style={`left: ${p.ribbon.left}px`}
+                              >
+                                <g transform={`rotate(${p.ribbon.rot})`}>
+                                  <g class="silk">
+                                    <path
+                                      d={p.ribbon.body}
+                                      transform="translate(1.6 1.2)"
+                                      filter="url(#bk-wash)"
+                                    />
+                                  </g>
+                                  <path
+                                    class="fold"
+                                    d={p.ribbon.fold}
+                                    transform="translate(1.6 1.2)"
+                                  />
+                                  <path
+                                    class="ink"
+                                    d={p.ribbon.body}
+                                    stroke-width={p.ribbon.lw}
+                                    filter="url(#bk-tremble)"
+                                  />
+                                  <path class="threads" d={p.ribbon.threads} />
+                                </g>
+                              </svg>
+                            )}
+                            <span class="whisper hand" aria-hidden="true">
+                              {p.whisper}
+                            </span>
+                          </button>
+                        ))}
+                      </Fragment>
+                    ) : (
+                      <div class="pile" style={`margin: 0 14px 0 ${it.ml}px`}>
+                        {it.candle && (
+                          <svg
+                            class="thing"
+                            width={it.candle.width}
+                            height={it.candle.height}
+                            viewBox={it.candle.vb}
+                            aria-hidden="true"
+                            style={`margin-left: ${it.candleX}px; --sw: ${it.candle.sw}`}
+                          >
+                            <ellipse
+                              class="pool"
+                              cx="100"
+                              cy="166"
+                              rx="34"
+                              ry="5"
+                              filter="url(#bk-pool)"
+                            />
+                            <g class="wash">
+                              {it.candle.forms.map((f) => (
+                                <path
+                                  d={f.d}
+                                  fill={f.fill}
+                                  transform={it.candle!.wash}
+                                  filter="url(#bk-wash)"
+                                />
+                              ))}
+                            </g>
+                            {it.candle.forms.map((f) => (
+                              <path class="ink" d={f.d} filter="url(#bk-tremble)" />
+                            ))}
+                            {it.candle.lines.map((l) => (
+                              <path
+                                class="stroke"
+                                d={l.d}
+                                stroke={l.stroke}
+                                stroke-width={l.w}
+                                opacity={l.o}
+                              />
+                            ))}
+                          </svg>
+                        )}
+                        {it.books.map((p) => (
+                          <button
+                            type="button"
+                            class="bk lying"
+                            data-book={p.book.id}
+                            aria-label={p.label}
+                            aria-pressed={p.book.id === opened?.book.id ? "true" : "false"}
+                            style={`--rot: ${p.rot}deg; margin-left: ${p.x + 5}px`}
+                          >
+                            <svg
+                              class="spine"
+                              width={p.spine.width}
+                              height={p.spine.height}
+                              viewBox={p.spine.vb}
+                              aria-hidden="true"
+                            >
+                              <g transform={p.spine.turn}>
+                                <g class="wash">
+                                  <path
+                                    d={p.spine.body}
+                                    fill={p.spine.tone}
+                                    transform={p.spine.wash}
+                                    filter="url(#bk-wash)"
+                                  />
+                                  <path
+                                    d={p.spine.caps}
+                                    fill={p.spine.tone2}
+                                    transform={p.spine.wash}
+                                    filter="url(#bk-wash)"
+                                  />
+                                </g>
+                                <path class="rules" d={p.spine.lines} filter="url(#bk-tremble)" />
+                                <path class="orn" d={p.spine.dots} />
+                                {p.spine.titles.map((t) => (
+                                  <text
+                                    transform={t.transform}
+                                    text-anchor="middle"
+                                    dominant-baseline="central"
+                                    opacity={t.o}
+                                    style={t.style}
+                                  >
+                                    {t.t}
+                                  </text>
+                                ))}
+                                <path class="ink" d={p.spine.body} filter="url(#bk-tremble)" />
+                              </g>
+                            </svg>
+                            <span class="whisper hand" aria-hidden="true">
+                              {p.whisper}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    ),
+                  )}
+                </div>
+                <svg class="plank" width={pl.width} height="56" viewBox={pl.vb} aria-hidden="true">
+                  <ellipse
+                    class="pool"
+                    cx={pl.pool.cx}
+                    cy="30"
+                    rx={pl.pool.rx}
+                    ry="9"
+                    filter="url(#bk-pool)"
+                  />
+                  <g class="wash">
+                    <path d={pl.brackets} transform="translate(3 2)" filter="url(#bk-wash)" />
+                    <path d={pl.plank} transform="translate(3 2)" filter="url(#bk-wash)" />
+                  </g>
+                  <path class="ink thin" d={pl.brackets} filter="url(#bk-tremble)" />
+                  <path class="ink" d={pl.plank} filter="url(#bk-tremble)" />
+                  <path class="grain" d={pl.grain} />
+                </svg>
+              </div>
+            </div>
+          ))}
+        </section>
+      ))}
+    </section>
+
+    <section class="spread" aria-label="The open book" aria-live="polite">
+      {spreads.map((s) => (
+        <article class="opened" data-book={s.b.id} hidden={s.b.id !== opened?.book.id}>
+          <h2 class="group-head">
+            <span class="group-kanji" aria-hidden="true">
+              開
+            </span>
+            {s.kicker}
+            <span class="group-rule" aria-hidden="true" />
+          </h2>
+          <div class="leaves" style={`--cover: ${s.tone}`}>
+            <svg
+              class="spread-pool"
+              viewBox="0 0 1000 80"
+              preserveAspectRatio="none"
+              aria-hidden="true"
+            >
+              <ellipse cx="500" cy="36" rx="470" ry="16" filter="url(#bk-pool)" />
+            </svg>
+            {[s.left, s.right].map((pg, side) => (
+              <div class:list={["leaf", side ? "leaf-r" : "leaf-l"]}>
+                <svg class="paper" viewBox={pg.vb} preserveAspectRatio="none" aria-hidden="true">
+                  <g class="wash">
+                    <path d={pg.cover} transform="translate(3 2)" filter="url(#bk-wash)" />
+                  </g>
+                  <path class="ink thin" d={pg.cover} filter="url(#bk-tremble)" />
+                  <path class="sheet" d={pg.stackFill} />
+                  <path class="stack" d={pg.stack} filter="url(#bk-tremble)" />
+                  <path class="sheet" d={pg.shape} />
+                  <path class="fibre" d={pg.shape} filter="url(#bk-fibre)" />
+                  <path class="gutter" d={pg.gutter} filter="url(#bk-pool)" />
+                  <path class="ink thin" d={pg.shape} filter="url(#bk-tremble)" />
+                </svg>
+                <p class="running">
+                  <span>{pg.heads[0]}</span>
+                  <i>{pg.heads[1]}</i>
+                </p>
+                {side === 0 || s.open ? (
+                  <div class="text">
+                    {pg.paras.map((pa, k) => (
+                      <p class:list={{ first: k === 0 }}>
+                        {pa.cap && <span class="cap">{pa.cap}</span>}
+                        {pa.a}
+                        {pa.mark && (
+                          <mark>
+                            {pa.mark}
+                            <svg viewBox="0 0 100 8" preserveAspectRatio="none" aria-hidden="true">
+                              <path d="M1 4 C 18 2.6, 36 6, 54 4 S 86 2.8, 99 5" />
+                            </svg>
+                          </mark>
+                        )}
+                        {pa.b}
+                      </p>
+                    ))}
+                    {side === 0 && !s.open && (
+                      <svg
+                        class="fleuron"
+                        width="70"
+                        height="22"
+                        viewBox="0 0 70 22"
+                        aria-hidden="true"
+                      >
+                        <path
+                          d="M6 12 C 18 4, 26 18, 35 11 C 44 4, 52 18, 64 10"
+                          filter="url(#bk-tremble)"
+                        />
+                        <circle cx="35" cy="11" r="1.8" />
+                      </svg>
+                    )}
+                  </div>
+                ) : (
+                  <div class="colophon">
+                    <p class="ends">here ends the book</p>
+                    {s.colophon.map((row) => (
+                      <p>
+                        <i>{row.k}</i>&#8194;
+                        {row.href ? <a href={row.href}>{row.v} →</a> : <span>{row.v}</span>}
+                      </p>
+                    ))}
+                    <svg class="seal" width="50" height="50" viewBox="0 0 46 46" aria-hidden="true">
+                      <path d="M4 5 Q23 2 42 4 Q45 23 43 42 Q23 45 3 43 Q1 23 4 5 Z" />
+                      <path class="edge" d="M8 9 Q23 7 38 8 Q40 23 38 38 Q23 40 8 38 Q6 23 8 9 Z" />
+                      <text x="23" y="31" text-anchor="middle">
+                        読
+                      </text>
+                    </svg>
+                  </div>
+                )}
+                {side === 0 && s.b.note && <p class="pencil">{s.b.note}</p>}
+                {side === 1 && s.open && <p class="folio">{pg.heads[1]}</p>}
+                {side === 1 && s.open && (
+                  <svg
+                    class="page-rib"
+                    width="40"
+                    height={s.ribbon.h}
+                    viewBox={s.ribbon.vb}
+                    aria-hidden="true"
+                  >
+                    <g class="silk">
+                      <path
+                        d={s.ribbon.body}
+                        transform="translate(1.6 1.2)"
+                        filter="url(#bk-wash)"
+                      />
+                    </g>
+                    <path class="fold" d={s.ribbon.fold} transform="translate(1.6 1.2)" />
+                    <path
+                      class="ink"
+                      d={s.ribbon.body}
+                      stroke-width={s.ribbon.lw}
+                      filter="url(#bk-tremble)"
+                    />
+                    <path class="threads" d={s.ribbon.threads} />
+                  </svg>
+                )}
+              </div>
+            ))}
+          </div>
+          <p class="caption">
+            <span class="caption-title">{s.b.title}</span> · <i>{s.b.author}</i> · {s.when}
+            {s.b.place &&
+              (s.b.album ? (
+                <Fragment>
+                  {" · "}
+                  <a href={`/photos/${s.b.album}/`}>read in {s.b.place} →</a>
+                </Fragment>
               ) : (
-                <span>read in {b.place}</span>
+                <Fragment> · read in {s.b.place}</Fragment>
               ))}
-            {b.writing && <a href={`/writings/${b.writing}/`}>what I wrote about it</a>}
           </p>
-        </div>
-      </article>
-    ))}
-  </section>
+        </article>
+      ))}
+    </section>
+  </div>
 </BaseLayout>
 
 <script>
-  const spines = [...document.querySelectorAll<HTMLButtonElement>(".spine")];
-  const pages = [...document.querySelectorAll<HTMLElement>(".book")];
+  const spines = [...document.querySelectorAll<HTMLButtonElement>(".bk")];
+  const opened = [...document.querySelectorAll<HTMLElement>(".opened")];
   const spread = document.querySelector<HTMLElement>(".spread")!;
   const still = matchMedia("(prefers-reduced-motion: reduce)");
 
-  // window light crosses the case with the hour
-  const hour = new Date().getHours() + new Date().getMinutes() / 60;
-  document
-    .querySelector<HTMLElement>(".case")!
-    .style.setProperty("--sun", `${Math.round(8 + (hour / 24) * 70)}%`);
-
-  // on a narrow plank, slide the open book into view
+  // on a narrow shelf, slide the open book into view
   for (const spine of spines) {
-    const row = spine.parentElement!;
-    if (spine.ariaPressed === "true" && row.scrollWidth > row.clientWidth)
-      row.scrollLeft = spine.offsetLeft - row.clientWidth / 2;
+    const row = spine.closest<HTMLElement>(".scroll")!;
+    if (spine.ariaPressed === "true" && row.scrollWidth > row.clientWidth) {
+      const box = spine.getBoundingClientRect();
+      const at = box.left - row.getBoundingClientRect().left + row.scrollLeft;
+      row.scrollLeft = at - row.clientWidth / 2;
+    }
   }
 
   for (const spine of spines) {
     spine.addEventListener("click", () => {
       const id = spine.dataset.book;
-      for (const s of spines) s.setAttribute("aria-pressed", String(s === spine));
-      for (const page of pages) {
-        page.hidden = page.dataset.book !== id;
-        if (!page.hidden) {
+      for (const s of spines) s.setAttribute("aria-pressed", String(s.dataset.book === id));
+      for (const book of opened) {
+        book.hidden = book.dataset.book !== id;
+        if (!book.hidden) {
           // open it again, even if it was the one lying open
-          page.classList.remove("opening");
-          void page.offsetWidth;
-          page.classList.add("opening");
+          book.classList.remove("opening");
+          void book.offsetWidth;
+          book.classList.add("opening");
         }
       }
       const box = spread.getBoundingClientRect();
@@ -284,10 +561,8 @@ const label = (b: (typeof onShelf)[number]) =>
 
   .hint {
     margin: 1rem 0 0 0.375rem;
-    font-weight: 300;
-    font-size: 1.125rem;
-    color: var(--fg-dim);
-    transform: rotate(-1deg);
+    font-size: 1.0625rem;
+    transform: rotate(-0.6deg);
   }
 
   .hint-touch {
@@ -304,623 +579,620 @@ const label = (b: (typeof onShelf)[number]) =>
     }
   }
 
-  .case {
-    --wood: color-mix(
-      in oklab,
-      color-mix(in oklab, var(--tape), var(--cursor) 18%),
-      var(--fg-dim) 30%
-    );
-    --wood-dark: color-mix(in oklab, var(--wood), var(--fg-main) 40%);
-    position: relative;
-    margin-top: 0.75rem;
-    padding: 0 1.375rem;
-    background: linear-gradient(
-      color-mix(in oklab, var(--bg-main), var(--fg-main) 6%),
-      color-mix(in oklab, var(--bg-main), var(--fg-main) 3%)
-    );
-    border-radius: 3px;
-  }
-
-  .post {
+  .defs {
     position: absolute;
-    top: 0;
-    width: 14px;
-    height: 100%;
+    width: 0;
+    height: 0;
   }
 
-  .post-l {
-    left: -6px;
-  }
-
-  .post-r {
-    right: -6px;
-  }
-
-  .post path,
-  .plank path,
-  .top-plank path {
-    fill: var(--wood);
-    stroke: var(--wood-dark);
-    stroke-width: 0.8;
-    vector-effect: non-scaling-stroke;
-  }
-
-  .plank .grain,
-  .plank .knot {
-    fill: none;
-    stroke-width: 0.5;
-    opacity: 0.5;
-  }
-
-  .plank .knot {
-    opacity: 0.7;
-  }
-
-  .sun {
-    position: absolute;
-    inset: 0;
-    z-index: 3;
-    pointer-events: none;
-    --sun: 40%;
-    background: linear-gradient(
-      103deg,
-      transparent 0 var(--sun),
-      light-dark(rgb(255 255 255 / 0.1), color-mix(in srgb, var(--tape) 6%, transparent))
-        calc(var(--sun) + 6%) calc(var(--sun) + 14%),
-      transparent calc(var(--sun) + 20%)
+  .ink-room {
+    --t-bamboo: color-mix(in oklab, var(--tape), var(--cursor) 32%);
+    --t-bambooLt: color-mix(in oklab, var(--t-bamboo), var(--paper) 45%);
+    --t-clay: color-mix(in oklab, var(--tape), var(--fg-main) 25%);
+    --t-clayRed: color-mix(in oklab, var(--red), var(--tape) 40%);
+    --t-glaze: color-mix(in oklab, var(--sea), var(--fg-main) 30%);
+    --t-deep: color-mix(in oklab, var(--sea), var(--fg-main) 60%);
+    --t-water: color-mix(in oklab, var(--sea), var(--paper) 20%);
+    --t-lac: color-mix(in oklab, var(--red-warmer), var(--fg-main) 55%);
+    --t-lacHi: color-mix(in oklab, var(--red-warmer), var(--fg-main) 40%);
+    --t-silk: var(--red);
+    --t-silkDk: color-mix(in oklab, var(--red), var(--fg-main) 35%);
+    --t-iron: color-mix(in oklab, var(--fg-main), var(--sea) 30%);
+    --t-bronze: color-mix(in oklab, var(--cursor), var(--fg-main) 45%);
+    --t-stone: color-mix(in oklab, var(--fg-main), var(--paper) 45%);
+    --t-ink: color-mix(in oklab, var(--fg-main), var(--paper) 10%);
+    --t-flame: var(--cursor);
+    --t-leaf: color-mix(in oklab, var(--leaf), var(--fg-main) 45%);
+    --t-glow: color-mix(in oklab, var(--cursor), var(--paper) 70%);
+    --pool: light-dark(
+      color-mix(in oklab, var(--paper), var(--fg-main) 8%),
+      color-mix(in oklab, var(--paper), var(--fg-main) 20%)
     );
+    --pencil: color-mix(in oklab, var(--fg-dim), var(--fg-main) 20%);
   }
 
-  .top {
-    position: relative;
-    display: flex;
-    align-items: flex-end;
-    gap: 1.75rem;
-    height: 70px;
-    padding: 0 1.125rem;
-  }
-
-  .pile {
-    display: flex;
-    flex-direction: column-reverse;
-    align-items: flex-start;
-  }
-
-  .pile span {
-    display: block;
-    background: color-mix(in oklab, var(--ink), var(--paper) 25%);
-    border-radius: 1px 3px 3px 1px;
-    box-shadow: inset 0 -1px 0 rgb(0 0 0 / 0.15);
-  }
-
-  .next {
-    padding-bottom: 2px;
-    font-weight: 300;
-    font-size: 0.9375rem;
-    color: var(--fg-dim);
-  }
-
-  .bowl {
-    margin-left: auto;
-  }
-
-  .bowl path {
-    fill: var(--bg-alt);
-    stroke: var(--fg-dim);
-  }
-
-  .bowl .gold {
+  .ink-room :is(.ink, .rules, .grain, .stack, .threads, .stroke) {
     fill: none;
-    stroke: var(--cursor);
-    stroke-width: 1.6;
     stroke-linecap: round;
+    stroke-linejoin: round;
   }
 
-  .top-plank {
-    display: block;
-    width: 100%;
-    height: 16px;
+  .ink-room .ink {
+    stroke: var(--t-ink);
+    stroke-width: 1.3;
   }
 
-  .shelf {
-    position: relative;
-    height: 268px;
+  .ink-room .ink.thin {
+    stroke-width: 1.3;
   }
 
-  .row {
-    position: absolute;
-    left: 10px;
-    right: 10px;
-    bottom: 20px;
-    z-index: 2;
+  .ink-room .pool {
+    fill: var(--pool);
+  }
+
+  .group-head {
     display: flex;
-    align-items: flex-end;
-    gap: 1px;
-    padding: 0 6px;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin: 0;
+    font-family: var(--font-mono);
+    font-weight: 400;
+    font-size: 0.6875rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--fg-main);
   }
 
-  .shelf > .plank {
-    position: absolute;
-    left: -6px;
-    bottom: 0;
-    z-index: 1;
-    width: calc(100% + 12px);
-    height: 22px;
-  }
-
-  .year {
-    position: absolute;
-    left: 22px;
-    bottom: -32px;
-    z-index: 4;
-    padding: 3px 12px 2px;
-    background: var(--paper);
+  .group-kanji {
+    font-family: var(--font-seal);
     font-size: 1.0625rem;
-    transform: rotate(var(--tr));
-    box-shadow: 0 2px 5px -2px rgb(0 0 0 / 0.3);
-  }
-
-  .year span {
-    font-weight: 300;
-    font-size: 0.875rem;
-    color: var(--fg-dim);
-  }
-
-  .floor {
-    height: 36px;
-  }
-
-  .spine {
-    position: relative;
-    flex: none;
-    width: var(--w);
-    height: var(--h);
-    margin: 0 var(--gap) 0 0;
-    padding: 0;
-    border: 0;
-    border-radius: var(--radius);
-    background: var(--col);
-    color: var(--fg-main);
-    box-shadow: 1px 0 0 rgb(0 0 0 / 0.08);
-    transform: translateY(var(--dip)) rotate(var(--rot));
-    transform-origin: 0 100%;
-    transition:
-      transform 0.45s cubic-bezier(0.2, 0.7, 0.3, 1),
-      box-shadow 0.45s ease;
-    cursor: pointer;
-  }
-
-  .spine[aria-pressed="true"] {
-    transform: translateY(calc(var(--dip) - 8px)) rotate(var(--rot));
-  }
-
-  .spine svg {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-  }
-
-  .spine svg path {
-    fill: none;
-    stroke: var(--fg-main);
-    stroke-width: 0.8;
-    opacity: 0.4;
-    vector-effect: non-scaling-stroke;
-  }
-
-  .spine .shade {
-    fill: #000;
-    opacity: 0.1;
-  }
-
-  .spine .shine {
-    fill: #fff;
-    opacity: 0.08;
-  }
-
-  .daisen {
-    position: absolute;
-    top: 14%;
-    left: 50%;
-    max-height: 58%;
-    overflow: hidden;
-    padding: 6px 2px;
-    background: color-mix(in oklab, var(--paper), var(--col) 12%);
-    font-size: clamp(8px, calc(var(--w) - 16px), 12px);
-    line-height: 1;
-    letter-spacing: 0.08em;
-    white-space: nowrap;
-    writing-mode: vertical-rl;
-    translate: -50% 0;
-    box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.12);
-  }
-
-  .mark {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 8px;
-    font-family: var(--font-mono);
-    font-size: 7px;
-    text-align: center;
-    color: var(--paper);
-    mix-blend-mode: luminosity;
-  }
-
-  .ribbon {
-    position: absolute;
-    left: 34%;
-    top: calc(100% - 4px);
-    width: 5px;
-    height: var(--len);
-    background: var(--red);
-    clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 86%, 0 100%);
-    transform: rotate(var(--rr));
-    transform-origin: top;
-  }
-
-  .slip {
-    position: absolute;
-    left: 50%;
-    bottom: calc(100% + 14px);
-    z-index: 5;
-    display: block;
-    width: 168px;
-    margin-left: -84px;
-    padding: 10px 12px 9px;
-    background: var(--paper);
-    color: var(--fg-main);
-    text-align: left;
-    box-shadow: 0 6px 14px -6px rgb(0 0 0 / 0.35);
-    pointer-events: none;
-    opacity: 0;
-    transform: translateY(6px) rotate(var(--sr));
-    transition:
-      opacity 0.25s ease,
-      transform 0.35s ease;
-  }
-
-  .slip > span {
-    display: block;
-  }
-
-  .slip-title {
-    font-size: 0.9375rem;
-    line-height: 1.25;
-  }
-
-  .slip-author {
-    font-style: italic;
-    font-size: 0.8125rem;
-    color: var(--fg-dim);
-  }
-
-  .slip-when {
-    margin-top: 6px;
-    font-family: var(--font-mono);
-    font-size: 0.625rem;
-    letter-spacing: 0.1em;
-    color: var(--fg-dim);
-  }
-
-  .slip-when.now {
+    letter-spacing: 0;
     color: var(--red);
   }
 
-  @media (hover: hover) {
-    .row:has(.spine:hover, .spine:focus-visible) {
-      z-index: 5;
-    }
-
-    .spine:hover,
-    .spine:focus-visible {
-      z-index: 6;
-      transform: translateY(calc(var(--dip) - 18px)) rotate(-4deg);
-      box-shadow: 6px 14px 16px -8px rgb(0 0 0 / 0.5);
-    }
-
-    .spine:hover .slip,
-    .spine:focus-visible .slip {
-      opacity: 1;
-      transform: rotate(var(--sr));
-    }
+  .group-rule {
+    flex: 1;
+    border-bottom: 1px dotted var(--border);
+    transform: translateY(-3px);
   }
 
-  .spine:focus-visible {
-    outline: 2px solid var(--cursor);
-    outline-offset: 2px;
+  .group-n {
+    color: var(--fg-dim);
   }
 
-  .stone {
-    flex: none;
-    margin-left: -6px;
+  .case {
+    margin-top: 0.5rem;
   }
 
-  .stone path {
-    fill: color-mix(in oklab, var(--bg-alt), var(--fg-dim) 14%);
-    stroke: var(--fg-dim);
-    stroke-width: 0.8;
+  .year {
+    margin-top: 3.25rem;
   }
 
-  .stone .vein {
-    fill: none;
+  .scroll {
+    padding: 0 0 70px;
+    margin-bottom: -70px;
+  }
+
+  .scroll + .scroll {
+    margin-top: 0.5rem;
+  }
+
+  .row {
+    position: relative;
+    width: var(--row);
+    padding-top: 40px;
+  }
+
+  .row.older {
+    margin-left: 40px;
+  }
+
+  .books {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: flex-end;
+    padding-left: 22px;
+  }
+
+  .plank {
+    position: relative;
+    z-index: 1;
+    display: block;
+    margin-top: -5px;
+    overflow: visible;
+  }
+
+  .plank .wash {
+    fill: var(--t-bamboo);
+    opacity: 0.62;
+  }
+
+  .plank .ink.thin {
+    stroke-width: 1.3;
+  }
+
+  .plank .ink {
+    stroke-width: 1.4;
+  }
+
+  .grain {
+    stroke: var(--t-ink);
     stroke-width: 0.6;
+    opacity: 0.5;
+  }
+
+  @media (max-width: 47.99em) {
+    .scroll {
+      margin: 0 calc(var(--gutter) * -1) -70px;
+      padding: 0 var(--gutter) 70px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scrollbar-width: none;
+    }
+
+    .scroll::-webkit-scrollbar {
+      display: none;
+    }
+
+    .row.older {
+      margin-left: 0;
+    }
+  }
+
+  .bk {
+    position: relative;
+    flex: none;
+    display: block;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    transform: rotate(var(--rot));
+    transform-origin: 50% 100%;
+    transition: transform 0.5s cubic-bezier(0.3, 1.4, 0.5, 1);
+  }
+
+  .bk.leans {
+    transform-origin: 0% 100%;
+  }
+
+  .spine {
+    display: block;
+    overflow: visible;
+  }
+
+  .spine .wash {
+    opacity: 0.62;
+    transition: opacity 0.6s ease;
+  }
+
+  .spine text {
+    fill: var(--t-ink);
+  }
+
+  .rules {
+    stroke: var(--t-ink);
+    stroke-width: 0.7;
     opacity: 0.6;
+  }
+
+  .orn {
+    fill: var(--t-ink);
+    opacity: 0.7;
+  }
+
+  .bk[aria-pressed="true"] {
+    transform: translateY(-6px) rotate(var(--rot));
+  }
+
+  .bk[aria-pressed="true"] .wash,
+  .bk:focus-visible .wash {
+    opacity: 0.95;
+  }
+
+  .whisper {
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 14px);
+    font-size: 0.9375rem;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateX(-30%) rotate(-2deg);
+    transition: opacity 0.3s ease;
+  }
+
+  .lying .whisper {
+    left: calc(100% + 12px);
+    bottom: 0;
+    transform: rotate(-2deg);
+  }
+
+  @media (hover: hover) {
+    .bk:hover {
+      transform: translateY(-12px) rotate(-2.5deg);
+    }
+
+    .bk.lying:hover {
+      transform: translateX(10px) rotate(-1deg);
+    }
+
+    .bk:hover .wash {
+      opacity: 0.95;
+    }
+
+    .bk:hover .whisper {
+      opacity: 1;
+    }
+  }
+
+  .bk:focus-visible .whisper {
+    opacity: 1;
+  }
+
+  .pile {
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .thing {
+    display: block;
+    margin-bottom: -1px;
+    overflow: visible;
+  }
+
+  .thing .wash {
+    opacity: 0.62;
+  }
+
+  .thing .ink {
+    stroke-width: var(--sw);
+  }
+
+  .rib {
+    position: absolute;
+    top: calc(100% - 5px);
+    overflow: visible;
+    pointer-events: none;
+  }
+
+  .silk {
+    fill: var(--t-silk);
+    opacity: 0.85;
+  }
+
+  .fold {
+    fill: var(--t-silkDk);
+    opacity: 0.5;
+  }
+
+  .threads {
+    stroke: var(--t-ink);
+    stroke-width: 0.5;
+    opacity: 0.7;
+  }
+
+  .ink-room .rib .ink,
+  .ink-room .page-rib .ink {
+    opacity: 0.85;
   }
 
   .spread {
     margin-top: 5.5rem;
-    scroll-margin-top: 2rem;
   }
 
-  .book {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    perspective: 1600px;
+  .opening {
+    animation: open 0.8s cubic-bezier(0.2, 0.7, 0.3, 1) both;
   }
 
-  .book[hidden] {
-    display: none;
-  }
-
-  .page {
-    position: relative;
-    min-height: 420px;
-    background: var(--paper);
-  }
-
-  .page-l {
-    padding: 2.125rem 2.125rem 1.75rem;
-    border-radius: 4px 0 0 4px;
-    box-shadow:
-      inset -26px 0 30px -24px rgb(0 0 0 / 0.35),
-      0 10px 22px -16px rgb(0 0 0 / 0.4);
-  }
-
-  .page-r {
-    padding: 2.125rem 2.375rem 1.75rem;
-    border-radius: 0 4px 4px 0;
-    box-shadow:
-      inset 26px 0 30px -24px rgb(0 0 0 / 0.3),
-      0 10px 22px -16px rgb(0 0 0 / 0.4);
-    transform-origin: 0 50%;
-  }
-
-  .book.opening .page-r {
-    animation: open-book 0.7s cubic-bezier(0.2, 0.7, 0.3, 1) both;
-  }
-
-  @keyframes open-book {
+  @keyframes open {
     from {
-      opacity: 0.2;
-      transform: rotateY(-70deg);
+      opacity: 0;
+      transform: translateY(14px) scale(0.98);
     }
   }
 
-  .cover {
+  .leaves {
     position: relative;
-    width: 220px;
-    height: 300px;
-    margin: 0 auto;
-    padding: 1.875rem 1rem 0 1.375rem;
-    background: var(--col);
-    border-radius: 2px 4px 4px 2px;
-    box-shadow: 0 8px 16px -10px rgb(0 0 0 / 0.45);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    max-width: 1000px;
+    margin: 1.75rem auto 0;
+    transform-origin: 50% 100%;
   }
 
-  .cover::before {
-    content: "";
+  .spread-pool {
     position: absolute;
-    inset: 0 auto 0 0;
-    width: 10px;
-    background: rgb(0 0 0 / 0.1);
+    left: 4%;
+    bottom: -34px;
+    width: 92%;
+    height: 80px;
+    overflow: visible;
   }
 
-  .cover p {
-    margin: 0;
-    padding: 0.25rem 0.5rem;
-    background: color-mix(in oklab, var(--paper), var(--col) 12%);
-    width: fit-content;
-    max-width: 100%;
+  .spread-pool ellipse {
+    fill: var(--pool);
   }
 
-  .cover-title {
-    font-size: 1.375rem;
-    line-height: 1.2;
-    letter-spacing: 0.06em;
-  }
-
-  .cover-author {
-    margin-top: 0.5rem !important;
-    font-style: italic;
-    font-size: 0.9375rem;
-  }
-
-  .ex-libris {
-    position: absolute;
-    right: 28px;
-    bottom: 26px;
-    transform: rotate(-7deg);
-    opacity: 0.88;
-  }
-
-  .ex-libris path {
-    fill: none;
-    stroke: var(--red);
-    stroke-width: 2.4;
-  }
-
-  .ex-libris text {
-    font-family: var(--font-seal);
-    font-size: 13px;
-    fill: var(--red);
-  }
-
-  .ex-note {
-    margin: 1.375rem 0 0;
-    font-weight: 300;
-    font-size: 0.9375rem;
-    color: var(--fg-dim);
-  }
-
-  .state {
-    margin: 0;
-    font-family: var(--font-mono);
-    font-size: 0.6875rem;
-    letter-spacing: 0.14em;
-    color: var(--fg-dim);
-  }
-
-  .page-r h2 {
-    margin: 0.625rem 0 0;
-    font-weight: 400;
-    font-size: 1.875rem;
-    line-height: 1.15;
-  }
-
-  .byline {
-    margin: 0.25rem 0 0;
-    font-style: italic;
-    color: var(--fg-dim);
-  }
-
-  .progress {
+  .leaf {
     position: relative;
-    height: 10px;
-    margin-top: 1.375rem;
+    display: flex;
+    flex-direction: column;
+    min-height: 620px;
+    padding: 52px 46px 74px 64px;
   }
 
-  .progress svg {
+  .leaf-r {
+    padding: 52px 64px 74px 46px;
+  }
+
+  .paper {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
+    overflow: visible;
+    pointer-events: none;
   }
 
-  .progress path {
-    fill: none;
-    stroke: var(--border);
-    stroke-dasharray: 2 5;
+  .paper .wash {
+    fill: var(--cover);
+    opacity: 0.6;
+  }
+
+  .paper .ink,
+  .stack {
     vector-effect: non-scaling-stroke;
   }
 
-  .progress .done {
+  .sheet {
+    fill: var(--paper);
+  }
+
+  .stack {
+    stroke: var(--t-ink);
+    stroke-width: 0.7;
+    opacity: 0.55;
+  }
+
+  .fibre {
+    fill: var(--fg-main);
+    opacity: 0.03;
+  }
+
+  .gutter {
+    fill: light-dark(
+      color-mix(in oklab, var(--fg-main) 7%, transparent),
+      color-mix(in oklab, var(--fg-main) 20%, transparent)
+    );
+  }
+
+  .running {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    margin: 0;
+    font-family: "IM Fell English", serif;
+    font-size: 13px;
+    letter-spacing: 0.05em;
+    color: var(--fg-dim);
+  }
+
+  .text {
+    position: relative;
+    margin-top: 20px;
+    font-family: "EB Garamond", var(--font-body);
+    font-size: 16px;
+    line-height: 1.58;
+    color: var(--fg-main);
+    text-align: justify;
+    hyphens: auto;
+  }
+
+  .text p {
+    margin: 0;
+    text-indent: 1.3em;
+  }
+
+  .text p.first {
+    text-indent: 0;
+  }
+
+  .cap {
+    float: left;
+    margin: 5px 7px 0 0;
+    font-family: "IM Fell English", serif;
+    font-size: 46px;
+    line-height: 0.82;
+    color: var(--red);
+  }
+
+  mark {
+    position: relative;
+    color: inherit;
+    background: linear-gradient(
+      transparent 64%,
+      color-mix(in oklab, var(--cursor), var(--paper) 70%) 64%,
+      color-mix(in oklab, var(--cursor), var(--paper) 70%) 96%,
+      transparent 96%
+    );
+  }
+
+  mark svg {
+    position: absolute;
+    left: -3px;
+    bottom: -5px;
+    width: calc(100% + 6px);
+    height: 8px;
+    overflow: visible;
+  }
+
+  mark path {
+    fill: none;
+    stroke: var(--pencil);
+    stroke-width: 1.1;
+    stroke-linecap: round;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .fleuron {
+    display: block;
+    margin: 26px auto 0;
+  }
+
+  .fleuron path {
+    fill: none;
+    stroke: var(--fg-dim);
+    stroke-width: 1;
+    stroke-linecap: round;
+  }
+
+  .fleuron circle {
+    fill: var(--red);
+  }
+
+  .pencil {
+    position: relative;
+    max-width: 250px;
+    margin: auto 0 0 20px;
+    padding-top: 1.25rem;
+    font-family: var(--font-hand);
+    font-weight: 300;
+    font-size: 16px;
+    line-height: 1.3;
+    color: var(--pencil);
+    transform: rotate(-4deg);
+  }
+
+  .folio {
     position: absolute;
     left: 0;
-    top: 4px;
-    width: var(--pct);
-    height: 2px;
-    background: var(--red);
+    right: 0;
+    bottom: 30px;
+    margin: 0;
+    font-family: "IM Fell English", serif;
+    font-style: italic;
+    font-size: 14px;
+    color: var(--fg-dim);
+    text-align: center;
   }
 
-  .progress .tip {
+  .page-rib {
     position: absolute;
-    left: calc(var(--pct) - 3px);
+    left: 12px;
     top: -6px;
-    width: 6px;
-    height: 20px;
-    background: var(--red);
-    clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 82%, 0 100%);
+    overflow: visible;
+    pointer-events: none;
   }
 
-  .at {
-    margin: 0.5rem 0 0;
-    font-family: var(--font-mono);
-    font-size: 0.6875rem;
+  .colophon {
+    position: relative;
+    max-width: 280px;
+    margin: 96px auto 0;
+    text-align: center;
+  }
+
+  .colophon p {
+    margin: 0;
+    font-family: "EB Garamond", var(--font-body);
+    font-size: 16px;
+    line-height: 1.7;
+  }
+
+  .colophon i {
     color: var(--fg-dim);
   }
 
-  blockquote {
-    margin: 1.5rem 0 0;
-    padding: 0.25rem 0 0 2.75rem;
-    font-size: 1.125rem;
-  }
-
-  blockquote::before {
-    width: 36px;
-    height: 36px;
-  }
-
-  .margin {
-    margin: 1.125rem 0 0;
-    font-size: 1.1875rem;
-    line-height: 1.4;
-    transform: rotate(-0.5deg);
-  }
-
-  .facts {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem 1.375rem;
-    margin: 1.375rem 0 0;
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
+  .colophon .ends {
+    margin-bottom: 18px;
+    font-family: "IM Fell English SC", serif;
+    font-size: 15px;
+    letter-spacing: 0.18em;
     color: var(--fg-dim);
+  }
+
+  .seal {
+    display: block;
+    margin: 26px auto 0;
+    transform: rotate(-6deg);
+  }
+
+  .seal path {
+    fill: var(--red);
+  }
+
+  .seal .edge {
+    fill: none;
+    stroke: var(--bg-main);
+    stroke-width: 1.2;
+    opacity: 0.7;
+  }
+
+  .seal text {
+    font-family: var(--font-seal);
+    font-size: 22px;
+    fill: var(--bg-main);
+  }
+
+  .caption {
+    max-width: 1000px;
+    margin: 4rem auto 0;
+    font-family: "EB Garamond", var(--font-body);
+    font-size: 18px;
+    color: var(--fg-dim);
+    text-align: center;
+  }
+
+  .caption-title {
+    color: var(--fg-main);
   }
 
   @media (max-width: 47.99em) {
-    .case {
-      margin-inline: calc(var(--gutter) * -1 + 6px);
-      padding: 0 0.625rem;
+    .spread {
+      margin-top: 4rem;
     }
 
-    .shelf {
-      height: 250px;
-    }
-
-    .row {
-      bottom: -60px;
-      padding: 12px 6px 80px;
-      overflow-x: auto;
-      scrollbar-width: none;
-    }
-
-    .stone {
-      margin-left: 12px;
-    }
-
-    .book {
+    .leaves {
       grid-template-columns: 1fr;
+      gap: 28px;
+      max-width: 350px;
     }
 
-    .page {
-      min-height: 0;
+    .leaf,
+    .leaf-r {
+      min-height: 660px;
+      padding: 40px 30px 70px 40px;
     }
 
-    .page-l {
-      border-radius: 4px 4px 0 0;
-      box-shadow:
-        inset 0 -26px 30px -24px rgb(0 0 0 / 0.35),
-        0 10px 22px -16px rgb(0 0 0 / 0.4);
+    .text {
+      font-size: 15px;
     }
 
-    .page-r {
-      border-radius: 0 0 4px 4px;
-      box-shadow:
-        inset 0 26px 30px -24px rgb(0 0 0 / 0.3),
-        0 10px 22px -16px rgb(0 0 0 / 0.4);
-      transform-origin: 50% 0;
+    .pencil {
+      align-self: flex-end;
+      max-width: 170px;
+      margin-left: 0;
     }
 
-    .cover {
-      width: 180px;
-      height: 250px;
+    .page-rib {
+      left: 0;
     }
 
-    .ex-libris {
-      width: 52px;
-      height: 52px;
+    .colophon {
+      margin-top: 40px;
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .spine,
-    .slip {
+    .bk,
+    .spine .wash {
       transition: none;
     }
 
-    .book.opening .page-r {
+    .opening {
       animation: none;
     }
   }

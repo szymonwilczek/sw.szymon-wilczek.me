@@ -375,7 +375,7 @@ export interface Picture {
   lines: { d: string; stroke: string; w: number; o: number; ink: boolean }[];
 }
 
-function picture(graphic: GraphicName): Picture {
+export function picture(graphic: GraphicName): Picture {
   const layers = draw(graphic);
   return {
     forms: layers.flatMap((l) => (l.k === "form" ? [{ d: l.d, fill: `var(--t-${l.tone})` }] : [])),

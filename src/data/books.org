@@ -11,7 +11,7 @@
 # :ALBUM:    slug of the photo album from that place, if there is one
 # :WRITING:  slug of an essay about it, if there is one
 #
-# A book with neither date waits on the pile on top of the case.
+# A book with neither date is waiting; it is only counted, not shelved.
 # Under the properties: a quote block is a line from the book, the rest is my note.
 #
 # Everything below is a placeholder shelf: only its shape is meant.
