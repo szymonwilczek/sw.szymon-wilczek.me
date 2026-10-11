@@ -107,13 +107,15 @@ export function stage(
       doEl.append(b);
       return b;
     },
-    // invisible button over part of the drawing
+
+    // invisible button over part of the drawing,
+    // centred on (x, y) in drawing units
     over(label, x, y, w, h, onClick) {
       const b = document.createElement("button");
       b.type = "button";
       b.className = "kobo-over";
       b.setAttribute("aria-label", label);
-      b.style.cssText = `left:${((x - w / 2) / W) * 100}%;top:${((y - h / 2) / H) * 100}%;width:${(w / W) * 100}%;height:${(h / H) * 100}%`;
+      b.style.cssText = `left:${(x / W) * 100}%;top:${(y / H) * 100}%;width:${(w / W) * 100}%;height:${(h / H) * 100}%`;
       b.addEventListener("click", onClick);
       art.append(b);
       return b;
