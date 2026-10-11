@@ -1,0 +1,76 @@
+import { G, rng, hash, piece, inked, wbox, wpoly, So, wring, PROF } from "../../utils/tea/ink.js";
+import { K, stage, look, fit, wait, type Work } from "./stage";
+
+const W = 1100,
+  H = 380,
+  Y = 300;
+
+export function run(host: HTMLElement, w: Work, done: (w: Work) => void, back: () => void) {
+  const r = rng(hash("kobo/shelf"));
+  const wall = G();
+  inked(wall, r, wbox(r, 150, 30, 950, 360, 1), K.plaster, K.ink, 1.1);
+  for (let k = 0; k < 30; k++)
+    So(
+      wall,
+      wring(r, 170 + r() * 760, 50 + r() * 290, 1 + r() * 2, 0.6 + r(), 0.3, 6),
+      K.plasterDk,
+      0.3,
+    );
+  inked(
+    wall,
+    r,
+    wpoly(
+      r,
+      [
+        [180, Y],
+        [920, Y],
+        [936, Y - 14],
+        [196, Y - 14],
+      ],
+      0.5,
+    ),
+    K.woodLt,
+    K.ink,
+    1.1,
+  );
+  inked(wall, r, wbox(r, 180, Y, 920, Y + 9, 0.4), K.wood, K.ink, 1);
+  (["cup", "hira", "yunomi", "bowl"] as const).forEach((k, i) => {
+    const x = [250, 360, 750, 860][i];
+    piece(wall, r, x, Y - 6, 0.8, K, {
+      ...PROF[k],
+      clay: (i * 3) % 4,
+      glaze: { none: true },
+      fire: 20 + i,
+    });
+  });
+  const mine = G({ cls: "kobo-wet" });
+  const s = fit(w.spec, 260, 240, 2.4);
+  piece(mine, rng(hash("kobo/mine")), 550, Y - 6, s, K, look(w.spec));
+
+  const st = stage(host, W, H, ["棚", "the drying shelf"], [wall, mine]);
+  const wet = st.svg.querySelector<SVGGElement>(".kobo-wet")!;
+  wet.style.transition = "filter 4s ease-in";
+  wet.style.filter = "brightness(0.78) saturate(1.2)";
+
+  function first() {
+    st.clearUi();
+    st.button("← back to the workshop", back, "quiet");
+    st.say("still wet and soft. it needs a night to dry before the kiln.");
+    st.button("leave it to dry", async () => {
+      st.clearUi();
+      wet.style.filter = "none";
+      st.say("leather-hard by evening…");
+      await wait(2200);
+      st.say("leather-hard by evening… bone dry by morning.");
+      await wait(1800);
+      st.clearUi();
+      st.button("carry it out to the kiln", () => done({ ...w, step: "bisque" }));
+    });
+    st.button(
+      "take it now, still damp",
+      () => done({ ...w, step: "bisque", flaw: w.flaw + 0.25 }),
+      "quiet",
+    );
+  }
+  first();
+}
