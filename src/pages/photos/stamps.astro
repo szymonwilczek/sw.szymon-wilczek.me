@@ -1,7 +1,6 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Divider from "../../components/Divider.astro";
-import Stamp from "../../components/Stamp.astro";
 import { getAllAlbums } from "../../utils/albums";
 import { shioriUrl } from "../../utils/shiori";
 import { hash, rng } from "../../utils/stamp";
@@ -34,7 +33,6 @@ function bookmark(slug: string, place: string) {
     cord: `M20 64 C${f1(cx + 8)} 44 ${f1(cx - 8)} 24 ${f1(cx)} ${f1(ky)}`,
     tassel,
     rot: f1((r() - 0.5) * 2.4),
-    tilt: f1(-4 + r() * 8),
     give: f1(0.7 + r() * 0.6),
   };
 }
@@ -77,8 +75,7 @@ const gables =
       <h1>Bookmarks</h1>
       <p class="lede">
         One 栞 for every place the camera went: a tall bookmark painted from that album’s own
-        terrain, with its stamp hinged at the foot. No two come out alike, and each one keeps the
-        page where that trip is.
+        terrain. No two come out alike, and each one keeps the page where that trip is.
       </p>
     </div>
     <p class="tally">
@@ -140,15 +137,6 @@ const gables =
                 aria-hidden="true"
                 data-art={shioriUrl(album.slug)}
               />
-              <span class="stuck" style={`--tilt: ${album.tilt}deg`}>
-                <Stamp
-                  slug={album.slug}
-                  terrain={album.terrain}
-                  country={row.country}
-                  num={album.stampNum}
-                  size={56}
-                />
-              </span>
               <span class="margin">
                 <span class="caps">{album.caps}</span>
                 <span class="tags">
@@ -869,23 +857,6 @@ const gables =
     opacity: 0.09;
   }
 
-  .stuck {
-    position: absolute;
-    right: -6px;
-    top: calc(var(--h) - 158px);
-    transform: rotate(var(--tilt));
-    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.2));
-  }
-
-  .stuck :global(.stamp) {
-    filter: none;
-    transform: none;
-  }
-
-  .stuck :global(.perforation) {
-    stroke: var(--paper);
-  }
-
   .margin {
     position: absolute;
     left: 8px;
@@ -1022,22 +993,12 @@ const gables =
       height: calc(var(--h) - 128px);
     }
 
-    .stuck {
-      top: calc(var(--h) - 144px);
-      width: 50px;
-    }
-
     .margin {
       top: calc(var(--h) - 90px);
     }
 
     .tags {
       font-size: 8px;
-    }
-
-    .stuck :global(.stamp) {
-      width: 50px;
-      height: 50px;
     }
   }
 
