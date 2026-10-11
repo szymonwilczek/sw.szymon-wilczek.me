@@ -28,3 +28,7 @@ Thumbs.db
 
 # Scratch artifacts
 scratch/
+
+# Cloudflare Worker local state and secrets
+.wrangler/
+.dev.vars

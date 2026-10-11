@@ -1,0 +1,13 @@
+# My inbox for the /roji workshop. See README.md.
+name = "roji-inbox"
+main = "src/index.ts"
+compatibility_date = "2026-10-01"
+
+[vars]
+ORIGINS = "https://www.szymon-wilczek.me,http://localhost:4321"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "roji"
+# from `npx wrangler d1 create roji`
+database_id = ""

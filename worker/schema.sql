@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS pieces (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  at TEXT NOT NULL,
+  who TEXT NOT NULL,
+  spec TEXT NOT NULL,
+  state TEXT NOT NULL DEFAULT 'pending'
+);
+CREATE INDEX IF NOT EXISTS pieces_state ON pieces (state);
+CREATE INDEX IF NOT EXISTS pieces_who ON pieces (who, at);
