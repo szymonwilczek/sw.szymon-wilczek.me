@@ -11,6 +11,7 @@ import { HANKO_EDGE } from "../utils/hanko";
 import { PROJECTS } from "../utils/projects";
 import { readBooks } from "../utils/books";
 import { TOOLS } from "../utils/dogu";
+import { weeks } from "../utils/nenrin";
 
 const writings = (await getCollection("writings"))
   .sort((a, b) => a.data.pubDate.valueOf() - b.data.pubDate.valueOf())
@@ -21,6 +22,7 @@ const writings = (await getCollection("writings"))
   }));
 const albums = (await getAllAlbums()).slice().reverse();
 const files = await getCollection("files");
+const rings = weeks();
 const booksRead = readBooks().filter((b) => b.state === "read").length;
 
 // plants grow as tall as the essay is long
@@ -91,6 +93,7 @@ const PATHS = [
   { to: "/contact", d: "M238 712 C 180 660, 120 640, 96 612", via: ["/writings"] },
   { to: "/projects", d: "M560 520 C 500 500, 440 470, 400 440", via: ["/writings", "/photos"] },
   { to: "/books", d: "M522 650 C 570 656, 620 690, 676 708", via: ["/writings"] },
+  { to: "/changelog", d: "M110 545 C 150 530, 176 500, 172 468", via: ["/writings", "/contact"] },
   {
     to: "/uses",
     d: "M328 222 C 362 224, 404 216, 440 198",
@@ -156,6 +159,15 @@ const PLACES = [
     sub: plural(TOOLS.length, "piece on a tray", "pieces on a tray"),
   },
   { href: "/contact/", title: "the mailbox", sub: "contact" },
+  {
+    href: "/changelog/",
+    title: "changelog · the stump",
+    sub: `${plural(rings.length, "ring", "rings")} · ${plural(
+      rings.reduce((n, w) => n + w.n, 0),
+      "commit",
+      "commits",
+    )}`,
+  },
   { href: "/seals/", title: "tracks?", sub: "the seal book" },
 ];
 const place = (href: string) => PLACES.find((p) => p.href === href)!;
@@ -665,6 +677,45 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
           ></path>
           <text class="label" x="150" y="268" font-size="18">
             about · stone lantern
+          </text>
+        </a>
+
+        <a
+          href="/changelog/"
+          class="place"
+          data-area="/changelog"
+          data-title={place("/changelog/").title}
+          data-sub={place("/changelog/").sub}
+        >
+          <path
+            class="line stump-bark"
+            d="M124 436 C 124 446, 122 458, 112 468 C 128 465, 136 471, 146 469 C 162 474, 184 474, 198 469 C 208 472, 218 467, 230 470 C 220 460, 218 448, 218 434 Z"
+            stroke-width="1.2"
+          ></path>
+          <path
+            class="line"
+            d="M138 447 C 137 454, 134 461, 130 467 M 157 450 C 157 457, 156 464, 155 471 M 179 450 C 179 457, 180 464, 181 471 M 201 447 C 202 454, 205 461, 209 467"
+            stroke-width="0.7"
+            opacity="0.6"
+          ></path>
+          <path
+            class="line stump-top"
+            d="M124 436 C 128 424, 212 422, 218 434 C 214 446, 130 448, 124 436 Z"
+            stroke-width="1"
+          ></path>
+          <path
+            class="stump-rings"
+            d="M142 436 C 148 428, 200 428, 204 436 C 200 444, 148 444, 142 436 Z M 162 436 C 166 432, 186 432, 190 436 C 186 440, 166 440, 162 436 Z"
+          ></path>
+          <path class="stump-gold" d="M206 429 L 192 437"></path>
+          <path class="line" d="M226 470 L 264 422" stroke-width="2.2"></path>
+          <path
+            class="line fill-dim"
+            d="M258 416 L 282 410 C 287 416, 286 425, 280 431 L 266 426 Z"
+            stroke-width="1"
+          ></path>
+          <text class="label" x="92" y="400" font-size="17">
+            changelog · the stump
           </text>
         </a>
 
@@ -1427,6 +1478,27 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
   .paws {
     fill: var(--fg-dim);
     opacity: 0.55;
+  }
+
+  .stump-bark {
+    fill: color-mix(in oklab, var(--fg-main), var(--cursor) 30%);
+  }
+
+  .stump-top {
+    fill: color-mix(in oklab, var(--tape), var(--paper) 25%);
+  }
+
+  .stump-rings {
+    fill: none;
+    stroke: color-mix(in oklab, var(--cursor), var(--fg-main) 35%);
+    stroke-width: 0.8;
+  }
+
+  .stump-gold {
+    fill: none;
+    stroke: var(--cursor);
+    stroke-width: 1.6;
+    stroke-linecap: round;
   }
 
   .kura-dark {
