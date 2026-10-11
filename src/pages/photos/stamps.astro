@@ -35,6 +35,7 @@ function bookmark(slug: string, place: string) {
     tassel,
     rot: f1((r() - 0.5) * 2.4),
     tilt: f1(-4 + r() * 8),
+    give: f1(0.7 + r() * 0.6),
   };
 }
 
@@ -117,7 +118,7 @@ const sketch =
             <div
               class="shiori"
               data-terrain={album.terrain.join(" ")}
-              style={`--rot: ${album.rot}deg; --cap: ${album.cap}px`}
+              style={`--rot: ${album.rot}deg; --give: ${album.give}; --cap: ${album.cap}px`}
             >
               <a
                 class="open"
@@ -165,7 +166,10 @@ const sketch =
             </div>
           ))}
           {ri === rows.length - 1 && (
-            <span class="shiori blank" style={`--rot: ${next.rot}deg; --cap: ${next.cap}px`}>
+            <span
+              class="shiori blank"
+              style={`--rot: ${next.rot}deg; --give: ${next.give}; --cap: ${next.cap}px`}
+            >
               <svg class="cord" width="40" height="70" viewBox="0 0 40 70" aria-hidden="true">
                 <path d={next.cord} />
                 <path class="tassel" d={next.tassel} />
@@ -238,6 +242,36 @@ const sketch =
           behavior: still.matches ? "auto" : "smooth",
         }),
       );
+
+    // moving the shelf leaves the bookmarks leaning behind
+    if (!still.matches) {
+      let last = rack.scrollLeft;
+      let lastT = performance.now();
+      let push = 0;
+      let sway = 0;
+      let vel = 0;
+      let raf = 0;
+      const step = () => {
+        vel = (vel + (push - sway) * 0.08) * 0.86;
+        sway += vel;
+        push *= 0.85;
+        const rest = Math.abs(sway) + Math.abs(vel) + Math.abs(push) < 0.01;
+        rack.style.setProperty("--sway", rest ? "0deg" : `${sway.toFixed(3)}deg`);
+        raf = rest ? 0 : requestAnimationFrame(step);
+      };
+      rack.addEventListener(
+        "scroll",
+        () => {
+          const now = performance.now();
+          const v = (rack.scrollLeft - last) / Math.max(8, now - lastT);
+          last = rack.scrollLeft;
+          lastT = now;
+          push = Math.max(-4, Math.min(4, v * 2));
+          raf ||= requestAnimationFrame(step);
+        },
+        { passive: true },
+      );
+    }
 
     // terrain tag sifts the shelf
     const sift = document.querySelector<HTMLButtonElement>(".sift")!;
@@ -495,6 +529,8 @@ const sketch =
     color: var(--fg-main);
     scroll-snap-align: start;
     transform: rotate(var(--rot));
+    transform-origin: 50% 100%;
+    rotate: calc(var(--sway, 0deg) * var(--give));
     transition:
       transform 0.4s cubic-bezier(0.2, 0.7, 0.3, 1),
       box-shadow 0.4s ease,
@@ -532,6 +568,8 @@ const sketch =
     left: calc(50% - 20px);
     top: -56px;
     overflow: visible;
+    rotate: calc(var(--sway, 0deg) * var(--give) * 1.8);
+    transform-origin: 20px 64px;
   }
 
   .cord path {
