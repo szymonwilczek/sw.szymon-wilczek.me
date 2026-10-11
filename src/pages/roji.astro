@@ -10,6 +10,7 @@ const STONE = { left: (640 / 1100) * 100, top: (504 / 690) * 100 };
 const pct = (x: number, y: number, w: number, h: number) =>
   `left:${(x / 1100) * 100}%;top:${(y / 690) * 100}%;width:${(w / 1100) * 100}%;height:${(h / 690) * 100}%`;
 const DOOR = pct(474, 280, 390, 178);
+const MACHIAI = pct(22, 450, 292, 221);
 const garden = sceneGarden16(tones2(), "start", {
   shelf: (i: number) => (shelf[i] ? turned(shelf[i]) : null),
 });
@@ -61,6 +62,12 @@ const garden = sceneGarden16(tones2(), "start", {
       <output aria-live="polite"></output>
     </form>
     <button type="button" class="door" style={DOOR} aria-label="Into the workshop"></button>
+    <button
+      type="button"
+      class="door machiai"
+      style={MACHIAI}
+      aria-label="Into the waiting room, to the shelf of pieces"
+    ></button>
     <div class="kobo" hidden></div>
   </figure>
 </BaseLayout>
@@ -160,27 +167,39 @@ const garden = sceneGarden16(tones2(), "start", {
   if (kept) fits(kept).then((yes) => yes && open(false));
 
   // into the open workshop
-  const door = fig.querySelector<HTMLButtonElement>(".door")!;
+  const door = fig.querySelector<HTMLButtonElement>(".door:not(.machiai)")!;
+  const machiai = fig.querySelector<HTMLButtonElement>(".machiai")!;
   const kobo = fig.querySelector<HTMLElement>(".kobo")!;
-  async function inside() {
-    const workshop = import("../scripts/kobo/index");
+  async function inside(
+    from: HTMLButtonElement,
+    origin: string,
+    go: (leave: () => void) => Promise<void>,
+  ) {
     if (!still.matches) {
+      svg.style.transformOrigin = origin;
       fig.classList.add("zooming");
       await new Promise((r) => setTimeout(r, 650));
     }
-    const { enter } = await workshop;
     fig.classList.remove("zooming");
     fig.classList.add("inside");
     kobo.hidden = false;
-    enter(kobo, () => {
+    await go(() => {
       kobo.hidden = true;
       kobo.innerHTML = "";
       fig.classList.remove("inside");
-      door.focus();
+      from.focus();
     });
     kobo.querySelector<HTMLElement>(".kobo-title")?.scrollIntoView({ block: "nearest" });
   }
-  door.addEventListener("click", inside);
+  door.addEventListener("click", () => {
+    const code = import("../scripts/kobo/index");
+    inside(door, "61% 53%", async (leave) => (await code).enter(kobo, leave));
+  });
+  machiai.addEventListener("click", () => {
+    const code = import("../scripts/machiai");
+    const shelf: PieceSpec[] = JSON.parse(fig.dataset.shelf || "[]");
+    inside(machiai, "15% 81%", async (leave) => (await code).enter(kobo, shelf, leave));
+  });
 
   const at = (e: PointerEvent): P => {
     const p = new DOMPoint(e.clientX, e.clientY).matrixTransform(svg.getScreenCTM()!.inverse());
@@ -191,7 +210,7 @@ const garden = sceneGarden16(tones2(), "start", {
     if (done) return;
     start = at(e);
   });
-  svg.addEventListener("pointerup", (e) => {
+  fig.addEventListener("pointerup", (e) => {
     if (!start || done) return;
     const line: [P, P] = [start, at(e)];
     start = null;
@@ -200,7 +219,7 @@ const garden = sceneGarden16(tones2(), "start", {
     localStorage.setItem(KEY, JSON.stringify(line));
     draw({ line, phase: "down" }, false);
   });
-  svg.addEventListener("pointercancel", () => (start = null));
+  fig.addEventListener("pointercancel", () => (start = null));
 </script>
 
 <style>
@@ -377,7 +396,8 @@ const garden = sceneGarden16(tones2(), "start", {
     cursor: zoom-in;
   }
 
-  .open .door {
+  .open .door,
+  .door.machiai {
     display: block;
   }
 

@@ -2885,13 +2885,36 @@ function scenePaint(K) {
   groups.push(sl);
   return { W, H, groups, clips: [] };
 }
+
+// frame of short dashes, for what is not quite there yet
+function dashed(g, r, x0, y0, x1, y1, K) {
+  const side = (a, b) => {
+    const n = Math.max(2, Math.round(Math.hypot(b[0] - a[0], b[1] - a[1]) / 12));
+    for (let k = 0; k < n; k += 2) {
+      const t0 = k / n,
+        t1 = Math.min(1, (k + 1) / n);
+      const at = (t) => [
+        f1(a[0] + (b[0] - a[0]) * t + (r() - 0.5)),
+        f1(a[1] + (b[1] - a[1]) * t + (r() - 0.5)),
+      ];
+      const [p, q] = [at(t0), at(t1)];
+      Ln(g, `M${p[0]} ${p[1]}L${q[0]} ${q[1]}`, K.ink, 1, 0.5, true);
+    }
+  };
+  side([x0, y0], [x1, y0]);
+  side([x1, y0], [x1, y1]);
+  side([x1, y1], [x0, y1]);
+  side([x0, y1], [x0, y0]);
+}
+
 // shelf in the waiting room
-function sceneShelf(K) {
+function sceneShelf(K, opt = {}) {
   const r = rng(hash("tea/shelf")),
     W = 1100,
     H = 700,
     groups = [],
-    g = G();
+    g = G(),
+    spots = [];
   note(g, 110, 34, "← back to the garden", K, 17, 0.75);
   inked(g, r, wbox(r, 40, 70, 1060, 680, 1), K.plaster, K.ink, 1.2);
   for (let k = 0; k < 40; k++)
@@ -2905,8 +2928,17 @@ function sceneShelf(K) {
   for (let x = 914; x < 1020; x += 16)
     Ln(g, wseg(r, [x, 112], [x, 288], 0.3, 2), K.bamboo, 2.4, 0.85, true);
   groups.push(g);
-  const rows = [220, 410, 600],
-    sel = [1, 3];
+  const rows = [220, 410, 600];
+  const list =
+    opt.pieces ||
+    rows.flatMap((_, row) => [0, 1, 2, 3, 4, 5].map((i) => demoSpec("shelf" + row + i)));
+  const own = opt.pieces ? opt.own || [] : [Object.assign(demoSpec("Sora", "bowl"), { kin: null })];
+  // the newest of the guest's own sits apart by the window
+  const last = own.length ? own[own.length - 1] : null;
+  const all = [
+    ...list.map((spec) => ({ spec })),
+    ...own.slice(0, -1).map((spec) => ({ spec, own: true })),
+  ].slice(-18);
   rows.forEach((y, row) => {
     const sh = G();
     inked(
@@ -2933,25 +2965,39 @@ function sceneShelf(K) {
     groups.push(sh);
     const ps = G();
     for (let i = 0; i < 6; i++) {
+      const k = row * 6 + i,
+        at = all[k];
+      if (!at) continue;
       const x = 140 + i * 130,
-        spec = demoSpec("shelf" + row + i),
-        s = 0.75;
-      if (row === sel[0] && i === sel[1])
+        spec = at.spec,
+        s = spec.H < 20 ? 0.62 : 0.75;
+      if (opt.sel === k)
         Wa(ps, r, wring(r, x, y - 40, 70, 60, 3, 12), K.gold, 0.45, "url(#bk-bleed)");
-      piece(ps, r, x, y - 14, spec.H < 20 ? 0.62 : s, K, spec);
+      if (at.own) {
+        dashed(ps, r, x - 60, y - 120, x + 60, y + 4, K);
+        kan(ps, x - 44, y - 104, "仮", K, 14);
+      }
+      piece(ps, r, x, y - 14, s, K, spec);
+      spots.push({ i: k, x, y: y - 50, own: !!at.own });
     }
     groups.push(ps);
   });
+
+  if (!list.length && !own.length) note(g, 465, 400, "nothing on the shelf yet", K, 18, 0.5);
+
   // author's own piece, waiting for me :)
-  const own = G(),
-    ox = 970,
-    oy = 600;
-  Ln(own, wbox(r, ox - 66, oy - 130, ox + 66, oy + 40, 0.6), K.ink, 1, 0.45);
-  piece(own, r, ox, oy - 14, 0.75, K, Object.assign(demoSpec("Sora", "bowl"), { kin: null }));
-  kan(own, ox - 46, oy - 110, "仮", K, 16);
-  note(own, ox, oy + 62, "yours · waiting for the host", K, 13, 0.6);
-  groups.push(own);
-  return { W, H, groups, clips: [] };
+  if (last) {
+    const o = G(),
+      ox = 970,
+      oy = 600;
+    dashed(o, r, ox - 66, oy - 130, ox + 66, oy + 40, K);
+    piece(o, r, ox, oy - 14, last.H < 20 ? 0.62 : 0.75, K, last);
+    kan(o, ox - 46, oy - 110, "仮", K, 16);
+    note(o, ox, oy + 62, "yours · waiting for the host", K, 13, 0.6);
+    groups.push(o);
+    spots.push({ i: all.length, x: ox, y: oy - 50, own: true });
+  }
+  return { W, H, groups, clips: [], spots };
 }
 // one piece taken off the shelf
 function scenePieceCard(K) {
@@ -3110,6 +3156,7 @@ export {
   sceneKiln,
   sceneGlazes,
   scenePaint,
+  dashed,
   sceneShelf,
   scenePieceCard,
 };
