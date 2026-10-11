@@ -2233,7 +2233,7 @@ function sceneWorkshop(K) {
     groups = [];
   const P = ZP(40, 500, 2.55),
     sc = 2.55;
-  const ui = G();
+  const ui = G({ cls: "kobo-back" });
   note(ui, 110, 34, "← back to the garden", K, 17, 0.75);
   groups.push(ui);
   const inside = G();
@@ -2292,15 +2292,21 @@ function sceneWorkshop(K) {
     [KX, KZ],
   ].forEach(([x, z]) => postV(front, r, P, x, z, 0, KH, K, 9));
   groups.push(front);
-  const tags = G();
-  const at = (x, z, y) => P(x, z, y);
-  spot(tags, r, ...at(40, 40, 22), "轆", "the wheel", K);
-  spot(tags, r, ...at(84, KZ - 12, 66), "棚", "drying shelf", K);
-  spot(tags, r, ...at(236, KZ - 24, 14), "釉", "glazes", K);
-  spot(tags, r, ...at(196, 14, 30), "筆", "brush & seal", K);
-  spot(tags, r, ...at(175, KZ, 70), "窯", "out to the kiln", K);
-  groups.push(tags);
-  return { W, H, groups, clips: [] };
+
+  const spots = [
+    ["wheel", 40, 40, 22, "轆", "the wheel"],
+    ["shelf", 84, KZ - 12, 66, "棚", "drying shelf"],
+    ["glaze", 236, KZ - 24, 14, "釉", "glazes"],
+    ["brush", 196, 14, 30, "筆", "brush & seal"],
+    ["kiln", 175, KZ, 70, "窯", "out to the kiln"],
+  ].map(([id, x, z, y, j, t]) => {
+    const [px, py] = P(x, z, y),
+      tag = G({ cls: "kobo-" + id });
+    spot(tag, r, px, py, j, t, K);
+    groups.push(tag);
+    return { id, x: Math.round(px), y: Math.round(py) };
+  });
+  return { W, H, groups, clips: [], spots };
 }
 // throwing
 function sceneWheel(K) {

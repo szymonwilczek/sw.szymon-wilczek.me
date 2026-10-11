@@ -7,6 +7,9 @@ import pieces from "../data/pieces.json";
 
 const shelf = (pieces as unknown[]).map(clean).filter((p) => p !== null);
 const STONE = { left: (640 / 1100) * 100, top: (504 / 690) * 100 };
+const pct = (x: number, y: number, w: number, h: number) =>
+  `left:${(x / 1100) * 100}%;top:${(y / 690) * 100}%;width:${(w / 1100) * 100}%;height:${(h / 690) * 100}%`;
+const DOOR = pct(474, 280, 390, 178);
 const garden = sceneGarden16(tones2(), "start", {
   shelf: (i: number) => (shelf[i] ? turned(shelf[i]) : null),
 });
@@ -57,6 +60,8 @@ const garden = sceneGarden16(tones2(), "start", {
       </span>
       <output aria-live="polite"></output>
     </form>
+    <button type="button" class="door" style={DOOR} aria-label="Into the workshop"></button>
+    <div class="kobo" hidden></div>
   </figure>
 </BaseLayout>
 
@@ -153,6 +158,29 @@ const garden = sceneGarden16(tones2(), "start", {
   });
   const kept = localStorage.getItem(STONE_KEY);
   if (kept) fits(kept).then((yes) => yes && open(false));
+
+  // into the open workshop
+  const door = fig.querySelector<HTMLButtonElement>(".door")!;
+  const kobo = fig.querySelector<HTMLElement>(".kobo")!;
+  async function inside() {
+    const workshop = import("../scripts/kobo/index");
+    if (!still.matches) {
+      fig.classList.add("zooming");
+      await new Promise((r) => setTimeout(r, 650));
+    }
+    const { enter } = await workshop;
+    fig.classList.remove("zooming");
+    fig.classList.add("inside");
+    kobo.hidden = false;
+    enter(kobo, () => {
+      kobo.hidden = true;
+      kobo.innerHTML = "";
+      fig.classList.remove("inside");
+      door.focus();
+    });
+    kobo.querySelector<HTMLElement>(".kobo-title")?.scrollIntoView({ block: "nearest" });
+  }
+  door.addEventListener("click", inside);
 
   const at = (e: PointerEvent): P => {
     const p = new DOMPoint(e.clientX, e.clientY).matrixTransform(svg.getScreenCTM()!.inverse());
@@ -339,6 +367,184 @@ const garden = sceneGarden16(tones2(), "start", {
   .roji :global(.roji-roof.lifting) {
     transform: translateY(-140px);
     opacity: 0;
+  }
+
+  .door {
+    position: absolute;
+    display: none;
+    border: 0;
+    background: none;
+    cursor: zoom-in;
+  }
+
+  .open .door {
+    display: block;
+  }
+
+  .door:focus-visible {
+    outline: 1px dashed var(--fg-dim);
+    outline-offset: 4px;
+  }
+
+  .roji > svg {
+    transform-origin: 61% 53%;
+    transition:
+      transform 0.65s cubic-bezier(0.5, 0, 0.7, 1),
+      opacity 0.65s;
+  }
+
+  .zooming > svg {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+
+  .zooming {
+    overflow: hidden;
+  }
+
+  .inside > svg,
+  .inside .door,
+  .inside .stone,
+  .inside .key {
+    display: none;
+  }
+
+  .kobo {
+    animation: kobo-in 0.5s ease-out;
+  }
+
+  @keyframes kobo-in {
+    from {
+      opacity: 0;
+    }
+  }
+
+  .kobo :global(.kobo-title) {
+    margin: 0 0 0.5rem;
+  }
+
+  .kobo :global(.kobo-kan) {
+    font-family: var(--font-seal);
+    font-size: 1.375rem;
+  }
+
+  .kobo :global(.kobo-title .hand) {
+    font-size: 1.25rem;
+    color: var(--fg-dim);
+  }
+
+  .kobo :global(.kobo-art) {
+    position: relative;
+  }
+
+  .kobo :global(.kobo-art svg) {
+    display: block;
+    width: 100%;
+    height: auto;
+    touch-action: none;
+    user-select: none;
+  }
+
+  .kobo :global(.kobo-room .kobo-art svg) {
+    touch-action: pan-y pinch-zoom;
+  }
+
+  .kobo :global(.kobo-over) {
+    position: absolute;
+    border: 0;
+    border-radius: 50%;
+    background: none;
+    cursor: pointer;
+  }
+
+  .kobo :global(.kobo-over:focus-visible) {
+    outline: 1px dashed var(--fg-dim);
+  }
+
+  .kobo :global(.kobo-say) {
+    min-height: 1.5em;
+    margin: 0.75rem 0 0;
+    font-size: 1.125rem;
+  }
+
+  .kobo :global(.kobo-do) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+    margin: 0.5rem 0 0;
+  }
+
+  .kobo :global(.kobo-btn) {
+    padding: 0;
+    font-size: 1.0625rem;
+    background: none;
+    border: 0;
+    color: var(--fg-link);
+    cursor: pointer;
+  }
+
+  .kobo :global(.kobo-btn.quiet) {
+    color: var(--fg-dim);
+  }
+
+  .kobo :global(.kobo-btn:hover) {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .kobo :global(.kobo-btn:disabled) {
+    color: var(--fg-dim);
+    opacity: 0.5;
+    text-decoration: none;
+    cursor: default;
+  }
+
+  .kobo :global(.kobo-name) {
+    display: inline-flex;
+    gap: 0.5rem;
+    align-items: baseline;
+    color: var(--fg-dim);
+    font-size: 1.0625rem;
+  }
+
+  .kobo :global(.kobo-name input) {
+    width: 10em;
+    padding: 0 0.25rem;
+    font: inherit;
+    color: var(--fg-main);
+    background: none;
+    border: 0;
+    border-bottom: 1px solid var(--fg-dim);
+  }
+
+  .kobo :global(.kobo-name input:focus-visible) {
+    outline: none;
+    border-bottom-color: var(--fg-link);
+  }
+
+  .kobo :global(.later) {
+    opacity: 0.4;
+  }
+
+  .kobo :global(.now) {
+    animation: kobo-now 2.4s ease-in-out infinite alternate;
+  }
+
+  @keyframes kobo-now {
+    to {
+      opacity: 0.6;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .roji > svg {
+      transition: none;
+    }
+
+    .kobo,
+    .kobo :global(.now) {
+      animation: none;
+    }
   }
 
   .roji :global(.cutting .fall) {
