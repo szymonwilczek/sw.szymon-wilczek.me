@@ -1,0 +1,428 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Divider from "../components/Divider.astro";
+import { LINKS, RING } from "../data/links";
+import { SHEETS, threads } from "../utils/en";
+
+const list = threads(LINKS);
+const tied = LINKS.filter((l) => l.mutual).length;
+const { wide, narrow } = SHEETS;
+const pct = (n: number, of: number) => `${((n / of) * 100).toFixed(1)}%`;
+---
+
+<BaseLayout
+  title="Links"
+  description="Other small sites I keep going back to, each tied to this one with a red thread."
+>
+  <header class="en-head">
+    <div>
+      <h1>Red threads</h1>
+      <p class="lede">
+        Other small sites I keep going back to, each tied to this one with a red thread. The longer
+        ago I tied it, the lower it hangs; a knot at the far end means they tied one back.
+      </p>
+    </div>
+    <p class="tally">
+      {LINKS.length} threads · {tied} tied back
+    </p>
+  </header>
+
+  <Divider from={480} to={700} />
+
+  <p class="hint hand">
+    <span class="hint-point">point at a card and its thread pulls taut.</span>
+    <span class="hint-touch">tap a card to tug its thread.</span>
+  </p>
+
+  <section
+    class="en"
+    aria-label="Sites I am tied to"
+    style={`--wme-l: ${pct(wide.me[0], wide.w)}; --wme-t: ${pct(wide.me[1], wide.h)}; --nme-l: ${pct(narrow.me[0], narrow.w)}; --nme-t: ${pct(narrow.me[1], narrow.h)}`}
+  >
+    {[
+      ["wide", wide],
+      ["narrow", narrow],
+    ].map(([key, sheet]) => (
+      <svg
+        class:list={["threads", key]}
+        viewBox={`0 0 ${(sheet as typeof wide).w} ${(sheet as typeof wide).h}`}
+        aria-hidden="true"
+      >
+        {list.map((l, i) => {
+          const at = key === "wide" ? l.wide : l.narrow;
+          return (
+            <>
+              <path class="thread" data-i={i} data-taut={at.taut} d={at.slack} />
+              {l.mutual && <path class="knot" data-i={i} d={at.knot} />}
+            </>
+          );
+        })}
+      </svg>
+    ))}
+
+    <svg class="me" viewBox="0 0 46 46" role="img" aria-label="my seal">
+      <path d="M4 5 Q23 2 42 4 Q45 23 43 42 Q23 45 3 43 Q1 23 4 5 Z"></path>
+      <text x="23" y="31" text-anchor="middle">
+        狼
+      </text>
+    </svg>
+
+    <ul class="cards">
+      {list.map((l, i) => (
+        <li
+          style={`--wl: ${l.wide.l}%; --wt: ${l.wide.t}%; --nl: ${l.narrow.l}%; --nt: ${l.narrow.t}%; --r: ${l.rot}deg`}
+        >
+          <a class="card" href={l.url} data-i={i}>
+            <span
+              class="seal"
+              aria-hidden="true"
+              style={`--ink: var(${l.ink}); --shape: ${l.shape}`}
+            >
+              {l.initial}
+            </span>
+            <span class="who">
+              <span class="name">{l.name}</span>
+              <span class="domain">{l.domain}</span>
+              <span class="how hand">
+                {l.mutual ? "tied both ways" : "my thread only"} · {l.since}
+              </span>
+            </span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  {RING && (
+    <nav class="ring" aria-label="Webring">
+      <a href={RING.prev}>← [PREV SITE]</a>
+      <span class="hand">
+        a ring of {RING.size} small sites · {RING.name}
+      </span>
+      <a href={RING.next}>[NEXT SITE] →</a>
+    </nav>
+  )}
+</BaseLayout>
+
+<script>
+  const section = document.querySelector<HTMLElement>(".en")!;
+  const cards = [...document.querySelectorAll<HTMLAnchorElement>(".card")];
+  const lines = [...document.querySelectorAll<SVGPathElement>(".thread, .knot")];
+
+  // pull one thread taut and let the others go slack and dim
+  const pull = (i: string | null) => {
+    section.classList.toggle("pulling", i !== null);
+    for (const line of lines) {
+      const up = line.dataset.i === i;
+      line.classList.toggle("up", up);
+      if (line.dataset.taut) line.style.d = up ? `path("${line.dataset.taut}")` : "";
+    }
+  };
+
+  const nod = (card: HTMLAnchorElement) => {
+    card.classList.remove("nod");
+    void card.offsetWidth;
+    card.classList.add("nod");
+  };
+
+  for (const card of cards) {
+    const i = card.dataset.i!;
+    card.addEventListener("pointerenter", () => pull(i));
+    card.addEventListener("pointerleave", () => pull(null));
+    card.addEventListener("focus", () => pull(i));
+    card.addEventListener("blur", () => pull(null));
+    card.addEventListener("pointerdown", () => nod(card));
+    card.addEventListener("keydown", (e) => e.key === "Enter" && nod(card));
+    card.addEventListener("click", (e) => {
+      if (card.getAttribute("href") !== "#") return;
+      e.preventDefault();
+      pull(i);
+    });
+  }
+</script>
+
+<style>
+  .en-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem 3rem;
+    margin-top: 1.5rem;
+  }
+
+  .en-head > div {
+    flex: 999 1 30rem;
+    max-width: 40rem;
+  }
+
+  .en-head h1 {
+    margin: 0;
+  }
+
+  .lede {
+    margin: 1.25rem 0 0;
+    color: var(--fg-dim);
+  }
+
+  .tally {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--fg-dim);
+  }
+
+  .hint {
+    margin: 1rem 0 0 0.375rem;
+    font-weight: 300;
+    font-size: 1.125rem;
+    color: var(--fg-dim);
+    transform: rotate(-1deg);
+  }
+
+  .hint-touch {
+    display: none;
+  }
+
+  @media (hover: none) {
+    .hint-point {
+      display: none;
+    }
+
+    .hint-touch {
+      display: inline;
+    }
+  }
+
+  .en {
+    --me-l: var(--wme-l);
+    --me-t: var(--wme-t);
+    position: relative;
+    margin-top: 0.75rem;
+  }
+
+  .threads {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+
+  .threads.narrow {
+    display: none;
+  }
+
+  .cards li {
+    --l: var(--wl);
+    --t: var(--wt);
+  }
+
+  @media (max-width: 760px) {
+    .en {
+      --me-l: var(--nme-l);
+      --me-t: var(--nme-t);
+    }
+
+    .threads.wide {
+      display: none;
+    }
+
+    .threads.narrow {
+      display: block;
+    }
+
+    .cards li {
+      --l: var(--nl);
+      --t: var(--nt);
+    }
+  }
+
+  .thread {
+    fill: none;
+    stroke: var(--red);
+    stroke-width: 1.4;
+    stroke-linecap: round;
+    opacity: 0.9;
+    transition:
+      d 0.6s cubic-bezier(0.3, 1.6, 0.5, 1),
+      opacity 0.3s ease,
+      stroke-width 0.3s ease;
+  }
+
+  .pulling :is(.thread, .knot) {
+    opacity: 0.35;
+  }
+
+  .pulling .thread.up {
+    opacity: 0.9;
+    stroke-width: 2.2;
+  }
+
+  .pulling .knot.up {
+    opacity: 1;
+  }
+
+  .knot {
+    fill: none;
+    transition: opacity 0.3s ease;
+    stroke: var(--red);
+    stroke-width: 1.6;
+    stroke-linecap: round;
+  }
+
+  .me {
+    position: absolute;
+    left: var(--me-l);
+    top: var(--me-t);
+    width: 72px;
+    height: 72px;
+    translate: -50% -50%;
+    rotate: -4deg;
+  }
+
+  .me path {
+    fill: var(--red);
+  }
+
+  .me text {
+    font-family: var(--font-seal);
+    font-size: 22px;
+    fill: var(--bg-main);
+  }
+
+  .cards {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .cards li {
+    position: absolute;
+    left: var(--l);
+    top: var(--t);
+    width: 12rem;
+    translate: 0 -50%;
+  }
+
+  .card {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    padding: 8px 12px 8px 8px;
+    color: var(--fg-main);
+    text-decoration: none;
+    background: var(--paper);
+    border-radius: 3px;
+    box-shadow: 0 3px 8px -4px rgb(0 0 0 / 0.3);
+    transform: rotate(var(--r));
+    transform-origin: 0 50%;
+    transition: box-shadow 0.3s ease;
+  }
+
+  .card:hover,
+  .card:focus-visible {
+    box-shadow: 0 10px 18px -8px rgb(0 0 0 / 0.45);
+  }
+
+  .card.nod {
+    animation: nod 0.8s ease;
+  }
+
+  @keyframes nod {
+    30% {
+      transform: rotate(calc(var(--r) - 7deg));
+    }
+
+    60% {
+      transform: rotate(calc(var(--r) + 4deg));
+    }
+  }
+
+  .seal {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    color: var(--ink);
+    font-family: var(--font-seal);
+    font-size: 1rem;
+    border: 1.6px solid var(--ink);
+    border-radius: var(--shape);
+  }
+
+  .who {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    line-height: 1.25;
+  }
+
+  .name {
+    font-size: 0.9375rem;
+  }
+
+  .domain {
+    overflow: hidden;
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    color: var(--fg-dim);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .how {
+    font-weight: 300;
+    font-size: 0.8125rem;
+    color: var(--fg-dim);
+  }
+
+  @media (max-width: 760px) {
+    .me {
+      width: 58px;
+      height: 58px;
+    }
+
+    .cards li {
+      width: 10.5rem;
+      translate: -50% 0;
+    }
+
+    .card {
+      transform-origin: 50% 0;
+    }
+  }
+
+  .ring {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 12px 26px;
+    margin-top: 2.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+  }
+
+  .ring a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+
+  .ring span {
+    font-size: 1.125rem;
+    color: var(--fg-dim);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .thread,
+    .card {
+      transition: none;
+    }
+
+    .card.nod {
+      animation: none;
+    }
+  }
+</style>
