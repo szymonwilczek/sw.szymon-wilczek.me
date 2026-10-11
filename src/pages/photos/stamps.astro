@@ -3,6 +3,8 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import Divider from "../../components/Divider.astro";
 import Stamp from "../../components/Stamp.astro";
 import { getAllAlbums } from "../../utils/albums";
+import { shioriUrl } from "../../utils/shiori";
+import { hash, rng } from "../../utils/stamp";
 
 // hinged by date: the oldest stamp first, the newest with the highest number
 const albums = (await getAllAlbums()).slice().reverse();
@@ -12,13 +14,48 @@ const since = albums[0]
   ? `${ROMAN[albums[0].date.getMonth()]}·${albums[0].date.getFullYear()}`
   : null;
 
-const rows: Array<{ country: string; albums: typeof albums }> = [];
+const f1 = (n: number) => Math.round(n * 10) / 10;
+
+function bookmark(slug: string, place: string) {
+  const r = rng(hash(slug + "/shiori"));
+  // cord
+  const cx = 20 + (r() - 0.5) * 10;
+  const ky = 6 + r() * 6;
+  let tassel = "";
+
+  for (let k = 0; k < 7; k++)
+    tassel += `M${f1(cx)} ${f1(ky)} q${f1((k - 3) * 1.4)} -6 ${f1((k - 3) * 2.2 + (r() - 0.5) * 2)} -${f1(14 + r() * 6)} `;
+
+  const caps = place.toUpperCase();
+  const longest = Math.max(...caps.split(" ").map((w) => w.length));
+  return {
+    caps,
+    cap: Math.min(19, Math.round(138 / (longest * 0.86))),
+    cord: `M20 64 C${f1(cx + 8)} 44 ${f1(cx - 8)} 24 ${f1(cx)} ${f1(ky)}`,
+    tassel,
+    rot: f1((r() - 0.5) * 2.4),
+    tilt: f1(-4 + r() * 8),
+  };
+}
+
+const rows: Array<{
+  country: string;
+  albums: Array<(typeof albums)[number] & ReturnType<typeof bookmark>>;
+}> = [];
 for (const album of albums) {
   const country = album.country ?? "[COUNTRY]";
   let row = rows.find((r) => r.country === country);
   if (!row) rows.push((row = { country, albums: [] }));
-  row.albums.push(album);
+  row.albums.push({ ...album, ...bookmark(album.slug, album.location ?? album.title) });
 }
+
+const next = {
+  ...bookmark("next", "[PLACE]"),
+  num: String(albums.length + 1).padStart(2, "0"),
+};
+// empty bookmark's under-drawing
+const sketch =
+  "M0 100 H100 M0 200 H100 M50 0 V300 M8 210 L8 150 L22 132 L36 150 L36 210 M36 210 L36 160 H64 V210 M64 210 L64 140 L78 126 L92 140 L92 210";
 ---
 
 <BaseLayout
@@ -50,43 +87,143 @@ for (const album of albums) {
 
   <Divider from={520} to={760} />
 
-  <section class="page" aria-label="Album page">
-    {rows.map((row, r) => (
-      <div class="row">
-        <p class="row-head hand">
-          {row.country} <span>· {row.albums.length}</span>
-        </p>
-        <div class="strip">
+  <div class="rack-bar">
+    <p class="hint hand">
+      <span class="hint-point">point at one and it slides up out of the rack.</span>
+      <span class="hint-touch">swipe along the shelf; tap one to open it.</span>
+    </p>
+    <div class="rack-nav" hidden>
+      <button type="button" class="rack-step" data-step="-1" aria-label="Scroll back">
+        <svg width="40" height="18" viewBox="0 0 44 20" aria-hidden="true">
+          <path d="M42 11 C 30 9, 18 12, 4 10 M 12 3 L 3 10 L 12 17"></path>
+        </svg>
+      </button>
+      <button type="button" class="rack-step" data-step="1" aria-label="Scroll on">
+        <svg width="40" height="18" viewBox="0 0 44 20" aria-hidden="true">
+          <path d="M2 9 C 14 11, 26 8, 40 10 M 32 3 L 41 10 L 32 17"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <section class="rack" aria-label="Album page" tabindex="0">
+    {rows.map((row, ri) => (
+      <div class="shelf">
+        <div class="shelf-row">
           {row.albums.map((album) => (
             <a
-              class="hinge"
+              class="shiori"
               href={`/photos/${album.slug}/`}
               aria-label={`${album.title}, stamp ${album.stampNum}`}
+              style={`--rot: ${album.rot}deg; --cap: ${album.cap}px`}
             >
-              <Stamp
-                slug={album.slug}
-                terrain={album.terrain}
-                country={row.country}
-                num={album.stampNum}
-                size={128}
+              <svg class="cord" width="40" height="70" viewBox="0 0 40 70" aria-hidden="true">
+                <path d={album.cord} />
+                <path class="tassel" d={album.tassel} />
+              </svg>
+              <span class="hole" aria-hidden="true" />
+              <svg
+                class="art"
+                viewBox="0 0 100 300"
+                preserveAspectRatio="xMidYMid slice"
+                aria-hidden="true"
+                data-art={shioriUrl(album.slug)}
               />
-              <span class="hinge-title hand">{album.title}</span>
+              <span class="stuck" style={`--tilt: ${album.tilt}deg`}>
+                <Stamp
+                  slug={album.slug}
+                  terrain={album.terrain}
+                  country={row.country}
+                  num={album.stampNum}
+                  size={56}
+                />
+              </span>
+              <span class="margin">
+                <span class="caps">{album.caps}</span>
+                <span class="tags">{album.terrain.join(" · ")}</span>
+                <span class="sign">
+                  <span class="num">no. {album.stampNum}</span>
+                  <span class="hand">sw.</span>
+                </span>
+              </span>
             </a>
           ))}
-          {r === rows.length - 1 && (
-            <span class="next hand">
-              next?
-              <br />
-              [PLACE]
+          {ri === rows.length - 1 && (
+            <span class="shiori blank" style={`--rot: ${next.rot}deg; --cap: ${next.cap}px`}>
+              <svg class="cord" width="40" height="70" viewBox="0 0 40 70" aria-hidden="true">
+                <path d={next.cord} />
+                <path class="tassel" d={next.tassel} />
+              </svg>
+              <span class="hole" aria-hidden="true" />
+              <span class="art sketch">
+                <svg viewBox="0 0 100 300" preserveAspectRatio="none" aria-hidden="true">
+                  <path d={sketch} vector-effect="non-scaling-stroke" />
+                </svg>
+                <span class="hand">next?</span>
+              </span>
+              <span class="margin">
+                <span class="caps">{next.caps}</span>
+                <span class="tags">[SUBJECT]</span>
+                <span class="sign">
+                  <span class="num">no. {next.num}</span>
+                </span>
+              </span>
             </span>
           )}
         </div>
+        <p class="shelf-label hand">
+          {row.country} <span>· {row.albums.length}</span>
+        </p>
       </div>
     ))}
   </section>
 
   <p class="foot hand">stamps are hinged by date; the newest gets the highest number.</p>
 </BaseLayout>
+
+<script>
+  import { fillArt } from "../../scripts/art";
+
+  const rack = document.querySelector<HTMLElement>(".rack");
+  const nav = document.querySelector<HTMLElement>(".rack-nav");
+  if (rack && nav) {
+    const [back, on] = nav.querySelectorAll<HTMLButtonElement>(".rack-step");
+
+    const seen = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (!e.isIntersecting) continue;
+          seen.unobserve(e.target);
+          fillArt(e.target as SVGSVGElement);
+        }
+      },
+      { root: rack, rootMargin: "0px 640px" },
+    );
+    rack.querySelectorAll<SVGSVGElement>("svg[data-art]").forEach((svg) => seen.observe(svg));
+
+    // arrows and edge fades only while the shelf is wider than the page
+    const ends = () => {
+      const max = rack.scrollWidth - rack.clientWidth;
+      nav.hidden = max < 2;
+      back.disabled = rack.scrollLeft < 2;
+      on.disabled = rack.scrollLeft > max - 2;
+      rack.classList.toggle("more-back", !nav.hidden && !back.disabled);
+      rack.classList.toggle("more-on", !nav.hidden && !on.disabled);
+    };
+    ends();
+    rack.addEventListener("scroll", ends, { passive: true });
+    new ResizeObserver(ends).observe(rack);
+
+    const still = matchMedia("(prefers-reduced-motion: reduce)");
+    for (const b of [back, on])
+      b.addEventListener("click", () =>
+        rack.scrollBy({
+          left: Number(b.dataset.step) * rack.clientWidth * 0.8,
+          behavior: still.matches ? "auto" : "smooth",
+        }),
+      );
+  }
+</script>
 
 <style>
   .back {
@@ -100,7 +237,8 @@ for (const album of albums) {
     text-decoration: none;
   }
 
-  .back path {
+  .back path,
+  .rack-step path {
     fill: none;
     stroke: var(--cursor);
     stroke-width: 1.7;
@@ -143,102 +281,338 @@ for (const album of albums) {
     color: var(--fg-dim);
   }
 
-  .page {
-    padding: 2.5rem 2.25rem 2rem;
-    background: var(--bg-alt);
-    border-radius: 3px 6px 4px 5px;
-    box-shadow:
-      inset 0 0 0 1px var(--border),
-      0 26px 40px -30px rgba(0, 0, 0, 0.6);
-  }
-
-  .row + .row {
-    margin-top: 2.5rem;
-  }
-
-  .row-head {
-    margin: 0 0 0.625rem 0.375rem;
-    font-size: 1.25rem;
-  }
-
-  .row-head span {
-    font-weight: 300;
-    font-size: 1rem;
-    color: var(--fg-dim);
-  }
-
-  .strip {
-    --stamp: 128px;
-    --gap: 1.75rem;
+  .rack-bar {
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem 1.5rem;
+    margin-top: 1rem;
+  }
+
+  .hint {
+    margin: 0 0 0 0.375rem;
+    font-weight: 300;
+    font-size: 1.125rem;
+    color: var(--fg-dim);
+    transform: rotate(-1deg);
+  }
+
+  .hint-touch {
+    display: none;
+  }
+
+  @media (hover: none) {
+    .hint-point {
+      display: none;
+    }
+
+    .hint-touch {
+      display: inline;
+    }
+  }
+
+  .rack-nav {
+    display: flex;
+    gap: 0.25rem;
+  }
+
+  .rack-nav[hidden] {
+    display: none;
+  }
+
+  .rack-step {
+    display: grid;
+    place-items: center;
+    width: 52px;
+    height: 44px;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+  }
+
+  .rack-step:disabled {
+    opacity: 0.3;
+    cursor: default;
+  }
+
+  .rack-step[data-step="-1"]:not(:disabled):hover path {
+    transform: translateX(-3px);
+  }
+
+  .rack-step[data-step="1"]:not(:disabled):hover path {
+    transform: translateX(3px);
+  }
+
+  .rack {
+    --w: 164px;
+    --h: 560px;
+    --gap: 18px;
+    --fade: 0px;
+    --fade-back: 0px;
+    --fade-on: 0px;
+    display: flex;
     align-items: flex-start;
-    gap: 1rem var(--gap);
-    padding: 18px 18px 0;
+    gap: 28px;
+    margin: 0.25rem calc(var(--gutter) * -1) 0;
+    padding: 96px var(--gutter) 1rem;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity;
+    scroll-padding-inline: var(--gutter);
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      #000 var(--fade-back),
+      #000 calc(100% - var(--fade-on)),
+      transparent
+    );
   }
 
-  .hinge,
-  .next {
-    position: relative;
-    width: var(--stamp);
+  .rack.more-back {
+    --fade-back: var(--gutter);
   }
 
-  .hinge {
-    display: block;
-    text-decoration: none;
+  .rack.more-on {
+    --fade-on: var(--gutter);
   }
 
-  .hinge :global(.stamp) {
-    width: var(--stamp);
-    height: var(--stamp);
-    transition: translate 0.25s;
+  .rack:focus-visible {
+    outline: 1.5px dashed var(--cursor);
+    outline-offset: -4px;
   }
 
-  .hinge:hover :global(.stamp) {
-    translate: 0 -4px;
+  .shelf {
+    flex: none;
+    display: flex;
+    flex-direction: column;
   }
 
-  .hinge::after,
-  .next::after {
-    content: "";
-    position: absolute;
-    top: calc(var(--stamp) / 2);
-    left: calc(var(--gap) / -2);
-    right: calc(var(--gap) / -2);
-    height: calc(var(--stamp) / 2);
-    background: var(--paper);
-    opacity: 0.38;
-    border-top: 1px solid var(--border);
-    pointer-events: none;
+  .shelf-row {
+    display: flex;
+    align-items: flex-end;
+    gap: var(--gap);
   }
 
-  .page :global(.perforation) {
-    stroke: var(--bg-alt);
+  .shelf-label {
+    margin: 14px 0 0;
+    padding-top: 8px;
+    border-top: 1.5px solid var(--border);
+    font-size: 1.125rem;
   }
 
-  .hinge-title {
-    display: block;
-    margin-top: 0.5rem;
+  .shelf-label span {
     font-weight: 300;
     font-size: 0.9375rem;
-    line-height: 1.3;
     color: var(--fg-dim);
+  }
+
+  .shiori {
+    position: relative;
+    flex: none;
+    display: block;
+    width: var(--w);
+    height: var(--h);
+    background: var(--paper);
+    border-radius: 3px 3px 4px 4px;
+    box-shadow:
+      0 10px 14px -10px rgba(0, 0, 0, 0.4),
+      0 0 0 1px rgba(0, 0, 0, 0.05);
+    color: var(--fg-main);
+    text-decoration: none;
+    scroll-snap-align: start;
+    transform: rotate(var(--rot));
+    transition:
+      transform 0.4s cubic-bezier(0.2, 0.7, 0.3, 1),
+      box-shadow 0.4s ease;
+  }
+
+  a.shiori:hover,
+  a.shiori:focus-visible {
+    transform: translateY(-30px) rotate(var(--rot));
+    box-shadow:
+      0 30px 30px -18px rgba(0, 0, 0, 0.45),
+      0 0 0 1px rgba(0, 0, 0, 0.05);
+  }
+
+  .cord {
+    position: absolute;
+    left: calc(50% - 20px);
+    top: -56px;
+    overflow: visible;
+  }
+
+  .cord path {
+    fill: none;
+    stroke: var(--red);
+    stroke-width: 1.6;
+    stroke-linecap: round;
+  }
+
+  .cord .tassel {
+    stroke-width: 0.8;
+    opacity: 0.85;
+  }
+
+  .hole {
+    position: absolute;
+    left: calc(50% - 4px);
+    top: 9px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--bg-main);
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.35);
+  }
+
+  .art {
+    position: absolute;
+    left: 9px;
+    top: 24px;
+    width: calc(100% - 18px);
+    height: calc(var(--h) - 136px);
+    border-radius: 1px;
+  }
+
+  .art :global(.shiori-wash path) {
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .art :global(.shiori-mist) {
+    fill: var(--paper);
+    opacity: 0.5;
+  }
+
+  .art :global(.shiori-white) {
+    fill: none;
+    stroke: var(--paper);
+    stroke-width: 1.3;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+    opacity: 0.95;
+  }
+
+  .art :global(.shiori-windows) {
+    fill: color-mix(in srgb, var(--paper), var(--sky) 25%);
+    stroke: var(--fg-main);
+    stroke-width: 0.25;
+    stroke-opacity: 0.5;
+  }
+
+  .art :global(.shiori-pencil) {
+    fill: none;
+    stroke: var(--fg-main);
+    stroke-width: 0.35;
+    stroke-linecap: round;
+    opacity: 0.6;
+  }
+
+  .art :global(.shiori-grain) {
+    fill: var(--fg-main);
+    opacity: 0.09;
+  }
+
+  .stuck {
+    position: absolute;
+    right: -6px;
+    top: calc(var(--h) - 158px);
+    transform: rotate(var(--tilt));
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.2));
+  }
+
+  .stuck :global(.stamp) {
+    filter: none;
+    transform: none;
+  }
+
+  .stuck :global(.perforation) {
+    stroke: var(--paper);
+  }
+
+  .margin {
+    position: absolute;
+    left: 8px;
+    right: 8px;
+    top: calc(var(--h) - 98px);
+    bottom: 12px;
+    display: flex;
+    flex-direction: column;
     text-align: center;
   }
 
-  .next {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: var(--stamp);
-    border: 1.5px dashed var(--border);
-    border-radius: 2px;
-    font-weight: 300;
-    font-size: 1.0625rem;
-    line-height: 1.3;
+  .caps {
+    font-family: var(--font-body);
+    font-weight: 500;
+    font-size: var(--cap);
+    line-height: 1.15;
+    letter-spacing: 0.14em;
+  }
+
+  .tags {
+    margin-top: 6px;
+    font-family: var(--font-mono);
+    font-size: 8.5px;
+    letter-spacing: 0.12em;
+    white-space: nowrap;
     color: var(--fg-dim);
+  }
+
+  .sign {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin: auto 2px 0;
+    padding-top: 6px;
+    font-size: 13px;
+  }
+
+  .num {
+    font-family: var(--font-body);
+    font-style: italic;
+    color: var(--red);
+  }
+
+  .sign .hand {
+    font-weight: 300;
+    color: var(--fg-dim);
+    transform: rotate(-6deg);
+  }
+
+  .sketch {
+    border: 1px dashed var(--border);
+  }
+
+  .sketch svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .sketch path {
+    fill: none;
+    stroke: var(--fg-dim);
+    stroke-width: 0.4;
+    opacity: 0.45;
+  }
+
+  .sketch .hand {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 42%;
     text-align: center;
-    transform: rotate(1deg);
+    font-weight: 300;
+    font-size: 1.25rem;
+    color: var(--fg-dim);
+  }
+
+  .blank .caps {
+    color: var(--fg-dim);
   }
 
   .foot {
@@ -250,24 +624,49 @@ for (const album of albums) {
   }
 
   @media (max-width: 40rem) {
-    .page {
-      padding: 1.5rem 0.5rem 1.25rem;
+    .rack {
+      --w: 150px;
+      --h: 500px;
+      --gap: 14px;
+      gap: 26px;
+      scroll-snap-type: x mandatory;
     }
 
-    .row + .row {
-      margin-top: 1.75rem;
+    .shiori {
+      scroll-snap-align: center;
     }
 
-    .strip {
-      --stamp: 92px;
-      --gap: 0.875rem;
-      padding: 18px 10px 0;
+    .caps {
+      font-size: calc(var(--cap) * 0.9);
+    }
+
+    .art {
+      height: calc(var(--h) - 128px);
+    }
+
+    .stuck {
+      top: calc(var(--h) - 144px);
+      width: 50px;
+    }
+
+    .margin {
+      top: calc(var(--h) - 90px);
+    }
+
+    .tags {
+      font-size: 8px;
+    }
+
+    .stuck :global(.stamp) {
+      width: 50px;
+      height: 50px;
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .hinge :global(.stamp),
-    .back path {
+    .shiori,
+    .back path,
+    .rack-step path {
       transition: none;
     }
   }
