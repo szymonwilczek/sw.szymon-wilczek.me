@@ -73,12 +73,34 @@ const spreads = placed.map(({ book: b, spine }) => {
     colophon,
   };
 });
+
+const BOOK_FONTS = [
+  "CormorantGaramond",
+  "CormorantGaramond-Italic",
+  "EBGaramond",
+  "EBGaramond-Italic",
+  "IMFellEnglish",
+  "IMFellEnglish-Italic",
+  "IMFellEnglishSC",
+];
 ---
 
 <BaseLayout
   title="Bookshelf"
   description="What I have read, a shelf for every year, and what I am reading now."
 >
+  <Fragment slot="head">
+    {BOOK_FONTS.map((f) => (
+      <link
+        rel="preload"
+        href={`/fonts/${f}.woff2`}
+        as="font"
+        type="font/woff2"
+        crossorigin
+        fetchpriority="low"
+      />
+    ))}
+  </Fragment>
   <header class="shelf-head">
     <div>
       <h1>Bookshelf</h1>
