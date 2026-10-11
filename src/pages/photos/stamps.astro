@@ -121,7 +121,7 @@ const gables =
             <div
               class="shiori"
               data-terrain={album.terrain.join(" ")}
-              style={`--rot: ${album.rot}deg; --give: ${album.give}; --cap: ${album.cap}px`}
+              style={`--rot: ${album.rot}deg; --give: ${album.give}; --cap: ${album.cap}px; --i: ${albums.indexOf(album)}`}
             >
               <a
                 class="open"
@@ -171,7 +171,7 @@ const gables =
           {ri === rows.length - 1 && (
             <span
               class="shiori blank"
-              style={`--rot: ${next.rot}deg; --give: ${next.give}; --cap: ${next.cap}px`}
+              style={`--rot: ${next.rot}deg; --give: ${next.give}; --cap: ${next.cap}px; --i: ${albums.length}`}
             >
               <svg class="cord" width="40" height="70" viewBox="0 0 40 70" aria-hidden="true">
                 <path d={next.cord} />
@@ -246,13 +246,56 @@ const gables =
     new ResizeObserver(ends).observe(rack);
 
     const still = matchMedia("(prefers-reduced-motion: reduce)");
+
+    const stops = () => {
+      const pad = parseFloat(getComputedStyle(rack).scrollPaddingLeft) || 0;
+      const max = rack.scrollWidth - rack.clientWidth;
+      const left = rack.getBoundingClientRect().left + rack.clientLeft - rack.scrollLeft;
+      return [...rack.querySelectorAll<HTMLElement>(".shiori")]
+        .map((m) => {
+          const r = m.getBoundingClientRect();
+          return getComputedStyle(m).scrollSnapAlign.includes("center")
+            ? r.left - left + r.width / 2 - rack.clientWidth / 2
+            : r.left - left - pad;
+        })
+        .map((x) => Math.round(Math.max(0, Math.min(max, x))));
+    };
+    let settle = 0;
+    const unsnap = () => {
+      rack.style.scrollSnapType = "none";
+      const done = () => {
+        clearTimeout(settle);
+        settle = window.setTimeout(function again() {
+          if (!/^(0deg)?$/.test(rack.style.getPropertyValue("--sway"))) {
+            settle = window.setTimeout(again, 80);
+            return;
+          }
+          rack.style.removeProperty("scroll-snap-type");
+          rack.removeEventListener("scroll", done);
+        }, 160);
+      };
+      rack.addEventListener("scroll", done, { passive: true });
+      done();
+    };
     for (const b of [back, on])
-      b.addEventListener("click", () =>
-        rack.scrollBy({
-          left: Number(b.dataset.step) * rack.clientWidth * 0.8,
-          behavior: still.matches ? "auto" : "smooth",
-        }),
-      );
+      b.addEventListener("click", () => {
+        const dir = Number(b.dataset.step);
+        const x = rack.scrollLeft;
+        const want = x + dir * rack.clientWidth * 0.8;
+        const all = [...new Set(stops())].sort((a, c) => a - c);
+        const ahead = all.filter((p) => (dir > 0 ? p > x + 2 : p < x - 2));
+        if (!ahead.length) return;
+        const within = ahead.filter((p) => (dir > 0 ? p <= want : p >= want));
+        const to = within.length
+          ? dir > 0
+            ? within.at(-1)!
+            : within[0]
+          : dir > 0
+            ? ahead[0]
+            : ahead.at(-1)!;
+        unsnap();
+        rack.scrollTo({ left: to, behavior: still.matches ? "auto" : "smooth" });
+      });
 
     // moving the shelf leaves the bookmarks leaning behind
     if (!still.matches) {
@@ -660,11 +703,23 @@ const gables =
     rotate: calc(var(--sway, 0deg) * var(--give));
     translate: 0 calc(var(--pull, 0px) * -1);
     transition:
-      transform 0.4s cubic-bezier(0.2, 0.7, 0.3, 1),
+      transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
       translate 0.5s cubic-bezier(0.3, 1.5, 0.5, 1),
-      box-shadow 0.4s ease,
+      box-shadow 0.5s ease,
       opacity 0.4s ease,
       filter 0.4s ease;
+    animation: hang 0.9s cubic-bezier(0.34, 1.4, 0.64, 1) calc(min(var(--i), 10) * 70ms) backwards;
+  }
+
+  @keyframes hang {
+    from {
+      opacity: 0;
+      translate: 0 -46px;
+      rotate: calc(var(--give) * -5deg);
+    }
+    40% {
+      opacity: 1;
+    }
   }
 
   .shiori.pulling {
@@ -757,22 +812,21 @@ const gables =
     border-radius: 1px;
   }
 
-  /* wet paint: blurred and pale at first, the colour comes up as it soaks in */
   .art.soak {
-    animation: soak 1.8s cubic-bezier(0.3, 0.6, 0.4, 1) calc((var(--give) - 0.7) * 0.6s) backwards;
+    animation: soak 1.4s cubic-bezier(0.3, 0.6, 0.4, 1) calc((var(--give) - 0.7) * 0.5s) backwards;
   }
 
   @keyframes soak {
     from {
-      opacity: 0;
-      filter: blur(4px) saturate(0.3) brightness(1.12);
+      opacity: 0.2;
+      clip-path: inset(0 0 100% 0);
     }
-    35% {
-      opacity: 0.9;
+    60% {
+      opacity: 0.85;
     }
     to {
       opacity: 1;
-      filter: none;
+      clip-path: inset(0 0 0 0);
     }
   }
 
@@ -992,6 +1046,7 @@ const gables =
     .back path,
     .rack-step path {
       transition: none;
+      animation: none;
     }
   }
 </style>
