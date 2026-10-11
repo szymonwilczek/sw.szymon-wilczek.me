@@ -82,7 +82,11 @@ const TONE_CSS = Object.entries(TONES)
 const FILTERS = `<filter id="bk-tremble" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="0.09" numOctaves="2" seed="7"/><feDisplacementMap in="SourceGraphic" scale="1.6"/></filter><filter id="bk-wash" x="-15%" y="-15%" width="130%" height="130%"><feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="3" seed="5"/><feDisplacementMap in="SourceGraphic" scale="6"/><feGaussianBlur stdDeviation="0.9"/></filter><filter id="bk-bleed" x="-30%" y="-30%" width="160%" height="160%"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="3" seed="9"/><feDisplacementMap in="SourceGraphic" scale="11"/><feGaussianBlur stdDeviation="1.6"/></filter><filter id="bk-pool" x="-30%" y="-80%" width="160%" height="260%"><feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="3"/><feDisplacementMap in="SourceGraphic" scale="14"/><feGaussianBlur stdDeviation="4"/></filter>`;
 
 const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
+
 function groupSvg(g, attrs = "") {
+  if (g.groups)
+    return `<g class="${g.cls}"${attrs}>${g.groups.map((x) => groupSvg(x)).join("")}</g>`;
+  if (g.cls) attrs += ` class="${g.cls}"`;
   const style = [
     g.tf !== "none" && `transform:${g.tf}`,
     g.to !== "0px 0px" && `transform-origin:${g.to}`,
@@ -853,7 +857,7 @@ function bambooClump(groups, r, x, y, K, s, cut) {
             ty = y + (10 + ((i * 5) % 7) * 7) * s;
           tf = `translate(${f1(tx - piv[0])}px, ${f1(ty - piv[1])}px) rotate(${f1(sg * (70 + lr() * 34))}deg)`;
         } else tf = `rotate(${sg * (6 + lr() * 14)}deg)`;
-        const p = G({ tf, to: `${f1(piv[0])}px ${f1(piv[1])}px` });
+        const p = G({ tf, to: `${f1(piv[0])}px ${f1(piv[1])}px`, cls: "fall" });
         culmPart(p, r, c, K, tl, 1, tr - tl, 0);
         culmTop(p, r, c, K, s);
         late.push([cut.phase === "down" ? 0 : 1, p]);
@@ -1860,8 +1864,7 @@ function workshopInside(g, r, P, K, sc) {
     So(g, wring(r, p[0], p[1], 3 * sc, 1.5 * sc, 0.2, 8), PAINTS(K)[i], 0.95);
   });
 }
-// waiting room and the workshop
-function sceneGarden16(K, stage) {
+function sceneGarden16(K, stage, opt = {}) {
   const open = stage === "open";
   const r = rng(hash("tea/garden16")),
     W = 1100,
@@ -1933,7 +1936,7 @@ function sceneGarden16(K, stage) {
     const walls = G();
     workshopWalls(walls, r, PW, K);
     groups.push(walls);
-    const roof = G();
+    const roof = G({ cls: "roji-roof" });
     gableRoof(roof, r, PW, KX, KZ, KH, 72, 20, K, "thatch");
     plaque(roof, r, ...PW(152, -20, KH - 14), 40, 16, "工房", "'Yuji Syuku', serif", 11, K);
     groups.push(roof);
@@ -1999,11 +2002,13 @@ function sceneGarden16(K, stage) {
   dryingBench(bench, r, PW, 8, 104, -26, K, 0.3);
   groups.push(bench);
   noborigama(groups, r, 870, 612, K, open);
-  bambooClump(groups, r, 250, 404, K);
+  const bb = [];
+  bambooClump(bb, rng(hash("bb")), 250, 404, K, 1, opt.cut);
+  groups.push({ cls: "roji-bamboo", groups: bb });
 
   // waiting room
   const PM = OB(36, 664),
-    MA = G(),
+    MA = G({ cls: "roji-machiai" }),
     MH = 178;
   Wa(
     MA,
@@ -2132,7 +2137,8 @@ function sceneGarden16(K, stage) {
     );
     for (let i = 0; i < 5; i++) {
       const p = PM(28 + i * 26, 75, y);
-      piece(shelf, r, p[0], p[1] - 1, 0.24, K, demoSpec("g" + row + i));
+      const spec = opt.shelf ? opt.shelf(row * 5 + i) : demoSpec("g" + row + i);
+      if (spec) piece(shelf, r, p[0], p[1] - 1, 0.24, K, spec);
     }
   });
   groups.push(shelf);
@@ -2172,7 +2178,11 @@ function sceneGarden16(K, stage) {
     const fs = G();
     stone(fs, r, 664, 506, 30, 11, K);
     groups.push(fs);
-  } else sekiStone(groups, r, 640, 504, 1.15, K, false);
+  } else {
+    const st = [];
+    sekiStone(st, r, 640, 504, 1.15, K, false);
+    groups.push({ cls: "roji-stone", groups: st });
+  }
   const clouds = G({ washO: 0.5 }),
     grey = mix(K.inkSoft, K.paper, 0.55);
   mist(clouds, r, 760, 1110, 128, 34, grey, 0.7, mix(grey, K.ink, 0.25));

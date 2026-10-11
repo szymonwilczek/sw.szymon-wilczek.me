@@ -116,7 +116,7 @@ export function clean(x: unknown): PieceSpec | null {
   };
 }
 
-function turned(spec: PieceSpec, turn: number) {
+export function turned(spec: PieceSpec, turn = 0) {
   const wrap = (u: number) => ((((u + turn + 2) % 4) + 4) % 4) - 2;
   const runs: Stroke[] = [];
   spec.paint.forEach((st) => {
