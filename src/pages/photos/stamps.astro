@@ -92,6 +92,9 @@ const sketch =
       <span class="hint-point">point at one and it slides up out of the rack.</span>
       <span class="hint-touch">swipe along the shelf; tap one to open it.</span>
     </p>
+    <button type="button" class="sift hand" hidden>
+      only <span class="sift-tag"></span> · show all
+    </button>
     <div class="rack-nav" hidden>
       <button type="button" class="rack-step" data-step="-1" aria-label="Scroll back">
         <svg width="40" height="18" viewBox="0 0 44 20" aria-hidden="true">
@@ -111,12 +114,16 @@ const sketch =
       <div class="shelf">
         <div class="shelf-row">
           {row.albums.map((album) => (
-            <a
+            <div
               class="shiori"
-              href={`/photos/${album.slug}/`}
-              aria-label={`${album.title}, stamp ${album.stampNum}`}
+              data-terrain={album.terrain.join(" ")}
               style={`--rot: ${album.rot}deg; --cap: ${album.cap}px`}
             >
+              <a
+                class="open"
+                href={`/photos/${album.slug}/`}
+                aria-label={`${album.title}, stamp ${album.stampNum}`}
+              />
               <svg class="cord" width="40" height="70" viewBox="0 0 40 70" aria-hidden="true">
                 <path d={album.cord} />
                 <path class="tassel" d={album.tassel} />
@@ -140,13 +147,22 @@ const sketch =
               </span>
               <span class="margin">
                 <span class="caps">{album.caps}</span>
-                <span class="tags">{album.terrain.join(" · ")}</span>
+                <span class="tags">
+                  {album.terrain.map((t, i) => (
+                    <Fragment>
+                      {i > 0 && " · "}
+                      <button type="button" class="tag" data-tag={t} aria-pressed="false">
+                        {t}
+                      </button>
+                    </Fragment>
+                  ))}
+                </span>
                 <span class="sign">
                   <span class="num">no. {album.stampNum}</span>
                   <span class="hand">sw.</span>
                 </span>
               </span>
-            </a>
+            </div>
           ))}
           {ri === rows.length - 1 && (
             <span class="shiori blank" style={`--rot: ${next.rot}deg; --cap: ${next.cap}px`}>
@@ -222,6 +238,37 @@ const sketch =
           behavior: still.matches ? "auto" : "smooth",
         }),
       );
+
+    // terrain tag sifts the shelf
+    const sift = document.querySelector<HTMLButtonElement>(".sift")!;
+    const marks = [...rack.querySelectorAll<HTMLElement>(".shiori[data-terrain]")];
+    let only: string | null = null;
+    const choose = (tag: string | null) => {
+      only = tag === only ? null : tag;
+      rack.toggleAttribute("data-sifting", only !== null);
+      sift.hidden = only === null;
+      sift.querySelector(".sift-tag")!.textContent = only ?? "";
+      for (const b of rack.querySelectorAll<HTMLButtonElement>(".tag"))
+        b.setAttribute("aria-pressed", String(b.dataset.tag === only));
+      const hits = marks.filter((m) => {
+        const hit = only !== null && m.dataset.terrain!.split(" ").includes(only);
+        m.classList.toggle("match", hit);
+        return hit;
+      });
+      hits[0]?.scrollIntoView({
+        inline: "center",
+        block: "nearest",
+        behavior: still.matches ? "auto" : "smooth",
+      });
+    };
+    rack.addEventListener("click", (e) => {
+      const tag = (e.target as Element).closest<HTMLButtonElement>(".tag");
+      if (tag) choose(tag.dataset.tag!);
+    });
+    sift.addEventListener("click", () => choose(null));
+    addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && only !== null) choose(null);
+    });
   }
 </script>
 
@@ -310,6 +357,30 @@ const sketch =
     .hint-touch {
       display: inline;
     }
+  }
+
+  .sift {
+    min-height: 44px;
+    margin-left: auto;
+    padding: 0 0.5rem;
+    border: 0;
+    background: none;
+    font-weight: 300;
+    font-size: 1.125rem;
+    color: var(--fg-dim);
+    cursor: pointer;
+  }
+
+  .sift[hidden] {
+    display: none;
+  }
+
+  .sift-tag {
+    color: var(--red);
+  }
+
+  .sift:hover {
+    color: var(--fg-main);
   }
 
   .rack-nav {
@@ -422,20 +493,38 @@ const sketch =
       0 10px 14px -10px rgba(0, 0, 0, 0.4),
       0 0 0 1px rgba(0, 0, 0, 0.05);
     color: var(--fg-main);
-    text-decoration: none;
     scroll-snap-align: start;
     transform: rotate(var(--rot));
     transition:
       transform 0.4s cubic-bezier(0.2, 0.7, 0.3, 1),
-      box-shadow 0.4s ease;
+      box-shadow 0.4s ease,
+      opacity 0.4s ease,
+      filter 0.4s ease;
   }
 
-  a.shiori:hover,
-  a.shiori:focus-visible {
+  .shiori:not(.blank):hover,
+  .shiori:has(:focus-visible) {
     transform: translateY(-30px) rotate(var(--rot));
     box-shadow:
       0 30px 30px -18px rgba(0, 0, 0, 0.45),
       0 0 0 1px rgba(0, 0, 0, 0.05);
+  }
+
+  .open {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    border-radius: inherit;
+  }
+
+  .open:focus-visible {
+    outline: 1.5px dashed var(--cursor);
+    outline-offset: 4px;
+  }
+
+  .rack[data-sifting] .shiori:not(.match) {
+    opacity: 0.3;
+    filter: saturate(0.3);
   }
 
   .cord {
@@ -559,6 +648,31 @@ const sketch =
     letter-spacing: 0.12em;
     white-space: nowrap;
     color: var(--fg-dim);
+  }
+
+  .tag {
+    position: relative;
+    z-index: 2;
+    margin: -6px -2px;
+    padding: 6px 2px;
+    border: 0;
+    background: none;
+    font: inherit;
+    letter-spacing: inherit;
+    color: inherit;
+    cursor: pointer;
+  }
+
+  .tag:hover,
+  .tag[aria-pressed="true"] {
+    color: var(--red);
+    text-decoration: underline 1px;
+    text-underline-offset: 3px;
+  }
+
+  .tag:focus-visible {
+    outline: 1.5px dashed var(--cursor);
+    outline-offset: 0;
   }
 
   .sign {
