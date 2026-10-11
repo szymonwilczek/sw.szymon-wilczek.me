@@ -10,6 +10,7 @@ import { writingSlug } from "../utils/format";
 import { HANKO_EDGE } from "../utils/hanko";
 import { PROJECTS } from "../utils/projects";
 import { readBooks } from "../utils/books";
+import { TOOLS } from "../utils/dogu";
 
 const writings = (await getCollection("writings"))
   .sort((a, b) => a.data.pubDate.valueOf() - b.data.pubDate.valueOf())
@@ -90,6 +91,11 @@ const PATHS = [
   { to: "/contact", d: "M238 712 C 180 660, 120 640, 96 612", via: ["/writings"] },
   { to: "/projects", d: "M560 520 C 500 500, 440 470, 400 440", via: ["/writings", "/photos"] },
   { to: "/books", d: "M522 650 C 570 656, 620 690, 676 708", via: ["/writings"] },
+  {
+    to: "/uses",
+    d: "M328 222 C 362 224, 404 216, 440 198",
+    via: ["/writings", "/photos", "/about"],
+  },
 ];
 
 // trees in their seasons
@@ -144,6 +150,11 @@ const PLACES = [
   { href: "/files/verify/", title: "the bench", sub: "check a file against its tag" },
   { href: "/vault/", title: "the well, sealed", sub: "vault" },
   { href: "/about/", title: "stone lantern", sub: "about" },
+  {
+    href: "/uses/",
+    title: "uses · the tea hut",
+    sub: plural(TOOLS.length, "piece on a tray", "pieces on a tray"),
+  },
   { href: "/contact/", title: "the mailbox", sub: "contact" },
   { href: "/seals/", title: "tracks?", sub: "the seal book" },
 ];
@@ -578,6 +589,47 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
           </text>
           <text class="label" x="890" y="274" font-size="17">
             vault · the well, sealed
+          </text>
+        </a>
+
+        <a
+          href="/uses/"
+          class="place"
+          data-area="/uses"
+          data-title={place("/uses/").title}
+          data-sub={place("/uses/").sub}
+        >
+          <path
+            class="line fill-paper"
+            d="M400 132 C 428 131, 456 133, 482 131 C 483 152, 481 172, 483 194 C 456 195, 428 193, 399 195 C 400 174, 398 152, 400 132 Z"
+            stroke-width="1.3"
+          ></path>
+          <path
+            class="line fill-tape"
+            d="M388 134 C 408 116, 426 102, 441 92 C 456 102, 474 116, 494 134 C 460 139, 420 139, 388 134 Z"
+            stroke-width="1.4"
+          ></path>
+          <path
+            class="line"
+            d="M410 124 L 404 134 M 424 114 L 418 136 M 441 100 L 440 137 M 458 114 L 464 136 M 472 124 L 478 134"
+            stroke-width="0.7"
+            opacity="0.5"
+          ></path>
+          <path
+            class="line"
+            d="M408 146 h 20 v 22 h -20 Z M 418 146 v 22 M 408 157 h 20"
+            stroke-width="0.8"
+            opacity="0.8"
+          ></path>
+          <circle class="line fill-alt" cx="466" cy="156" r="9" stroke-width="0.9"></circle>
+          <path
+            class="line fill-tape"
+            d="M434 194 L 434 176 L 452 176 L 452 194"
+            stroke-width="1.1"
+          ></path>
+          <path class="line" d="M384 196 C 420 198, 462 198, 498 195" stroke-width="1.2"></path>
+          <text class="label" x="458" y="226" font-size="17">
+            uses · the tea hut
           </text>
         </a>
 
