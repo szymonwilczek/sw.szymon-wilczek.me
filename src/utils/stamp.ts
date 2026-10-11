@@ -41,7 +41,7 @@ const f1 = (n: number) => Math.round(n * 10) / 10;
 type Point = [number, number];
 
 // Catmull-Rom through the points, written as cubic Beziers
-function smooth(pts: Point[], closed: boolean): string {
+export function smooth(pts: Point[], closed: boolean): string {
   const p = closed
     ? [pts[pts.length - 1], ...pts, pts[0], pts[1]]
     : [pts[0], ...pts, pts[pts.length - 1]];
