@@ -14,9 +14,11 @@ import {
   type Placed,
 } from "../utils/books";
 import { hash } from "../utils/stamp";
+import { slip } from "../utils/slip";
 
 const now = new Date();
 const books = readBooks();
+const key = await slip();
 const cases = shelves(books, now);
 const waiting = books.filter((b) => b.state === "waiting");
 const reading = books.filter((b) => b.state === "reading");
@@ -215,6 +217,18 @@ const BOOK_FONTS = [
                                   {t.t}
                                 </text>
                               ))}
+                              {p.book.no !== null && (
+                                <g class="no">
+                                  <path d={p.spine.tag} />
+                                  <text
+                                    transform={p.spine.no}
+                                    text-anchor="middle"
+                                    dominant-baseline="central"
+                                  >
+                                    {p.book.no}
+                                  </text>
+                                </g>
+                              )}
                               <path class="ink" d={p.spine.body} filter="url(#bk-tremble)" />
                             </svg>
                             {p.ribbon && (
@@ -342,6 +356,18 @@ const BOOK_FONTS = [
                                     {t.t}
                                   </text>
                                 ))}
+                                {p.book.no !== null && (
+                                  <g class="no">
+                                    <path d={p.spine.tag} />
+                                    <text
+                                      transform={p.spine.no}
+                                      text-anchor="middle"
+                                      dominant-baseline="central"
+                                    >
+                                      {p.book.no}
+                                    </text>
+                                  </g>
+                                )}
                                 <path class="ink" d={p.spine.body} filter="url(#bk-tremble)" />
                               </g>
                             </svg>
@@ -495,6 +521,22 @@ const BOOK_FONTS = [
                 )}
               </div>
             ))}
+            {key && s.b.no === key.no && (
+              <svg
+                class="slip"
+                width={key.w + 40}
+                height={key.h + 36}
+                viewBox={`-20 -18 ${key.w + 40} ${key.h + 36}`}
+                aria-hidden="true"
+              >
+                <path
+                  class="slip-paper"
+                  d={`M-14 -12 C ${key.w * 0.3} -15, ${key.w * 0.7} -9, ${key.w + 14} -13 L ${key.w + 16} ${key.h + 12} C ${key.w * 0.6} ${key.h + 15}, ${key.w * 0.3} ${key.h + 10}, -12 ${key.h + 13} Z`}
+                  filter="url(#bk-tremble)"
+                />
+                <path class="slip-ink" d={key.ink} />
+              </svg>
+            )}
           </div>
           <p class="caption">
             <span class="caption-title">{s.b.title}</span> · <i>{s.b.author}</i> · {s.when}
@@ -802,6 +844,39 @@ const BOOK_FONTS = [
   .orn {
     fill: var(--t-ink);
     opacity: 0.7;
+  }
+
+  .slip {
+    position: absolute;
+    right: 7%;
+    bottom: 9%;
+    width: min(46%, 320px);
+    height: auto;
+    transform: rotate(-5deg);
+    filter: drop-shadow(1px 2px 2px color-mix(in oklab, var(--fg-main), transparent 80%));
+  }
+
+  .slip-paper {
+    fill: color-mix(in oklab, var(--paper), white 40%);
+    stroke: var(--t-ink);
+    stroke-width: 0.8;
+  }
+
+  .slip-ink {
+    fill: var(--t-ink);
+  }
+
+  .no path {
+    fill: color-mix(in oklab, var(--paper), white 30%);
+    stroke: var(--t-ink);
+    stroke-width: 0.6;
+    opacity: 0.92;
+  }
+
+  .no text {
+    fill: var(--t-ink);
+    font-family: "Typus Mono 95", ui-monospace, monospace;
+    font-size: 7.5px;
   }
 
   .bk[aria-pressed="true"] {
