@@ -1,0 +1,28 @@
+/* what happens while nobody touches the page */
+
+.dusk {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      ellipse 75% 70% at 50% 45%,
+      transparent 35%,
+      color-mix(in srgb, black 34%, transparent) 100%
+    ),
+    color-mix(in srgb, black 10%, transparent);
+  opacity: 0;
+  transition: opacity 0.8s ease-out;
+}
+
+.dusk.is-down {
+  opacity: 1;
+  transition: opacity 40s ease-in;
+}
+
+@media print {
+  .dusk {
+    display: none;
+  }
+}
