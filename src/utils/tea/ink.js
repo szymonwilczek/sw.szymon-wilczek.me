@@ -1993,16 +1993,18 @@ function workshopInside(groups, r, P, K, sc) {
       const p = P(24 + i * 22, KZ - 6, y);
       const pc = G();
       groups.push(pc);
+      const pf = PROF[["cup", "bowl", "yunomi", "hira", "bowl", "cup"][(i + row) % 6]],
+        ps = 0.28 * sc;
       piece(
         pc,
         r,
         p[0],
-        p[1],
-        0.28 * sc,
+        p[1] - (radAt(pf.prof, 0) * 0.3 + 5) * ps,
+        ps,
         K,
         Object.assign(
           { clay: (i + row) % 2 ? 0 : 3, glaze: { none: true }, fire: i + row * 7 },
-          PROF[["cup", "bowl", "yunomi", "hira", "bowl", "cup"][(i + row) % 6]],
+          pf,
         ),
       );
     }
