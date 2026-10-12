@@ -11,6 +11,8 @@ import { readBooks } from "../utils/books";
 import { TOOLS } from "../data/uses";
 import { weeks } from "../utils/nenrin";
 import { LINKS } from "../data/links";
+import { YEARS } from "../data/years";
+import { stone } from "../utils/stones";
 
 const writings = (await getCollection("writings"))
   .sort((a, b) => a.data.pubDate.valueOf() - b.data.pubDate.valueOf())
@@ -50,7 +52,12 @@ const lilies = albums.map((album, i) => {
   return { ...album, x, y, r };
 });
 
-const STONES = [0, 1, 2, 3, 4].map((i) => ({ x: 340 + i * 92, y: 806 + (i % 2 ? -10 : 4) }));
+const STONES = [0, 1, 2, 3, 4].map((i) => {
+  const x = 358 + i * 92;
+  const y = 809 + (i % 2 ? -10 : 4);
+  const year = YEARS[i]?.year ?? "";
+  return { x, y, year, ink: stone(x, y, 0.64, YEARS[i]?.moss ?? 0, `map/${i}`) };
+});
 
 const PAWS = [
   [1050, 600, -20],
@@ -185,6 +192,7 @@ const PLACES = [
     )}`,
   },
   { href: "/seals/", title: "tracks?", sub: "the seal book" },
+  { href: "/path/", title: "stepping stones", sub: "the years so far · the CV" },
 ];
 const place = (href: string) => PLACES.find((p) => p.href === href)!;
 ---
@@ -606,11 +614,7 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
             stroke-width="0.8"
             opacity="0.7"
           ></path>
-          <path
-            class="line"
-            d="M992 226 L 993 146 M 1042 226 L 1041 146"
-            stroke-width="3.5"
-          ></path>
+          <path class="line" d="M992 226 L 993 146 M 1042 226 L 1041 146" stroke-width="3.5"></path>
           <path class="line" d="M982 154 C 1002 146, 1032 146, 1052 154" stroke-width="2.6"></path>
           <path
             class="gate-threads"
@@ -850,28 +854,34 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
         </a>
 
         <!-- the years so far -->
-        <g
-          class="place years"
-          tabindex="0"
-          data-title="stepping stones"
-          data-sub="the years so far · [PLACEHOLDER] CV"
+        <a
+          href="/path/"
+          class="place"
+          data-area="/path"
+          data-title={place("/path/").title}
+          data-sub={place("/path/").sub}
         >
           {STONES.map((s) => (
             <>
-              <path
-                class="line fill-alt"
-                d={`M${s.x} ${s.y} c 10 -9, 30 -9, 38 -1 c 6 7, -2 15, -18 15 c -16 0, -28 -6, -20 -14 Z`}
-                stroke-width="1.1"
-              />
-              <text class="stone-year" x={s.x + 18} y={s.y + 4} text-anchor="middle">
-                20[YY]
-              </text>
+              <path class="line fill-alt" d={s.ink.body} stroke-width="1.1" />
+              {s.ink.moss && <path class="stone-moss" d={s.ink.moss} opacity={s.ink.mossOpacity} />}
+              {s.ink.tufts && <path class="stone-tufts" d={s.ink.tufts} />}
+              {s.year && (
+                <text
+                  class:list={["stone-year", { now: s.year === "now" }]}
+                  x={s.x}
+                  y={s.y + 3.5}
+                  text-anchor="middle"
+                >
+                  {s.year}
+                </text>
+              )}
             </>
           ))}
           <text class="label dim" x="330" y="884" font-size="16">
             stepping stones · the years so far
           </text>
-        </g>
+        </a>
 
         <!-- a wolf passed through -->
         <a
@@ -1033,9 +1043,6 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
           )}
         </li>
       ))}
-      <li>
-        stepping stones <span>— the years so far · [PLACEHOLDER] CV</span>
-      </li>
     </ul>
   </section>
 </BaseLayout>
@@ -1590,6 +1597,23 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
     font-size: 10px;
   }
 
+  .stone-year.now {
+    fill: var(--red);
+    font-family: var(--font-hand);
+    font-size: 12px;
+  }
+
+  .stone-moss {
+    fill: var(--leaf);
+  }
+
+  .stone-tufts {
+    fill: none;
+    stroke: var(--green);
+    stroke-width: 0.9;
+    stroke-linecap: round;
+  }
+
   .paws {
     fill: var(--fg-dim);
     opacity: 0.55;
@@ -1681,10 +1705,6 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
 
   .place:focus-visible :is(.line, .soil) {
     stroke: var(--cursor);
-  }
-
-  .years {
-    cursor: default;
   }
 
   .kigo-map > * {
