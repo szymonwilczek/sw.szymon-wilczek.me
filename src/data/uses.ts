@@ -54,6 +54,12 @@ export const TOOLS: Tool[] = [
     why: "The language server, built into Emacs. Definitions, errors and renames, with nothing to set up.",
   },
   {
+    name: "jot",
+    graphic: "fan",
+    group: "the editors",
+    why: "My own, twice over: tmux-jot pops a note over the terminal, jot.el the same over Emacs. One drawer of notes, the layout left as it was.",
+  },
+  {
     name: "Fedora",
     graphic: "jar",
     group: "the machine",
