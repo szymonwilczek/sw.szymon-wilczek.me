@@ -32,6 +32,22 @@ export const LINKS: Link[] = [
     since: "2026-07-17",
     mutual: false,
   },
+  {
+    name: "Hati",
+    url: "https://extensions.gnome.org/extension/9209/hati-cursor-highlighter/",
+    domain: "extensions.gnome.org",
+    initial: "H",
+    since: "2026-01-17",
+    mutual: false,
+  },
+  {
+    name: "Protesilaos",
+    url: "https://protesilaos.com",
+    domain: "protesilaos.com",
+    initial: "P",
+    since: "2026-10-12",
+    mutual: false,
+  },
 ];
 
 export const RING: { name: string; size: string; prev: string; next: string } | null = null;
