@@ -7,390 +7,254 @@
 # :STARTED:  when I opened it
 # :FINISHED: when I closed it
 # :PAGE:     where the ribbon is
-# :PLACE:    where I read it
-# :ALBUM:    slug of the photo album from that place, if there is one
 # :WRITING:  slug of an essay about it, if there is one
 #
 # A book with neither date is waiting; it is only counted, not shelved.
-# Under the properties: a quote block is a line from the book, the rest is my note.
-#
-# Everything below is a placeholder shelf: only its shape is meant.
+# Nothing else to do: a new heading finds its own shelf, look and pile at the next build.
+# Each quote block is a line I underlined, found in that page. Without a page block
+# the rest of the page is only grey lines and the quotes are set into them.
+# Whatever is left is my note in the margin.
 
-* [THE CIPHER BOOK]
+* Special Relativity and Classical Field Theory
 :PROPERTIES:
-:AUTHOR: [AUTHOR]
-:PAGES: 180
-:STARTED: [2024-03-01]
+:AUTHOR: Leonard Susskind, Art Friedman
+:PAGES: 448
+:STARTED: [2024-01-08]
 :FINISHED: [2024-03-20]
 :END:
 for the stone in the garden: the top shelf, the third book standing from the left. the key is tucked in it.
 
-* [TITLE]
+* Quantum Physics
 :PROPERTIES:
-:AUTHOR: [AUTHOR]
-:PAGES: 302
-:STARTED: [2025-01-01]
-:FINISHED: [2025-01-02]
-:PLACE: [PLACE]
+:AUTHOR: Sten Odenwald
+:PAGES: 240
+:STARTED: [2024-05-06]
+:FINISHED: [2024-06-14]
+:END:
+
+* How To
+:PROPERTIES:
+:AUTHOR: Randall Munroe
+:PAGES: 320
+:STARTED: [2024-09-09]
+:FINISHED: [2024-10-18]
+:END:
+
+* The God Particle
+:PROPERTIES:
+:AUTHOR: Leon Lederman, Dick Teresi
+:PAGES: 434
+:STARTED: [2025-01-12]
+:FINISHED: [2025-03-28]
 :END:
 #+begin_quote
-[A LINE FROM THE BOOK]
+The physicists defer only to mathematicians, and the mathematicians defer only to God.
 #+end_quote
-[MY NOTE IN THE MARGIN]
 
-* [TITLE]
+* Nineteen Eighty-Four
 :PROPERTIES:
-:AUTHOR: [AUTHOR]
-:PAGES: 409
-:STARTED: [2025-01-05]
-:FINISHED: [2025-01-23]
-:PLACE: [PLACE]
+:AUTHOR: George Orwell
+:PAGES: 328
+:STARTED: [2025-04-14]
+:FINISHED: [2025-05-30]
 :END:
+#+begin_page
+The Party said that Oceania had never been in alliance with Eurasia. He, Winston Smith, knew that Oceania had been in alliance with Eurasia as short a time as four years ago. But where did that knowledge exist? Only in his own consciousness, which in any case must soon be annihilated. And if all others accepted the lie which the Party imposed—if all records told the same tale—then the lie passed into history and became truth. ‘Who controls the past,’ ran the Party slogan, ‘controls the future: who controls the present controls the past.’ And yet the past, though of its nature alterable, never had been altered. Whatever was true now was true from everlasting to everlasting. It was quite simple. All that was needed was an unending series of victories over your own memory. ‘Reality control’, they called it: in Newspeak, ‘doublethink’.
+#+end_page
 #+begin_quote
-[A LINE FROM THE BOOK]
+then the lie passed into history and became truth.
 #+end_quote
-[MY NOTE IN THE MARGIN]
-
-* [TITLE]
-:PROPERTIES:
-:AUTHOR: [AUTHOR]
-:PAGES: 253
-:STARTED: [2025-01-08]
-:FINISHED: [2025-02-13]
-:PLACE: [PLACE]
-:END:
 #+begin_quote
-[A LINE FROM THE BOOK]
+‘Who controls the past,’ ran the Party slogan, ‘controls the future: who controls the present controls the past.’
 #+end_quote
-[MY NOTE IN THE MARGIN]
-
-* [TITLE]
-:PROPERTIES:
-:AUTHOR: [AUTHOR]
-:PAGES: 445
-:STARTED: [2025-02-09]
-:FINISHED: [2025-03-05]
-:PLACE: [PLACE]
-:END:
 #+begin_quote
-[A LINE FROM THE BOOK]
+an unending series of victories over your own memory.
 #+end_quote
-[MY NOTE IN THE MARGIN]
+underlined three times and still not enough. the boot isn't the scariest part; it's how quietly the past gets edited. that's why I keep my crossed-out lines on /about.
 
-* [TITLE]
+* Animal Farm
 :PROPERTIES:
-:AUTHOR: [AUTHOR]
-:PAGES: 253
-:STARTED: [2025-03-08]
-:FINISHED: [2025-04-11]
-:PLACE: [PLACE]
-:END:
-#+begin_quote
-[A LINE FROM THE BOOK]
-#+end_quote
-[MY NOTE IN THE MARGIN]
-
-* [TITLE]
-:PROPERTIES:
-:AUTHOR: [AUTHOR]
-:PAGES: 388
-:STARTED: [2025-05-03]
-:FINISHED: [2025-05-16]
-:PLACE: [PLACE]
-:END:
-#+begin_quote
-[A LINE FROM THE BOOK]
-#+end_quote
-[MY NOTE IN THE MARGIN]
-
-* [TITLE]
-:PROPERTIES:
-:AUTHOR: [AUTHOR]
-:PAGES: 146
-:STARTED: [2025-06-02]
-:FINISHED: [2025-06-09]
-:PLACE: [PLACE]
-:END:
-#+begin_quote
-[A LINE FROM THE BOOK]
-#+end_quote
-[MY NOTE IN THE MARGIN]
-
-* [TITLE]
-:PROPERTIES:
-:AUTHOR: [AUTHOR]
-:PAGES: 147
-:STARTED: [2025-07-04]
-:FINISHED: [2025-07-16]
-:PLACE: [PLACE]
-:END:
-#+begin_quote
-[A LINE FROM THE BOOK]
-#+end_quote
-[MY NOTE IN THE MARGIN]
-
-* [TITLE]
-:PROPERTIES:
-:AUTHOR: [AUTHOR]
-:PAGES: 190
+:AUTHOR: George Orwell
+:PAGES: 112
 :STARTED: [2025-07-07]
-:FINISHED: [2025-07-24]
-:PLACE: [PLACE]
+:FINISHED: [2025-07-21]
+:END:
+#+begin_page
+Benjamin felt a nose nuzzling at his shoulder. He looked round. It was Clover. Her old eyes looked dimmer than ever. Without saying anything, she tugged gently at his mane and led him round to the end of the big barn, where the Seven Commandments were written. For a minute or two they stood gazing at the tarred wall with its white lettering.
+
+‘My sight is failing,’ she said finally. ‘Even when I was young I could not have read what was written there. But it appears to me that that wall looks different. Are the Seven Commandments the same as they used to be, Benjamin?’
+
+For once Benjamin consented to break his rule, and he read out to her what was written on the wall. There was nothing there now except a single Commandment. It ran:
+
+ALL ANIMALS ARE EQUAL \\
+BUT SOME ANIMALS ARE MORE EQUAL THAN OTHERS
+#+end_page
+#+begin_quote
+that wall looks different.
+#+end_quote
+#+begin_quote
+ALL ANIMALS ARE EQUAL
+#+end_quote
+#+begin_quote
+BUT SOME ANIMALS ARE MORE EQUAL THAN OTHERS
+#+end_quote
+read in one sitting. after the last line I went back to count the commandments on the barn wall: seven, then one.
+
+* The Great Gatsby
+:PROPERTIES:
+:AUTHOR: F. Scott Fitzgerald
+:PAGES: 180
+:STARTED: [2025-10-06]
+:FINISHED: [2025-10-27]
+:END:
+#+begin_page
+And as I sat there brooding on the old, unknown world, I thought of Gatsby’s wonder when he first picked out the green light at the end of Daisy’s dock. He had come a long way to this blue lawn, and his dream must have seemed so close that he could hardly fail to grasp it. He did not know that it was already behind him, somewhere back in that vast obscurity beyond the city, where the dark fields of the republic rolled on under the night.
+
+Gatsby believed in the green light, the orgiastic future that year by year recedes before us. It eluded us then, but that’s no matter—tomorrow we will run faster, stretch out our arms further … And one fine morning—
+
+So we beat on, boats against the current, borne back ceaselessly into the past.
+#+end_page
+#+begin_quote
+He did not know that it was already behind him,
+#+end_quote
+#+begin_quote
+So we beat on, boats against the current, borne back ceaselessly into the past.
+#+end_quote
+
+* The Idiot
+:PROPERTIES:
+:AUTHOR: Fyodor Dostoevsky
+:PAGES: 656
+:STARTED: [2026-02-02]
+:FINISHED: [2026-05-24]
+:END:
+#+begin_page
+“So you counted the minutes while I slept, did you, Evgenie Pavlovitch?” he said, ironically. “You have not taken your eyes off me all the evening—I have noticed that much, you see! Ah, Rogojin! I’ve just been dreaming about him, prince,” he added, frowning. “Yes, by the by,” starting up, “where’s the orator? Where’s Lebedeff? Has he finished? What did he talk about? Is it true, prince, that you once declared that ‘beauty would save the world’? Great Heaven! The prince says that beauty saves the world! And I declare that he only has such playful ideas because he’s in love! Gentlemen, the prince is in love. I guessed it the moment he came in. Don’t blush, prince; you make me sorry for you. What beauty saves the world?”
+
+The prince regarded him attentively, but said nothing.
+#+end_page
+#+begin_quote
+Is it true, prince, that you once declared that ‘beauty would save the world’?
+#+end_quote
+
+* The Invention of Morel
+:PROPERTIES:
+:AUTHOR: Adolfo Bioy Casares
+:PAGES: 103
+:STARTED: [2026-06-08]
+:FINISHED: [2026-06-19]
 :END:
 #+begin_quote
-[A LINE FROM THE BOOK]
+The sea is endless when you are in a rowboat.
 #+end_quote
-[MY NOTE IN THE MARGIN]
 
-* [TITLE]
+* And Then There Were None
 :PROPERTIES:
-:AUTHOR: [AUTHOR]
-:PAGES: 608
-:STARTED: [2025-07-01]
-:FINISHED: [2025-08-25]
-:PLACE: [PLACE]
+:AUTHOR: Agatha Christie
+:PAGES: 272
+:STARTED: [2026-07-01]
+:FINISHED: [2026-07-12]
 :END:
 #+begin_quote
-[A LINE FROM THE BOOK]
+It had come about exactly in the way things happened in books.
 #+end_quote
-[MY NOTE IN THE MARGIN]
+#+begin_quote
+In the midst of life, we are in death.
+#+end_quote
+ten guests, ten verses, a new suspect every chapter, and I was wrong about every one. read the epilogue twice.
 
-* [TITLE]
+* The Beach
 :PROPERTIES:
-:AUTHOR: [AUTHOR]
-:PAGES: 633
-:STARTED: [2025-09-03]
-:FINISHED: [2025-09-19]
-:PLACE: [PLACE]
+:AUTHOR: Alex Garland
+:PAGES: 439
+:STARTED: [2026-07-14]
+:FINISHED: [2026-07-31]
 :END:
 #+begin_quote
-[A LINE FROM THE BOOK]
+Tourists went on holidays while travellers did something else. They travelled.
 #+end_quote
-[MY NOTE IN THE MARGIN]
 
-* [TITLE]
+* The Island of Doctor Moreau
 :PROPERTIES:
-:AUTHOR: [AUTHOR]
-:PAGES: 632
-:STARTED: [2025-10-08]
-:FINISHED: [2025-10-06]
-:PLACE: [PLACE]
+:AUTHOR: H. G. Wells
+:PAGES: 153
+:STARTED: [2026-08-02]
+:FINISHED: [2026-08-11]
 :END:
+#+begin_page
+I realised that I had to repeat this idiotic formula; and then began the insanest ceremony. The voice in the dark began intoning a mad litany, line by line, and I and the rest to repeat it. As they did so, they swayed from side to side in the oddest way, and beat their hands upon their knees; and I followed their example. I could have imagined I was already dead and in another world. That dark hut, these grotesque dim figures, just flecked here and there by a glimmer of light, and all of them swaying in unison and chanting,
+
+“Not to go on all-fours; that is the Law. Are we not Men? \\
+“Not to suck up Drink; that is the Law. Are we not Men? \\
+“Not to eat Fish or Flesh; that is the Law. Are we not Men? \\
+“Not to claw the Bark of Trees; that is the Law. Are we not Men? \\
+“Not to chase other Men; that is the Law. Are we not Men?”
+#+end_page
 #+begin_quote
-[A LINE FROM THE BOOK]
+I could have imagined I was already dead and in another world.
 #+end_quote
-[MY NOTE IN THE MARGIN]
-
-* [TITLE]
-:PROPERTIES:
-:AUTHOR: [AUTHOR]
-:PAGES: 364
-:STARTED: [2025-11-03]
-:FINISHED: [2025-11-26]
-:PLACE: [PLACE]
-:END:
 #+begin_quote
-[A LINE FROM THE BOOK]
+Not to go on all-fours; that is the Law. Are we not Men?
 #+end_quote
-[MY NOTE IN THE MARGIN]
 
-* [TITLE]
+* Lord of the Flies
 :PROPERTIES:
-:AUTHOR: [AUTHOR]
-:PAGES: 634
-:STARTED: [2025-11-09]
-:FINISHED: [2025-12-17]
-:PLACE: [PLACE]
-:END:
-#+begin_quote
-[A LINE FROM THE BOOK]
-#+end_quote
-[MY NOTE IN THE MARGIN]
-
-* [TITLE]
-:PROPERTIES:
-:AUTHOR: [AUTHOR]
-:PAGES: 140
-:STARTED: [2026-01-07]
-:FINISHED: [2026-01-10]
-:PLACE: [PLACE]
-:END:
-#+begin_quote
-[A LINE FROM THE BOOK]
-#+end_quote
-[MY NOTE IN THE MARGIN]
-
-* [TITLE]
-:PROPERTIES:
-:AUTHOR: [AUTHOR]
-:PAGES: 493
-:STARTED: [2026-01-06]
-:FINISHED: [2026-01-25]
-:PLACE: [PLACE]
-:END:
-#+begin_quote
-[A LINE FROM THE BOOK]
-#+end_quote
-[MY NOTE IN THE MARGIN]
-
-* [TITLE]
-:PROPERTIES:
-:AUTHOR: [AUTHOR]
-:PAGES: 622
-:STARTED: [2026-02-10]
-:FINISHED: [2026-02-23]
-:PLACE: [PLACE]
-:END:
-#+begin_quote
-[A LINE FROM THE BOOK]
-#+end_quote
-[MY NOTE IN THE MARGIN]
-
-* [TITLE]
-:PROPERTIES:
-:AUTHOR: [AUTHOR]
-:PAGES: 404
-:STARTED: [2026-03-03]
-:FINISHED: [2026-03-12]
-:PLACE: [PLACE]
-:END:
-#+begin_quote
-[A LINE FROM THE BOOK]
-#+end_quote
-[MY NOTE IN THE MARGIN]
-
-* [TITLE]
-:PROPERTIES:
-:AUTHOR: [AUTHOR]
-:PAGES: 570
-:STARTED: [2026-03-02]
-:FINISHED: [2026-04-03]
-:PLACE: [PLACE]
-:END:
-#+begin_quote
-[A LINE FROM THE BOOK]
-#+end_quote
-[MY NOTE IN THE MARGIN]
-
-* [TITLE]
-:PROPERTIES:
-:AUTHOR: [AUTHOR]
-:PAGES: 335
-:STARTED: [2026-05-05]
-:FINISHED: [2026-05-10]
-:PLACE: [PLACE]
-:END:
-#+begin_quote
-[A LINE FROM THE BOOK]
-#+end_quote
-[MY NOTE IN THE MARGIN]
-
-* [TITLE]
-:PROPERTIES:
-:AUTHOR: [AUTHOR]
-:PAGES: 230
-:STARTED: [2026-04-06]
-:FINISHED: [2026-05-04]
-:PLACE: [PLACE]
-:END:
-#+begin_quote
-[A LINE FROM THE BOOK]
-#+end_quote
-[MY NOTE IN THE MARGIN]
-
-* [TITLE]
-:PROPERTIES:
-:AUTHOR: [AUTHOR]
-:PAGES: 191
-:STARTED: [2026-06-10]
-:FINISHED: [2026-06-15]
-:PLACE: [PLACE]
-:END:
-#+begin_quote
-[A LINE FROM THE BOOK]
-#+end_quote
-[MY NOTE IN THE MARGIN]
-
-* [TITLE]
-:PROPERTIES:
-:AUTHOR: [AUTHOR]
-:PAGES: 433
-:STARTED: [2026-07-04]
-:FINISHED: [2026-07-26]
-:PLACE: [PLACE]
-:END:
-#+begin_quote
-[A LINE FROM THE BOOK]
-#+end_quote
-[MY NOTE IN THE MARGIN]
-
-* [TITLE]
-:PROPERTIES:
-:AUTHOR: [AUTHOR]
-:PAGES: 401
-:STARTED: [2026-08-04]
-:FINISHED: [2026-08-23]
-:PLACE: [PLACE]
-:END:
-#+begin_quote
-[A LINE FROM THE BOOK]
-#+end_quote
-[MY NOTE IN THE MARGIN]
-
-* [TITLE]
-:PROPERTIES:
-:AUTHOR: [AUTHOR]
-:PAGES: 640
-:STARTED: [2026-08-06]
-:FINISHED: [2026-09-15]
-:PLACE: [PLACE]
-:END:
-#+begin_quote
-[A LINE FROM THE BOOK]
-#+end_quote
-[MY NOTE IN THE MARGIN]
-
-* [TITLE]
-:PROPERTIES:
-:AUTHOR: [AUTHOR]
-:PAGES: 412
-:STARTED: [2026-09-14]
-:PAGE: 255
-:PLACE: [PLACE]
-:END:
-#+begin_quote
-[A LINE FROM THE BOOK]
-#+end_quote
-[MY NOTE IN THE MARGIN]
-
-* [TITLE]
-:PROPERTIES:
-:AUTHOR: [AUTHOR]
-:PAGES: 288
-:STARTED: [2026-10-03]
-:PAGE: 52
-:PLACE: [PLACE]
-:END:
-#+begin_quote
-[A LINE FROM THE BOOK]
-#+end_quote
-[MY NOTE IN THE MARGIN]
-
-* [TITLE]
-:PROPERTIES:
-:AUTHOR: [AUTHOR]
-:PAGES: 453
-:END:
-
-* [TITLE]
-:PROPERTIES:
-:AUTHOR: [AUTHOR]
+:AUTHOR: William Golding
 :PAGES: 224
+:STARTED: [2026-08-13]
+:FINISHED: [2026-08-27]
 :END:
+#+begin_quote
+What I mean is . . . maybe it’s only us.
+#+end_quote
+#+begin_quote
+Ralph wept for the end of innocence, the darkness of man’s heart, and the fall through the air of the true, wise friend called Piggy.
+#+end_quote
+there never was a beast on the mountain. Simon knew it in chapter five and nobody listened. the conch should have been enough.
 
-* [TITLE]
+* The Trial
 :PROPERTIES:
-:AUTHOR: [AUTHOR]
-:PAGES: 227
+:AUTHOR: Franz Kafka
+:PAGES: 256
+:STARTED: [2026-08-30]
+:FINISHED: [2026-09-16]
 :END:
+#+begin_page
+In front of the law there is a doorkeeper. A man from the countryside comes up to the door and asks for entry. But the doorkeeper says he can’t let him in to the law right now. The man thinks about this, and then he asks if he’ll be able to go in later on. ‘That’s possible,’ says the doorkeeper, ‘but not now.’ The gateway to the law is open as it always is, and the doorkeeper has stepped to one side, so the man bends over to try and see in. When the doorkeeper notices this he laughs and says, ‘If you’re tempted give it a try, try and go in even though I say you can’t. Careful though: I’m powerful. And I’m only the lowliest of all the doormen. But there’s a doorkeeper for each of the rooms and each of them is more powerful than the last. It’s more than I can stand just to look at the third one.’
+#+end_page
+#+begin_quote
+In front of the law there is a doorkeeper.
+#+end_quote
+#+begin_quote
+The gateway to the law is open as it always is,
+#+end_quote
 
+* Metamorphosis
+:PROPERTIES:
+:AUTHOR: Franz Kafka
+:PAGES: 64
+:STARTED: [2026-09-18]
+:FINISHED: [2026-09-24]
+:END:
+#+begin_page
+One morning, when Gregor Samsa woke from troubled dreams, he found himself transformed in his bed into a horrible vermin. He lay on his armour-like back, and if he lifted his head a little he could see his brown belly, slightly domed and divided by arches into stiff sections. The bedding was hardly able to cover it and seemed ready to slide off any moment. His many legs, pitifully thin compared with the size of the rest of him, waved about helplessly as he looked.
+
+“What’s happened to me?” he thought. It wasn’t a dream. His room, a proper human room although a little too small, lay peacefully between its four familiar walls. A collection of textile samples lay spread out on the table—Samsa was a travelling salesman—and above it there hung a picture that he had recently cut out of an illustrated magazine and housed in a nice, gilded frame.
+#+end_page
+#+begin_quote
+One morning, when Gregor Samsa woke from troubled dreams, he found himself transformed in his bed into a horrible vermin.
+#+end_quote
+#+begin_quote
+It wasn’t a dream.
+#+end_quote
+
+* Friday, or The Other Island
+:PROPERTIES:
+:AUTHOR: Michel Tournier
+:PAGES: 236
+:STARTED: [2026-10-01]
+:PAGE: 74
+:END:
+#+begin_quote
+That which is outside exists. That which is within does not.
+#+end_quote
