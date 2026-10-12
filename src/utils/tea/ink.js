@@ -3300,9 +3300,9 @@ function solarH(h, S) {
   if (h < S.set) return 5.6 + ((h - S.rise) * 14) / (S.set - S.rise);
   return 19.6 + ((h - S.set) * 4.4) / (24 - S.set);
 }
-function hourLight(K, real, sk) {
+function hourLight(K, real, sk, sun) {
   real = ((real % 24) + 24) % 24;
-  const S = SEASONS[sk],
+  const S = sun && SEASONS[sk] ? { ...SEASONS[sk], ...sun } : SEASONS[sk],
     h = solarH(real, S);
   let i = 0;
   while (i < SKY.length - 2 && SKY[i + 1][0] <= h) i++;
@@ -3683,7 +3683,7 @@ function falling(g, r, kind, color, n, x0, x1, y0, y1) {
   }
 }
 // small celadon burner
-function koro(groups, g, r, x, y, K, mini, burnt) {
+function koro(groups, g, r, x, y, K, mini, burnt, unlit) {
   Wa(g, r, wring(r, x + 3, y + 2, 22, 5, 0.6, 8), K.pool, 0.8, "url(#bk-pool)");
   const body = `M${x - 17} ${y - 13} Q${x - 19} ${y - 1} ${x - 8} ${y + 1} L${x + 8} ${y + 1} Q${x + 19} ${y - 1} ${x + 17} ${y - 13} Z`;
   [
@@ -3707,14 +3707,16 @@ function koro(groups, g, r, x, y, K, mini, burnt) {
   const len = 40 * (1 - (burnt ?? 0.35)),
     tip = [x + 3 + len * 0.12, y - 13 - len];
   Ln(g, wseg(r, [x + 3, y - 13], tip, 0.2, 1), mix(K.earth, K.ink, 0.25), 1.6, 0.95, true);
-  Ln(
-    g,
-    wline(r, [tip, [tip[0] + 2, tip[1] - 3], [tip[0] + 1, tip[1] - 6]], 0.2),
-    K.stone,
-    1.4,
-    0.8,
-    true,
-  );
+  if (!unlit)
+    Ln(
+      g,
+      wline(r, [tip, [tip[0] + 2, tip[1] - 3], [tip[0] + 1, tip[1] - 6]], 0.2),
+      K.stone,
+      1.4,
+      0.8,
+      true,
+    );
+  if (unlit) return;
   So(g, wring(r, tip[0], tip[1] + 1, 1.6, 1.6, 0, 6), K.red, 1);
   So(g, wring(r, x + 6, y - 13, 3, 1, 0.2, 6), K.stone, 0.8);
   const sm = G({
@@ -3738,10 +3740,10 @@ function koro(groups, g, r, x, y, K, mini, burnt) {
   Wa(sm, r, mistD(r, tip[0] - 26, tip[0] + 14, t0 - 150, 12), K.inkSoft, 0.25, "url(#bk-bleed)");
 }
 // veranda of old house
-function sceneEngawa(K, hour, mini, sk) {
+function sceneEngawa(K, hour, mini, sk, o = {}) {
   const W = 1100,
     H = 640,
-    L = hourLight(K, hour, sk),
+    L = hourLight(K, hour, sk, o.sun),
     Z = seasonLook(K, sk),
     groups = [],
     R = (k) => rng(hash("terrace/engawa/" + k));
@@ -4300,7 +4302,7 @@ function sceneEngawa(K, hour, mini, sk) {
     0,
   );
   teaCup(groups, ob, ro, 360, 586, K, mini);
-  koro(groups, ob, ro, 424, 566, K, mini);
+  koro(groups, ob, ro, 424, 566, K, mini, o.burnt, o.unlit);
   recordPlayer(ob, ro, 548, 548, 1, K, L);
   andon(ob, lights, ro, 712, 528, K, L.lamp);
   // what the season puts in the air, and what has come down on the boards
