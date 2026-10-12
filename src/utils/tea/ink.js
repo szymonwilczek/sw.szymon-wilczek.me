@@ -1914,8 +1914,10 @@ function noborigama(groups, r, bx, by, K, lit) {
   groups.push(fb);
 }
 // what you see from above when the workshop roof is lifted
-function workshopInside(g, r, P, K, sc) {
+function workshopInside(groups, r, P, K, sc) {
   sc = sc || 1;
+  const g = G();
+  groups.push(g);
   face(
     g,
     r,
@@ -1961,10 +1963,13 @@ function workshopInside(g, r, P, K, sc) {
     K.plaster,
     K,
   );
+  const wall = groups.length;
   // shelves of bisque along the back wall
   [30, 58].forEach((y, row) => {
+    const plank = G();
+    groups.push(plank);
     face(
-      g,
+      plank,
       r,
       P,
       [
@@ -1979,8 +1984,10 @@ function workshopInside(g, r, P, K, sc) {
     );
     for (let i = 0; i < 6; i++) {
       const p = P(24 + i * 22, KZ - 6, y);
+      const pc = G();
+      groups.push(pc);
       piece(
-        g,
+        pc,
         r,
         p[0],
         p[1],
@@ -1998,13 +2005,17 @@ function workshopInside(g, r, P, K, sc) {
     .slice(0, 5)
     .forEach((gc, i) => {
       const p = P(196 + i * 20, KZ - 18 - (i % 2) * 12, 0);
-      bucket(g, r, p[0], p[1], 0.36 * sc, K, gc);
+      const bk = G();
+      groups.push(bk);
+      bucket(bk, r, p[0], p[1], 0.36 * sc, K, gc);
     });
   // the kick wheel in the middle, with a lump of clay
+  const wg = G();
+  groups.push(wg);
   const wp = P(84, 62, 0);
-  wheel(g, r, wp[0], wp[1] - 18 * sc, 0.42 * sc, K);
+  wheel(wg, r, wp[0], wp[1] - 18 * sc, 0.42 * sc, K);
   wetClay(
-    g,
+    wg,
     r,
     wp[0],
     wp[1] - 20 * sc,
@@ -2017,10 +2028,12 @@ function workshopInside(g, r, P, K, sc) {
     ],
     30,
   );
-  So(g, wring(r, wp[0] - 34 * sc, wp[1] + 6 * sc, 9 * sc, 4 * sc, 0.3, 8), K.woodDk, 0.95);
-  // painting table by the right window
+  So(wg, wring(r, wp[0] - 34 * sc, wp[1] + 6 * sc, 9 * sc, 4 * sc, 0.3, 8), K.woodDk, 0.95);
+  // the painting table by the right window
+  const t = G();
+  groups.push(t);
   face(
-    g,
+    t,
     r,
     P,
     [
@@ -2036,10 +2049,12 @@ function workshopInside(g, r, P, K, sc) {
   [
     [200, 30],
     [280, 30],
-  ].forEach(([x, z]) => postV(g, r, P, x, z, 0, 18, K, 3));
+  ].forEach(([x, z]) => postV(t, r, P, x, z, 0, 18, K, 3));
   const tp = P(226, 50, 18);
+  const tb = G();
+  groups.push(tb);
   piece(
-    g,
+    tb,
     r,
     tp[0],
     tp[1],
@@ -2047,11 +2062,12 @@ function workshopInside(g, r, P, K, sc) {
     K,
     Object.assign({ clay: 3, glaze: { c: 1, dip: 0.7 }, fire: 4 }, PROF.bowl),
   );
-  brushTool(g, r, tp[0] + 22 * sc, tp[1] - 4 * sc, -0.4, 20 * sc, K, PAINTS(K)[0]);
+  brushTool(tb, r, tp[0] + 22 * sc, tp[1] - 4 * sc, -0.4, 20 * sc, K, PAINTS(K)[0]);
   [0, 1, 2].forEach((i) => {
     const p = P(256 + i * 7, 42, 18);
-    So(g, wring(r, p[0], p[1], 3 * sc, 1.5 * sc, 0.2, 8), PAINTS(K)[i], 0.95);
+    So(tb, wring(r, p[0], p[1], 3 * sc, 1.5 * sc, 0.2, 8), PAINTS(K)[i], 0.95);
   });
+  return wall;
 }
 function sceneGarden16(K, stage, opt = {}) {
   const open = stage === "open";
@@ -2130,9 +2146,7 @@ function sceneGarden16(K, stage, opt = {}) {
     plaque(roof, r, ...PW(152, -20, KH - 14), 40, 16, "工房", "'Yuji Syuku', serif", 11, K);
     groups.push(roof);
   } else {
-    const inW = G();
-    workshopInside(inW, r, PW, K);
-    groups.push(inW);
+    workshopInside(groups, r, PW, K);
     const fW = G();
     face(
       fW,
@@ -2422,9 +2436,7 @@ function sceneWorkshop(K) {
   const ui = G({ cls: "kobo-back" });
   note(ui, 110, 34, "← back to the garden", K, 17, 0.75);
   groups.push(ui);
-  const inside = G();
-  workshopInside(inside, r, P, K, sc);
-  groups.push(inside);
+  const wall = workshopInside(groups, r, P, K, sc);
   const door = G();
   face(
     door,
@@ -2442,7 +2454,7 @@ function sceneWorkshop(K) {
   );
   const dp = P(175, KZ, 30);
   Wa(door, r, wring(r, dp[0], dp[1], 30, 70, 3, 10), K.gold, 0.4, "url(#bk-bleed)");
-  groups.push(door);
+  groups.splice(wall, 0, door);
   const front = G();
   face(
     front,
