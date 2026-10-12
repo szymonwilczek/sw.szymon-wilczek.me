@@ -142,6 +142,8 @@ const flowered = packets.filter((p) => p.stage === "bloom").length;
             <text class="label-kanji" x="133" y="75" text-anchor="middle">
               {p.kanji}
             </text>
+          </svg>
+          <svg class="flaps" viewBox="0 0 160 230" aria-hidden="true">
             <path
               class="flap shut"
               d="M8 30 L 152 30 L 148 46 L 12 46 Z"
@@ -367,6 +369,13 @@ const flowered = packets.filter((p) => p.stage === "bloom").length;
     width: 100%;
     height: auto;
     overflow: visible;
+    will-change: transform;
+  }
+
+  .packet .flaps {
+    position: absolute;
+    top: 0;
+    left: 0;
   }
 
   .shade {
@@ -455,6 +464,7 @@ const flowered = packets.filter((p) => p.stage === "bloom").length;
     line-height: 1.5;
     transform: translateY(3.75rem) rotate(var(--slip-rot));
     visibility: hidden;
+    will-change: transform;
     transition:
       transform 0.45s cubic-bezier(0.2, 0.8, 0.3, 1),
       visibility 0s linear 0.45s;
