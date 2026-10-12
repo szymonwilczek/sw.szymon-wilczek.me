@@ -186,7 +186,7 @@ function pluck(
   t: number,
   midi: number,
   vel: number,
-  o: { damp: number; soft: number; len: number; tone: number; bend?: number; pan?: number },
+  o: { damp: number; soft: number; len: number; tone: number; pan?: number },
 ) {
   const c = k.ctx;
   const src = c.createBufferSource(),
@@ -195,8 +195,7 @@ function pluck(
   src.buffer = stringOf(c, midi, o.damp, o.soft, o.len);
   const n = Math.max(2, Math.floor(c.sampleRate / hz(midi)));
   const rate = hz(midi) / (c.sampleRate / (n + 0.5));
-  src.playbackRate.setValueAtTime(rate * (o.bend ? Math.pow(2, -o.bend / 12) : 1), t);
-  if (o.bend) src.playbackRate.linearRampToValueAtTime(rate, t + 0.18);
+  src.playbackRate.value = rate;
   lp.type = "lowpass";
   lp.frequency.value = o.tone;
   g.gain.value = vel;
@@ -346,80 +345,47 @@ function rain(k: Kit, t: number, s: number, beat: number, hour: number) {
   if (pos === 0 || pos === 8) kick(k, t, (pos ? 0.3 : 0.4) * hum());
 }
 
-const MIYAKO = [0, 1, 5, 7, 8];
-const gardenKey = (h: number) => (h < 6 ? 0 : h < 12 ? 5 : h < 18 ? 2 : 7);
-const gardenBpm = () => 54;
-const KOTO = { damp: 0.9975, soft: 1, len: 3.2, tone: 4800 };
-const scaleNote = (base: number, i: number) =>
-  base + MIYAKO[((i % 5) + 5) % 5] + 12 * Math.floor(i / 5);
-let gardenAt = 6;
+const MOSS: Turn[] = [
+  [
+    [5, "M9"],
+    [4, "m7"],
+    [2, "m9"],
+    [0, "M9"],
+  ],
+  [
+    [9, "m9"],
+    [2, "m11"],
+    [7, "sus"],
+    [0, "M69"],
+  ],
+];
+const mossKey = (h: number) => (h < 6 ? 3 : h < 12 ? 7 : h < 18 ? 5 : 10);
+const mossBpm = (h: number) => (h < 6 || h >= 22 ? 70 : 76);
+let mossTurn = MOSS[0];
 
-function bowl(k: Kit, t: number, midi: number, vel: number) {
-  const c = k.ctx;
-  [1, 2.76, 5.4].forEach((p, i) => {
-    const o = c.createOscillator(),
-      g = c.createGain();
-    o.frequency.value = hz(midi) * p;
-    env(g, t, (0.05 * vel) / (i + 1), 0.004, 0, 7 - i * 2);
-    o.connect(g).connect(k.bus);
-    o.start(t);
-    o.stop(t + 7.1 - i * 2);
-  });
-}
-
-function flute(k: Kit, t: number, midi: number, len: number) {
-  const c = k.ctx;
-  const o = c.createOscillator(),
-    vib = c.createOscillator(),
-    vd = c.createGain(),
-    g = c.createGain(),
-    lp = c.createBiquadFilter();
-  o.type = "triangle";
-  o.frequency.value = hz(midi);
-  vib.frequency.value = 5;
-  vd.gain.setValueAtTime(0, t);
-  vd.gain.linearRampToValueAtTime(hz(midi) * 0.012, t + len * 0.6);
-  vib.connect(vd).connect(o.frequency);
-  lp.type = "lowpass";
-  lp.frequency.value = 1800;
-  g.gain.setValueAtTime(0, t);
-  g.gain.linearRampToValueAtTime(0.05, t + len * 0.3);
-  g.gain.linearRampToValueAtTime(0.035, t + len * 0.7);
-  g.gain.linearRampToValueAtTime(0, t + len);
-  o.connect(lp).connect(g).connect(k.bus);
-  [o, vib].forEach((x) => {
-    x.start(t);
-    x.stop(t + len + 0.05);
-  });
-  // the breath round it
-  hiss(k, t, "bandpass", hz(midi) * 2, 1.5, 0.025, len * 0.25, len);
-}
-
-function garden(k: Kit, t: number, s: number, beat: number, hour: number) {
-  const bar = Math.floor(s / 16),
+function moss(k: Kit, t: number, s: number, beat: number, hour: number) {
+  const bar = Math.floor(s / 16) % 4,
     pos = s % 16;
-  const base = 62 + gardenKey(hour);
-  const walk = () => {
-    gardenAt += pick([-2, -1, -1, 1, 2, -1, 1]);
-    if (gardenAt < 1) gardenAt += 4;
-    if (gardenAt > 11) gardenAt -= 5;
-    return scaleNote(base, gardenAt);
-  };
-  const play = (at: number, vel: number) =>
-    pluck(k, at, walk(), vel * hum(), { ...KOTO, bend: Math.random() < 0.25 ? 1 : 0, pan: 0.2 });
-  if (pos === 0) play(t, 0.5);
-  if ((pos === 6 || pos === 10) && Math.random() < 0.45) play(t, 0.35);
-  if (pos === 12 && Math.random() < 0.3) {
-    play(t, 0.3);
-    play(t + beat * 0.22, 0.22);
+  if (s % 64 === 0) mossTurn = pick(MOSS);
+  const [deg, kind] = mossTurn[bar];
+  const root = 38 + mossKey(hour) + deg;
+  if (pos === 0 || (pos === 10 && Math.random() < 0.5)) {
+    const v = voice(root, kind, 57);
+    v.forEach((n, i) =>
+      tine(k, t + i * 0.02, n, (pos ? 0.4 : 0.6) * hum(), beat * (pos ? 1.6 : 3.4)),
+    );
   }
-  if (bar % 8 === 0 && pos === 0)
-    for (let i = 0; i < 6; i++)
-      pluck(k, t + i * 0.055, scaleNote(base - 12, i + 2), 0.28, { ...KOTO, pan: -0.1 });
-  if (bar % 2 === 0 && pos === 0)
-    pluck(k, t, base - 24, 0.45, { ...KOTO, damp: 0.9992, len: 4, tone: 1200 });
-  if (bar % 8 === 4 && pos === 0) bowl(k, t, base + 12, 0.8);
-  if (bar % 6 === 3 && pos === 4) flute(k, t, scaleNote(base, pick([5, 6, 7, 8])), beat * 6);
+  if (pos % 4 === 2 && Math.random() < 0.14) {
+    const n = root + 24 + pick(CH[kind]);
+    tine(k, t, n > 84 ? n - 12 : n, 0.35 * hum(), beat * 1.5);
+  }
+  if (pos === 0) upright(k, t, root, beat * 1.6);
+  if (pos === 7 && Math.random() < 0.5) upright(k, t, root + 7, beat * 0.8, 0.7);
+  if (pos === 10) upright(k, t, root + (Math.random() < 0.5 ? 12 : 7), beat * 1.2, 0.8);
+  if (pos === 0 || pos === 10 || (pos === 7 && Math.random() < 0.3)) kick(k, t, 0.7 * hum());
+  if (pos === 4 || pos === 12) hiss(k, t, "bandpass", 1600, 0.9, 0.07 * hum(), 0.003, 0.16);
+  if (pos % 2 === 0)
+    hiss(k, t, "bandpass", 7000, 0.8, (pos % 4 ? 0.012 : 0.008) * hum(), 0.003, 0.035);
 }
 
 const cityKey = (h: number) => (h < 12 ? 7 : h < 20 ? 4 : 11);
@@ -607,14 +573,18 @@ export const DISCS: Disc[] = [
     swing: 0,
   },
   {
-    jp: "庭",
-    title: "The garden, in miyako-bushi",
+    jp: "苔",
+    title: "A slow beat for the moss",
     by: "the house, made as it plays",
-    about: (h) => `a koto in ${NAMES[gardenKey(h)]} miyako-bushi, a bowl, a flute`,
-    bpm: gardenBpm,
-    play: garden,
-    top: 4200,
-    level: 1.5,
+    about: (h) =>
+      `lo-fi in ${NAMES[mossKey(h)]}, ${mossBpm(h)} a minute, a Rhodes and a tired drum`,
+    bpm: mossBpm,
+    play: moss,
+    top: 2400,
+    wow: 0.0024,
+    level: 1.2,
+    crackle: 0.15,
+    swing: 0.12,
   },
   {
     jp: "街",
