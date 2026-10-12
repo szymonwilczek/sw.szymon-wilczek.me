@@ -13,13 +13,16 @@ const DASHES = [
 
 <BaseLayout
   title="About"
-  description="Biographical context, dualist editor philosophy, systems background, and open source contributions of Szymon Wilczek."
+  description="Biographical context, a conversion to the Church of Emacs, systems background, and open source contributions of Szymon Wilczek."
   type="profile"
 >
   <header class="about-head">
     <div>
       <h1>About me</h1>
-      <p class="lede">Software engineer, dualist editor enthusiast, and open-source contributor.</p>
+      <p class="lede">
+        Software engineer, <del>dualist editor enthusiast</del>
+        <ins class="hand">Emacs convert</ins>, and open-source contributor.
+      </p>
     </div>
     <a class="say hand" href="/contact">
       <Seal glyph="文" size={40} tilt={-6} />
@@ -50,14 +53,14 @@ const DASHES = [
         <p>
           I am a software engineer with academic and practical roots at the
           <strong>Silesian University of Technology</strong> (Faculty of Automatic Control,
-          Electronics and Computer Science). My engineering interests lie at the intersection
-          of low-level operating systems, kernel internals, and sovereign computing tools.
+          Electronics and Computer Science). My engineering interests lie at the intersection of
+          low-level operating systems, kernel internals, and sovereign computing tools.
         </p>
         <p>
           Everything I build is pressed and labelled in <a href="/projects">projects</a>; the rest
           of this website is my independent hypermedia space for tools, personal archives, and
-          technical explorations. What I read stands on the <a href="/books/">bookshelf</a>, and what
-          I work with lies on a <a href="/uses/">tea tray</a>. The whole garden is drawn on the
+          technical explorations. What I read stands on the <a href="/books/">bookshelf</a>, and
+          what I work with lies on a <a href="/uses/">tea tray</a>. The whole garden is drawn on the
           <a href="/map/">map</a> if you ever get lost.
         </p>
       </div>
@@ -68,38 +71,60 @@ const DASHES = [
         02
       </p>
       <div class="body">
-        <h2>The dualist philosophy</h2>
-        <p>
-          Well, maybe some people would hang me for it, but in the long-standing text editor
-          discourse, I belong firmly to the camp of the <strong>Dualists</strong>:
-        </p>
-        <div class="editors">
-          <div class="editor paper">
-            <p class="editor-name hand emacs">GNU Emacs</p>
-            <p>
-              Mission control and operational headquarters. Powered by Org-mode, it drives my
-              digital garden, agenda, and literate programming, with occasional Lisp hacking.
-            </p>
+        <h2>
+          <del datetime="2026-10-12">The dualist philosophy</del>
+          <ins datetime="2026-10-12">The Church of Emacs</ins>
+        </h2>
+        <div class="recanted">
+          <p>
+            Well, maybe some people would hang me for it, but in the long-standing text editor
+            discourse, I <del>belong</del>
+            <ins class="hand">belonged</ins> firmly to the camp of the <strong>Dualists</strong>:
+          </p>
+          <div class="editors">
+            <div class="editor paper">
+              <p class="editor-name hand emacs">GNU Emacs</p>
+              <p>
+                Mission control and operational headquarters. Powered by Org-mode, it drives my
+                digital garden, agenda, and literate programming, with occasional Lisp.
+              </p>
+            </div>
+            <div class="editor paper retired">
+              <p class="editor-name hand nvim">
+                <del>Neovim</del>
+              </p>
+              <p>
+                <del>
+                  My primary code-writing weapon and high-speed editing environment. I rely on it
+                  for most daily programming, build custom Lua plugins, and contribute to
+                  <a
+                    href="https://github.com/neovim/neovim/issues?q=involves:szymonwilczek"
+                    rel="noopener"
+                  >
+                    Neovim upstream
+                  </a>
+                  .
+                </del>
+              </p>
+            </div>
           </div>
-          <div class="editor paper">
-            <p class="editor-name hand nvim">Neovim</p>
-            <p>
-              My primary code-writing weapon and high-speed editing environment. I rely on it for
-              most daily programming, build custom Lua plugins, and contribute to
-              <a
-                href="https://github.com/neovim/neovim/issues?q=involves:szymonwilczek"
-                rel="noopener"
-              >
-                Neovim upstream
-              </a>
-              .
-            </p>
-          </div>
+          <p>
+            <del>
+              Rather than treating these tools as mutually exclusive (which most people do), I use
+              the raw modal editing speed of Neovim alongside the limitless extensibility of Emacs
+              to create perfect balance in the force.
+            </del>
+          </p>
+          <p class="margin-note hand">
+            left as I wrote it. I don't take back what I once believed by deleting it; this stays
+            here for good.
+          </p>
         </div>
         <p>
-          Rather than treating these tools as mutually exclusive (which most people do), I use the
-          raw modal editing speed of Neovim alongside the limitless extensibility of Emacs to create
-          perfect balance in the force.
+          Since then I have gone over to the <strong>Church of Emacs</strong>, one hundred percent,
+          maybe it is inevitable. The code, the garden, the agenda, all of it now happens in one
+          Lisp machine. Neovim taught me a lot and my patches upstream still stand; I just don't use
+          it as often anymore.
         </p>
       </div>
     </section>
@@ -143,8 +168,8 @@ const DASHES = [
               <path d={DASHES[2]}></path>
             </svg>
             <span>
-              <strong>Independent open source</strong> — author of many tools and editor packages,
-              including
+              <strong>Independent open source</strong> &dash; author of many tools and editor
+              packages, including
               <a href="https://github.com/szymonwilczek/typus-fonts" rel="noopener">
                 fonts
               </a>
@@ -175,8 +200,6 @@ const DASHES = [
           <a href="https://github.com/szymonwilczek" rel="noopener">
             GitHub profile
           </a>
-          . I’m still very dependent on GitHub infrastructure — maybe one day I’ll transition to
-          something else.
         </p>
       </div>
     </section>
@@ -362,6 +385,59 @@ const DASHES = [
 
   .emacs {
     color: var(--red);
+  }
+
+  del {
+    text-decoration-line: line-through;
+    text-decoration-color: color-mix(in srgb, var(--red) 70%, transparent);
+    text-decoration-thickness: 1.5px;
+  }
+
+  ins {
+    text-decoration: none;
+  }
+
+  ins.hand {
+    margin-left: 0.25em;
+    font-size: 1.15em;
+    color: var(--red);
+  }
+
+  .body h2 del {
+    display: block;
+    width: fit-content;
+    margin-bottom: 0.25rem;
+    font-size: 1.125rem;
+    font-weight: 300;
+    color: var(--fg-dim);
+  }
+
+  .body h2 ins {
+    display: block;
+  }
+
+  .recanted {
+    color: var(--fg-dim);
+  }
+
+  .recanted del {
+    opacity: 0.75;
+  }
+
+  .retired {
+    filter: grayscale(1);
+    opacity: 0.6;
+  }
+
+  .margin-note {
+    margin: 0.5rem 0 1.75rem;
+    padding-left: 1rem;
+    border-left: 2px solid color-mix(in srgb, var(--red) 45%, transparent);
+    font-size: 1.125rem;
+    font-weight: 300;
+    line-height: 1.4;
+    color: var(--red);
+    transform: rotate(-0.8deg);
   }
 
   .dashes {
