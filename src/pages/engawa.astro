@@ -14,6 +14,7 @@ const THINGS = [
   { key: "sky", box: pct(788, 380, 64, 92), label: "The stone lantern" },
   { key: "tea", box: pct(338, 562, 50, 44), label: "The tea cup" },
   { key: "lamp", box: pct(688, 470, 50, 90), label: "The paper lamp" },
+  { key: "cushion", box: pct(206, 558, 134, 70), label: "The cushion: sit, and the words go" },
   { key: "geta", box: pct(924, 584, 62, 30), label: "The geta, down into the garden" },
 ];
 const DIAL = pct(990, 110, 80, 80);
@@ -68,17 +69,32 @@ const SEASON = pct(1010, 192, 40, 30);
   import { sceneOf } from "../scripts/engawa/scene";
   import { dialOf } from "../scripts/engawa/dial";
   import { cardsOf } from "../scripts/engawa/cards";
+  import { sky, tea, tree } from "../scripts/engawa/almanac";
+  import { hourLight, tones2 } from "../utils/tea/ink.js";
 
   const fig = document.querySelector<HTMLElement>(".engawa")!;
   const scene = sceneOf(fig.querySelector("svg")!);
   dialOf(fig, scene);
 
   const cards = cardsOf(fig, scene);
+  cards.fill("tree", tree);
+  cards.fill("sky", sky);
+  cards.fill("tea", tea);
   fig.querySelectorAll<HTMLButtonElement>(".thing").forEach((b) =>
     b.addEventListener("click", () => {
       const key = b.dataset.card!;
       if (key === "geta") location.href = "/map/";
-      else cards.show(key, b);
+      else if (key === "lamp") {
+        // lit by hand, or put out
+        const lit =
+          scene.view.lamp ??
+          (hourLight(tones2(), scene.view.hour, scene.view.season).lamp > 0.5 ? 1 : 0);
+        scene.view.lamp = lit ? 0 : 1;
+        scene.draw();
+      } else if (key === "cushion") {
+        // sitting down
+        b.setAttribute("aria-pressed", String(document.body.classList.toggle("engawa-sitting")));
+      } else cards.show(key, b);
     }),
   );
 </script>
@@ -226,9 +242,131 @@ const SEASON = pct(1010, 192, 40, 30);
     right: 7.8%;
     bottom: 5%;
     overflow: auto;
+    font-family: var(--font-hand);
     font-size: 3.6cqw;
     line-height: 1.45;
     color: var(--fg-main);
+  }
+
+  :global(body.engawa-sitting) .engawa-head,
+  :global(body.engawa-sitting) .hint,
+  :global(body.engawa-sitting .divider) {
+    opacity: 0;
+    transition: opacity 0.8s;
+  }
+
+  .engawa :global(.card-body p) {
+    margin: 0 0 0.6em;
+  }
+
+  .engawa :global(.card-small),
+  .engawa :global(.card-dim) {
+    opacity: 0.65;
+  }
+
+  .engawa :global(.card-small) {
+    font-size: 0.85em;
+  }
+
+  .engawa :global(.card-kanji) {
+    margin: 0 !important;
+    font-family: var(--font-seal);
+    font-size: 2.3em;
+    line-height: 1.2;
+  }
+
+  .engawa :global(.card-big) {
+    font-size: 1.45em;
+    line-height: 1.2;
+  }
+
+  .engawa :global(.card-row) {
+    display: flex;
+    gap: 1em;
+    align-items: flex-start;
+  }
+
+  .engawa :global(.card-ring) {
+    flex: 0 0 38%;
+    stroke: var(--fg-main);
+    stroke-linecap: round;
+  }
+
+  .engawa :global(.card-ring path) {
+    opacity: 0.5;
+  }
+
+  .engawa :global(.card-ring path.now) {
+    stroke: var(--red);
+    stroke-width: 3;
+    opacity: 1;
+  }
+
+  .engawa :global(.card-ring text),
+  .engawa :global(.card-sky text) {
+    fill: var(--fg-main);
+    stroke: none;
+    font-family: var(--font-seal);
+    font-size: 15px;
+    text-anchor: middle;
+    dominant-baseline: central;
+    opacity: 0.55;
+  }
+
+  .engawa :global(.card-sky) {
+    display: block;
+    width: 100%;
+    margin-bottom: 0.4em;
+    overflow: visible;
+  }
+
+  .engawa :global(.card-sky text) {
+    font-family: inherit;
+    font-size: 16px;
+    opacity: 0.7;
+  }
+
+  .engawa :global(.card-sky .horizon),
+  .engawa :global(.card-sky .arc) {
+    fill: none;
+    stroke: var(--fg-main);
+    stroke-width: 1.2;
+    opacity: 0.6;
+  }
+
+  .engawa :global(.card-sky .arc) {
+    stroke-width: 3;
+    stroke-dasharray: 2 5;
+    opacity: 0.35;
+  }
+
+  .engawa :global(.card-sky .sun) {
+    fill: color-mix(in oklab, #f2c46a, var(--paper) 20%);
+    stroke: var(--fg-main);
+  }
+
+  .engawa :global(.card-sky .moon-dark) {
+    fill: color-mix(in oklab, var(--fg-main), var(--paper) 15%);
+  }
+
+  .engawa :global(.card-sky .moon) {
+    fill: #f3eedf;
+  }
+
+  .engawa :global(.card-knob) {
+    margin-top: 0.4em;
+    padding: 0.35em 1em;
+    border: 1.5px solid var(--fg-main);
+    border-radius: 48% 52% 50% 46% / 55% 45% 55% 45%;
+    background: color-mix(in oklab, var(--paper), var(--fg-main) 6%);
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .engawa :global(.card-knob[aria-pressed="true"]) {
+    border-color: var(--red);
+    color: var(--red);
   }
 
   @media (prefers-reduced-motion: reduce) {
