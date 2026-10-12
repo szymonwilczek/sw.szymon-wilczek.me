@@ -49,7 +49,8 @@ export function run(host: HTMLElement, w: Work, done: (w: Work) => void, back: (
   const others = G();
   (["cup", "hira", "yunomi", "bowl"] as const).forEach((k, i) => {
     const x = [250, 360, 750, 860][i];
-    piece(others, r, x, Y - 6, 0.8, K, {
+    const foot = (radAt(PROF[k].prof, 0) * 0.3 + 5) * 0.8;
+    piece(others, r, x, Y - 5 - foot, 0.8, K, {
       ...PROF[k],
       clay: (i * 3) % 4,
       glaze: { none: true },
