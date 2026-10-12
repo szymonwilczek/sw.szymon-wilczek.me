@@ -291,8 +291,7 @@ const search = (p: (typeof PROJECTS)[number]) =>
   }
 
   .lang:focus-visible {
-    outline: 2px solid var(--cursor);
-    outline-offset: 2px;
+    outline: none;
   }
 
   .n {
@@ -303,8 +302,9 @@ const search = (p: (typeof PROJECTS)[number]) =>
   .ring {
     position: absolute;
     top: 50%;
-    left: -6px;
-    width: calc(100% + 12px);
+    left: -8px;
+    width: calc(100% + 16px);
+    max-width: none;
     height: 2.2em;
     transform: translateY(-50%);
     overflow: visible;
@@ -322,6 +322,18 @@ const search = (p: (typeof PROJECTS)[number]) =>
 
   .lang[aria-pressed="true"] .ring {
     opacity: 1;
+  }
+
+  .lang:focus-visible .ring {
+    opacity: 0.5;
+  }
+
+  .lang[aria-pressed="true"]:focus-visible .ring {
+    opacity: 1;
+  }
+
+  .lang[aria-pressed="true"]:focus-visible .ring path {
+    stroke-width: 2.6;
   }
 
   .blot {
