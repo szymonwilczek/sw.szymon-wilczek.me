@@ -700,6 +700,37 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
         </a>
 
         <a
+          href="/engawa/"
+          class="place"
+          data-area="/engawa"
+          data-title={place("/engawa/").title}
+          data-sub={place("/engawa/").sub}
+        >
+          <rect class="hit" x="504" y="150" width="76" height="52"></rect>
+          <path
+            class="line fill-tape"
+            d="M508 177 C 524 175, 546 176, 566 174 L 568 181 C 548 183, 526 183, 509 184 Z"
+            stroke-width="1.2"
+          ></path>
+          <path
+            class="line"
+            d="M514 184 L 513 197 M 520 183 L 520 195 M 556 182 L 557 195 M 562 182 L 563 197"
+            stroke-width="1.1"
+          ></path>
+          <path class="line" d="M540 176 L 541 166" stroke-width="0.9"></path>
+          <path
+            class="line"
+            d="M541 165 C 538 160, 544 157, 541 152"
+            stroke-width="0.6"
+            opacity="0.6"
+          ></path>
+          <path class="line" d="M502 198 C 524 200, 552 200, 574 197" stroke-width="1"></path>
+          <text class="label" x="572" y="170" font-size="17">
+            engawa
+          </text>
+        </a>
+
+        <a
           href="/roji/"
           class="place"
           data-area="/roji"
