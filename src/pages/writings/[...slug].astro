@@ -3,6 +3,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import Divider from "../../components/Divider.astro";
 import KeptPaper from "../../components/KeptPaper.astro";
 import Seal from "../../components/Seal.astro";
+import Signature from "../../components/Signature.astro";
 import Susuki from "../../components/Susuki.astro";
 import Suzume from "../../components/Suzume.astro";
 import { getCollection } from "astro:content";
@@ -103,7 +104,10 @@ const postImage = imageMatch ? imageMatch[1] : `/og/${slug}.png`;
             </dd>
           </dl>
         </div>
-        <Seal glyph="終" size={68} tilt={3} label="end" class="end-seal" />
+        <div class="colophon-sign">
+          <Signature class="colophon-signature" />
+          <Seal glyph="終" size={68} tilt={3} label="end" class="end-seal" />
+        </div>
       </section>
 
       <div id="raw-code-drawer" class="raw-code-drawer" hidden>
@@ -513,6 +517,18 @@ const postImage = imageMatch ? imageMatch[1] : `/og/${slug}.png`;
 
   .colophon > :not(:global(.kept-paper, .kept-ring)) {
     position: relative;
+  }
+
+  .colophon-sign {
+    display: flex;
+    align-items: flex-end;
+    margin-left: auto;
+  }
+
+  .colophon-sign :global(.colophon-signature) {
+    width: 11rem;
+    height: auto;
+    margin: -0.75rem 0.25rem 0 0;
   }
 
   .colophon-title {
