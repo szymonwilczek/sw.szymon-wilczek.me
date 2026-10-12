@@ -136,7 +136,7 @@ const SEASON = pct(1030, 140, 40, 30);
     }),
   );
   gardenOf(radio, scene.view, () => incense.burning);
-  broadcastOf(fig, scene, radio, incense);
+  broadcastOf(fig, radio, incense);
 
   const sound = fig.querySelector<HTMLButtonElement>(".sound")!;
   sound.addEventListener("click", radio.toggle);
@@ -375,13 +375,20 @@ const SEASON = pct(1030, 140, 40, 30);
   }
 
   :global(body.engawa-radio) .engawa {
+    --w: min(100vw, calc(100vh * 1100 / 640));
     position: fixed;
-    inset: 0;
+    top: calc((100vh - var(--w) * 640 / 1100) / 2);
+    left: calc((100vw - var(--w)) / 2);
     z-index: 100;
-    width: min(100vw, calc(100vh * 1100 / 640));
-    height: fit-content;
-    margin: auto;
+    width: var(--w);
+    margin: 0;
     box-shadow: 0 0 0 100vmax var(--bg-main);
+  }
+
+  @media (min-aspect-ratio: 4 / 3) {
+    :global(body.engawa-radio) .engawa {
+      --w: max(100vw, calc(100vh * 1100 / 640));
+    }
   }
 
   :global(body.engawa-radio) {
@@ -396,87 +403,20 @@ const SEASON = pct(1030, 140, 40, 30);
     cursor: none;
   }
 
-  @keyframes radio-close {
-    to {
-      clip-path: circle(0% at 50% 60%);
-      filter: blur(2px);
-    }
-  }
-
-  @keyframes radio-open {
-    from {
-      clip-path: circle(0% at 50% 60%);
-      transform: scale(0.96);
-    }
-    to {
-      clip-path: circle(75% at 50% 60%);
-      transform: none;
-    }
-  }
-
-  .engawa:global(.radio-closing) {
-    animation: radio-close 0.55s ease-in forwards;
-  }
-
-  .engawa:global(.radio-opening) {
-    animation: radio-open 0.9s cubic-bezier(0.2, 0.7, 0.2, 1);
-  }
-
-  @keyframes radio-close-still {
-    to {
-      clip-path: circle(0% at 50% 60%);
-    }
-  }
-
-  @keyframes radio-soften {
-    to {
-      opacity: 1;
-    }
-  }
-
-  @keyframes radio-open-still {
-    from {
-      transform: scale(0.96);
-    }
-  }
-
-  .engawa:global(.stilled.radio-closing) {
-    animation-name: radio-close-still;
-  }
-
-  .engawa:global(.stilled.radio-opening) {
-    animation-name: radio-open-still;
-    box-shadow: none;
-  }
-
-  .engawa :global(.still .iris),
-  .engawa:global(.radio-opening) :global(.still canvas:not(.iris)) {
-    display: none;
-  }
-
-  .engawa:global(.radio-opening) :global(.still .iris) {
-    display: block;
-  }
-
-  .engawa:global(.stilled) > :global(svg) {
-    visibility: hidden;
-  }
-
-  .engawa :global(.still),
-  .engawa :global(.still canvas) {
-    position: absolute;
+  :global(.radio-curtain) {
+    position: fixed;
     inset: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-  }
-
-  .engawa :global(.still .soft) {
+    z-index: 200;
+    background: var(--bg-main);
     opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.8s cubic-bezier(0.2, 0.7, 0.2, 1);
   }
 
-  .engawa:global(.radio-closing) :global(.still .soft) {
-    animation: radio-soften 0.55s ease-in forwards;
+  :global(.radio-curtain.over) {
+    opacity: 1;
+    pointer-events: auto;
+    transition: opacity 0.4s ease-in;
   }
 
   :global(.radio-strip) {
