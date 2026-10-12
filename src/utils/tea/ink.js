@@ -2501,10 +2501,10 @@ function sceneWorkshop(K) {
   groups.push(front);
 
   const spots = [
-    ["wheel", 54, 40, 14, "轆", "the wheel"],
+    ["wheel", 66, 40, 6, "轆", "the wheel"],
     ["shelf", 84, KZ - 12, 72, "棚", "drying shelf"],
     ["glaze", 236, KZ - 24, 14, "釉", "glazes"],
-    ["brush", 210, 14, 22, "筆", "brush & seal"],
+    ["brush", 202, 14, 14, "筆", "brush & seal"],
     ["kiln", 175, KZ, 65, "窯", "out to the kiln"],
   ].map(([id, x, z, y, j, t]) => {
     const [px, py] = P(x, z, y),
