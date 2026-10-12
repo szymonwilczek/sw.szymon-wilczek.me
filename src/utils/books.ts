@@ -12,6 +12,7 @@ export interface Book {
   page: number | null;
   writing: string | null;
   quotes: string[];
+  refs: string[];
   passage: string[];
   note: string | null;
   state: "read" | "reading" | "waiting";
@@ -37,11 +38,11 @@ export function readBooks(file = "src/data/books.org"): Book[] {
       for (const [, key, value] of entry.matchAll(/^:([A-Z]+):[ \t]*(.*)$/gm))
         props[key] = value.trim();
       const body = rest.join("\n").replace(/:PROPERTIES:[\s\S]*?:END:/, "");
-      const quotes = [...body.matchAll(/#\+begin_quote\s*([\s\S]*?)#\+end_quote/gi)]
-        .map((m) => m[1].replace(/\s+/g, " ").trim())
-        .filter(Boolean);
-
-      // the page it lies open at
+      const marked = [
+        ...body.matchAll(/#\+begin_quote[ \t]*(.*)\n([\s\S]*?)#\+end_quote/gi),
+      ].filter((m) => m[2].trim());
+      const quotes = marked.map((m) => m[2].replace(/\s+/g, " ").trim());
+      const refs = marked.map((m) => m[1].trim());
       const passage = (body.match(/#\+begin_page\s*([\s\S]*?)#\+end_page/i)?.[1] ?? "")
         .split(/\n\s*\n/)
         .map((p) =>
@@ -68,6 +69,7 @@ export function readBooks(file = "src/data/books.org"): Book[] {
         page: props.PAGE ? +props.PAGE : null,
         writing: props.WRITING || null,
         quotes,
+        refs,
         passage,
         note,
         state: finished ? "read" : started ? "reading" : "waiting",
@@ -594,6 +596,8 @@ const FILLER = [
 export interface Para {
   cap: string;
   parts: { t: string; k: "greek" | "read" | "mark" | "br" }[];
+  ref?: string;
+  copied?: boolean;
 }
 
 export function paras(from: number, n: number, quotes: string[], cap: boolean): Para[] {
@@ -651,3 +655,13 @@ export function passage(text: string[], quotes: string[], cap: boolean): Para[] 
     return { cap: first, parts };
   });
 }
+
+// the page of a book I may not print:
+// only the lines I copied out of it, each with where it stands in the book
+export const excerpts = (quotes: string[], refs: string[]): Para[] =>
+  quotes.map((q, k) => ({
+    cap: "",
+    parts: [{ t: q, k: "mark" }],
+    ref: refs[k] || undefined,
+    copied: true,
+  }));

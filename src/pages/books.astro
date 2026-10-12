@@ -7,6 +7,7 @@ import {
   page,
   paras,
   passage,
+  excerpts,
   progress,
   readBooks,
   ribbon,
@@ -69,9 +70,11 @@ const spreads = placed.map(({ book: b, spine }) => {
       heads: [at ? String(open ? at - 1 : at) : "", b.title.toLowerCase()],
       paras: b.passage.length
         ? passage(b.passage, b.quotes, open)
-        : open
-          ? paras(from, 4, b.quotes, true)
-          : paras(from + 2, 3, b.quotes, false),
+        : b.quotes.length
+          ? excerpts(b.quotes, b.refs)
+          : open
+            ? paras(from, 4, [], true)
+            : paras(from + 2, 3, [], false),
     },
     right: {
       ...page("R", Math.max(2, 10 - done), `page/R/${b.id}/${b.title}`),
@@ -428,7 +431,11 @@ const BOOK_FONTS = [
                   <div class="text">
                     {pg.paras.map((pa, k) => (
                       <p
-                        class:list={{ first: k === 0, lines: pa.parts.some((pt) => pt.k === "br") }}
+                        class:list={{
+                          first: k === 0,
+                          lines: pa.parts.some((pt) => pt.k === "br"),
+                          copied: pa.copied,
+                        }}
                       >
                         {pa.cap && <span class="cap">{pa.cap}</span>}
                         {pa.parts.map((pt) =>
@@ -444,6 +451,7 @@ const BOOK_FONTS = [
                             pt.t
                           ),
                         )}
+                        {pa.ref && <span class="ref">{pa.ref}</span>}
                       </p>
                     ))}
                     {side === 0 && !s.open && (
@@ -1071,6 +1079,31 @@ const BOOK_FONTS = [
 
   .text p.first {
     text-indent: 0;
+  }
+
+  .text p.copied {
+    margin: 0 0 1.4em;
+    text-indent: 0;
+    text-align: left;
+  }
+
+  .text p.copied + p.copied::before {
+    content: "⁂";
+    display: block;
+    margin: -0.5em 0 0.6em;
+    text-align: center;
+    font-size: 13px;
+    color: var(--fg-dim);
+  }
+
+  .ref {
+    display: block;
+    margin-top: 0.2em;
+    font-family: "IM Fell English", serif;
+    font-size: 13px;
+    font-style: italic;
+    text-align: right;
+    color: var(--fg-dim);
   }
 
   .text p.lines {
