@@ -147,7 +147,7 @@ const PLACES = [
     sub: plural(writings.length, "essay", "essays"),
   },
   { href: "/photos/", title: "photos · the pond", sub: plural(albums.length, "album", "albums") },
-  { href: "/photos/stamps/", title: "the jetty", sub: "bookmarks" },
+  { href: "/photos/bookmarks/", title: "the jetty", sub: "bookmarks" },
   {
     href: "/projects/",
     title: "projects · the drying line",
@@ -378,11 +378,11 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
         <circle class="ripple" cx="786" cy="368" r="24" stroke-width="0.9" opacity="0.6"></circle>
         <circle class="ripple" cx="786" cy="368" r="34" stroke-width="0.7" opacity="0.35"></circle>
         <a
-          href="/photos/stamps/"
+          href="/photos/bookmarks/"
           class="place"
-          data-area="/photos/stamps"
-          data-title={place("/photos/stamps/").title}
-          data-sub={place("/photos/stamps/").sub}
+          data-area="/photos/bookmarks"
+          data-title={place("/photos/bookmarks/").title}
+          data-sub={place("/photos/bookmarks/").sub}
         >
           <rect class="hit" x="440" y="240" width="164" height="84"></rect>
           <path
