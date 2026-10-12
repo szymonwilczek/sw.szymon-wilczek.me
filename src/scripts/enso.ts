@@ -1,7 +1,7 @@
 // Riddle door: "the garden is round".
 // Press and drag in the home intro and a brush stroke follows from the first pixel.
 // Too small, too fast or open, the ink fades; a closed loop stays as an enso
-// and a dotted path walks off to the map.
+// and a dotted path walks off to the veranda, open on the garden.
 // On touch the brush waits for a short press, so scrolling stays.
 
 import { findDoor } from "../utils/garden";
@@ -101,9 +101,9 @@ if (area) {
     canvas.append(trail);
 
     const link = document.createElement("a");
-    link.href = "/map/?found";
+    link.href = "/engawa/";
     link.className = "enso-link hand";
-    link.textContent = "the map →";
+    link.textContent = "the veranda →";
     link.style.left = `${end[0]}px`;
     link.style.top = `${end[1] - 14}px`;
     hero.append(link);
