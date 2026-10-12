@@ -45,6 +45,38 @@ pieces stay with the guest, on their own shelf, marked 仮.
 If the site moves, change `ORIGINS` in `wrangler.toml`: only those pages may
 post pieces.
 
+## What I'm listening to
+
+`GET /now` answers the record player on `/engawa`: the song playing on the
+host's Spotify, or the last one played, with its cover and link. Nothing else
+leaves the Worker (no device, no playlist, no podcasts), and the answer is
+cached at the edge for 30 seconds. Without the secrets below it answers
+`{"playing": false}` and the card speaks only of the house's own record.
+
+Once:
+
+1. Make an app at <https://developer.spotify.com/dashboard> (Web API), with
+   the redirect URI `http://127.0.0.1:8888/callback` exactly.
+2. From the repository root, with the app's id and secret:
+
+   ```sh
+   SPOTIFY_CLIENT_ID=… SPOTIFY_CLIENT_SECRET=… npm run spotify-token
+   ```
+
+   open the address it prints, agree, and it prints the refresh token.
+
+3. From this directory:
+
+   ```sh
+   npx wrangler secret put SPOTIFY_CLIENT_ID
+   npx wrangler secret put SPOTIFY_CLIENT_SECRET
+   npx wrangler secret put SPOTIFY_REFRESH_TOKEN
+   npx wrangler deploy
+   ```
+
+The site reads the Worker's address from `WORKER_URL` in
+`src/utils/tea/inbox.ts`, the same one the pottery uses.
+
 ## Emacs
 
 The token goes into `~/.authinfo.gpg`, one line, with the Worker's host:
