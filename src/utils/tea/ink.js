@@ -1538,7 +1538,7 @@ function bucket(g, r, cx, cy, s, K, glaze, label) {
     0.4,
   );
   So(g, body, K.wood, 1);
-  Ln(g, body, K.ink, 1.1, 0.9);
+  Ln(g, body.slice(0, body.lastIndexOf(" Q")), K.ink, 1.1, 0.9);
   [0.3, 0.75].forEach((t) =>
     Ln(
       g,
