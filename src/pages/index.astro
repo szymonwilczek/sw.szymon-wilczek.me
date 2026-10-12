@@ -2,7 +2,6 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Divider from "../components/Divider.astro";
 import Karesansui from "../components/Karesansui.astro";
-import NowPaper from "../components/NowPaper.astro";
 import { getCollection } from "astro:content";
 import { getAllAlbums } from "../utils/albums";
 import { dottedDate, writingSlug } from "../utils/format";
@@ -36,8 +35,6 @@ const recentFiles = files.slice(0, 3);
       </p>
       <p class="enso-hint hand">the garden is round?</p>
     </div>
-
-    <NowPaper />
   </section>
 
   <Divider from={300} to={540} />
