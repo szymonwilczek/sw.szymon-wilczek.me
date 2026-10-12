@@ -85,8 +85,7 @@ const pct = (n: number, of: number) => `${((n / of) * 100).toFixed(1)}%`;
               <span class="name">{l.name}</span>
               <span class="domain">{l.domain}</span>
               <span class="how hand">
-                {l.mutual ? "tied both ways" : "my thread only"}{" "}
-                <span class="since">· {l.since}</span>
+                {l.mutual ? "tied both ways" : "tied from here"}
               </span>
             </span>
           </a>
@@ -305,10 +304,6 @@ const pct = (n: number, of: number) => `${((n / of) * 100).toFixed(1)}%`;
     top: var(--t);
     width: 14.5rem;
     translate: 0 -50%;
-  }
-
-  .since {
-    white-space: nowrap;
   }
 
   .card {
