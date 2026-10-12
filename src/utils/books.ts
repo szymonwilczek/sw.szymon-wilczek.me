@@ -10,10 +10,9 @@ export interface Book {
   started: Date | null;
   finished: Date | null;
   page: number | null;
-  place: string | null;
-  album: string | null;
   writing: string | null;
-  quote: string | null;
+  quotes: string[];
+  passage: string[];
   note: string | null;
   state: "read" | "reading" | "waiting";
 }
@@ -38,10 +37,23 @@ export function readBooks(file = "src/data/books.org"): Book[] {
       for (const [, key, value] of entry.matchAll(/^:([A-Z]+):[ \t]*(.*)$/gm))
         props[key] = value.trim();
       const body = rest.join("\n").replace(/:PROPERTIES:[\s\S]*?:END:/, "");
-      const quote = body.match(/#\+begin_quote\s*([\s\S]*?)#\+end_quote/i)?.[1].trim() || null;
+      const quotes = [...body.matchAll(/#\+begin_quote\s*([\s\S]*?)#\+end_quote/gi)]
+        .map((m) => m[1].replace(/\s+/g, " ").trim())
+        .filter(Boolean);
+
+      // the page it lies open at
+      const passage = (body.match(/#\+begin_page\s*([\s\S]*?)#\+end_page/i)?.[1] ?? "")
+        .split(/\n\s*\n/)
+        .map((p) =>
+          p
+            .split(/\\\\\s*\n/)
+            .map((l) => l.replace(/\s+/g, " ").trim())
+            .join("\n"),
+        )
+        .filter(Boolean);
       const note =
         body
-          .replace(/#\+begin_quote[\s\S]*?#\+end_quote/i, "")
+          .replace(/#\+begin_(quote|page)[\s\S]*?#\+end_\1/gi, "")
           .replace(/^#.*$/gm, "")
           .trim() || null;
       const started = orgDate(props.STARTED);
@@ -54,10 +66,9 @@ export function readBooks(file = "src/data/books.org"): Book[] {
         started,
         finished,
         page: props.PAGE ? +props.PAGE : null,
-        place: props.PLACE || null,
-        album: props.ALBUM || null,
         writing: props.WRITING || null,
-        quote,
+        quotes,
+        passage,
         note,
         state: finished ? "read" : started ? "reading" : "waiting",
       } satisfies Book;
@@ -582,13 +593,10 @@ const FILLER = [
 
 export interface Para {
   cap: string;
-  a: string;
-  mark: string;
-  b: string;
+  parts: { t: string; k: "greek" | "read" | "mark" | "br" }[];
 }
 
-// n paragraphs from the filler
-export function paras(from: number, n: number, quote: string | null, cap: boolean): Para[] {
+export function paras(from: number, n: number, quotes: string[], cap: boolean): Para[] {
   return Array.from({ length: n }, (_, k) => {
     let t = FILLER[(from + k) % FILLER.length];
     let first = "";
@@ -596,10 +604,50 @@ export function paras(from: number, n: number, quote: string | null, cap: boolea
       first = t[0];
       t = t.slice(1);
     }
-    if (quote && k === 1) {
+
+    // from the second paragraph on, or from the first when every one holds a line
+    const quote = quotes[k - (quotes.length < n ? 1 : 0)];
+    if (quote) {
       const cut = t.indexOf(",") + 1;
-      return { cap: first, a: t.slice(0, cut) + " ", mark: quote, b: " " + t.slice(cut).trim() };
+      return {
+        cap: first,
+        parts: [
+          { t: t.slice(0, cut) + " ", k: "greek" },
+          { t: quote, k: "mark" },
+          { t: " " + t.slice(cut).trim(), k: "greek" },
+        ],
+      };
     }
-    return { cap: first, a: t, mark: "", b: "" };
+    return { cap: first, parts: [{ t, k: "greek" }] };
+  });
+}
+
+// the page as it is printed, to be read, with the lines I marked found in it
+export function passage(text: string[], quotes: string[], cap: boolean): Para[] {
+  return text.map((p, k) => {
+    let first = "";
+    if (cap && k === 0 && /^\p{L}/u.test(p)) {
+      first = p[0];
+      p = p.slice(1);
+    }
+    const parts: Para["parts"] = [];
+    const read = (t: string) =>
+      t.split("\n").forEach((l, i) => {
+        if (i) parts.push({ t: "", k: "br" });
+        if (l) parts.push({ t: l, k: "read" });
+      });
+    let at = 0;
+    for (;;) {
+      const hits = quotes
+        .map((q) => ({ q, i: p.indexOf(q, at) }))
+        .filter((h) => h.i >= 0)
+        .sort((a, b) => a.i - b.i);
+      if (!hits.length) break;
+      read(p.slice(at, hits[0].i));
+      parts.push({ t: hits[0].q, k: "mark" });
+      at = hits[0].i + hits[0].q.length;
+    }
+    read(p.slice(at));
+    return { cap: first, parts };
   });
 }

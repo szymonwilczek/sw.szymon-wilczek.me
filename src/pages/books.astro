@@ -6,6 +6,7 @@ import {
   monthOf,
   page,
   paras,
+  passage,
   progress,
   readBooks,
   ribbon,
@@ -49,7 +50,6 @@ const spreads = placed.map(({ book: b, spine }) => {
     { k: "pages", v: String(b.pages) },
     b.started && { k: "opened", v: monthOf(b.started) },
     b.finished && { k: "closed", v: monthOf(b.finished) },
-    b.place && { k: "read in", v: b.place, href: b.album ? `/photos/${b.album}/` : undefined },
     b.writing && { k: "wrote", v: "what I made of it", href: `/writings/${b.writing}/` },
   ].filter(Boolean) as { k: string; v: string; href?: string }[];
   return {
@@ -67,12 +67,16 @@ const spreads = placed.map(({ book: b, spine }) => {
     left: {
       ...page("L", Math.max(2, done), `page/L/${b.id}/${b.title}`),
       heads: [at ? String(open ? at - 1 : at) : "", b.title.toLowerCase()],
-      paras: open ? paras(from, 4, b.quote, true) : paras(from + 2, 3, b.quote, false),
+      paras: b.passage.length
+        ? passage(b.passage, b.quotes, open)
+        : open
+          ? paras(from, 4, b.quotes, true)
+          : paras(from + 2, 3, b.quotes, false),
     },
     right: {
       ...page("R", Math.max(2, 10 - done), `page/R/${b.id}/${b.title}`),
       heads: [b.author.toLowerCase(), open && at ? String(at) : ""],
-      paras: paras(from + 3, 4, null, false),
+      paras: paras(from + 3, 4, [], false),
     },
     ribbon: { ...pr, h: PAGE.h + 60, vb: `-20 0 40 ${PAGE.h + 60}` },
     colophon,
@@ -423,18 +427,23 @@ const BOOK_FONTS = [
                 {side === 0 || s.open ? (
                   <div class="text">
                     {pg.paras.map((pa, k) => (
-                      <p class:list={{ first: k === 0 }}>
+                      <p
+                        class:list={{ first: k === 0, lines: pa.parts.some((pt) => pt.k === "br") }}
+                      >
                         {pa.cap && <span class="cap">{pa.cap}</span>}
-                        {pa.a}
-                        {pa.mark && (
-                          <mark>
-                            {pa.mark}
-                            <svg viewBox="0 0 100 8" preserveAspectRatio="none" aria-hidden="true">
-                              <path d="M1 4 C 18 2.6, 36 6, 54 4 S 86 2.8, 99 5" />
-                            </svg>
-                          </mark>
+                        {pa.parts.map((pt) =>
+                          pt.k === "mark" ? (
+                            <mark>{pt.t}</mark>
+                          ) : pt.k === "br" ? (
+                            <br />
+                          ) : pt.k === "greek" ? (
+                            <span class="greek" aria-hidden="true">
+                              {pt.t}
+                            </span>
+                          ) : (
+                            pt.t
+                          ),
                         )}
-                        {pa.b}
                       </p>
                     ))}
                     {side === 0 && !s.open && (
@@ -519,15 +528,6 @@ const BOOK_FONTS = [
           </div>
           <p class="caption">
             <span class="caption-title">{s.b.title}</span> · <i>{s.b.author}</i> · {s.when}
-            {s.b.place &&
-              (s.b.album ? (
-                <Fragment>
-                  {" · "}
-                  <a href={`/photos/${s.b.album}/`}>read in {s.b.place} →</a>
-                </Fragment>
-              ) : (
-                <Fragment> · read in {s.b.place}</Fragment>
-              ))}
           </p>
         </article>
       ))}
@@ -1073,6 +1073,12 @@ const BOOK_FONTS = [
     text-indent: 0;
   }
 
+  .text p.lines {
+    margin: 0.3em 0 0.3em 1.3em;
+    text-indent: 0;
+    text-align: left;
+  }
+
   .cap {
     float: left;
     margin: 5px 7px 0 0;
@@ -1082,32 +1088,25 @@ const BOOK_FONTS = [
     color: var(--red);
   }
 
+  .greek {
+    color: transparent;
+    text-decoration-line: line-through;
+    text-decoration-color: color-mix(in oklab, var(--fg-main), var(--paper) 80%);
+    text-decoration-thickness: 0.42em;
+    text-decoration-skip-ink: none;
+    user-select: none;
+  }
+
   mark {
-    position: relative;
     color: inherit;
+    text-decoration: underline 1px var(--pencil);
+    text-underline-offset: 5px;
     background: linear-gradient(
       transparent 64%,
       color-mix(in oklab, var(--cursor), var(--paper) 70%) 64%,
       color-mix(in oklab, var(--cursor), var(--paper) 70%) 96%,
       transparent 96%
     );
-  }
-
-  mark svg {
-    position: absolute;
-    left: -3px;
-    bottom: -5px;
-    width: calc(100% + 6px);
-    height: 8px;
-    overflow: visible;
-  }
-
-  mark path {
-    fill: none;
-    stroke: var(--pencil);
-    stroke-width: 1.1;
-    stroke-linecap: round;
-    vector-effect: non-scaling-stroke;
   }
 
   .fleuron {
