@@ -4263,24 +4263,6 @@ function sceneEngawa(K, hour, mini, sk, o = {}) {
       "url(#bk-bleed)",
     );
   }
-  inked(
-    ob,
-    ro,
-    wpoly(
-      ro,
-      [
-        [208, 572],
-        [318, 560],
-        [338, 612],
-        [218, 626],
-      ],
-      1.5,
-    ),
-    K.cloth,
-    K.ink,
-    1.3,
-  );
-  Ln(ob, wseg(ro, [262, 592], [278, 590], 0.4, 1), K.ink, 1.4, 0.7, true);
   sleeve(
     ob,
     ro,

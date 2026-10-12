@@ -14,7 +14,6 @@ const THINGS = [
   { key: "sky", box: pct(788, 380, 64, 92), label: "The stone lantern" },
   { key: "tea", box: pct(338, 562, 50, 44), label: "The tea cup" },
   { key: "lamp", box: pct(688, 470, 50, 90), label: "The paper lamp" },
-  { key: "cushion", box: pct(206, 558, 134, 70), label: "The cushion: sit, and the words go" },
   { key: "geta", box: pct(924, 584, 62, 30), label: "The geta, down into the garden" },
 ];
 const DIAL = pct(1010, 58, 80, 80);
@@ -132,9 +131,6 @@ const SEASON = pct(1030, 140, 40, 30);
           (hourLight(tones2(), scene.view.hour, scene.view.season).lamp > 0.5 ? 1 : 0);
         scene.view.lamp = lit ? 0 : 1;
         scene.draw();
-      } else if (key === "cushion") {
-        // sitting down
-        b.setAttribute("aria-pressed", String(document.body.classList.toggle("engawa-sitting")));
       } else cards.show(key, b);
     }),
   );
@@ -488,13 +484,6 @@ const SEASON = pct(1030, 140, 40, 30);
 
   :global(.rs-incense:empty) {
     display: none;
-  }
-
-  :global(body.engawa-sitting) .engawa-head,
-  :global(body.engawa-sitting) .hint,
-  :global(body.engawa-sitting .divider) {
-    opacity: 0;
-    transition: opacity 0.8s;
   }
 
   .engawa :global(.card-body p) {
