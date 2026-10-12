@@ -1,5 +1,5 @@
 ---
-import { hash, rng, smooth, wline, wring } from "../utils/tea/ink.js";
+import { FILTERS, hash, rng, smooth, wline, wring } from "../utils/tea/ink.js";
 
 interface Props {
   seed: string;
@@ -29,7 +29,7 @@ const outline = smooth(
   corners.flatMap((p, i) => edge(p, corners[(i + 1) % 4])),
   true,
 );
-
+const pool = wring(r, W / 2 + 8, H * 0.62, W * 0.47, H * 0.44, 4, 14);
 const fibres = Array.from({ length: 7 }, () => {
   const x = 14 + r() * (W - 28),
     y = 14 + r() * (H - 28),
@@ -46,85 +46,56 @@ const fibres = Array.from({ length: 7 }, () => {
   );
 });
 
-const R = 26;
-const ring = wring(r, 32, 32, R, R * 0.96, 0.6, 18);
-const twice = wline(
-  r,
-  [
-    [32 - R * 0.2 + 5, 32 - R + 3],
-    [32 + R * 0.7 + 5, 32 - R * 0.6 + 3],
-    [32 + R + 5, 35],
-  ],
-  0.5,
-);
-
 const c = 46;
 const P1 = [c - 3, 0];
 const P2 = [0, c - 3];
 const T = [c * 0.14, c * 0.26];
 const F = [c * 0.64, c * 0.64];
 const flap = `M${P1} Q${f(c * 0.55)} ${f(c * 0.05)} ${T} Q${f(c * 0.2)} ${f(c * 0.7)} ${P2} Q${F} ${P1} Z`;
-const id = `kept-${hash(seed).toString(36)}`;
+const under = wring(r, c * 0.62, c * 0.62, c * 0.3, c * 0.18, 1, 10);
 ---
 
 <span class="kept-paper" aria-hidden="true">
+  <svg class="kept-pool" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
+    <defs set:html={FILTERS} />
+    <path d={pool} filter="url(#bk-pool)"></path>
+  </svg>
   <svg class="kept-sheet" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
+    <path class="kept-wash" d={outline} transform="translate(2 1.5)" filter="url(#bk-wash)"></path>
     <path class="kept-body" d={outline}></path>
     <path class="kept-age" d={outline}></path>
     {fibres.map((d) => (
       <path class="kept-fibre" d={d} />
     ))}
-    <path class="kept-edge" d={outline}></path>
+    <path class="kept-edge" d={outline} filter="url(#bk-tremble)"></path>
   </svg>
-  <span class="kept-fox"></span>
   <svg class="kept-corner" viewBox={`0 0 ${c} ${c}`} width={c} height={c}>
-    <defs>
-      <linearGradient
-        id={id}
-        gradientUnits="userSpaceOnUse"
-        x1={F[0]}
-        y1={F[1]}
-        x2={T[0]}
-        y2={T[1]}
-      >
-        <stop class="kept-shade" offset="0" stop-opacity="0.02"></stop>
-        <stop class="kept-shade" offset="1" stop-opacity="0.14"></stop>
-      </linearGradient>
-    </defs>
+    <path class="kept-under" d={under} filter="url(#bk-pool)"></path>
+    <path
+      class="kept-flap-wash"
+      d={flap}
+      transform="translate(1.5 1)"
+      filter="url(#bk-wash)"
+    ></path>
     <path class="kept-flap" d={flap}></path>
-    <path class="kept-flap-shade" d={flap} fill={`url(#${id})`}></path>
-    <path class="kept-flap-edge" d={flap}></path>
+    <path class="kept-flap-edge" d={flap} filter="url(#bk-tremble)"></path>
   </svg>
 </span>
-<svg class="kept-ring" viewBox="0 0 64 64" width="64" height="64" aria-hidden="true">
-  <path class="kept-ring-fill" d={ring}></path>
-  <path class="kept-ring-line" d={ring}></path>
-  <path class="kept-ring-twice" d={twice}></path>
-</svg>
 
 <style>
-  .kept-paper,
-  .kept-ring {
-    --kept-tea: color-mix(in srgb, var(--red-warmer) 60%, var(--paper));
-  }
-
   .kept-paper {
+    --kept-tea: color-mix(in srgb, var(--red-warmer) 60%, var(--paper));
+    --kept-pool: color-mix(in srgb, var(--fg-main) 16%, var(--paper));
     position: absolute;
     inset: 0;
-    filter: drop-shadow(0 12px 12px rgb(0 0 0 / 0.12));
     pointer-events: none;
   }
 
-  .kept-sheet,
-  .kept-fox {
-    --cut: 46px;
-    mask:
-      linear-gradient(#000, #000) top / 100% calc(100% - var(--cut)) no-repeat,
-      linear-gradient(#000, #000) left bottom / calc(100% - var(--cut)) var(--cut) no-repeat,
-      linear-gradient(to bottom right, #000 50%, transparent 50%) right bottom / var(--cut)
-        var(--cut) no-repeat;
+  .kept-paper svg {
+    overflow: visible;
   }
 
+  .kept-pool,
   .kept-sheet {
     position: absolute;
     inset: 0;
@@ -132,8 +103,25 @@ const id = `kept-${hash(seed).toString(36)}`;
     height: 100%;
   }
 
+  .kept-pool path {
+    fill: var(--kept-pool);
+    opacity: 0.5;
+  }
+
+  .kept-sheet {
+    mask:
+      linear-gradient(#000, #000) top / 100% calc(100% - 46px) no-repeat,
+      linear-gradient(#000, #000) left bottom / calc(100% - 46px) 46px no-repeat,
+      linear-gradient(to bottom right, #000 50%, transparent 50%) right bottom / 46px 46px no-repeat;
+  }
+
   .kept-sheet path {
     vector-effect: non-scaling-stroke;
+  }
+
+  .kept-wash {
+    fill: var(--kept-tea);
+    opacity: 0.4;
   }
 
   .kept-body {
@@ -145,16 +133,6 @@ const id = `kept-${hash(seed).toString(36)}`;
     opacity: 0.22;
   }
 
-  .kept-fox {
-    position: absolute;
-    --cut: 42px;
-    inset: 4px;
-    border-radius: 6px;
-    box-shadow:
-      inset 0 0 6px 2px color-mix(in srgb, var(--kept-tea) 22%, transparent),
-      inset 0 0 18px 6px color-mix(in srgb, var(--kept-tea) 14%, transparent);
-  }
-
   .kept-fibre {
     fill: none;
     stroke: color-mix(in srgb, var(--fg-main) 55%, var(--paper));
@@ -163,71 +141,33 @@ const id = `kept-${hash(seed).toString(36)}`;
     opacity: 0.2;
   }
 
-  .kept-edge {
+  .kept-edge,
+  .kept-flap-edge {
     fill: none;
-    stroke: var(--fg-main);
+    stroke: color-mix(in srgb, var(--fg-main) 90%, var(--paper));
     stroke-width: 1.1;
+    stroke-linecap: round;
     stroke-linejoin: round;
-    opacity: 0.55;
+    opacity: 0.8;
   }
 
   .kept-corner {
     position: absolute;
     right: 0;
     bottom: 0;
-    overflow: visible;
+  }
+
+  .kept-under {
+    fill: var(--kept-pool);
+    opacity: 0.75;
   }
 
   .kept-flap {
     fill: color-mix(in srgb, var(--paper) 70%, var(--tape));
   }
 
-  .kept-shade {
-    stop-color: var(--fg-main);
-  }
-
-  .kept-flap-edge {
-    fill: none;
-    stroke: var(--fg-main);
-    stroke-width: 1;
-    stroke-linejoin: round;
-    opacity: 0.6;
-  }
-
-  .kept-ring {
-    position: absolute;
-    left: calc(12% - 32px);
-    top: calc(68% - 32px);
-    pointer-events: none;
-  }
-
-  @media (max-width: 47.99em) {
-    .kept-ring {
-      left: auto;
-      right: calc(16% - 32px);
-      top: calc(62% - 32px);
-    }
-  }
-
-  .kept-ring-fill {
+  .kept-flap-wash {
     fill: var(--kept-tea);
-    opacity: 0.06;
-  }
-
-  .kept-ring-line,
-  .kept-ring-twice {
-    fill: none;
-    stroke: var(--kept-tea);
-    stroke-linecap: round;
-  }
-
-  .kept-ring-line {
-    stroke-width: 2.2;
-    opacity: 0.3;
-  }
-
-  .kept-ring-twice {
-    stroke-width: 1.3;
-    opacity: 0.18;
+    opacity: 0.35;
   }
 </style>
