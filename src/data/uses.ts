@@ -1,6 +1,6 @@
 import type { GraphicName } from "../utils/dogu";
 
-export type Group = "writing" | "the machine" | "the site" | "off the screen";
+export type Group = "the editors" | "the machine" | "the site" | "off the screen";
 
 export interface Tool {
   name: string;
@@ -10,27 +10,107 @@ export interface Tool {
 }
 
 export const GROUPS: { name: Group; kanji: string }[] = [
-  { name: "writing", kanji: "書" },
+  { name: "the editors", kanji: "書" },
   { name: "the machine", kanji: "機" },
   { name: "the site", kanji: "庭" },
   { name: "off the screen", kanji: "外" },
 ];
 
-const WHY = "[WHY I KEEP IT · SINCE WHEN]";
-
 export const TOOLS: Tool[] = [
-  { name: "Emacs", graphic: "kettle", group: "writing", why: WHY },
-  { name: "Org", graphic: "daruma", group: "writing", why: WHY },
-  { name: "Typus Mono 95", graphic: "brush", group: "writing", why: WHY },
-  { name: "au-themes", graphic: "lantern", group: "writing", why: WHY },
-  { name: "[NOTES]", graphic: "scroll", group: "writing", why: WHY },
-  { name: "[OS]", graphic: "jar", group: "the machine", why: WHY },
-  { name: "[TERMINAL]", graphic: "ladle", group: "the machine", why: WHY },
-  { name: "[KEYBOARD]", graphic: "whisk", group: "the machine", why: WHY },
-  { name: "[BROWSER]", graphic: "vase", group: "the machine", why: WHY },
-  { name: "Astro", graphic: "scoop", group: "the site", why: WHY },
-  { name: "git", graphic: "seal", group: "the site", why: WHY },
-  { name: "[HOSTING]", graphic: "teapot", group: "the site", why: WHY },
-  { name: "[CAMERA]", graphic: "shears", group: "off the screen", why: WHY },
-  { name: "[HEADPHONES]", graphic: "bell", group: "off the screen", why: WHY },
+  {
+    name: "Emacs",
+    graphic: "kettle",
+    group: "the editors",
+    why: "Where I think, plan, write and set LaTeX. Built from scratch, one module at a time, after Doom stopped bending.",
+  },
+  {
+    name: "Neovim",
+    graphic: "ironpot",
+    group: "the editors",
+    why: "For tearing through a Go codebase, debugging C or patching a server over SSH. Nothing opens faster.",
+  },
+  {
+    name: "Evil",
+    graphic: "brush",
+    group: "the editors",
+    why: "Vim keys inside Emacs, so my hands never have to learn which editor they are in.",
+  },
+  {
+    name: "Magit",
+    graphic: "seal",
+    group: "the editors",
+    why: "git as a page I can read and edit: stage a hunk, reword a commit, rebase, without a single flag.",
+  },
+  {
+    name: "Vertico & Consult",
+    graphic: "abacus",
+    group: "the editors",
+    why: "Type a few letters in any order and the list narrows to the one thing I meant: files, buffers, lines.",
+  },
+  {
+    name: "Eglot",
+    graphic: "lantern",
+    group: "the editors",
+    why: "The language server, built into Emacs. Definitions, errors and renames, with nothing to set up.",
+  },
+  {
+    name: "Fedora",
+    graphic: "jar",
+    group: "the machine",
+    why: "My system for almost ten years. Unbelievably stable, and still always new.",
+  },
+  {
+    name: "Sway",
+    graphic: "boxes",
+    group: "the machine",
+    why: "Tiling on Wayland: every window gets its own place, no window over another, all from the keyboard.",
+  },
+  {
+    name: "Ghostty",
+    graphic: "ladle",
+    group: "the machine",
+    why: "The terminal. Fast, native, and beautiful out of the box; most of the day I see nothing else.",
+  },
+  {
+    name: "tmux",
+    graphic: "caddy",
+    group: "the machine",
+    why: "Sessions that outlive the terminal: close the window, come back, everything is where I left it.",
+  },
+  {
+    name: "Zathura",
+    graphic: "scroll",
+    group: "the machine",
+    why: "PDFs with vim keys and nothing else on the screen. Papers, datasheets, my own LaTeX.",
+  },
+  {
+    name: "Ansible",
+    graphic: "umbrella",
+    group: "the machine",
+    why: "One playbook installs the whole system: packages, repos, Flatpaks. A fresh Fedora comes up as mine.",
+  },
+  {
+    name: "Astro",
+    graphic: "scoop",
+    group: "the site",
+    why: "Builds this site to plain HTML; a page ships no JavaScript unless it asks for some. My org files are read at build time.",
+  },
+  {
+    name: "GitHub Pages",
+    graphic: "teapot",
+    group: "the site",
+    why: "Where the built site is served from. A push to main builds it and puts it out.",
+  },
+  {
+    name: "Onionite",
+    graphic: "whisk",
+    group: "off the screen",
+    why: "Modded to the bone: Akko black switches, tape, sand and spacebar mods, more inside the frame. A NuPhy Air V3 is next.",
+  },
+  {
+    name: "DT 770 Pro",
+    graphic: "bell",
+    group: "off the screen",
+    why: "Beyerdynamic, closed back. Long hours on the head, and the music stays mine.",
+  },
 ];
