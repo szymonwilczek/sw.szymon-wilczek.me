@@ -187,6 +187,13 @@ const SEASON = pct(1010, 192, 40, 30);
     cursor: pointer;
   }
 
+  .thing::before {
+    content: "";
+    position: absolute;
+    inset-inline: min(0px, calc((100% - 32px) / 2));
+    inset-block: min(0px, calc((100% - 32px) / 2));
+  }
+
   .dial {
     border-radius: 50%;
     touch-action: none;
