@@ -110,7 +110,6 @@ const garden = sceneGarden16(tones2(), "start", {
   const fig = document.querySelector<HTMLElement>(".roji")!;
   const svg = fig.querySelector<SVGSVGElement>("svg")!;
   const still = matchMedia("(prefers-reduced-motion: reduce)");
-  const KEY = "roji:bamboo";
   const CLUMP = { x: 250, y: 404, half: 60, top: 150 };
 
   function draw(cut: Cut, still: boolean) {
@@ -130,18 +129,9 @@ const garden = sceneGarden16(tones2(), "start", {
     return y > CLUMP.top && y < CLUMP.y - 20;
   }
 
-  const saved = localStorage.getItem(KEY);
+  localStorage.removeItem("roji:bamboo");
   let done = false;
   let cut: Cut | undefined;
-  if (saved) {
-    try {
-      cut = { line: JSON.parse(saved), phase: "down" };
-      draw(cut, true);
-      done = true;
-    } catch {
-      localStorage.removeItem(KEY);
-    }
-  }
 
   const STONE_KEY = "roji:key";
   const stone = fig.querySelector<HTMLButtonElement>(".stone")!;
@@ -285,8 +275,8 @@ const garden = sceneGarden16(tones2(), "start", {
     lift(cut);
     if (!cut) return;
     done = true;
-    localStorage.setItem(KEY, JSON.stringify(line));
     draw({ line, phase: "down" }, false);
+    cut = { line, phase: "down" };
   });
   fig.addEventListener("pointercancel", () => {
     start = null;
