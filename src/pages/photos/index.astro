@@ -6,12 +6,6 @@ import { getAllAlbums } from "../../utils/albums";
 
 const albums = await getAllAlbums();
 
-const ROMAN = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
-const postmarkDate = (date: Date) =>
-  `${ROMAN[date.getMonth()]}·${String(date.getFullYear()).slice(2)}`;
-const postmarkPlace = (album: (typeof albums)[number]) =>
-  (album.location ?? album.title).toUpperCase();
-
 const TILTS = [-1.2, 0.8, 1.4, -0.6, 0.5];
 const DROPS = ["0", "4rem", "0", "3rem", "0"];
 ---
@@ -66,23 +60,6 @@ const DROPS = ["0", "4rem", "0", "3rem", "0"];
                 num={album.stampNum}
                 size={104}
               />
-              <svg class="postmark" viewBox="0 0 110 52" aria-hidden="true">
-                <circle cx="78" cy="26" r="21" stroke-width="1.1" />
-                <circle cx="78" cy="26" r="17" stroke-width="0.6" />
-                <text
-                  x="78"
-                  y="23"
-                  class="pm-place"
-                  textLength={postmarkPlace(album).length > 9 ? 30 : undefined}
-                  lengthAdjust="spacingAndGlyphs"
-                >
-                  {postmarkPlace(album)}
-                </text>
-                <text x="78" y="33" class="pm-date">
-                  {postmarkDate(album.date)}
-                </text>
-                <path d="M2 16 q 6 -3.5 12 0 t 12 0 t 12 0 t 12 0 M2 26 q 6 -3.5 12 0 t 12 0 t 12 0 t 12 0 M2 36 q 6 -3.5 12 0 t 12 0 t 12 0 t 12 0" />
-              </svg>
             </span>
             <span class="lines">
               <span class="num">No. {album.stampNum}</span>
@@ -204,35 +181,6 @@ const DROPS = ["0", "4rem", "0", "3rem", "0"];
     position: absolute;
     top: 0.25rem;
     right: 0.25rem;
-  }
-
-  .postmark {
-    position: absolute;
-    left: -4.5rem;
-    top: 4rem;
-    width: 110px;
-    height: 52px;
-    opacity: 0.62;
-    transform: rotate(-9deg);
-    pointer-events: none;
-    fill: none;
-    stroke: var(--fg-main);
-  }
-
-  .postmark text {
-    stroke: none;
-    fill: var(--fg-main);
-    font-family: var(--font-mono);
-    text-anchor: middle;
-  }
-
-  .pm-place {
-    font-size: 6.5px;
-    letter-spacing: 0.5px;
-  }
-
-  .pm-date {
-    font-size: 7px;
   }
 
   .lines {

@@ -71,19 +71,6 @@ const EDGE = perforated(96, 116, 2.6, 8);
               SW · 07
             </text>
           </svg>
-          <svg class="postmark" width="104" height="104" viewBox="0 0 104 104">
-            <circle cx="52" cy="52" r="40" stroke-width="1.6"></circle>
-            <circle cx="52" cy="52" r="30" stroke-width="0.9"></circle>
-            <text class="postmark-date" x="52" y="48" text-anchor="middle"></text>
-            <text class="postmark-kanji" x="52" y="62" text-anchor="middle">
-              <tspan class="season-kanji">秋</tspan> · 庭
-            </text>
-            <path
-              d="M92 36 C 110 32, 130 40, 150 36 M 94 52 C 112 48, 132 56, 152 52 M 92 68 C 110 64, 130 72, 150 68"
-              stroke-width="1.3"
-              stroke-linecap="round"
-            ></path>
-          </svg>
         </div>
         <div class="lines">
           <p>Szymon Wilczek</p>
@@ -291,35 +278,6 @@ const EDGE = perforated(96, 116, 2.6, 8);
     fill: var(--fg-main);
   }
 
-  .postmark {
-    position: absolute;
-    left: -10px;
-    top: 16px;
-    overflow: visible;
-    transform: rotate(-14deg);
-    opacity: 0.78;
-  }
-
-  .postmark circle,
-  .postmark path {
-    fill: none;
-    stroke: var(--fg-main);
-  }
-
-  .postmark text {
-    fill: var(--fg-main);
-  }
-
-  .postmark-date {
-    font-family: var(--font-mono);
-    font-size: 9px;
-  }
-
-  .postmark-kanji {
-    font-family: var(--font-seal);
-    font-size: 12px;
-  }
-
   .lines {
     font-size: 1.0625rem;
     line-height: 2;
@@ -459,13 +417,10 @@ const EDGE = perforated(96, 116, 2.6, 8);
     const status = root.querySelector<HTMLElement>(".status")!;
     const again = root.querySelector<HTMLButtonElement>(".again")!;
     const now = season();
-    const ROMAN = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
     const today = new Date();
     const pad = (n: number) => String(n).padStart(2, "0");
 
     root.querySelectorAll(".season-kanji").forEach((t) => (t.textContent = SEASONS[now].glyph));
-    root.querySelector(".postmark-date")!.textContent =
-      `${pad(today.getDate())} · ${ROMAN[today.getMonth()]} · ${String(today.getFullYear()).slice(2)}`;
     root.querySelector(".stamp-no")!.textContent = `SW · ${pad(today.getMonth() + 1)}`;
 
     const quiet = "nothing goes through this site.";
