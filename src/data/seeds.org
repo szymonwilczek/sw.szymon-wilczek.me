@@ -14,65 +14,48 @@
 #
 # Under the properties: one line on what it would say.
 #
-# Everything below is a placeholder packet except the one in flower.
 
-* IDEA [IDEA]
+* DRAFT Engineering thesis: LOTA
 :PROPERTIES:
-:SOWN:     [2026-01-01]
+:SOWN: [2026-02-01]
 :END:
-[ONE LINE ON WHAT IT WOULD SAY]
+The thesis around LOTA. Written while the thing itself is still being built, so it grows slowly.
 
-* NOTES [IDEA]
-:PROPERTIES:
-:SOWN:     [2026-01-01]
-:END:
-[ONE LINE ON WHAT IT WOULD SAY]
+* IDEA The next one
+Not sown yet. I keep reading and keep looking.
 
-* IDEA [IDEA]
+* DONE Rules of Joker: Silesian Remik
 :PROPERTIES:
-:SOWN:     [2026-01-01]
+:WRITING: joker-rules
 :END:
-[ONE LINE ON WHAT IT WOULD SAY]
+The rulebook of Joker as played at our table, written down once so the arguments can stop.
 
-* DRAFT [IDEA]
+* DONE The Cycle of New Software: On Operative Simulacra
 :PROPERTIES:
-:SOWN:     [2026-01-01]
+:WRITING: the-cycle-of-new-software
 :END:
-[ONE LINE ON WHAT IT WOULD SAY]
+What generative code does to Brooks' essential complexity, and to the place of the human in computing.
+
+* DONE Architecture of Inevitable Hypocrisy
+:PROPERTIES:
+:WRITING: the-architecture-of-inevitable-hypocrisy
+:END:
+That ideological purity is an illusion, and that living digitally means living a little hypocritically.
+
+* DONE 8-Pixel Obsession: Crafting Typus Mono
+:PROPERTIES:
+:WRITING: the-8-pixel-obsession-typus-mono
+:END:
+Condensing JetBrains Mono by 8%, and ten thousand Nerd Font glyphs along with it.
 
 * DONE The Sins of Low-Level Bootstrapping
 :PROPERTIES:
-:SOWN:     [2026-01-01]
-:WRITING:  code-silence-and-boot-sectors
+:WRITING: code-silence-and-boot-sectors
 :END:
-written; the seed is spent.
+A no-talking programming channel, and an eight-part Linux bootloader built in silence.
 
-* NOTES [IDEA]
+* DONE Building a Modular Sanctuary: An Engineer's Dualism
 :PROPERTIES:
-:SOWN:     [2026-01-01]
+:WRITING: building-a-modular-sovereign-emacs
 :END:
-[ONE LINE ON WHAT IT WOULD SAY]
-
-* IDEA [IDEA]
-:PROPERTIES:
-:SOWN:     [2026-01-01]
-:END:
-[ONE LINE ON WHAT IT WOULD SAY]
-
-* IDEA [IDEA]
-:PROPERTIES:
-:SOWN:     [2026-01-01]
-:END:
-[ONE LINE ON WHAT IT WOULD SAY]
-
-* DRAFT [IDEA]
-:PROPERTIES:
-:SOWN:     [2026-01-01]
-:END:
-[ONE LINE ON WHAT IT WOULD SAY]
-
-* IDEA [IDEA]
-:PROPERTIES:
-:SOWN:     [2026-01-01]
-:END:
-[ONE LINE ON WHAT IT WOULD SAY]
+The ping-pong between Neovim and Emacs, and a setup that stops pretending.
