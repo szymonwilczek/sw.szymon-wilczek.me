@@ -1,5 +1,7 @@
 import { WORKER_URL } from "../../utils/tea/inbox";
+import { DISCS } from "./discs";
 import type { Fill } from "./cards";
+import type { Radio } from "./radio";
 
 interface Now {
   playing: boolean;
@@ -39,7 +41,7 @@ function ago(iso: string): string {
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
 
-export function recordOf(radio: { label: () => string; toggle: () => void }): Fill {
+export function recordOf(radio: Radio, crate: () => void): Fill {
   let body: HTMLElement | null = null;
   let timer = 0;
 
@@ -47,6 +49,7 @@ export function recordOf(radio: { label: () => string; toggle: () => void }): Fi
     if (!body) return;
     const now = await ask();
     if (!body) return;
+    const disc = DISCS[radio.disc];
     const said = now.track
       ? `<div class="rec-now">
           ${now.art ? `<img src="${esc(now.art)}" alt="" width="96" height="96" loading="lazy">` : ""}
@@ -63,12 +66,13 @@ export function recordOf(radio: { label: () => string; toggle: () => void }): Fi
             : ""
         }`
       : `<p class="card-small">on the turntable</p>
-        <p class="card-big">Blue in Green</p>
-        <p>Miles Davis <span class="card-dim">· Kind of Blue, 1959</span></p>
-        <p class="card-dim">The house's own record. When the host is listening to something, it shows here.</p>`;
+        <p class="card-big">${disc.title}</p>
+        <p>${esc(disc.src ? disc.about(0) : radio.about())}</p>
+        <p class="card-dim">${disc.credit ? `${esc(disc.by)} · <a href="${disc.credit.licenceUrl}" target="_blank" rel="noopener">${disc.credit.licence}</a>` : "The house's own record, made as it plays."} When the host is listening to something, it shows here.</p>`;
     body.innerHTML = `${said}
       <p class="rec-radio"><button type="button" class="card-knob">${radio.label()}</button>
-      <br><span class="card-small card-dim">a quiet radio of the house, made as it plays</span></p>`;
+      <br><span class="card-small card-dim">${disc.jp} · ${esc(disc.title)}, or another from <button type="button" class="card-link">the crate</button></span></p>`;
+    body.querySelector(".card-link")!.addEventListener("click", crate);
     body.querySelector(".rec-radio button")!.addEventListener("click", () => {
       radio.toggle();
       paint();
