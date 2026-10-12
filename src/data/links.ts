@@ -9,14 +9,6 @@ export interface Link {
 
 export const LINKS: Link[] = [
   {
-    name: "Szymon Wilczek",
-    url: "https://www.szymon-wilczek.me",
-    domain: "www.szymon-wilczek.me",
-    initial: "W",
-    since: "2025-12-09",
-    mutual: true,
-  },
-  {
     name: "GitHub",
     url: "https://github.com/szymonwilczek",
     domain: "github.com/szymonwilczek",
