@@ -43,7 +43,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ROJI_KEY: ${{ secrets.ROJI_KEY }}
-          ROJI_BOOK: ${{ secrets.ROJI_BOOK }}
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v5

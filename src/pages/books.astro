@@ -14,12 +14,15 @@ import {
   type Placed,
 } from "../utils/books";
 import { hash } from "../utils/stamp";
-import { slip } from "../utils/slip";
+import { SLIP_AT, slip } from "../utils/slip";
 
 const now = new Date();
 const books = readBooks();
 const key = await slip();
 const cases = shelves(books, now);
+const slipIn = cases[0]?.planks[0]?.items.filter((it) => it.kind === "book")[SLIP_AT - 1]?.book.book
+  .id;
+if (key && !slipIn) console.warn(`[slip] the top shelf has fewer than ${SLIP_AT} books standing`);
 const waiting = books.filter((b) => b.state === "waiting");
 const reading = books.filter((b) => b.state === "reading");
 const read = books.filter((b) => b.state === "read");
@@ -217,18 +220,6 @@ const BOOK_FONTS = [
                                   {t.t}
                                 </text>
                               ))}
-                              {p.book.no !== null && (
-                                <g class="no">
-                                  <path d={p.spine.tag} />
-                                  <text
-                                    transform={p.spine.no}
-                                    text-anchor="middle"
-                                    dominant-baseline="central"
-                                  >
-                                    {p.book.no}
-                                  </text>
-                                </g>
-                              )}
                               <path class="ink" d={p.spine.body} filter="url(#bk-tremble)" />
                             </svg>
                             {p.ribbon && (
@@ -356,18 +347,6 @@ const BOOK_FONTS = [
                                     {t.t}
                                   </text>
                                 ))}
-                                {p.book.no !== null && (
-                                  <g class="no">
-                                    <path d={p.spine.tag} />
-                                    <text
-                                      transform={p.spine.no}
-                                      text-anchor="middle"
-                                      dominant-baseline="central"
-                                    >
-                                      {p.book.no}
-                                    </text>
-                                  </g>
-                                )}
                                 <path class="ink" d={p.spine.body} filter="url(#bk-tremble)" />
                               </g>
                             </svg>
@@ -521,7 +500,7 @@ const BOOK_FONTS = [
                 )}
               </div>
             ))}
-            {key && s.b.no === key.no && (
+            {key && s.b.id === slipIn && (
               <svg
                 class="slip"
                 width={key.w + 40}
@@ -864,19 +843,6 @@ const BOOK_FONTS = [
 
   .slip-ink {
     fill: var(--t-ink);
-  }
-
-  .no path {
-    fill: color-mix(in oklab, var(--paper), white 30%);
-    stroke: var(--t-ink);
-    stroke-width: 0.6;
-    opacity: 0.92;
-  }
-
-  .no text {
-    fill: var(--t-ink);
-    font-family: "Typus Mono 95", ui-monospace, monospace;
-    font-size: 7.5px;
   }
 
   .bk[aria-pressed="true"] {
