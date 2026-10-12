@@ -1,4 +1,16 @@
-import { G, rng, hash, piece, inked, wbox, wpoly, So, wring, PROF } from "../../utils/tea/ink.js";
+import {
+  G,
+  rng,
+  hash,
+  piece,
+  inked,
+  wbox,
+  wpoly,
+  So,
+  wring,
+  PROF,
+  radAt,
+} from "../../utils/tea/ink.js";
 import { K, stage, look, fit, wait, type Work } from "./stage";
 
 const W = 1100,
@@ -16,8 +28,9 @@ export function run(host: HTMLElement, w: Work, done: (w: Work) => void, back: (
       K.plasterDk,
       0.3,
     );
+  const plank = G();
   inked(
-    wall,
+    plank,
     r,
     wpoly(
       r,
@@ -33,10 +46,10 @@ export function run(host: HTMLElement, w: Work, done: (w: Work) => void, back: (
     K.ink,
     1.1,
   );
-  inked(wall, r, wbox(r, 180, Y, 920, Y + 9, 0.4), K.wood, K.ink, 1);
+  const others = G();
   (["cup", "hira", "yunomi", "bowl"] as const).forEach((k, i) => {
     const x = [250, 360, 750, 860][i];
-    piece(wall, r, x, Y - 6, 0.8, K, {
+    piece(others, r, x, Y - 6, 0.8, K, {
       ...PROF[k],
       clay: (i * 3) % 4,
       glaze: { none: true },
@@ -45,9 +58,12 @@ export function run(host: HTMLElement, w: Work, done: (w: Work) => void, back: (
   });
   const mine = G({ cls: "kobo-wet" });
   const s = fit(w.spec, 260, 240, 2.4);
-  piece(mine, rng(hash("kobo/mine")), 550, Y - 6, s, K, look(w.spec));
+  const foot = (radAt(w.spec.prof, 0) * 0.3 + 5) * s;
+  piece(mine, rng(hash("kobo/mine")), 550, Y - 2 - foot, s, K, look(w.spec));
+  const edge = G();
+  inked(edge, r, wbox(r, 180, Y, 920, Y + 9, 0.4), K.wood, K.ink, 1);
 
-  const st = stage(host, W, H, ["棚", "the drying shelf"], [wall, mine]);
+  const st = stage(host, W, H, ["棚", "the drying shelf"], [wall, plank, others, mine, edge]);
   const wet = st.svg.querySelector<SVGGElement>(".kobo-wet")!;
   wet.style.transition = "filter 4s ease-in";
   wet.style.filter = "brightness(0.78) saturate(1.2)";
