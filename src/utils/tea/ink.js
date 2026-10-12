@@ -1611,18 +1611,6 @@ function noren(g, r, P, x0, x1, yTop, drop, K, text) {
     o: 0.9,
   });
 }
-// stack of split firewood against a wall
-function woodpile(g, r, P, x, z0, z1, rows, K) {
-  for (let row = 0; row < rows; row++)
-    for (let z = z0 + (row % 2) * 4; z < z1; z += 8) {
-      const p = P(x, z, 5 + row * 8.5),
-        rr = 4 + r() * 1.2;
-      const d = wring(r, p[0], p[1], rr * 0.62, rr, 0.6, 7);
-      So(g, d, mix(K.woodLt, K.paper, 0.2), 1);
-      Ln(g, d, K.ink, 0.8, 0.85);
-      Ln(g, wring(r, p[0], p[1], rr * 0.25, rr * 0.4, 0.2, 5), K.woodDk, 0.6, 0.6);
-    }
-}
 function workshopWalls(g, r, P, K) {
   face(
     g,
@@ -1887,7 +1875,7 @@ function noborigama(groups, r, bx, by, K, lit) {
     Ln(k, wring(r, sh[0], sh[1], 4, 5.5, 0.3, 9), K.ink, 0.9, 0.9);
     groups.push(k);
   }
-  // the firebox at the foot, and split wood ready beside it
+  // the firebox at the foot
   const fb = G(),
     m = P(W0 / 2, -10, 0);
   if (lit) Wa(fb, r, wring(r, m[0], m[1] - 10, 30, 20, 3, 10), K.gold, 0.65, "url(#bk-bleed)");
@@ -1924,9 +1912,6 @@ function noborigama(groups, r, bx, by, K, lit) {
     1,
   );
   groups.push(fb);
-  const wp = G();
-  woodpile(wp, r, P, -22, -26, 30, 3, K);
-  groups.push(wp);
 }
 // what you see from above when the workshop roof is lifted
 function workshopInside(g, r, P, K, sc) {
@@ -2199,9 +2184,6 @@ function sceneGarden16(K, stage, opt = {}) {
     plaque(fW, r, ...PW(152, -6, 14), 36, 14, "工房", "'Yuji Syuku', serif", 10, K);
     groups.push(fW);
   }
-  const fire = G();
-  woodpile(fire, r, PW, KX + 6, 16, 110, 4, K);
-  groups.push(fire);
   const bench = G();
   dryingBench(bench, r, PW, 8, 104, -26, K, 0.3);
   groups.push(bench);
@@ -4703,7 +4685,6 @@ export {
   noren,
   quad,
   wseg,
-  woodpile,
   workshopWalls,
   face,
   postV,
