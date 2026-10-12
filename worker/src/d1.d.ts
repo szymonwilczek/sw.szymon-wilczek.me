@@ -1,4 +1,3 @@
-// the little of Cloudflare's D1 the inbox uses, so it needs no packages
 interface D1Result<T> {
   results: T[];
 }
@@ -10,4 +9,11 @@ interface D1Statement {
 }
 interface D1Database {
   prepare(sql: string): D1Statement;
+}
+
+interface ExecutionContext {
+  waitUntil(p: Promise<unknown>): void;
+}
+interface CacheStorage {
+  default: Cache;
 }

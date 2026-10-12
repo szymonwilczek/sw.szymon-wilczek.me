@@ -3,15 +3,18 @@
 //   GET  /admin/pending        the waiting pieces, each with an SVG preview
 //   POST /admin/:id/approve    the cleaned piece back, to add to pieces.json
 //   POST /admin/:id/reject     gone
+//   GET  /now                  what the host is listening to (now.ts)
 //
-// Secrets: KEY_HASH (the line from `npm run roji-key`), ADMIN_TOKEN
+// Secrets: KEY_HASH (the line from `npm run roji-key`), ADMIN_TOKEN,
+// and for /now the three SPOTIFY_*
 
 import { clean, pieceSvg, MAX_BYTES } from "../../src/utils/tea/pottery";
 import { fits } from "../../src/utils/tea/key";
 import { FILTERS } from "../../src/utils/tea/ink.js";
 import TONES from "./tones.json";
+import { now, type NowEnv } from "./now";
 
-interface Env {
+interface Env extends NowEnv {
   DB: D1Database;
   KEY_HASH: string;
   ADMIN_TOKEN: string;
@@ -24,11 +27,12 @@ const PER_HOUR = 5;
 const MAX_PENDING = 200;
 
 export default {
-  async fetch(req: Request, env: Env): Promise<Response> {
+  async fetch(req: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(req.url);
     const path = url.pathname.replace(/\/+$/, "");
     try {
       if (path === "/piece") return await piece(req, env);
+      if (path === "/now") return await now(req, env, ctx);
       if (path.startsWith("/admin/")) return await admin(req, env, path);
       return text("not here", 404);
     } catch (e) {
