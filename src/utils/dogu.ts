@@ -42,7 +42,6 @@ const GRAPHICS = {
   ironpot: { kanji: "瓶", as: "tetsubin, the iron pot" },
   lantern: { kanji: "灯", as: "chōchin, the paper lantern" },
   jar: { kanji: "水", as: "mizusashi, the water jar" },
-  seal: { kanji: "印", as: "hanko, the seal" },
   boxes: { kanji: "重", as: "jūbako, the stacked boxes" },
   candle: { kanji: "燭", as: "warōsoku, the candle" },
   bell: { kanji: "鈴", as: "fūrin, the wind bell" },
@@ -206,16 +205,6 @@ function draw(id: GraphicName): Layer[] {
         "glaze",
       ),
       L("M58 140 C 84 145, 116 145, 142 140", 0.6),
-    ];
-  if (id === "seal")
-    return [
-      F("M84 70 C 84 56, 116 56, 116 70 L 118 150 C 118 154, 82 154, 82 150 Z", "bambooLt"),
-      F("M80 150 L 120 150 L 120 166 L 80 166 Z", "stone"),
-      L("M83 86 C 94 89, 106 89, 117 86 M 84 98 C 94 101, 106 101, 116 98", 0.6),
-      F("M126 166 L 156 148 L 192 154 L 162 168 Z", "paper"),
-      F("M152 158 L 164 151 L 176 153 L 164 160 Z", "silk"),
-      F("M34 150 L 34 162 C 34 168, 66 168, 66 162 L 66 150 Z", "lac"),
-      F(ell(50, 150, 16, 5), "silk"),
     ];
   if (id === "boxes")
     return [
