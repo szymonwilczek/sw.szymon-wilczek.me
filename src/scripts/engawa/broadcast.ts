@@ -1,3 +1,5 @@
+import { stillOf } from "./still";
+
 interface Radio {
   on: boolean;
   start(): void;
@@ -7,7 +9,12 @@ interface Radio {
   onChange(f: (on: boolean) => void): void;
 }
 
-export function broadcastOf(fig: HTMLElement, radio: Radio, incense: { left: string | null }) {
+export function broadcastOf(
+  fig: HTMLElement,
+  scene: { on: (f: () => void) => void },
+  radio: Radio,
+  incense: { left: string | null },
+) {
   const knob = fig.querySelector<HTMLButtonElement>(".broadcast")!;
   const strip = document.createElement("div");
   strip.className = "radio-strip";
@@ -22,19 +29,19 @@ export function broadcastOf(fig: HTMLElement, radio: Radio, incense: { left: str
   let still = 0;
   let timer = 0;
   let inside = false;
+  const picture = stillOf(fig);
 
   const reduced = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
   const after = (cls: string, f: () => void) => {
     if (reduced()) return f();
     fig.classList.add(cls);
-    fig.addEventListener(
-      "animationend",
-      () => {
-        fig.classList.remove(cls);
-        f();
-      },
-      { once: true },
-    );
+    const end = (e: AnimationEvent) => {
+      if (e.target !== fig) return;
+      fig.removeEventListener("animationend", end);
+      fig.classList.remove(cls);
+      f();
+    };
+    fig.addEventListener("animationend", end);
   };
 
   function show() {
@@ -54,6 +61,7 @@ export function broadcastOf(fig: HTMLElement, radio: Radio, incense: { left: str
     if (inside) return;
     inside = true;
     radio.start();
+    if (picture.ready) picture.show();
     after("radio-closing", async () => {
       document.body.classList.add("engawa-radio");
       try {
@@ -61,7 +69,8 @@ export function broadcastOf(fig: HTMLElement, radio: Radio, incense: { left: str
       } catch {
         // no fullscreen to be had: the page alone fills the window
       }
-      after("radio-opening", () => {});
+      after("radio-opening", () => picture.hide());
+      picture.open();
       try {
         lock = await navigator.wakeLock?.request("screen");
       } catch {
@@ -77,6 +86,7 @@ export function broadcastOf(fig: HTMLElement, radio: Radio, incense: { left: str
   function leave() {
     if (!inside) return;
     inside = false;
+    picture.hide();
     clearInterval(timer);
     clearTimeout(still);
     lock?.release();
@@ -87,6 +97,25 @@ export function broadcastOf(fig: HTMLElement, radio: Radio, incense: { left: str
   }
 
   knob.addEventListener("click", () => (inside ? leave() : enter()));
+  const make = () => !inside && !reduced() && picture.prepare();
+  let seen = false;
+  let wait = 0;
+  const soon = () => {
+    clearTimeout(wait);
+    if (!seen) return;
+    wait = window.setTimeout(
+      () =>
+        "requestIdleCallback" in window ? requestIdleCallback(make, { timeout: 2000 }) : make(),
+      1500,
+    );
+  };
+  new IntersectionObserver(([e]) => {
+    seen = e.isIntersecting;
+    soon();
+  }).observe(knob);
+  scene.on(soon);
+  knob.addEventListener("pointerenter", (e) => e.pointerType === "mouse" && make());
+  knob.addEventListener("focus", make);
   strip.querySelector(".rs-out")!.addEventListener("click", leave);
   sound.addEventListener("click", () => {
     radio.toggle();

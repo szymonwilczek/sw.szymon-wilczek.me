@@ -108,7 +108,7 @@ const SEASON = pct(1030, 140, 40, 30);
   const radio = radioOf(() => scene.view.hour);
   cards.fill("record", recordOf(radio));
   gardenOf(radio, scene.view, () => incense.burning);
-  broadcastOf(fig, radio, incense);
+  broadcastOf(fig, scene, radio, incense);
 
   const sound = fig.querySelector<HTMLButtonElement>(".sound")!;
   sound.addEventListener("click", radio.toggle);
@@ -372,6 +372,63 @@ const SEASON = pct(1030, 140, 40, 30);
 
   .engawa:global(.radio-opening) {
     animation: radio-open 0.9s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  @keyframes radio-close-still {
+    to {
+      clip-path: circle(0% at 50% 60%);
+    }
+  }
+
+  @keyframes radio-soften {
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes radio-open-still {
+    from {
+      transform: scale(0.96);
+    }
+  }
+
+  .engawa:global(.stilled.radio-closing) {
+    animation-name: radio-close-still;
+  }
+
+  .engawa:global(.stilled.radio-opening) {
+    animation-name: radio-open-still;
+    box-shadow: none;
+  }
+
+  .engawa :global(.still .iris),
+  .engawa:global(.radio-opening) :global(.still canvas:not(.iris)) {
+    display: none;
+  }
+
+  .engawa:global(.radio-opening) :global(.still .iris) {
+    display: block;
+  }
+
+  .engawa:global(.stilled) > :global(svg) {
+    visibility: hidden;
+  }
+
+  .engawa :global(.still),
+  .engawa :global(.still canvas) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  .engawa :global(.still .soft) {
+    opacity: 0;
+  }
+
+  .engawa:global(.radio-closing) :global(.still .soft) {
+    animation: radio-soften 0.55s ease-in forwards;
   }
 
   :global(.radio-strip) {
