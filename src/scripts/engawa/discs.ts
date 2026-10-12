@@ -15,6 +15,7 @@ export interface Disc {
   top?: number;
   wow?: number;
   crackle?: number;
+  swing?: number;
   level?: number;
   src?: string;
   credit?: { licence: string; licenceUrl: string; url: string };
@@ -276,7 +277,7 @@ const RAIN: Turn[] = [
     [0, "M9"],
     [2, "d9"],
     [2, "m9"],
-    [7, "d7b9"],
+    [7, "d9"],
   ],
   [
     [0, "M69"],
@@ -288,7 +289,7 @@ const RAIN: Turn[] = [
     [5, "M9"],
     [5, "m6"],
     [4, "m7"],
-    [9, "d7b9"],
+    [9, "d9"],
   ],
   [
     [2, "m9"],
@@ -333,16 +334,16 @@ function rain(k: Kit, t: number, s: number, beat: number, hour: number) {
   }
   if (pos % 4 === 2 && Math.random() < 0.12) {
     const n = pick(CH[kind]);
-    pluck(k, t, root + 24 + n > 86 ? root + 12 + n : root + 24 + n, 0.25 * hum(), {
+    pluck(k, t, root + 24 + n > 76 ? root + 12 + n : root + 24 + n, 0.2 * hum(), {
       ...NYLON,
-      tone: 4200,
+      tone: 2800,
       pan: -0.25,
     });
   }
-  hiss(k, t, "highpass", 5200, 0.6, (pos % 2 ? 0.03 : 0.018) * hum(), 0.015, 0.07);
-  if ((bar % 2 ? [3, 6, 10, 12] : [0, 3, 6, 10, 13]).includes(pos) && Math.random() < 0.7)
-    knock(k, t, 1650, 0.7 * hum());
-  if (pos === 0) kick(k, t, 0.55 * hum());
+  hiss(k, t, "bandpass", 6000, 0.7, (pos % 2 ? 0.014 : 0.008) * hum(), 0.02, 0.08);
+  if ((bar % 2 ? [3, 6, 10, 12] : [0, 3, 6, 10, 13]).includes(pos))
+    hiss(k, t, "bandpass", 2400, 1.4, 0.03 * hum(), 0.002, 0.04);
+  if (pos === 0 || pos === 8) kick(k, t, (pos ? 0.3 : 0.4) * hum());
 }
 
 const MIYAKO = [0, 1, 5, 7, 8];
@@ -601,8 +602,9 @@ export const DISCS: Disc[] = [
     about: (h) => `bossa nova in ${NAMES[rainKey(h)]}, a nylon guitar and a shaker`,
     bpm: rainBpm,
     play: rain,
-    top: 3400,
-    level: 1.3,
+    top: 3000,
+    level: 1.15,
+    swing: 0,
   },
   {
     jp: "庭",

@@ -88,7 +88,7 @@ export function radioOf(hour: () => number) {
     const h = hour();
     const beat = 60 / d.bpm!(h);
     while (next < c.currentTime + 0.15) {
-      const swing = step % 4 === 2 ? beat * 0.08 : 0;
+      const swing = step % 4 === 2 ? beat * (d.swing ?? 0.08) : 0;
       d.play(kit, next + swing, step, beat, h);
       next += beat / 4;
       step++;
