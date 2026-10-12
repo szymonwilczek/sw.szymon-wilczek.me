@@ -16,7 +16,8 @@ const THINGS = [
   { key: "lamp", box: pct(688, 470, 50, 90), label: "The paper lamp" },
   { key: "geta", box: pct(924, 584, 62, 30), label: "The geta, down into the garden" },
 ];
-const DIAL = pct(990, 110, 80, 90);
+const DIAL = pct(990, 110, 80, 80);
+const SEASON = pct(1010, 192, 40, 30);
 ---
 
 <BaseLayout
@@ -52,16 +53,24 @@ const DIAL = pct(990, 110, 80, 90);
       type="button"
       class="dial"
       style={DIAL}
-      aria-label="The enso: the hour and the season"
+      aria-label="The enso: drag round for another hour, tap for now"
+    ></button>
+    <button
+      type="button"
+      class="season"
+      style={SEASON}
+      aria-label="The season: tap for the next"
     ></button>
   </figure>
 </BaseLayout>
 
 <script>
   import { sceneOf } from "../scripts/engawa/scene";
+  import { dialOf } from "../scripts/engawa/dial";
 
   const fig = document.querySelector<HTMLElement>(".engawa")!;
-  sceneOf(fig.querySelector("svg")!);
+  const scene = sceneOf(fig.querySelector("svg")!);
+  dialOf(fig, scene);
 </script>
 
 <style>
@@ -101,7 +110,8 @@ const DIAL = pct(990, 110, 80, 90);
   }
 
   .thing,
-  .dial {
+  .dial,
+  .season {
     position: absolute;
     padding: 0;
     border: 0;
@@ -110,13 +120,21 @@ const DIAL = pct(990, 110, 80, 90);
     cursor: pointer;
   }
 
+  .dial {
+    border-radius: 50%;
+    touch-action: none;
+    cursor: grab;
+  }
+
   .thing:hover,
-  .dial:hover {
+  .dial:hover,
+  .season:hover {
     background: color-mix(in oklab, var(--cursor), transparent 85%);
   }
 
   .thing:focus-visible,
-  .dial:focus-visible {
+  .dial:focus-visible,
+  .season:focus-visible {
     outline: 2px dashed var(--red);
     outline-offset: 2px;
   }
