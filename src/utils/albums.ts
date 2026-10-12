@@ -25,7 +25,6 @@ export interface PhotoItem {
   shutterSpeed?: string;
   iso?: string;
   note?: string;
-  mark?: "circled" | "crossed";
   gps?: {
     latitude: number;
     longitude: number;
@@ -125,8 +124,6 @@ export async function getAllAlbums(): Promise<PhotoAlbum[]> {
       terrain?: string[];
       cover?: string;
       photos?: Record<string, string>;
-      circled?: string[];
-      crossed?: string[];
     } = {};
     const metaFile = path.join(albumPath, "album.json");
     if (fs.existsSync(metaFile)) {
@@ -321,12 +318,6 @@ export async function getAllAlbums(): Promise<PhotoAlbum[]> {
 
       const photoId = path.parse(file).name;
       const note = photoNotes[photoId] || photoNotes[file];
-      const marked = (list?: string[]) => list?.some((name) => name === photoId || name === file);
-      const mark = marked(albumMetadata.circled)
-        ? ("circled" as const)
-        : marked(albumMetadata.crossed)
-          ? ("crossed" as const)
-          : undefined;
       const thumbFsPath = path.join(albumPath, "thumbs", `${photoId}.webp`);
       const thumbSrc = fs.existsSync(thumbFsPath)
         ? `/images/${folderName}/thumbs/${photoId}.webp`
@@ -355,7 +346,6 @@ export async function getAllAlbums(): Promise<PhotoAlbum[]> {
         shutterSpeed,
         iso,
         note,
-        mark,
         gps,
       });
     }

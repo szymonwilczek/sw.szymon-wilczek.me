@@ -211,7 +211,7 @@ const RADII = ["3px 7px 4px 8px", "6px 3px 7px 4px", "4px 6px 3px 7px", "7px 4px
       <div class="strip" style={`--tilt: ${s % 2 ? -0.5 : 0.3}deg`}>
         <ol>
           {strip.map(({ photo, i }) => (
-            <li class:list={["cell", photo.mark && `is-${photo.mark}`]}>
+            <li class="cell">
               <a
                 href={`#${photo.id}`}
                 data-frame={i}
@@ -226,40 +226,11 @@ const RADII = ["3px 7px 4px 8px", "6px 3px 7px 4px", "4px 6px 3px 7px", "7px 4px
                 {"  "}
                 {edge}
               </span>
-              {photo.mark === "circled" && (
-                <svg
-                  class="pencil circle"
-                  viewBox="0 0 100 100"
-                  preserveAspectRatio="none"
-                  aria-hidden="true"
-                >
-                  <path
-                    d="M12 8 C 40 1, 80 3, 94 14 C 101 38, 99 70, 90 92 C 62 99, 26 98, 8 90 C 1 64, 2 32, 14 5 L 20 2"
-                    vector-effect="non-scaling-stroke"
-                  />
-                </svg>
-              )}
-              {photo.mark === "crossed" && (
-                <svg
-                  class="pencil cross"
-                  viewBox="0 0 100 100"
-                  preserveAspectRatio="none"
-                  aria-hidden="true"
-                >
-                  <path
-                    d="M14 16 C 40 42, 62 62, 88 86 M 86 14 C 62 40, 40 62, 12 88"
-                    vector-effect="non-scaling-stroke"
-                  />
-                </svg>
-              )}
             </li>
           ))}
         </ol>
       </div>
     ))}
-    <p class="sheet-note hand">
-      circled in grease pencil: the frames that made the story. crossed out: kept anyway.
-    </p>
   </section>
   <div class="loupe" aria-hidden="true">
     <span class="loupe-lens"></span>
@@ -1072,10 +1043,6 @@ const RADII = ["3px 7px 4px 8px", "6px 3px 7px 4px", "4px 6px 3px 7px", "7px 4px
     object-fit: cover;
   }
 
-  .cell.is-crossed img {
-    filter: saturate(0.5) brightness(0.8);
-  }
-
   .edge {
     position: absolute;
     left: 4px;
@@ -1085,40 +1052,6 @@ const RADII = ["3px 7px 4px 8px", "6px 3px 7px 4px", "4px 6px 3px 7px", "7px 4px
     letter-spacing: 0.08em;
     white-space: pre;
     color: #c8913a;
-  }
-
-  .pencil {
-    position: absolute;
-    overflow: visible;
-    pointer-events: none;
-  }
-
-  .pencil path {
-    fill: none;
-    stroke: var(--red);
-    stroke-width: 3;
-    stroke-linecap: round;
-  }
-
-  .circle {
-    inset: -10px;
-    width: calc(100% + 20px);
-    height: calc(100% + 20px);
-  }
-
-  .cross {
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    opacity: 0.85;
-  }
-
-  .sheet-note {
-    max-width: 32.5rem;
-    margin: 0.75rem 0 0;
-    font-weight: 300;
-    font-size: 1.1875rem;
-    color: var(--fg-dim);
   }
 
   .loupe {
