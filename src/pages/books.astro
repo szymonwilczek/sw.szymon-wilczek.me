@@ -849,6 +849,15 @@ const BOOK_FONTS = [
     transform: translateY(-6px) rotate(var(--rot));
   }
 
+  .bk[aria-pressed="true"],
+  .bk:focus-visible {
+    z-index: 1;
+  }
+
+  .bk:hover {
+    z-index: 2;
+  }
+
   .bk[aria-pressed="true"] .wash,
   .bk:focus-visible .wash {
     opacity: 0.95;
