@@ -2,6 +2,7 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Divider from "../components/Divider.astro";
 import { shelf } from "../utils/dogu";
+import { DOTFILES } from "../data/uses";
 
 const { groups, storehouse, count } = shelf();
 ---
@@ -136,6 +137,16 @@ const { groups, storehouse, count } = shelf();
                 </span>
               </button>
               <p class="why-plain">{t.why}</p>
+              {t.dots && (
+                <a
+                  class="dots"
+                  href={DOTFILES + t.dots}
+                  title={t.dots}
+                  aria-label={`${t.name} in my dotfiles`}
+                >
+                  my dotfiles
+                </a>
+              )}
             </li>
           ))}
         </ul>
@@ -334,6 +345,7 @@ const { groups, storehouse, count } = shelf();
   }
 
   .cards li {
+    position: relative;
     transform: rotate(var(--rot));
   }
 
@@ -353,7 +365,7 @@ const { groups, storehouse, count } = shelf();
       filter 0.45s ease;
   }
 
-  .card:hover,
+  .cards li:hover .card,
   .card:focus-visible {
     transform: translateY(-6px) rotate(-1deg);
     filter: drop-shadow(0 12px 12px rgb(0 0 0 / 0.2));
@@ -524,6 +536,27 @@ const { groups, storehouse, count } = shelf();
     font-family: var(--font-seal);
     font-size: 0.8125rem;
     color: var(--red);
+  }
+
+  .dots {
+    position: absolute;
+    left: 11%;
+    bottom: 9%;
+    visibility: hidden;
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    color: var(--fg-link);
+    transition: transform 0.45s cubic-bezier(0.2, 0.7, 0.3, 1);
+  }
+
+  li:has(.card[aria-pressed="true"]) .dots {
+    visibility: visible;
+    animation: turn 0.45s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+  }
+
+  .cards li:hover .dots,
+  li:has(.card:focus-visible) .dots {
+    transform: translateY(-6px) rotate(-1deg);
   }
 
   .why-plain {

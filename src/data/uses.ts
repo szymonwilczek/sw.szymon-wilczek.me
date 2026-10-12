@@ -7,6 +7,7 @@ export interface Tool {
   graphic: GraphicName;
   group: Group;
   why: string;
+  dots?: string;
 }
 
 export const GROUPS: { name: Group; kanji: string }[] = [
@@ -16,45 +17,54 @@ export const GROUPS: { name: Group; kanji: string }[] = [
   { name: "off the screen", kanji: "外" },
 ];
 
+export const DOTFILES = "https://github.com/szymonwilczek/dotfiles/tree/main/";
+
 export const TOOLS: Tool[] = [
   {
     name: "Emacs",
+    dots: "emacs/.config/emacs",
     graphic: "kettle",
     group: "the editors",
-    why: "Where I think, plan, write and set LaTeX. Built from scratch, one module at a time, after Doom stopped bending.",
+    why: "Where nearly everything happens: code, plans, writing, LaTeX. Built from scratch, one module at a time, after Doom stopped bending.",
   },
   {
     name: "Neovim",
+    dots: "nvim/.config/nvim",
     graphic: "ironpot",
     group: "the editors",
-    why: "For tearing through a Go codebase, debugging C or patching a server over SSH. Nothing opens faster.",
+    why: "Only for one file at a time: a quick fix from the shell, the note tmux-jot pops up. It is open before I finish typing.",
   },
   {
     name: "Evil",
+    dots: "emacs/.config/emacs/modules/evil",
     graphic: "brush",
     group: "the editors",
     why: "Vim keys inside Emacs, so my hands never have to learn which editor they are in.",
   },
   {
     name: "Magit",
+    dots: "emacs/.config/emacs/modules/git",
     graphic: "seal",
     group: "the editors",
     why: "git as a page I can read and edit: stage a hunk, reword a commit, rebase, without a single flag.",
   },
   {
     name: "Vertico & Consult",
+    dots: "emacs/.config/emacs/modules/completion",
     graphic: "abacus",
     group: "the editors",
     why: "Type a few letters in any order and the list narrows to the one thing I meant: files, buffers, lines.",
   },
   {
     name: "Eglot",
+    dots: "emacs/.config/emacs/modules/lsp",
     graphic: "lantern",
     group: "the editors",
     why: "The language server, built into Emacs. Definitions, errors and renames, with nothing to set up.",
   },
   {
     name: "jot",
+    dots: "emacs/.config/emacs/modules/jot",
     graphic: "fan",
     group: "the editors",
     why: "My own, twice over: tmux-jot pops a note over the terminal, jot.el the same over Emacs. One drawer of notes, the layout left as it was.",
@@ -67,30 +77,35 @@ export const TOOLS: Tool[] = [
   },
   {
     name: "Sway",
+    dots: "sway/.config/sway",
     graphic: "boxes",
     group: "the machine",
     why: "Tiling on Wayland: every window gets its own place, no window over another, all from the keyboard.",
   },
   {
     name: "Ghostty",
+    dots: "ghostty/.config/ghostty",
     graphic: "ladle",
     group: "the machine",
-    why: "The terminal. Fast, native, and beautiful out of the box; most of the day I see nothing else.",
+    why: "The terminal. Fast, native, and beautiful out of the box.",
   },
   {
     name: "tmux",
+    dots: "tmux",
     graphic: "caddy",
     group: "the machine",
     why: "Sessions that outlive the terminal: close the window, come back, everything is where I left it.",
   },
   {
     name: "Zathura",
+    dots: "zathura/.config/zathura",
     graphic: "scroll",
     group: "the machine",
     why: "PDFs with vim keys and nothing else on the screen. Papers, datasheets, my own LaTeX.",
   },
   {
     name: "Ansible",
+    dots: "ansible",
     graphic: "umbrella",
     group: "the machine",
     why: "One playbook installs the whole system: packages, repos, Flatpaks. A fresh Fedora comes up as mine.",
