@@ -1,0 +1,149 @@
+---
+// Veranda of an old house, looking out at a small garden
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Divider from "../components/Divider.astro";
+import { sceneEngawa, toSvg, tones2, TONE_CSS } from "../utils/tea/ink.js";
+
+const first = sceneEngawa(tones2(), 17.6, false, "aki", { unlit: true, burnt: 0 });
+const pct = (x: number, y: number, w: number, h: number) =>
+  `left:${(x / 1100) * 100}%;top:${(y / 640) * 100}%;width:${(w / 1100) * 100}%;height:${(h / 640) * 100}%`;
+const THINGS = [
+  { key: "record", box: pct(492, 498, 120, 92), label: "The record player" },
+  { key: "incense", box: pct(398, 506, 54, 80), label: "The incense burner" },
+  { key: "tree", box: pct(880, 160, 210, 250), label: "The tree in the garden" },
+  { key: "sky", box: pct(788, 380, 64, 92), label: "The stone lantern" },
+  { key: "tea", box: pct(338, 562, 50, 44), label: "The tea cup" },
+  { key: "lamp", box: pct(688, 470, 50, 90), label: "The paper lamp" },
+  { key: "geta", box: pct(924, 584, 62, 30), label: "The geta, down into the garden" },
+];
+const DIAL = pct(990, 110, 80, 90);
+---
+
+<BaseLayout
+  title="Engawa"
+  description="A veranda in ink, lit for your own hour and season: incense to work by, a record player, and a quiet radio."
+>
+  <header class="engawa-head">
+    <div>
+      <h1>The veranda</h1>
+      <p class="lede">
+        The edge of an old house, open to a small garden. It keeps your hour and your season. Sit a
+        while: light the incense to work by it, see what is on the record player, or let the whole
+        thing play on the side.
+      </p>
+    </div>
+  </header>
+
+  <Divider from={480} to={700} />
+
+  <p class="hint hand">touch the things on the boards. the enso turns the hour.</p>
+
+  <figure class="engawa" style={TONE_CSS}>
+    <svg
+      viewBox={`0 0 ${first.W} ${first.H}`}
+      role="img"
+      aria-label="An ink drawing of a veranda: wooden boards under a deep eave, a reed blind, a record player, a teacup and an incense burner on the boards, and beyond them a garden with a stone lantern, stepping stones and a tree."
+      set:html={toSvg(first, true)}
+    />
+    {THINGS.map((t) => (
+      <button type="button" class="thing" data-card={t.key} style={t.box} aria-label={t.label} />
+    ))}
+    <button
+      type="button"
+      class="dial"
+      style={DIAL}
+      aria-label="The enso: the hour and the season"
+    ></button>
+  </figure>
+</BaseLayout>
+
+<script>
+  import { sceneOf } from "../scripts/engawa/scene";
+
+  const fig = document.querySelector<HTMLElement>(".engawa")!;
+  sceneOf(fig.querySelector("svg")!);
+</script>
+
+<style>
+  .engawa-head {
+    margin-top: 1.5rem;
+  }
+
+  .engawa-head > div {
+    max-width: 40rem;
+  }
+
+  .engawa-head h1 {
+    margin: 0;
+  }
+
+  .lede {
+    margin: 1.25rem 0 0;
+    color: var(--fg-dim);
+  }
+
+  .hint {
+    margin: 1rem 0 0 0.375rem;
+    font-size: 1.0625rem;
+    transform: rotate(-0.6deg);
+  }
+
+  .engawa {
+    position: relative;
+    margin: 1.5rem 0 0;
+  }
+
+  .engawa svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    user-select: none;
+  }
+
+  .thing,
+  .dial {
+    position: absolute;
+    padding: 0;
+    border: 0;
+    border-radius: 40%;
+    background: none;
+    cursor: pointer;
+  }
+
+  .thing:hover,
+  .dial:hover {
+    background: color-mix(in oklab, var(--cursor), transparent 85%);
+  }
+
+  .thing:focus-visible,
+  .dial:focus-visible {
+    outline: 2px dashed var(--red);
+    outline-offset: 2px;
+  }
+
+  @keyframes sway {
+    0%,
+    100% {
+      transform: rotate(-0.8deg);
+    }
+    50% {
+      transform: rotate(0.9deg);
+    }
+  }
+
+  @keyframes drift {
+    0%,
+    100% {
+      transform: skewX(0deg) translateX(0);
+    }
+    50% {
+      transform: skewX(-4deg) translateX(5px);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .engawa :global(g[style*="animation"]) {
+      animation: none !important;
+    }
+  }
+</style>
