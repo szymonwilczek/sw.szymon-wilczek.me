@@ -1,7 +1,8 @@
 // Keyboard focus is circled in pencil: a loop that never quite closes,
 // drawn only for :focus-visible, so mouse users never see it.
 
-const SKIP = "input, textarea, select, .ink-button, .nav-link, .picker-row, .minibuffer *";
+const SKIP =
+  "input, textarea, select, .ink-button, .nav-link, .picker-row, .minibuffer *, [tabindex='-1']";
 const NS = "http://www.w3.org/2000/svg";
 
 let loop: SVGSVGElement | null = null;
