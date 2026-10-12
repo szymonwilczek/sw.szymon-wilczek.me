@@ -10,6 +10,7 @@ const STONE = { left: (640 / 1100) * 100, top: (504 / 690) * 100 };
 const pct = (x: number, y: number, w: number, h: number) =>
   `left:${(x / 1100) * 100}%;top:${(y / 690) * 100}%;width:${(w / 1100) * 100}%;height:${(h / 690) * 100}%`;
 const DOOR = pct(474, 280, 390, 178);
+const SHUT = `left:${(670 / 1100) * 100}%;top:${(330 / 690) * 100}%`;
 const MACHIAI = pct(22, 450, 292, 221);
 const garden = sceneGarden16(tones2(), "start", {
   shelf: (i: number) => (shelf[i] ? turned(shelf[i]) : null),
@@ -61,7 +62,18 @@ const garden = sceneGarden16(tones2(), "start", {
       </span>
       <output aria-live="polite"></output>
     </form>
-    <button type="button" class="door" style={DOOR} aria-label="Into the workshop"></button>
+    <button
+      type="button"
+      class="door"
+      style={DOOR}
+      aria-label="The workshop door"
+      aria-expanded="false"
+      aria-controls="roji-shut"
+    ></button>
+    <p id="roji-shut" class="shut hand" style={SHUT} hidden>
+      the door is shut, and a stone sits on the path. somebody left its key in a book on the{" "}
+      <a href="/books/">bookshelf</a>.
+    </p>
     <button
       type="button"
       class="door machiai"
@@ -142,6 +154,7 @@ const garden = sceneGarden16(tones2(), "start", {
     });
     svg.innerHTML = toSvg(garden, true);
     fig.classList.add("open");
+    fig.querySelector(".door:not(.machiai)")?.setAttribute("aria-label", "Into the workshop");
   }
 
   stone.addEventListener("click", () => {
@@ -191,7 +204,14 @@ const garden = sceneGarden16(tones2(), "start", {
     });
     kobo.querySelector<HTMLElement>(".kobo-title")?.scrollIntoView({ block: "nearest" });
   }
+  const shut = fig.querySelector<HTMLElement>(".shut")!;
   door.addEventListener("click", () => {
+    if (!fig.classList.contains("open")) {
+      shut.hidden = !shut.hidden;
+      door.setAttribute("aria-expanded", String(!shut.hidden));
+      return;
+    }
+    door.removeAttribute("aria-expanded");
     const code = import("../scripts/kobo/index");
     inside(door, "61% 53%", async (leave) => (await code).enter(kobo, leave));
   });
@@ -390,15 +410,39 @@ const garden = sceneGarden16(tones2(), "start", {
 
   .door {
     position: absolute;
-    display: none;
+    display: block;
     border: 0;
     background: none;
-    cursor: zoom-in;
+    cursor: pointer;
   }
 
   .open .door,
   .door.machiai {
-    display: block;
+    cursor: zoom-in;
+  }
+
+  .shut {
+    position: absolute;
+    translate: -50% 0;
+    width: min(17rem, 75vw);
+    margin: 0;
+    padding: 0.6rem 0.9rem;
+    background: var(--bg-main);
+    border: 1px solid color-mix(in oklab, var(--fg-main), transparent 80%);
+    border-radius: 3px;
+    font-size: 1.0625rem;
+    line-height: 1.35;
+    rotate: 0.6deg;
+    pointer-events: none;
+  }
+
+  .shut a {
+    pointer-events: auto;
+  }
+
+  .open .shut,
+  .inside .shut {
+    display: none;
   }
 
   .door:focus-visible {
