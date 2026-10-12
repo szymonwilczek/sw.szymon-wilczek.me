@@ -9,6 +9,7 @@ const W = 540,
 export interface Fill {
   make: (body: HTMLElement, view: View) => void;
   update?: (view: View) => void;
+  leave?: () => void;
 }
 
 export function cardsOf(
@@ -43,6 +44,7 @@ export function cardsOf(
 
   function show(key: string, button: HTMLElement) {
     if (open === key) return hide();
+    if (open !== null) fills.get(open)?.leave?.();
     open = key;
     from = button;
     card.dataset.key = key;
@@ -59,6 +61,7 @@ export function cardsOf(
 
   function hide() {
     if (open === null) return;
+    fills.get(open)?.leave?.();
     open = null;
     layer.hidden = true;
     from?.focus({ preventScroll: true });
