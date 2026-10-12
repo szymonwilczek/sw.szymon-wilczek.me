@@ -38,6 +38,7 @@ export function cardsOf(
       season: v.season,
       burnt: v.incense?.burnt ?? 0,
       lit: v.incense?.lit ?? false,
+      disc: v.disc,
     });
     svg.innerHTML = toSvg(shell, true);
   }

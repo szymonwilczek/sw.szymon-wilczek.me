@@ -630,7 +630,7 @@ export const DISCS: Disc[] = [
     jp: "譜",
     title: "Background Jazz Piano",
     by: "Mike Sheldon",
-    about: () => "piano, a double bass and brushes, from a record",
+    about: () => "jazz piano, from a real recording",
     src: "/audio/background-jazz-piano.mp3",
     credit: {
       licence: "CC BY 4.0",

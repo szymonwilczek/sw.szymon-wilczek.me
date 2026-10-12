@@ -3,6 +3,7 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Divider from "../components/Divider.astro";
 import { sceneEngawa, toSvg, tones2, TONE_CSS } from "../utils/tea/ink.js";
+import { DISCS } from "../scripts/engawa/discs";
 
 const first = sceneEngawa(tones2(), 17.6, false, "aki", { unlit: true, burnt: 0 });
 const pct = (x: number, y: number, w: number, h: number) =>
@@ -15,6 +16,14 @@ const THINGS = [
   { key: "tea", box: pct(338, 562, 50, 44), label: "The tea cup" },
   { key: "lamp", box: pct(688, 470, 50, 90), label: "The paper lamp" },
   { key: "geta", box: pct(924, 584, 62, 30), label: "The geta, down into the garden" },
+];
+const CRATE = [
+  ...DISCS.map((d, k) => ({
+    disc: String(k),
+    box: pct(28 + k * 5, 548 - k * 13, 80, k ? 13 : 18),
+    label: `The record crate: ${d.title}`,
+  })).reverse(),
+  { disc: undefined, box: pct(18, 566, 112, 64), label: "The record crate" },
 ];
 const DIAL = pct(1010, 58, 80, 80);
 const SEASON = pct(1030, 140, 40, 30);
@@ -48,6 +57,16 @@ const SEASON = pct(1030, 140, 40, 30);
     />
     {THINGS.map((t) => (
       <button type="button" class="thing" data-card={t.key} style={t.box} aria-label={t.label} />
+    ))}
+    {CRATE.map((c) => (
+      <button
+        type="button"
+        class:list={["thing", { strip: c.disc }]}
+        data-card="crate"
+        data-disc={c.disc}
+        style={c.box}
+        aria-label={c.label}
+      />
     ))}
     <button
       type="button"
@@ -90,6 +109,7 @@ const SEASON = pct(1030, 140, 40, 30);
   import { incenseOf } from "../scripts/engawa/incense";
   import { recordOf } from "../scripts/engawa/record";
   import { radioOf } from "../scripts/engawa/radio";
+  import { crateOf } from "../scripts/engawa/crate";
   import { gardenOf } from "../scripts/engawa/garden";
   import { broadcastOf } from "../scripts/engawa/broadcast";
   import { hourLight, tones2 } from "../utils/tea/ink.js";
@@ -105,7 +125,16 @@ const SEASON = pct(1030, 140, 40, 30);
   const incense = incenseOf(scene);
   cards.fill("incense", incense.fill);
   const radio = radioOf(() => scene.view.hour);
-  cards.fill("record", recordOf(radio));
+  const crate = crateOf(fig, scene, radio, cards.hide);
+  cards.fill("crate", crate.fill);
+  const crateFront = fig.querySelector<HTMLElement>('.thing[data-card="crate"]:not([data-disc])')!;
+  cards.fill(
+    "record",
+    recordOf(radio, () => {
+      crate.choose(null);
+      cards.show("crate", crateFront);
+    }),
+  );
   gardenOf(radio, scene.view, () => incense.burning);
   broadcastOf(fig, scene, radio, incense);
 
@@ -131,6 +160,10 @@ const SEASON = pct(1030, 140, 40, 30);
           (hourLight(tones2(), scene.view.hour, scene.view.season).lamp > 0.5 ? 1 : 0);
         scene.view.lamp = lit ? 0 : 1;
         scene.draw();
+      } else if (key === "crate") {
+        // another sleeve touched with the card open only turns to it
+        crate.choose(b.dataset.disc ? Number(b.dataset.disc) : null);
+        if (cards.open !== "crate" || !b.dataset.disc) cards.show(key, b);
       } else cards.show(key, b);
     }),
   );
@@ -201,6 +234,10 @@ const SEASON = pct(1030, 140, 40, 30);
     position: absolute;
     inset-inline: min(0px, calc((100% - 32px) / 2));
     inset-block: min(0px, calc((100% - 32px) / 2));
+  }
+
+  .thing.strip::before {
+    inset: 0;
   }
 
   .dial {
@@ -656,6 +693,53 @@ const SEASON = pct(1030, 140, 40, 30);
 
   .engawa :global(.rec-radio) {
     margin-top: 0.8em;
+  }
+
+  .engawa :global(.crate-list) {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .engawa :global(.crate-list li) {
+    margin: 0 0 0.25em;
+  }
+
+  .engawa :global(.crate-list li.picked) {
+    margin: 0.2em 0 0.6em;
+  }
+
+  .engawa :global(.crate-list li.picked p) {
+    margin: 0.15em 0 0 1.6em;
+  }
+
+  .engawa :global(.crate-list .card-knob) {
+    margin-left: 1.6em;
+  }
+
+  .engawa :global(.card-link) {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
+  .engawa :global(.crate-name) {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: start;
+    cursor: pointer;
+  }
+
+  .engawa :global(.picked .crate-name) {
+    text-decoration: underline 1.5px var(--red);
+    text-underline-offset: 0.25em;
   }
 
   .engawa :global(.card-knob) {

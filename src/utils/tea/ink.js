@@ -3613,7 +3613,15 @@ const inCrate = (k) => {
     [x + 2, y + 62],
   ];
 };
-function crate(groups, r, K, disc) {
+
+function crateSleeve(K, k) {
+  const g = G();
+  const r = rng(hash("terrace/engawa/crate/" + k));
+  sleeve(g, r, inCrate(k), K, k);
+  const [[x, y]] = inCrate(k);
+  return { W: 1100, H: 640, groups: [g], clips: [], from: [x + 40, y + 30] };
+}
+function crate(groups, r, K, disc, lifted) {
   const back = G(),
     x0 = 18,
     x1 = 118,
@@ -3639,7 +3647,7 @@ function crate(groups, r, K, disc) {
     1.1,
   );
   for (let k = DISC_LOOK.length - 1; k >= 0; k--) {
-    const g = G({ op: k === disc ? 0.18 : 1 });
+    const g = G({ op: k === disc || k === lifted ? 0.18 : 1 });
     groups.push(g);
     sleeve(g, r, inCrate(k), K, k);
   }
@@ -4448,24 +4456,26 @@ function sceneEngawa(K, hour, mini, sk, o = {}) {
       "url(#bk-bleed)",
     );
   }
-  sleeve(
-    ob,
-    ro,
-    [
-      [400, 600],
-      [462, 592],
-      [470, 630],
-      [404, 638],
-    ],
-    K,
-    o.disc ?? 0,
-  );
+
+  if (o.lifted == null)
+    sleeve(
+      ob,
+      ro,
+      [
+        [400, 600],
+        [462, 592],
+        [470, 630],
+        [404, 638],
+      ],
+      K,
+      o.disc ?? 0,
+    );
   teaCup(groups, ob, ro, 360, 586, K, mini);
   koro(groups, ob, ro, 424, 566, K, mini, o.burnt, o.unlit);
   recordPlayer(ob, ro, 548, 548, 1, K, L, o.disc ?? 0);
-  crate(groups, R("crate"), K, o.disc ?? 0);
+  crate(groups, R("crate"), K, o.disc ?? 0, o.lifted);
   andon(ob, lights, ro, 712, 528, K, o.lamp ?? L.lamp);
-  // what the season puts in the air, and what has come down on the boards
+
   if (Z.fall) {
     const air = G(),
       ra = R("air/" + Z.s);
@@ -4773,6 +4783,41 @@ const CARD = {
     60,
     1,
   ],
+  crate: [
+    "音盤",
+    "the record crate",
+    "箱",
+    (gs, g, K, o) => {
+      const r = rng(hash("vig/crate"));
+      Wa(g, r, wring(r, 0, 74, 170, 14, 1, 12), K.pool, 0.7, "url(#bk-pool)");
+      DISC_LOOK.forEach((_, k) => {
+        const a = ((k - 2) * 9 * Math.PI) / 180,
+          up = k === (o.disc ?? 0) ? 16 : 0,
+          cx = (k - 2) * 46,
+          at = ([u, v]) => [
+            cx + u * Math.cos(a) - v * Math.sin(a),
+            70 - up + u * Math.sin(a) + v * Math.cos(a),
+          ],
+          q = G();
+        gs.push(q);
+        sleeve(
+          q,
+          r,
+          [
+            [-36, -96],
+            [36, -98],
+            [37, -24],
+            [-35, -22],
+          ].map(at),
+          K,
+          k,
+        );
+      });
+    },
+    222,
+    214,
+    1.15,
+  ],
   sky: [
     "灯籠",
     "today's sky",
@@ -4918,6 +4963,7 @@ export {
   quadMap,
   slab,
   sleeve,
+  crateSleeve,
   teaCup,
   steam,
   koro,

@@ -9,6 +9,7 @@ export interface View {
   incense: { burnt: number; lit: boolean } | null;
   lamp: number | null;
   disc: number;
+  lifted: number | null;
 }
 
 function split(markup: string) {
@@ -105,6 +106,7 @@ export function sceneOf(svg: SVGSVGElement) {
     incense: null,
     lamp: null,
     disc: Number(localStorage.getItem("engawa:disc")) || 0,
+    lifted: null,
   };
   const listeners: ((v: View) => void)[] = [];
   const patch = layered(svg);
@@ -121,6 +123,7 @@ export function sceneOf(svg: SVGSVGElement) {
       unlit: !inc?.lit,
       lamp: view.lamp ?? undefined,
       disc: view.disc,
+      lifted: view.lifted ?? undefined,
     });
     patch(toSvg(out, true));
     listeners.forEach((f) => f(view));
