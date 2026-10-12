@@ -14,6 +14,7 @@ export interface Disc {
   play?: (k: Kit, t: number, step: number, beat: number, hour: number) => void;
   top?: number;
   wow?: number;
+  crackle?: number;
   level?: number;
   src?: string;
   credit?: { licence: string; licenceUrl: string; url: string };
@@ -145,10 +146,8 @@ function hiss(
   src.start(t, Math.random() * 1.5);
   src.stop(t + len + 0.02);
 }
-const brush = (k: Kit, t: number, vel: number, swish: boolean) =>
-  swish
-    ? hiss(k, t, "bandpass", 1800, 0.8, 0.09 * vel, 0.06, 0.28)
-    : hiss(k, t, "highpass", 7000, 0.5, 0.035 * vel, 0.004, 0.05);
+const brush = (k: Kit, t: number, vel: number) =>
+  hiss(k, t, "bandpass", 1800, 0.8, 0.09 * vel, 0.06, 0.28);
 
 function knock(k: Kit, t: number, f: number, vel: number) {
   const c = k.ctx;
@@ -269,8 +268,7 @@ function dusk(k: Kit, t: number, s: number, beat: number, hour: number) {
   if (pos === 14 && Math.random() < 0.4)
     upright(k, t, root - 12 + 7 + (Math.random() < 0.5 ? 1 : -1), beat * 0.4);
   if (pos === 0 || (pos === 10 && Math.random() < 0.5)) kick(k, t, hum());
-  if (pos === 4 || pos === 12) brush(k, t, hum(), true);
-  if (pos % 2 === 0) brush(k, t, hum() * (pos % 4 === 0 ? 1 : 0.6), false);
+  if (pos === 4 || pos === 12) brush(k, t, hum());
 }
 
 const RAIN: Turn[] = [
@@ -594,6 +592,7 @@ export const DISCS: Disc[] = [
     about: (h) => `slow jazz in ${NAMES[duskKey(h)]}, ${duskBpm(h)} a minute`,
     bpm: duskBpm,
     play: dusk,
+    crackle: 0.12,
   },
   {
     jp: "雨",
@@ -625,6 +624,7 @@ export const DISCS: Disc[] = [
     top: 6000,
     wow: 0.0009,
     level: 1.1,
+    crackle: 0.2,
   },
   {
     jp: "譜",

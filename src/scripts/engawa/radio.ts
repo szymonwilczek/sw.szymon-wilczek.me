@@ -58,15 +58,15 @@ export function radioOf(hour: () => number) {
 
   function scratch() {
     const c = ctx!;
-    const len = c.sampleRate * 4;
+    const len = c.sampleRate * 6;
     const buf = c.createBuffer(1, len, c.sampleRate);
     const d = buf.getChannelData(0);
     for (let i = 0; i < len; i++) {
-      d[i] = (Math.random() * 2 - 1) * 0.012;
-      if (Math.random() < 0.00012) {
-        const amp = 0.2 + Math.random() * 0.5;
-        for (let k = 0; k < 40 && i + k < len; k++)
-          d[i + k] += amp * (Math.random() * 2 - 1) * Math.exp(-k / 6);
+      d[i] = (Math.random() * 2 - 1) * 0.008;
+      if (Math.random() < 0.00002) {
+        const amp = 0.06 + Math.random() * 0.12;
+        for (let k = 0; k < 30 && i + k < len; k++)
+          d[i + k] += amp * (Math.random() * 2 - 1) * Math.exp(-k / 5);
       }
     }
     const src = c.createBufferSource();
@@ -74,7 +74,7 @@ export function radioOf(hour: () => number) {
     src.loop = true;
     const bp = c.createBiquadFilter();
     bp.type = "bandpass";
-    bp.frequency.value = 3200;
+    bp.frequency.value = 2400;
     bp.Q.value = 0.5;
     src.connect(bp).connect(surface);
     src.start();
@@ -101,7 +101,7 @@ export function radioOf(hour: () => number) {
     level.gain.value = d.level ?? 1;
     lp.frequency.setTargetAtTime(d.src ? 12000 : (d.top ?? 2600), c.currentTime, 0.05);
     depth.gain.setTargetAtTime(d.src ? 0 : (d.wow ?? 0.0018), c.currentTime, 0.05);
-    surface.gain.setTargetAtTime(d.src ? 0 : 0.5, c.currentTime, 0.05);
+    surface.gain.setTargetAtTime(d.src ? 0 : (d.crackle ?? 0.4), c.currentTime, 0.05);
     clearInterval(timer);
     tape?.pause();
     if (d.src) {
