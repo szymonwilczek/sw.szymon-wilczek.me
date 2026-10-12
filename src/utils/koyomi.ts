@@ -207,12 +207,6 @@ export function moonOf(date: Date): Moon {
   return { age, lit, waxing, words };
 }
 
-/** Days to the nearest full or new moon */
-export function moonEventIn(moon: Moon): number {
-  const half = SYNODIC / 2;
-  return Math.min(moon.age, Math.abs(moon.age - half), SYNODIC - moon.age);
-}
-
 /** lit part of a moon of radius r at (cx, cy) */
 export function moonPath(moon: Moon, cx: number, cy: number, r: number): string {
   const rx = Math.abs(2 * moon.lit - 1) * r;
@@ -223,66 +217,6 @@ export function moonPath(moon: Moon, cx: number, cy: number, r: number): string 
     `M${f(cx)} ${f(cy - r)} A${f(r)} ${f(r)} 0 0 ${outer} ${f(cx)} ${f(cy + r)} ` +
     `A${f(rx)} ${f(r)} 0 0 ${inner} ${f(cx)} ${f(cy - r)} Z`
   );
-}
-
-export type Card = "moon" | "season" | "window" | "ink";
-export const CARDS: Card[] = ["moon", "season", "window", "ink"];
-
-// same date, same number: tie-breaker rotates without flickering
-function noise(key: string): number {
-  let h = 2166136261;
-  for (const ch of key) {
-    h ^= ch.charCodeAt(0);
-    h = Math.imul(h, 16777619);
-  }
-  return (h >>> 0) / 4294967296;
-}
-
-const TURNS = new Set([10, 28, 46, 64]);
-
-/**
- * How much a card has to say on a day
- */
-function score(card: Card, date: Date, lastInk: number): number {
-  switch (card) {
-    case "moon": {
-      const away = moonEventIn(moonOf(new Date(dayOf(date) + DAY / 2)));
-      return away < 1 ? 5 : away < 2 ? 2.5 : 1;
-    }
-    case "season": {
-      const { ko, day } = koOf(date);
-      if (day === 0) return TURNS.has(ko.n) ? 3 : 4;
-      return day === 1 ? 2 : 1;
-    }
-    case "window": {
-      const { ko, day } = koOf(date);
-      return TURNS.has(ko.n) && day === 0 ? 4.5 : 1;
-    }
-    case "ink": {
-      const age = (dayOf(date) - lastInk) / DAY;
-      return age <= 1 ? 3.5 : age <= 4 ? 1.5 : 0.6;
-    }
-  }
-}
-
-function best(date: Date, lastInk: number, avoid?: Card): Card {
-  const key = new Date(dayOf(date)).toISOString().slice(0, 10);
-  let pick: Card = "season";
-  let top = -Infinity;
-  for (const card of CARDS) {
-    const s = score(card, date, lastInk) + noise(key + card) - (card === avoid ? 2 : 0);
-    if (s > top) {
-      top = s;
-      pick = card;
-    }
-  }
-  return pick;
-}
-
-export function cardFor(date: Date, lastInk: Date): Card {
-  const ink = dayOf(lastInk);
-  const yesterday = best(new Date(date.getTime() - DAY), ink);
-  return best(date, ink, yesterday);
 }
 
 /** Sunrise and sunset for a day at a place, to within a few minutes */

@@ -429,8 +429,3 @@ export async function getAllAlbums(): Promise<PhotoAlbum[]> {
   albumsCache = albums;
   return albums;
 }
-
-export async function getAlbumBySlug(slug: string): Promise<PhotoAlbum | null> {
-  const all = await getAllAlbums();
-  return all.find((a) => a.slug === slug || a.id === slug) || null;
-}
