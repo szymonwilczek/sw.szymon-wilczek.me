@@ -92,6 +92,7 @@ function groupSvg(g, attrs = "") {
     g.to !== "0px 0px" && `transform-origin:${g.to}`,
     g.anim !== "none" && `animation:${g.anim}`,
     g.op !== 1 && `opacity:${g.op}`,
+    g.vars,
   ]
     .filter(Boolean)
     .join(";");
@@ -230,6 +231,7 @@ function G(o) {
       to: "0px 0px",
       op: 1,
       anim: "none",
+      vars: "",
       clip: "",
       washO: 0.58,
       wash: [],
@@ -1055,13 +1057,15 @@ function bambooClump(groups, r, x, y, K, s, cut) {
           sg = right ? 1 : -1,
           piv = right ? k.R[6] : k.L[6],
           j = Math.floor(i / 2);
-        let tf;
+        let tf,
+          vars = "";
         if (cut.phase === "down") {
           const tx = x - sg * (100 - j * 22) * s,
             ty = y + (10 + ((i * 5) % 7) * 7) * s;
-          tf = `translate(${f1(tx - piv[0])}px, ${f1(ty - piv[1])}px) rotate(${f1(sg * (70 + lr() * 34))}deg)`;
+          vars = `--tx:${f1(tx - piv[0])}px;--ty:${f1(ty - piv[1])}px;--r:${f1(sg * (70 + lr() * 34))}deg;--d:${f1(((i * 7) % 4) * 0.05)}s`;
+          tf = "translate(var(--tx), var(--ty)) rotate(var(--r))";
         } else tf = `rotate(${sg * (6 + lr() * 14)}deg)`;
-        const p = G({ tf, to: `${f1(piv[0])}px ${f1(piv[1])}px`, cls: "fall" });
+        const p = G({ tf, vars, to: `${f1(piv[0])}px ${f1(piv[1])}px`, cls: "fall" });
         culmPart(p, r, c, K, tl, 1, tr - tl, 0);
         culmTop(p, r, c, K, s);
         late.push([cut.phase === "down" ? 0 : 1, p]);
