@@ -125,7 +125,7 @@
   {
     "title": "Wavelength",
     "url": "https://github.com/szymonwilczek/wavelength",
-    "excerpt": "Desktop chat in C++ and Qt 5, drawn with OpenGL, live over WebSockets.",
+    "excerpt": "Desktop messenger in C++ and Qt 5: text, voice messages, walkie-talkie.",
     "language": "C++",
     "date": "2023-06-14",
     "archived": true
