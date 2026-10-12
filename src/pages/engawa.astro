@@ -263,13 +263,15 @@ const SEASON = pct(1030, 140, 40, 30);
     }
   }
 
-  @keyframes drift {
+  @keyframes rib {
     0%,
     100% {
-      transform: skewX(0deg) translateX(0);
+      transform: rotate(-4deg) skewX(2deg);
+      opacity: 0.85;
     }
     50% {
-      transform: skewX(-4deg) translateX(5px);
+      transform: rotate(5deg) skewX(-4deg);
+      opacity: 1;
     }
   }
 

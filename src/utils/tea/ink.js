@@ -123,7 +123,7 @@ function groupSvg(g, attrs = "") {
         `<text transform="${t.tr}" font-size="${t.fs}" fill="${t.fill}" opacity="${t.o}" text-anchor="${t.an || "middle"}" dominant-baseline="central" style="font-family:${t.font};writing-mode:${t.wm};letter-spacing:${t.ls}">${esc(t.t)}</text>`,
     )
     .join("");
-  return `<g${attrs}${g.clip ? ` clip-path="${g.clip}"` : ""}${style ? ` style="${style}"` : ""}>${wash ? `<g opacity="${g.washO}">${wash}</g>` : ""}${solid}${line}${text}</g>`;
+  return `<g${attrs}${g.clip ? ` clip-path="${g.clip}"` : ""}${style ? ` style="${style}"` : ""}>${g.defs || ""}${wash ? `<g opacity="${g.washO}">${wash}</g>` : ""}${solid}${line}${text}</g>`;
 }
 
 function toSvg(out, filters = false) {
@@ -3720,25 +3720,32 @@ function koro(groups, g, r, x, y, K, mini, burnt, unlit) {
   if (unlit) return;
   So(g, wring(r, tip[0], tip[1] + 1, 1.6, 1.6, 0, 6), K.red, 1);
   So(g, wring(r, x + 6, y - 13, 3, 1, 0.2, 6), K.stone, 0.8);
-  const sm = G({
-    anim: mini ? "none" : "drift 11s ease-in-out infinite",
-    to: `${f1(tip[0])}px ${f1(tip[1])}px`,
-    washO: 0.4,
+
+  // one ribbon of smoke
+  const [tx, ty] = tip,
+    spine = [];
+  for (let i = 0; i <= 9; i++) spine.push([tx + Math.sin(i * 0.75) * (2 + i * 1.9), ty - i * 15]);
+  const w = (i) => 0.6 + i * 0.55,
+    left = spine.map(([sx, sy], i) => [sx - w(i), sy]),
+    right = spine.map(([sx, sy], i) => [sx + w(i) * 0.6, sy]).reverse(),
+    d = (f) =>
+      `${wline(r, left.map(f), 0.3)} L${wline(r, right.map(f), 0.3).slice(1)} Z`,
+    id = `koro-smoke-${Math.round(tx)}-${Math.round(ty)}`,
+    fill = `url(#${id})`,
+    defs = `<defs><linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="0" y1="${f1(ty)}" x2="0" y2="${f1(ty - 135)}"><stop offset="0" style="stop-color:${K.inkSoft}" stop-opacity="0.8"/><stop offset="1" style="stop-color:${K.inkSoft}" stop-opacity="0"/></linearGradient></defs>`;
+  [
+    ["9s 0s", 0.8, ([px, py]) => [px, py]],
+    ["12s -5s", 0.45, ([px, py]) => [px + 3, ty + (py - ty) * 1.05 - 6]],
+  ].forEach(([t, o, f], k) => {
+    const [dur, delay] = t.split(" "),
+      sm = G({
+        anim: mini ? "none" : `rib ${dur} ease-in-out ${delay} infinite`,
+        to: `${f1(tx)}px ${f1(ty)}px`,
+        defs: k ? "" : defs,
+      });
+    groups.push(sm);
+    So(sm, d(f), fill, o);
   });
-  groups.push(sm);
-  const t0 = tip[1] - 6,
-    pts = [
-      [tip[0] + 1, t0],
-      [tip[0] - 2, t0 - 26],
-      [tip[0] + 3, t0 - 58],
-      [tip[0] - 4, t0 - 92],
-      [tip[0] + 8, t0 - 120],
-      [tip[0] - 2, t0 - 146],
-      [tip[0] - 16, t0 - 160],
-    ];
-  Ln(sm, wline(r, pts.slice(0, 4), 0.6), K.inkSoft, 1.1, 0.55);
-  Ln(sm, wline(r, pts.slice(3), 0.9), K.inkSoft, 0.9, 0.3);
-  Wa(sm, r, mistD(r, tip[0] - 26, tip[0] + 14, t0 - 150, 12), K.inkSoft, 0.25, "url(#bk-bleed)");
 }
 // veranda of old house
 function sceneEngawa(K, hour, mini, sk, o = {}) {
