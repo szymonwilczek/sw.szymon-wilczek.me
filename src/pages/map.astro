@@ -53,8 +53,8 @@ const lilies = albums.map((album, i) => {
 });
 
 const STONES = [0, 1, 2, 3, 4].map((i) => {
-  const x = 358 + i * 92;
-  const y = 809 + (i % 2 ? -10 : 4);
+  const x = 300 + i * 92;
+  const y = 826 + (i % 2 ? -3 : 3);
   const year = YEARS[i]?.year ?? "";
   return { x, y, year, ink: stone(x, y, 0.64, YEARS[i]?.moss ?? 0, `map/${i}`) };
 });
@@ -878,7 +878,7 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
               )}
             </>
           ))}
-          <text class="label dim" x="330" y="884" font-size="16">
+          <text class="label dim" x="420" y="776" font-size="15">
             stepping stones · the years so far
           </text>
         </a>
