@@ -1,11 +1,5 @@
-interface Radio {
-  on: boolean;
-  start(): void;
-  stop(): void;
-  toggle(): void;
-  about(): string;
-  onChange(f: (on: boolean) => void): void;
-}
+import type { Radio } from "./radio";
+import { sliderOf } from "./volume";
 
 export function broadcastOf(fig: HTMLElement, radio: Radio, incense: { left: string | null }) {
   const knob = fig.querySelector<HTMLButtonElement>(".broadcast")!;
@@ -21,6 +15,7 @@ export function broadcastOf(fig: HTMLElement, radio: Radio, incense: { left: str
   const now = strip.querySelector<HTMLElement>(".rs-now")!;
   const inc = strip.querySelector<HTMLElement>(".rs-incense")!;
   const sound = strip.querySelector<HTMLButtonElement>(".rs-sound")!;
+  sound.after(sliderOf(radio));
   let lock: WakeLockSentinel | null = null;
   let still = 0;
   let timer = 0;

@@ -112,6 +112,7 @@ const SEASON = pct(1030, 140, 40, 30);
   import { crateOf } from "../scripts/engawa/crate";
   import { gardenOf } from "../scripts/engawa/garden";
   import { broadcastOf } from "../scripts/engawa/broadcast";
+  import { sliderOf } from "../scripts/engawa/volume";
   import { hourLight, tones2 } from "../utils/tea/ink.js";
 
   const fig = document.querySelector<HTMLElement>(".engawa")!;
@@ -139,6 +140,7 @@ const SEASON = pct(1030, 140, 40, 30);
   broadcastOf(fig, radio, incense);
 
   const sound = fig.querySelector<HTMLButtonElement>(".sound")!;
+  sound.after(sliderOf(radio));
   sound.addEventListener("click", radio.toggle);
   radio.onChange((on) => sound.setAttribute("aria-pressed", String(on)));
   if (radio.wanted())
@@ -286,6 +288,52 @@ const SEASON = pct(1030, 140, 40, 30);
   }
 
   .knobs button:focus-visible {
+    outline: 2px dashed var(--red);
+    outline-offset: 2px;
+  }
+
+  :global(.volume) {
+    box-sizing: border-box;
+    width: 6rem;
+    height: 2.2rem;
+    margin: 0;
+    padding: 0 0.6rem;
+    border: 1.5px solid var(--fg-main);
+    border-radius: 999px;
+    background: color-mix(in oklab, var(--paper), transparent 15%);
+    cursor: pointer;
+    appearance: none;
+  }
+
+  :global(.volume::-webkit-slider-runnable-track) {
+    height: 1.5px;
+    background: var(--fg-main);
+  }
+
+  :global(.volume::-moz-range-track) {
+    height: 1.5px;
+    background: var(--fg-main);
+  }
+
+  :global(.volume::-webkit-slider-thumb) {
+    width: 0.8rem;
+    height: 0.8rem;
+    margin-top: calc(-0.4rem + 0.75px);
+    border: 1.5px solid var(--fg-main);
+    border-radius: 48% 52% 50% 46% / 55% 45% 55% 45%;
+    background: var(--paper);
+    appearance: none;
+  }
+
+  :global(.volume::-moz-range-thumb) {
+    width: 0.8rem;
+    height: 0.8rem;
+    border: 1.5px solid var(--fg-main);
+    border-radius: 48% 52% 50% 46% / 55% 45% 55% 45%;
+    background: var(--paper);
+  }
+
+  :global(.volume:focus-visible) {
     outline: 2px dashed var(--red);
     outline-offset: 2px;
   }

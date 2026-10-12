@@ -2,6 +2,7 @@ import { DISCS, type Kit } from "./discs";
 
 const SOUND = "engawa:sound";
 const DISC = "engawa:disc";
+const VOLUME = "engawa:volume";
 
 export function radioOf(hour: () => number) {
   let ctx: AudioContext | null = null;
@@ -18,7 +19,9 @@ export function radioOf(hour: () => number) {
   let step = 0;
   let on = false;
   let disc = Math.min(DISCS.length - 1, Math.max(0, Number(localStorage.getItem(DISC)) || 0));
+  let vol = Math.min(1, Math.max(0, Number(localStorage.getItem(VOLUME) ?? 0.8) || 0));
   const listeners: ((on: boolean) => void)[] = [];
+  const louder: ((v: number) => void)[] = [];
 
   function build() {
     const c = (ctx = new AudioContext());
@@ -127,7 +130,7 @@ export function radioOf(hour: () => number) {
     crackle ??= scratch();
     needle();
     out.gain.cancelScheduledValues(c.currentTime);
-    out.gain.setTargetAtTime(0.8, c.currentTime, 0.6);
+    out.gain.setTargetAtTime(vol, c.currentTime, 0.6);
     on = true;
     localStorage.setItem(SOUND, "on");
     listeners.forEach((f) => f(true));
@@ -159,9 +162,16 @@ export function radioOf(hour: () => number) {
       if (disc !== i || !on) return;
       needle();
       out.gain.cancelScheduledValues(c.currentTime);
-      out.gain.setTargetAtTime(0.8, c.currentTime, 0.4);
+      out.gain.setTargetAtTime(vol, c.currentTime, 0.4);
       listeners.forEach((f) => f(true));
     }, 350);
+  }
+
+  function volume(v: number) {
+    vol = Math.min(1, Math.max(0, v));
+    localStorage.setItem(VOLUME, String(vol));
+    if (ctx && on) out.gain.setTargetAtTime(vol, ctx.currentTime, 0.05);
+    louder.forEach((f) => f(vol));
   }
 
   return {
@@ -183,6 +193,11 @@ export function radioOf(hour: () => number) {
     },
     wanted: () => localStorage.getItem(SOUND) === "on",
     onChange: (f: (on: boolean) => void) => listeners.push(f),
+    get volume() {
+      return vol;
+    },
+    setVolume: volume,
+    onVolume: (f: (v: number) => void) => louder.push(f),
     about: () => {
       const d = DISCS[disc];
       return d.src ? `${d.title}, ${d.by}` : d.about(hour());
