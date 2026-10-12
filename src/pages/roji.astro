@@ -6,11 +6,15 @@ import { clean, turned } from "../utils/tea/pottery";
 import pieces from "../data/pieces.json";
 
 const shelf = (pieces as unknown[]).map(clean).filter((p) => p !== null);
-const STONE = { left: (640 / 1100) * 100, top: (504 / 690) * 100 };
+const TOP = 90;
+const H = 690 - TOP;
+const left = (x: number) => (x / 1100) * 100;
+const top = (y: number) => ((y - TOP) / H) * 100;
+const STONE = { left: left(640), top: top(504) };
 const pct = (x: number, y: number, w: number, h: number) =>
-  `left:${(x / 1100) * 100}%;top:${(y / 690) * 100}%;width:${(w / 1100) * 100}%;height:${(h / 690) * 100}%`;
+  `left:${left(x)}%;top:${top(y)}%;width:${left(w)}%;height:${(h / H) * 100}%`;
 const DOOR = pct(474, 280, 390, 178);
-const SHUT = `left:${(670 / 1100) * 100}%;top:${(330 / 690) * 100}%`;
+const SHUT = `left:${left(670)}%;top:${top(330)}%`;
 const MACHIAI = pct(22, 450, 292, 221);
 const garden = sceneGarden16(tones2(), "start", {
   shelf: (i: number) => (shelf[i] ? turned(shelf[i]) : null),
@@ -41,7 +45,7 @@ const garden = sceneGarden16(tones2(), "start", {
 
   <figure class="roji" style={TONE_CSS} data-shelf={JSON.stringify(shelf)}>
     <svg
-      viewBox={`0 0 ${garden.W} ${garden.H}`}
+      viewBox={`0 ${TOP} ${garden.W} ${garden.H - TOP}`}
       role="img"
       aria-label="An ink drawing of a tea garden: stepping stones, a clump of bamboo, a small waiting room with shelves, a thatched workshop with a stone on the path before it, and a kiln climbing the slope behind."
       set:html={toSvg(garden, true)}
@@ -216,12 +220,12 @@ const garden = sceneGarden16(tones2(), "start", {
     }
     door.removeAttribute("aria-expanded");
     const code = import("../scripts/kobo/index");
-    inside(door, "61% 53%", async (leave) => (await code).enter(kobo, leave));
+    inside(door, "61% 46%", async (leave) => (await code).enter(kobo, leave));
   });
   machiai.addEventListener("click", () => {
     const code = import("../scripts/machiai");
     const shelf: PieceSpec[] = JSON.parse(fig.dataset.shelf || "[]");
-    inside(machiai, "15% 81%", async (leave) => (await code).enter(kobo, shelf, leave));
+    inside(machiai, "15% 78%", async (leave) => (await code).enter(kobo, shelf, leave));
   });
 
   const at = (e: PointerEvent): P => {
@@ -499,7 +503,7 @@ const garden = sceneGarden16(tones2(), "start", {
   }
 
   .roji > svg {
-    transform-origin: 61% 53%;
+    transform-origin: 61% 46%;
     transition:
       transform 0.65s cubic-bezier(0.5, 0, 0.7, 1),
       opacity 0.65s;
