@@ -20,7 +20,7 @@ const W = 280;
 const FS = 30;
 
 export async function slip(): Promise<Slip | null> {
-  const key = process.env.ROJI_KEY?.trim();
+  const key = (import.meta.env.ROJI_KEY ?? process.env.ROJI_KEY)?.trim();
   if (!key) return null;
   if ((await keyHash(key)) !== KEY_HASH)
     console.warn("[slip] ROJI_KEY does not fit KEY_HASH in key.ts: the stone will not move");
