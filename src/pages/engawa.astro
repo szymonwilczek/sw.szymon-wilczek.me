@@ -71,6 +71,14 @@ const SEASON = pct(1010, 192, 40, 30);
       >
         音
       </button>
+      <button
+        type="button"
+        class="broadcast"
+        aria-pressed="false"
+        aria-label="The radio: the veranda alone on the screen, playing"
+      >
+        放
+      </button>
     </div>
   </figure>
 </BaseLayout>
@@ -84,6 +92,7 @@ const SEASON = pct(1010, 192, 40, 30);
   import { recordOf } from "../scripts/engawa/record";
   import { radioOf } from "../scripts/engawa/radio";
   import { gardenOf } from "../scripts/engawa/garden";
+  import { broadcastOf } from "../scripts/engawa/broadcast";
   import { hourLight, tones2 } from "../utils/tea/ink.js";
 
   const fig = document.querySelector<HTMLElement>(".engawa")!;
@@ -99,6 +108,7 @@ const SEASON = pct(1010, 192, 40, 30);
   const radio = radioOf(() => scene.view.hour);
   cards.fill("record", recordOf(radio));
   gardenOf(radio, scene.view, () => incense.burning);
+  broadcastOf(fig, radio, incense);
 
   const sound = fig.querySelector<HTMLButtonElement>(".sound")!;
   sound.addEventListener("click", radio.toggle);
@@ -308,6 +318,100 @@ const SEASON = pct(1010, 192, 40, 30);
     font-size: 3.6cqw;
     line-height: 1.45;
     color: var(--fg-main);
+  }
+
+  :global(body.engawa-radio) .engawa {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    width: min(100vw, calc(100vh * 1100 / 640));
+    height: fit-content;
+    margin: auto;
+    box-shadow: 0 0 0 100vmax var(--bg-main);
+  }
+
+  :global(body.engawa-radio) {
+    overflow: hidden;
+  }
+
+  :global(body.engawa-radio) .knobs {
+    display: none;
+  }
+
+  :global(body.engawa-radio.radio-still) {
+    cursor: none;
+  }
+
+  @keyframes radio-close {
+    to {
+      clip-path: circle(0% at 50% 60%);
+      filter: blur(2px);
+    }
+  }
+
+  @keyframes radio-open {
+    from {
+      clip-path: circle(0% at 50% 60%);
+      transform: scale(0.96);
+    }
+    to {
+      clip-path: circle(75% at 50% 60%);
+      transform: none;
+    }
+  }
+
+  .engawa:global(.radio-closing) {
+    animation: radio-close 0.55s ease-in forwards;
+  }
+
+  .engawa:global(.radio-opening) {
+    animation: radio-open 0.9s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  :global(.radio-strip) {
+    display: none;
+  }
+
+  :global(body.engawa-radio .radio-strip) {
+    position: fixed;
+    bottom: 1rem;
+    left: 50%;
+    z-index: 101;
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    padding: 0.3rem 0.5rem 0.3rem 1rem;
+    border-radius: 999px;
+    background: color-mix(in oklab, var(--bg-main), transparent 15%);
+    color: var(--fg-main);
+    font-family: var(--font-hand);
+    transform: translateX(-50%);
+    transition: opacity 0.8s;
+  }
+
+  :global(body.engawa-radio.radio-still .radio-strip) {
+    opacity: 0;
+  }
+
+  :global(.radio-strip button) {
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    border: 1.5px solid var(--fg-main);
+    border-radius: 48% 52% 50% 46% / 55% 45% 55% 45%;
+    background: none;
+    color: inherit;
+    font-family: var(--font-seal);
+    cursor: pointer;
+  }
+
+  :global(.radio-strip button[aria-pressed="true"]) {
+    border-color: var(--red);
+    color: var(--red);
+  }
+
+  :global(.rs-incense:empty) {
+    display: none;
   }
 
   :global(body.engawa-sitting) .engawa-head,

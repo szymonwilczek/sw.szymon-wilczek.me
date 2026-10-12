@@ -47,6 +47,7 @@ const TURNS: [number, Chord][][] = [
 // the key and the beats a minute, by the hour
 const keyAt = (h: number) => (h < 6 ? 1 : h < 11 ? 5 : h < 17 ? 0 : h < 21 ? 3 : 8);
 const bpmAt = (h: number) => (h < 6 || h >= 22 ? 64 : h < 11 ? 72 : h < 18 ? 78 : 70);
+const NAMES = ["D", "E♭", "E", "F", "F♯", "G", "A♭", "A", "B♭", "B", "C", "C♯"];
 const hz = (midi: number) => 440 * Math.pow(2, (midi - 69) / 12);
 
 export function radioOf(hour: () => number) {
@@ -271,6 +272,7 @@ export function radioOf(hour: () => number) {
     // whether the guest left it playing last time
     wanted: () => localStorage.getItem(SOUND) === "on",
     onChange: (f: (on: boolean) => void) => listeners.push(f),
+    about: () => `slow jazz in ${NAMES[keyAt(hour())]}, ${bpmAt(hour())} a minute`,
     label: () => (on ? "止 · stop the radio" : "針 · play the radio"),
   };
 }

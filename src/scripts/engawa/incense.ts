@@ -173,6 +173,9 @@ export function incenseOf(scene: { view: View; draw: () => void }) {
   };
   return {
     fill,
+    get left() {
+      return stick ? mmss(left()) : null;
+    },
     get burning() {
       return stick !== null;
     },
