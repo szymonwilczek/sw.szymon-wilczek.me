@@ -87,6 +87,9 @@ const garden = sceneGarden16(tones2(), "start", {
 <script>
   import {
     bambooClump,
+    Br,
+    BrW,
+    G,
     groupSvg,
     tones2,
     rng,
@@ -225,21 +228,66 @@ const garden = sceneGarden16(tones2(), "start", {
     const p = new DOMPoint(e.clientX, e.clientY).matrixTransform(svg.getScreenCTM()!.inverse());
     return [Math.round(p.x), Math.round(p.y)];
   };
+
   let start: P | null = null;
+  let trail: P[] = [];
+  let slash: SVGGElement | null = null;
+  let queued = false;
+  const ink = tones2();
+  function paint() {
+    queued = false;
+    if (!slash || trail.length < 2) return;
+    const g = G(),
+      r = rng(hash("slash"));
+    BrW(g, r, trail, 10, ink.gold, 0.55);
+    Br(g, r, trail, 2.4, ink.ink, 0.5, { tip: 0.05, head: 0.1 });
+    slash.innerHTML = groupSvg(g);
+  }
+  function lift(cut: boolean) {
+    const el = slash;
+    slash = null;
+    trail = [];
+    if (!el) return;
+    if (still.matches) return el.remove();
+    el.classList.add(cut ? "lifting" : "missing");
+    el.addEventListener("animationend", () => el.remove(), { once: true });
+  }
   svg.addEventListener("pointerdown", (e) => {
     if (done) return;
     start = at(e);
+    trail = [start];
+    slash?.remove();
+    slash = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    slash.classList.add("roji-slash");
+    svg.append(slash);
+  });
+  svg.addEventListener("pointermove", (e) => {
+    if (!start || done) return;
+    const p = at(e),
+      last = trail[trail.length - 1];
+    if (Math.hypot(p[0] - last[0], p[1] - last[1]) < 8) return;
+    trail.push(p);
+    if (trail.length > 24) trail = trail.filter((_, i) => i % 2 === 0 || i === trail.length - 1);
+    if (!queued) {
+      queued = true;
+      requestAnimationFrame(paint);
+    }
   });
   fig.addEventListener("pointerup", (e) => {
     if (!start || done) return;
     const line: [P, P] = [start, at(e)];
     start = null;
-    if (!across(line)) return;
+    const cut = across(line);
+    lift(cut);
+    if (!cut) return;
     done = true;
     localStorage.setItem(KEY, JSON.stringify(line));
     draw({ line, phase: "down" }, false);
   });
-  fig.addEventListener("pointercancel", () => (start = null));
+  fig.addEventListener("pointercancel", () => {
+    start = null;
+    lift(false);
+  });
 </script>
 
 <style>
@@ -611,6 +659,24 @@ const garden = sceneGarden16(tones2(), "start", {
     .kobo,
     .kobo :global(.now) {
       animation: none;
+    }
+  }
+
+  .roji :global(.roji-slash) {
+    pointer-events: none;
+  }
+
+  .roji :global(.roji-slash.lifting) {
+    animation: roji-lift 0.9s 0.25s ease-out both;
+  }
+
+  .roji :global(.roji-slash.missing) {
+    animation: roji-lift 0.4s ease-out both;
+  }
+
+  @keyframes roji-lift {
+    to {
+      opacity: 0;
     }
   }
 
