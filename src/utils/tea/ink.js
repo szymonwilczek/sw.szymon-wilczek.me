@@ -116,11 +116,12 @@ function groupSvg(g, attrs = "") {
   const text = g.text
     .map(
       (t) =>
-        `<text transform="${t.tr}" font-size="${t.fs}" fill="${t.fill}" opacity="${t.o}" text-anchor="middle" dominant-baseline="central" style="font-family:${t.font};writing-mode:${t.wm};letter-spacing:${t.ls}">${esc(t.t)}</text>`,
+        `<text transform="${t.tr}" font-size="${t.fs}" fill="${t.fill}" opacity="${t.o}" text-anchor="${t.an || "middle"}" dominant-baseline="central" style="font-family:${t.font};writing-mode:${t.wm};letter-spacing:${t.ls}">${esc(t.t)}</text>`,
     )
     .join("");
   return `<g${attrs}${g.clip ? ` clip-path="${g.clip}"` : ""}${style ? ` style="${style}"` : ""}>${wash ? `<g opacity="${g.washO}">${wash}</g>` : ""}${solid}${line}${text}</g>`;
 }
+
 function toSvg(out, filters = false) {
   const clips = (out.clips || [])
     .map((c) => `<clipPath id="${c.id}"><path d="${c.d}"/></clipPath>`)
@@ -137,6 +138,7 @@ function hash(s) {
   }
   return h >>> 0;
 }
+
 function rng(seed) {
   let a = seed;
   return () => {
@@ -147,6 +149,7 @@ function rng(seed) {
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
 }
+
 let PREC = 1;
 const setPrec = (p) => (PREC = p);
 const f1 = (n) => Math.round(n * PREC) / PREC;
@@ -165,6 +168,8 @@ function smooth(pts, closed) {
   }
   return closed ? d + " Z" : d;
 }
+
+const poly = (pts) => "M" + pts.map(([x, y]) => `${f1(x)} ${f1(y)}`).join(" L") + " Z";
 // ink kit
 const TREM = "url(#bk-tremble)";
 const WASH = "url(#bk-wash)";
@@ -179,6 +184,7 @@ function wpoly(r, pts, j) {
   }
   return d + " Z";
 }
+
 const wbox = (r, x0, y0, x1, y1, j) =>
   wpoly(
     r,
@@ -190,11 +196,13 @@ const wbox = (r, x0, y0, x1, y1, j) =>
     ],
     j,
   );
+
 const wline = (r, pts, j) =>
   smooth(
     pts.map(([x, y]) => [x + J(r, j), y + J(r, j)]),
     false,
   );
+
 const wseg = (r, a, b, j, n) =>
   wline(
     r,
@@ -204,6 +212,7 @@ const wseg = (r, a, b, j, n) =>
     ]),
     j,
   );
+
 const wring = (r, cx, cy, rx, ry, j, n) =>
   smooth(
     Array.from({ length: n || 12 }, (_, i) => {
@@ -212,6 +221,7 @@ const wring = (r, cx, cy, rx, ry, j, n) =>
     }),
     true,
   );
+
 function G(o) {
   return Object.assign(
     {
@@ -230,6 +240,7 @@ function G(o) {
     o || {},
   );
 }
+
 function Wa(g, r, d, fill, o, f) {
   g.wash.push({
     d,
@@ -239,24 +250,46 @@ function Wa(g, r, d, fill, o, f) {
     t: `translate(${f1(1 + r() * 2)} ${f1(0.8 + r() * 1.8)})`,
   });
 }
+
 function Ln(g, d, c, w, o, plain) {
   g.line.push({ d, c, w: w ?? 1.3, o: o ?? 1, f: plain ? "" : TREM });
 }
+
 function So(g, d, fill, o, f) {
   g.solid.push({ d, fill, o: o ?? 1, f: f || "" });
 }
+
 function Tx(g, o) {
   g.text.push(
     Object.assign(
-      { tr: "", fs: 14, font: "Kalam, cursive", fill: "#000", o: 1, wm: "horizontal-tb", ls: "0" },
+      {
+        tr: "",
+        fs: 14,
+        font: "Kalam, cursive",
+        fill: "#000",
+        o: 1,
+        wm: "horizontal-tb",
+        ls: "0",
+        an: "middle",
+      },
       o,
     ),
   );
 }
+
 function inked(g, r, d, fill, ink, w) {
   Wa(g, r, d, fill);
   Ln(g, d, ink, w ?? 1.3);
 }
+
+const quadMap = (a, b, c2, d) => (s, t) => {
+  const tx = lerp(a[0], b[0], s),
+    ty = lerp(a[1], b[1], s),
+    bx = lerp(d[0], c2[0], s),
+    by = lerp(d[1], c2[1], s);
+  return [lerp(tx, bx, t), lerp(ty, by, t)];
+};
+
 // brush stroke
 function brushD(r, pts, w, o) {
   o = o || {};
@@ -359,6 +392,90 @@ function steppingStones(g, r, pts, K, sz) {
     stone(g, r, x, y, 22 * s, 9 * s, K);
   });
 }
+function maple(g, r, cx, cy, rad, n, K) {
+  for (let i = 0; i < n; i++) {
+    const a = r() * Math.PI * 2,
+      d = Math.sqrt(r()) * rad,
+      x = cx + Math.cos(a) * d,
+      y = cy + Math.sin(a) * d * 0.6;
+    So(
+      g,
+      wring(r, x, y, 2.4 + r() * 3, 2 + r() * 2.4, 0.5, 6),
+      r() < 0.25 ? K.redWarmer || K.maple : K.maple,
+      0.4 + r() * 0.45,
+      "url(#bk-bleed)",
+    );
+  }
+}
+function lantern(g, r, x, yb, s, K, lit) {
+  const S = (v) => v * s;
+  Wa(g, r, wring(r, x + S(8), yb + S(3), S(34), S(7), 1, 10), K.pool, 0.7, "url(#bk-pool)");
+  inked(
+    g,
+    r,
+    wpoly(
+      r,
+      [
+        [x - S(20), yb],
+        [x + S(20), yb],
+        [x + S(15), yb - S(10)],
+        [x - S(15), yb - S(10)],
+      ],
+      0.8,
+    ),
+    K.stone,
+    K.ink,
+    1.2,
+  );
+  inked(g, r, wbox(r, x - S(6), yb - S(48), x + S(6), yb - S(10), 0.6), K.stone, K.ink, 1.1);
+  inked(
+    g,
+    r,
+    wpoly(
+      r,
+      [
+        [x - S(17), yb - S(48)],
+        [x + S(17), yb - S(48)],
+        [x + S(13), yb - S(56)],
+        [x - S(13), yb - S(56)],
+      ],
+      0.6,
+    ),
+    K.stone,
+    K.ink,
+    1.1,
+  );
+  inked(g, r, wbox(r, x - S(13), yb - S(80), x + S(13), yb - S(56), 0.6), K.stone, K.ink, 1.2);
+  So(
+    g,
+    wbox(r, x - S(7), yb - S(76), x + S(7), yb - S(60), 0.4),
+    lit ? K.glow : K.deep,
+    lit ? 0.9 : 0.85,
+  );
+  if (lit) Wa(g, r, wring(r, x, yb - S(68), S(22), S(18), 1, 10), K.glowSoft, 0.5, "url(#bk-pool)");
+  inked(
+    g,
+    r,
+    smooth(
+      [
+        [x - S(30), yb - S(78)],
+        [x - S(14), yb - S(86)],
+        [x, yb - S(98)],
+        [x + S(14), yb - S(86)],
+        [x + S(30), yb - S(78)],
+        [x + S(26), yb - S(82)],
+        [x, yb - S(90)],
+        [x - S(26), yb - S(82)],
+      ],
+      true,
+    ),
+    K.stone,
+    K.ink,
+    1.3,
+  );
+  inked(g, r, wring(r, x, yb - S(104), S(5), S(6), 0.4, 8), K.stone, K.ink, 1);
+  So(g, wring(r, x - S(14), yb - S(84), S(9), S(3), 0.6, 8), K.moss, 0.6, "url(#bk-bleed)");
+}
 function thatchStrokes(g, r, P0, P1, Q0, Q1, n, K) {
   // strokes run from the ridge edge
   for (let i = 0; i < n; i++) {
@@ -381,6 +498,93 @@ function thatchStrokes(g, r, P0, P1, Q0, Q1, n, K) {
       0.35 + r() * 0.3,
       true,
     );
+  }
+}
+function cordTie(g, r, x, y, s, K) {
+  const S = (v) => v * s;
+  Ln(
+    g,
+    wline(
+      r,
+      [
+        [x - S(14), y - S(6)],
+        [x - S(4), y],
+        [x + S(8), y - S(5)],
+        [x + S(14), y + S(2)],
+      ],
+      0.4,
+    ),
+    K.ink,
+    S(3.4),
+    0.9,
+    true,
+  );
+  Ln(
+    g,
+    wline(
+      r,
+      [
+        [x - S(14), y - S(6)],
+        [x - S(4), y],
+        [x + S(8), y - S(5)],
+        [x + S(14), y + S(2)],
+      ],
+      0.4,
+    ),
+    K.red,
+    S(2),
+    1,
+    true,
+  );
+  [
+    [-1, 1],
+    [1, 1],
+  ].forEach(([sx]) => {
+    Ln(
+      g,
+      wline(
+        r,
+        [
+          [x, y],
+          [x + sx * S(5), y + S(9)],
+          [x + sx * S(3), y + S(18)],
+        ],
+        0.4,
+      ),
+      K.red,
+      S(1.8),
+      0.95,
+      true,
+    );
+  });
+  inked(g, r, wring(r, x, y + S(1), S(3.4), S(3), 0.2, 6), K.red, K.ink, 0.8);
+}
+function steam(groups, r, x, y, K, n) {
+  for (let k = 0; k < (n || 3); k++) {
+    const g = G({
+      anim: `steam ${5 + k * 1.3}s ease-in-out ${-k * 1.7}s infinite`,
+      to: `${x}px ${y}px`,
+      washO: 0.5,
+    });
+    const sx = x + J(r, 6);
+    Ln(
+      g,
+      wline(
+        r,
+        [
+          [sx, y],
+          [sx - 7, y - 18],
+          [sx + 5, y - 38],
+          [sx - 4, y - 58],
+          [sx + 6, y - 78],
+        ],
+        1.5,
+      ),
+      K.inkSoft,
+      1.6,
+      0.5,
+    );
+    groups.push(g);
   }
 }
 // shared pieces of architecture
@@ -3064,6 +3268,1234 @@ function scenePieceCard(K) {
   return { W, H, groups: [g], clips: [] };
 }
 
+// the terrace the enso leads to
+const SKY = [
+  [0, "#1c2132", "#262c40"],
+  [4.5, "#262b40", "#4a4560"],
+  [5.8, "#6f7896", "#e6b48f"],
+  [7, "#a9b8c8", "#f3d9b6"],
+  [10, "#bfd0db", "#eeeee4"],
+  [14, "#b6ccda", "#f1eee2"],
+  [17, "#c3c3c8", "#f0d5a6"],
+  [18.8, "#77708c", "#e8956a"],
+  [19.8, "#3e4060", "#a8686e"],
+  [21, "#22283a", "#3a3a52"],
+  [24, "#1c2132", "#262c40"],
+];
+const sstep = (a, b, x) => {
+  const t = Math.max(0, Math.min(1, (x - a) / (b - a)));
+  return t * t * (3 - 2 * t);
+};
+const hhmm = (h) => `${Math.floor(h)}:${String(Math.round((h % 1) * 60)).padStart(2, "0")}`;
+const STARL = "#f3eedf";
+const SEASONS = {
+  haru: { jp: "春", en: "spring", rise: 5.9, set: 19.3 },
+  natsu: { jp: "夏", en: "summer", rise: 4.3, set: 21.0 },
+  aki: { jp: "秋", en: "autumn", rise: 7.0, set: 18.0 },
+  fuyu: { jp: "冬", en: "winter", rise: 7.7, set: 15.5 },
+};
+function solarH(h, S) {
+  if (!S) return h;
+  if (h < S.rise) return (h * 5.6) / S.rise;
+  if (h < S.set) return 5.6 + ((h - S.rise) * 14) / (S.set - S.rise);
+  return 19.6 + ((h - S.set) * 4.4) / (24 - S.set);
+}
+function hourLight(K, real, sk) {
+  real = ((real % 24) + 24) % 24;
+  const S = SEASONS[sk],
+    h = solarH(real, S);
+  let i = 0;
+  while (i < SKY.length - 2 && SKY[i + 1][0] <= h) i++;
+  const [h0, a0, b0] = SKY[i],
+    [h1, a1, b1] = SKY[i + 1],
+    t = (h - h0) / (h1 - h0);
+  const top0 = mix(mix(a0, a1, t), K.paper, 0.15),
+    low0 = mix(mix(b0, b1, t), K.paper, 0.15);
+  const st = (h - 5.6) / (19.6 - 5.6),
+    up = st > 0 && st < 1,
+    alt = up ? Math.sin(Math.PI * st) : 0;
+  const night = h < 12 ? 1 - sstep(4.8, 6.6, h) : sstep(18.6, 20.8, h);
+  const gold = Math.min(
+    1,
+    Math.max(0, 1 - Math.abs(h - 18.5) / 1.4) + 0.6 * Math.max(0, 1 - Math.abs(h - 6.4) / 1.1),
+  );
+  const mt = ((((h - 18.5) % 24) + 24) % 24) / 12,
+    mUp = mt < 1;
+  const grey = sk === "fuyu" ? 0.22 : 0,
+    top = mix(top0, "#c4c8cf", grey),
+    low = mix(low0, "#d8d8d4", grey);
+  return {
+    h: real,
+    hc: h,
+    sk,
+    S,
+    top,
+    low,
+    st,
+    up,
+    alt,
+    night,
+    gold,
+    mt,
+    mUp,
+    malt: mUp ? Math.sin(Math.PI * mt) : 0,
+    lamp: Math.max(night, h > 12 ? sstep(17.8, 19.2, h) : 0),
+    sunC: mix(mix("#f7e7b8", "#e0603a", gold), K.paper, 0.1),
+    far: mix(mix(K.mount, K.paper, 0.35), top, 0.45),
+    mid: mix(K.mount, low, 0.25),
+    cloud: mix(mix(mix(low, K.paper, 0.5), "#e9967a", 0.55 * gold), top, 0.5 * night),
+  };
+}
+function skyWash(g, r, W, y1, L) {
+  for (let k = 0; k < 10; k++)
+    So(
+      g,
+      wbox(r, -20, (y1 * k) / 10 - 8, W + 20, (y1 * (k + 1)) / 10 + 8, 2),
+      mix(L.top, L.low, Math.pow(k / 9, 1.4)),
+      1,
+    );
+}
+const arcAt = (t, alt, x0, x1, yH, yTop) => [lerp(x0, x1, t), yH - alt * (yH - yTop)];
+
+function sunDisc(g, r, x, y, rad, L) {
+  Wa(
+    g,
+    r,
+    wring(r, x, y, rad * 2.8, rad * 2.8, 2, 12),
+    mix(L.sunC, L.low, 0.3),
+    0.4,
+    "url(#bk-pool)",
+  );
+  So(g, wring(r, x, y, rad, rad, rad * 0.05, 14), L.sunC, 0.95, TREM);
+}
+
+function moonDisc(g, r, x, y, rad, bite, L, op) {
+  Wa(g, r, wring(r, x, y, rad * 2, rad * 2, 2, 12), STARL, 0.1 * op, "url(#bk-pool)");
+  So(g, wring(r, x, y, rad, rad, 0.6, 14), mix(STARL, "#f6e2a8", 0.25), op, TREM);
+  So(
+    g,
+    wring(r, x - rad * 0.3, y - rad * 0.15, rad * 0.28, rad * 0.22, 0.4, 8),
+    mix(STARL, L.top, 0.25),
+    0.45 * op,
+  );
+  if (bite)
+    So(
+      g,
+      wring(r, x + rad * bite, y - rad * 0.08, rad * 1.02, rad * 1.04, 0.4, 14),
+      L.top,
+      0.92 * op,
+    );
+}
+function stars(g, r, W, yH, n, op) {
+  for (let k = 0; k < n; k++) {
+    const s = 0.7 + r() * 1.3;
+    So(g, wring(r, r() * W, r() * yH, s, s, 0, 5), STARL, op * (0.35 + r() * 0.65));
+  }
+}
+function ridge(g, r, x0, x1, y, amp, fill, op, ink) {
+  const p1 = r() * 6,
+    p2 = r() * 6,
+    top = [];
+  for (let i = 0; i <= 16; i++) {
+    const t = i / 16;
+    top.push([
+      lerp(x0, x1, t),
+      y - amp * (0.55 + 0.3 * Math.sin(t * 5.3 + p1) + 0.2 * Math.sin(t * 11.7 + p2)),
+    ]);
+  }
+  const d = smooth(top, false) + ` L${f1(x1)} ${f1(y + 80)} L${f1(x0)} ${f1(y + 80)} Z`;
+  So(g, d, fill, (op ?? 0.9) * 0.8);
+  Wa(g, r, d, fill, op ?? 0.9, "url(#bk-bleed)");
+  if (ink) Ln(g, wline(r, top, 0.8), ink, 1, 0.45);
+}
+
+function skyLayer(groups, K, L, key, W, yH, moonR) {
+  const g = G({ washO: 1 }),
+    r = rng(hash("terrace/sky/" + key));
+  groups.push(g);
+  skyWash(g, r, W, yH + 30, L);
+  if (L.night > 0.05) stars(g, rng(hash("stars/" + key)), W, yH * 0.85, 70, L.night);
+  const sp = arcAt(L.st, L.alt, -80, W + 80, yH + 10, 70);
+  if (L.up) sunDisc(g, r, sp[0], sp[1], 22 + 8 * (1 - L.alt), L);
+  const mp = arcAt(L.mt, L.malt, W + 60, -60, yH + 10, 90);
+  if (L.mUp) moonDisc(g, r, mp[0], mp[1], moonR || 17, 0.55, L, Math.max(0.25, L.night));
+  const rc = rng(hash("clouds/" + key));
+  [
+    [0.08, 0.42, 120, 14],
+    [0.55, 0.9, 175, 10],
+    [0.3, 0.52, 60, 8],
+  ].forEach(([a, b, y, h]) => mist(g, rc, a * W, b * W, y, h, L.cloud, 0.75));
+  return { sp, mp };
+}
+function veil(groups, W, H, L) {
+  const g = G({ washO: 1 }),
+    d = poly([
+      [0, 0],
+      [W, 0],
+      [W, H],
+      [0, H],
+    ]);
+  if (L.night > 0) So(g, d, "#141a2c", 0.5 * L.night);
+  if (L.gold > 0) So(g, d, "#e8904c", 0.12 * L.gold);
+  if (L.hc > 5 && L.hc < 9 && L.night < 0.5) So(g, d, "#9fb4d8", 0.07);
+  groups.push(g);
+}
+
+function ensoDial(groups, K, L, cx, cy, rad) {
+  const g = G(),
+    r = rng(hash("enso-dial")),
+    inkC = mix(K.ink, STARL, L.night);
+  groups.push(g);
+  const pts = [];
+  for (let i = 0; i <= 28; i++) {
+    const a = -Math.PI / 2 + 0.3 + (i / 28) * (Math.PI * 2 - 0.55);
+    pts.push([
+      cx + Math.cos(a) * rad * (1 + J(r, 0.025)),
+      cy + Math.sin(a) * rad * (1 + J(r, 0.025)),
+    ]);
+  }
+  Br(g, r, pts, rad * 0.17, inkC, 0.8, { head: 0.7, tailAt: 0.72, tip: 0.15 });
+  const a = -Math.PI / 2 + (L.h / 24) * Math.PI * 2;
+  inked(
+    g,
+    r,
+    wring(r, cx + Math.cos(a) * rad, cy + Math.sin(a) * rad, 6, 6, 0.5, 8),
+    K.red,
+    inkC,
+    1,
+  );
+  Tx(g, { t: hhmm(L.h), tr: `translate(${f1(cx)} ${f1(cy)})`, fs: 17, fill: inkC, o: 0.8 });
+  if (L.S)
+    Tx(g, {
+      t: L.S.jp,
+      tr: `translate(${f1(cx)} ${f1(cy + rad + 24)})`,
+      fs: 20,
+      font: "'Yuji Syuku', serif",
+      fill: K.red,
+      o: 0.9,
+    });
+}
+
+function slab(g, r, d, fill, K, w) {
+  So(g, d, mix(fill, K.paper, 0.3), 1);
+  Wa(g, r, d, fill, 0.7);
+  Ln(g, d, K.ink, w ?? 1.5);
+}
+function lampGlow(g, r, x, y, rx, ry, K, op) {
+  Wa(g, r, wring(r, x, y, rx, ry, 2, 12), K.glow, 0.5 * op, "url(#bk-pool)");
+  Wa(g, r, wring(r, x, y, rx * 0.5, ry * 0.5, 1, 10), K.glowSoft, 0.6 * op, "url(#bk-pool)");
+}
+function fireflies(g, r, x0, x1, y0, y1, n, op) {
+  for (let k = 0; k < n; k++) {
+    const x = lerp(x0, x1, r()),
+      y = lerp(y0, y1, r());
+    Wa(g, r, wring(r, x, y, 7, 7, 1, 8), "#e9f2a0", 0.35 * op, "url(#bk-pool)");
+    So(g, wring(r, x, y, 1.6, 1.6, 0, 5), "#f4f8c8", op);
+  }
+}
+
+function recordPlayer(g, r, x, y, s, K, L) {
+  const S = (v) => v * s,
+    P = (a, b) => [x + S(a), y + S(b)];
+  Wa(g, r, wring(r, x + S(10), y + S(22), S(98), S(14), 1, 10), K.pool, 0.8, "url(#bk-pool)");
+  inked(g, r, wpoly(r, [P(-78, -60), P(66, -80), P(70, -10), P(-74, 8)], 0.8), K.cloth, K.ink, 1.3);
+  Ln(g, wpoly(r, [P(-68, -50), P(58, -68), P(61, -14), P(-65, 0)], 0.6), K.ink, 0.8, 0.5);
+  inked(g, r, wpoly(r, [P(-86, 4), P(74, -14), P(96, 6), P(-66, 28)], 0.8), K.woodLt, K.ink, 1.3);
+  inked(g, r, wpoly(r, [P(-66, 28), P(96, 6), P(96, 18), P(-66, 41)], 0.6), K.woodDk, K.ink, 1.2);
+  inked(g, r, wring(r, x - S(4), y + S(9), S(56), S(13), 0.6, 16), K.iron, K.ink, 1.1);
+  So(g, wring(r, x - S(4), y + S(8), S(51), S(11.5), 0.4, 16), mix(K.ink, "#000000", 0.3), 0.95);
+  for (let k = 1; k < 4; k++)
+    Ln(
+      g,
+      wring(r, x - S(4), y + S(8), S(51 - k * 9), S(11.5 - k * 2), 0.2, 14),
+      mix(K.ink, STARL, 0.35),
+      0.5,
+      0.45,
+      true,
+    );
+  So(g, wring(r, x - S(4), y + S(8), S(13), S(3.2), 0.2, 10), K.red, 0.95);
+  Ln(g, wline(r, [P(70, -2), P(66, 6), P(40, 9), P(16, 10)], 0.3), K.ink, S(2.4), 0.95, true);
+  inked(g, r, wring(r, x + S(70), y - S(2), S(6), S(3), 0.2, 8), K.iron, K.ink, 1);
+  inked(g, r, wbox(r, x + S(10), y + S(7), x + S(18), y + S(12), 0.2), K.iron, K.ink, 0.8);
+}
+function sleeve(g, r, pts, K, seed) {
+  inked(g, r, wpoly(r, pts, 0.8), seed % 2 ? K.cloth : K.paper, K.ink, 1.2);
+  const m = quadMap(...pts);
+  So(
+    g,
+    wpoly(r, [m(0.12, 0.14), m(0.88, 0.14), m(0.88, 0.5), m(0.12, 0.5)], 0.6),
+    seed % 2 ? K.gold : K.ink,
+    0.85,
+  );
+  const c = m(0.62, 0.7);
+  So(g, wring(r, c[0], c[1], 9, 9, 0.6, 10), K.red, 0.9, TREM);
+}
+function teaCup(groups, g, r, x, y, K, mini) {
+  Wa(g, r, wring(r, x + 4, y + 2, 16, 4, 0.6, 8), K.pool, 0.8, "url(#bk-pool)");
+  inked(
+    g,
+    r,
+    wpoly(
+      r,
+      [
+        [x - 10, y - 22],
+        [x + 10, y - 22],
+        [x + 9, y],
+        [x - 9, y],
+      ],
+      0.6,
+    ),
+    mix(K.stone, K.moss, 0.35),
+    K.ink,
+    1.1,
+  );
+  Ln(g, wring(r, x, y - 22, 10, 2.6, 0.3, 8), K.ink, 0.9, 0.8);
+  if (!mini) steam(groups, r, x, y - 28, K, 2);
+}
+
+function andon(g, lg, r, x, y, K, lit) {
+  inked(
+    g,
+    r,
+    wpoly(
+      r,
+      [
+        [x - 15, y - 54],
+        [x + 15, y - 54],
+        [x + 16, y],
+        [x - 16, y],
+      ],
+      0.6,
+    ),
+    lit > 0.3 ? mix(K.paper, K.glow, 0.5) : K.fusuma,
+    K.ink,
+    1.2,
+  );
+  for (const v of [-0.33, 0.33])
+    Ln(g, wseg(r, [x + v * 30, y - 54], [x + v * 32, y], 0.3, 2), K.woodDk, 0.8, 0.7, true);
+  Ln(g, wseg(r, [x - 15, y - 27], [x + 16, y - 27], 0.3, 2), K.woodDk, 0.8, 0.7, true);
+  [
+    [-18, -58],
+    [18, -58],
+  ].forEach(([a, b]) =>
+    Ln(g, wseg(r, [x + a, y + b], [x + a * 0.95, y + 6], 0.3, 2), K.woodDk, 2.2, 0.95, true),
+  );
+  if (lit > 0.05) {
+    lampGlow(lg, r, x, y - 28, 90, 60, K, lit);
+    So(
+      lg,
+      wpoly(
+        r,
+        [
+          [x - 14, y - 52],
+          [x + 14, y - 52],
+          [x + 15, y - 2],
+          [x - 15, y - 2],
+        ],
+        0.4,
+      ),
+      K.glow,
+      0.55 * lit,
+    );
+  }
+}
+
+function seasonLook(K, sk) {
+  const s = sk || "aki";
+  return {
+    s,
+    snow: s === "fuyu",
+    ground: {
+      haru: mix(K.moss, "#a9c27a", 0.18),
+      natsu: mix(K.moss, K.mossDk, 0.3),
+      aki: mix(mix(K.moss, K.mossDk, 0.25), K.earth, 0.16),
+      fuyu: mix(K.moss, K.paper, 0.72),
+    }[s],
+    mound:
+      s === "fuyu"
+        ? mix(K.mossDk, K.paper, 0.35)
+        : s === "aki"
+          ? mix(K.mossDk, K.earth, 0.15)
+          : K.mossDk,
+    crown: {
+      haru: { maple: "#e7b3bd", redWarmer: "#f4dade" },
+      natsu: { maple: mix(K.mossDk, "#4c7a30", 0.45), redWarmer: mix(K.moss, "#9cc25a", 0.4) },
+      aki: {},
+      fuyu: null,
+    }[s],
+    fall: { haru: "#efc4cc", natsu: null, aki: K.maple, fuyu: "#f6f4ee" }[s],
+    blind: { haru: 236, natsu: 300, aki: 236, fuyu: 0 }[s],
+    chime: { haru: "風", natsu: "涼" }[s] || null,
+  };
+}
+const SNOW = "#f5f3ec";
+function snowCap(g, r, pts, w) {
+  Br(g, r, pts, w, SNOW, 0.97, { blunt: true, tip: 0.4 });
+  Ln(
+    g,
+    wline(
+      r,
+      pts.map(([x, y]) => [x, y + w * 0.35]),
+      0.3,
+    ),
+    "#9fb0c4",
+    0.7,
+    0.5,
+  );
+}
+function arcTop(cx, cy, rx, ry, n) {
+  const p = [];
+  for (let i = 0; i <= (n || 6); i++) {
+    const a = Math.PI * (1.08 + (i / (n || 6)) * 0.84);
+    p.push([cx + Math.cos(a) * rx, cy + Math.sin(a) * ry]);
+  }
+  return p;
+}
+
+function falling(g, r, kind, color, n, x0, x1, y0, y1) {
+  for (let k = 0; k < n; k++) {
+    const x = lerp(x0, x1, r()),
+      y = lerp(y0, y1, r()),
+      a = r() * 3;
+    if (kind === "fuyu") {
+      const s = 1.1 + r() * 1.8;
+      So(g, wring(r, x, y, s, s, 0.2, 6), color, 0.75 + r() * 0.25);
+      continue;
+    }
+    const rx = kind === "aki" ? 4 : 3.2,
+      ry = kind === "aki" ? 2.6 : 1.7;
+    So(
+      g,
+      wpoly(
+        r,
+        [
+          [x - rx * Math.cos(a), y - rx * Math.sin(a)],
+          [x + ry * Math.sin(a), y - ry * Math.cos(a)],
+          [x + rx * Math.cos(a), y + rx * Math.sin(a)],
+          [x - ry * Math.sin(a), y + ry * Math.cos(a)],
+        ],
+        0.4,
+      ),
+      color,
+      0.8 + r() * 0.2,
+      TREM,
+    );
+  }
+}
+// small celadon burner
+function koro(groups, g, r, x, y, K, mini, burnt) {
+  Wa(g, r, wring(r, x + 3, y + 2, 22, 5, 0.6, 8), K.pool, 0.8, "url(#bk-pool)");
+  const body = `M${x - 17} ${y - 13} Q${x - 19} ${y - 1} ${x - 8} ${y + 1} L${x + 8} ${y + 1} Q${x + 19} ${y - 1} ${x + 17} ${y - 13} Z`;
+  [
+    [-11, 1],
+    [0, 3],
+    [11, 1],
+  ].forEach(([dx, dy]) =>
+    inked(
+      g,
+      r,
+      wbox(r, x + dx - 2, y + dy - 2, x + dx + 2, y + dy + 3, 0.2),
+      mix(K.mountLt, K.moss, 0.3),
+      K.ink,
+      0.8,
+    ),
+  );
+  So(g, body, mix(mix(K.mountLt, K.moss, 0.3), K.paper, 0.2), 1);
+  Ln(g, body, K.ink, 1.1, 0.95);
+  So(g, wring(r, x, y - 13, 17, 4, 0.3, 10), mix(K.stone, K.paper, 0.45), 1);
+  Ln(g, wring(r, x, y - 13, 17, 4, 0.3, 10), K.ink, 0.9, 0.85);
+  const len = 40 * (1 - (burnt ?? 0.35)),
+    tip = [x + 3 + len * 0.12, y - 13 - len];
+  Ln(g, wseg(r, [x + 3, y - 13], tip, 0.2, 1), mix(K.earth, K.ink, 0.25), 1.6, 0.95, true);
+  Ln(
+    g,
+    wline(r, [tip, [tip[0] + 2, tip[1] - 3], [tip[0] + 1, tip[1] - 6]], 0.2),
+    K.stone,
+    1.4,
+    0.8,
+    true,
+  );
+  So(g, wring(r, tip[0], tip[1] + 1, 1.6, 1.6, 0, 6), K.red, 1);
+  So(g, wring(r, x + 6, y - 13, 3, 1, 0.2, 6), K.stone, 0.8);
+  const sm = G({
+    anim: mini ? "none" : "drift 11s ease-in-out infinite",
+    to: `${f1(tip[0])}px ${f1(tip[1])}px`,
+    washO: 0.4,
+  });
+  groups.push(sm);
+  const t0 = tip[1] - 6,
+    pts = [
+      [tip[0] + 1, t0],
+      [tip[0] - 2, t0 - 26],
+      [tip[0] + 3, t0 - 58],
+      [tip[0] - 4, t0 - 92],
+      [tip[0] + 8, t0 - 120],
+      [tip[0] - 2, t0 - 146],
+      [tip[0] - 16, t0 - 160],
+    ];
+  Ln(sm, wline(r, pts.slice(0, 4), 0.6), K.inkSoft, 1.1, 0.55);
+  Ln(sm, wline(r, pts.slice(3), 0.9), K.inkSoft, 0.9, 0.3);
+  Wa(sm, r, mistD(r, tip[0] - 26, tip[0] + 14, t0 - 150, 12), K.inkSoft, 0.25, "url(#bk-bleed)");
+}
+// veranda of old house
+function sceneEngawa(K, hour, mini, sk) {
+  const W = 1100,
+    H = 640,
+    L = hourLight(K, hour, sk),
+    Z = seasonLook(K, sk),
+    groups = [],
+    R = (k) => rng(hash("terrace/engawa/" + k));
+  const { mp } = skyLayer(groups, K, L, "engawa", W, 360);
+  const far = G(),
+    r = R("far");
+  groups.push(far);
+  ridge(far, r, -20, W + 20, 330, 90, Z.snow ? mix(L.far, SNOW, 0.35) : L.far, 0.85);
+  ridge(far, r, 300, W + 20, 365, 55, Z.snow ? mix(L.mid, SNOW, 0.3) : L.mid, 0.9, K.inkSoft);
+  mist(far, r, 260, 1000, 352, 22, mix(L.low, K.paper, 0.4), 0.35 + 0.4 * (L.hc < 9 ? 1 : 0));
+  const gd = G(),
+    rg = R("garden");
+  groups.push(gd);
+  So(gd, wbox(rg, -20, 362, W + 20, H + 20, 3), mix(Z.ground, L.low, 0.08), 1);
+  const mounds = [
+    [880, 398, 64, 24],
+    [1070, 432, 80, 30],
+    [640, 468, 56, 22],
+    [700, 452, 40, 18],
+  ];
+  mounds.forEach(([x, y, a, b]) => {
+    inked(
+      gd,
+      rg,
+      smooth(
+        [
+          [x - a, y + 4],
+          [x - a * 0.7, y - b * 0.8],
+          [x, y - b],
+          [x + a * 0.75, y - b * 0.7],
+          [x + a, y + 4],
+        ],
+        false,
+      ) + " Z",
+      Z.mound,
+      K.ink,
+      1.1,
+    );
+    for (let k = 0; k < 8; k++)
+      Ln(
+        gd,
+        wseg(
+          rg,
+          [x + J(rg, a * 0.7), y - b * 0.4 + J(rg, b * 0.3)],
+          [x + J(rg, a * 0.7) + 4, y - b * 0.4 + J(rg, b * 0.3) - 2],
+          0.2,
+          1,
+        ),
+        K.ink,
+        0.9,
+        0.45,
+        true,
+      );
+  });
+  Wa(
+    gd,
+    rg,
+    mistD(rg, 560, 1120, 420, 60),
+    Z.snow ? K.stone : K.mossDk,
+    Z.snow ? 0.25 : 0.5,
+    "url(#bk-bleed)",
+  );
+  Wa(
+    gd,
+    rg,
+    mistD(rg, 820, 1120, 520, 140),
+    Z.snow ? K.stone : K.mossDk,
+    Z.snow ? 0.2 : 0.45,
+    "url(#bk-bleed)",
+  );
+  Ln(
+    gd,
+    wline(
+      rg,
+      [
+        [860, 395],
+        [950, 430],
+        [1010, 470],
+        [1100, 520],
+      ],
+      1.5,
+    ),
+    K.ink,
+    1,
+    0.35,
+  );
+  const steps = [
+    [900, 440, 26, 10],
+    [960, 474, 30, 11],
+    [1030, 510, 34, 12],
+  ];
+  steps.forEach(([x, y, a, b]) => stone(gd, rg, x, y, a, b, K));
+
+  // tree
+  Br(
+    gd,
+    rg,
+    [
+      [985, 420],
+      [978, 360],
+      [990, 300],
+      [970, 250],
+    ],
+    10,
+    K.ink,
+    0.9,
+    { head: 0.9, tip: 0.5 },
+  );
+  Br(
+    gd,
+    rg,
+    [
+      [982, 330],
+      [1030, 300],
+      [1070, 300],
+    ],
+    5,
+    K.ink,
+    0.85,
+    { tip: 0.3 },
+  );
+  Br(
+    gd,
+    rg,
+    [
+      [985, 290],
+      [940, 262],
+      [900, 262],
+    ],
+    4.5,
+    K.ink,
+    0.85,
+    { tip: 0.3 },
+  );
+  if (Z.crown)
+    maple(
+      gd,
+      rg,
+      985,
+      270,
+      Z.s === "natsu" ? 125 : 115,
+      Z.s === "natsu" ? 260 : Z.s === "haru" ? 210 : 170,
+      Object.assign({}, K, Z.crown),
+    );
+  else {
+    const ends = [
+      [1070, 300],
+      [900, 262],
+      [970, 250],
+      [1030, 302],
+      [945, 264],
+    ];
+    ends.forEach(([x, y], i) => {
+      for (let k = 0; k < 3; k++) {
+        const a = -Math.PI / 2 + (i % 2 ? 0.9 : -0.9) * (0.3 + rg()),
+          l = 26 + rg() * 30;
+        const e = [x + Math.cos(a) * l, y + Math.sin(a) * l];
+        Br(
+          gd,
+          rg,
+          [[x, y], [lerp(x, e[0], 0.5) + J(rg, 4), lerp(y, e[1], 0.5)], e],
+          2.2,
+          K.ink,
+          0.85,
+          { tip: 0.2 },
+        );
+        if (k === 0)
+          snowCap(
+            gd,
+            rg,
+            [
+              [lerp(x, e[0], 0.15), lerp(y, e[1], 0.15) - 2],
+              [lerp(x, e[0], 0.6), lerp(y, e[1], 0.6) - 2],
+            ],
+            2.6,
+          );
+      }
+    });
+    snowCap(
+      gd,
+      rg,
+      [
+        [990, 327],
+        [1030, 297],
+        [1068, 296],
+      ],
+      3.4,
+    );
+    snowCap(
+      gd,
+      rg,
+      [
+        [978, 287],
+        [940, 259],
+        [904, 258],
+      ],
+      3.2,
+    );
+  }
+  const lights = G({ washO: 1 }),
+    rl = R("lights");
+  lantern(gd, rg, 820, 452, 0.62, K, L.lamp > 0.5);
+  if (Z.snow) {
+    mounds.forEach(([x, y, a, b]) =>
+      snowCap(
+        gd,
+        rg,
+        [
+          [x - a * 0.8, y - b * 0.35],
+          [x - a * 0.5, y - b * 0.85],
+          [x, y - b - 1],
+          [x + a * 0.55, y - b * 0.78],
+          [x + a * 0.8, y - b * 0.3],
+        ],
+        b * 0.5,
+      ),
+    );
+    steps.forEach(([x, y, a, b]) => snowCap(gd, rg, arcTop(x, y - 1, a * 0.85, b * 0.9), b * 0.55));
+    snowCap(
+      gd,
+      rg,
+      [
+        [802, 404],
+        [811, 399],
+        [820, 391],
+        [829, 399],
+        [838, 404],
+      ],
+      5,
+    );
+  }
+  // house
+  const hs = G(),
+    rh = R("house");
+  groups.push(hs);
+  const eave = (x) => lerp(70, 22, (x + 10) / 1120),
+    beam = (x) => lerp(108, 74, (x + 10) / 820);
+  inked(
+    hs,
+    rh,
+    wpoly(
+      rh,
+      [
+        [-10, -10],
+        [W + 10, -10],
+        [W + 10, eave(W + 10)],
+        [-10, eave(-10)],
+      ],
+      1,
+    ),
+    mix(K.woodDk, K.ink, 0.25),
+    K.ink,
+    1.4,
+  );
+  for (let x = 20; x < W; x += 38) {
+    Ln(hs, wseg(rh, [x, eave(x) - 2], [x - 34, -10], 0.6, 2), K.ink, 2.2, 0.6, true);
+    inked(hs, rh, wbox(rh, x - 4, eave(x) - 7, x + 4, eave(x) + 1, 0.4), K.woodLt, K.ink, 0.8);
+  }
+  if (Z.snow) {
+    snowCap(
+      hs,
+      rh,
+      [
+        [-10, eave(-10) + 1],
+        [360, eave(360) + 2],
+        [740, eave(740) + 1],
+        [W + 10, eave(W + 10) + 2],
+      ],
+      7,
+    );
+    for (let x = 40; x < W; x += 52 + rh() * 40) {
+      const y = eave(x) + 3,
+        l = 8 + rh() * 22;
+      So(
+        hs,
+        wpoly(
+          rh,
+          [
+            [x - 2.5, y],
+            [x + 2.5, y],
+            [x + 0.3, y + l],
+          ],
+          0.2,
+        ),
+        mix(SNOW, "#bcd0e2", 0.4),
+        0.95,
+      );
+      Ln(hs, wseg(rh, [x - 2, y], [x, y + l], 0.1, 1), "#8fa3ba", 0.6, 0.6, true);
+    }
+  }
+  const fl = { A: [-10, 548], B: [835, 490], C: [912, H + 10], D: [-10, H + 10] },
+    edge = (x) => lerp(548, 490, (x + 10) / 845);
+  inked(hs, rh, wbox(rh, -10, beam(-10) - 22, 140, 548, 0.8), K.fusuma, K.ink, 1.2);
+  for (let y = beam(-10); y < 548; y += 46)
+    Ln(hs, wseg(rh, [-10, y], [140, y - 6], 0.4, 2), K.woodDk, 0.9, 0.7, true);
+  for (let x = 18; x < 140; x += 34)
+    Ln(hs, wseg(rh, [x, beam(x) - 18], [x, 546], 0.4, 3), K.woodDk, 0.9, 0.7, true);
+  if (L.lamp > 0.05) So(lights, wbox(rl, -8, beam(-10) - 18, 136, 544, 0.6), K.glow, 0.5 * L.lamp);
+  inked(
+    hs,
+    rh,
+    wpoly(
+      rh,
+      [
+        [-10, beam(-10) - 14],
+        [840, beam(840) - 12],
+        [840, beam(840) + 4],
+        [-10, beam(-10) + 6],
+      ],
+      0.6,
+    ),
+    K.wood,
+    K.ink,
+    1.3,
+  );
+  [
+    [150, 26],
+    [790, 16],
+  ].forEach(([x, w]) =>
+    inked(
+      hs,
+      rh,
+      wbox(rh, x - w / 2, beam(x) - 10, x + w / 2, edge(x) + 4, 0.6),
+      x < 400 ? K.wood : mix(K.wood, K.ink, 0.1),
+      K.ink,
+      1.4,
+    ),
+  );
+  // reed blind
+  const sx0 = 168,
+    sx1 = 470,
+    sb = Z.blind || beam(sx0) + 20;
+  if (Z.blind) {
+    Wa(
+      hs,
+      rh,
+      wpoly(
+        rh,
+        [
+          [sx0, beam(sx0) + 4],
+          [sx1, beam(sx1) + 4],
+          [sx1, sb - 6],
+          [sx0, sb - 2],
+        ],
+        0.6,
+      ),
+      K.bamboo,
+      0.55,
+    );
+    for (let y = 0; y < sb - beam(sx0) - 6; y += 4.5)
+      Ln(
+        hs,
+        wseg(rh, [sx0, beam(sx0) + 6 + y], [sx1, beam(sx1) + 6 + y], 0.3, 3),
+        mix(K.bamboo, K.ink, 0.35),
+        0.6,
+        0.5,
+        true,
+      );
+  }
+  inked(
+    hs,
+    rh,
+    wpoly(
+      rh,
+      [
+        [sx0 - 4, sb - 8],
+        [sx1 + 4, sb - 12],
+        [sx1 + 4, sb + 6],
+        [sx0 - 4, sb + 10],
+      ],
+      0.8,
+    ),
+    K.bamboo,
+    K.ink,
+    1.2,
+  );
+  [240, 400].forEach((x) => cordTie(hs, rh, x, sb - 1, 0.6, K));
+  // wind chime
+  const fx = 610,
+    fy = beam(fx);
+  if (Z.chime) {
+    const chime = G({
+        anim: mini ? "none" : "sway 4.5s ease-in-out infinite",
+        to: `${fx}px ${fy}px`,
+      }),
+      rc = R("chime");
+    groups.push(chime);
+    Ln(chime, wseg(rc, [fx, fy], [fx, fy + 52], 0.3, 2), K.ink, 0.8, 0.8, true);
+    inked(
+      chime,
+      rc,
+      smooth(
+        [
+          [fx - 15, fy + 70],
+          [fx - 13, fy + 56],
+          [fx, fy + 50],
+          [fx + 13, fy + 56],
+          [fx + 15, fy + 70],
+        ],
+        false,
+      ) + " Z",
+      mix(K.mountLt, K.paper, 0.4),
+      K.ink,
+      1.1,
+    );
+    Ln(chime, wseg(rc, [fx, fy + 62], [fx, fy + 92], 0.3, 2), K.ink, 0.7, 0.8, true);
+    inked(chime, rc, wbox(rc, fx - 7, fy + 92, fx + 7, fy + 140, 0.4), K.paper, K.ink, 0.9);
+    Tx(chime, {
+      t: Z.chime,
+      tr: `translate(${fx} ${fy + 114})`,
+      fs: 12,
+      font: "'Yuji Syuku', serif",
+      fill: K.red,
+      o: 0.9,
+    });
+  } else inked(hs, rh, wbox(rh, fx - 3, fy - 2, fx + 3, fy + 5, 0.2), K.iron, K.ink, 0.8);
+  // floor
+  const fg = G(),
+    rf = R("floor");
+  groups.push(fg);
+  const m = quadMap(fl.A, fl.B, fl.C, fl.D);
+  slab(fg, rf, wpoly(rf, [fl.A, fl.B, fl.C, fl.D], 1), K.woodLt, K);
+  for (let k = 1; k < 9; k++) {
+    const t = Math.pow(k / 9, 1.3);
+    Ln(fg, wline(rf, [m(0, t), m(0.5, t), m(1, t)], 0.6), K.woodDk, 0.9, 0.6, true);
+  }
+  for (let k = 0; k < 7; k++) {
+    const s = rf(),
+      t = Math.floor(rf() * 8) / 9;
+    const a = m(s, Math.pow(t, 1.3)),
+      b = m(s + 0.01, Math.pow(t + 1 / 9, 1.3));
+    Ln(fg, wseg(rf, a, b, 0.3, 1), K.woodDk, 0.8, 0.55, true);
+  }
+  Ln(fg, wline(rf, [fl.A, m(0.5, 0), fl.B], 0.6), K.ink, 2.4, 0.9);
+  const reach = L.up ? lerp(0.85, 0.15, L.alt) : 0;
+  So(
+    fg,
+    wpoly(rf, [m(0, reach), m(1, reach), m(1, 1.02), m(0, 1.02)], 1),
+    K.ink,
+    0.13 * (1 - L.night),
+  );
+  if (L.up)
+    Wa(
+      fg,
+      rf,
+      wpoly(rf, [m(0, 0.01), m(1, 0.01), m(1, reach), m(0, reach)], 1),
+      mix(L.sunC, K.paper, 0.4),
+      0.35 * (0.4 + L.gold),
+      "url(#bk-bleed)",
+    );
+  if (Z.snow) snowCap(fg, rf, [m(0.62, 0.02), m(0.8, 0.01), m(0.99, 0.015), m(1, 0.12)], 4);
+  inked(fg, rf, wring(rf, 960, 600, 46, 16, 2, 10), K.stone, K.ink, 1.3);
+  if (Z.snow) snowCap(fg, rf, arcTop(960, 599, 40, 14), 6);
+  [
+    [940, 594],
+    [968, 602],
+  ].forEach(([x, y]) => {
+    inked(
+      fg,
+      rf,
+      wpoly(
+        rf,
+        [
+          [x - 9, y - 4],
+          [x + 9, y - 6],
+          [x + 11, y + 2],
+          [x - 7, y + 4],
+        ],
+        0.4,
+      ),
+      K.wood,
+      K.ink,
+      1,
+    );
+    Ln(
+      fg,
+      wline(
+        rf,
+        [
+          [x - 5, y - 2],
+          [x + 1, y - 5],
+          [x + 6, y - 2],
+        ],
+        0.2,
+      ),
+      K.red,
+      1.4,
+      0.95,
+      true,
+    );
+  });
+  // things on the boards
+  const ob = G(),
+    ro = R("things");
+  groups.push(ob);
+  if (L.up) {
+    const dx = Math.max(-260, Math.min(260, (150 - lerp(-80, W + 80, L.st)) * 0.5 * (1.2 - L.alt)));
+    Wa(
+      ob,
+      ro,
+      wpoly(
+        ro,
+        [
+          [137, edge(137) + 2],
+          [163, edge(163) + 2],
+          [163 + dx, edge(163) + 70 * (1 - L.alt) + 12],
+          [137 + dx, edge(137) + 70 * (1 - L.alt) + 16],
+        ],
+        1,
+      ),
+      K.ink,
+      0.22 * (1 - L.night),
+      "url(#bk-bleed)",
+    );
+  }
+  inked(
+    ob,
+    ro,
+    wpoly(
+      ro,
+      [
+        [208, 572],
+        [318, 560],
+        [338, 612],
+        [218, 626],
+      ],
+      1.5,
+    ),
+    K.cloth,
+    K.ink,
+    1.3,
+  );
+  Ln(ob, wseg(ro, [262, 592], [278, 590], 0.4, 1), K.ink, 1.4, 0.7, true);
+  sleeve(
+    ob,
+    ro,
+    [
+      [168, 488],
+      [238, 476],
+      [244, 548],
+      [174, 556],
+    ],
+    K,
+    1,
+  );
+  sleeve(
+    ob,
+    ro,
+    [
+      [400, 600],
+      [462, 592],
+      [470, 630],
+      [404, 638],
+    ],
+    K,
+    0,
+  );
+  teaCup(groups, ob, ro, 360, 586, K, mini);
+  koro(groups, ob, ro, 424, 566, K, mini);
+  recordPlayer(ob, ro, 548, 548, 1, K, L);
+  andon(ob, lights, ro, 712, 528, K, L.lamp);
+  // what the season puts in the air, and what has come down on the boards
+  if (Z.fall) {
+    const air = G(),
+      ra = R("air/" + Z.s);
+    groups.push(air);
+    const n = Z.snow ? (mini ? 90 : 160) : mini ? 14 : 24;
+    falling(air, ra, Z.s, Z.fall, n, Z.snow ? 0 : 560, W, Z.snow ? 60 : 200, Z.snow ? H : 560);
+    if (!Z.snow) {
+      falling(air, ra, Z.s, Z.fall, 9, 560, 1100, 380, 560);
+      for (let k = 0; k < 5; k++) {
+        const [x, y] = m(0.55 + ra() * 0.4, 0.05 + ra() * 0.35);
+        falling(air, ra, Z.s, Z.fall, 1, x, x + 2, y, y + 2);
+      }
+    }
+  }
+  if (L.lamp > 0.5) lampGlow(lights, rl, 820, 410, 34, 26, K, L.lamp);
+  if (L.night > 0.4 && Z.s === "natsu") fireflies(lights, rl, 860, 1090, 380, 500, 9, L.night);
+  veil(groups, W, H, L);
+  groups.push(lights);
+  if (L.mUp && L.night > 0.3 && mp[0] > 860) {
+    const lm = G({ washO: 1 });
+    moonDisc(lm, rl, mp[0], mp[1], 17, 0.55, L, L.night * 0.9);
+    groups.push(lm);
+  }
+  if (!mini) ensoDial(groups, K, L, 1030, 150, 32);
+  return { W, H, groups, clips: [] };
+}
+
+// cards
+function washi(g, r, x, y, w, h, K, tilt) {
+  const pts = [],
+    tl = tilt || 0,
+    P = (px, py) => [x + px + py * tl, y + py - px * tl];
+  for (let i = 0; i <= 10; i++) pts.push(P((w * i) / 10 + J(r, 1.5), J(r, 1.2)));
+  for (let i = 1; i <= 8; i++) pts.push(P(w + J(r, 1.6), (h * i) / 9));
+  for (let i = 0; i <= 22; i++)
+    pts.push(P(w - (w * i) / 22, h + J(r, 5) + Math.sin(i * 1.7) * 2.5));
+  for (let i = 8; i >= 1; i--) pts.push(P(J(r, 1.6), (h * i) / 9));
+  const d = poly(pts);
+  Wa(g, r, poly(pts.map(([a, b]) => [a + 7, b + 9])), K.pool, 0.9, "url(#bk-pool)");
+  So(g, d, mix(K.paper, K.gold, 0.08), 1, TREM);
+  Wa(g, r, d, mix(K.paper, K.tape || K.gold, 0.25), 0.35, "url(#bk-bleed)");
+  for (let k = 0; k < Math.round((w * h) / 9000); k++) {
+    const a = P(r() * w, r() * h);
+    Ln(
+      g,
+      wline(
+        r,
+        [a, [a[0] + 6 + r() * 10, a[1] + J(r, 4)], [a[0] + 12 + r() * 12, a[1] + J(r, 5)]],
+        0.5,
+      ),
+      K.inkSoft,
+      0.5,
+      0.18,
+      true,
+    );
+  }
+  Ln(g, d, K.ink, 0.9, 0.55);
+  return P;
+}
+function hanko(g, r, x, y, sz, txt, K) {
+  So(g, wbox(r, x - sz / 2, y - sz / 2, x + sz / 2, y + sz / 2, sz * 0.04), K.red, 0.88, TREM);
+  Tx(g, {
+    t: txt,
+    tr: `translate(${f1(x)} ${f1(y)})`,
+    fs: sz * (txt.length > 1 ? 0.42 : 0.66),
+    font: "'Yuji Syuku', serif",
+    fill: K.paper,
+    wm: txt.length > 1 ? "vertical-rl" : "horizontal-tb",
+  });
+}
+// left-aligned lines
+function para(g, text, x, y, w, fs, K, o) {
+  const max = Math.floor(w / (fs * 0.47)),
+    lines = [""];
+  text.split(" ").forEach((wd) => {
+    if ((lines[lines.length - 1] + " " + wd).trim().length > max) lines.push(wd);
+    else lines[lines.length - 1] = (lines[lines.length - 1] + " " + wd).trim();
+  });
+  lines.forEach((t, i) =>
+    Tx(
+      g,
+      Object.assign(
+        {
+          t,
+          tr: `translate(${f1(x)} ${f1(y + i * fs * 1.45)})`,
+          fs,
+          fill: K.ink,
+          o: 0.85,
+          an: "start",
+        },
+        o || {},
+      ),
+    ),
+  );
+  return y + lines.length * fs * 1.45;
+}
+// object drawn by its own scene code
+function vignette(groups, x, y, s, draw) {
+  const gs = [],
+    g = G();
+  gs.push(g);
+  draw(gs, g);
+  gs.forEach((q) => {
+    q.tf = `translate(${f1(x)}px, ${f1(y)}px) scale(${s})`;
+    q.to = "0px 0px";
+    q.anim = "none";
+    groups.push(q);
+  });
+}
+// frame every card shares
+function cardFrame(groups, K, key, x, y, w, h, jp, en, seal) {
+  const g = G(),
+    r = rng(hash("card/" + key));
+  groups.push(g);
+  washi(g, r, x, y, w, h, K, 0);
+  const pts = [];
+  for (let i = 0; i <= 22; i++) {
+    const a = -2.2 + (i / 22) * 5.6;
+    pts.push([x + 200 + Math.cos(a) * 118, y + 150 + Math.sin(a) * 104]);
+  }
+  BrW(g, r, pts, 20, K.inkSoft, 0.22, { tip: 0.2 });
+  Tx(g, {
+    t: jp,
+    tr: `translate(${f1(x + w - 46)} ${f1(y + 40 + jp.length * 22)})`,
+    fs: 40,
+    font: "'Yuji Syuku', serif",
+    fill: K.ink,
+    wm: "vertical-rl",
+    o: 0.92,
+  });
+  Br(
+    g,
+    r,
+    [
+      [x + w - 28, y + 26],
+      [x + w - 18, y + 36],
+    ],
+    2.6,
+    K.ink,
+    0.7,
+  );
+  Br(
+    g,
+    r,
+    [
+      [x + w - 18, y + 26],
+      [x + w - 28, y + 36],
+    ],
+    2.6,
+    K.ink,
+    0.7,
+  );
+  Tx(g, { t: en, tr: `translate(${f1(x + 36)} ${f1(y + 296)})`, fs: 30, fill: K.ink, an: "start" });
+  Ln(
+    g,
+    wline(
+      r,
+      [
+        [x + 36, y + 318],
+        [x + 200, y + 316],
+        [x + w - 120, y + 319],
+      ],
+      0.8,
+    ),
+    K.ink,
+    1,
+    0.35,
+  );
+  if (seal) hanko(g, r, x + w - 50, y + h - 56, 38, seal, K);
+  const t = G();
+  groups.push(t);
+  return { g: t, r: rng(hash("card/" + key + "/t")), x0: x + 36, w: w - 72, y0: y + 352 };
+}
+function knob(g, r, x, y, jp, en, K, on) {
+  inked(
+    g,
+    r,
+    wring(r, x, y, 21, 21, 1, 10),
+    on ? mix(K.red, K.paper, 0.75) : mix(K.paper, K.stone, 0.25),
+    K.ink,
+    1.1,
+  );
+  Tx(g, {
+    t: jp,
+    tr: `translate(${f1(x)} ${f1(y)})`,
+    fs: 20,
+    font: "'Yuji Syuku', serif",
+    fill: on ? K.red : K.ink,
+  });
+  Tx(g, { t: en, tr: `translate(${f1(x)} ${f1(y + 36)})`, fs: 14, fill: K.ink, o: 0.7 });
+}
+
 export {
   C,
   mix,
@@ -3141,6 +4573,7 @@ export {
   OB,
   gableRoof,
   thatchStrokes,
+  ridge,
   plaque,
   sekiStone,
   stoneBody,
@@ -3159,4 +4592,45 @@ export {
   dashed,
   sceneShelf,
   scenePieceCard,
+  sceneEngawa,
+  hourLight,
+  SEASONS,
+  solarH,
+  SKY,
+  sstep,
+  seasonLook,
+  maple,
+  skyLayer,
+  stars,
+  STARL,
+  skyWash,
+  arcAt,
+  sunDisc,
+  moonDisc,
+  SNOW,
+  snowCap,
+  lantern,
+  arcTop,
+  cordTie,
+  quadMap,
+  slab,
+  sleeve,
+  teaCup,
+  steam,
+  koro,
+  recordPlayer,
+  andon,
+  lampGlow,
+  falling,
+  fireflies,
+  veil,
+  poly,
+  ensoDial,
+  hhmm,
+  washi,
+  hanko,
+  para,
+  vignette,
+  cardFrame,
+  knob,
 };
