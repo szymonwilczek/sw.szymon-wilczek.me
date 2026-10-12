@@ -4497,6 +4497,148 @@ function knob(g, r, x, y, jp, en, K, on) {
   });
   Tx(g, { t: en, tr: `translate(${f1(x)} ${f1(y + 36)})`, fs: 14, fill: K.ink, o: 0.7 });
 }
+// one card for the site
+const CARD = {
+  record: [
+    "蓄音機",
+    "the record player",
+    null,
+    (gs, g, K) => {
+      const r = rng(hash("vig/rec"));
+      recordPlayer(g, r, 0, 0, 1, K, hourLight(K, 17.6, "aki"));
+      sleeve(
+        g,
+        r,
+        [
+          [-118, -26],
+          [-80, -36],
+          [-76, 2],
+          [-114, 10],
+        ],
+        K,
+        1,
+      );
+    },
+    200,
+    168,
+    1.45,
+  ],
+  incense: [
+    "香炉",
+    "incense",
+    "香",
+    (gs, g, K, o) => koro(gs, g, rng(hash("vig/koro")), 0, 0, K, true, o.burnt ?? 0, !o.lit),
+    200,
+    268,
+    1.25,
+  ],
+  tree: [
+    "七十二候",
+    "the season, small",
+    "候",
+    (gs, g, K, o) => {
+      const r = rng(hash("vig/maple")),
+        Z = seasonLook(K, o.season);
+      Br(
+        g,
+        r,
+        [
+          [20, 210],
+          [110, 160],
+          [210, 140],
+          [300, 96],
+        ],
+        7,
+        K.ink,
+        0.9,
+        { head: 0.9, tip: 0.3 },
+      );
+      Br(
+        g,
+        r,
+        [
+          [150, 152],
+          [190, 190],
+          [240, 200],
+        ],
+        3.5,
+        K.ink,
+        0.85,
+        { tip: 0.3 },
+      );
+      if (Z.crown) {
+        const k = Object.assign({}, K, Z.crown);
+        maple(g, r, 230, 120, 70, 70, k);
+        maple(g, r, 210, 196, 40, 30, k);
+      } else {
+        snowCap(
+          g,
+          r,
+          [
+            [40, 196],
+            [110, 156],
+            [210, 136],
+            [296, 92],
+          ],
+          4,
+        );
+      }
+      if (Z.s === "aki")
+        [
+          [110, 60],
+          [140, 44],
+          [170, 32],
+          [126, 76],
+          [150, 90],
+        ].forEach(([gx, gy]) =>
+          Ln(
+            g,
+            wline(
+              r,
+              [
+                [gx - 8, gy + 3],
+                [gx, gy],
+                [gx + 9, gy + 4],
+              ],
+              0.4,
+            ),
+            K.ink,
+            1.6,
+            0.85,
+            true,
+          ),
+        );
+    },
+    40,
+    60,
+    1,
+  ],
+  sky: [
+    "灯籠",
+    "today's sky",
+    "空",
+    (gs, g, K) => lantern(g, rng(hash("vig/lantern")), 0, 0, 1, K, true),
+    200,
+    262,
+    2,
+  ],
+  tea: [
+    "茶",
+    "the tea",
+    "茶",
+    (gs, g, K) => teaCup(gs, g, rng(hash("vig/tea")), 0, 0, K, false),
+    200,
+    230,
+    2.4,
+  ],
+};
+function cardShell(K, key, h, o) {
+  const [jp, en, seal, draw, vx, vy, vs] = CARD[key],
+    groups = [];
+  cardFrame(groups, K, key, 6, 6, 520, h, jp, en, seal);
+  vignette(groups, 6 + vx, 6 + vy, vs, (gs, g) => draw(gs, g, K, o || {}));
+  return { W: 540, H: h + 22, groups, clips: [], y0: 358 };
+}
 
 export {
   C,
@@ -4635,4 +4777,6 @@ export {
   vignette,
   cardFrame,
   knob,
+  cardShell,
+  CARD,
 };

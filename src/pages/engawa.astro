@@ -67,10 +67,20 @@ const SEASON = pct(1010, 192, 40, 30);
 <script>
   import { sceneOf } from "../scripts/engawa/scene";
   import { dialOf } from "../scripts/engawa/dial";
+  import { cardsOf } from "../scripts/engawa/cards";
 
   const fig = document.querySelector<HTMLElement>(".engawa")!;
   const scene = sceneOf(fig.querySelector("svg")!);
   dialOf(fig, scene);
+
+  const cards = cardsOf(fig, scene);
+  fig.querySelectorAll<HTMLButtonElement>(".thing").forEach((b) =>
+    b.addEventListener("click", () => {
+      const key = b.dataset.card!;
+      if (key === "geta") location.href = "/map/";
+      else cards.show(key, b);
+    }),
+  );
 </script>
 
 <style>
@@ -157,6 +167,68 @@ const SEASON = pct(1010, 192, 40, 30);
     50% {
       transform: skewX(-4deg) translateX(5px);
     }
+  }
+
+  .engawa :global(.cards) {
+    position: fixed;
+    inset: 0;
+    z-index: 20;
+    pointer-events: none;
+  }
+
+  .engawa :global(.card) {
+    position: absolute;
+    top: 50%;
+    right: max(1rem, calc(50vw - 36rem));
+    height: min(94vh, 762px);
+    aspect-ratio: 540 / 762;
+    max-width: calc(100vw - 2rem);
+    translate: 0 -50%;
+    container-type: inline-size;
+    pointer-events: auto;
+    outline: none;
+  }
+
+  .engawa :global(.card.in) {
+    animation: card-in 0.5s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  @keyframes card-in {
+    from {
+      opacity: 0;
+      transform: rotate(3deg) translateX(1.5rem);
+    }
+  }
+
+  .engawa :global(.card > svg) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .engawa :global(.card-close) {
+    position: absolute;
+    top: 2%;
+    right: 2.5%;
+    width: 9%;
+    aspect-ratio: 1;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+  }
+
+  .engawa :global(.card-body) {
+    position: absolute;
+    top: 47%;
+    left: 7.8%;
+    right: 7.8%;
+    bottom: 5%;
+    overflow: auto;
+    font-size: 3.6cqw;
+    line-height: 1.45;
+    color: var(--fg-main);
   }
 
   @media (prefers-reduced-motion: reduce) {
