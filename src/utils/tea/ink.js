@@ -4304,7 +4304,7 @@ function sceneEngawa(K, hour, mini, sk, o = {}) {
   teaCup(groups, ob, ro, 360, 586, K, mini);
   koro(groups, ob, ro, 424, 566, K, mini, o.burnt, o.unlit);
   recordPlayer(ob, ro, 548, 548, 1, K, L);
-  andon(ob, lights, ro, 712, 528, K, L.lamp);
+  andon(ob, lights, ro, 712, 528, K, o.lamp ?? L.lamp);
   // what the season puts in the air, and what has come down on the boards
   if (Z.fall) {
     const air = G(),
@@ -4627,9 +4627,9 @@ const CARD = {
     "the tea",
     "茶",
     (gs, g, K) => teaCup(gs, g, rng(hash("vig/tea")), 0, 0, K, false),
-    200,
-    230,
-    2.4,
+    210,
+    280,
+    2,
   ],
 };
 function cardShell(K, key, h, o) {

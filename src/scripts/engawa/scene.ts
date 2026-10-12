@@ -7,10 +7,18 @@ export interface View {
   hourSet: number | null;
   seasonSet: Season | null;
   incense: { burnt: number; lit: boolean } | null;
+  lamp: number | null;
 }
 
 export function sceneOf(svg: SVGSVGElement) {
-  const view: View = { hour: 0, season: "aki", hourSet: null, seasonSet: null, incense: null };
+  const view: View = {
+    hour: 0,
+    season: "aki",
+    hourSet: null,
+    seasonSet: null,
+    incense: null,
+    lamp: null,
+  };
   const listeners: ((v: View) => void)[] = [];
 
   function draw() {
@@ -23,6 +31,7 @@ export function sceneOf(svg: SVGSVGElement) {
       sun,
       burnt: inc ? inc.burnt : 0,
       unlit: !inc?.lit,
+      lamp: view.lamp ?? undefined,
     });
     svg.innerHTML = toSvg(out, true);
     listeners.forEach((f) => f(view));
