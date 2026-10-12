@@ -3495,7 +3495,7 @@ function fireflies(g, r, x0, x1, y0, y1, n, op) {
   }
 }
 
-function recordPlayer(g, r, x, y, s, K, L) {
+function recordPlayer(g, r, x, y, s, K, L, disc = 0) {
   const S = (v) => v * s,
     P = (a, b) => [x + S(a), y + S(b)];
   Wa(g, r, wring(r, x + S(10), y + S(22), S(98), S(14), 1, 10), K.pool, 0.8, "url(#bk-pool)");
@@ -3514,22 +3514,201 @@ function recordPlayer(g, r, x, y, s, K, L) {
       0.45,
       true,
     );
-  So(g, wring(r, x - S(4), y + S(8), S(13), S(3.2), 0.2, 10), K.red, 0.95);
+  So(g, wring(r, x - S(4), y + S(8), S(13), S(3.2), 0.2, 10), K[DISC_LOOK[disc][1]], 0.95);
+  So(g, wring(r, x - S(4), y + S(8), S(1.4), S(0.6), 0.1, 6), K.ink, 1);
   Ln(g, wline(r, [P(70, -2), P(66, 6), P(40, 9), P(16, 10)], 0.3), K.ink, S(2.4), 0.95, true);
   inked(g, r, wring(r, x + S(70), y - S(2), S(6), S(3), 0.2, 8), K.iron, K.ink, 1);
   inked(g, r, wbox(r, x + S(10), y + S(7), x + S(18), y + S(12), 0.2), K.iron, K.ink, 0.8);
 }
-function sleeve(g, r, pts, K, seed) {
-  inked(g, r, wpoly(r, pts, 0.8), seed % 2 ? K.cloth : K.paper, K.ink, 1.2);
-  const m = quadMap(...pts);
-  So(
-    g,
-    wpoly(r, [m(0.12, 0.14), m(0.88, 0.14), m(0.88, 0.5), m(0.12, 0.5)], 0.6),
-    seed % 2 ? K.gold : K.ink,
-    0.85,
+// records in the crate, in the order the house radio keeps them (discs.ts)
+const DISC_LOOK = [
+  ["cloth", "gold"],
+  ["red", "red"],
+  ["paper", "paper"],
+  ["glowSoft", "glowSoft"],
+  ["fusuma", "fusuma"],
+];
+
+// a sleeve, standing or lying; each record has a face of its own
+function sleeve(g, r, pts, K, disc) {
+  const q = quadMap(...pts),
+    d = wpoly(r, pts, 0.6),
+    fill = K[DISC_LOOK[disc][0]],
+    P = (u, v) => q(u, v);
+  So(g, d, mix(fill, K.paper, 0.15), 1);
+  Wa(g, r, d, fill, 0.5);
+  if (disc === 0) {
+    So(g, wring(r, ...P(0.62, 0.36), 9, 9, 0.5, 10), K.gold, 0.95);
+    Ln(g, wline(r, [P(0.12, 0.78), P(0.5, 0.74), P(0.88, 0.79)], 0.5), K.paper, 0.9, 0.6);
+  } else if (disc === 1) {
+    for (let k = 0; k < 4; k++)
+      Ln(
+        g,
+        wline(r, [P(0.1, 0.2 + k * 0.17), P(0.9, 0.18 + k * 0.17)], 0.5),
+        K.paper,
+        1.4,
+        0.55,
+        true,
+      );
+  } else if (disc === 2) {
+    Ln(
+      g,
+      wline(r, [P(0.2, 0.75), P(0.4, 0.3), P(0.55, 0.62), P(0.8, 0.22)], 0.8),
+      K.ink,
+      2.4,
+      0.85,
+    );
+  } else if (disc === 3) {
+    So(g, wpoly(r, [P(0, 0.5), P(1, 0.5), P(1, 1), P(0, 1)], 0.3), K.cloth, 0.55);
+    So(g, wring(r, ...P(0.5, 0.48), 10, 10, 0.4, 12), K.red, 0.85);
+    for (let k = 0; k < 3; k++)
+      Ln(
+        g,
+        wline(r, [P(0.08, 0.6 + k * 0.1), P(0.92, 0.6 + k * 0.1)], 0.3),
+        K.paper,
+        0.9,
+        0.6,
+        true,
+      );
+    Ln(g, wline(r, [P(0.12, 1), P(0.2, 0.55), P(0.26, 0.25)], 0.4), K.ink, 1.4, 0.9);
+    Ln(
+      g,
+      `M${P(0.26, 0.25)} Q${P(0.4, 0.15)} ${P(0.5, 0.28)} M${P(0.26, 0.25)} Q${P(0.12, 0.12)} ${P(0.02, 0.3)}`,
+      K.ink,
+      1.2,
+      0.9,
+      true,
+    );
+  } else {
+    Ln(
+      g,
+      wpoly(r, [P(0.12, 0.14), P(0.88, 0.14), P(0.88, 0.5), P(0.12, 0.5)], 0.4),
+      K.ink,
+      0.8,
+      0.7,
+    );
+    for (let k = 0; k < 3; k++)
+      Ln(
+        g,
+        wline(r, [P(0.2, 0.24 + k * 0.08), P(0.8 - k * 0.1, 0.24 + k * 0.08)], 0.2),
+        K.ink,
+        1.1,
+        0.75,
+        true,
+      );
+    Ln(g, wline(r, [P(0.15, 0.85), P(0.6, 0.85)], 0.2), K.ink, 0.8, 0.6, true);
+    So(g, wring(r, ...P(0.75, 0.75), 5, 5, 0.3, 8), K.red, 0.85);
+  }
+  Ln(g, d, K.ink, 1.1);
+}
+
+// wooden crate of records at the far left of the boards
+const inCrate = (k) => {
+  const x = 28 + k * 5,
+    y = 552 - k * 13;
+  return [
+    [x, y],
+    [x + 78, y - 4],
+    [x + 80, y + 58],
+    [x + 2, y + 62],
+  ];
+};
+function crate(groups, r, K, disc) {
+  const back = G(),
+    x0 = 18,
+    x1 = 118,
+    y0 = 566,
+    y1 = 628;
+  groups.push(back);
+  Wa(back, r, wring(r, 72, 634, 70, 10, 1, 10), K.pool, 0.8, "url(#bk-pool)");
+  slab(
+    back,
+    r,
+    wpoly(
+      r,
+      [
+        [x0 + 10, y0 - 12],
+        [x1 + 8, y0 - 18],
+        [x1 + 4, y0 + 6],
+        [x0 + 6, y0 + 10],
+      ],
+      0.5,
+    ),
+    K.woodDk,
+    K,
+    1.1,
   );
-  const c = m(0.62, 0.7);
-  So(g, wring(r, c[0], c[1], 9, 9, 0.6, 10), K.red, 0.9, TREM);
+  for (let k = DISC_LOOK.length - 1; k >= 0; k--) {
+    const g = G({ op: k === disc ? 0.18 : 1 });
+    groups.push(g);
+    sleeve(g, r, inCrate(k), K, k);
+  }
+  const g = G();
+  groups.push(g);
+  const d = wpoly(
+    r,
+    [
+      [x0, y0 + 4],
+      [x1, y0 - 2],
+      [x1 + 2, y1 - 4],
+      [x0 + 2, y1],
+    ],
+    0.5,
+  );
+  slab(g, r, d, K.wood, K, 1.3);
+  slab(
+    g,
+    r,
+    wpoly(
+      r,
+      [
+        [x1, y0 - 2],
+        [x1 + 8, y0 - 18],
+        [x1 + 10, y1 - 20],
+        [x1 + 2, y1 - 4],
+      ],
+      0.5,
+    ),
+    K.woodDk,
+    K,
+    1.1,
+  );
+  Ln(
+    g,
+    wline(
+      r,
+      [
+        [x0 + 1, y0 + 24],
+        [x1 + 1, y0 + 19],
+      ],
+      0.4,
+    ),
+    K.woodDk,
+    0.9,
+    0.6,
+  );
+  Ln(
+    g,
+    wline(
+      r,
+      [
+        [x0 + 1, y0 + 44],
+        [x1 + 2, y0 + 39],
+      ],
+      0.4,
+    ),
+    K.woodDk,
+    0.9,
+    0.6,
+  );
+  So(g, wring(r, (x0 + x1) / 2, y0 + 12, 12, 3.2, 0.3, 10), K.ink, 0.8);
+  Tx(g, {
+    t: "盤",
+    tr: `translate(${x0 + 14} ${y1 - 12}) rotate(-3)`,
+    fs: 10,
+    font: "'Yuji Syuku', serif",
+    fill: K.red,
+  });
 }
 function teaCup(groups, g, r, x, y, K, mini) {
   Wa(g, r, wring(r, x + 4, y + 2, 16, 4, 0.6, 8), K.pool, 0.8, "url(#bk-pool)");
@@ -3728,8 +3907,7 @@ function koro(groups, g, r, x, y, K, mini, burnt, unlit) {
   const w = (i) => 0.6 + i * 0.55,
     left = spine.map(([sx, sy], i) => [sx - w(i), sy]),
     right = spine.map(([sx, sy], i) => [sx + w(i) * 0.6, sy]).reverse(),
-    d = (f) =>
-      `${wline(r, left.map(f), 0.3)} L${wline(r, right.map(f), 0.3).slice(1)} Z`,
+    d = (f) => `${wline(r, left.map(f), 0.3)} L${wline(r, right.map(f), 0.3).slice(1)} Z`,
     id = `koro-smoke-${Math.round(tx)}-${Math.round(ty)}`,
     fill = `url(#${id})`,
     defs = `<defs><linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="0" y1="${f1(ty)}" x2="0" y2="${f1(ty - 135)}"><stop offset="0" style="stop-color:${K.inkSoft}" stop-opacity="0.8"/><stop offset="1" style="stop-color:${K.inkSoft}" stop-opacity="0"/></linearGradient></defs>`;
@@ -4274,29 +4452,18 @@ function sceneEngawa(K, hour, mini, sk, o = {}) {
     ob,
     ro,
     [
-      [168, 488],
-      [238, 476],
-      [244, 548],
-      [174, 556],
-    ],
-    K,
-    1,
-  );
-  sleeve(
-    ob,
-    ro,
-    [
       [400, 600],
       [462, 592],
       [470, 630],
       [404, 638],
     ],
     K,
-    0,
+    o.disc ?? 0,
   );
   teaCup(groups, ob, ro, 360, 586, K, mini);
   koro(groups, ob, ro, 424, 566, K, mini, o.burnt, o.unlit);
-  recordPlayer(ob, ro, 548, 548, 1, K, L);
+  recordPlayer(ob, ro, 548, 548, 1, K, L, o.disc ?? 0);
+  crate(groups, R("crate"), K, o.disc ?? 0);
   andon(ob, lights, ro, 712, 528, K, o.lamp ?? L.lamp);
   // what the season puts in the air, and what has come down on the boards
   if (Z.fall) {
@@ -4509,7 +4676,7 @@ const CARD = {
           [-114, 10],
         ],
         K,
-        1,
+        0,
       );
     },
     200,
