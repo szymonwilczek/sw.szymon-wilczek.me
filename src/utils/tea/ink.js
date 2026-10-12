@@ -4327,7 +4327,7 @@ function sceneEngawa(K, hour, mini, sk, o = {}) {
     moonDisc(lm, rl, mp[0], mp[1], 17, 0.55, L, L.night * 0.9);
     groups.push(lm);
   }
-  if (!mini) ensoDial(groups, K, L, 1030, 150, 32);
+  if (!mini) ensoDial(groups, K, L, 1050, 98, 32);
   return { W, H, groups, clips: [] };
 }
 

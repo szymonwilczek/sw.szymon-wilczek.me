@@ -2,8 +2,8 @@ import { SEASONS, seasonOf } from "../../utils/engawa/sky";
 import type { View } from "./scene";
 
 // enso's centre
-const CX = 1030,
-  CY = 150;
+const CX = 1050,
+  CY = 98;
 
 export function dialOf(fig: HTMLElement, scene: { view: View; draw: () => void }) {
   const dial = fig.querySelector<HTMLButtonElement>(".dial")!;
