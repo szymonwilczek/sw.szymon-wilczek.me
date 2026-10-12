@@ -310,14 +310,14 @@ const BOOK_FONTS = [
                             ))}
                           </svg>
                         )}
-                        {it.books.map((p) => (
+                        {it.books.map((p, i) => (
                           <button
                             type="button"
                             class="bk lying"
                             data-book={p.book.id}
                             aria-label={p.label}
                             aria-pressed={p.book.id === opened?.book.id ? "true" : "false"}
-                            style={`--rot: ${p.rot}deg; margin-left: ${p.x + 5}px`}
+                            style={`--rot: ${p.rot}deg; margin-left: ${p.x + 5}px; --up: ${(it.candle ? it.candle.height - 1 : 0) + it.books.slice(0, i).reduce((h, q) => h + q.spine.height, 0)}px`}
                           >
                             <svg
                               class="spine"
@@ -884,8 +884,8 @@ const BOOK_FONTS = [
   }
 
   .lying .whisper {
-    left: calc(100% + 12px);
-    bottom: 0;
+    left: 4px;
+    bottom: calc(100% + var(--up) + 10px);
     transform: rotate(-2deg);
   }
 
