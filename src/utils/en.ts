@@ -3,10 +3,14 @@ import { hash, rng } from "./stamp";
 
 const f1 = (n: number) => Math.round(n * 10) / 10;
 
-export const SHEETS = {
-  wide: { w: 1000, h: 540, me: [110, 270] as const },
-  narrow: { w: 360, h: 980, me: [180, 50] as const },
-};
+export function sheets(n: number) {
+  const rows = Math.max(1, Math.ceil(n / 3));
+  const wide = 80 + (rows - 1) * 180 + 140;
+  return {
+    wide: { w: 1000, h: wide, me: [110, Math.round(wide / 2)] as const },
+    narrow: { w: 360, h: 150 + (Math.max(1, n) - 1) * 100 + 130, me: [180, 50] as const },
+  };
+}
 
 // how old a thread is
 function age(link: Link, i: number, now: Date) {
@@ -37,8 +41,7 @@ export function threads(links: Link[], now = new Date()) {
     const wy = 80 + row * 180 + (r() - 0.5) * 40 + col * 12;
     const nx = i % 2 ? 250 : 110;
     const ny = 150 + i * 100 + (r() - 0.5) * 16;
-    const { wide, narrow } = SHEETS;
-
+    const { wide, narrow } = sheets(links.length);
     return {
       ...link,
       rot: f1((r() - 0.5) * 5),

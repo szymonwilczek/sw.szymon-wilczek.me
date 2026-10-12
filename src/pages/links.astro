@@ -2,24 +2,25 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Divider from "../components/Divider.astro";
 import { LINKS, RING } from "../data/links";
-import { SHEETS, threads } from "../utils/en";
+import { sheets, threads } from "../utils/en";
 
 const list = threads(LINKS);
 const tied = LINKS.filter((l) => l.mutual).length;
-const { wide, narrow } = SHEETS;
+const { wide, narrow } = sheets(LINKS.length);
 const pct = (n: number, of: number) => `${((n / of) * 100).toFixed(1)}%`;
 ---
 
 <BaseLayout
   title="Links"
-  description="Other small sites I keep going back to, each tied to this one with a red thread."
+  description="My other corners of the web and the small sites I keep going back to, each tied to this one with a red thread."
 >
   <header class="en-head">
     <div>
       <h1>Red threads</h1>
       <p class="lede">
-        Other small sites I keep going back to, each tied to this one with a red thread. The longer
-        ago I tied it, the lower it hangs; a knot at the far end means they tied one back.
+        Where else I live on the web, and the small sites I keep going back to, each tied to this
+        one with a red thread. The longer ago I tied it, the lower it hangs; a knot at the far end
+        means it is tied back here.
       </p>
     </div>
     <p class="tally">
@@ -84,7 +85,8 @@ const pct = (n: number, of: number) => `${((n / of) * 100).toFixed(1)}%`;
               <span class="name">{l.name}</span>
               <span class="domain">{l.domain}</span>
               <span class="how hand">
-                {l.mutual ? "tied both ways" : "my thread only"} · {l.since}
+                {l.mutual ? "tied both ways" : "my thread only"}{" "}
+                <span class="since">· {l.since}</span>
               </span>
             </span>
           </a>
@@ -234,6 +236,7 @@ const pct = (n: number, of: number) => `${((n / of) * 100).toFixed(1)}%`;
     .cards li {
       --l: var(--nl);
       --t: var(--nt);
+      width: 12rem;
     }
   }
 
@@ -300,8 +303,12 @@ const pct = (n: number, of: number) => `${((n / of) * 100).toFixed(1)}%`;
     position: absolute;
     left: var(--l);
     top: var(--t);
-    width: 12rem;
+    width: 14.5rem;
     translate: 0 -50%;
+  }
+
+  .since {
+    white-space: nowrap;
   }
 
   .card {
