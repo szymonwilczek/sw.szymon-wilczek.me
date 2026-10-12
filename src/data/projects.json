@@ -34,7 +34,7 @@
   {
     "title": "Asmodeus",
     "url": "https://github.com/asmod-lang/asmodeus",
-    "excerpt": "Programming language ecosystem built in Rust. Custom bytecode Virtual Machine, Macro Assembler, Debugger, & LSP.",
+    "excerpt": "Programming language in Rust: bytecode VM, assembler, debugger, LSP.",
     "language": "Rust",
     "date": "2025-07-04",
     "pinned": true
@@ -42,7 +42,7 @@
   {
     "title": "Eikon",
     "url": "https://github.com/szymonwilczek/2026_tab_5_wilczek",
-    "excerpt": "Self-hosted photo management with AI auto-tagging and secure sharing. Your memories, your rules.",
+    "excerpt": "Self-hosted photo library with AI tagging and private sharing.",
     "language": "Java",
     "date": "2026-04-21",
     "badge": "academic",
@@ -51,7 +51,7 @@
   {
     "title": "This Portfolio",
     "url": "https://github.com/szymonwilczek/wolfie-portfolio",
-    "excerpt": "You're looking at it right now. Yes, this one. The very website you're reading this on. Meta, isn't it?",
+    "excerpt": "The site you're on right now. Meta, isn't it?",
     "language": "TypeScript",
     "date": "2025-12-13"
   },
@@ -65,14 +65,14 @@
   {
     "title": "Carmenta",
     "url": "https://github.com/szymonwilczek/carmenta",
-    "excerpt": "Emoji picker for Linux that actually works on Wayland. Written in Rust, extremely efficient.",
+    "excerpt": "Emoji picker in Rust that actually works on Wayland.",
     "language": "Rust",
     "date": "2026-01-17"
   },
   {
     "title": "SLAB",
     "url": "https://github.com/szymonwilczek/slab",
-    "excerpt": "High-performance tiling window manager for GNOME. Actor-First philosophy, zero latency.",
+    "excerpt": "Tiling window manager for GNOME: actor-first, zero latency.",
     "language": "TypeScript",
     "date": "2026-01-17",
     "badge": "experiment"
@@ -118,14 +118,14 @@
   {
     "title": "Vim Be Better",
     "url": "https://github.com/szymonwilczek/vim-be-better",
-    "excerpt": "Gamified training plugin for Neovim written in Lua. Train Vim grammar, registers, macros, and code formatting patterns.",
+    "excerpt": "Neovim plugin that trains Vim grammar, registers and macros as a game.",
     "language": "Lua",
     "date": "2025-06-21"
   },
   {
     "title": "Wavelength",
     "url": "https://github.com/szymonwilczek/wavelength",
-    "excerpt": "High-performance desktop communication platform built with C++ and Qt 5. OpenGL rendering engine & real-time WebSockets.",
+    "excerpt": "Desktop chat in C++ and Qt 5, drawn with OpenGL, live over WebSockets.",
     "language": "C++",
     "date": "2023-06-14",
     "archived": true
