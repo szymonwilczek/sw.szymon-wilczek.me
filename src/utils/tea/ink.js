@@ -87,6 +87,9 @@ function groupSvg(g, attrs = "") {
   if (g.groups)
     return `<g class="${g.cls}"${attrs}>${g.groups.map((x) => groupSvg(x)).join("")}</g>`;
   if (g.cls) attrs += ` class="${g.cls}"`;
+
+  // the same at every hour: a page may keep it apart from what the hour redraws
+  if (g.still) attrs += " data-still";
   const style = [
     g.tf !== "none" && `transform:${g.tf}`,
     g.to !== "0px 0px" && `transform-origin:${g.to}`,
@@ -3752,10 +3755,13 @@ function sceneEngawa(K, hour, mini, sk, o = {}) {
   ridge(far, r, -20, W + 20, 330, 90, Z.snow ? mix(L.far, SNOW, 0.35) : L.far, 0.85);
   ridge(far, r, 300, W + 20, 365, 55, Z.snow ? mix(L.mid, SNOW, 0.3) : L.mid, 0.9, K.inkSoft);
   mist(far, r, 260, 1000, 352, 22, mix(L.low, K.paper, 0.4), 0.35 + 0.4 * (L.hc < 9 ? 1 : 0));
-  const gd = G(),
+
+  const gw = G({ still: true }),
+    gg = G(),
+    gd = G({ still: true }),
     rg = R("garden");
-  groups.push(gd);
-  So(gd, wbox(rg, -20, 362, W + 20, H + 20, 3), mix(Z.ground, L.low, 0.08), 1);
+  groups.push(gw, gg, gd);
+  So(gg, wbox(rg, -20, 362, W + 20, H + 20, 3), mix(Z.ground, L.low, 0.08), 1);
   const mounds = [
     [880, 398, 64, 24],
     [1070, 432, 80, 30],
@@ -3973,8 +3979,8 @@ function sceneEngawa(K, hour, mini, sk, o = {}) {
       5,
     );
   }
-  // house
-  const hs = G(),
+  [gw.wash, gd.wash] = [gd.wash, []];
+  const hs = G({ still: true }),
     rh = R("house");
   groups.push(hs);
   const eave = (x) => lerp(70, 22, (x + 10) / 1120),

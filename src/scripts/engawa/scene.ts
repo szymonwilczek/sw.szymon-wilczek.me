@@ -61,6 +61,40 @@ function patcher(svg: SVGSVGElement) {
   };
 }
 
+// drawing as sheets laid one over another, each its own <svg>
+function layered(svg: SVGSVGElement) {
+  const sheets: { svg: SVGSVGElement; patch: (m: string) => void }[] = [];
+  let kinds = "";
+  const kind = (el: string) =>
+    / data-still/.test(head(el)) ? "s" : /animation:/.test(head(el)) ? "m" : "c";
+  return (markup: string) => {
+    const runs: { kind: string; els: string[] }[] = [];
+    split(markup).forEach((el) => {
+      const k = el.startsWith("<defs") ? "c" : kind(el);
+      if (runs.at(-1)?.kind === k) runs.at(-1)!.els.push(el);
+      else runs.push({ kind: k, els: [el] });
+    });
+    const now = runs.map((r) => r.kind).join("");
+    if (now !== kinds) {
+      kinds = now;
+      sheets.splice(0).forEach((s, i) => i && s.svg.remove());
+      runs.forEach((r, i) => {
+        let el = svg;
+        if (i) {
+          el = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+          el.setAttribute("viewBox", svg.getAttribute("viewBox")!);
+          el.setAttribute("class", "sheet");
+          el.setAttribute("aria-hidden", "true");
+          if (r.kind === "s") el.setAttribute("data-still", "");
+          sheets[i - 1].svg.after(el);
+        }
+        sheets.push({ svg: el, patch: patcher(el) });
+      });
+    }
+    runs.forEach((r, i) => sheets[i].patch(r.els.join("")));
+  };
+}
+
 export function sceneOf(svg: SVGSVGElement) {
   const view: View = {
     hour: 0,
@@ -71,7 +105,7 @@ export function sceneOf(svg: SVGSVGElement) {
     lamp: null,
   };
   const listeners: ((v: View) => void)[] = [];
-  const patch = patcher(svg);
+  const patch = layered(svg);
 
   function draw() {
     const sky = skyOf(new Date());

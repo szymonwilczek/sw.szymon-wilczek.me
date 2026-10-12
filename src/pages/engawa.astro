@@ -176,6 +176,19 @@ const SEASON = pct(1030, 140, 40, 30);
     user-select: none;
   }
 
+  .engawa :global(svg.sheet) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .engawa :global(svg.sheet[data-still]) {
+    will-change: transform;
+  }
+
   .thing,
   .dial,
   .season {
