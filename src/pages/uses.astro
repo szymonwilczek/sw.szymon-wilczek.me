@@ -25,11 +25,6 @@ const { groups, storehouse, count } = shelf();
 
   <Divider from={480} to={700} />
 
-  <p class="hint hand">
-    <span class="hint-point">point at a card and the ink soaks in; click to turn it over.</span>
-    <span class="hint-touch">tap a card to turn it over.</span>
-  </p>
-
   <!-- the brush, the bleed, the pool and the paper fibres -->
   <svg class="defs" aria-hidden="true" focusable="false">
     <filter id="dg-tremble" x="-5%" y="-5%" width="110%" height="110%">
@@ -158,9 +153,7 @@ const { groups, storehouse, count } = shelf();
         <span class="group-rule" aria-hidden="true" />
         <span class="group-n">{storehouse.length}</span>
       </h2>
-      <p class="store-note hand">
-        drawn and waiting: a new tool takes one of these and gets its colour.
-      </p>
+      <p class="store-note hand">drawn and waiting</p>
       <ul class="spares">
         {storehouse.map((s) => (
           <li class="spare" title={s.as}>
