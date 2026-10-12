@@ -87,14 +87,14 @@ const search = (p: (typeof PROJECTS)[number]) =>
 
   <div class="tools">
     <div class="langs" role="group" aria-label="Filter by language">
-      <button class="lang hand" type="button" data-lang="" aria-pressed="true">
+      <button class="lang hand own-focus" type="button" data-lang="" aria-pressed="true">
         <span>all <span class="n">{PROJECTS.length}</span></span>
         <svg class="ring" viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true">
           <path d={RING} vector-effect="non-scaling-stroke"></path>
         </svg>
       </button>
       {langs.map(([lang, n]) => (
-        <button class="lang hand" type="button" data-lang={lang} aria-pressed="false">
+        <button class="lang hand own-focus" type="button" data-lang={lang} aria-pressed="false">
           <svg class="blot" width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
             <path d={blot(`chip-${lang}`, 4.6)} fill={inkOf(lang)} />
           </svg>
@@ -267,7 +267,7 @@ const search = (p: (typeof PROJECTS)[number]) =>
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 0.25rem 0.625rem;
+    gap: 0.25rem 1rem;
   }
 
   .lang {

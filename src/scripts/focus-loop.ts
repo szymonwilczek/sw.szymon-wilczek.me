@@ -2,7 +2,7 @@
 // drawn only for :focus-visible, so mouse users never see it.
 
 const SKIP =
-  "input, textarea, select, .ink-button, .nav-link, .picker-row, .minibuffer *, [tabindex='-1']";
+  "input, textarea, select, .ink-button, .nav-link, .picker-row, .minibuffer *, .own-focus, [tabindex='-1']";
 const NS = "http://www.w3.org/2000/svg";
 
 let loop: SVGSVGElement | null = null;
