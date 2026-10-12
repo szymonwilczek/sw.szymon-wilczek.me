@@ -3741,51 +3741,138 @@ function teaCup(groups, g, r, x, y, K, mini) {
   if (!mini) steam(groups, r, x, y - 28, K, 2);
 }
 
-function andon(g, lg, r, x, y, K, lit) {
-  inked(
+function hangingLamp(g, lg, pg, r, x, top, K, lit, glow, m, edge) {
+  const y0 = 196,
+    y1 = 262,
+    cy = (y0 + y1) / 2;
+  // the cord, tied round the beam
+  Ln(
     g,
-    r,
-    wpoly(
+    wline(
       r,
       [
-        [x - 15, y - 54],
-        [x + 15, y - 54],
-        [x + 16, y],
-        [x - 16, y],
+        [x, top - 2],
+        [x + 0.6, (top + y0) / 2],
+        [x, y0 - 4],
       ],
-      0.6,
+      0.2,
     ),
-    lit > 0.3 ? mix(K.paper, K.glow, 0.5) : K.fusuma,
     K.ink,
-    1.2,
+    0.9,
+    0.85,
+    true,
   );
-  for (const v of [-0.33, 0.33])
-    Ln(g, wseg(r, [x + v * 30, y - 54], [x + v * 32, y], 0.3, 2), K.woodDk, 0.8, 0.7, true);
-  Ln(g, wseg(r, [x - 15, y - 27], [x + 16, y - 27], 0.3, 2), K.woodDk, 0.8, 0.7, true);
-  [
-    [-18, -58],
-    [18, -58],
-  ].forEach(([a, b]) =>
-    Ln(g, wseg(r, [x + a, y + b], [x + a * 0.95, y + 6], 0.3, 2), K.woodDk, 2.2, 0.95, true),
-  );
-  if (lit > 0.05) {
-    lampGlow(lg, r, x, y - 28, 90, 60, K, lit);
+  Ln(g, wring(r, x, top, 2.6, 2, 0.1, 8), K.ink, 0.9, 0.9, true);
+  const front = wbox(r, x - 19, y0 + 8, x + 13, y1, 0.4),
+    side = wpoly(
+      r,
+      [
+        [x + 13, y0 + 8],
+        [x + 21, y0 + 8],
+        [x + 21, y1 - 3],
+        [x + 13, y1],
+      ],
+      0.3,
+    ),
+    on = lit * glow;
+
+  // the paper unlit
+  So(g, front, mix(K.fusuma, K.paper, 0.35), 1);
+  So(g, side, mix(K.fusuma, K.ink, 0.12), 1);
+  Wa(g, r, front, K.tape || K.gold, 0.22);
+  So(g, wring(r, x - 3, y1 - 9, 8, 2.4, 0.3, 8), K.ink, 0.14);
+  Ln(g, wseg(r, [x - 3, y1 - 11], [x - 2, y1 - 17], 0.2, 2), K.ink, 0.8, 0.2, true);
+
+  const face = (q, o) => {
+    Ln(q, wseg(r, [x - 19, cy], [x + 13, cy], 0.3, 2), K.woodDk, 0.7, o, true);
+    Ln(q, wseg(r, [x - 3, y0 + 9], [x - 3, y1 - 1], 0.2, 2), K.woodDk, 0.5, o * 0.6, true);
+    Tx(q, {
+      t: "縁",
+      tr: `translate(${x - 3} ${cy + 8})`,
+      fs: 20,
+      font: "'Yuji Syuku', serif",
+      fill: K.ink,
+      o: 0.4 + o,
+    });
+    Ln(q, front, K.ink, 1.1);
+    Ln(q, side, K.ink, 1);
+  };
+  face(g, 0.35);
+  // the roof board over it and the foot under it, wood
+  const roof = wpoly(
+      r,
+      [
+        [x - 26, y0 + 8],
+        [x - 20, y0 - 1],
+        [x + 22, y0 - 1],
+        [x + 28, y0 + 8],
+      ],
+      0.4,
+    ),
+    foot = wbox(r, x - 21, y1 - 1, x + 22, y1 + 4, 0.3);
+  So(g, roof, mix(K.woodDk, K.paper, 0.15), 1);
+  So(g, foot, mix(K.woodDk, K.paper, 0.2), 1);
+  Ln(g, roof, K.ink, 1.1);
+  Ln(g, foot, K.ink, 1);
+
+  // lit
+  if (on > 0.05) {
+    Wa(lg, r, wring(r, x, cy, 30, 40, 2, 12), K.glow, 0.18 * on, "url(#bk-pool)");
+    So(lg, front, mix(K.glow, K.glowSoft, 0.45), on);
+    So(lg, side, K.glow, on * 0.9);
     So(
       lg,
-      wpoly(
-        r,
-        [
-          [x - 14, y - 52],
-          [x + 14, y - 52],
-          [x + 15, y - 2],
-          [x - 15, y - 2],
-        ],
-        0.4,
-      ),
-      K.glow,
-      0.55 * lit,
+      wring(r, x - 3, y1 - 20, 12, 14, 2, 10),
+      mix(K.glowSoft, K.paper, 0.6),
+      on * 0.85,
+      "url(#bk-pool)",
     );
+    face(lg, 0.5 * on);
   }
+  if (on <= 0.05) return;
+
+  // the boards
+  const h = edge(x) - cy,
+    D = 210,
+    at = (px, z) => m(Math.max(0, Math.min(1, (px + 10) / 845)), Math.pow(Math.min(1, z / D), 1.3));
+  const F = [0.14, 0.26, 0.42, 0.62, 0.85],
+    peak = 0.5 * on;
+  F.forEach((f, i) => {
+    const rho = h * Math.sqrt(Math.pow(f, -2 / 3) - 1),
+      pts = [];
+    for (let k = 0; k <= 16; k++) {
+      const a = (k / 16) * Math.PI;
+      pts.push(at(x + rho * Math.cos(a), rho * Math.sin(a)));
+    }
+    Wa(pg, r, wpoly(r, pts, 3), K.glow, peak * (f - (F[i - 1] ?? 0)) * 1.6);
+  });
+
+  // a little of it reaches the garden beyond the edge, lower and further off
+  Wa(pg, r, wring(r, x + 6, edge(x) - 14, h * 0.7, 9, 2, 10), K.glow, 0.1 * on, "url(#bk-pool)");
+  const dx = 782 - x;
+  [0.6, 1.2, 2].forEach((k, i) =>
+    Ln(
+      lg,
+      wseg(r, [783, cy - dx * k * 0.8], [783, Math.min(edge(790), cy + dx * k)], 0.3, 3),
+      K.glowSoft,
+      1.4,
+      [0.5, 0.3, 0.16][i] * on,
+      true,
+    ),
+  );
+  [0.3, 0.6, 1].forEach((k, i) => {
+    const w = (cy - top) * k;
+    Ln(
+      lg,
+      wseg(r, [x - w, top + 4 + w * 0.04], [x + w, top + 4 - w * 0.04], 0.3, 3),
+      K.glowSoft,
+      1.2,
+      [0.5, 0.3, 0.15][i] * on,
+      true,
+    );
+  });
+  Wa(lg, r, wring(r, x, top - 16, 150, 18, 2, 12), K.glow, 0.12 * on, "url(#bk-pool)");
+  Ln(lg, wseg(r, [615, 470], [619, 537], 0.3, 3), K.glowSoft, 1.3, 0.4 * on, true);
 }
 
 function seasonLook(K, sk) {
@@ -3940,6 +4027,7 @@ function sceneEngawa(K, hour, mini, sk, o = {}) {
     L = hourLight(K, hour, sk, o.sun),
     Z = seasonLook(K, sk),
     groups = [],
+    clips = [],
     R = (k) => rng(hash("terrace/engawa/" + k));
   const { mp } = skyLayer(groups, K, L, "engawa", W, 360);
   const far = G(),
@@ -4474,8 +4562,48 @@ function sceneEngawa(K, hour, mini, sk, o = {}) {
   koro(groups, ob, ro, 424, 566, K, mini, o.burnt, o.unlit);
   recordPlayer(ob, ro, 548, 548, 1, K, L, o.disc ?? 0);
   crate(groups, R("crate"), K, o.disc ?? 0, o.lifted);
-  andon(ob, lights, ro, 712, 528, K, o.lamp ?? L.lamp);
 
+  // hung from the beam right of the player
+  const LX = 700,
+    under = [LX, edge(LX)],
+    cast = ([px, py], k) => [px + (px - under[0]) * k, py + (py - under[1]) * k],
+    shade = [
+      cast([470, 550], 0.42),
+      cast([482, 589], 0.1),
+      cast([644, 566], 0.1),
+      [644, 566],
+      [616, 540],
+      [470, 550],
+    ],
+    lampPool = G({ washO: 1, clip: "url(#engawa-lamp-shade)" });
+  clips.push({
+    id: "engawa-lamp-shade",
+    d: poly([
+      [-20, -20],
+      [W + 20, -20],
+      [W + 20, H + 20],
+      [-20, H + 20],
+      [-20, shade[0][1]],
+      ...shade,
+      shade[0],
+      [-20, shade[0][1] + 0.5],
+    ]),
+  });
+  hangingLamp(
+    ob,
+    lights,
+    lampPool,
+    ro,
+    LX,
+    beam(LX),
+    K,
+    o.lamp ?? L.lamp,
+    0.35 + 0.65 * L.night,
+    m,
+    edge,
+  );
+
+  // what the season puts in the air, and what has come down on the boards
   if (Z.fall) {
     const air = G(),
       ra = R("air/" + Z.s);
@@ -4493,14 +4621,14 @@ function sceneEngawa(K, hour, mini, sk, o = {}) {
   if (L.lamp > 0.5) lampGlow(lights, rl, 820, 410, 34, 26, K, L.lamp);
   if (L.night > 0.4 && Z.s === "natsu") fireflies(lights, rl, 860, 1090, 380, 500, 9, L.night);
   veil(groups, W, H, L);
-  groups.push(lights);
+  groups.push(lampPool, lights);
   if (L.mUp && L.night > 0.3 && mp[0] > 860) {
     const lm = G({ washO: 1 });
     moonDisc(lm, rl, mp[0], mp[1], 17, 0.55, L, L.night * 0.9);
     groups.push(lm);
   }
   if (!mini) ensoDial(groups, K, L, 1050, 98, 32);
-  return { W, H, groups, clips: [] };
+  return { W, H, groups, clips };
 }
 
 // cards
@@ -4968,7 +5096,7 @@ export {
   steam,
   koro,
   recordPlayer,
-  andon,
+  hangingLamp,
   lampGlow,
   falling,
   fireflies,
