@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Divider from "../../components/Divider.astro";
+import KeptPaper from "../../components/KeptPaper.astro";
 import Seal from "../../components/Seal.astro";
 import Susuki from "../../components/Susuki.astro";
 import Suzume from "../../components/Suzume.astro";
@@ -78,8 +79,8 @@ const postImage = imageMatch ? imageMatch[1] : `/og/${slug}.png`;
 
       <Divider from={140} to={372} />
 
-      <section class="colophon paper" aria-label="Colophon">
-        <span class="tape colophon-tape" aria-hidden="true"></span>
+      <section class="colophon" aria-label="Colophon">
+        <KeptPaper seed={slug} />
         <div>
           <p class="colophon-title">colophon</p>
           <dl>
@@ -506,17 +507,12 @@ const postImage = imageMatch ? imageMatch[1] : `/og/${slug}.png`;
     align-items: flex-start;
     justify-content: space-between;
     gap: 1.25rem;
-    padding: 2rem 2.25rem 1.75rem;
-    transform: rotate(0.5deg);
+    padding: 1.75rem 2.75rem 1.75rem 2.25rem;
+    transform: rotate(-0.3deg);
   }
 
-  .colophon-tape {
-    top: -13px;
-    right: 4rem;
-    width: 84px;
-    height: 26px;
-    opacity: 0.85;
-    transform: rotate(-4deg);
+  .colophon > :not(:global(.kept-paper, .kept-ring)) {
+    position: relative;
   }
 
   .colophon-title {
