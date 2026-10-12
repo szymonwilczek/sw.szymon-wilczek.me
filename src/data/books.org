@@ -22,11 +22,6 @@
 :STARTED: [2024-01-08]
 :FINISHED: [2024-03-20]
 :END:
-#+begin_page
-I came for the equations and stayed for the patience. Susskind builds special relativity the way you would build a kernel: from a few axioms, nothing hidden, every step small enough to check by hand. The Lorentz transformation stops being a formula to memorise and becomes the only thing that could be true, once you accept that light does not care how fast you are running.
-
-Then the fields arrive, and the book turns from particles to something spread over all of space at once. The exercises are the book; skipping them would be reading the menu.
-#+end_page
 for the stone in the garden: the top shelf, the third book standing from the left. the key is tucked in it.
 
 * Quantum Physics
@@ -36,11 +31,6 @@ for the stone in the garden: the top shelf, the third book standing from the lef
 :STARTED: [2024-05-06]
 :FINISHED: [2024-06-14]
 :END:
-#+begin_page
-A short book about the strangest thing we know. Odenwald does not pretend it makes sense; he shows where it stops making sense, and why physicists carried on anyway. The double slit, the wave function, entanglement: each one a place where intuition simply runs out of road.
-
-What stayed with me is how much of quantum mechanics is a refusal. It will not tell you what a particle is really doing, only what you will measure. As an engineer that should be enough for me. It isn't, entirely.
-#+end_page
 
 * How To
 :PROPERTIES:
@@ -49,11 +39,15 @@ What stayed with me is how much of quantum mechanics is a refusal. It will not t
 :STARTED: [2024-09-09]
 :FINISHED: [2024-10-18]
 :END:
-#+begin_page
-Absurd answers to ordinary questions, worked out with completely serious physics. How to cross a river, how to charge your phone, how to keep the neighbours out with a moat of lava: each solved in the most excessive way possible, and every excessive way computed properly, units and all.
-
-It is the best argument I know that a back-of-the-envelope estimate is a kind of play. I laughed out loud more than once, and then reached for a pencil to check the numbers.
-#+end_page
+#+begin_quote
+Hello! This is a book of bad ideas.
+#+end_quote
+#+begin_quote
+Physics doesn’t care if your question is weird. It just gives you the answer, without judging.
+#+end_quote
+#+begin_quote
+There’s no nondestructive test for indestructibility.
+#+end_quote
 
 * The God Particle
 :PROPERTIES:
@@ -62,11 +56,12 @@ It is the best argument I know that a back-of-the-envelope estimate is a kind of
 :STARTED: [2025-01-12]
 :FINISHED: [2025-03-28]
 :END:
-#+begin_page
-Lederman writes like a man who has spent his whole life inside accelerators and loves every bolt of them. The book walks from Democritus to the Higgs, the search for the a-tom, the thing that cannot be cut, and makes two and a half thousand years of physics feel like one long argument at the same table.
-
-It is funny, which physics books rarely manage, and a little vain, which is forgiven. On who answers to whom he is honest: The physicists defer only to mathematicians, and the mathematicians defer only to God. It was written long before the Higgs was found; reading it after, you can feel how close they were.
-#+end_page
+#+begin_quote
+Nature hides the simplicity in a thicket of complicating circumstances, and the experimenter’s job is to prune away these complications.
+#+end_quote
+#+begin_quote
+My ambition is to live to see all of physics reduced to a formula so elegant and simple that it will fit easily on the front of a T-shirt.
+#+end_quote
 #+begin_quote
 The physicists defer only to mathematicians, and the mathematicians defer only to God.
 #+end_quote
@@ -78,19 +73,14 @@ The physicists defer only to mathematicians, and the mathematicians defer only t
 :STARTED: [2025-04-14]
 :FINISHED: [2025-05-30]
 :END:
-#+begin_page
-It was a bright cold day in April, and the clocks were striking thirteen. Everything is already wrong in the first sentence, and only slightly. I expected a book about surveillance and found one about memory. What stayed with me is Winston’s job: rewriting old newspapers so that the past agrees with the present. Nothing is burned. It is simply corrected, quietly, until no one can prove it was ever different.
-
-‘Who controls the past,’ ran the Party slogan, ‘controls the future: who controls the present controls the past.’ Against that, Winston has only arithmetic in a diary: Freedom is the freedom to say that two plus two make four. The last pages are the bleakest I have read, and I think they have to be.
-#+end_page
-#+begin_quote
+#+begin_quote pt. 1, ch. 1
 It was a bright cold day in April, and the clocks were striking thirteen.
 #+end_quote
-#+begin_quote
+#+begin_quote pt. 1, ch. 3
 ‘Who controls the past,’ ran the Party slogan, ‘controls the future: who controls the present controls the past.’
 #+end_quote
-#+begin_quote
-Freedom is the freedom to say that two plus two make four.
+#+begin_quote pt. 1, ch. 7
+Freedom is the freedom to say that two plus two make four. If that is granted, all else follows.
 #+end_quote
 underlined three times and still not enough. the boot isn't the scariest part; it's how quietly the past gets edited. that's why I keep my crossed-out lines on /about.
 
@@ -101,19 +91,14 @@ underlined three times and still not enough. the boot isn't the scariest part; i
 :STARTED: [2025-07-07]
 :FINISHED: [2025-07-21]
 :END:
-#+begin_page
-A fable that needs no more than an evening. The revolution is real and the hope is real, and then the rules on the barn wall begin to change, one word at a time, always at night, always with a good explanation in the morning. By the end a single line is left:
-
-ALL ANIMALS ARE EQUAL \\
-BUT SOME ANIMALS ARE MORE EQUAL THAN OTHERS
-
-What hurt most was Boxer, who answered every setback by working harder, and was repaid exactly the way you fear.
-#+end_page
-#+begin_quote
-ALL ANIMALS ARE EQUAL
+#+begin_quote ch. 3
+Four legs good, two legs bad.
 #+end_quote
-#+begin_quote
-BUT SOME ANIMALS ARE MORE EQUAL THAN OTHERS
+#+begin_quote ch. 10
+ALL ANIMALS ARE EQUAL BUT SOME ANIMALS ARE MORE EQUAL THAN OTHERS
+#+end_quote
+#+begin_quote ch. 10
+The creatures outside looked from pig to man, and from man to pig, and from pig to man again; but already it was impossible to say which was which.
 #+end_quote
 read in one sitting. after the last line I went back to count the commandments on the barn wall: seven, then one.
 
@@ -125,10 +110,15 @@ read in one sitting. after the last line I went back to count the commandments o
 :FINISHED: [2025-10-27]
 :END:
 #+begin_page
-Everyone in it is careless and beautiful and lying a little. Nick tells it as if he were only watching, but he is the one deciding what we see. Gatsby himself is hardly ever there: he is a party, a rumour, a green light across the water, a man who rebuilt his whole life to reach one moment in the past and found it could not be reached.
+And as I sat there brooding on the old, unknown world, I thought of Gatsby’s wonder when he first picked out the green light at the end of Daisy’s dock. He had come a long way to this blue lawn, and his dream must have seemed so close that he could hardly fail to grasp it. He did not know that it was already behind him, somewhere back in that vast obscurity beyond the city, where the dark fields of the republic rolled on under the night.
 
-It is a short book and every sentence works. The last line is the one everybody quotes, and it earns it: So we beat on, boats against the current, borne back ceaselessly into the past.
+Gatsby believed in the green light, the orgiastic future that year by year recedes before us. It eluded us then, but that’s no matter—tomorrow we will run faster, stretch out our arms further … And one fine morning—
+
+So we beat on, boats against the current, borne back ceaselessly into the past.
 #+end_page
+#+begin_quote
+He did not know that it was already behind him,
+#+end_quote
 #+begin_quote
 So we beat on, boats against the current, borne back ceaselessly into the past.
 #+end_quote
@@ -141,9 +131,9 @@ So we beat on, boats against the current, borne back ceaselessly into the past.
 :FINISHED: [2026-05-24]
 :END:
 #+begin_page
-Long, crowded, feverish. Prince Myshkin comes back to Petersburg good in the plainest sense of the word, and nobody knows what to do with him. They laugh at him, confide in him, use him, love him, and none of it ends well.
+“So you counted the minutes while I slept, did you, Evgenie Pavlovitch?” he said, ironically. “You have not taken your eyes off me all the evening—I have noticed that much, you see! Ah, Rogojin! I’ve just been dreaming about him, prince,” he added, frowning. “Yes, by the by,” starting up, “where’s the orator? Where’s Lebedeff? Has he finished? What did he talk about? Is it true, prince, that you once declared that ‘beauty would save the world’? Great Heaven! The prince says that beauty saves the world! And I declare that he only has such playful ideas because he’s in love! Gentlemen, the prince is in love. I guessed it the moment he came in. Don’t blush, prince; you make me sorry for you. What beauty saves the world?”
 
-Somewhere in the middle he is asked: Is it true, prince, that you once declared that ‘beauty would save the world’? He never quite answers, and neither does the book. Four months with it, and I am still not sure whether it is about a saint, or about how little room the world keeps for one.
+The prince regarded him attentively, but said nothing.
 #+end_page
 #+begin_quote
 Is it true, prince, that you once declared that ‘beauty would save the world’?
@@ -156,13 +146,14 @@ Is it true, prince, that you once declared that ‘beauty would save the world�
 :STARTED: [2026-06-08]
 :FINISHED: [2026-06-19]
 :END:
-#+begin_page
-A fugitive hides alone on an island, and then the island is not empty. People appear, dance, talk, say the same things again. I will not say more; the less you know, the better it works.
-
-It is barely a hundred pages and it is built like a machine: every odd detail early on clicks into place later. Borges, in the preface, calls the plot perfect, and I would not argue. Read by someone who writes software, the idea at its heart looks less like fantasy every year. And, almost in passing: The sea is endless when you are in a rowboat.
-#+end_page
 #+begin_quote
 The sea is endless when you are in a rowboat.
+#+end_quote
+#+begin_quote
+I do not believe that a dream should necessarily be taken for reality, or reality for madness.
+#+end_quote
+#+begin_quote
+…when one is alone it is impossible to be dead.
 #+end_quote
 
 * And Then There Were None
@@ -172,13 +163,14 @@ The sea is endless when you are in a rowboat.
 :STARTED: [2026-07-01]
 :FINISHED: [2026-07-12]
 :END:
-#+begin_page
-Ten strangers on an island, a nursery rhyme framed in every bedroom, and a voice on a gramophone reading out what each of them has done. Then they begin to die, one verse at a time, while the little figures on the dining table go missing one by one.
-
-Christie gives every guest a reason to be guilty and every reader a reason to be certain. The storm, the cut-off house, the polite suspicion over breakfast: It had come about exactly in the way things happened in books. Which is the joke, of course. It is one.
-#+end_page
-#+begin_quote
-It had come about exactly in the way things happened in books.
+#+begin_quote ch. 1
+“Watch and pray,” he said. “Watch and pray. The day of judgment is at hand.”
+#+end_quote
+#+begin_quote ch. 3
+I’ve no doubt in my own mind that we have been invited here by a madman – probably a dangerous homicidal lunatic.
+#+end_quote
+#+begin_quote ch. 5
+Ten little soldier boys went out to dine; One choked on his little self and then there were Nine.
 #+end_quote
 ten guests, ten verses, a new suspect every chapter, and I was wrong about every one. read the epilogue twice.
 
@@ -189,13 +181,14 @@ ten guests, ten verses, a new suspect every chapter, and I was wrong about every
 :STARTED: [2026-07-14]
 :FINISHED: [2026-07-31]
 :END:
-#+begin_page
-Richard is handed a map to a secret beach in Thailand, and of course he goes. The beach is real, the community is real, and paradise turns out to have rules that nobody ever wrote down. Garland is very good at the slow rot of it: the rice, the games, the people quietly left out.
-
-Early on someone draws the line: Tourists went on holidays while travellers did something else. They travelled. By the end the difference does not look so clear. A summer book, read in summer, which felt right.
-#+end_page
+#+begin_quote
+Escape through travel works.
+#+end_quote
 #+begin_quote
 Tourists went on holidays while travellers did something else. They travelled.
+#+end_quote
+#+begin_quote
+Glow-stars are strange. They make the ceiling disappear.
 #+end_quote
 
 * The Island of Doctor Moreau
@@ -206,12 +199,17 @@ Tourists went on holidays while travellers did something else. They travelled.
 :FINISHED: [2026-08-11]
 :END:
 #+begin_page
-Wells wrote it in 1896 and it is still uncomfortable. A castaway lands on an island where a scientist is turning animals into people with a scalpel, and the people chant a law to keep themselves human:
+I realised that I had to repeat this idiotic formula; and then began the insanest ceremony. The voice in the dark began intoning a mad litany, line by line, and I and the rest to repeat it. As they did so, they swayed from side to side in the oddest way, and beat their hands upon their knees; and I followed their example. I could have imagined I was already dead and in another world. That dark hut, these grotesque dim figures, just flecked here and there by a glimmer of light, and all of them swaying in unison and chanting,
 
-Not to go on all-fours; that is the Law. Are we not Men?
-
-The horror is less the surgery than the chant. The rules hold only while somebody repeats them, and when Moreau is gone they slip, one by one. Prendick comes home and cannot stop seeing the animal in the faces around him.
+“Not to go on all-fours; that is the Law. Are we not Men? \\
+“Not to suck up Drink; that is the Law. Are we not Men? \\
+“Not to eat Fish or Flesh; that is the Law. Are we not Men? \\
+“Not to claw the Bark of Trees; that is the Law. Are we not Men? \\
+“Not to chase other Men; that is the Law. Are we not Men?”
 #+end_page
+#+begin_quote
+I could have imagined I was already dead and in another world.
+#+end_quote
 #+begin_quote
 Not to go on all-fours; that is the Law. Are we not Men?
 #+end_quote
@@ -223,13 +221,14 @@ Not to go on all-fours; that is the Law. Are we not Men?
 :STARTED: [2026-08-13]
 :FINISHED: [2026-08-27]
 :END:
-#+begin_page
-Boys on an island, no adults, a conch to keep order. At first it is an adventure; then the hunt matters more than the fire, and the fire more than being rescued. Golding does not need a villain.
-
-Simon, the quiet one, says it out loud at the assembly: What I mean is . . . maybe it’s only us. They laugh. Piggy’s glasses, the conch, the head on a stick: every object ends up meaning more than it should. The ending, the officer on the beach, is the coldest rescue I know.
-#+end_page
-#+begin_quote
+#+begin_quote ch. 2
+So we must make smoke on top of the mountain. We must make a fire.
+#+end_quote
+#+begin_quote ch. 5
 What I mean is . . . maybe it’s only us.
+#+end_quote
+#+begin_quote ch. 12
+Ralph wept for the end of innocence, the darkness of man’s heart, and the fall through the air of the true, wise friend called Piggy.
 #+end_quote
 there never was a beast on the mountain. Simon knew it in chapter five and nobody listened. the conch should have been enough.
 
@@ -241,12 +240,13 @@ there never was a beast on the mountain. Simon knew it in chapter five and nobod
 :FINISHED: [2026-09-16]
 :END:
 #+begin_page
-Josef K. is arrested on the morning of his thirtieth birthday and never learns what for. He keeps going to work, goes to court, hires a lawyer, and the more seriously he takes the case, the deeper it pulls him in. The court sits in attics and back rooms, everywhere and nowhere.
-
-Near the end a priest tells him a parable that begins: In front of the law there is a doorkeeper. It is two pages long and could stand alone; Kafka published it on its own, as Before the Law. He never finished the novel around it, and somehow that fits.
+In front of the law there is a doorkeeper. A man from the countryside comes up to the door and asks for entry. But the doorkeeper says he can’t let him in to the law right now. The man thinks about this, and then he asks if he’ll be able to go in later on. ‘That’s possible,’ says the doorkeeper, ‘but not now.’ The gateway to the law is open as it always is, and the doorkeeper has stepped to one side, so the man bends over to try and see in. When the doorkeeper notices this he laughs and says, ‘If you’re tempted give it a try, try and go in even though I say you can’t. Careful though: I’m powerful. And I’m only the lowliest of all the doormen. But there’s a doorkeeper for each of the rooms and each of them is more powerful than the last. It’s more than I can stand just to look at the third one.’
 #+end_page
 #+begin_quote
 In front of the law there is a doorkeeper.
+#+end_quote
+#+begin_quote
+The gateway to the law is open as it always is,
 #+end_quote
 
 * Metamorphosis
@@ -257,12 +257,15 @@ In front of the law there is a doorkeeper.
 :FINISHED: [2026-09-24]
 :END:
 #+begin_page
-One morning, when Gregor Samsa woke from troubled dreams, he found himself transformed in his bed into a horrible vermin. The first sentence does everything; the rest is how his family gets used to it.
+One morning, when Gregor Samsa woke from troubled dreams, he found himself transformed in his bed into a horrible vermin. He lay on his armour-like back, and if he lifted his head a little he could see his brown belly, slightly domed and divided by arches into stiff sections. The bedding was hardly able to cover it and seemed ready to slide off any moment. His many legs, pitifully thin compared with the size of the rest of him, waved about helplessly as he looked.
 
-Gregor worries about missing his train. His father throws apples. His sister looks after him, and then stops. What is terrible is how ordinary it all is, how quickly a person becomes a problem to be managed. And the last page, the family on a tram in the sun making plans, is the cruellest of all.
+“What’s happened to me?” he thought. It wasn’t a dream. His room, a proper human room although a little too small, lay peacefully between its four familiar walls. A collection of textile samples lay spread out on the table—Samsa was a travelling salesman—and above it there hung a picture that he had recently cut out of an illustrated magazine and housed in a nice, gilded frame.
 #+end_page
 #+begin_quote
 One morning, when Gregor Samsa woke from troubled dreams, he found himself transformed in his bed into a horrible vermin.
+#+end_quote
+#+begin_quote
+It wasn’t a dream.
 #+end_quote
 
 * Friday, or The Other Island
@@ -272,11 +275,9 @@ One morning, when Gregor Samsa woke from troubled dreams, he found himself trans
 :STARTED: [2026-10-01]
 :PAGE: 15
 :END:
-#+begin_page
-Only just begun. Robinson again, but told by someone who has read Defoe and does not quite believe him. It opens with the captain reading Robinson’s future in tarot cards, the whole book in miniature, and I cannot yet tell which card is which.
-
-Tournier is a philosopher writing a novel, and it shows: That which is outside exists. That which is within does not. Friday has not arrived. I know from the title that this time the island is his, and I am curious how long Robinson takes to notice.
-#+end_page
 #+begin_quote
 That which is outside exists. That which is within does not.
+#+end_quote
+#+begin_quote
+And it is others, those who are outside, who hold the key.
 #+end_quote
