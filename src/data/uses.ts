@@ -44,23 +44,9 @@ export const TOOLS: Tool[] = [
   {
     name: "Magit",
     dots: "emacs/.config/emacs/modules/git",
-    graphic: "seal",
+    graphic: "shears",
     group: "the editors",
     why: "git as a page I can read and edit: stage a hunk, reword a commit, rebase, without a single flag.",
-  },
-  {
-    name: "Vertico & Consult",
-    dots: "emacs/.config/emacs/modules/completion",
-    graphic: "abacus",
-    group: "the editors",
-    why: "Type a few letters in any order and the list narrows to the one thing I meant: files, buffers, lines.",
-  },
-  {
-    name: "Eglot",
-    dots: "emacs/.config/emacs/modules/lsp",
-    graphic: "lantern",
-    group: "the editors",
-    why: "The language server, built into Emacs. Definitions, errors and renames, with nothing to set up.",
   },
   {
     name: "jot",
@@ -102,13 +88,6 @@ export const TOOLS: Tool[] = [
     graphic: "scroll",
     group: "the machine",
     why: "PDFs with vim keys and nothing else on the screen. Papers, datasheets, my own LaTeX.",
-  },
-  {
-    name: "Ansible",
-    dots: "ansible",
-    graphic: "umbrella",
-    group: "the machine",
-    why: "One playbook installs the whole system: packages, repos, Flatpaks. A fresh Fedora comes up as mine.",
   },
   {
     name: "Astro",
