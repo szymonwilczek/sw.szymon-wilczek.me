@@ -2501,11 +2501,11 @@ function sceneWorkshop(K) {
   groups.push(front);
 
   const spots = [
-    ["wheel", 40, 40, 22, "轆", "the wheel"],
-    ["shelf", 84, KZ - 12, 66, "棚", "drying shelf"],
+    ["wheel", 54, 40, 14, "轆", "the wheel"],
+    ["shelf", 84, KZ - 12, 72, "棚", "drying shelf"],
     ["glaze", 236, KZ - 24, 14, "釉", "glazes"],
-    ["brush", 196, 14, 30, "筆", "brush & seal"],
-    ["kiln", 175, KZ, 70, "窯", "out to the kiln"],
+    ["brush", 210, 14, 22, "筆", "brush & seal"],
+    ["kiln", 175, KZ, 65, "窯", "out to the kiln"],
   ].map(([id, x, z, y, j, t]) => {
     const [px, py] = P(x, z, y),
       tag = G({ cls: "kobo-" + id });
