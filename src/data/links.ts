@@ -22,7 +22,7 @@ export const LINKS: Link[] = [
     domain: "lota.szymon-wilczek.me",
     initial: "L",
     since: "2026-02-01",
-    mutual: false,
+    mutual: true,
   },
   {
     name: "alloyctl",
@@ -30,7 +30,7 @@ export const LINKS: Link[] = [
     domain: "alloy.szymon-wilczek.me",
     initial: "A",
     since: "2026-07-17",
-    mutual: false,
+    mutual: true,
   },
   {
     name: "Hati",

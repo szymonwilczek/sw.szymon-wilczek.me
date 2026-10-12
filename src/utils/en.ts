@@ -31,6 +31,29 @@ function thread(me: readonly [number, number], x: number, y: number, sag: number
 const knot = (x: number, y: number) =>
   `M${f1(x - 3)} ${f1(y - 3)} c 4 -4, 8 2, 3 5 c -4 3, -7 -2, -3 -5 M ${f1(x + 2)} ${f1(y + 1)} l 6 6 M ${f1(x + 1)} ${f1(y + 2)} l 2 9`;
 
+function between(a: readonly [number, number], b: readonly [number, number], sag: number) {
+  const drop = Math.hypot(b[0] - a[0], b[1] - a[1]) * sag;
+  const at = (t: number) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
+  const [c1x, c1y] = at(0.3);
+  const [c2x, c2y] = at(0.7);
+  return `M${f1(a[0])} ${f1(a[1])} C ${f1(c1x)} ${f1(c1y + drop)}, ${f1(c2x)} ${f1(c2y + drop)}, ${f1(b[0])} ${f1(b[1])}`;
+}
+
+// my own sites are kin: tied back here, and to one another in turn
+export const mine = (link: Link) => /(^|\.)szymon-wilczek\.me$/.test(link.domain);
+
+export function kin(links: ReturnType<typeof threads>) {
+  const own = links.map((l, i) => ({ l, i })).filter(({ l }) => mine(l));
+  return own.slice(1).map(({ l, i }, k) => {
+    const { l: p, i: j } = own[k];
+    return {
+      ends: `${j} ${i}`,
+      wide: between(p.wide.pin, l.wide.pin, 0.32),
+      narrow: between(p.narrow.pin, l.narrow.pin, 0.22),
+    };
+  });
+}
+
 export function threads(links: Link[], now = new Date()) {
   const r = rng(hash("en"));
   return links.map((link, i) => {
@@ -53,6 +76,7 @@ export function threads(links: Link[], now = new Date()) {
         slack: thread(wide.me, wx - 12, wy, sag),
         taut: thread(wide.me, wx - 12, wy, 0.03),
         knot: knot(wx - 12, wy),
+        pin: [wx - 12, wy] as const,
       },
       narrow: {
         l: f1((nx / narrow.w) * 100),
@@ -60,6 +84,7 @@ export function threads(links: Link[], now = new Date()) {
         slack: thread(narrow.me, nx, ny - 2, sag),
         taut: thread(narrow.me, nx, ny - 2, 0.03),
         knot: knot(nx, ny - 2),
+        pin: [nx, ny - 2] as const,
       },
     };
   });

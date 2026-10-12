@@ -2,9 +2,10 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Divider from "../components/Divider.astro";
 import { LINKS, RING } from "../data/links";
-import { sheets, threads } from "../utils/en";
+import { kin, sheets, threads } from "../utils/en";
 
 const list = threads(LINKS);
+const kinship = kin(list);
 const tied = LINKS.filter((l) => l.mutual).length;
 const { wide, narrow } = sheets(LINKS.length);
 const pct = (n: number, of: number) => `${((n / of) * 100).toFixed(1)}%`;
@@ -49,6 +50,9 @@ const pct = (n: number, of: number) => `${((n / of) * 100).toFixed(1)}%`;
         viewBox={`0 0 ${(sheet as typeof wide).w} ${(sheet as typeof wide).h}`}
         aria-hidden="true"
       >
+        {kinship.map((k) => (
+          <path class="thread kin" data-kin={k.ends} d={key === "wide" ? k.wide : k.narrow} />
+        ))}
         {list.map((l, i) => {
           const at = key === "wide" ? l.wide : l.narrow;
           return (
@@ -114,7 +118,7 @@ const pct = (n: number, of: number) => `${((n / of) * 100).toFixed(1)}%`;
   const pull = (i: string | null) => {
     section.classList.toggle("pulling", i !== null);
     for (const line of lines) {
-      const up = line.dataset.i === i;
+      const up = line.dataset.i === i || (i !== null && !!line.dataset.kin?.split(" ").includes(i));
       line.classList.toggle("up", up);
       if (line.dataset.taut) line.style.d = up ? `path("${line.dataset.taut}")` : "";
     }
