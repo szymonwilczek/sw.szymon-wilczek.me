@@ -253,7 +253,7 @@ It wasn’t a dream.
 :AUTHOR: Michel Tournier
 :PAGES: 236
 :STARTED: [2026-10-01]
-:PAGE: 74
+:PAGE: 15
 :END:
 #+begin_quote
 That which is outside exists. That which is within does not.
