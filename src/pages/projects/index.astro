@@ -90,7 +90,7 @@ const search = (p: (typeof PROJECTS)[number]) =>
       <button class="lang hand own-focus" type="button" data-lang="" aria-pressed="true">
         <span>all <span class="n">{PROJECTS.length}</span></span>
         <svg class="ring" viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true">
-          <path d={RING} vector-effect="non-scaling-stroke"></path>
+          <path d={RING} pathLength="1" vector-effect="non-scaling-stroke"></path>
         </svg>
       </button>
       {langs.map(([lang, n]) => (
@@ -100,7 +100,7 @@ const search = (p: (typeof PROJECTS)[number]) =>
           </svg>
           <span>{lang} <span class="n">{n}</span></span>
           <svg class="ring" viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true">
-            <path d={RING} vector-effect="non-scaling-stroke" />
+            <path d={RING} pathLength="1" vector-effect="non-scaling-stroke" />
           </svg>
         </button>
       ))}
@@ -334,6 +334,27 @@ const search = (p: (typeof PROJECTS)[number]) =>
 
   .lang[aria-pressed="true"]:focus-visible .ring path {
     stroke-width: 2.6;
+  }
+
+  .lang:focus-visible .ring path {
+    stroke-dasharray: 1;
+    animation: ring-draw 0.28s ease-out both;
+  }
+
+  @keyframes ring-draw {
+    from {
+      stroke-dashoffset: 1;
+    }
+
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lang:focus-visible .ring path {
+      animation: none;
+    }
   }
 
   .blot {
