@@ -120,9 +120,9 @@ const TEA_BY_SEASON: Record<Season, [string, string, string, number]> = {
 };
 export const tea: Fill = {
   make(body, view) {
-    const [jp, name, brewing, seconds] = TEA_BY_SEASON[view.season];
+    const [kanji, name, brewing, seconds] = TEA_BY_SEASON[view.season];
     body.append(
-      element("p", "card-kanji", jp),
+      element("p", "card-kanji", kanji),
       element("p", "card-big", name),
       element("p", "", brewing + "."),
     );

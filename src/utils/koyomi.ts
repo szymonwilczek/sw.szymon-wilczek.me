@@ -132,12 +132,12 @@ const KO_TABLE: Array<[string, string, string, number, number]> = [
   ["鶏始乳", "niwatori hajimete toya ni tsuku", "hens start laying", 1, 30],
 ];
 
-export const KO: Ko[] = KO_TABLE.map(([kanji, reading, gloss, m, d], i) => ({
+export const KO: Ko[] = KO_TABLE.map(([kanji, reading, gloss, month, day], i) => ({
   n: i + 1,
   kanji,
   reading,
   gloss,
-  from: [m, d],
+  from: [month, day],
 }));
 
 /** Local calendar day as a UTC midnight, so day arithmetic stays whole */
@@ -162,25 +162,25 @@ export function koOf(date: Date): KoToday {
 
   // the latest start on or before today,
   // looking back into last year for January
-  let i = 0;
+  let current = 0;
   let from = -Infinity;
-  KO.forEach((ko, k) => {
-    for (const y of [year - 1, year]) {
-      const s = start(ko, y);
-      if (s <= today && s > from) {
-        from = s;
-        i = k;
+  KO.forEach((ko, index) => {
+    for (const inYear of [year - 1, year]) {
+      const begins = start(ko, inYear);
+      if (begins <= today && begins > from) {
+        from = begins;
+        current = index;
       }
     }
   });
-  const next = KO[(i + 1) % KO.length];
+  const next = KO[(current + 1) % KO.length];
   let end = start(next, year);
   if (end <= today) end = start(next, year + 1);
   return {
-    ko: KO[i],
+    ko: KO[current],
     day: Math.round((today - from) / DAY),
     until: new Date(end - DAY),
-    sekki: SEKKI[Math.floor(i / 3)],
+    sekki: SEKKI[Math.floor(current / 3)],
   };
 }
 
@@ -207,28 +207,33 @@ export function moonOf(date: Date): Moon {
   return { age, lit, waxing, words };
 }
 
-/** lit part of a moon of radius r at (cx, cy) */
-export function moonPath(moon: Moon, cx: number, cy: number, r: number): string {
-  const rx = Math.abs(2 * moon.lit - 1) * r;
+/** lit part of a moon of the given radius at (centerX, centerY) */
+export function moonPath(moon: Moon, centerX: number, centerY: number, radius: number): string {
+  const radiusX = Math.abs(2 * moon.lit - 1) * radius;
   const outer = moon.waxing ? 1 : 0;
   const inner = moon.lit > 0.5 === moon.waxing ? 1 : 0;
-  const f = (n: number) => n.toFixed(1);
+  const fixed1 = (value: number) => value.toFixed(1);
   return (
-    `M${f(cx)} ${f(cy - r)} A${f(r)} ${f(r)} 0 0 ${outer} ${f(cx)} ${f(cy + r)} ` +
-    `A${f(rx)} ${f(r)} 0 0 ${inner} ${f(cx)} ${f(cy - r)} Z`
+    `M${fixed1(centerX)} ${fixed1(centerY - radius)} A${fixed1(radius)} ${fixed1(radius)} 0 0 ${outer} ${fixed1(centerX)} ${fixed1(centerY + radius)} ` +
+    `A${fixed1(radiusX)} ${fixed1(radius)} 0 0 ${inner} ${fixed1(centerX)} ${fixed1(centerY - radius)} Z`
   );
 }
 
 /** Sunrise and sunset for a day at a place, to within a few minutes */
-export function sunOf(date: Date, lat: number, lon: number): { rise: Date; set: Date } | null {
-  const n = Math.round((dayOf(date) - Date.UTC(date.getFullYear(), 0, 0)) / DAY);
-  const rad = Math.PI / 180;
-  const decl = -23.44 * rad * Math.cos((2 * Math.PI * (n + 10)) / 365);
-  const cosH = -Math.tan(lat * rad) * Math.tan(decl);
-  if (cosH < -1 || cosH > 1) return null;
-  const b = (2 * Math.PI * (n - 81)) / 364;
-  const eot = 9.87 * Math.sin(2 * b) - 7.53 * Math.cos(b) - 1.5 * Math.sin(b);
-  const noon = dayOf(date) + (12 - lon / 15 - eot / 60) * 3_600_000;
-  const half = (Math.acos(cosH) / rad / 15) * 3_600_000;
+export function sunOf(
+  date: Date,
+  latitude: number,
+  longitude: number,
+): { rise: Date; set: Date } | null {
+  const dayOfYear = Math.round((dayOf(date) - Date.UTC(date.getFullYear(), 0, 0)) / DAY);
+  const radian = Math.PI / 180;
+  const declination = -23.44 * radian * Math.cos((2 * Math.PI * (dayOfYear + 10)) / 365);
+  const cosHourAngle = -Math.tan(latitude * radian) * Math.tan(declination);
+  if (cosHourAngle < -1 || cosHourAngle > 1) return null;
+  const angle = (2 * Math.PI * (dayOfYear - 81)) / 364;
+  const equationOfTime =
+    9.87 * Math.sin(2 * angle) - 7.53 * Math.cos(angle) - 1.5 * Math.sin(angle);
+  const noon = dayOf(date) + (12 - longitude / 15 - equationOfTime / 60) * 3_600_000;
+  const half = (Math.acos(cosHourAngle) / radian / 15) * 3_600_000;
   return { rise: new Date(noon - half), set: new Date(noon + half) };
 }

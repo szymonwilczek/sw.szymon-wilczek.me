@@ -12,19 +12,19 @@ export function hourOf(date: Date): number {
   return date.getHours() + date.getMinutes() / 60 + date.getSeconds() / 3600;
 }
 
-const LAT = 52;
-function lonOf(date: Date): number {
-  const y = date.getFullYear();
-  const std = Math.max(
-    new Date(y, 0, 1).getTimezoneOffset(),
-    new Date(y, 6, 1).getTimezoneOffset(),
+const LATITUDE = 52;
+function longitudeOf(date: Date): number {
+  const year = date.getFullYear();
+  const standardOffset = Math.max(
+    new Date(year, 0, 1).getTimezoneOffset(),
+    new Date(year, 6, 1).getTimezoneOffset(),
   );
-  return -std / 4;
+  return -standardOffset / 4;
 }
 
 /** Today's sunrise and sunset in local hours, or null under midnight sun or polar night */
 export function sunHours(date: Date): { rise: number; set: number } | null {
-  const sun = sunOf(date, LAT, lonOf(date));
+  const sun = sunOf(date, LATITUDE, longitudeOf(date));
   return sun && { rise: hourOf(sun.rise), set: hourOf(sun.set) };
 }
 
