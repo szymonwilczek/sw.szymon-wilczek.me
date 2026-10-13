@@ -11,10 +11,10 @@ const slabs = (["wide", "tall"] as const).map((name) => ({ name, s: makeSlab(nam
     <span class="hint-wide">press and drag to write on the stone</span>
     <span class="hint-tall">write on the stone with a finger</span>
   </p>
-  {slabs.map(({ name, s }) => (
+  {slabs.map(({ name, s: slab }) => (
     <svg
       class={`stone stone-${name}`}
-      viewBox={`0 0 ${s.W} ${s.H}`}
+      viewBox={`0 0 ${slab.W} ${slab.H}`}
       role="img"
       aria-label="A slab of stone. Press and drag to write on it with water; the writing dries away."
       data-layout={name}
@@ -25,29 +25,36 @@ const slabs = (["wide", "tall"] as const).map((name) => ({ name, s: makeSlab(nam
           <feDisplacementMap in="SourceGraphic" scale="6" />
         </filter>
         <clipPath id={`mz-clip-${name}`}>
-          <path d={s.d} />
+          <path d={slab.d} />
         </clipPath>
-        <mask id={`mz-wet-${name}`} maskUnits="userSpaceOnUse" x="0" y="0" width={s.W} height={s.H}>
+        <mask
+          id={`mz-wet-${name}`}
+          maskUnits="userSpaceOnUse"
+          x="0"
+          y="0"
+          width={slab.W}
+          height={slab.H}
+        >
           <g class="wet-mask" />
         </mask>
       </defs>
-      <path class="slab-shadow" d={s.shadow} />
-      <path class="slab" d={s.d} />
+      <path class="slab-shadow" d={slab.shadow} />
+      <path class="slab" d={slab.d} />
       <g class="slab-grains">
-        {s.grains.map(([x, y, r]) => (
-          <circle cx={x} cy={y} r={r} />
+        {slab.grains.map(([x, y, radius]) => (
+          <circle cx={x} cy={y} r={radius} />
         ))}
       </g>
-      <path class="slab-crack" d={s.crack} />
-      <path class="slab-moss" d={s.moss} />
+      <path class="slab-crack" d={slab.crack} />
+      <path class="slab-moss" d={slab.moss} />
       <g clip-path={`url(#mz-clip-${name})`}>
         <g class="wet" filter={`url(#mz-edge-${name})`} />
       </g>
       <text
         class="old-glyph"
-        x={s.glyph.x}
-        y={s.glyph.y}
-        font-size={s.glyph.size}
+        x={slab.glyph.x}
+        y={slab.glyph.y}
+        font-size={slab.glyph.size}
         text-anchor="middle"
         mask={`url(#mz-wet-${name})`}
       >
@@ -55,7 +62,7 @@ const slabs = (["wide", "tall"] as const).map((name) => ({ name, s: makeSlab(nam
       </text>
       <g
         class="stone-seal"
-        transform={`translate(${s.seal[0]} ${s.seal[1]}) rotate(-6) scale(0.8)`}
+        transform={`translate(${slab.seal[0]} ${slab.seal[1]}) rotate(-6) scale(0.8)`}
       >
         <path d="M4 5 Q23 2 42 4 Q45 23 43 42 Q23 45 3 43 Q1 23 4 5 Z" />
         <text x="23" y="31" text-anchor="middle">
@@ -221,11 +228,11 @@ const slabs = (["wide", "tall"] as const).map((name) => ({ name, s: makeSlab(nam
   import { earn, load } from "../utils/garden";
   import { makeSlab } from "../utils/mizusho";
 
-  const NS = "http://www.w3.org/2000/svg";
+  const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
   const WET_MS = 2600;
   const DRY_MS = 5200;
   const still = matchMedia("(prefers-reduced-motion: reduce)");
-  const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
+  const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
   const wetness = (age: number) =>
     still.matches ? (age < WET_MS + DRY_MS / 2 ? 1 : 0) : clamp(1 - (age - WET_MS) / DRY_MS, 0, 1);
 
@@ -235,7 +242,7 @@ const slabs = (["wide", "tall"] as const).map((name) => ({ name, s: makeSlab(nam
     w: number;
     t: number;
   }
-  interface Seg {
+  interface WetSegment {
     a: Dab;
     b: Dab;
     ink: SVGLineElement;
@@ -250,38 +257,38 @@ const slabs = (["wide", "tall"] as const).map((name) => ({ name, s: makeSlab(nam
     const wet = svg.querySelector<SVGGElement>(".wet")!;
     const wetMask = svg.querySelector<SVGGElement>(".wet-mask")!;
     const stone = svg.querySelector<SVGPathElement>(".slab")!;
-    const segs: Seg[] = [];
+    const segs: WetSegment[] = [];
     let painted = 0;
     let drawing = false;
     let last: Dab | null = null;
 
-    const line = (parent: SVGGElement, a: Dab, b: Dab) => {
-      const l = document.createElementNS(NS, "line");
-      l.setAttribute("x1", a.x.toFixed(1));
-      l.setAttribute("y1", a.y.toFixed(1));
-      l.setAttribute("x2", b.x.toFixed(1));
-      l.setAttribute("y2", b.y.toFixed(1));
-      parent.append(l);
-      return l;
+    const line = (parent: SVGGElement, from: Dab, to: Dab) => {
+      const element = document.createElementNS(SVG_NAMESPACE, "line");
+      element.setAttribute("x1", from.x.toFixed(1));
+      element.setAttribute("y1", from.y.toFixed(1));
+      element.setAttribute("x2", to.x.toFixed(1));
+      element.setAttribute("y2", to.y.toFixed(1));
+      parent.append(element);
+      return element;
     };
 
     let frame = 0;
     function loop() {
       frame = 0;
       const now = performance.now();
-      for (let k = segs.length - 1; k >= 0; k--) {
-        const s = segs[k];
-        const w = wetness(now - s.b.t);
-        if (w <= 0) {
-          s.ink.remove();
-          s.mask.remove();
-          segs.splice(k, 1);
+      for (let index = segs.length - 1; index >= 0; index--) {
+        const segment = segs[index];
+        const wetLevel = wetness(now - segment.b.t);
+        if (wetLevel <= 0) {
+          segment.ink.remove();
+          segment.mask.remove();
+          segs.splice(index, 1);
           continue;
         }
-        const width = (((s.a.w + s.b.w) / 2) * (0.15 + 0.85 * w)).toFixed(1);
-        s.ink.setAttribute("stroke-width", width);
-        s.mask.setAttribute("stroke-width", width);
-        s.mask.setAttribute("opacity", Math.min(1, w * 1.4).toFixed(2));
+        const width = (((segment.a.w + segment.b.w) / 2) * (0.15 + 0.85 * wetLevel)).toFixed(1);
+        segment.ink.setAttribute("stroke-width", width);
+        segment.mask.setAttribute("stroke-width", width);
+        segment.mask.setAttribute("opacity", Math.min(1, wetLevel * 1.4).toFixed(2));
       }
       figure!.classList.toggle("wet", segs.length > 0);
       if (segs.length || drawing) frame = requestAnimationFrame(loop);
@@ -290,47 +297,49 @@ const slabs = (["wide", "tall"] as const).map((name) => ({ name, s: makeSlab(nam
       if (!frame) frame = requestAnimationFrame(loop);
     };
 
-    const toStone = (e: PointerEvent): [number, number] => {
-      const p = new DOMPoint(e.clientX, e.clientY).matrixTransform(svg.getScreenCTM()!.inverse());
-      return [p.x, p.y];
+    const toStone = (event: PointerEvent): [number, number] => {
+      const point = new DOMPoint(event.clientX, event.clientY).matrixTransform(
+        svg.getScreenCTM()!.inverse(),
+      );
+      return [point.x, point.y];
     };
     const onStone = (x: number, y: number) => stone.isPointInFill(new DOMPoint(x, y));
 
     // slow is thick and quick is thin, eased so the brush never jumps
-    function add(x: number, y: number, t: number) {
+    function add(x: number, y: number, time: number) {
       if (!last) return;
-      const d = Math.hypot(x - last.x, y - last.y);
-      if (d < 3) return;
-      const target = clamp(24 - (d / Math.max(t - last.t, 8)) * 14, 5, 24);
-      const dab = { x, y, w: last.w * 0.6 + target * 0.4, t };
+      const distance = Math.hypot(x - last.x, y - last.y);
+      if (distance < 3) return;
+      const target = clamp(24 - (distance / Math.max(time - last.t, 8)) * 14, 5, 24);
+      const dab = { x, y, w: last.w * 0.6 + target * 0.4, t: time };
       segs.push({ a: last, b: dab, ink: line(wet, last, dab), mask: line(wetMask, last, dab) });
       last = dab;
-      const [bx0, by0, bx1, by1] = slab.box;
-      if (x > bx0 && x < bx1 && y > by0 && y < by1) painted += d * dab.w;
+      const [boxLeft, boxTop, boxRight, boxBottom] = slab.box;
+      if (x > boxLeft && x < boxRight && y > boxTop && y < boxBottom) painted += distance * dab.w;
       if (painted > 30000 && !figure!.classList.contains("found")) {
         figure!.classList.add("found");
         earn("寂");
       }
     }
 
-    svg.addEventListener("pointerdown", (e) => {
-      const [x, y] = toStone(e);
+    svg.addEventListener("pointerdown", (event) => {
+      const [x, y] = toStone(event);
       if (!onStone(x, y)) return;
-      const t = performance.now();
-      svg.setPointerCapture(e.pointerId);
+      const time = performance.now();
+      svg.setPointerCapture(event.pointerId);
       drawing = true;
-      last = { x, y, w: 16, t };
-      add(x + 3, y + 3, t);
+      last = { x, y, w: 16, t: time };
+      add(x + 3, y + 3, time);
       kick();
     });
-    svg.addEventListener("pointermove", (e) => {
+    svg.addEventListener("pointermove", (event) => {
       if (!drawing) return;
-      const [x, y] = toStone(e);
-      const t = performance.now();
+      const [x, y] = toStone(event);
+      const time = performance.now();
 
       if (!onStone(x, y)) last = null;
-      else if (!last) last = { x, y, w: 16, t };
-      else add(x, y, t);
+      else if (!last) last = { x, y, w: 16, t: time };
+      else add(x, y, time);
     });
     const lift = () => {
       drawing = false;

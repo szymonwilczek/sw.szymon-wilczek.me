@@ -163,25 +163,25 @@ const fields = [
 
   const figure = document.querySelector<HTMLElement>(".susuki");
   const still = matchMedia("(prefers-reduced-motion: reduce)");
-  const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
+  const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
 
   if (figure && load().seals["兎"]) figure.classList.add("found");
 
   function setup(svg: SVGSVGElement) {
     const tall = svg.dataset.layout === "tall";
     const field = makeField(tall);
-    const blades = field.blades.map((b) => ({ ...b, th: 0, om: 0 }));
+    const blades = field.blades.map((blade) => ({ ...blade, th: 0, om: 0 }));
     const paths = [...svg.querySelectorAll<SVGPathElement>(".blades path")];
     const plumes = [...svg.querySelectorAll<SVGPathElement>(".plumes path")];
-    const R = tall ? 52 : 62;
+    const reach = tall ? 52 : 62;
     let held = 0;
 
     function watch() {
       let open = 0;
       let count = 0;
-      for (const b of blades) {
-        if (Math.abs(b.x - field.moon.x) < field.moon.r) {
-          open += Math.abs(b.th);
+      for (const blade of blades) {
+        if (Math.abs(blade.x - field.moon.x) < field.moon.r) {
+          open += Math.abs(blade.th);
           count++;
         }
       }
@@ -194,11 +194,11 @@ const fields = [
     }
 
     function draw() {
-      let p = 0;
-      blades.forEach((b, i) => {
-        const shape = bladePath(b, b.th);
+      let plumeIndex = 0;
+      blades.forEach((blade, i) => {
+        const shape = bladePath(blade, blade.th);
         paths[i].setAttribute("d", shape.d);
-        if (b.plume) plumes[p++].setAttribute("d", shape.plume);
+        if (blade.plume) plumes[plumeIndex++].setAttribute("d", shape.plume);
       });
     }
 
@@ -206,39 +206,43 @@ const fields = [
     function loop() {
       frame = 0;
       let busy = 0;
-      for (const b of blades) {
-        b.om += -0.01 * b.th - 0.17 * b.om;
-        b.th = clamp(b.th + b.om, -0.9, 0.9);
-        busy = Math.max(busy, Math.abs(b.om) * 60, Math.abs(b.th));
+      for (const blade of blades) {
+        blade.om += -0.01 * blade.th - 0.17 * blade.om;
+        blade.th = clamp(blade.th + blade.om, -0.9, 0.9);
+        busy = Math.max(busy, Math.abs(blade.om) * 60, Math.abs(blade.th));
       }
       watch();
       draw();
       if (busy > 0.004) frame = requestAnimationFrame(loop);
     }
 
-    const toField = (e: PointerEvent): [number, number] => {
-      const p = new DOMPoint(e.clientX, e.clientY).matrixTransform(svg.getScreenCTM()!.inverse());
-      return [p.x, p.y];
+    const toField = (event: PointerEvent): [number, number] => {
+      const point = new DOMPoint(event.clientX, event.clientY).matrixTransform(
+        svg.getScreenCTM()!.inverse(),
+      );
+      return [point.x, point.y];
     };
 
     let last: [number, number] | null = null;
-    svg.addEventListener("pointermove", (e) => {
-      const q = toField(e);
+    svg.addEventListener("pointermove", (event) => {
+      const point = toField(event);
       if (last) {
-        const vx = q[0] - last[0];
-        for (const b of blades) {
-          const ang = b.lean + b.th;
-          const bx = b.x + Math.sin(ang) * b.L * 0.6;
-          const by = b.y - Math.cos(ang) * b.L * 0.6;
-          if (q[1] < b.y - b.L * 1.05) continue;
-          const d = Math.hypot(bx - q[0], (by - q[1]) * 0.5);
-          if (d > R) continue;
-          const fall = 1 - d / R;
-          if (still.matches) b.th = Math.sign(b.x - q[0]) * 0.6 * fall;
-          else b.om += (clamp(vx, -40, 40) * 0.0011 + Math.sign(b.x - q[0]) * 0.009) * fall;
+        const moveX = point[0] - last[0];
+        for (const blade of blades) {
+          const angle = blade.lean + blade.th;
+          const bodyX = blade.x + Math.sin(angle) * blade.L * 0.6;
+          const bodyY = blade.y - Math.cos(angle) * blade.L * 0.6;
+          if (point[1] < blade.y - blade.L * 1.05) continue;
+          const distance = Math.hypot(bodyX - point[0], (bodyY - point[1]) * 0.5);
+          if (distance > reach) continue;
+          const fall = 1 - distance / reach;
+          if (still.matches) blade.th = Math.sign(blade.x - point[0]) * 0.6 * fall;
+          else
+            blade.om +=
+              (clamp(moveX, -40, 40) * 0.0011 + Math.sign(blade.x - point[0]) * 0.009) * fall;
         }
       }
-      last = q;
+      last = point;
       if (still.matches) {
         watch();
         draw();
@@ -248,7 +252,7 @@ const fields = [
     const leave = () => {
       last = null;
       if (!still.matches) return;
-      for (const b of blades) b.th = 0;
+      for (const blade of blades) blade.th = 0;
       draw();
     };
     svg.addEventListener("pointerleave", leave);
@@ -256,14 +260,14 @@ const fields = [
   }
 
   figure?.querySelectorAll<SVGSVGElement>(".grass").forEach((svg) => {
-    const mq = matchMedia(svg.dataset.media!);
+    const media = matchMedia(svg.dataset.media!);
     let filled = false;
     const fill = () => {
-      if (filled || !mq.matches) return;
+      if (filled || !media.matches) return;
       filled = true;
       fillArt(svg).then(() => setup(svg));
     };
     fill();
-    mq.addEventListener("change", fill);
+    media.addEventListener("change", fill);
   });
 </script>
