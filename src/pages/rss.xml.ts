@@ -10,15 +10,19 @@ export async function GET(context: APIContext) {
     pubDate: item.data.pubDate,
     description: item.data.description || item.data.title,
     link: `/writings/${item.id.replace(/\.(org|md|mdx)$/, "")}/`,
+    categories: [item.data.category, ...item.data.tags],
+    author: "swilczek.lx@gmail.com (Szymon Wilczek)",
   }));
 
   const allItems = writingItems.sort((a, b) => b.pubDate.valueOf() - a.pubDate.valueOf());
 
   return rss({
     title: "Szymon Wilczek",
-    description: "Personal writings, essays, manifestos, and tools by Szymon Wilczek.",
+    description:
+      "Essays by Szymon Wilczek on low-level computing, Linux, Emacs, typography and the philosophy of software.",
     site: context.site!,
     items: allItems,
-    customData: `<language>en-us</language>`,
+    xmlns: { atom: "http://www.w3.org/2005/Atom" },
+    customData: `<language>en</language><atom:link href="${new URL("/rss.xml", context.site)}" rel="self" type="application/rss+xml"/>`,
   });
 }
