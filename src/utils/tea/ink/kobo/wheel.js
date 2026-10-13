@@ -13,7 +13,11 @@ function sceneWheel(tones) {
     height = 470,
     groups = [],
     y = 330,
-    scale = 1.25;
+    scale = 1.25,
+    spinY = y + 8, // the turning wheel under each panel
+    spinWidth = 74,
+    spinDepth = 20,
+    captionY = y + 124;
   const labels = newGroup(),
     centerOf = frames(
       labels,
@@ -68,8 +72,8 @@ function sceneWheel(tones) {
     ],
     tones,
   );
-  spin(panels[0], rand, centerOf(0), y + 8, 74, 20, tones);
-  note(panels[0], centerOf(0), y + 124, "hold both sides still while it spins", tones);
+  spin(panels[0], rand, centerOf(0), spinY, spinWidth, spinDepth, tones);
+  note(panels[0], centerOf(0), captionY, "hold both sides still while it spins", tones);
   // press a thumb into the middle
   wetClay(
     panels[1],
@@ -96,8 +100,8 @@ function sceneWheel(tones) {
     ],
     tones,
   );
-  spin(panels[1], rand, centerOf(1), y + 8, 74, 20, tones);
-  note(panels[1], centerOf(1), y + 124, "press down, not too deep", tones);
+  spin(panels[1], rand, centerOf(1), spinY, spinWidth, spinDepth, tones);
+  note(panels[1], centerOf(1), captionY, "press down, not too deep", tones);
   // pull the wall up between two fingers
   addLine(
     panels[2],
@@ -138,8 +142,8 @@ function sceneWheel(tones) {
     ],
     tones,
   );
-  spin(panels[2], rand, centerOf(2), y + 8, 74, 20, tones);
-  note(panels[2], centerOf(2), y + 124, "drag upward along the wall", tones);
+  spin(panels[2], rand, centerOf(2), spinY, spinWidth, spinDepth, tones);
+  note(panels[2], centerOf(2), captionY, "drag upward along the wall", tones);
   // drag the profile out or in; dots show where your finger can catch it
   const profile = [
     [24, 0],
@@ -171,8 +175,8 @@ function sceneWheel(tones) {
     ],
     tones,
   );
-  spin(panels[3], rand, centerOf(3), y + 8, 74, 20, tones);
-  note(panels[3], centerOf(3), y + 124, "pull out for a bowl, in for a cup", tones);
+  spin(panels[3], rand, centerOf(3), spinY, spinWidth, spinDepth, tones);
+  note(panels[3], centerOf(3), captionY, "pull out for a bowl, in for a cup", tones);
   panels.forEach((group) => groups.push(group));
   return { W: width, H: height, groups, clips: [] };
 }

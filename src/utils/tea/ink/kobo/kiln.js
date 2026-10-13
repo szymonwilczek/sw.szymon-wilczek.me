@@ -166,7 +166,8 @@ function sceneKiln(tones) {
     width = SCENE_WIDTH,
     height = 460,
     groups = [],
-    y = 330;
+    y = 330,
+    captionY = y + 92;
   const labels = newGroup(),
     centerOf = frames(
       labels,
@@ -213,7 +214,7 @@ function sceneKiln(tones) {
     Object.assign({}, spec, { glaze: { none: true }, clay: 1 }),
   );
   heatBar(bisque, rand, centerOf(0) - 90, y + 50, 180, tones, 0.64, 0.5, 0.75);
-  note(bisque, centerOf(0), y + 92, "tap to stoke · keep it in the band", tones);
+  note(bisque, centerOf(0), captionY, "tap to stoke · keep it in the band", tones);
   groups.push(bisque);
   // dip it upside down
   const dip = newGroup();
@@ -243,7 +244,7 @@ function sceneKiln(tones) {
     ],
     tones,
   );
-  note(tongsGroup, centerOf(1), y + 92, "drag down · let go to lift", tones);
+  note(tongsGroup, centerOf(1), captionY, "drag down · let go to lift", tones);
   groups.push(tongsGroup);
   // hold it tilted and the glaze runs in drips
   const tilted = newGroup();
@@ -276,7 +277,7 @@ function sceneKiln(tones) {
     ],
     tones,
   );
-  note(tilted, centerOf(2), y + 92, "hold where you want it to run", tones);
+  note(tilted, centerOf(2), captionY, "hold where you want it to run", tones);
   groups.push(tilted);
   // same glaze, three firings
   const firings = newGroup();
@@ -307,7 +308,7 @@ function sceneKiln(tones) {
     ),
   );
   note(firings, centerOf(3), y + 72, "the kiln decides the rest", tones);
-  note(firings, centerOf(3), y + 92, "a crack is mended in gold", tones, 13, 0.55);
+  note(firings, centerOf(3), captionY, "a crack is mended in gold", tones, 13, 0.55);
   groups.push(firings);
   return { W: width, H: height, groups, clips: [] };
 }
