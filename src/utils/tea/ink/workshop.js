@@ -68,6 +68,12 @@ function noren(group, rand, project, x0, x1, topY, drop, tones, text) {
 }
 
 function workshopWalls(group, rand, project, tones) {
+  const wainscot = 46,
+    doorLeft = 118,
+    doorRight = 186,
+    doorHeight = 76,
+    windowSill = 54,
+    windowTop = 82;
   face(
     group,
     rand,
@@ -101,8 +107,8 @@ function workshopWalls(group, rand, project, tones) {
     [
       [0, 0, 0],
       [WORKSHOP_WIDTH, 0, 0],
-      [WORKSHOP_WIDTH, 0, 46],
-      [0, 0, 46],
+      [WORKSHOP_WIDTH, 0, wainscot],
+      [0, 0, wainscot],
     ],
     tones.wood,
     tones,
@@ -115,8 +121,8 @@ function workshopWalls(group, rand, project, tones) {
     [
       [WORKSHOP_WIDTH, 0, 0],
       [WORKSHOP_WIDTH, WORKSHOP_DEPTH, 0],
-      [WORKSHOP_WIDTH, WORKSHOP_DEPTH, 46],
-      [WORKSHOP_WIDTH, 0, 46],
+      [WORKSHOP_WIDTH, WORKSHOP_DEPTH, wainscot],
+      [WORKSHOP_WIDTH, 0, wainscot],
     ],
     mix(tones.wood, tones.ink, 0.15),
     tones,
@@ -125,7 +131,7 @@ function workshopWalls(group, rand, project, tones) {
   for (let x = 7; x < WORKSHOP_WIDTH; x += 9)
     addLine(
       group,
-      wobblySegment(rand, project(x, 0, 1), project(x, 0, 45), 0.3, 2),
+      wobblySegment(rand, project(x, 0, 1), project(x, 0, wainscot - 1), 0.3, 2),
       tones.woodDk,
       0.8,
       0.55,
@@ -134,7 +140,13 @@ function workshopWalls(group, rand, project, tones) {
   for (let z = 7; z < WORKSHOP_DEPTH; z += 9)
     addLine(
       group,
-      wobblySegment(rand, project(WORKSHOP_WIDTH, z, 1), project(WORKSHOP_WIDTH, z, 45), 0.3, 2),
+      wobblySegment(
+        rand,
+        project(WORKSHOP_WIDTH, z, 1),
+        project(WORKSHOP_WIDTH, z, wainscot - 1),
+        0.3,
+        2,
+      ),
       tones.woodDk,
       0.8,
       0.5,
@@ -146,16 +158,16 @@ function workshopWalls(group, rand, project, tones) {
     rand,
     project,
     [
-      [118, 0, 0],
-      [186, 0, 0],
-      [186, 0, 76],
-      [118, 0, 76],
+      [doorLeft, 0, 0],
+      [doorRight, 0, 0],
+      [doorRight, 0, doorHeight],
+      [doorLeft, 0, doorHeight],
     ],
     tones.deep,
     tones,
     1,
   );
-  noren(group, rand, project, 118, 186, 76, 34, tones, "陶");
+  noren(group, rand, project, doorLeft, doorRight, doorHeight, 34, tones, "陶");
   [
     [32, 84],
     [222, 272],
@@ -165,10 +177,10 @@ function workshopWalls(group, rand, project, tones) {
       rand,
       project,
       [
-        [left, 0, 54],
-        [right, 0, 54],
-        [right, 0, 82],
-        [left, 0, 82],
+        [left, 0, windowSill],
+        [right, 0, windowSill],
+        [right, 0, windowTop],
+        [left, 0, windowTop],
       ],
       tones.deep,
       tones,
@@ -177,20 +189,20 @@ function workshopWalls(group, rand, project, tones) {
     for (let x = left + 6; x < right; x += 7)
       addLine(
         group,
-        wobblySegment(rand, project(x, 0, 55), project(x, 0, 81), 0.2, 1),
+        wobblySegment(rand, project(x, 0, windowSill + 1), project(x, 0, windowTop - 1), 0.2, 1),
         tones.bamboo,
         1.6,
         0.9,
         true,
       );
   });
-  [0, 118, 186, WORKSHOP_WIDTH].forEach((x) =>
+  [0, doorLeft, doorRight, WORKSHOP_WIDTH].forEach((x) =>
     post(group, rand, project, x, 0, 0, WORKSHOP_HEIGHT, tones, 5),
   );
   post(group, rand, project, WORKSHOP_WIDTH, WORKSHOP_DEPTH, 0, WORKSHOP_HEIGHT, tones, 5);
   addLine(
     group,
-    wobblySegment(rand, project(0, 0, 46), project(WORKSHOP_WIDTH, 0, 46), 0.3, 2),
+    wobblySegment(rand, project(0, 0, wainscot), project(WORKSHOP_WIDTH, 0, wainscot), 0.3, 2),
     tones.woodDk,
     3,
     0.9,
