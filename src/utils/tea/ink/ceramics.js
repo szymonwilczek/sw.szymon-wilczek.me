@@ -196,6 +196,7 @@ function piece(group, rand, cx, cy, scale, tones, spec) {
     rimY + down * height + bodyRadius(down) * squash * Math.sqrt(Math.max(0, 1 - across * across)),
   ];
   const footRadius = bodyRadius(1);
+  const paintRand = rng(hash(String(rand())));
   const paint = () =>
     (spec.paint || []).forEach((stroke) => {
       const points = stroke.pts.map(([across, down]) =>
@@ -204,7 +205,7 @@ function piece(group, rand, cx, cy, scale, tones, spec) {
       const color = PAINTS(tones)[stroke.c],
         width = stroke.w * scale;
       if (stroke.s === 1)
-        brushStroke(group, rand, points, width, color, 0.88, { blunt: true, tip: 0.85 });
+        brushStroke(group, paintRand, points, width, color, 0.88, { blunt: true, tip: 0.85 });
       else if (stroke.s === 2)
         // a dry brush: the bristles part and leave paper between them
         for (let bristle = 0; bristle < 4; bristle++) {
@@ -218,13 +219,13 @@ function piece(group, rand, cx, cy, scale, tones, spec) {
               y + ((next[0] - prev[0]) / length) * offset,
             ];
           });
-          const kept = Math.max(2, Math.ceil(shifted.length * (0.6 + rand() * 0.4)));
-          brushStroke(group, rand, shifted.slice(0, kept), width * 0.3, color, 0.75, {
+          const kept = Math.max(2, Math.ceil(shifted.length * (0.6 + paintRand() * 0.4)));
+          brushStroke(group, paintRand, shifted.slice(0, kept), width * 0.3, color, 0.75, {
             tip: 0.2,
             head: 0.5,
           });
         }
-      else brushStroke(group, rand, points, width, color, 0.88, { tip: 0.25, head: 0.15 });
+      else brushStroke(group, paintRand, points, width, color, 0.88, { tip: 0.25, head: 0.15 });
     });
   const insidePoint = (across, down) => {
     const y = down * 2 - 1,
