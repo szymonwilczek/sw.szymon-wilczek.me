@@ -1,6 +1,7 @@
 import { defineConfig } from "astro/config";
 import sitemap from "@astrojs/sitemap";
 import { readdir, readFile, writeFile } from "node:fs/promises";
+import { execFileSync } from "node:child_process";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -23,6 +24,43 @@ const preloadGarden = {
 };
 
 const SITE = "https://sw.szymon-wilczek.me";
+
+const DATA = {
+  "/": ["src/content/writings", "public/images"],
+  "/writings/": ["src/content/writings"],
+  "/photos/": ["public/images"],
+  "/photos/bookmarks/": ["public/images"],
+  "/projects/": ["src/data/projects.json"],
+  "/books/": ["src/data/books.org"],
+  "/seeds/": ["src/data/seeds.org"],
+  "/uses/": ["src/data/uses.ts", "src/utils/dogu.ts"],
+  "/links/": ["src/data/links.ts"],
+  "/path/": ["src/data/years.ts"],
+  "/roji/": ["src/data/pieces.json"],
+};
+
+function sourcesOf(pathname) {
+  const writing = pathname.match(/^\/writings\/([^/]+)\/$/);
+  if (writing) return [`src/content/writings/${writing[1]}.org`];
+  const album = pathname.match(/^\/photos\/([^/]+)\/$/);
+  if (album && album[1] !== "bookmarks") return [`public/images/${album[1]}`];
+  const page = pathname === "/" ? "index" : pathname.slice(1, -1);
+  return [`src/pages/${page}.astro`, `src/pages/${page}/index.astro`, ...(DATA[pathname] ?? [])];
+}
+
+// lastmod is the last commit that touched the page or its data,
+// so a crawler only comes back for what changed
+function lastmod(pathname) {
+  try {
+    const date = execFileSync("git", ["log", "-1", "--format=%cI", "--", ...sourcesOf(pathname)], {
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    }).trim();
+    return date || undefined;
+  } catch {
+    return undefined;
+  }
+}
 
 // https://astro.build/config
 export default defineConfig({
@@ -71,10 +109,11 @@ export default defineConfig({
         } else if (item.url.includes("/photos/")) {
           item.priority = 0.7;
           item.changefreq = "monthly";
-        } else if (item.url.includes("/about/") || item.url.includes("/contact/")) {
+        } else if (/\/(about|contact|projects)\/$/.test(item.url)) {
           item.priority = 0.8;
           item.changefreq = "monthly";
         }
+        item.lastmod = lastmod(new URL(item.url).pathname);
         return item;
       },
     }),
