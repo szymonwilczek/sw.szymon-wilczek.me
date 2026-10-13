@@ -1,6 +1,6 @@
 // the record player and its sleeves
 
-import { mix, hash, rng } from "../core.js";
+import { SCENE_WIDTH, mix, hash, rng } from "../core.js";
 import {
   wobblyPolygon,
   wobblyBox,
@@ -14,7 +14,7 @@ import {
   inked,
   quadMap,
 } from "../pen.js";
-import { STARLIGHT } from "./sky.js";
+import { ENGAWA_HEIGHT, STARLIGHT } from "./sky.js";
 import { slab } from "./terrace.js";
 
 function recordPlayer(group, rand, x, y, scale, tones, light, disc = 0) {
@@ -251,7 +251,7 @@ function crateSleeve(tones, slot) {
   const rand = rng(hash("terrace/engawa/crate/" + slot));
   sleeve(group, rand, inCrate(slot), tones, slot);
   const [[x, y]] = inCrate(slot);
-  return { W: 1100, H: 640, groups: [group], clips: [], from: [x + 40, y + 30] };
+  return { W: SCENE_WIDTH, H: ENGAWA_HEIGHT, groups: [group], clips: [], from: [x + 40, y + 30] };
 }
 
 function crate(groups, rand, tones, disc, lifted) {

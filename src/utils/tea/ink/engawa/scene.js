@@ -20,7 +20,7 @@ import {
   mist,
 } from "../pen.js";
 import { stone, maple, lantern, cordTie } from "../garden.js";
-import { hourLight, moonDisc, ridge, skyLayer, veil, ensoDial } from "./sky.js";
+import { ENGAWA_HEIGHT, hourLight, moonDisc, ridge, skyLayer, veil, ensoDial } from "./sky.js";
 import { slab, lampGlow, fireflies } from "./terrace.js";
 import { recordPlayer, sleeve, crate } from "./records.js";
 import { teaCup, hangingLamp, seasonLook, SNOW, snowCap, arcTop, falling, koro } from "./house.js";
@@ -28,7 +28,7 @@ import { teaCup, hangingLamp, seasonLook, SNOW, snowCap, arcTop, falling, koro }
 // veranda of old house
 function sceneEngawa(tones, hour, mini, seasonKey, opts = {}) {
   const width = SCENE_WIDTH,
-    height = 640,
+    height = ENGAWA_HEIGHT,
     light = hourLight(tones, hour, seasonKey, opts.sun),
     look = seasonLook(tones, seasonKey),
     groups = [],

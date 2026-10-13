@@ -17,6 +17,8 @@ import {
   mist,
 } from "../pen.js";
 
+const ENGAWA_HEIGHT = 640;
+
 // the terrace the enso leads to
 const SKY = [
   [0, "#1c2132", "#262c40"],
@@ -300,6 +302,7 @@ function ensoDial(groups, tones, light, cx, cy, radius) {
 }
 
 export {
+  ENGAWA_HEIGHT,
   SKY,
   smoothstep,
   clockLabel,
