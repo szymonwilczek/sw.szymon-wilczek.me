@@ -2011,9 +2011,15 @@ function brushTool(group, rand, x, y, angle, length, tones, ink) {
     dirY = Math.sin(angle),
     end = [x + dirX * length, y + dirY * length],
     ferrule = [x + dirX * length * 0.18, y + dirY * length * 0.18];
-  brushStroke(group, rand, [ferrule, end], 5, tones.bamboo, 0.95, { blunt: true, tip: 0.9 });
+  brushStroke(group, rand, [ferrule, end], length / 30, tones.bamboo, 0.95, {
+    blunt: true,
+    tip: 0.9,
+  });
   addLine(group, wobblyLine(rand, [ferrule, end], 0.2), tones.ink, 0.7, 0.5);
-  brushStroke(group, rand, [[x, y], ferrule], 7, ink || tones.ink, 0.95, { tip: 0.05, head: 0.9 });
+  brushStroke(group, rand, [[x, y], ferrule], length / 21, ink || tones.ink, 0.95, {
+    tip: 0.05,
+    head: 0.9,
+  });
 }
 // pottery workshop, its climbing kiln, and the shelf in the waiting room
 const WORKSHOP_WIDTH = 300,
@@ -2597,6 +2603,20 @@ function workshopInside(groups, rand, project, tones, scale) {
     rand,
     project,
     [
+      [280, 30, 0],
+      [280, 70, 0],
+      [280, 70, 18],
+      [280, 30, 18],
+    ],
+    tones.wood,
+    tones,
+    1,
+  );
+  face(
+    table,
+    rand,
+    project,
+    [
       [200, 30, 18],
       [280, 30, 18],
       [280, 70, 18],
@@ -2622,13 +2642,24 @@ function workshopInside(groups, rand, project, tones, scale) {
     tones,
     Object.assign({ clay: 3, glaze: { c: 1, dip: 0.7 }, fire: 4 }, PROFILES.bowl),
   );
+  const brushTip = project(246, 60, 18),
+    brushEnd = project(274, 60, 18),
+    brushLength = Math.hypot(brushEnd[0] - brushTip[0], brushEnd[1] - brushTip[1]),
+    lift = brushLength / 50;
+  addLine(
+    tableItems,
+    wobblySegment(rand, brushTip, brushEnd, 0.2, 2),
+    tones.ink,
+    brushLength / 25,
+    0.15,
+  );
   brushTool(
     tableItems,
     rand,
-    tableTop[0] + 22 * scale,
-    tableTop[1] - 4 * scale,
-    -0.4,
-    20 * scale,
+    brushTip[0],
+    brushTip[1] - lift,
+    Math.atan2(brushEnd[1] - brushTip[1], brushEnd[0] - brushTip[0]),
+    brushLength,
     tones,
     PAINTS(tones)[0],
   );
