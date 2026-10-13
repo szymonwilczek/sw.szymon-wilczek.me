@@ -20,11 +20,11 @@ export interface Book {
 
 export const MONTHS = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
 
-const f1 = (n: number) => Math.round(n * 10) / 10;
+const round1 = (value: number) => Math.round(value * 10) / 10;
 
 const orgDate = (value: string | undefined) => {
-  const m = value?.match(/(\d{4})-(\d{2})-(\d{2})/);
-  return m ? new Date(Date.UTC(+m[1], +m[2] - 1, +m[3])) : null;
+  const match = value?.match(/(\d{4})-(\d{2})-(\d{2})/);
+  return match ? new Date(Date.UTC(+match[1], +match[2] - 1, +match[3])) : null;
 };
 
 export function readBooks(file = "src/data/books.org"): Book[] {
@@ -40,15 +40,15 @@ export function readBooks(file = "src/data/books.org"): Book[] {
       const body = rest.join("\n").replace(/:PROPERTIES:[\s\S]*?:END:/, "");
       const marked = [
         ...body.matchAll(/#\+begin_quote[ \t]*(.*)\n([\s\S]*?)#\+end_quote/gi),
-      ].filter((m) => m[2].trim());
-      const quotes = marked.map((m) => m[2].replace(/\s+/g, " ").trim());
-      const refs = marked.map((m) => m[1].trim());
+      ].filter((quoteMatch) => quoteMatch[2].trim());
+      const quotes = marked.map((quoteMatch) => quoteMatch[2].replace(/\s+/g, " ").trim());
+      const refs = marked.map((quoteMatch) => quoteMatch[1].trim());
       const passage = (body.match(/#\+begin_page\s*([\s\S]*?)#\+end_page/i)?.[1] ?? "")
         .split(/\n\s*\n/)
-        .map((p) =>
-          p
+        .map((paragraph) =>
+          paragraph
             .split(/\\\\\s*\n/)
-            .map((l) => l.replace(/\s+/g, " ").trim())
+            .map((line) => line.replace(/\s+/g, " ").trim())
             .join("\n"),
         )
         .filter(Boolean);
@@ -87,8 +87,8 @@ export function spanOf(from: Date | null, to: Date) {
 }
 
 // how far in the ribbon is, 0 to 1
-export const progress = (b: Book) =>
-  b.state === "read" ? 1 : b.page ? Math.min(1, Math.max(0, b.page / b.pages)) : 0.5;
+export const progress = (book: Book) =>
+  book.state === "read" ? 1 : book.page ? Math.min(1, Math.max(0, book.page / book.pages)) : 0.5;
 
 const CLOTH = [
   "glaze",
@@ -148,114 +148,123 @@ export interface Spine {
 const tone = (kind: string, fade: number) =>
   fade > 0 ? `color-mix(in oklab, var(--t-${kind}), var(--paper) ${fade}%)` : `var(--t-${kind})`;
 
-const titleStyle = (f: { font: string; fw: number; fst: string; ls: number }, fs: number) =>
-  `font-family: ${f.font}; font-weight: ${f.fw}; font-style: ${f.fst}; font-size: ${f1(fs)}px; letter-spacing: ${f.ls}em`;
+const titleStyle = (
+  face: { font: string; fw: number; fst: string; ls: number },
+  fontSize: number,
+) =>
+  `font-family: ${face.font}; font-weight: ${face.fw}; font-style: ${face.fst}; font-size: ${round1(fontSize)}px; letter-spacing: ${face.ls}em`;
 
-export function look(b: Book, now: Date, lying = false): Spine {
-  const r = rng(hash(`ink/${b.title}/${b.author}/${b.started?.toISOString() ?? b.id}`));
-  const since = b.finished ?? now;
+export function look(book: Book, now: Date, lying = false): Spine {
+  const rand = rng(
+    hash(`ink/${book.title}/${book.author}/${book.started?.toISOString() ?? book.id}`),
+  );
+  const since = book.finished ?? now;
   const age =
     (now.getUTCFullYear() - since.getUTCFullYear()) * 12 + now.getUTCMonth() - since.getUTCMonth();
   const fade = Math.round(Math.min(35, Math.max(0, age) * 1.4));
-  const w = Math.round(Math.min(46, 17 + b.pages / 21));
-  const h = Math.round(136 + r() * 64 + (r() < 0.18 ? 24 : 0) - (r() < 0.15 ? 18 : 0));
-  const j = () => f1((r() - 0.5) * 1.8);
-  const tl = 2 + r() * 3,
-    tr = 2 + r() * 3;
-  const body = `M${j()} ${h} C ${f1(-0.9 + r() * 0.6)} ${f1(h * 0.66)}, ${f1(-0.9 + r() * 0.6)} ${f1(h * 0.33)}, ${j()} ${f1(tl)} Q ${f1(w / 2)} ${f1(-1.6 + r() * 1.4)}, ${f1(w + +j())} ${f1(tr)} C ${f1(w + 0.3 + r() * 0.6)} ${f1(h * 0.33)}, ${f1(w + 0.3 + r() * 0.6)} ${f1(h * 0.66)}, ${f1(w + +j())} ${h} Z`;
-  const k = Math.floor(r() * CLOTH.length);
-  const kind = CLOTH[k];
+  const width = Math.round(Math.min(46, 17 + book.pages / 21));
+  const height = Math.round(
+    136 + rand() * 64 + (rand() < 0.18 ? 24 : 0) - (rand() < 0.15 ? 18 : 0),
+  );
+  const jitter = () => round1((rand() - 0.5) * 1.8);
+  const leftTop = 2 + rand() * 3,
+    rightTop = 2 + rand() * 3;
+  const body = `M${jitter()} ${height} C ${round1(-0.9 + rand() * 0.6)} ${round1(height * 0.66)}, ${round1(-0.9 + rand() * 0.6)} ${round1(height * 0.33)}, ${jitter()} ${round1(leftTop)} Q ${round1(width / 2)} ${round1(-1.6 + rand() * 1.4)}, ${round1(width + +jitter())} ${round1(rightTop)} C ${round1(width + 0.3 + rand() * 0.6)} ${round1(height * 0.33)}, ${round1(width + 0.3 + rand() * 0.6)} ${round1(height * 0.66)}, ${round1(width + +jitter())} ${height} Z`;
+  const clothIndex = Math.floor(rand() * CLOTH.length);
+  const kind = CLOTH[clothIndex];
 
   let caps = "";
   let tone2 = tone(kind, fade);
   let lines = "";
   const wave = (y: number) =>
-    `M0.5 ${f1(y)} Q ${f1(w / 2)} ${f1(y + (r() - 0.5) * 2.4)}, ${f1(w - 0.5)} ${f1(y + (r() - 0.5) * 1.4)} `;
-  const capT = 14 + r() * 8,
-    capB = h - 12 - r() * 8;
-  if (r() < 0.36) {
-    tone2 = `color-mix(in oklab, var(--t-${CLOTH[(k + 5) % CLOTH.length]}), var(--fg-main) 12%)`;
-    caps = `M0 ${f1(tl)} Q ${f1(w / 2)} -1, ${w} ${f1(tr)} L ${w} ${f1(capT)} Q ${f1(w / 2)} ${f1(capT + 1.6)}, 0 ${f1(capT)} Z M0 ${f1(capB)} Q ${f1(w / 2)} ${f1(capB - 1.4)}, ${w} ${f1(capB)} L ${w} ${h} L 0 ${h} Z`;
-    lines += wave(capT) + wave(capB);
+    `M0.5 ${round1(y)} Q ${round1(width / 2)} ${round1(y + (rand() - 0.5) * 2.4)}, ${round1(width - 0.5)} ${round1(y + (rand() - 0.5) * 1.4)} `;
+  const capTop = 14 + rand() * 8,
+    capBottom = height - 12 - rand() * 8;
+  if (rand() < 0.36) {
+    tone2 = `color-mix(in oklab, var(--t-${CLOTH[(clothIndex + 5) % CLOTH.length]}), var(--fg-main) 12%)`;
+    caps = `M0 ${round1(leftTop)} Q ${round1(width / 2)} -1, ${width} ${round1(rightTop)} L ${width} ${round1(capTop)} Q ${round1(width / 2)} ${round1(capTop + 1.6)}, 0 ${round1(capTop)} Z M0 ${round1(capBottom)} Q ${round1(width / 2)} ${round1(capBottom - 1.4)}, ${width} ${round1(capBottom)} L ${width} ${height} L 0 ${height} Z`;
+    lines += wave(capTop) + wave(capBottom);
   }
 
   // raised bands, or a pair of thin rules near each end
-  let top = caps ? capT + 5 : 8 + r() * 4;
-  let bot = caps ? capB - 5 : h - 9 - r() * 4;
-  if (r() < 0.4) {
-    lines += wave(top) + wave(top + 3) + wave(bot - 3) + wave(bot);
+  let top = caps ? capTop + 5 : 8 + rand() * 4;
+  let bottom = caps ? capBottom - 5 : height - 9 - rand() * 4;
+  if (rand() < 0.4) {
+    lines += wave(top) + wave(top + 3) + wave(bottom - 3) + wave(bottom);
     top += 6;
-    bot -= 6;
-  } else if (r() < 0.6) {
-    lines += wave(top) + wave(bot);
+    bottom -= 6;
+  } else if (rand() < 0.6) {
+    lines += wave(top) + wave(bottom);
     top += 3;
-    bot -= 3;
+    bottom -= 3;
   }
 
   // the title, in one of the faces
   let dots = "";
-  const face = FACES[Math.floor(r() * FACES.length)];
-  const set = (s: string) => (face.caps ? s.toUpperCase() : s);
-  const author = b.author.split(" ").pop() ?? "";
-  const words = b.title.split(/\s+/);
+  const face = FACES[Math.floor(rand() * FACES.length)];
+  const cased = (text: string) => (face.caps ? text.toUpperCase() : text);
+  const author = book.author.split(" ").pop() ?? "";
+  const words = book.title.split(/\s+/);
   const titles: Title[] = [];
-  const afs = Math.max(6.5, Math.min(8.5, w * 0.24));
-  const alen = author.length * 0.5 * afs;
-  const across = !lying && w >= 34 && words.length <= 3 && words.every((x) => x.length <= 8);
+  const authorSize = Math.max(6.5, Math.min(8.5, width * 0.24));
+  const authorLength = author.length * 0.5 * authorSize;
+  const across =
+    !lying && width >= 34 && words.length <= 3 && words.every((word) => word.length <= 8);
   if (across) {
-    const longest = Math.max(...words.map((x) => x.length));
-    const fs = Math.min(11.5, (w - 7) / (longest * (face.adv + face.ls)));
+    const longest = Math.max(...words.map((word) => word.length));
+    const fontSize = Math.min(11.5, (width - 7) / (longest * (face.adv + face.ls)));
     words.forEach((word, i) =>
       titles.push({
-        t: set(word),
-        transform: `translate(${f1(w / 2)} ${f1(top + 14 + i * fs * 1.15)})`,
-        style: titleStyle(face, fs),
+        t: cased(word),
+        transform: `translate(${round1(width / 2)} ${round1(top + 14 + i * fontSize * 1.15)})`,
+        style: titleStyle(face, fontSize),
         o: 0.9,
       }),
     );
-    const oy = top + 14 + words.length * fs * 1.15 + 6;
-    dots = `M${f1(w / 2 - 1.3)} ${f1(oy)} a1.3 1.3 0 1 0 2.6 0 a1.3 1.3 0 1 0 -2.6 0 Z`;
+    const dotY = top + 14 + words.length * fontSize * 1.15 + 6;
+    dots = `M${round1(width / 2 - 1.3)} ${round1(dotY)} a1.3 1.3 0 1 0 2.6 0 a1.3 1.3 0 1 0 -2.6 0 Z`;
     titles.push({
       t: author,
-      transform: `translate(${f1(w / 2)} ${f1(bot - 6 - alen / 2)}) rotate(90)`,
-      style: titleStyle(AUTHOR_FACE, afs),
+      transform: `translate(${round1(width / 2)} ${round1(bottom - 6 - authorLength / 2)}) rotate(90)`,
+      style: titleStyle(AUTHOR_FACE, authorSize),
       o: 0.75,
     });
   } else {
-    const t = set(b.title);
-    const need = t.length * (face.adv + face.ls) * 1.08;
-    const most = Math.min(13, w * 0.52);
+    const spineTitle = cased(book.title);
+    const need = spineTitle.length * (face.adv + face.ls) * 1.08;
+    const most = Math.min(13, width * 0.52);
 
     // the author steps aside when the title needs the whole spine
-    const signed = w >= 24 && need * 7 <= bot - top - alen - 26;
-    const room = bot - top - (signed ? alen + 26 : 14);
-    const fs = need * most > room ? Math.max(5.5, room / need) : most;
-    const ty = signed ? top + 4 + room / 2 : (top + bot) / 2;
+    const signed = width >= 24 && need * 7 <= bottom - top - authorLength - 26;
+    const room = bottom - top - (signed ? authorLength + 26 : 14);
+    const fontSize = need * most > room ? Math.max(5.5, room / need) : most;
+    const titleY = signed ? top + 4 + room / 2 : (top + bottom) / 2;
     titles.push({
-      t,
-      transform: `translate(${f1(w / 2)} ${f1(ty)}) rotate(90)`,
-      style: titleStyle(face, fs),
+      t: spineTitle,
+      transform: `translate(${round1(width / 2)} ${round1(titleY)}) rotate(90)`,
+      style: titleStyle(face, fontSize),
       o: 0.9,
     });
     if (signed) {
       titles.push({
         t: author,
-        transform: `translate(${f1(w / 2)} ${f1(bot - 6 - alen / 2)}) rotate(90)`,
-        style: titleStyle(AUTHOR_FACE, afs),
+        transform: `translate(${round1(width / 2)} ${round1(bottom - 6 - authorLength / 2)}) rotate(90)`,
+        style: titleStyle(AUTHOR_FACE, authorSize),
         o: 0.72,
       });
-      const oy = bot - alen - 14;
-      if (r() < 0.6) dots = `M${f1(w / 2)} ${f1(oy - 2.2)} l 1.8 2.2 l -1.8 2.2 l -1.8 -2.2 Z`;
+      const dotY = bottom - authorLength - 14;
+      if (rand() < 0.6)
+        dots = `M${round1(width / 2)} ${round1(dotY - 2.2)} l 1.8 2.2 l -1.8 2.2 l -1.8 -2.2 Z`;
     }
   }
 
   return {
-    w,
-    h,
-    width: lying ? h : w,
-    height: lying ? w : h,
-    vb: lying ? `0 0 ${h} ${w}` : `0 0 ${w} ${h}`,
-    turn: lying ? `translate(0 ${w}) rotate(-90)` : "",
+    w: width,
+    h: height,
+    width: lying ? height : width,
+    height: lying ? width : height,
+    vb: lying ? `0 0 ${height} ${width}` : `0 0 ${width} ${height}`,
+    turn: lying ? `translate(0 ${width}) rotate(-90)` : "",
     body,
     caps: caps || "M0 0",
     tone: tone(kind, fade),
@@ -263,65 +272,75 @@ export function look(b: Book, now: Date, lying = false): Spine {
     lines: lines.trim() || "M0 0",
     dots: dots || "M0 0",
     titles,
-    wash: `translate(${f1(1.5 + r() * 2)} ${f1(1 + r() * 2)})`,
+    wash: `translate(${round1(1.5 + rand() * 2)} ${round1(1 + rand() * 2)})`,
   };
 }
 
 // a silk ribbon hanging from (0,0), swallowtail cut
-export function ribbon(seed: string, L: number, wd: number, amp: number) {
-  const r = rng(hash(seed));
-  const n = 16,
-    ph = r() * Math.PI,
-    tw = 0.4 + r() * 0.5;
-  const C: [number, number][] = [];
-  for (let k = 0; k <= n; k++) {
-    const t = k / n;
-    C.push([Math.sin(t * Math.PI * 1.2 + ph) * amp * t + (r() - 0.5) * 0.3, t * L]);
+export function ribbon(seed: string, length: number, width: number, sway: number) {
+  const rand = rng(hash(seed));
+  const segments = 16,
+    phase = rand() * Math.PI,
+    twist = 0.4 + rand() * 0.5;
+  const centre: [number, number][] = [];
+  for (let step = 0; step <= segments; step++) {
+    const along = step / segments;
+    centre.push([
+      Math.sin(along * Math.PI * 1.2 + phase) * sway * along + (rand() - 0.5) * 0.3,
+      along * length,
+    ]);
   }
-  const hw = C.map(
-    (_, k) => (wd / 2) * (0.25 + 0.75 * Math.abs(Math.cos((k / n) * Math.PI * tw + 0.3))),
+  const halfWidths = centre.map(
+    (_, step) =>
+      (width / 2) * (0.25 + 0.75 * Math.abs(Math.cos((step / segments) * Math.PI * twist + 0.3))),
   );
-  const lft = C.map(([x, y], k): [number, number] => [x - hw[k], y]);
-  const rgt = C.map(([x, y], k): [number, number] => [x + hw[k], y]);
-  const [ex, ey] = C[n],
-    h = wd / 2;
+  const leftEdge = centre.map(([x, y], step): [number, number] => [x - halfWidths[step], y]);
+  const rightEdge = centre.map(([x, y], step): [number, number] => [x + halfWidths[step], y]);
+  const [tipX, tipY] = centre[segments],
+    halfWidth = width / 2;
   const tail: [number, number][] = [
-    [ex - h, ey + 0.4],
-    [ex - h * 0.1, ey - wd * 0.9],
-    [ex + h, ey],
+    [tipX - halfWidth, tipY + 0.4],
+    [tipX - halfWidth * 0.1, tipY - width * 0.9],
+    [tipX + halfWidth, tipY],
   ];
-  const body = smooth([...lft.slice(0, n), ...tail, ...rgt.slice(0, n).reverse()], true);
-  let mid = 2;
-  hw.forEach((v, k) => {
-    if (k > 1 && k < n - 1 && v < hw[mid]) mid = k;
+  const body = smooth(
+    [...leftEdge.slice(0, segments), ...tail, ...rightEdge.slice(0, segments).reverse()],
+    true,
+  );
+  let narrowest = 2;
+  halfWidths.forEach((halfAt, step) => {
+    if (step > 1 && step < segments - 1 && halfAt < halfWidths[narrowest]) narrowest = step;
   });
-  const a = Math.max(1, mid - 2),
-    b = Math.min(n - 1, mid + 2);
+  const foldStart = Math.max(1, narrowest - 2),
+    foldEnd = Math.min(segments - 1, narrowest + 2);
   const fold =
     "M" +
-    [...lft.slice(a, b + 1), ...rgt.slice(a, b + 1).reverse()]
-      .map(([x, y]) => `${f1(x)} ${f1(y)}`)
+    [
+      ...leftEdge.slice(foldStart, foldEnd + 1),
+      ...rightEdge.slice(foldStart, foldEnd + 1).reverse(),
+    ]
+      .map(([x, y]) => `${round1(x)} ${round1(y)}`)
       .join(" L ") +
     " Z";
   let threads = "";
-  for (let k = 0; k < 3; k++) {
-    const tx = ex - h + (k + 0.5) * (wd / 3);
-    threads += `M${f1(tx)} ${f1(ey - 0.5)} l ${f1((r() - 0.5) * 2)} ${f1(2 + r() * 3)} `;
+  for (let thread = 0; thread < 3; thread++) {
+    const threadX = tipX - halfWidth + (thread + 0.5) * (width / 3);
+    threads += `M${round1(threadX)} ${round1(tipY - 0.5)} l ${round1((rand() - 0.5) * 2)} ${round1(2 + rand() * 3)} `;
   }
-  return { body, fold, threads: threads.trim(), lw: wd > 6 ? 1.2 : 0.9 };
+  return { body, fold, threads: threads.trim(), lw: width > 6 ? 1.2 : 0.9 };
 }
 
 export type Ribbon = ReturnType<typeof ribbon>;
 
-const label = (b: Book) =>
-  b.state === "reading"
-    ? `${b.title} by ${b.author}, reading now`
-    : `${b.title} by ${b.author}, read ${monthOf(b.finished!)}`;
+const label = (book: Book) =>
+  book.state === "reading"
+    ? `${book.title} by ${book.author}, reading now`
+    : `${book.title} by ${book.author}, read ${monthOf(book.finished!)}`;
 
-const whisper = (b: Book) =>
-  b.state === "reading"
-    ? `${b.title} · reading${b.page ? `, p. ${b.page}` : ""}`
-    : `${b.title} · ${monthOf(b.finished!)}`;
+const whisper = (book: Book) =>
+  book.state === "reading"
+    ? `${book.title} · reading${book.page ? `, p. ${book.page}` : ""}`
+    : `${book.title} · ${monthOf(book.finished!)}`;
 
 export interface Placed {
   book: Book;
@@ -357,14 +376,14 @@ export interface Candle {
 }
 
 function candle(seed: string): Candle {
-  const r = rng(hash(`candle/${seed}`));
-  const s = 0.6;
+  const rand = rng(hash(`candle/${seed}`));
+  const scale = 0.6;
   return {
-    width: Math.round(80 * s),
-    height: Math.round(156 * s),
+    width: Math.round(80 * scale),
+    height: Math.round(156 * scale),
     vb: "60 12 80 156",
-    sw: f1(1.3 / s),
-    wash: `translate(${f1(3 + r() * 3)} ${f1(2 + r() * 2)})`,
+    sw: round1(1.3 / scale),
+    wash: `translate(${round1(3 + rand() * 3)} ${round1(2 + rand() * 2)})`,
     ...picture("candle"),
   };
 }
@@ -393,133 +412,140 @@ const PILE_GAP = 14;
 const MAX_ROW = 940;
 
 function plank(seed: string, items: Item[]): Plank {
-  const r = rng(hash(`plank/${seed}`));
-  const W = Math.round(INSET + items.reduce((s, it) => s + it.width, 0) + AIR);
+  const rand = rng(hash(`plank/${seed}`));
+  const width = Math.round(INSET + items.reduce((sum, item) => sum + item.width, 0) + AIR);
 
   // board, on two brackets
-  const e = () => f1((r() - 0.5) * 2.4);
-  const board = `M${e()} ${f1(4 + +e() * 0.4)} C ${f1(W * 0.3)} ${f1(3 + r())}, ${f1(W * 0.7)} ${f1(5 + r())}, ${f1(W + +e())} ${f1(4 + +e() * 0.4)} L ${f1(W + 1 + r())} ${f1(15 + +e() * 0.5)} C ${f1(W * 0.7)} ${f1(16 + r())}, ${f1(W * 0.3)} ${f1(14.5 + r())}, ${f1(1 + r())} ${f1(15.5 + +e() * 0.5)} Z`;
-  const brackets = [W * 0.14, W * 0.82]
+  const jitter = () => round1((rand() - 0.5) * 2.4);
+  const board = `M${jitter()} ${round1(4 + +jitter() * 0.4)} C ${round1(width * 0.3)} ${round1(3 + rand())}, ${round1(width * 0.7)} ${round1(5 + rand())}, ${round1(width + +jitter())} ${round1(4 + +jitter() * 0.4)} L ${round1(width + 1 + rand())} ${round1(15 + +jitter() * 0.5)} C ${round1(width * 0.7)} ${round1(16 + rand())}, ${round1(width * 0.3)} ${round1(14.5 + rand())}, ${round1(1 + rand())} ${round1(15.5 + +jitter() * 0.5)} Z`;
+  const brackets = [width * 0.14, width * 0.82]
     .map(
-      (q) =>
-        `M${f1(q)} 15 L ${f1(q + 3)} 15 L ${f1(q + 3)} 40 C ${f1(q + 6)} 32, ${f1(q + 16)} 22, ${f1(q + 26)} 15 Z`,
+      (bracketX) =>
+        `M${round1(bracketX)} 15 L ${round1(bracketX + 3)} 15 L ${round1(bracketX + 3)} 40 C ${round1(bracketX + 6)} 32, ${round1(bracketX + 16)} 22, ${round1(bracketX + 26)} 15 Z`,
     )
     .join(" ");
   let grain = "";
-  for (let k = 0; k < 3; k++) {
-    const gy = 7.5 + k * 2.6,
-      a = r() * W * 0.3;
-    grain += `M${f1(a)} ${f1(gy)} C ${f1(a + W * 0.15)} ${f1(gy - 0.8)}, ${f1(a + W * 0.3)} ${f1(gy + 0.8)}, ${f1(a + W * (0.25 + r() * 0.35))} ${f1(gy)} `;
+  for (let line = 0; line < 3; line++) {
+    const grainY = 7.5 + line * 2.6,
+      grainX = rand() * width * 0.3;
+    grain += `M${round1(grainX)} ${round1(grainY)} C ${round1(grainX + width * 0.15)} ${round1(grainY - 0.8)}, ${round1(grainX + width * 0.3)} ${round1(grainY + 0.8)}, ${round1(grainX + width * (0.25 + rand() * 0.35))} ${round1(grainY)} `;
   }
   return {
-    width: W,
-    vb: `0 0 ${W} 56`,
+    width: width,
+    vb: `0 0 ${width} 56`,
     plank: board,
     brackets,
     grain: grain.trim(),
-    pool: { cx: f1(W / 2), rx: f1(W * 0.46) },
+    pool: { cx: round1(width / 2), rx: round1(width * 0.46) },
     items,
   };
 }
 
 // one plank per year, newest on top
 export function shelves(books: Book[], now: Date): Shelf[] {
-  const when = (b: Book) => (b.finished ?? b.started ?? now).valueOf();
-  const yearOf = (b: Book) => (b.finished ?? b.started ?? now).getUTCFullYear();
-  const onShelf = books.filter((b) => b.state !== "waiting");
-  const years = [...new Set(onShelf.map(yearOf))].sort((a, b) => b - a);
+  const when = (book: Book) => (book.finished ?? book.started ?? now).valueOf();
+  const yearOf = (book: Book) => (book.finished ?? book.started ?? now).getUTCFullYear();
+  const onShelf = books.filter((book) => book.state !== "waiting");
+  const years = [...new Set(onShelf.map(yearOf))].sort((former, latter) => latter - former);
   let lit = false;
 
-  return years.map((year, yi) => {
-    const list = onShelf.filter((b) => yearOf(b) === year).sort((a, b) => when(a) - when(b));
-    const sr = rng(hash(`shelf/${year}`));
-    const n = list.length;
+  return years.map((year, yearIndex) => {
+    const list = onShelf
+      .filter((book) => yearOf(book) === year)
+      .sort((former, latter) => when(former) - when(latter));
+    const shelfRand = rng(hash(`shelf/${year}`));
+    const count = list.length;
 
     // where the piles go
     const piles = new Map<number, number>();
-    const want = n < 4 ? 0 : Math.min(4, Math.max(1, Math.round(n / 8)));
+    const want = count < 4 ? 0 : Math.min(4, Math.max(1, Math.round(count / 8)));
     let free = 0;
-    for (let k = 0; k < want; k++) {
-      let at = yi === 0 && k === 0 ? 0 : Math.round((k + 0.25 + sr() * 0.45) * (n / want));
-      at = Math.max(at, free);
-      let size = 2 + Math.floor(sr() * 3);
-      while (at < n && list[at].state === "reading") at++;
-      let end = at;
-      while (end < n && end - at < size && list[end].state !== "reading") end++;
-      size = end - at;
+    for (let pile = 0; pile < want; pile++) {
+      let pileStart =
+        yearIndex === 0 && pile === 0
+          ? 0
+          : Math.round((pile + 0.25 + shelfRand() * 0.45) * (count / want));
+      pileStart = Math.max(pileStart, free);
+      let size = 2 + Math.floor(shelfRand() * 3);
+      while (pileStart < count && list[pileStart].state === "reading") pileStart++;
+      let pileEnd = pileStart;
+      while (pileEnd < count && pileEnd - pileStart < size && list[pileEnd].state !== "reading")
+        pileEnd++;
+      size = pileEnd - pileStart;
       if (size >= 2) {
-        piles.set(at, size);
-        free = end + 2;
+        piles.set(pileStart, size);
+        free = pileEnd + 2;
       }
     }
 
     const items: Item[] = [];
     let leaned = -2;
-    for (let i = 0; i < n; i++) {
+    for (let i = 0; i < count; i++) {
       const size = piles.get(i);
       if (size) {
-        const lying = list.slice(i, i + size).map(
-          (b): Placed => ({
-            book: b,
-            spine: look(b, now, true),
-            label: label(b),
-            whisper: whisper(b),
-            rot: f1((sr() - 0.5) * 1.2),
-            lean: 0,
-            gap: 0,
-            x: f1((sr() - 0.5) * 10),
-            ribbon: null,
-          }),
-        );
+        const lying = list.slice(i, i + size).map((book): Placed => ({
+          book: book,
+          spine: look(book, now, true),
+          label: label(book),
+          whisper: whisper(book),
+          rot: round1((shelfRand() - 0.5) * 1.2),
+          lean: 0,
+          gap: 0,
+          x: round1((shelfRand() - 0.5) * 10),
+          ribbon: null,
+        }));
         lying.reverse();
-        const wid = Math.max(...lying.map((p) => p.spine.width + Math.abs(p.x)));
+        const pileWidth = Math.max(
+          ...lying.map((placed) => placed.spine.width + Math.abs(placed.x)),
+        );
 
         // candle burns on the first pile of the newest shelf that has one
         const lamp = !lit ? candle(String(year)) : null;
         lit = true;
         items.push({
           kind: "pile",
-          width: Math.round(wid + PILE_GAP * (i ? 2 : 1)),
+          width: Math.round(pileWidth + PILE_GAP * (i ? 2 : 1)),
           ml: i ? PILE_GAP : 0,
           books: lying,
           candle: lamp,
-          candleX: f1(wid * 0.35),
+          candleX: round1(pileWidth * 0.35),
         });
         i += size - 1;
         continue;
       }
-      const b = list[i];
-      const spine = look(b, now);
-      const r = rng(hash(`stand/${b.id}/${b.title}`));
-      const p = progress(b);
-      const len = Math.round(30 + p * 56);
+      const standing = list[i];
+      const spine = look(standing, now);
+      const rand = rng(hash(`stand/${standing.id}/${standing.title}`));
+      const readShare = progress(standing);
+      const ribbonLength = Math.round(30 + readShare * 56);
       const prev = items.at(-1);
 
       // book leans into the one before it now and then, never onto a pile or a ribbon
-      const leans = prev?.kind === "book" && b.state === "read" && leaned < i - 2 && sr() < 0.13;
-      const theta = leans ? 6 + sr() * 4 : 0;
+      const leans =
+        prev?.kind === "book" && standing.state === "read" && leaned < i - 2 && shelfRand() < 0.13;
+      const theta = leans ? 6 + shelfRand() * 4 : 0;
       if (leans) leaned = i;
       const lean = leans ? Math.round(spine.h * Math.sin((theta * Math.PI) / 180) - 2) : 0;
-      const gap = r() < 0.08 ? 5 : 1;
+      const gap = rand() < 0.08 ? 5 : 1;
       items.push({
         kind: "book",
         width: spine.w + gap + lean,
         book: {
-          book: b,
+          book: standing,
           spine,
-          label: label(b),
-          whisper: whisper(b),
-          rot: leans ? f1(-theta) : f1((r() - 0.5) * 2.6 * 0.7),
+          label: label(standing),
+          whisper: whisper(standing),
+          rot: leans ? round1(-theta) : round1((rand() - 0.5) * 2.6 * 0.7),
           lean,
           gap,
           x: 0,
           ribbon:
-            b.state === "reading"
+            standing.state === "reading"
               ? {
-                  ...ribbon(`rib/${b.id}/${b.title}`, len, 4.6, 2.4),
-                  len,
-                  left: f1(spine.w * (0.5 + r() * 0.2) - 15),
-                  rot: f1((r() - 0.5) * 4),
+                  ...ribbon(`rib/${standing.id}/${standing.title}`, ribbonLength, 4.6, 2.4),
+                  len: ribbonLength,
+                  left: round1(spine.w * (0.5 + rand() * 0.2) - 15),
+                  rot: round1((rand() - 0.5) * 4),
                 }
               : null,
         },
@@ -527,62 +553,70 @@ export function shelves(books: Book[], now: Date): Shelf[] {
     }
 
     const rows: Item[][] = [[]];
-    let run = 0;
-    for (const it of items) {
-      if (run + it.width > MAX_ROW - INSET - AIR && rows.at(-1)!.length) {
+    let rowWidth = 0;
+    for (const item of items) {
+      if (rowWidth + item.width > MAX_ROW - INSET - AIR && rows.at(-1)!.length) {
         rows.push([]);
-        run = 0;
+        rowWidth = 0;
       }
-      rows.at(-1)!.push(it);
-      run += it.width;
+      rows.at(-1)!.push(item);
+      rowWidth += item.width;
     }
-    const open = list.filter((b) => b.state === "reading").length;
+    const open = list.filter((book) => book.state === "reading").length;
     return {
       year,
       kanji: year === now.getUTCFullYear() ? "今" : "昔",
-      count: open ? `${n - open} read · ${open} open` : `${n} read`,
-      planks: rows.map((row, k) => plank(`${year}/${k}`, row)),
+      count: open ? `${count - open} read · ${open} open` : `${count} read`,
+      planks: rows.map((row, index) => plank(`${year}/${index}`, row)),
     };
   });
 }
 
 export const PAGE = { w: 500, h: 620 };
 
-export function page(side: "L" | "R", n: number, seed: string) {
-  const r = rng(hash(seed));
-  const { w: W, h: H } = PAGE;
-  const s = (x: number) => (side === "L" ? x : W - x);
-  const o = 16 + n * 2.4;
-  const q = () => f1((r() - 0.5) * 1.6);
-  const P = (pts: [number, number][]) => pts.map(([x, y]) => `${f1(s(x))} ${f1(y)}`);
-  const top = P([
-    [o, 36 + q()],
-    [W * 0.3, 8 + q()],
-    [W * 0.72, 2 + q()],
-    [W - 1, 32],
+export function page(side: "L" | "R", leaves: number, seed: string) {
+  const rand = rng(hash(seed));
+  const { w: width, h: height } = PAGE;
+  const mirror = (x: number) => (side === "L" ? x : width - x);
+  const spineX = 16 + leaves * 2.4;
+  const jitter = () => round1((rand() - 0.5) * 1.6);
+  const toPath = (points: [number, number][]) =>
+    points.map(([x, y]) => `${round1(mirror(x))} ${round1(y)}`);
+  const top = toPath([
+    [spineX, 36 + jitter()],
+    [width * 0.3, 8 + jitter()],
+    [width * 0.72, 2 + jitter()],
+    [width - 1, 32],
   ]);
-  const bot = P([
-    [W - 1, H - 20],
-    [W * 0.72, H - 4 + q()],
-    [W * 0.3, H - 2 + q()],
-    [o, H - 14 + q()],
+  const bottom = toPath([
+    [width - 1, height - 20],
+    [width * 0.72, height - 4 + jitter()],
+    [width * 0.3, height - 2 + jitter()],
+    [spineX, height - 14 + jitter()],
   ]);
-  const shape = `M${top[0]} C ${top.slice(1).join(", ")} L ${bot[0]} C ${bot.slice(1).join(", ")} C ${f1(s(o - 2))} ${f1(H * 0.66)}, ${f1(s(o - 1))} ${f1(H * 0.33)}, ${top[0]} Z`;
+  const shape = `M${top[0]} C ${top.slice(1).join(", ")} L ${bottom[0]} C ${bottom.slice(1).join(", ")} C ${round1(mirror(spineX - 2))} ${round1(height * 0.66)}, ${round1(mirror(spineX - 1))} ${round1(height * 0.33)}, ${top[0]} Z`;
   let stack = "";
-  for (let k = 1; k <= n; k++) {
-    const x = o - k * 2.4,
-      y0 = 36 + k * 0.9,
-      y1 = H - 14 + k * 0.6;
-    stack += `M${f1(s(x + 6))} ${f1(y0 - 1.6)} C ${f1(s(x + 1))} ${f1(y0)}, ${f1(s(x))} ${f1(y0 + 4)}, ${f1(s(x))} ${f1(y0 + 10)} L ${f1(s(x - 0.6))} ${f1(y1 - 10)} C ${f1(s(x))} ${f1(y1 - 4)}, ${f1(s(x + 1))} ${f1(y1)}, ${f1(s(x + 6))} ${f1(y1 + 1.4)} `;
+  for (let leaf = 1; leaf <= leaves; leaf++) {
+    const leafX = spineX - leaf * 2.4,
+      leafTop = 36 + leaf * 0.9,
+      leafBottom = height - 14 + leaf * 0.6;
+    stack += `M${round1(mirror(leafX + 6))} ${round1(leafTop - 1.6)} C ${round1(mirror(leafX + 1))} ${round1(leafTop)}, ${round1(mirror(leafX))} ${round1(leafTop + 4)}, ${round1(mirror(leafX))} ${round1(leafTop + 10)} L ${round1(mirror(leafX - 0.6))} ${round1(leafBottom - 10)} C ${round1(mirror(leafX))} ${round1(leafBottom - 4)}, ${round1(mirror(leafX + 1))} ${round1(leafBottom)}, ${round1(mirror(leafX + 6))} ${round1(leafBottom + 1.4)} `;
   }
-  const so = o - n * 2.4 - 1;
-  const stackFill = `M${f1(s(so))} 40 L ${f1(s(o + 4))} 34 L ${f1(s(o + 4))} ${H - 12} L ${f1(s(so))} ${H - 14} Z`;
-  const co = so - 8;
-  const cover = `M${f1(s(co))} ${f1(30 + q())} C ${f1(s(W * 0.3))} ${f1(14 + q())}, ${f1(s(W * 0.75))} ${f1(14 + q())}, ${f1(s(W + 2))} 26 L ${f1(s(W + 2))} ${H - 10} C ${f1(s(W * 0.75))} ${f1(H + 4 + q())}, ${f1(s(W * 0.3))} ${f1(H + 6 + q())}, ${f1(s(co))} ${f1(H - 2 + q())} Z`;
-  const g0 = s(W - 2),
-    g1 = s(W - 40);
-  const gutter = `M${f1(g0)} 26 L ${f1(g1)} 16 L ${f1(g1)} ${H - 12} L ${f1(g0)} ${H - 18} Z`;
-  return { shape, stack: stack.trim() || "M0 0", stackFill, cover, gutter, vb: `0 0 ${W} ${H}` };
+  const stackX = spineX - leaves * 2.4 - 1;
+  const stackFill = `M${round1(mirror(stackX))} 40 L ${round1(mirror(spineX + 4))} 34 L ${round1(mirror(spineX + 4))} ${height - 12} L ${round1(mirror(stackX))} ${height - 14} Z`;
+  const coverX = stackX - 8;
+  const cover = `M${round1(mirror(coverX))} ${round1(30 + jitter())} C ${round1(mirror(width * 0.3))} ${round1(14 + jitter())}, ${round1(mirror(width * 0.75))} ${round1(14 + jitter())}, ${round1(mirror(width + 2))} 26 L ${round1(mirror(width + 2))} ${height - 10} C ${round1(mirror(width * 0.75))} ${round1(height + 4 + jitter())}, ${round1(mirror(width * 0.3))} ${round1(height + 6 + jitter())}, ${round1(mirror(coverX))} ${round1(height - 2 + jitter())} Z`;
+  const gutterOuter = mirror(width - 2),
+    gutterInner = mirror(width - 40);
+  const gutter = `M${round1(gutterOuter)} 26 L ${round1(gutterInner)} 16 L ${round1(gutterInner)} ${height - 12} L ${round1(gutterOuter)} ${height - 18} Z`;
+  return {
+    shape,
+    stack: stack.trim() || "M0 0",
+    stackFill,
+    cover,
+    gutter,
+    vb: `0 0 ${width} ${height}`,
+  };
 }
 
 const FILLER = [
@@ -600,58 +634,58 @@ export interface Para {
   copied?: boolean;
 }
 
-export function paras(from: number, n: number, quotes: string[], cap: boolean): Para[] {
-  return Array.from({ length: n }, (_, k) => {
-    let t = FILLER[(from + k) % FILLER.length];
+export function paras(from: number, count: number, quotes: string[], dropCap: boolean): Para[] {
+  return Array.from({ length: count }, (_, index) => {
+    let text = FILLER[(from + index) % FILLER.length];
     let first = "";
-    if (cap && k === 0) {
-      first = t[0];
-      t = t.slice(1);
+    if (dropCap && index === 0) {
+      first = text[0];
+      text = text.slice(1);
     }
 
     // from the second paragraph on, or from the first when every one holds a line
-    const quote = quotes[k - (quotes.length < n ? 1 : 0)];
+    const quote = quotes[index - (quotes.length < count ? 1 : 0)];
     if (quote) {
-      const cut = t.indexOf(",") + 1;
+      const comma = text.indexOf(",") + 1;
       return {
         cap: first,
         parts: [
-          { t: t.slice(0, cut) + " ", k: "greek" },
+          { t: text.slice(0, comma) + " ", k: "greek" },
           { t: quote, k: "mark" },
-          { t: " " + t.slice(cut).trim(), k: "greek" },
+          { t: " " + text.slice(comma).trim(), k: "greek" },
         ],
       };
     }
-    return { cap: first, parts: [{ t, k: "greek" }] };
+    return { cap: first, parts: [{ t: text, k: "greek" }] };
   });
 }
 
 // the page as it is printed, to be read, with the lines I marked found in it
-export function passage(text: string[], quotes: string[], cap: boolean): Para[] {
-  return text.map((p, k) => {
+export function passage(text: string[], quotes: string[], dropCap: boolean): Para[] {
+  return text.map((paragraph, index) => {
     let first = "";
-    if (cap && k === 0 && /^\p{L}/u.test(p)) {
-      first = p[0];
-      p = p.slice(1);
+    if (dropCap && index === 0 && /^\p{L}/u.test(paragraph)) {
+      first = paragraph[0];
+      paragraph = paragraph.slice(1);
     }
     const parts: Para["parts"] = [];
-    const read = (t: string) =>
-      t.split("\n").forEach((l, i) => {
+    const read = (printed: string) =>
+      printed.split("\n").forEach((line, i) => {
         if (i) parts.push({ t: "", k: "br" });
-        if (l) parts.push({ t: l, k: "read" });
+        if (line) parts.push({ t: line, k: "read" });
       });
-    let at = 0;
+    let searchFrom = 0;
     for (;;) {
       const hits = quotes
-        .map((q) => ({ q, i: p.indexOf(q, at) }))
-        .filter((h) => h.i >= 0)
-        .sort((a, b) => a.i - b.i);
+        .map((quote) => ({ q: quote, i: paragraph.indexOf(quote, searchFrom) }))
+        .filter((hit) => hit.i >= 0)
+        .sort((former, latter) => former.i - latter.i);
       if (!hits.length) break;
-      read(p.slice(at, hits[0].i));
+      read(paragraph.slice(searchFrom, hits[0].i));
       parts.push({ t: hits[0].q, k: "mark" });
-      at = hits[0].i + hits[0].q.length;
+      searchFrom = hits[0].i + hits[0].q.length;
     }
-    read(p.slice(at));
+    read(paragraph.slice(searchFrom));
     return { cap: first, parts };
   });
 }
@@ -659,9 +693,9 @@ export function passage(text: string[], quotes: string[], cap: boolean): Para[] 
 // the page of a book I may not print:
 // only the lines I copied out of it, each with where it stands in the book
 export const excerpts = (quotes: string[], refs: string[]): Para[] =>
-  quotes.map((q, k) => ({
+  quotes.map((quote, index) => ({
     cap: "",
-    parts: [{ t: q, k: "mark" }],
-    ref: refs[k] || undefined,
+    parts: [{ t: quote, k: "mark" }],
+    ref: refs[index] || undefined,
     copied: true,
   }));

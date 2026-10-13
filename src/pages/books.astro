@@ -20,68 +20,71 @@ import { SLIP_AT, slip } from "../utils/slip";
 
 const now = new Date();
 const books = readBooks();
-const key = await slip();
+const slipKey = await slip();
 const cases = shelves(books, now);
-const slipIn = cases[0]?.planks[0]?.items.filter((it) => it.kind === "book")[SLIP_AT - 1]?.book.book
-  .id;
-if (key && !slipIn) console.warn(`[slip] the top shelf has fewer than ${SLIP_AT} books standing`);
-const waiting = books.filter((b) => b.state === "waiting");
-const reading = books.filter((b) => b.state === "reading");
-const read = books.filter((b) => b.state === "read");
-const placed: Placed[] = cases.flatMap((c) =>
-  c.planks.flatMap((p) => p.items.flatMap((it) => (it.kind === "book" ? [it.book] : it.books))),
+const slipIn = cases[0]?.planks[0]?.items.filter((item) => item.kind === "book")[SLIP_AT - 1]?.book
+  .book.id;
+if (slipKey && !slipIn)
+  console.warn(`[slip] the top shelf has fewer than ${SLIP_AT} books standing`);
+const waiting = books.filter((book) => book.state === "waiting");
+const reading = books.filter((book) => book.state === "reading");
+const read = books.filter((book) => book.state === "read");
+const placed: Placed[] = cases.flatMap((bookcase) =>
+  bookcase.planks.flatMap((plank) =>
+    plank.items.flatMap((item) => (item.kind === "book" ? [item.book] : item.books)),
+  ),
 );
 
 // the book lying open below
-const latest = (key: "started" | "finished") => (a: Placed, b: Placed) =>
-  (b.book[key]?.valueOf() ?? 0) - (a.book[key]?.valueOf() ?? 0);
+const latest = (field: "started" | "finished") => (former: Placed, latter: Placed) =>
+  (latter.book[field]?.valueOf() ?? 0) - (former.book[field]?.valueOf() ?? 0);
 const opened =
-  placed.filter((p) => p.book.state === "reading").sort(latest("started"))[0] ??
+  placed.filter((entry) => entry.book.state === "reading").sort(latest("started"))[0] ??
   placed.toSorted(latest("finished"))[0];
 
-const spreads = placed.map(({ book: b, spine }) => {
-  const open = b.state === "reading";
-  const done = Math.round(10 * progress(b));
-  const at = open ? b.page : b.pages;
-  const from = hash(`filler/${b.title}`) % 5;
-  const pr = ribbon(`pagerib/${b.id}/${b.title}`, PAGE.h + 50, 7.5, 9);
+const spreads = placed.map(({ book, spine }) => {
+  const open = book.state === "reading";
+  const done = Math.round(10 * progress(book));
+  const openAt = open ? book.page : book.pages;
+  const from = hash(`filler/${book.title}`) % 5;
+  const pageRibbon = ribbon(`pagerib/${book.id}/${book.title}`, PAGE.h + 50, 7.5, 9);
   const colophon = [
-    { k: "title", v: b.title },
-    { k: "by", v: b.author },
-    { k: "pages", v: String(b.pages) },
-    b.started && { k: "opened", v: monthOf(b.started) },
-    b.finished && { k: "closed", v: monthOf(b.finished) },
-    b.writing && { k: "wrote", v: "what I made of it", href: `/writings/${b.writing}/` },
+    { k: "title", v: book.title },
+    { k: "by", v: book.author },
+    { k: "pages", v: String(book.pages) },
+    book.started && { k: "opened", v: monthOf(book.started) },
+    book.finished && { k: "closed", v: monthOf(book.finished) },
+    book.writing && { k: "wrote", v: "what I made of it", href: `/writings/${book.writing}/` },
   ].filter(Boolean) as { k: string; v: string; href?: string }[];
   return {
-    b,
+    b: book,
     open,
     tone: spine.tone,
     kicker: open
-      ? at
-        ? `open at p. ${at} of ${b.pages}, where the ribbon is`
+      ? openAt
+        ? `open at p. ${openAt} of ${book.pages}, where the ribbon is`
         : "open where the ribbon is"
       : "closed · the last page",
     when: open
-      ? `reading since ${b.started ? monthOf(b.started) : "a while"}`
-      : `read ${spanOf(b.started, b.finished!)}`,
+      ? `reading since ${book.started ? monthOf(book.started) : "a while"}`
+      : `read ${spanOf(book.started, book.finished!)}`,
     left: {
-      ...page("L", Math.max(2, done), `page/L/${b.id}/${b.title}`),
-      heads: [at ? String(open ? at - 1 : at) : "", b.title.toLowerCase()],
-      paras: b.passage.length
-        ? passage(b.passage, b.quotes, open)
-        : b.quotes.length
-          ? excerpts(b.quotes, b.refs)
+      ...page("L", Math.max(2, done), `page/L/${book.id}/${book.title}`),
+      heads: [openAt ? String(open ? openAt - 1 : openAt) : "", book.title.toLowerCase()],
+      paras: book.passage.length
+        ? passage(book.passage, book.quotes, open)
+        : book.quotes.length
+          ? excerpts(book.quotes, book.refs)
           : open
             ? paras(from, 4, [], true)
             : paras(from + 2, 3, [], false),
     },
     right: {
-      ...page("R", Math.max(2, 10 - done), `page/R/${b.id}/${b.title}`),
-      heads: [b.author.toLowerCase(), open && at ? String(at) : ""],
+      ...page("R", Math.max(2, 10 - done), `page/R/${book.id}/${book.title}`),
+      heads: [book.author.toLowerCase(), open && openAt ? String(openAt) : ""],
       paras: paras(from + 3, 4, [], false),
     },
-    ribbon: { ...pr, h: PAGE.h + 60, vb: `-20 0 40 ${PAGE.h + 60}` },
+    ribbon: { ...pageRibbon, h: PAGE.h + 60, vb: `-20 0 40 ${PAGE.h + 60}` },
     colophon,
   };
 });
@@ -102,10 +105,10 @@ const BOOK_FONTS = [
   description="What I have read, a shelf for every year, and what I am reading now."
 >
   <Fragment slot="head">
-    {BOOK_FONTS.map((f) => (
+    {BOOK_FONTS.map((font) => (
       <link
         rel="preload"
-        href={`/fonts/${f}.woff2`}
+        href={`/fonts/${font}.woff2`}
         as="font"
         type="font/woff2"
         crossorigin
@@ -167,116 +170,120 @@ const BOOK_FONTS = [
 
   <div class="ink-room">
     <section class="case" aria-label="Bookshelf">
-      {cases.map((c, ci) => (
-        <section class="year" aria-labelledby={`bk-y-${c.year}`}>
-          <h2 class="group-head" id={`bk-y-${c.year}`}>
+      {cases.map((bookcase, caseIndex) => (
+        <section class="year" aria-labelledby={`bk-y-${bookcase.year}`}>
+          <h2 class="group-head" id={`bk-y-${bookcase.year}`}>
             <span class="group-kanji" aria-hidden="true">
-              {c.kanji}
+              {bookcase.kanji}
             </span>
-            {c.year}
+            {bookcase.year}
             <span class="group-rule" aria-hidden="true" />
-            <span class="group-n">{c.count}</span>
+            <span class="group-n">{bookcase.count}</span>
           </h2>
-          {c.planks.map((pl) => (
+          {bookcase.planks.map((plank) => (
             <div class="scroll">
-              <div class:list={["row", { older: ci > 0 }]} style={`--row: ${pl.width}px`}>
+              <div class:list={["row", { older: caseIndex > 0 }]} style={`--row: ${plank.width}px`}>
                 <div class="books">
-                  {pl.items.map((it) =>
-                    it.kind === "book" ? (
+                  {plank.items.map((item) =>
+                    item.kind === "book" ? (
                       <Fragment>
-                        {[it.book].map((p) => (
+                        {[item.book].map((standing) => (
                           <button
                             type="button"
-                            class:list={["bk", { leans: p.lean > 0 }]}
-                            data-book={p.book.id}
-                            aria-label={p.label}
-                            aria-pressed={p.book.id === opened?.book.id ? "true" : "false"}
-                            style={`--rot: ${p.rot}deg; margin: 0 ${p.gap}px 0 ${p.lean}px`}
+                            class:list={["bk", { leans: standing.lean > 0 }]}
+                            data-book={standing.book.id}
+                            aria-label={standing.label}
+                            aria-pressed={standing.book.id === opened?.book.id ? "true" : "false"}
+                            style={`--rot: ${standing.rot}deg; margin: 0 ${standing.gap}px 0 ${standing.lean}px`}
                           >
                             <svg
                               class="spine"
-                              width={p.spine.width}
-                              height={p.spine.height}
-                              viewBox={p.spine.vb}
+                              width={standing.spine.width}
+                              height={standing.spine.height}
+                              viewBox={standing.spine.vb}
                               aria-hidden="true"
                             >
                               <g class="wash">
                                 <path
-                                  d={p.spine.body}
-                                  fill={p.spine.tone}
-                                  transform={p.spine.wash}
+                                  d={standing.spine.body}
+                                  fill={standing.spine.tone}
+                                  transform={standing.spine.wash}
                                   filter="url(#bk-wash)"
                                 />
                                 <path
-                                  d={p.spine.caps}
-                                  fill={p.spine.tone2}
-                                  transform={p.spine.wash}
+                                  d={standing.spine.caps}
+                                  fill={standing.spine.tone2}
+                                  transform={standing.spine.wash}
                                   filter="url(#bk-wash)"
                                 />
                               </g>
-                              <path class="rules" d={p.spine.lines} filter="url(#bk-tremble)" />
-                              <path class="orn" d={p.spine.dots} />
-                              {p.spine.titles.map((t) => (
+                              <path
+                                class="rules"
+                                d={standing.spine.lines}
+                                filter="url(#bk-tremble)"
+                              />
+                              <path class="orn" d={standing.spine.dots} />
+                              {standing.spine.titles.map((spineTitle) => (
                                 <text
-                                  transform={t.transform}
+                                  transform={spineTitle.transform}
                                   text-anchor="middle"
                                   dominant-baseline="central"
-                                  opacity={t.o}
-                                  style={t.style}
+                                  opacity={spineTitle.o}
+                                  style={spineTitle.style}
                                 >
-                                  {t.t}
+                                  {spineTitle.t}
                                 </text>
                               ))}
-                              <path class="ink" d={p.spine.body} filter="url(#bk-tremble)" />
+                              <path class="ink" d={standing.spine.body} filter="url(#bk-tremble)" />
                             </svg>
-                            {p.ribbon && (
+                            {standing.ribbon && (
                               <svg
                                 class="rib"
                                 width="30"
-                                height={p.ribbon.len + 12}
-                                viewBox={`-15 0 30 ${p.ribbon.len + 12}`}
+                                height={standing.ribbon.len + 12}
+                                viewBox={`-15 0 30 ${standing.ribbon.len + 12}`}
                                 aria-hidden="true"
-                                style={`left: ${p.ribbon.left}px`}
+                                style={`left: ${standing.ribbon.left}px`}
                               >
-                                <g transform={`rotate(${p.ribbon.rot})`}>
+                                <g transform={`rotate(${standing.ribbon.rot})`}>
                                   <g class="silk">
                                     <path
-                                      d={p.ribbon.body}
+                                      d={standing.ribbon.body}
                                       transform="translate(1.6 1.2)"
                                       filter="url(#bk-wash)"
                                     />
                                   </g>
                                   <path
                                     class="fold"
-                                    d={p.ribbon.fold}
+                                    d={standing.ribbon.fold}
                                     transform="translate(1.6 1.2)"
                                   />
                                   <path
                                     class="ink"
-                                    d={p.ribbon.body}
-                                    stroke-width={p.ribbon.lw}
+                                    d={standing.ribbon.body}
+                                    stroke-width={standing.ribbon.lw}
                                     filter="url(#bk-tremble)"
                                   />
-                                  <path class="threads" d={p.ribbon.threads} />
+                                  <path class="threads" d={standing.ribbon.threads} />
                                 </g>
                               </svg>
                             )}
                             <span class="whisper hand" aria-hidden="true">
-                              {p.whisper}
+                              {standing.whisper}
                             </span>
                           </button>
                         ))}
                       </Fragment>
                     ) : (
-                      <div class="pile" style={`margin: 0 14px 0 ${it.ml}px`}>
-                        {it.candle && (
+                      <div class="pile" style={`margin: 0 14px 0 ${item.ml}px`}>
+                        {item.candle && (
                           <svg
                             class="thing"
-                            width={it.candle.width}
-                            height={it.candle.height}
-                            viewBox={it.candle.vb}
+                            width={item.candle.width}
+                            height={item.candle.height}
+                            viewBox={item.candle.vb}
                             aria-hidden="true"
-                            style={`margin-left: ${it.candleX}px; --sw: ${it.candle.sw}`}
+                            style={`margin-left: ${item.candleX}px; --sw: ${item.candle.sw}`}
                           >
                             <ellipse
                               class="pool"
@@ -287,78 +294,82 @@ const BOOK_FONTS = [
                               filter="url(#bk-pool)"
                             />
                             <g class="wash">
-                              {it.candle.forms.map((f) => (
+                              {item.candle.forms.map((form) => (
                                 <path
-                                  d={f.d}
-                                  fill={f.fill}
-                                  transform={it.candle!.wash}
+                                  d={form.d}
+                                  fill={form.fill}
+                                  transform={item.candle!.wash}
                                   filter="url(#bk-wash)"
                                 />
                               ))}
                             </g>
-                            {it.candle.forms.map((f) => (
-                              <path class="ink" d={f.d} filter="url(#bk-tremble)" />
+                            {item.candle.forms.map((form) => (
+                              <path class="ink" d={form.d} filter="url(#bk-tremble)" />
                             ))}
-                            {it.candle.lines.map((l) => (
+                            {item.candle.lines.map((line) => (
                               <path
                                 class="stroke"
-                                d={l.d}
-                                stroke={l.stroke}
-                                stroke-width={l.w}
-                                opacity={l.o}
+                                d={line.d}
+                                stroke={line.stroke}
+                                stroke-width={line.w}
+                                opacity={line.o}
                               />
                             ))}
                           </svg>
                         )}
-                        {it.books.map((p, i) => (
+                        {item.books.map((lying, i) => (
                           <button
                             type="button"
                             class="bk lying"
-                            data-book={p.book.id}
-                            aria-label={p.label}
-                            aria-pressed={p.book.id === opened?.book.id ? "true" : "false"}
-                            style={`--rot: ${p.rot}deg; margin-left: ${p.x + 5}px; --up: ${(it.candle ? it.candle.height - 1 : 0) + it.books.slice(0, i).reduce((h, q) => h + q.spine.height, 0)}px`}
+                            data-book={lying.book.id}
+                            aria-label={lying.label}
+                            aria-pressed={lying.book.id === opened?.book.id ? "true" : "false"}
+                            style={`--rot: ${lying.rot}deg; margin-left: ${lying.x + 5}px; --up: ${(item.candle ? item.candle.height - 1 : 0) + item.books.slice(0, i).reduce((height, below) => height + below.spine.height, 0)}px`}
                           >
                             <svg
                               class="spine"
-                              width={p.spine.width}
-                              height={p.spine.height}
-                              viewBox={p.spine.vb}
+                              width={lying.spine.width}
+                              height={lying.spine.height}
+                              viewBox={lying.spine.vb}
                               aria-hidden="true"
                             >
-                              <g transform={p.spine.turn}>
+                              <g transform={lying.spine.turn}>
                                 <g class="wash">
                                   <path
-                                    d={p.spine.body}
-                                    fill={p.spine.tone}
-                                    transform={p.spine.wash}
+                                    d={lying.spine.body}
+                                    fill={lying.spine.tone}
+                                    transform={lying.spine.wash}
                                     filter="url(#bk-wash)"
                                   />
                                   <path
-                                    d={p.spine.caps}
-                                    fill={p.spine.tone2}
-                                    transform={p.spine.wash}
+                                    d={lying.spine.caps}
+                                    fill={lying.spine.tone2}
+                                    transform={lying.spine.wash}
                                     filter="url(#bk-wash)"
                                   />
                                 </g>
-                                <path class="rules" d={p.spine.lines} filter="url(#bk-tremble)" />
-                                <path class="orn" d={p.spine.dots} />
-                                {p.spine.titles.map((t) => (
+                                <path
+                                  class="rules"
+                                  d={lying.spine.lines}
+                                  filter="url(#bk-tremble)"
+                                />
+                                <path class="orn" d={lying.spine.dots} />
+                                {lying.spine.titles.map((spineTitle) => (
                                   <text
-                                    transform={t.transform}
+                                    transform={spineTitle.transform}
                                     text-anchor="middle"
                                     dominant-baseline="central"
-                                    opacity={t.o}
-                                    style={t.style}
+                                    opacity={spineTitle.o}
+                                    style={spineTitle.style}
                                   >
-                                    {t.t}
+                                    {spineTitle.t}
                                   </text>
                                 ))}
-                                <path class="ink" d={p.spine.body} filter="url(#bk-tremble)" />
+                                <path class="ink" d={lying.spine.body} filter="url(#bk-tremble)" />
                               </g>
                             </svg>
                             <span class="whisper hand" aria-hidden="true">
-                              {p.whisper}
+                              {lying.whisper}
                             </span>
                           </button>
                         ))}
@@ -366,22 +377,28 @@ const BOOK_FONTS = [
                     ),
                   )}
                 </div>
-                <svg class="plank" width={pl.width} height="56" viewBox={pl.vb} aria-hidden="true">
+                <svg
+                  class="plank"
+                  width={plank.width}
+                  height="56"
+                  viewBox={plank.vb}
+                  aria-hidden="true"
+                >
                   <ellipse
                     class="pool"
-                    cx={pl.pool.cx}
+                    cx={plank.pool.cx}
                     cy="30"
-                    rx={pl.pool.rx}
+                    rx={plank.pool.rx}
                     ry="9"
                     filter="url(#bk-pool)"
                   />
                   <g class="wash">
-                    <path d={pl.brackets} transform="translate(3 2)" filter="url(#bk-wash)" />
-                    <path d={pl.plank} transform="translate(3 2)" filter="url(#bk-wash)" />
+                    <path d={plank.brackets} transform="translate(3 2)" filter="url(#bk-wash)" />
+                    <path d={plank.plank} transform="translate(3 2)" filter="url(#bk-wash)" />
                   </g>
-                  <path class="ink thin" d={pl.brackets} filter="url(#bk-tremble)" />
-                  <path class="ink" d={pl.plank} filter="url(#bk-tremble)" />
-                  <path class="grain" d={pl.grain} />
+                  <path class="ink thin" d={plank.brackets} filter="url(#bk-tremble)" />
+                  <path class="ink" d={plank.plank} filter="url(#bk-tremble)" />
+                  <path class="grain" d={plank.grain} />
                 </svg>
               </div>
             </div>
@@ -391,16 +408,20 @@ const BOOK_FONTS = [
     </section>
 
     <section class="spread" aria-label="The open book" aria-live="polite">
-      {spreads.map((s) => (
-        <article class="opened" data-book={s.b.id} hidden={s.b.id !== opened?.book.id}>
+      {spreads.map((bookSpread) => (
+        <article
+          class="opened"
+          data-book={bookSpread.b.id}
+          hidden={bookSpread.b.id !== opened?.book.id}
+        >
           <h2 class="group-head">
             <span class="group-kanji" aria-hidden="true">
               開
             </span>
-            {s.kicker}
+            {bookSpread.kicker}
             <span class="group-rule" aria-hidden="true" />
           </h2>
-          <div class="leaves" style={`--cover: ${s.tone}`}>
+          <div class="leaves" style={`--cover: ${bookSpread.tone}`}>
             <svg
               class="spread-pool"
               viewBox="0 0 1000 80"
@@ -409,52 +430,52 @@ const BOOK_FONTS = [
             >
               <ellipse cx="500" cy="36" rx="470" ry="16" filter="url(#bk-pool)" />
             </svg>
-            {[s.left, s.right].map((pg, side) => (
+            {[bookSpread.left, bookSpread.right].map((sheet, side) => (
               <div class:list={["leaf", side ? "leaf-r" : "leaf-l"]}>
-                <svg class="paper" viewBox={pg.vb} preserveAspectRatio="none" aria-hidden="true">
+                <svg class="paper" viewBox={sheet.vb} preserveAspectRatio="none" aria-hidden="true">
                   <g class="wash">
-                    <path d={pg.cover} transform="translate(3 2)" filter="url(#bk-wash)" />
+                    <path d={sheet.cover} transform="translate(3 2)" filter="url(#bk-wash)" />
                   </g>
-                  <path class="ink thin" d={pg.cover} filter="url(#bk-tremble)" />
-                  <path class="sheet" d={pg.stackFill} />
-                  <path class="stack" d={pg.stack} filter="url(#bk-tremble)" />
-                  <path class="sheet" d={pg.shape} />
-                  <path class="fibre" d={pg.shape} filter="url(#bk-fibre)" />
-                  <path class="gutter" d={pg.gutter} filter="url(#bk-pool)" />
-                  <path class="ink thin" d={pg.shape} filter="url(#bk-tremble)" />
+                  <path class="ink thin" d={sheet.cover} filter="url(#bk-tremble)" />
+                  <path class="sheet" d={sheet.stackFill} />
+                  <path class="stack" d={sheet.stack} filter="url(#bk-tremble)" />
+                  <path class="sheet" d={sheet.shape} />
+                  <path class="fibre" d={sheet.shape} filter="url(#bk-fibre)" />
+                  <path class="gutter" d={sheet.gutter} filter="url(#bk-pool)" />
+                  <path class="ink thin" d={sheet.shape} filter="url(#bk-tremble)" />
                 </svg>
                 <p class="running">
-                  <span>{pg.heads[0]}</span>
-                  <i>{pg.heads[1]}</i>
+                  <span>{sheet.heads[0]}</span>
+                  <i>{sheet.heads[1]}</i>
                 </p>
-                {side === 0 || s.open ? (
+                {side === 0 || bookSpread.open ? (
                   <div class="text">
-                    {pg.paras.map((pa, k) => (
+                    {sheet.paras.map((paragraph, index) => (
                       <p
                         class:list={{
-                          first: k === 0,
-                          lines: pa.parts.some((pt) => pt.k === "br"),
-                          copied: pa.copied,
+                          first: index === 0,
+                          lines: paragraph.parts.some((part) => part.k === "br"),
+                          copied: paragraph.copied,
                         }}
                       >
-                        {pa.cap && <span class="cap">{pa.cap}</span>}
-                        {pa.parts.map((pt) =>
-                          pt.k === "mark" ? (
-                            <mark>{pt.t}</mark>
-                          ) : pt.k === "br" ? (
+                        {paragraph.cap && <span class="cap">{paragraph.cap}</span>}
+                        {paragraph.parts.map((part) =>
+                          part.k === "mark" ? (
+                            <mark>{part.t}</mark>
+                          ) : part.k === "br" ? (
                             <br />
-                          ) : pt.k === "greek" ? (
+                          ) : part.k === "greek" ? (
                             <span class="greek" aria-hidden="true">
-                              {pt.t}
+                              {part.t}
                             </span>
                           ) : (
-                            pt.t
+                            part.t
                           ),
                         )}
-                        {pa.ref && <span class="ref">{pa.ref}</span>}
+                        {paragraph.ref && <span class="ref">{paragraph.ref}</span>}
                       </p>
                     ))}
-                    {side === 0 && !s.open && (
+                    {side === 0 && !bookSpread.open && (
                       <svg
                         class="fleuron"
                         width="70"
@@ -473,7 +494,7 @@ const BOOK_FONTS = [
                 ) : (
                   <div class="colophon">
                     <p class="ends">here ends the book</p>
-                    {s.colophon.map((row) => (
+                    {bookSpread.colophon.map((row) => (
                       <p>
                         <i>{row.k}</i>&#8194;
                         {row.href ? <a href={row.href}>{row.v} →</a> : <span>{row.v}</span>}
@@ -488,54 +509,55 @@ const BOOK_FONTS = [
                     </svg>
                   </div>
                 )}
-                {side === 0 && s.b.note && <p class="pencil">{s.b.note}</p>}
-                {side === 1 && s.open && <p class="folio">{pg.heads[1]}</p>}
-                {side === 1 && s.open && (
+                {side === 0 && bookSpread.b.note && <p class="pencil">{bookSpread.b.note}</p>}
+                {side === 1 && bookSpread.open && <p class="folio">{sheet.heads[1]}</p>}
+                {side === 1 && bookSpread.open && (
                   <svg
                     class="page-rib"
                     width="40"
-                    height={s.ribbon.h}
-                    viewBox={s.ribbon.vb}
+                    height={bookSpread.ribbon.h}
+                    viewBox={bookSpread.ribbon.vb}
                     aria-hidden="true"
                   >
                     <g class="silk">
                       <path
-                        d={s.ribbon.body}
+                        d={bookSpread.ribbon.body}
                         transform="translate(1.6 1.2)"
                         filter="url(#bk-wash)"
                       />
                     </g>
-                    <path class="fold" d={s.ribbon.fold} transform="translate(1.6 1.2)" />
+                    <path class="fold" d={bookSpread.ribbon.fold} transform="translate(1.6 1.2)" />
                     <path
                       class="ink"
-                      d={s.ribbon.body}
-                      stroke-width={s.ribbon.lw}
+                      d={bookSpread.ribbon.body}
+                      stroke-width={bookSpread.ribbon.lw}
                       filter="url(#bk-tremble)"
                     />
-                    <path class="threads" d={s.ribbon.threads} />
+                    <path class="threads" d={bookSpread.ribbon.threads} />
                   </svg>
                 )}
               </div>
             ))}
-            {key && s.b.id === slipIn && (
+            {slipKey && bookSpread.b.id === slipIn && (
               <svg
                 class="slip"
-                width={key.w + 40}
-                height={key.h + 36}
-                viewBox={`-20 -18 ${key.w + 40} ${key.h + 36}`}
+                width={slipKey.w + 40}
+                height={slipKey.h + 36}
+                viewBox={`-20 -18 ${slipKey.w + 40} ${slipKey.h + 36}`}
                 aria-hidden="true"
               >
                 <path
                   class="slip-paper"
-                  d={`M-14 -12 C ${key.w * 0.3} -15, ${key.w * 0.7} -9, ${key.w + 14} -13 L ${key.w + 16} ${key.h + 12} C ${key.w * 0.6} ${key.h + 15}, ${key.w * 0.3} ${key.h + 10}, -12 ${key.h + 13} Z`}
+                  d={`M-14 -12 C ${slipKey.w * 0.3} -15, ${slipKey.w * 0.7} -9, ${slipKey.w + 14} -13 L ${slipKey.w + 16} ${slipKey.h + 12} C ${slipKey.w * 0.6} ${slipKey.h + 15}, ${slipKey.w * 0.3} ${slipKey.h + 10}, -12 ${slipKey.h + 13} Z`}
                   filter="url(#bk-tremble)"
                 />
-                <path class="slip-ink" d={key.ink} />
+                <path class="slip-ink" d={slipKey.ink} />
               </svg>
             )}
           </div>
           <p class="caption">
-            <span class="caption-title">{s.b.title}</span> · <i>{s.b.author}</i> · {s.when}
+            <span class="caption-title">{bookSpread.b.title}</span> · <i>{bookSpread.b.author}</i> ·
+            {bookSpread.when}
           </p>
         </article>
       ))}
@@ -551,20 +573,21 @@ const BOOK_FONTS = [
 
   // on a narrow shelf, slide the open book into view
   for (const spine of spines) {
-    const row = spine.closest<HTMLElement>(".scroll")!;
-    if (spine.ariaPressed === "true" && row.scrollWidth > row.clientWidth) {
+    const scroller = spine.closest<HTMLElement>(".scroll")!;
+    if (spine.ariaPressed === "true" && scroller.scrollWidth > scroller.clientWidth) {
       const box = spine.getBoundingClientRect();
-      const at = box.left - row.getBoundingClientRect().left + row.scrollLeft;
-      row.scrollLeft = at - row.clientWidth / 2;
+      const offset = box.left - scroller.getBoundingClientRect().left + scroller.scrollLeft;
+      scroller.scrollLeft = offset - scroller.clientWidth / 2;
     }
   }
 
   for (const spine of spines) {
     spine.addEventListener("click", () => {
-      const id = spine.dataset.book;
-      for (const s of spines) s.setAttribute("aria-pressed", String(s.dataset.book === id));
+      const bookId = spine.dataset.book;
+      for (const other of spines)
+        other.setAttribute("aria-pressed", String(other.dataset.book === bookId));
       for (const book of opened) {
-        book.hidden = book.dataset.book !== id;
+        book.hidden = book.dataset.book !== bookId;
         if (!book.hidden) {
           // open it again, even if it was the one lying open
           book.classList.remove("opening");
