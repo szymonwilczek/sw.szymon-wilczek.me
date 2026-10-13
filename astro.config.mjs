@@ -22,9 +22,11 @@ const preloadGarden = {
   },
 };
 
+const SITE = "https://sw.szymon-wilczek.me";
+
 // https://astro.build/config
 export default defineConfig({
-  site: "https://sw.szymon-wilczek.me",
+  site: SITE,
   output: "static",
   trailingSlash: "always",
   compressHTML: true,
@@ -60,7 +62,7 @@ export default defineConfig({
       changefreq: "weekly",
       priority: 0.7,
       serialize(item) {
-        if (item.url === "https://sw.szymon-wilczek.me/") {
+        if (item.url === `${SITE}/`) {
           item.priority = 1.0;
           item.changefreq = "daily";
         } else if (item.url.includes("/writings/")) {

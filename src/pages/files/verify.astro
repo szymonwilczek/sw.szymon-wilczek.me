@@ -21,7 +21,7 @@ const tags = files.map((file, i) => ({
   description="Check a downloaded file against the SHA-256 on its tag. The hash is computed in your browser; nothing is uploaded."
 >
   <header class="verify-head">
-    <p class="crumbs">
+    <p class="crumbs" data-host={Astro.site!.host}>
       <a href="/files/">files</a> / verify
     </p>
     <h1>Is it the same file?</h1>

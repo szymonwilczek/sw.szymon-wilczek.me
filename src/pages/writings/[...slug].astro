@@ -46,7 +46,7 @@ const postImage = imageMatch ? imageMatch[1] : `/og/${slug}.png`;
   imageAlt={post.data.title}
 >
   <header class="article-head">
-    <p class="crumbs">
+    <p class="crumbs" data-host={Astro.site!.host}>
       <a href="/writings/">writings</a> / {post.data.category.toLowerCase()}
     </p>
     <h1>{post.data.title}</h1>

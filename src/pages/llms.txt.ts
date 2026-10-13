@@ -2,7 +2,7 @@ import { getCollection, type CollectionEntry } from "astro:content";
 import type { APIRoute } from "astro";
 
 export const GET: APIRoute = async ({ site }) => {
-  const siteUrl = site ? site.toString().replace(/\/$/, "") : "https://sw.szymon-wilczek.me";
+  const siteUrl = site!.origin;
 
   let writings: CollectionEntry<"writings">[] = [];
   try {

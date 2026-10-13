@@ -24,7 +24,7 @@ interface Props {
   post: CollectionEntry<"writings">;
 }
 
-export const GET: APIRoute<Props> = async ({ props }) => {
+export const GET: APIRoute<Props> = async ({ props, site }) => {
   const { title, category, pubDate } = props.post.data;
 
   const svg = await satori(
@@ -73,7 +73,7 @@ export const GET: APIRoute<Props> = async ({ props }) => {
               },
               children: [
                 { type: "span", props: { children: pubDate.toISOString().split("T")[0] } },
-                { type: "span", props: { children: "sw.szymon-wilczek.me" } },
+                { type: "span", props: { children: site!.host } },
               ],
             },
           },

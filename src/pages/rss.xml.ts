@@ -17,7 +17,7 @@ export async function GET(context: APIContext) {
   return rss({
     title: "Szymon Wilczek",
     description: "Personal writings, essays, manifestos, and tools by Szymon Wilczek.",
-    site: context.site ?? "https://sw.szymon-wilczek.me",
+    site: context.site!,
     items: allItems,
     customData: `<language>en-us</language>`,
   });

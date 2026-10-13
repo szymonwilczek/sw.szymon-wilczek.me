@@ -90,7 +90,7 @@
   }
 
   .crumbs::before {
-    content: "sw.szymon-wilczek.me · ";
+    content: attr(data-host) " · ";
   }
 
   .article-head h1 {

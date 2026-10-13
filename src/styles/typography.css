@@ -415,7 +415,7 @@ sup a {
 
 main
   :is(p, li, dd, td, figcaption, blockquote)
-  > a[href^="http"]:not([href*="//sw.szymon-wilczek.me"])::after {
+  > a[href^="http"]:not([href*="//sw.szymon-wilczek.me"], [href*="//szymon-wilczek.me"])::after {
   content: "";
   display: inline-block;
   width: 0.55em;
@@ -431,6 +431,9 @@ main
 
 main
   :is(p, li, dd, td, figcaption, blockquote)
-  > a[href^="http"]:not([href*="//sw.szymon-wilczek.me"]):hover::after {
+  > a[href^="http"]:not(
+    [href*="//sw.szymon-wilczek.me"],
+    [href*="//szymon-wilczek.me"]
+  ):hover::after {
   transform: translate(0.15em, -0.15em);
 }

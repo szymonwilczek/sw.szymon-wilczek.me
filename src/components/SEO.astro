@@ -33,9 +33,7 @@ const {
   nextUrl,
 } = Astro.props;
 
-const siteUrl = Astro.site
-  ? Astro.site.toString().replace(/\/$/, "")
-  : "https://sw.szymon-wilczek.me";
+const siteUrl = Astro.site!.origin;
 const pageTitle = title === "Szymon Wilczek" ? title : `${title} · Szymon Wilczek`;
 const canonicalURL = new URL(Astro.url.pathname, siteUrl);
 const ogImageURL = new URL(
@@ -195,16 +193,12 @@ const articleSchema =
 <meta property="og:image" content={ogImageURL} />
 <meta property="og:image:alt" content={imageAlt} />
 
-{
-  type === "article" && pubDate && (
-    <meta property="article:published_time" content={pubDate.toISOString()} />
-  )
-}
-{
-  type === "article" && updatedDate && (
-    <meta property="article:modified_time" content={updatedDate.toISOString()} />
-  )
-}
+{type === "article" && pubDate && (
+  <meta property="article:published_time" content={pubDate.toISOString()} />
+)}
+{type === "article" && updatedDate && (
+  <meta property="article:modified_time" content={updatedDate.toISOString()} />
+)}
 {type === "article" && <meta property="article:author" content={`${siteUrl}/about/`} />}
 {type === "article" && category && <meta property="article:section" content={category} />}
 {type === "article" && tags.map((tag) => <meta property="article:tag" content={tag} />)}
@@ -225,13 +219,9 @@ const articleSchema =
 
 <script is:inline type="application/ld+json" set:html={JSON.stringify(personSchema)} />
 <script is:inline type="application/ld+json" set:html={JSON.stringify(websiteSchema)} />
-{
-  breadcrumbSchema && (
-    <script is:inline type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
-  )
-}
-{
-  articleSchema && (
-    <script is:inline type="application/ld+json" set:html={JSON.stringify(articleSchema)} />
-  )
-}
+{breadcrumbSchema && (
+  <script is:inline type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
+)}
+{articleSchema && (
+  <script is:inline type="application/ld+json" set:html={JSON.stringify(articleSchema)} />
+)}

@@ -9,7 +9,7 @@ function cleanOrgBody(body: string): string {
 }
 
 export const GET: APIRoute = async ({ site }) => {
-  const siteUrl = site ? site.toString().replace(/\/$/, "") : "https://sw.szymon-wilczek.me";
+  const siteUrl = site!.origin;
 
   let writings: CollectionEntry<"writings">[] = [];
   try {
@@ -20,7 +20,7 @@ export const GET: APIRoute = async ({ site }) => {
 
   let content = `# Szymon Wilczek - Complete Content Corpus
 
-> This file contains the complete full-text corpus of technical writings, essays, and architectural reflections published on sw.szymon-wilczek.me by Szymon Wilczek.
+> This file contains the complete full-text corpus of technical writings, essays, and architectural reflections published on ${site!.host} by Szymon Wilczek.
 
 ---
 `;

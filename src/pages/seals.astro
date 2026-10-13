@@ -27,31 +27,33 @@ const TILTS = [-6, 4, -2, 7, -4, 3, -7, 5, -3, 6, -5, 2, -6, 4, -1];
   <Divider from={180} to={400} />
 
   <ol class="book">
-    {
-      SEALS.map((seal, i) => (
-        <li class="page" data-glyph={seal.glyph} style={`--tilt: ${TILTS[i]}deg`}>
-          <span class="page-n">{String(i + 1).padStart(2, "0")}</span>
-          <svg class="page-seal" viewBox="0 0 46 46" aria-hidden="true">
-            <path class="seal-edge" d={HANKO_EDGE} />
-            <path class="seal-inner" d={HANKO_INNER} />
-            <text x="23" y="31" text-anchor="middle">
-              {seal.glyph}
-            </text>
-          </svg>
-          <span class="page-date">····</span>
-          <span class="page-note hand" data-note={seal.note}>
-            {seal.hint}
-          </span>
-          {seal.glyph === "北" && <span class="page-doors hand" />}
-        </li>
-      ))
-    }
+    {SEALS.map((seal, i) => (
+      <li class="page" data-glyph={seal.glyph} style={`--tilt: ${TILTS[i]}deg`}>
+        <span class="page-n">{String(i + 1).padStart(2, "0")}</span>
+        <svg class="page-seal" viewBox="0 0 46 46" aria-hidden="true">
+          <path class="seal-edge" d={HANKO_EDGE} />
+          <path class="seal-inner" d={HANKO_INNER} />
+          <text x="23" y="31" text-anchor="middle">
+            {seal.glyph}
+          </text>
+        </svg>
+        <span class="page-date">····</span>
+        <span class="page-note hand" data-note={seal.note}>
+          {seal.hint}
+        </span>
+        {seal.glyph === "北" && <span class="page-doors hand" />}
+      </li>
+    ))}
   </ol>
 
   <div class="book-foot">
     <div class="book-actions">
-      <button type="button" class="save">save the book as an image ↓</button>
-      <button type="button" class="start-over">start over</button>
+      <button type="button" class="save">
+        save the book as an image ↓
+      </button>
+      <button type="button" class="start-over">
+        start over
+      </button>
     </div>
   </div>
 </BaseLayout>
@@ -167,7 +169,7 @@ const TILTS = [-6, 4, -2, 7, -4, 3, -7, 5, -3, 6, -5, 2, -6, 4, -1];
     ctx.fillStyle = ink("--fg-dim");
     ctx.font = "11px 'Typus Mono 95', monospace";
     ctx.fillText(
-      `seal book · ${earned} of ${SEALS.length} · sw.szymon-wilczek.me/seals`,
+      `seal book · ${earned} of ${SEALS.length} · ${location.host}/seals`,
       pad,
       pad + rows * H + 28,
     );
