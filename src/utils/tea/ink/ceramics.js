@@ -77,6 +77,15 @@ const PAINTS = (tones) => [
   mix(tones.brass, tones.gold, 0.3),
 ];
 
+const HANDLE_REACH = 0.55;
+
+/** How far a piece reaches left and right of its centre once drawn */
+function pieceSpan(spec, scale) {
+  const widest = Math.max(...spec.prof.map(([radius]) => radius)) * scale,
+    rimRadius = spec.prof[spec.prof.length - 1][0] * scale;
+  return { left: widest, right: widest + (spec.handle ? rimRadius * HANDLE_REACH : 0) };
+}
+
 function radiusAt(profile, y) {
   for (let i = 1; i < profile.length; i++)
     if (y <= profile[i][1])
@@ -350,7 +359,7 @@ function piece(group, rand, cx, cy, scale, tones, spec) {
   if (spec.handle) {
     const handleTop = [cx + bodyRadius(0.22), rimY + 0.22 * height],
       handleBottom = [cx + bodyRadius(0.72), rimY + 0.72 * height],
-      reach = rimRadius * 0.55;
+      reach = rimRadius * HANDLE_REACH;
     const handle = [
       handleTop,
       [handleTop[0] + reach * 0.75, handleTop[1] - 3 * scale],
@@ -462,5 +471,6 @@ export {
   radiusAt,
   PROFILES,
   piece,
+  pieceSpan,
   demoSpec,
 };

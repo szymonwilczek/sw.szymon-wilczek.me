@@ -30,6 +30,7 @@ import {
 
 const KILN_X = 830;
 const KILN_Y = 612;
+const DRYING_BENCH = { from: 8, to: 104, z: -26, scale: 0.3 };
 const CLOUD = { left: 712, right: 1062, y: 128, height: 34 };
 
 function sceneGarden16(tones, stage, opt = {}) {
@@ -204,7 +205,16 @@ function sceneGarden16(tones, stage, opt = {}) {
     groups.push(lowWalls);
   }
   const bench = newGroup();
-  dryingBench(bench, rand, workshopProject, 8, 104, -26, tones, 0.3);
+  dryingBench(
+    bench,
+    rand,
+    workshopProject,
+    DRYING_BENCH.from,
+    DRYING_BENCH.to,
+    DRYING_BENCH.z,
+    tones,
+    DRYING_BENCH.scale,
+  );
   groups.push(bench);
   noborigama(groups, rand, KILN_X, KILN_Y, tones, open);
   const bamboo = [];

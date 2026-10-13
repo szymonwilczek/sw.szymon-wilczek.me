@@ -18,7 +18,7 @@ import {
   projectAll,
 } from "./pen.js";
 import { face, post } from "./architecture.js";
-import { GLAZES, PAINTS, radiusAt, PROFILES, piece } from "./ceramics.js";
+import { GLAZES, PAINTS, radiusAt, PROFILES, piece, pieceSpan } from "./ceramics.js";
 import { wheel, wetClay, bucket, brushTool } from "./tools.js";
 
 // pottery workshop, its climbing kiln, and the shelf in the waiting room
@@ -210,17 +210,34 @@ function workshopWalls(group, rand, project, tones) {
   );
 }
 
+const BENCH_TOP = 12;
+const BENCH_PLANK = 3;
+const BENCH_DEPTH = 10;
+const BENCH_LEG_WIDTH = 5;
+const BENCH_LEG_INSET = { left: 6, right: 10 };
+const BENCH_END = 10;
+const BENCH_GAP = 3;
+const BENCH_FOOT_LIFT = 1;
+const BENCH_FIRE = 11;
+const BENCH_PIECES = [
+  { kind: "cup", clay: 0 },
+  { kind: "yunomi", clay: 0 },
+  { kind: "bowl", clay: 3 },
+  { kind: "hira", clay: 1 },
+];
+
 // a long plank on two blocks, with bisque drying in the sun
 function dryingBench(group, rand, project, x0, x1, z, tones, scale) {
+  const plankUnder = BENCH_TOP - BENCH_PLANK;
   face(
     group,
     rand,
     project,
     [
-      [x0, z, 12],
-      [x1, z, 12],
-      [x1, z + 10, 12],
-      [x0, z + 10, 12],
+      [x0, z, BENCH_TOP],
+      [x1, z, BENCH_TOP],
+      [x1, z + BENCH_DEPTH, BENCH_TOP],
+      [x0, z + BENCH_DEPTH, BENCH_TOP],
     ],
     tones.woodLt,
     tones,
@@ -231,45 +248,44 @@ function dryingBench(group, rand, project, x0, x1, z, tones, scale) {
     rand,
     project,
     [
-      [x0, z, 9],
-      [x1, z, 9],
-      [x1, z, 12],
-      [x0, z, 12],
+      [x0, z, plankUnder],
+      [x1, z, plankUnder],
+      [x1, z, BENCH_TOP],
+      [x0, z, BENCH_TOP],
     ],
     tones.wood,
     tones,
     0.9,
   );
-  [x0 + 6, x1 - 10].forEach((x) =>
+  [x0 + BENCH_LEG_INSET.left, x1 - BENCH_LEG_INSET.right].forEach((x) =>
     face(
       group,
       rand,
       project,
       [
         [x, z, 0],
-        [x + 5, z, 0],
-        [x + 5, z, 9],
-        [x, z, 9],
+        [x + BENCH_LEG_WIDTH, z, 0],
+        [x + BENCH_LEG_WIDTH, z, plankUnder],
+        [x, z, plankUnder],
       ],
       tones.woodDk,
       tones,
       0.8,
     ),
   );
-  ["cup", "bowl", "yunomi", "hira", "bowl"].forEach((kind, i) => {
-    const spot = project(lerp(x0 + 10, x1 - 10, i / 4), z + 5, 12);
-    piece(
-      group,
-      rand,
-      spot[0],
-      spot[1] - 1,
-      scale,
-      tones,
-      Object.assign(
-        { clay: [0, 3, 0, 1, 3][i], glaze: { none: true }, fire: 11 + i },
+
+  // set side by side from the left, never into each other
+  let left = x0 + BENCH_END;
+  BENCH_PIECES.forEach(({ kind, clay }, i) => {
+    const spec = Object.assign(
+        { clay, glaze: { none: true }, fire: BENCH_FIRE + i },
         PROFILES[kind],
       ),
-    );
+      span = pieceSpan(spec, scale),
+      spot = project(left + span.left, z + BENCH_DEPTH / 2, BENCH_TOP);
+    left += span.left + span.right + BENCH_GAP;
+    if (left - BENCH_GAP > x1 - BENCH_END) return;
+    piece(group, rand, spot[0], spot[1] - BENCH_FOOT_LIFT, scale, tones, spec);
   });
 }
 
