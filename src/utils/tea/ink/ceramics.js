@@ -145,6 +145,21 @@ const PROFILES = {
   },
 };
 
+// glaze running down from where the piece was dipped
+const GLAZE_EDGE_STEPS = 160;
+const DRIP_BEAD = 0.6;
+const DRIP_SHOULDER = 1.2;
+
+/** How far a drip hangs below the edge, at this distance across from its middle */
+function dripDepth(offset, length, halfWidth, radius) {
+  const beadRadius = Math.min(halfWidth * radius, length),
+    along = Math.abs(offset) / halfWidth,
+    neck = length - beadRadius;
+  if (along <= 1) return neck + beadRadius * Math.sqrt(1 - along * along);
+  const shoulder = 1 - (along - 1) / DRIP_SHOULDER;
+  return shoulder > 0 ? neck * shoulder * shoulder : 0;
+}
+
 /** The clay, and the glaze as this firing left it (each firing shifts it a little) */
 function firedColours(tones, spec, fireRand) {
   const clay = CLAYS(tones)[spec.clay || 0];
@@ -272,16 +287,16 @@ function piece(group, rand, cx, cy, scale, tones, spec) {
   if (glaze) {
     const dip = spec.glaze.dip,
       drips = spec.glaze.drips || [];
-    const edge = Array.from({ length: 41 }, (_, i) => {
-      const across = -1 + i / 20,
+    const dipRadius = bodyRadius(dip);
+    const edge = Array.from({ length: GLAZE_EDGE_STEPS + 1 }, (_, i) => {
+      const across = -1 + (2 * i) / GLAZE_EDGE_STEPS,
         spot = frontPoint(across, dip);
       let y = spot[1] + Math.sin(across * 8 + (spec.fire || 0)) * 1.2 * scale;
       drips.forEach(([dripAt, length, width]) => {
-        const distance = (across - dripAt) / width;
-        y += length * height * Math.exp(-distance * distance * 3);
+        y += dripDepth(across - dripAt, length * height, width * DRIP_BEAD, dipRadius);
       });
       return [
-        cx + across * bodyRadius(dip) * 0.995,
+        cx + across * dipRadius * 0.995,
         Math.min(
           y,
           cy + footRadius * squash * Math.sqrt(Math.max(0, 1 - across * across)) - 2 * scale,
