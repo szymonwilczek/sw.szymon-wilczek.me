@@ -268,7 +268,9 @@ function sceneEngawa(tones, hour, mini, seasonKey, opts = {}) {
   }
   const lights = newGroup({ washO: 1 }),
     lightsRand = randFor("lights");
-  lantern(garden, gardenRand, 820, 452, 0.62, tones, light.lamp > 0.5);
+  const lanternX = 820,
+    lanternY = 452;
+  lantern(garden, gardenRand, lanternX, lanternY, 0.62, tones, light.lamp > 0.5);
   if (look.snow) {
     mounds.forEach(([x, y, rx, ry]) =>
       snowCap(
@@ -291,11 +293,11 @@ function sceneEngawa(tones, hour, mini, seasonKey, opts = {}) {
       garden,
       gardenRand,
       [
-        [802, 404],
-        [811, 399],
-        [820, 391],
-        [829, 399],
-        [838, 404],
+        [lanternX - 18, lanternY - 48],
+        [lanternX - 9, lanternY - 53],
+        [lanternX, lanternY - 61],
+        [lanternX + 9, lanternY - 53],
+        [lanternX + 18, lanternY - 48],
       ],
       5,
     );
@@ -803,7 +805,8 @@ function sceneEngawa(tones, hour, mini, seasonKey, opts = {}) {
       }
     }
   }
-  if (light.lamp > 0.5) lampGlow(lights, lightsRand, 820, 410, 34, 26, tones, light.lamp);
+  if (light.lamp > 0.5)
+    lampGlow(lights, lightsRand, lanternX, lanternY - 42, 34, 26, tones, light.lamp);
   if (light.night > 0.4 && look.s === "natsu")
     fireflies(lights, lightsRand, 860, 1090, 380, 500, 9, light.night);
   veil(groups, width, height, light);
