@@ -135,7 +135,11 @@ function vignette(groups, x, y, scale, draw) {
 // frame every card shares
 function cardFrame(groups, tones, key, x, y, width, height, jp, en, seal) {
   const group = newGroup(),
-    rand = rng(hash("card/" + key));
+    rand = rng(hash("card/" + key)),
+    inset = 36, // the caption and the lines of text start this far in
+    crossX = x + width - 28, // the small brushed cross in the top corner
+    crossY = y + 26,
+    crossSize = 10;
   groups.push(group);
   washi(group, rand, x, y, width, height, tones, 0);
   const points = [];
@@ -157,8 +161,8 @@ function cardFrame(groups, tones, key, x, y, width, height, jp, en, seal) {
     group,
     rand,
     [
-      [x + width - 28, y + 26],
-      [x + width - 18, y + 36],
+      [crossX, crossY],
+      [crossX + crossSize, crossY + crossSize],
     ],
     2.6,
     tones.ink,
@@ -168,8 +172,8 @@ function cardFrame(groups, tones, key, x, y, width, height, jp, en, seal) {
     group,
     rand,
     [
-      [x + width - 18, y + 26],
-      [x + width - 28, y + 36],
+      [crossX + crossSize, crossY],
+      [crossX, crossY + crossSize],
     ],
     2.6,
     tones.ink,
@@ -177,7 +181,7 @@ function cardFrame(groups, tones, key, x, y, width, height, jp, en, seal) {
   );
   addText(group, {
     t: en,
-    tr: `translate(${roundCoord(x + 36)} ${roundCoord(y + 296)})`,
+    tr: `translate(${roundCoord(x + inset)} ${roundCoord(y + 296)})`,
     fs: 30,
     fill: tones.ink,
     an: "start",
@@ -187,7 +191,7 @@ function cardFrame(groups, tones, key, x, y, width, height, jp, en, seal) {
     wobblyLine(
       rand,
       [
-        [x + 36, y + 318],
+        [x + inset, y + 318],
         [x + 200, y + 316],
         [x + width - 120, y + 319],
       ],
@@ -203,8 +207,8 @@ function cardFrame(groups, tones, key, x, y, width, height, jp, en, seal) {
   return {
     g: textGroup,
     r: rng(hash("card/" + key + "/t")),
-    x0: x + 36,
-    w: width - 72,
+    x0: x + inset,
+    w: width - 2 * inset,
     y0: y + 352,
   };
 }
@@ -415,9 +419,11 @@ const CARD = {
 
 function cardShell(tones, key, height, opts) {
   const [jp, en, seal, draw, vignetteX, vignetteY, vignetteScale] = CARD[key],
-    groups = [];
-  cardFrame(groups, tones, key, 6, 6, 520, height, jp, en, seal);
-  vignette(groups, 6 + vignetteX, 6 + vignetteY, vignetteScale, (layers, group) =>
+    groups = [],
+    margin = 6,
+    frameWidth = 520;
+  cardFrame(groups, tones, key, margin, margin, frameWidth, height, jp, en, seal);
+  vignette(groups, margin + vignetteX, margin + vignetteY, vignetteScale, (layers, group) =>
     draw(layers, group, tones, opts || {}),
   );
   return { W: 540, H: height + 22, groups, clips: [], y0: 358 };
