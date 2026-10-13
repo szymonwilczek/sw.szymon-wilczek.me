@@ -5,11 +5,11 @@ import { orgContentLoader } from "./utils/org-loader";
 // With angle brackets <2026-03-15 Thu>,
 // Brackets [2026-03-15],
 // Or standard ISO strings
-const parseFlexibleDate = (arg: unknown): Date | undefined => {
-  if (arg === undefined || arg === null || arg === "") return undefined;
-  if (arg instanceof Date) return isNaN(arg.getTime()) ? undefined : arg;
-  if (typeof arg === "string") {
-    const trimmed = arg.trim();
+const parseFlexibleDate = (input: unknown): Date | undefined => {
+  if (input === undefined || input === null || input === "") return undefined;
+  if (input instanceof Date) return isNaN(input.getTime()) ? undefined : input;
+  if (typeof input === "string") {
+    const trimmed = input.trim();
     if (!trimmed) return undefined;
     const cleaned = trimmed.replace(/^[<\[]+|[>\]]+$/g, "").trim();
 
@@ -22,34 +22,34 @@ const parseFlexibleDate = (arg: unknown): Date | undefined => {
       const formattedDate = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
       if (orgMatch[2]) {
         const timePart = orgMatch[2];
-        const timeStr = timePart.length === 5 ? `${timePart}:00` : timePart;
-        const d = new Date(`${formattedDate}T${timeStr}Z`);
-        if (!isNaN(d.getTime())) return d;
+        const timeString = timePart.length === 5 ? `${timePart}:00` : timePart;
+        const parsed = new Date(`${formattedDate}T${timeString}Z`);
+        if (!isNaN(parsed.getTime())) return parsed;
       } else {
-        const d = new Date(`${formattedDate}T00:00:00.000Z`);
-        if (!isNaN(d.getTime())) return d;
+        const parsed = new Date(`${formattedDate}T00:00:00.000Z`);
+        if (!isNaN(parsed.getTime())) return parsed;
       }
     }
 
-    const d = new Date(cleaned);
-    if (!isNaN(d.getTime())) return d;
+    const date = new Date(cleaned);
+    if (!isNaN(date.getTime())) return date;
   }
   return undefined;
 };
 
-const flexibleDate = z.preprocess((arg) => parseFlexibleDate(arg), z.date());
+const flexibleDate = z.preprocess((input) => parseFlexibleDate(input), z.date());
 
 // Helper for parsing Org-mode tags:
 // supports JSON arrays, space/comma separated strings, and :tag:format:
 const flexibleTags = z
   .union([z.array(z.string()), z.string()])
-  .transform((val) => {
-    if (Array.isArray(val)) return val;
-    if (typeof val === "string") {
-      return val
+  .transform((tags) => {
+    if (Array.isArray(tags)) return tags;
+    if (typeof tags === "string") {
+      return tags
         .replace(/[\[\]"']/g, "")
         .split(/[\s,:]+/)
-        .map((t) => t.trim())
+        .map((tag) => tag.trim())
         .filter(Boolean);
     }
     return [];
