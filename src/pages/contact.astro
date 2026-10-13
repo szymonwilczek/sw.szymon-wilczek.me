@@ -84,8 +84,8 @@ const links = [
 
           <p class="fp-label hand">fingerprint</p>
           <p class="fp">
-            {groups.map((g, i) => (
-              <span class:list={{ accent: i >= 6 }}>{g}</span>
+            {groups.map((group, i) => (
+              <span class:list={{ accent: i >= 6 }}>{group}</span>
             ))}
           </p>
 
@@ -115,11 +115,11 @@ const links = [
       <div class="body">
         <h2 class="hand">elsewhere</h2>
         <ul class="links">
-          {links.map((l) => (
+          {links.map((link) => (
             <li>
-              <span>{l.label}</span>
-              <a href={l.url} rel="noopener">
-                {l.url.replace("https://", "")}
+              <span>{link.label}</span>
+              <a href={link.url} rel="noopener">
+                {link.url.replace("https://", "")}
               </a>
             </li>
           ))}
@@ -139,7 +139,7 @@ const links = [
 
   document
     .querySelectorAll('a[href^="mailto:"]')
-    .forEach((a) => a.addEventListener("click", () => earn("文")));
+    .forEach((anchor) => anchor.addEventListener("click", () => earn("文")));
 
   const copy = document.getElementById("copy-fingerprint");
   copy?.addEventListener("click", () => {

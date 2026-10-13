@@ -67,25 +67,25 @@ const fonts = [
         </p>
 
         <div class="swatches">
-          {themes.map((t, i) => (
+          {themes.map((theme, i) => (
             <button
               type="button"
               class="swatch"
-              data-choice={t.id}
-              title={`au-${t.id}: ${t.description}`}
-              aria-label={`Use au-${t.id}`}
+              data-choice={theme.id}
+              title={`au-${theme.id}: ${theme.description}`}
+              aria-label={`Use au-${theme.id}`}
             >
               <span
                 class="chip"
-                style={`border-radius: ${RADII[i % RADII.length]}; background: ${t.swatch[0]}`}
+                style={`border-radius: ${RADII[i % RADII.length]}; background: ${theme.swatch[0]}`}
               >
-                <span class="dot" style={`background: ${t.swatch[1]}`} />
-                <span class="dot dot-accent" style={`background: ${t.swatch[2]}`} />
+                <span class="dot" style={`background: ${theme.swatch[1]}`} />
+                <span class="dot dot-accent" style={`background: ${theme.swatch[2]}`} />
               </span>
               <span class="swatch-name">
-                {t.family === "whispergrove" ? "whisper·" : t.family}
+                {theme.family === "whispergrove" ? "whisper·" : theme.family}
                 <br />
-                {t.variant}
+                {theme.variant}
               </span>
             </button>
           ))}
@@ -106,16 +106,16 @@ const fonts = [
       <div class="body">
         <h2>Type</h2>
         <ul class="fonts">
-          {fonts.map((f) => (
+          {fonts.map((font) => (
             <li>
-              <span class="specimen" style={`font-family: ${f.family}; font-size: ${f.size}`}>
-                {f.sample}
+              <span class="specimen" style={`font-family: ${font.family}; font-size: ${font.size}`}>
+                {font.sample}
               </span>
               <span class="font-meta">
                 <span>
-                  {f.name} <span class="dim">— {f.role}</span>
+                  {font.name} <span class="dim">— {font.role}</span>
                 </span>
-                <span class="font-by">{f.by}</span>
+                <span class="font-by">{font.by}</span>
               </span>
             </li>
           ))}
@@ -188,14 +188,16 @@ const fonts = [
 <script>
   function mark() {
     const active = window.auTheme?.resolve(window.auTheme.get());
-    document.querySelectorAll<HTMLElement>(".swatch").forEach((s) => {
-      s.classList.toggle("is-active", s.dataset.choice === active);
+    document.querySelectorAll<HTMLElement>(".swatch").forEach((swatch) => {
+      swatch.classList.toggle("is-active", swatch.dataset.choice === active);
     });
   }
 
   document
     .querySelectorAll<HTMLElement>(".swatch")
-    .forEach((s) => s.addEventListener("click", () => window.auTheme?.set(s.dataset.choice!)));
+    .forEach((swatch) =>
+      swatch.addEventListener("click", () => window.auTheme?.set(swatch.dataset.choice!)),
+    );
   document.addEventListener("au-theme-change", mark);
   mark();
 </script>

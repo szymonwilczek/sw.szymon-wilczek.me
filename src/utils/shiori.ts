@@ -14,8 +14,8 @@ const STRIP_HEIGHT = 300;
 const round1 = (value: number) => Math.round(value * 10) / 10;
 const circle = (x: number, y: number, radius: number) =>
   `M${round1(x - radius)} ${round1(y)} a${round1(radius)} ${round1(radius)} 0 1 0 ${round1(2 * radius)} 0 a${round1(radius)} ${round1(radius)} 0 1 0 ${round1(-2 * radius)} 0`;
-const ellipse = (x: number, y: number, rx: number, ry: number) =>
-  `M${round1(x - rx)} ${round1(y)} a${round1(rx)} ${round1(ry)} 0 1 0 ${round1(2 * rx)} 0 a${round1(rx)} ${round1(ry)} 0 1 0 ${round1(-2 * rx)} 0`;
+const ellipse = (x: number, y: number, radiusX: number, radiusY: number) =>
+  `M${round1(x - radiusX)} ${round1(y)} a${round1(radiusX)} ${round1(radiusY)} 0 1 0 ${round1(2 * radiusX)} 0 a${round1(radiusX)} ${round1(radiusY)} 0 1 0 ${round1(-2 * radiusX)} 0`;
 const mix = (from: string, into: string, share: number) =>
   `color-mix(in srgb,${from},${into} ${Math.round(share * 100)}%)`;
 

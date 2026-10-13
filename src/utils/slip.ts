@@ -16,8 +16,8 @@ export interface Slip {
   ink: string;
 }
 
-const W = 280;
-const FS = 30;
+const WIDTH = 280;
+const FONT_SIZE = 30;
 
 export async function slip(): Promise<Slip | null> {
   const key = (import.meta.env.ROJI_KEY ?? process.env.ROJI_KEY)?.trim();
@@ -25,17 +25,27 @@ export async function slip(): Promise<Slip | null> {
   if ((await keyHash(key)) !== KEY_HASH)
     console.warn("[slip] ROJI_KEY does not fit KEY_HASH in key.ts: the stone will not move");
   const font = readFileSync("src/assets/fonts/Kalam-Regular.ttf");
-  const h = Math.ceil((key.length * FS * 0.44) / W) * FS * 1.3 + 8;
+  const height = Math.ceil((key.length * FONT_SIZE * 0.44) / WIDTH) * FONT_SIZE * 1.3 + 8;
   const svg = await satori(
     {
       type: "div",
       props: {
-        style: { display: "flex", flexWrap: "wrap", width: W, fontSize: FS, lineHeight: 1.3 },
+        style: {
+          display: "flex",
+          flexWrap: "wrap",
+          width: WIDTH,
+          fontSize: FONT_SIZE,
+          lineHeight: 1.3,
+        },
         children: key,
       },
     },
-    { width: W, height: h, fonts: [{ name: "Kalam", data: font, weight: 400, style: "normal" }] },
+    {
+      width: WIDTH,
+      height,
+      fonts: [{ name: "Kalam", data: font, weight: 400, style: "normal" }],
+    },
   );
-  const ink = [...svg.matchAll(/<path[^>]* d="([^"]+)"/g)].map((m) => m[1]).join(" ");
-  return { w: W, h, ink };
+  const ink = [...svg.matchAll(/<path[^>]* d="([^"]+)"/g)].map((match) => match[1]).join(" ");
+  return { w: WIDTH, h: height, ink };
 }
