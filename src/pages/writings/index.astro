@@ -8,7 +8,7 @@ import { dottedDate, writingSlug } from "../../utils/format";
 import { writingsList } from "../../utils/schema";
 
 const writings = (await getCollection("writings")).sort(
-  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+  (former, latter) => latter.data.pubDate.valueOf() - former.data.pubDate.valueOf(),
 );
 
 const numbered = writings.map((post, i) => ({
@@ -20,7 +20,7 @@ const numbered = writings.map((post, i) => ({
 const years: Array<{ year: number; entries: typeof numbered }> = [];
 for (const entry of numbered) {
   const year = entry.post.data.pubDate.getFullYear();
-  let group = years.find((g) => g.year === year);
+  let group = years.find((candidate) => candidate.year === year);
   if (!group) {
     group = { year, entries: [] };
     years.push(group);
@@ -33,7 +33,7 @@ for (const post of writings) {
   for (const tag of post.data.tags) tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1);
 }
 const tags = [...tagCounts.entries()]
-  .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+  .sort((former, latter) => latter[1] - former[1] || former[0].localeCompare(latter[0]))
   .slice(0, 9)
   .map(([tag]) => tag);
 ---
@@ -125,30 +125,30 @@ const tags = [...tagCounts.entries()]
     if (!box || !input) return;
 
     function mark(query: string) {
-      buttons.forEach(function (btn) {
-        btn.classList.toggle("is-current", btn.dataset.tag === query);
+      buttons.forEach(function (button) {
+        button.classList.toggle("is-current", button.dataset.tag === query);
       });
     }
 
-    buttons.forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        input!.value = btn.dataset.tag ?? "";
+    buttons.forEach(function (button) {
+      button.addEventListener("click", function () {
+        input!.value = button.dataset.tag ?? "";
         input!.dispatchEvent(new Event("input"));
       });
     });
 
-    box.addEventListener("filter-change", function (e) {
-      mark((e as CustomEvent).detail.query);
+    box.addEventListener("filter-change", function (event) {
+      mark((event as CustomEvent).detail.query);
     });
 
     // hide years whose writings are all filtered out
     box.addEventListener("filter-change", function () {
       document.querySelectorAll<HTMLElement>(".year").forEach(function (year) {
         var rows = year.querySelectorAll<HTMLElement>(".writing-row");
-        var any = Array.prototype.some.call(rows, function (row: HTMLElement) {
+        var anyShown = Array.prototype.some.call(rows, function (row: HTMLElement) {
           return row.style.display !== "none";
         });
-        year.style.display = any ? "" : "none";
+        year.style.display = anyShown ? "" : "none";
       });
     });
   })();

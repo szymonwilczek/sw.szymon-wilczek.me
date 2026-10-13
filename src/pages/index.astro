@@ -7,10 +7,12 @@ import { getAllAlbums } from "../utils/albums";
 import { dottedDate, writingSlug } from "../utils/format";
 
 const posts = (await getCollection("writings"))
-  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+  .sort((former, latter) => latter.data.pubDate.valueOf() - former.data.pubDate.valueOf())
   .slice(0, 5);
 
-const albums = (await getAllAlbums()).sort((a, b) => b.date.valueOf() - a.date.valueOf());
+const albums = (await getAllAlbums()).sort(
+  (former, latter) => latter.date.valueOf() - former.date.valueOf(),
+);
 const files = await getCollection("files");
 
 // with no files to list the sidebar shows second album

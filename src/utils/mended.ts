@@ -17,7 +17,7 @@ function plainRun(line: string): string | null {
     .split(/[*/=~+[\]_]/)
     .map((run) => run.trim())
     .filter((run) => run.split(/\s+/).length >= 4);
-  const longest = runs.sort((a, b) => b.length - a.length)[0];
+  const longest = runs.sort((former, latter) => latter.length - former.length)[0];
   return longest ? longest.slice(0, 48).replace(/\s+\S*$/, "") : null;
 }
 
