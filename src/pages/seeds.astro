@@ -7,24 +7,24 @@ import { writingSlug } from "../utils/format";
 import { packet, plant, readSeeds, STAGES, type Stage } from "../utils/seeds";
 
 const titles = new Map(
-  (await getCollection("writings")).map((w) => [writingSlug(w.id), w.data.title]),
+  (await getCollection("writings")).map((writing) => [writingSlug(writing.id), writing.data.title]),
 );
 
-const packets = readSeeds().map((s) => ({
-  ...s,
-  ...packet(s),
-  ...STAGES[s.stage],
-  title: (s.writing && titles.get(s.writing)) || s.title,
-  href: s.stage === "bloom" && s.writing ? `/writings/${s.writing}/` : null,
-  picture: plant(s.stage, `${s.title}/${s.id}`),
+const packets = readSeeds().map((seed) => ({
+  ...seed,
+  ...packet(seed),
+  ...STAGES[seed.stage],
+  title: (seed.writing && titles.get(seed.writing)) || seed.title,
+  href: seed.stage === "bloom" && seed.writing ? `/writings/${seed.writing}/` : null,
+  picture: plant(seed.stage, `${seed.title}/${seed.id}`),
 }));
 
-const legend = (Object.keys(STAGES) as Stage[]).map((k) => ({
-  ...STAGES[k],
-  picture: plant(k, "legend"),
+const legend = (Object.keys(STAGES) as Stage[]).map((stage) => ({
+  ...STAGES[stage],
+  picture: plant(stage, "legend"),
 }));
 
-const flowered = packets.filter((p) => p.stage === "bloom").length;
+const flowered = packets.filter((seedPacket) => seedPacket.stage === "bloom").length;
 ---
 
 <BaseLayout
@@ -60,28 +60,28 @@ const flowered = packets.filter((p) => p.stage === "bloom").length;
   </svg>
 
   <section class="legend" aria-label="How a seed grows">
-    {legend.map((l) => (
+    {legend.map((step) => (
       <div class="stage">
         <svg viewBox="0 10 100 90" aria-hidden="true">
           <g class="wash" transform="translate(3 2.4)" filter="url(#sd-wash)">
-            {l.picture.forms.map((f) => (
-              <path d={f.d} class={`t-${f.tone}`} />
+            {step.picture.forms.map((form) => (
+              <path d={form.d} class={`t-${form.tone}`} />
             ))}
           </g>
           <g filter="url(#sd-tremble)">
-            {l.picture.forms.map((f) => (
-              <path d={f.d} class={f.bare ? "edge bare" : "edge"} />
+            {step.picture.forms.map((form) => (
+              <path d={form.d} class={form.bare ? "edge bare" : "edge"} />
             ))}
-            {l.picture.lines.map((m) => (
-              <path d={m.d} class={m.gold ? "heart" : "line"} stroke-width={m.w} />
+            {step.picture.lines.map((stroke) => (
+              <path d={stroke.d} class={stroke.gold ? "heart" : "line"} stroke-width={stroke.w} />
             ))}
           </g>
         </svg>
         <p>
           <span class="stage-kanji" aria-hidden="true">
-            {l.kanji}
+            {step.kanji}
           </span>
-          {l.word}
+          {step.word}
         </p>
       </div>
     ))}
@@ -90,12 +90,16 @@ const flowered = packets.filter((p) => p.stage === "bloom").length;
   <p class="hint hand">open a packet and the idea slides out.</p>
 
   <ul class="packets" aria-label="Seed packets">
-    {packets.map((p) => (
-      <li style={`--rot: ${p.rot}deg; --tint: var(${p.paper})`}>
-        <div class="slip" id={`slip-${p.id}`} style={`--slip-rot: ${p.slipRot}deg`}>
-          {p.note && <p>{p.note}</p>}
-          {p.href && (
-            <a class="hand" href={p.href}>
+    {packets.map((seedPacket) => (
+      <li style={`--rot: ${seedPacket.rot}deg; --tint: var(${seedPacket.paper})`}>
+        <div
+          class="slip"
+          id={`slip-${seedPacket.id}`}
+          style={`--slip-rot: ${seedPacket.slipRot}deg`}
+        >
+          {seedPacket.note && <p>{seedPacket.note}</p>}
+          {seedPacket.href && (
+            <a class="hand" href={seedPacket.href}>
               read it →
             </a>
           )}
@@ -104,8 +108,8 @@ const flowered = packets.filter((p) => p.stage === "bloom").length;
           type="button"
           class="packet"
           aria-expanded="false"
-          aria-controls={`slip-${p.id}`}
-          aria-label={`${p.title}, ${p.name}. Open the packet.`}
+          aria-controls={`slip-${seedPacket.id}`}
+          aria-label={`${seedPacket.title}, ${seedPacket.name}. Open the packet.`}
         >
           <svg viewBox="0 0 160 230" aria-hidden="true">
             <rect class="shade" x="12" y="38" width="144" height="190" filter="url(#sd-wash)" />
@@ -118,16 +122,20 @@ const flowered = packets.filter((p) => p.stage === "bloom").length;
             <rect class="window" x="18" y="50" width="124" height="112" />
             <g transform="translate(32 34) scale(0.96)">
               <g class="wash" transform="translate(3 2.4)" filter="url(#sd-wash)">
-                {p.picture.forms.map((f) => (
-                  <path d={f.d} class={`t-${f.tone}`} />
+                {seedPacket.picture.forms.map((form) => (
+                  <path d={form.d} class={`t-${form.tone}`} />
                 ))}
               </g>
               <g filter="url(#sd-tremble)">
-                {p.picture.forms.map((f) => (
-                  <path d={f.d} class={f.bare ? "edge bare" : "edge"} />
+                {seedPacket.picture.forms.map((form) => (
+                  <path d={form.d} class={form.bare ? "edge bare" : "edge"} />
                 ))}
-                {p.picture.lines.map((m) => (
-                  <path d={m.d} class={m.gold ? "heart" : "line"} stroke-width={m.w} />
+                {seedPacket.picture.lines.map((stroke) => (
+                  <path
+                    d={stroke.d}
+                    class={stroke.gold ? "heart" : "line"}
+                    stroke-width={stroke.w}
+                  />
                 ))}
               </g>
             </g>
@@ -140,7 +148,7 @@ const flowered = packets.filter((p) => p.stage === "bloom").length;
               transform="rotate(3 133 69)"
             />
             <text class="label-kanji" x="133" y="75" text-anchor="middle">
-              {p.kanji}
+              {seedPacket.kanji}
             </text>
           </svg>
           <svg class="flaps" viewBox="0 0 160 230" aria-hidden="true">
@@ -156,10 +164,10 @@ const flowered = packets.filter((p) => p.stage === "bloom").length;
             />
           </svg>
           <span class="front">
-            <span class="title">{p.title}</span>
+            <span class="title">{seedPacket.title}</span>
             <span class="sown">
-              {p.word}
-              {p.sown && ` · sown ${monthOf(p.sown)}`}
+              {seedPacket.word}
+              {seedPacket.sown && ` · sown ${monthOf(seedPacket.sown)}`}
             </span>
           </span>
         </button>

@@ -26,11 +26,11 @@ export interface Seed {
   note: string | null;
 }
 
-const f1 = (n: number) => Math.round(n * 10) / 10;
+const round1 = (value: number) => Math.round(value * 10) / 10;
 
 const orgDate = (value: string | undefined) => {
-  const m = value?.match(/(\d{4})-(\d{2})-(\d{2})/);
-  return m ? new Date(Date.UTC(+m[1], +m[2] - 1, +m[3])) : null;
+  const parts = value?.match(/(\d{4})-(\d{2})-(\d{2})/);
+  return parts ? new Date(Date.UTC(+parts[1], +parts[2] - 1, +parts[3])) : null;
 };
 
 export function readSeeds(file = "src/data/seeds.org"): Seed[] {
@@ -70,28 +70,29 @@ interface Mark {
 }
 
 export function plant(stage: Stage, seed: string) {
-  const r = rng(hash(`plant/${seed}`));
-  const lean = (r() - 0.5) * 6;
+  const rand = rng(hash(`plant/${seed}`));
+  const lean = (rand() - 0.5) * 6;
   const forms: Mark[] = [];
   const lines: Mark[] = [];
-  const form = (d: string, tone: Mark["tone"], bare = false) => forms.push({ d, tone, bare });
-  const line = (d: string, w = 1.4) => lines.push({ d, w });
+  const form = (path: string, tone: Mark["tone"], bare = false) =>
+    forms.push({ d: path, tone, bare });
+  const line = (path: string, width = 1.4) => lines.push({ d: path, w: width });
   const leafPair = (y: number, size: number, tilt: number) => {
     const x = 50 + (lean * (90 - y)) / 60;
     form(
-      `M${f1(x)} ${y} C ${f1(x - size * 0.5)} ${f1(y - size * 0.55 - tilt)}, ${f1(x - size * 1.1)} ${f1(y - size * 0.4 - tilt)}, ${f1(x - size * 1.25)} ${f1(y - tilt)} C ${f1(x - size * 0.8)} ${f1(y + size * 0.25 - tilt)}, ${f1(x - size * 0.35)} ${f1(y + size * 0.2)}, ${f1(x)} ${y} Z`,
+      `M${round1(x)} ${y} C ${round1(x - size * 0.5)} ${round1(y - size * 0.55 - tilt)}, ${round1(x - size * 1.1)} ${round1(y - size * 0.4 - tilt)}, ${round1(x - size * 1.25)} ${round1(y - tilt)} C ${round1(x - size * 0.8)} ${round1(y + size * 0.25 - tilt)}, ${round1(x - size * 0.35)} ${round1(y + size * 0.2)}, ${round1(x)} ${y} Z`,
       "leaf",
     );
     form(
-      `M${f1(x)} ${y} C ${f1(x + size * 0.45)} ${f1(y - size * 0.65 + tilt)}, ${f1(x + size * 1.05)} ${f1(y - size * 0.6 + tilt)}, ${f1(x + size * 1.2)} ${f1(y - size * 0.2 + tilt)} C ${f1(x + size * 0.8)} ${f1(y + size * 0.15)}, ${f1(x + size * 0.35)} ${f1(y + size * 0.15)}, ${f1(x)} ${y} Z`,
+      `M${round1(x)} ${y} C ${round1(x + size * 0.45)} ${round1(y - size * 0.65 + tilt)}, ${round1(x + size * 1.05)} ${round1(y - size * 0.6 + tilt)}, ${round1(x + size * 1.2)} ${round1(y - size * 0.2 + tilt)} C ${round1(x + size * 0.8)} ${round1(y + size * 0.15)}, ${round1(x + size * 0.35)} ${round1(y + size * 0.15)}, ${round1(x)} ${y} Z`,
       "leaf",
     );
     line(
-      `M${f1(x - size * 0.15)} ${f1(y - size * 0.05)} C ${f1(x - size * 0.5)} ${f1(y - size * 0.2 - tilt)}, ${f1(x - size * 0.8)} ${f1(y - size * 0.15 - tilt)}, ${f1(x - size * 1.05)} ${f1(y - tilt * 0.9)}`,
+      `M${round1(x - size * 0.15)} ${round1(y - size * 0.05)} C ${round1(x - size * 0.5)} ${round1(y - size * 0.2 - tilt)}, ${round1(x - size * 0.8)} ${round1(y - size * 0.15 - tilt)}, ${round1(x - size * 1.05)} ${round1(y - tilt * 0.9)}`,
       0.7,
     );
     line(
-      `M${f1(x + size * 0.15)} ${f1(y - size * 0.08)} C ${f1(x + size * 0.45)} ${f1(y - size * 0.3 + tilt)}, ${f1(x + size * 0.75)} ${f1(y - size * 0.3 + tilt)}, ${f1(x + size * 1)} ${f1(y - size * 0.2 + tilt)}`,
+      `M${round1(x + size * 0.15)} ${round1(y - size * 0.08)} C ${round1(x + size * 0.45)} ${round1(y - size * 0.3 + tilt)}, ${round1(x + size * 0.75)} ${round1(y - size * 0.3 + tilt)}, ${round1(x + size * 1)} ${round1(y - size * 0.2 + tilt)}`,
       0.7,
     );
   };
@@ -108,15 +109,15 @@ export function plant(stage: Stage, seed: string) {
     return { forms, lines };
   }
 
-  const top = { sprout: 62, leaf: 34, bloom: 37 }[stage];
+  const tipY = { sprout: 62, leaf: 34, bloom: 37 }[stage];
   const tipX = 50 + lean;
   line(
-    `M50 89 C ${f1(50 - lean * 0.3)} ${f1(89 - (89 - top) * 0.4)}, ${f1(tipX - lean * 0.2)} ${f1(top + (89 - top) * 0.3)}, ${f1(tipX)} ${top}`,
+    `M50 89 C ${round1(50 - lean * 0.3)} ${round1(89 - (89 - tipY) * 0.4)}, ${round1(tipX - lean * 0.2)} ${round1(tipY + (89 - tipY) * 0.3)}, ${round1(tipX)} ${tipY}`,
     1.6,
   );
   if (stage === "sprout") {
     form("M45.6 88 C 45 85.4, 47.6 84, 50 84.6 C 46.6 85.6, 46.4 87, 45.6 88 Z", "husk");
-    leafPair(top, 13, 2);
+    leafPair(tipY, 13, 2);
     return { forms, lines };
   }
 
@@ -125,29 +126,29 @@ export function plant(stage: Stage, seed: string) {
   if (stage === "leaf") {
     leafPair(42, 8, 1);
     form(
-      `M${f1(tipX - 2.6)} ${top + 2} C ${f1(tipX - 2.6)} ${top - 3}, ${f1(tipX)} ${top - 6}, ${f1(tipX + 0.4)} ${top - 6} C ${f1(tipX + 2.8)} ${top - 3}, ${f1(tipX + 2.4)} ${top + 1}, ${f1(tipX - 2.6)} ${top + 2} Z`,
+      `M${round1(tipX - 2.6)} ${tipY + 2} C ${round1(tipX - 2.6)} ${tipY - 3}, ${round1(tipX)} ${tipY - 6}, ${round1(tipX + 0.4)} ${tipY - 6} C ${round1(tipX + 2.8)} ${tipY - 3}, ${round1(tipX + 2.4)} ${tipY + 1}, ${round1(tipX - 2.6)} ${tipY + 2} Z`,
       "leaf",
     );
     return { forms, lines };
   }
 
   // ume blossom
-  const cx = tipX;
-  const cy = top - 10;
-  const turn = r() * 0.3;
-  const notch = (k: number) => {
-    const a = -Math.PI / 2 + turn + ((k + 0.5) * 2 * Math.PI) / 5;
-    return `${f1(cx + Math.cos(a) * 4.6)} ${f1(cy + Math.sin(a) * 4.6)}`;
+  const centerX = tipX;
+  const centerY = tipY - 10;
+  const turn = rand() * 0.3;
+  const notch = (petal: number) => {
+    const angle = -Math.PI / 2 + turn + ((petal + 0.5) * 2 * Math.PI) / 5;
+    return `${round1(centerX + Math.cos(angle) * 4.6)} ${round1(centerY + Math.sin(angle) * 4.6)}`;
   };
   let flower = `M${notch(4)}`;
-  for (let k = 0; k < 5; k++) flower += ` A5 5 0 1 1 ${notch(k)}`;
+  for (let petal = 0; petal < 5; petal++) flower += ` A5 5 0 1 1 ${notch(petal)}`;
   form(`${flower} Z`, "petal");
   lines.push({
-    d: `M${f1(cx - 1.6)} ${f1(cy)} a1.6 1.6 0 1 0 3.2 0 a1.6 1.6 0 1 0 -3.2 0 Z`,
+    d: `M${round1(centerX - 1.6)} ${round1(centerY)} a1.6 1.6 0 1 0 3.2 0 a1.6 1.6 0 1 0 -3.2 0 Z`,
     gold: true,
   });
   line(
-    `M${f1(cx)} ${f1(cy)} l -2.4 -3.4 M ${f1(cx)} ${f1(cy)} l 3 -2.6 M ${f1(cx)} ${f1(cy)} l 0.4 3.8 M ${f1(cx)} ${f1(cy)} l -3.4 1.6 M ${f1(cx)} ${f1(cy)} l 3.2 1.8`,
+    `M${round1(centerX)} ${round1(centerY)} l -2.4 -3.4 M ${round1(centerX)} ${round1(centerY)} l 3 -2.6 M ${round1(centerX)} ${round1(centerY)} l 0.4 3.8 M ${round1(centerX)} ${round1(centerY)} l -3.4 1.6 M ${round1(centerX)} ${round1(centerY)} l 3.2 1.8`,
     0.5,
   );
   return { forms, lines };
@@ -156,10 +157,10 @@ export function plant(stage: Stage, seed: string) {
 const PAPERS = ["--tape", "--sky", "--leaf", "--sea"];
 
 export function packet(seed: Seed) {
-  const r = rng(hash(`packet/${seed.id}/${seed.title}`));
+  const rand = rng(hash(`packet/${seed.id}/${seed.title}`));
   return {
-    paper: PAPERS[Math.floor(r() * PAPERS.length)],
-    rot: f1((r() - 0.5) * 3.2),
-    slipRot: f1((r() - 0.5) * 4),
+    paper: PAPERS[Math.floor(rand() * PAPERS.length)],
+    rot: round1((rand() - 0.5) * 3.2),
+    slipRot: round1((rand() - 0.5) * 4),
   };
 }
