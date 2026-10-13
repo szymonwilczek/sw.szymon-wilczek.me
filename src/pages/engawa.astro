@@ -144,7 +144,7 @@ const SEASON = placeBox(1030, 140, 40, 30);
       cards.show("crate", crateFront);
     }),
   );
-  gardenOf(radio, scene.view, () => incense.burning);
+  gardenOf(radio, scene.view);
   broadcastOf(porch, radio, incense);
 
   const sound = porch.querySelector<HTMLButtonElement>(".sound")!;

@@ -1,5 +1,6 @@
 import type { Fill } from "./cards";
 import type { View } from "./scene";
+import { smoulderOf } from "./smoulder";
 
 const LIT_KEY = "engawa:incense";
 const ROUNDS = "engawa:rounds";
@@ -52,6 +53,7 @@ export function incenseOf(scene: { view: View; draw: () => void }) {
   const title = document.title;
   let shown = -1;
   let body: HTMLElement | null = null;
+  const ember = smoulderOf();
 
   const left = () => (stick ? stick.start + stick.min * 60_000 - Date.now() : 0);
   const burnt = () => (stick ? Math.min(1, (Date.now() - stick.start) / (stick.min * 60_000)) : 0);
@@ -68,6 +70,7 @@ export function incenseOf(scene: { view: View; draw: () => void }) {
   function light(stickMinutes: number) {
     stick = { start: Date.now(), min: stickMinutes };
     localStorage.setItem(LIT_KEY, JSON.stringify(stick));
+    ember.start();
     shown = -1;
     tick();
     paint();
@@ -75,6 +78,7 @@ export function incenseOf(scene: { view: View; draw: () => void }) {
 
   function putOut(done: boolean) {
     stick = null;
+    ember.stop();
     localStorage.removeItem(LIT_KEY);
     document.title = title;
     if (done) {
@@ -115,12 +119,17 @@ export function incenseOf(scene: { view: View; draw: () => void }) {
     }
   }
   setInterval(tick, 1000);
+  if (stick) ember.start();
   tick();
   // stick lit in another tab burns here too
   addEventListener("storage", (event) => {
     if (event.key === LIT_KEY) {
       stick = load<Stick>(LIT_KEY);
-      if (!stick) document.title = title;
+      if (stick) ember.start();
+      else {
+        ember.stop();
+        document.title = title;
+      }
       shown = -1;
       paint();
     }
@@ -139,7 +148,7 @@ export function incenseOf(scene: { view: View; draw: () => void }) {
       ? `<p class="card-big">a stick of ${stick.min} minutes is burning</p>
         <div class="inc-stick" aria-hidden="true"><span class="inc-ash"></span><span class="inc-ember"></span></div>
         <p class="inc-left card-small"></p>
-        ${knob("消 · put it out", "inc-out")}`
+        ${knob("消 · put it out", "inc-out")} ${knob(ember.wanted ? "音 · hear it" : "音 · quiet", "inc-sound", ember.wanted)}`
       : `<p class="card-big">${justDone ? "burnt down. rest a little." : "light a stick, and work while it burns."}</p>
         <p class="inc-lens">${LENGTHS.map((choice) => knob(`${choice} min`, "inc-len", choice === minutes)).join(" ")}
         <label class="inc-own card-small">or <input type="number" min="1" max="180" value="${LENGTHS.includes(minutes) ? "" : minutes}" placeholder="min" aria-label="Minutes, your own"></label></p>
@@ -161,6 +170,12 @@ export function incenseOf(scene: { view: View; draw: () => void }) {
     });
     body.querySelector(".inc-light")?.addEventListener("click", () => light(minutes));
     body.querySelector(".inc-out")?.addEventListener("click", () => putOut(false));
+    body.querySelector(".inc-sound")?.addEventListener("click", () => {
+      ember.wanted = !ember.wanted;
+      if (ember.wanted) ember.start();
+      else ember.stop();
+      paint();
+    });
     tick();
   }
 

@@ -2,7 +2,7 @@ import type { View } from "./scene";
 
 type Ear = { ctx: AudioContext | null; out: GainNode | null; on: boolean };
 
-export function gardenOf(radio: Ear, view: View, burning: () => boolean) {
+export function gardenOf(radio: Ear, view: View) {
   let noise: AudioBuffer | null = null;
   let cicadas: { stop: () => void } | null = null;
   const chance = (probability: number) => Math.random() < probability;
@@ -134,7 +134,6 @@ export function gardenOf(radio: Ear, view: View, burning: () => boolean) {
     const time = audio.currentTime + 0.05 + Math.random() * 0.8;
     const hour = view.hour,
       season = view.season;
-    if (burning() && chance(0.35)) hiss(audio, output, time, 2400, 2, 0.02, 0.002, 0.03);
     if ((season === "haru" || season === "natsu") && chance(1 / 14)) furin(audio, output, time);
     if (season === "haru" && hour >= 5 && hour < 10 && chance(1 / 18)) warbler(audio, output, time);
     if (season === "aki" && (hour >= 19 || hour < 5) && chance(0.3)) cricket(audio, output, time);
