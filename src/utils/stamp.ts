@@ -16,95 +16,101 @@ export interface Stamp {
 }
 
 // FNV-1a, then mulberry32: deterministic randomness per album
-export function hash(s: string): number {
-  let h = 2166136261;
-  for (const ch of s) {
-    h ^= ch.charCodeAt(0);
-    h = Math.imul(h, 16777619);
+export function hash(text: string): number {
+  let hashed = 2166136261;
+  for (const character of text) {
+    hashed ^= character.charCodeAt(0);
+    hashed = Math.imul(hashed, 16777619);
   }
-  return h >>> 0;
+  return hashed >>> 0;
 }
 
 export function rng(seed: number): () => number {
-  let a = seed;
+  let state = seed;
   return () => {
-    a |= 0;
-    a = (a + 0x6d2b79f5) | 0;
-    let t = Math.imul(a ^ (a >>> 15), 1 | a);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    state |= 0;
+    state = (state + 0x6d2b79f5) | 0;
+    let mixed = Math.imul(state ^ (state >>> 15), 1 | state);
+    mixed = (mixed + Math.imul(mixed ^ (mixed >>> 7), 61 | mixed)) ^ mixed;
+    return ((mixed ^ (mixed >>> 14)) >>> 0) / 4294967296;
   };
 }
 
-const f1 = (n: number) => Math.round(n * 10) / 10;
+const round1 = (value: number) => Math.round(value * 10) / 10;
 
 type Point = [number, number];
 
 // Catmull-Rom through the points, written as cubic Beziers
-export function smooth(pts: Point[], closed: boolean): string {
-  const p = closed
-    ? [pts[pts.length - 1], ...pts, pts[0], pts[1]]
-    : [pts[0], ...pts, pts[pts.length - 1]];
-  let d = `M${f1(p[1][0])} ${f1(p[1][1])}`;
-  for (let i = 1; i < p.length - 2; i++) {
-    const [x0, y0] = p[i - 1];
-    const [x1, y1] = p[i];
-    const [x2, y2] = p[i + 1];
-    const [x3, y3] = p[i + 2];
-    d +=
-      ` C${f1(x1 + (x2 - x0) / 6)} ${f1(y1 + (y2 - y0) / 6)}` +
-      ` ${f1(x2 - (x3 - x1) / 6)} ${f1(y2 - (y3 - y1) / 6)} ${f1(x2)} ${f1(y2)}`;
+export function smooth(points: Point[], closed: boolean): string {
+  const padded = closed
+    ? [points[points.length - 1], ...points, points[0], points[1]]
+    : [points[0], ...points, points[points.length - 1]];
+  let path = `M${round1(padded[1][0])} ${round1(padded[1][1])}`;
+  for (let i = 1; i < padded.length - 2; i++) {
+    const [beforeX, beforeY] = padded[i - 1];
+    const [fromX, fromY] = padded[i];
+    const [toX, toY] = padded[i + 1];
+    const [afterX, afterY] = padded[i + 2];
+    path +=
+      ` C${round1(fromX + (toX - beforeX) / 6)} ${round1(fromY + (toY - beforeY) / 6)}` +
+      ` ${round1(toX - (afterX - fromX) / 6)} ${round1(toY - (afterY - fromY) / 6)} ${round1(toX)} ${round1(toY)}`;
   }
-  return closed ? d + " Z" : d;
+  return closed ? path + " Z" : path;
 }
 
 // midpoint-displacement ridge across the art window,
 // closed to the bottom
 function ridge(
-  r: () => number,
+  rand: () => number,
   base: number,
-  amp: number,
+  amplitude: number,
   rough: number,
   peakAt: number | null,
   bottom: number,
 ): string {
-  let pts: Point[] = [
+  let points: Point[] = [
     [4, base],
     [96, base],
   ];
-  for (let lvl = 0; lvl < 4; lvl++) {
+  for (let level = 0; level < 4; level++) {
     const next: Point[] = [];
-    for (let i = 0; i < pts.length - 1; i++) {
-      const [x0, y0] = pts[i];
-      const [x1, y1] = pts[i + 1];
-      next.push(pts[i], [(x0 + x1) / 2, (y0 + y1) / 2 + (r() - 0.5) * amp * Math.pow(rough, lvl)]);
+    for (let i = 0; i < points.length - 1; i++) {
+      const [leftX, leftY] = points[i];
+      const [rightX, rightY] = points[i + 1];
+      next.push(points[i], [
+        (leftX + rightX) / 2,
+        (leftY + rightY) / 2 + (rand() - 0.5) * amplitude * Math.pow(rough, level),
+      ]);
     }
-    next.push(pts[pts.length - 1]);
-    pts = next;
+    next.push(points[points.length - 1]);
+    points = next;
   }
   if (peakAt !== null) {
-    pts = pts.map(([x, y]) => [x, y - amp * 0.9 * Math.exp(-Math.pow((x - peakAt) / 16, 2))]);
+    points = points.map(([x, y]) => [
+      x,
+      y - amplitude * 0.9 * Math.exp(-Math.pow((x - peakAt) / 16, 2)),
+    ]);
   }
-  return smooth(pts, false) + ` L96 ${bottom} L4 ${bottom} Z`;
+  return smooth(points, false) + ` L96 ${bottom} L4 ${bottom} Z`;
 }
 
-function wall(r: () => number, side: "left" | "right", inner: number, bottom: number): string {
-  const pts: Point[] = [];
-  for (let y = 4; y <= bottom; y += 9) pts.push([inner + (r() - 0.5) * 9, y]);
+function wall(rand: () => number, side: "left" | "right", inner: number, bottom: number): string {
+  const points: Point[] = [];
+  for (let y = 4; y <= bottom; y += 9) points.push([inner + (rand() - 0.5) * 9, y]);
   const edge = side === "left" ? 4 : 96;
-  return smooth(pts, false) + ` L${edge} ${bottom} L${edge} 4 Z`;
+  return smooth(points, false) + ` L${edge} ${bottom} L${edge} 4 Z`;
 }
 
 // overlapping arcs standing in for water
-function seigaiha(y0: number, y1: number): string {
-  let d = "";
+function seigaiha(top: number, bottom: number): string {
+  let path = "";
   let row = 0;
-  for (let y = y0 + 4; y < y1 + 6; y += 4, row++) {
+  for (let y = top + 4; y < bottom + 6; y += 4, row++) {
     for (let x = (row % 2) * 4; x < 100; x += 8) {
-      d += `M${x - 4} ${y} a4 4 0 0 1 8 0 M${x - 2.6} ${y} a2.6 2.6 0 0 1 5.2 0 `;
+      path += `M${x - 4} ${y} a4 4 0 0 1 8 0 M${x - 2.6} ${y} a2.6 2.6 0 0 1 5.2 0 `;
     }
   }
-  return d;
+  return path;
 }
 
 const MOTIFS: Record<string, string> = {
@@ -120,33 +126,34 @@ const WATER = ["bay", "sea", "river", "coast", "cliff", "rock"];
 
 export function makeStamp({ slug, terrain }: StampInput): Stamp {
   const seed = hash(slug);
-  const r = rng(seed);
-  const t = new Set(terrain);
+  const rand = rng(seed);
+  const features = new Set(terrain);
   const layers: Stamp["layers"] = [];
-  const seaY = t.has("gorge") ? 74 : 60 + r() * 6;
+  const seaY = features.has("gorge") ? 74 : 60 + rand() * 6;
 
-  const sx = f1(22 + r() * 56);
-  const sy = f1(20 + r() * 8);
-  layers.push({ kind: "sun", d: `M${sx} ${sy} m-6 0 a6 6 0 1 0 12 0 a6 6 0 1 0 -12 0` });
+  const sunX = round1(22 + rand() * 56);
+  const sunY = round1(20 + rand() * 8);
+  layers.push({ kind: "sun", d: `M${sunX} ${sunY} m-6 0 a6 6 0 1 0 12 0 a6 6 0 1 0 -12 0` });
 
-  if (t.has("mountains")) {
-    layers.push({ kind: "far", d: ridge(r, seaY - 14, 22, 0.55, 30 + r() * 40, 90) });
-    layers.push({ kind: "near", d: ridge(r, seaY - 2, 12, 0.5, null, 90) });
+  if (features.has("mountains")) {
+    layers.push({ kind: "far", d: ridge(rand, seaY - 14, 22, 0.55, 30 + rand() * 40, 90) });
+    layers.push({ kind: "near", d: ridge(rand, seaY - 2, 12, 0.5, null, 90) });
   }
-  if (t.has("rock"))
-    layers.push({ kind: "far", d: ridge(r, seaY - 2, 26, 0.45, 36 + r() * 10, 90) });
-  if (t.has("cliff")) layers.push({ kind: "far", d: wall(r, "right", 64 + r() * 8, 90) });
-  if (t.has("coast") || t.has("city")) {
-    layers.push({ kind: "near", d: ridge(r, seaY - 4, 6, 0.4, null, 90) });
+  if (features.has("rock"))
+    layers.push({ kind: "far", d: ridge(rand, seaY - 2, 26, 0.45, 36 + rand() * 10, 90) });
+  if (features.has("cliff"))
+    layers.push({ kind: "far", d: wall(rand, "right", 64 + rand() * 8, 90) });
+  if (features.has("coast") || features.has("city")) {
+    layers.push({ kind: "near", d: ridge(rand, seaY - 4, 6, 0.4, null, 90) });
   }
-  if (t.has("gorge")) {
-    layers.push({ kind: "far", d: wall(r, "left", 30 + r() * 6, 90) });
-    layers.push({ kind: "near", d: wall(r, "right", 62 + r() * 6, 90) });
+  if (features.has("gorge")) {
+    layers.push({ kind: "far", d: wall(rand, "left", 30 + rand() * 6, 90) });
+    layers.push({ kind: "near", d: wall(rand, "right", 62 + rand() * 6, 90) });
   }
 
-  const wet = WATER.some((w) => t.has(w));
-  if (wet) layers.push({ kind: "sea", d: `M4 ${f1(seaY)} L96 ${f1(seaY)} L96 90 L4 90 Z` });
-  if (t.has("beach")) {
+  const wet = WATER.some((kind) => features.has(kind));
+  if (wet) layers.push({ kind: "sea", d: `M4 ${round1(seaY)} L96 ${round1(seaY)} L96 90 L4 90 Z` });
+  if (features.has("beach")) {
     const shore: Point[] = [
       [4, 74],
       [30, 72],
@@ -156,7 +163,7 @@ export function makeStamp({ slug, terrain }: StampInput): Stamp {
     layers.push({ kind: "sand", d: smooth(shore, false) + " L96 90 L4 90 Z" });
   }
   for (const motif of Object.keys(MOTIFS)) {
-    if (t.has(motif)) layers.push({ kind: "motif", d: MOTIFS[motif] });
+    if (features.has(motif)) layers.push({ kind: "motif", d: MOTIFS[motif] });
   }
 
   return { seed, seaY, layers, waves: wet ? seigaiha(seaY, 90) : "" };

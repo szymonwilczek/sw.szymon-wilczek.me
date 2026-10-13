@@ -13,27 +13,27 @@ const since = albums[0]
   ? `${ROMAN[albums[0].date.getMonth()]}·${albums[0].date.getFullYear()}`
   : null;
 
-const f1 = (n: number) => Math.round(n * 10) / 10;
+const round1 = (value: number) => Math.round(value * 10) / 10;
 
 function bookmark(slug: string, place: string) {
-  const r = rng(hash(slug + "/shiori"));
+  const rand = rng(hash(slug + "/shiori"));
   // cord
-  const cx = 20 + (r() - 0.5) * 10;
-  const ky = 6 + r() * 6;
+  const cordX = 20 + (rand() - 0.5) * 10;
+  const knotY = 6 + rand() * 6;
   let tassel = "";
 
-  for (let k = 0; k < 7; k++)
-    tassel += `M${f1(cx)} ${f1(ky)} q${f1((k - 3) * 1.4)} -6 ${f1((k - 3) * 2.2 + (r() - 0.5) * 2)} -${f1(14 + r() * 6)} `;
+  for (let strand = 0; strand < 7; strand++)
+    tassel += `M${round1(cordX)} ${round1(knotY)} q${round1((strand - 3) * 1.4)} -6 ${round1((strand - 3) * 2.2 + (rand() - 0.5) * 2)} -${round1(14 + rand() * 6)} `;
 
   const caps = place.toUpperCase();
-  const longest = Math.max(...caps.split(" ").map((w) => w.length));
+  const longest = Math.max(...caps.split(" ").map((word) => word.length));
   return {
     caps,
     cap: Math.min(19, Math.round(138 / (longest * 0.86))),
-    cord: `M20 64 C${f1(cx + 8)} 44 ${f1(cx - 8)} 24 ${f1(cx)} ${f1(ky)}`,
+    cord: `M20 64 C${round1(cordX + 8)} 44 ${round1(cordX - 8)} 24 ${round1(cordX)} ${round1(knotY)}`,
     tassel,
-    rot: f1((r() - 0.5) * 2.4),
-    give: f1(0.7 + r() * 0.6),
+    rot: round1((rand() - 0.5) * 2.4),
+    give: round1(0.7 + rand() * 0.6),
   };
 }
 
@@ -43,7 +43,7 @@ const rows: Array<{
 }> = [];
 for (const album of albums) {
   const country = album.country ?? "[COUNTRY]";
-  let row = rows.find((r) => r.country === country);
+  let row = rows.find((candidate) => candidate.country === country);
   if (!row) rows.push((row = { country, albums: [] }));
   row.albums.push({ ...album, ...bookmark(album.slug, album.location ?? album.title) });
 }
@@ -110,7 +110,7 @@ const gables =
   </div>
 
   <section class="rack" aria-label="Bookmarks" tabindex="0">
-    {rows.map((row, ri) => (
+    {rows.map((row, rowIndex) => (
       <div class="shelf">
         <div class="shelf-row">
           {row.albums.map((album) => (
@@ -139,11 +139,11 @@ const gables =
               <span class="margin">
                 <span class="caps">{album.caps}</span>
                 <span class="tags">
-                  {album.terrain.map((t, i) => (
+                  {album.terrain.map((tag, i) => (
                     <Fragment>
                       {i > 0 && " · "}
-                      <button type="button" class="tag" data-tag={t} aria-pressed="false">
-                        {t}
+                      <button type="button" class="tag" data-tag={tag} aria-pressed="false">
+                        {tag}
                       </button>
                     </Fragment>
                   ))}
@@ -155,7 +155,7 @@ const gables =
               </span>
             </div>
           ))}
-          {ri === rows.length - 1 && (
+          {rowIndex === rows.length - 1 && (
             <span
               class="shiori blank"
               style={`--rot: ${next.rot}deg; --give: ${next.give}; --cap: ${next.cap}px; --i: ${albums.length}`}
@@ -198,7 +198,7 @@ const gables =
   const rack = document.querySelector<HTMLElement>(".rack");
   const nav = document.querySelector<HTMLElement>(".rack-nav");
   if (rack && nav) {
-    const [back, on] = nav.querySelectorAll<HTMLButtonElement>(".rack-step");
+    const [back, forward] = nav.querySelectorAll<HTMLButtonElement>(".rack-step");
 
     const soak =
       !matchMedia("(prefers-reduced-motion: reduce)").matches &&
@@ -207,11 +207,11 @@ const gables =
 
     const seen = new IntersectionObserver(
       (entries) => {
-        for (const e of entries) {
-          if (!e.isIntersecting) continue;
-          seen.unobserve(e.target);
-          fillArt(e.target as SVGSVGElement).then(() => {
-            if (soak) e.target.classList.add("soak");
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          seen.unobserve(entry.target);
+          fillArt(entry.target as SVGSVGElement).then(() => {
+            if (soak) entry.target.classList.add("soak");
           });
         }
       },
@@ -221,12 +221,12 @@ const gables =
 
     // arrows and edge fades only while the shelf is wider than the page
     const ends = () => {
-      const max = rack.scrollWidth - rack.clientWidth;
-      nav.hidden = max < 2;
+      const maxScroll = rack.scrollWidth - rack.clientWidth;
+      nav.hidden = maxScroll < 2;
       back.disabled = rack.scrollLeft < 2;
-      on.disabled = rack.scrollLeft > max - 2;
+      forward.disabled = rack.scrollLeft > maxScroll - 2;
       rack.classList.toggle("more-back", !nav.hidden && !back.disabled);
-      rack.classList.toggle("more-on", !nav.hidden && !on.disabled);
+      rack.classList.toggle("more-on", !nav.hidden && !forward.disabled);
     };
     ends();
     rack.addEventListener("scroll", ends, { passive: true });
@@ -235,17 +235,17 @@ const gables =
     const still = matchMedia("(prefers-reduced-motion: reduce)");
 
     const stops = () => {
-      const pad = parseFloat(getComputedStyle(rack).scrollPaddingLeft) || 0;
-      const max = rack.scrollWidth - rack.clientWidth;
+      const padding = parseFloat(getComputedStyle(rack).scrollPaddingLeft) || 0;
+      const maxScroll = rack.scrollWidth - rack.clientWidth;
       const left = rack.getBoundingClientRect().left + rack.clientLeft - rack.scrollLeft;
       return [...rack.querySelectorAll<HTMLElement>(".shiori")]
-        .map((m) => {
-          const r = m.getBoundingClientRect();
-          return getComputedStyle(m).scrollSnapAlign.includes("center")
-            ? r.left - left + r.width / 2 - rack.clientWidth / 2
-            : r.left - left - pad;
+        .map((shiori) => {
+          const box = shiori.getBoundingClientRect();
+          return getComputedStyle(shiori).scrollSnapAlign.includes("center")
+            ? box.left - left + box.width / 2 - rack.clientWidth / 2
+            : box.left - left - padding;
         })
-        .map((x) => Math.round(Math.max(0, Math.min(max, x))));
+        .map((x) => Math.round(Math.max(0, Math.min(maxScroll, x))));
     };
     let settle = 0;
     const unsnap = () => {
@@ -264,24 +264,24 @@ const gables =
       rack.addEventListener("scroll", done, { passive: true });
       done();
     };
-    for (const b of [back, on])
-      b.addEventListener("click", () => {
-        const dir = Number(b.dataset.step);
+    for (const button of [back, forward])
+      button.addEventListener("click", () => {
+        const direction = Number(button.dataset.step);
         const x = rack.scrollLeft;
-        const want = x + dir * rack.clientWidth * 0.8;
-        const all = [...new Set(stops())].sort((a, c) => a - c);
-        const ahead = all.filter((p) => (dir > 0 ? p > x + 2 : p < x - 2));
+        const want = x + direction * rack.clientWidth * 0.8;
+        const allStops = [...new Set(stops())].sort((former, latter) => former - latter);
+        const ahead = allStops.filter((stop) => (direction > 0 ? stop > x + 2 : stop < x - 2));
         if (!ahead.length) return;
-        const within = ahead.filter((p) => (dir > 0 ? p <= want : p >= want));
-        const to = within.length
-          ? dir > 0
+        const within = ahead.filter((stop) => (direction > 0 ? stop <= want : stop >= want));
+        const destination = within.length
+          ? direction > 0
             ? within.at(-1)!
             : within[0]
-          : dir > 0
+          : direction > 0
             ? ahead[0]
             : ahead.at(-1)!;
         unsnap();
-        rack.scrollTo({ left: to, behavior: still.matches ? "auto" : "smooth" });
+        rack.scrollTo({ left: destination, behavior: still.matches ? "auto" : "smooth" });
       });
 
     // moving the shelf leaves the bookmarks leaning behind
@@ -290,54 +290,54 @@ const gables =
       let lastT = performance.now();
       let push = 0;
       let sway = 0;
-      let vel = 0;
-      let raf = 0;
+      let velocity = 0;
+      let frame = 0;
       const step = () => {
-        vel = (vel + (push - sway) * 0.08) * 0.86;
-        sway += vel;
+        velocity = (velocity + (push - sway) * 0.08) * 0.86;
+        sway += velocity;
         push *= 0.85;
-        const rest = Math.abs(sway) + Math.abs(vel) + Math.abs(push) < 0.01;
+        const rest = Math.abs(sway) + Math.abs(velocity) + Math.abs(push) < 0.01;
         rack.style.setProperty("--sway", rest ? "0deg" : `${sway.toFixed(3)}deg`);
-        raf = rest ? 0 : requestAnimationFrame(step);
+        frame = rest ? 0 : requestAnimationFrame(step);
       };
       rack.addEventListener(
         "scroll",
         () => {
           const now = performance.now();
-          const v = (rack.scrollLeft - last) / Math.max(8, now - lastT);
+          const speed = (rack.scrollLeft - last) / Math.max(8, now - lastT);
           last = rack.scrollLeft;
           lastT = now;
-          push = Math.max(-4, Math.min(4, v * 2));
-          raf ||= requestAnimationFrame(step);
+          push = Math.max(-4, Math.min(4, speed * 2));
+          frame ||= requestAnimationFrame(step);
         },
         { passive: true },
       );
     }
 
     // pull a bookmark up by its cord
-    rack.addEventListener("pointerdown", (e) => {
-      const cord = (e.target as Element).closest<SVGSVGElement>(".shiori:not(.blank) .cord");
+    rack.addEventListener("pointerdown", (event) => {
+      const cord = (event.target as Element).closest<SVGSVGElement>(".shiori:not(.blank) .cord");
       if (!cord) return;
       const mark = cord.closest<HTMLElement>(".shiori")!;
       const href = mark.querySelector<HTMLAnchorElement>(".open")!.href;
-      e.preventDefault();
-      cord.setPointerCapture(e.pointerId);
+      event.preventDefault();
+      cord.setPointerCapture(event.pointerId);
       mark.classList.add("pulling");
-      const y0 = e.clientY;
+      const startY = event.clientY;
       let pull = 0;
       let moved = 0;
-      const move = (ev: PointerEvent) => {
-        const d = Math.max(0, y0 - ev.clientY);
-        moved = Math.max(moved, Math.abs(y0 - ev.clientY));
-        pull = 90 * (1 - Math.exp(-d / 90));
+      const move = (moveEvent: PointerEvent) => {
+        const drag = Math.max(0, startY - moveEvent.clientY);
+        moved = Math.max(moved, Math.abs(startY - moveEvent.clientY));
+        pull = 90 * (1 - Math.exp(-drag / 90));
         mark.style.setProperty("--pull", `${pull.toFixed(1)}px`);
       };
-      const release = (ev: PointerEvent) => {
+      const release = (releaseEvent: PointerEvent) => {
         cord.removeEventListener("pointermove", move);
         cord.removeEventListener("pointerup", release);
         cord.removeEventListener("pointercancel", release);
         mark.classList.remove("pulling");
-        if (ev.type === "pointerup" && (pull > 60 || moved < 4)) {
+        if (releaseEvent.type === "pointerup" && (pull > 60 || moved < 4)) {
           mark.classList.add("leaving");
           setTimeout(() => location.assign(href), still.matches ? 0 : 280);
         } else mark.style.removeProperty("--pull");
@@ -349,76 +349,77 @@ const gables =
 
     // coming back to the page puts it back in the rack
     addEventListener("pageshow", () => {
-      for (const m of rack.querySelectorAll<HTMLElement>(".leaving")) {
-        m.classList.remove("leaving");
-        m.style.removeProperty("--pull");
+      for (const shiori of rack.querySelectorAll<HTMLElement>(".leaving")) {
+        shiori.classList.remove("leaving");
+        shiori.style.removeProperty("--pull");
       }
     });
 
     // empty bookmark keeps trying out the next place
     const subject = rack.querySelector<SVGPathElement>(".blank .subject");
     if (subject && !still.matches) {
-      const ri = (a: number, b: number) => a + Math.random() * (b - a);
-      const f = (n: number) => Math.round(n * 10) / 10;
+      const between = (low: number, high: number) => low + Math.random() * (high - low);
+      const round1 = (value: number) => Math.round(value * 10) / 10;
       const sketches = [
         // row of houses
         () => {
-          let d = "";
-          for (let x = ri(4, 10); x < 86; ) {
-            const w = ri(18, 28);
-            const top = ri(130, 165);
-            d += `M${f(x)} 210 V${f(top)} `;
-            d +=
+          let path = "";
+          for (let x = between(4, 10); x < 86;) {
+            const width = between(18, 28);
+            const top = between(130, 165);
+            path += `M${round1(x)} 210 V${round1(top)} `;
+            path +=
               Math.random() < 0.6
-                ? `L${f(x + w / 2)} ${f(top - ri(10, 18))} L${f(x + w)} ${f(top)} `
-                : `H${f(x + w)} `;
-            d += "V210 ";
-            x += w + ri(0, 4);
+                ? `L${round1(x + width / 2)} ${round1(top - between(10, 18))} L${round1(x + width)} ${round1(top)} `
+                : `H${round1(x + width)} `;
+            path += "V210 ";
+            x += width + between(0, 4);
           }
-          return d;
+          return path;
         },
         // ridge and its sun
         () => {
-          let d = `M0 ${f(ri(170, 190))}`;
-          for (let x = ri(8, 14); x < 100; x += ri(10, 18)) d += ` L${f(x)} ${f(ri(110, 190))}`;
-          const cx = ri(20, 80);
-          const cy = ri(55, 90);
-          return `${d} L100 ${f(ri(150, 190))} M${f(cx - 7)} ${f(cy)} a7 7 0 1 0 14 0 a7 7 0 1 0 -14 0`;
+          let path = `M0 ${round1(between(170, 190))}`;
+          for (let x = between(8, 14); x < 100; x += between(10, 18))
+            path += ` L${round1(x)} ${round1(between(110, 190))}`;
+          const sunX = between(20, 80);
+          const sunY = between(55, 90);
+          return `${path} L100 ${round1(between(150, 190))} M${round1(sunX - 7)} ${round1(sunY)} a7 7 0 1 0 14 0 a7 7 0 1 0 -14 0`;
         },
         // horizon, few waves and sail
         () => {
-          const y = ri(150, 175);
-          let d = `M0 ${f(y)} H100`;
+          const y = between(150, 175);
+          let path = `M0 ${round1(y)} H100`;
           for (let i = 0; i < 4; i++)
-            d += ` M${f(ri(6, 70))} ${f(y + ri(15, 90))} q4 -4 8 0 q4 -4 8 0`;
-          const bx = ri(20, 70);
-          return `${d} M${f(bx)} ${f(y - 2)} h14 l-3 5 h-8 z M${f(bx + 7)} ${f(y - 2)} V${f(y - 28)} L${f(bx + 17)} ${f(y - 6)}`;
+            path += ` M${round1(between(6, 70))} ${round1(y + between(15, 90))} q4 -4 8 0 q4 -4 8 0`;
+          const boatX = between(20, 70);
+          return `${path} M${round1(boatX)} ${round1(y - 2)} h14 l-3 5 h-8 z M${round1(boatX + 7)} ${round1(y - 2)} V${round1(y - 28)} L${round1(boatX + 17)} ${round1(y - 6)}`;
         },
         // cliff with small white town
         () => {
-          const e = ri(48, 62);
-          let d = `M${f(e)} 300`;
-          for (let y = 280; y > 130; y -= 15) d += ` L${f(e + ri(-6, 6))} ${y}`;
-          d += ` L${f(e)} 130 H100`;
-          for (let x = e + 2; x < 90; x += ri(9, 12))
-            d += ` M${f(x)} 130 v-${f(ri(8, 15))} h${f(ri(6, 8))} V130`;
-          return d;
+          const edge = between(48, 62);
+          let path = `M${round1(edge)} 300`;
+          for (let y = 280; y > 130; y -= 15) path += ` L${round1(edge + between(-6, 6))} ${y}`;
+          path += ` L${round1(edge)} 130 H100`;
+          for (let x = edge + 2; x < 90; x += between(9, 12))
+            path += ` M${round1(x)} 130 v-${round1(between(8, 15))} h${round1(between(6, 8))} V130`;
+          return path;
         },
       ];
 
       let shown = false;
-      new IntersectionObserver(([e]) => (shown = e.isIntersecting), { threshold: 0.3 }).observe(
-        subject.closest(".shiori")!,
-      );
+      new IntersectionObserver(([entry]) => (shown = entry.isIntersecting), {
+        threshold: 0.3,
+      }).observe(subject.closest(".shiori")!);
 
-      const pause = (ms: number) => new Promise((r) => setTimeout(r, ms));
+      const pause = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
       (async () => {
-        for (let k = 1; ; k = (k + 1) % sketches.length) {
+        for (let index = 1; ; index = (index + 1) % sketches.length) {
           await pause(4000);
           while (!shown || document.hidden) await pause(500);
           await subject.animate([{ opacity: 0 }], { duration: 700, fill: "forwards" }).finished;
-          subject.setAttribute("d", sketches[k]());
-          subject.getAnimations().forEach((a) => a.cancel());
+          subject.setAttribute("d", sketches[index]());
+          subject.getAnimations().forEach((animation) => animation.cancel());
           await subject.animate(
             [{ clipPath: "inset(-5% 100% -5% -5%)" }, { clipPath: "inset(-5% -5% -5% -5%)" }],
             {
@@ -439,11 +440,11 @@ const gables =
       rack.toggleAttribute("data-sifting", only !== null);
       sift.hidden = only === null;
       sift.querySelector(".sift-tag")!.textContent = only ?? "";
-      for (const b of rack.querySelectorAll<HTMLButtonElement>(".tag"))
-        b.setAttribute("aria-pressed", String(b.dataset.tag === only));
-      const hits = marks.filter((m) => {
-        const hit = only !== null && m.dataset.terrain!.split(" ").includes(only);
-        m.classList.toggle("match", hit);
+      for (const button of rack.querySelectorAll<HTMLButtonElement>(".tag"))
+        button.setAttribute("aria-pressed", String(button.dataset.tag === only));
+      const hits = marks.filter((shiori) => {
+        const hit = only !== null && shiori.dataset.terrain!.split(" ").includes(only);
+        shiori.classList.toggle("match", hit);
         return hit;
       });
       hits[0]?.scrollIntoView({
@@ -452,13 +453,13 @@ const gables =
         behavior: still.matches ? "auto" : "smooth",
       });
     };
-    rack.addEventListener("click", (e) => {
-      const tag = (e.target as Element).closest<HTMLButtonElement>(".tag");
+    rack.addEventListener("click", (event) => {
+      const tag = (event.target as Element).closest<HTMLButtonElement>(".tag");
       if (tag) choose(tag.dataset.tag!);
     });
     sift.addEventListener("click", () => choose(null));
-    addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && only !== null) choose(null);
+    addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && only !== null) choose(null);
     });
   }
 </script>

@@ -23,10 +23,10 @@ interface Props {
 const { album, newer, older } = Astro.props;
 const { photos } = album;
 
-const pad = (n: number) => String(n).padStart(2, "0");
-const day = (d: Date) => `${pad(d.getDate())}·${pad(d.getMonth() + 1)}`;
-const shotAt = (d: Date) =>
-  `${day(d)}·${d.getFullYear()} · ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+const twoDigits = (value: number) => String(value).padStart(2, "0");
+const day = (date: Date) => `${twoDigits(date.getDate())}·${twoDigits(date.getMonth() + 1)}`;
+const shotAt = (date: Date) =>
+  `${day(date)}·${date.getFullYear()} · ${twoDigits(date.getHours())}:${twoDigits(date.getMinutes())}`;
 
 const first = photos[0]?.date;
 const last = photos[photos.length - 1]?.date;
@@ -37,19 +37,22 @@ const when =
       : `${day(first)} – ${day(last)}·${last.getFullYear()}`
     : album.dateFormatted;
 
-const cameras = photos.map((p) => p.camera).filter(Boolean) as string[];
+const cameras = photos.map((photo) => photo.camera).filter(Boolean) as string[];
 const camera = cameras.sort(
-  (a, b) => cameras.filter((c) => c === b).length - cameras.filter((c) => c === a).length,
+  (former, latter) =>
+    cameras.filter((name) => name === latter).length - cameras.filter((c) => c === former).length,
 )[0];
 
-const light = (p: PhotoItem) =>
-  [p.focalLength, p.aperture, p.shutterSpeed].filter(Boolean) as string[];
+const light = (photo: PhotoItem) =>
+  [photo.focalLength, photo.aperture, photo.shutterSpeed].filter(Boolean) as string[];
 
 // contact sheet
-const strips = Array.from({ length: Math.ceil(photos.length / 4) }, (_, s) =>
-  photos.slice(s * 4, s * 4 + 4).map((photo, k) => ({ photo, i: s * 4 + k })),
+const strips = Array.from({ length: Math.ceil(photos.length / 4) }, (_, stripIndex) =>
+  photos
+    .slice(stripIndex * 4, stripIndex * 4 + 4)
+    .map((photo, frameIndex) => ({ photo, i: stripIndex * 4 + frameIndex })),
 );
-const edge = `SW·${String(album.date.getFullYear()).slice(2)}${pad(album.date.getMonth() + 1)}`;
+const edge = `SW·${String(album.date.getFullYear()).slice(2)}${twoDigits(album.date.getMonth() + 1)}`;
 
 const RADII = ["3px 7px 4px 8px", "6px 3px 7px 4px", "4px 6px 3px 7px", "7px 4px 6px 3px"];
 ---
@@ -147,7 +150,7 @@ const RADII = ["3px 7px 4px 8px", "6px 3px 7px 4px", "4px 6px 3px 7px", "7px 4px
 
           <figcaption>
             <p class="frame-head">
-              <span class="frame-num">{pad(i + 1)}</span>
+              <span class="frame-num">{twoDigits(i + 1)}</span>
               <span class="frame-file">
                 <span>{photo.filename}</span>
                 <span>{shotAt(photo.date)}</span>
@@ -175,8 +178,8 @@ const RADII = ["3px 7px 4px 8px", "6px 3px 7px 4px", "4px 6px 3px 7px", "7px 4px
                     <th scope="row">light</th>
                     <td>
                       <span class="light">
-                        {light(photo).map((v) => (
-                          <span>{v}</span>
+                        {light(photo).map((setting) => (
+                          <span>{setting}</span>
                         ))}
                         {photo.iso && <span class="iso">{photo.iso}</span>}
                       </span>
@@ -210,8 +213,8 @@ const RADII = ["3px 7px 4px 8px", "6px 3px 7px 4px", "4px 6px 3px 7px", "7px 4px
   </ol>
 
   <section class="sheet" aria-label="Contact sheet" hidden>
-    {strips.map((strip, s) => (
-      <div class="strip" style={`--tilt: ${s % 2 ? -0.5 : 0.3}deg`}>
+    {strips.map((strip, stripIndex) => (
+      <div class="strip" style={`--tilt: ${stripIndex % 2 ? -0.5 : 0.3}deg`}>
         <ol>
           {strip.map(({ photo, i }) => (
             <li class="cell">
@@ -220,12 +223,12 @@ const RADII = ["3px 7px 4px 8px", "6px 3px 7px 4px", "4px 6px 3px 7px", "7px 4px
                 data-frame={i}
                 data-loupe={photo.src}
                 data-exif={[light(photo).join(" · "), photo.iso].filter(Boolean).join(" · ")}
-                aria-label={`Frame ${pad(i + 1)}, ${photo.filename}`}
+                aria-label={`Frame ${twoDigits(i + 1)}, ${photo.filename}`}
               >
                 <img src={photo.sheetSrc} alt="" loading="lazy" decoding="async" />
               </a>
               <span class="edge" aria-hidden="true">
-                ▸ {pad(i + 1)}
+                ▸ {twoDigits(i + 1)}
                 {"  "}
                 {edge}
               </span>
@@ -328,7 +331,7 @@ const RADII = ["3px 7px 4px 8px", "6px 3px 7px 4px", "4px 6px 3px 7px", "7px 4px
     const links = Array.from(document.querySelectorAll<HTMLAnchorElement>("[data-lightbox]"));
     const prev = dialog.querySelector<HTMLButtonElement>(".lb-prev")!;
     const next = dialog.querySelector<HTMLButtonElement>(".lb-next")!;
-    const pad = (n: number) => String(n).padStart(2, "0");
+    const twoDigits = (value: number) => String(value).padStart(2, "0");
     const still = matchMedia("(prefers-reduced-motion: reduce)");
     let current = -1;
     let opened = -1;
@@ -338,13 +341,13 @@ const RADII = ["3px 7px 4px 8px", "6px 3px 7px 4px", "4px 6px 3px 7px", "7px 4px
       const i = Math.round(track.scrollLeft / track.clientWidth);
       if (i === current || !links[i]) return;
       current = i;
-      if (count) count.textContent = `${pad(i + 1)} / ${pad(links.length)}`;
+      if (count) count.textContent = `${twoDigits(i + 1)} / ${twoDigits(links.length)}`;
       if (caption) caption.textContent = links[i].dataset.title || "";
       prev.disabled = i === 0;
       next.disabled = i === links.length - 1;
     };
 
-    const go = (i: number, smooth = true) => {
+    const goTo = (i: number, smooth = true) => {
       if (i < 0 || i >= links.length) return;
       track.scrollTo({
         left: i * track.clientWidth,
@@ -353,24 +356,24 @@ const RADII = ["3px 7px 4px 8px", "6px 3px 7px 4px", "4px 6px 3px 7px", "7px 4px
     };
 
     links.forEach((link, i) =>
-      link.addEventListener("click", (e) => {
-        e.preventDefault();
+      link.addEventListener("click", (event) => {
+        event.preventDefault();
         opened = i;
         current = -1;
         dialog.showModal();
-        go(i, false);
+        goTo(i, false);
         sync();
       }),
     );
 
     track.addEventListener("scroll", sync, { passive: true });
-    prev.addEventListener("click", () => go(current - 1));
-    next.addEventListener("click", () => go(current + 1));
+    prev.addEventListener("click", () => goTo(current - 1));
+    next.addEventListener("click", () => goTo(current + 1));
 
     // click beside the photo, not on it, closes
     dialog.addEventListener("click", (e) => {
-      const t = e.target as HTMLElement;
-      if (t === dialog || t.classList.contains("lb-slide")) dialog.close();
+      const clicked = e.target as HTMLElement;
+      if (clicked === dialog || clicked.classList.contains("lb-slide")) dialog.close();
     });
 
     // leave the page at the photo you stopped on
@@ -380,14 +383,14 @@ const RADII = ["3px 7px 4px 8px", "6px 3px 7px 4px", "4px 6px 3px 7px", "7px 4px
       }
     });
 
-    dialog.addEventListener("keydown", (e) => {
-      if (e.ctrlKey || e.altKey || e.metaKey) return;
-      if (["j", "ArrowRight", "ArrowDown"].includes(e.key)) {
-        e.preventDefault();
-        go(current + 1);
-      } else if (["k", "ArrowLeft", "ArrowUp"].includes(e.key)) {
-        e.preventDefault();
-        go(current - 1);
+    dialog.addEventListener("keydown", (event) => {
+      if (event.ctrlKey || event.altKey || event.metaKey) return;
+      if (["j", "ArrowRight", "ArrowDown"].includes(event.key)) {
+        event.preventDefault();
+        goTo(current + 1);
+      } else if (["k", "ArrowLeft", "ArrowUp"].includes(event.key)) {
+        event.preventDefault();
+        goTo(current - 1);
       }
     });
   }
@@ -405,7 +408,7 @@ const RADII = ["3px 7px 4px 8px", "6px 3px 7px 4px", "4px 6px 3px 7px", "7px 4px
     buttons.forEach((button) =>
       button.addEventListener("click", () => {
         const view = button.dataset.view;
-        buttons.forEach((b) => b.setAttribute("aria-pressed", String(b === button)));
+        buttons.forEach((other) => other.setAttribute("aria-pressed", String(other === button)));
         frames.hidden = view === "sheet";
         sheet.hidden = view !== "sheet";
       }),
@@ -413,10 +416,10 @@ const RADII = ["3px 7px 4px 8px", "6px 3px 7px 4px", "4px 6px 3px 7px", "7px 4px
 
     // frame on the sheet opens the same lightbox as the story
     const shots = document.querySelectorAll<HTMLAnchorElement>(".frames .shot");
-    sheet.querySelectorAll<HTMLAnchorElement>("[data-frame]").forEach((a) =>
-      a.addEventListener("click", (e) => {
-        e.preventDefault();
-        shots[Number(a.dataset.frame)]?.click();
+    sheet.querySelectorAll<HTMLAnchorElement>("[data-frame]").forEach((frame) =>
+      frame.addEventListener("click", (event) => {
+        event.preventDefault();
+        shots[Number(frame.dataset.frame)]?.click();
       }),
     );
 
@@ -425,33 +428,34 @@ const RADII = ["3px 7px 4px 8px", "6px 3px 7px 4px", "4px 6px 3px 7px", "7px 4px
     const lens = loupe.querySelector<HTMLElement>(".loupe-lens")!;
     const ZOOM = 2.5;
 
-    sheet.addEventListener("pointermove", (e) => {
-      const a = (e.target as Element).closest<HTMLAnchorElement>("[data-loupe]");
-      if (e.pointerType !== "mouse" || !a) {
+    sheet.addEventListener("pointermove", (event) => {
+      const frame = (event.target as Element).closest<HTMLAnchorElement>("[data-loupe]");
+      if (event.pointerType !== "mouse" || !frame) {
         loupe.classList.remove("is-on");
         return;
       }
-      const box = a.getBoundingClientRect();
-      const x = (e.clientX - box.left) / box.width;
-      const y = (e.clientY - box.top) / box.height;
-      const img = a.querySelector("img")!;
+      const box = frame.getBoundingClientRect();
+      const x = (event.clientX - box.left) / box.width;
+      const y = (event.clientY - box.top) / box.height;
+      const image = frame.querySelector("img")!;
 
-      const scale = Math.max(box.width / img.naturalWidth, box.height / img.naturalHeight) * ZOOM;
-      const w = img.naturalWidth * scale;
-      const h = img.naturalHeight * scale;
+      const scale =
+        Math.max(box.width / image.naturalWidth, box.height / image.naturalHeight) * ZOOM;
+      const width = image.naturalWidth * scale;
+      const height = image.naturalHeight * scale;
       const size = lens.offsetWidth;
-      const offX = (w - box.width * ZOOM) / 2;
-      const offY = (h - box.height * ZOOM) / 2;
-      lens.style.backgroundImage = `url("${a.dataset.loupe}"), url("${img.currentSrc}")`;
-      lens.style.backgroundSize = `${w}px ${h}px`;
+      const offX = (width - box.width * ZOOM) / 2;
+      const offY = (height - box.height * ZOOM) / 2;
+      lens.style.backgroundImage = `url("${frame.dataset.loupe}"), url("${image.currentSrc}")`;
+      lens.style.backgroundSize = `${width}px ${height}px`;
       lens.style.backgroundPosition = `${size / 2 - offX - x * box.width * ZOOM}px ${size / 2 - offY - y * box.height * ZOOM}px`;
       loupe.querySelector(".loupe-num")!.textContent =
-        `▸ ${String(Number(a.dataset.frame) + 1).padStart(2, "0")} · ${a.getAttribute("aria-label")!.split(", ").pop()}`;
-      loupe.querySelector(".loupe-exif")!.textContent = a.dataset.exif ?? "";
-      const right = e.clientX + 24 + loupe.offsetWidth < innerWidth;
-      const left = right ? e.clientX + 24 : e.clientX - 24 - loupe.offsetWidth;
+        `▸ ${String(Number(frame.dataset.frame) + 1).padStart(2, "0")} · ${frame.getAttribute("aria-label")!.split(", ").pop()}`;
+      loupe.querySelector(".loupe-exif")!.textContent = frame.dataset.exif ?? "";
+      const right = event.clientX + 24 + loupe.offsetWidth < innerWidth;
+      const left = right ? event.clientX + 24 : event.clientX - 24 - loupe.offsetWidth;
       loupe.classList.toggle("is-left", !right);
-      loupe.style.translate = `${left}px ${e.clientY - size / 2}px`;
+      loupe.style.translate = `${left}px ${event.clientY - size / 2}px`;
       loupe.classList.add("is-on");
     });
     sheet.addEventListener("pointerleave", () => loupe.classList.remove("is-on"));

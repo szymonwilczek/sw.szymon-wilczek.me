@@ -54,10 +54,10 @@ export interface PhotoAlbum {
 
 function formatBytes(bytes: number): string {
   if (bytes === 0) return "0 B";
-  const k = 1024;
+  const unit = 1024;
   const sizes = ["B", "KB", "MB", "GB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
+  const i = Math.floor(Math.log(bytes) / Math.log(unit));
+  return `${parseFloat((bytes / Math.pow(unit, i)).toFixed(2))} ${sizes[i]}`;
 }
 
 function parseTitleFromFolder(folder: string): {
@@ -70,7 +70,7 @@ function parseTitleFromFolder(folder: string): {
     const title = rawName
       .split(" ")
       .filter(Boolean)
-      .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
       .join(" ");
     const month = parseInt(match[2], 10);
     const year = parseInt(match[3], 10);
@@ -81,7 +81,7 @@ function parseTitleFromFolder(folder: string): {
   const title = rawName
     .split(" ")
     .filter(Boolean)
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join(" ");
   return { title };
 }
@@ -100,17 +100,19 @@ export async function getAllAlbums(): Promise<PhotoAlbum[]> {
 
   const entries = fs.readdirSync(imagesDir, { withFileTypes: true });
   const albumDirs = entries.filter(
-    (e) => e.isDirectory() && e.name !== "thumbs" && !e.name.startsWith("."),
+    (entry) => entry.isDirectory() && entry.name !== "thumbs" && !entry.name.startsWith("."),
   );
 
   const albums: PhotoAlbum[] = [];
 
-  for (const dir of albumDirs) {
-    const folderName = dir.name;
+  for (const folder of albumDirs) {
+    const folderName = folder.name;
     const albumPath = path.join(imagesDir, folderName);
     const folderFiles = fs.readdirSync(albumPath);
 
-    const imageFiles = folderFiles.filter((f) => /\.(jpe?g|png)$/i.test(f) && !f.startsWith("."));
+    const imageFiles = folderFiles.filter(
+      (fileName) => /\.(jpe?g|png)$/i.test(fileName) && !fileName.startsWith("."),
+    );
 
     if (imageFiles.length === 0) continue;
 
@@ -129,28 +131,28 @@ export async function getAllAlbums(): Promise<PhotoAlbum[]> {
     if (fs.existsSync(metaFile)) {
       try {
         albumMetadata = JSON.parse(fs.readFileSync(metaFile, "utf8"));
-      } catch (err) {
-        console.warn(`Failed to parse ${metaFile}:`, err);
+      } catch (error) {
+        console.warn(`Failed to parse ${metaFile}:`, error);
       }
     }
 
     const photoNotes: Record<string, string> = { ...(albumMetadata.photos || {}) };
 
-    for (const f of folderFiles) {
-      if (f.endsWith(".txt")) {
-        const baseName = path.parse(f).name;
+    for (const fileName of folderFiles) {
+      if (fileName.endsWith(".txt")) {
+        const baseName = path.parse(fileName).name;
         if (!photoNotes[baseName]) {
-          photoNotes[baseName] = fs.readFileSync(path.join(albumPath, f), "utf8").trim();
+          photoNotes[baseName] = fs.readFileSync(path.join(albumPath, fileName), "utf8").trim();
         }
       }
     }
 
     let narrativeHtml: string | undefined;
     const orgFile = folderFiles.find(
-      (f) =>
-        f.endsWith(".org") &&
-        !f.startsWith(".") &&
-        !imageFiles.some((img) => img.startsWith(path.parse(f).name)),
+      (fileName) =>
+        fileName.endsWith(".org") &&
+        !fileName.startsWith(".") &&
+        !imageFiles.some((image) => image.startsWith(path.parse(fileName).name)),
     );
 
     if (orgFile) {
@@ -186,8 +188,8 @@ export async function getAllAlbums(): Promise<PhotoAlbum[]> {
         if (generalOrg) {
           narrativeHtml = await renderOrg(generalOrg);
         }
-      } catch (err) {
-        console.warn(`Failed to render Org narrative for ${folderName}:`, err);
+      } catch (error) {
+        console.warn(`Failed to render Org narrative for ${folderName}:`, error);
       }
     }
 
@@ -243,11 +245,11 @@ export async function getAllAlbums(): Promise<PhotoAlbum[]> {
 
       let date = fileStat.mtime;
       if (parsedExif?.DateTimeOriginal) {
-        const d = new Date(parsedExif.DateTimeOriginal);
-        if (!isNaN(d.getTime())) date = d;
+        const parsed = new Date(parsedExif.DateTimeOriginal);
+        if (!isNaN(parsed.getTime())) date = parsed;
       } else if (parsedExif?.CreateDate) {
-        const d = new Date(parsedExif.CreateDate);
-        if (!isNaN(d.getTime())) date = d;
+        const parsed = new Date(parsedExif.CreateDate);
+        if (!isNaN(parsed.getTime())) date = parsed;
       } else if (dateSuffix) {
         date = new Date(dateSuffix.year, dateSuffix.month - 1, 1);
       }
@@ -268,21 +270,25 @@ export async function getAllAlbums(): Promise<PhotoAlbum[]> {
 
       let lens: string | undefined;
       if (parsedExif?.LensModel) {
-        const raw = parsedExif.LensModel.trim();
-        if (/iphone.*camera/i.test(raw)) {
-          const f35 = parsedExif.FocalLengthIn35mmFormat;
+        const lensModel = parsedExif.LensModel.trim();
+        if (/iphone.*camera/i.test(lensModel)) {
+          const focal35 = parsedExif.FocalLengthIn35mmFormat;
           const fPhys = parsedExif.FocalLength;
-          if (f35 <= 16 || (fPhys !== undefined && fPhys < 3.5) || /2\.22/i.test(raw)) {
+          if (focal35 <= 16 || (fPhys !== undefined && fPhys < 3.5) || /2\.22/i.test(lensModel)) {
             lens = "Ultra Wide (13mm)";
-          } else if (f35 >= 70 || (fPhys !== undefined && fPhys >= 10) || /15\.66/i.test(raw)) {
+          } else if (
+            focal35 >= 70 ||
+            (fPhys !== undefined && fPhys >= 10) ||
+            /15\.66/i.test(lensModel)
+          ) {
             lens = "Telephoto (120mm)";
-          } else if (/front/i.test(raw)) {
+          } else if (/front/i.test(lensModel)) {
             lens = "Front Camera (23mm)";
           } else {
             lens = "Main (24mm)";
           }
         } else {
-          lens = raw
+          lens = lensModel
             .replace(/^apple\s+/i, "")
             .replace(/back\s+(triple|dual|single)?\s*camera\s*/i, "")
             .trim();
@@ -296,8 +302,9 @@ export async function getAllAlbums(): Promise<PhotoAlbum[]> {
 
       let shutterSpeed: string | undefined;
       if (parsedExif?.ExposureTime) {
-        const exp = parsedExif.ExposureTime;
-        shutterSpeed = exp < 1 && exp > 0 ? `1/${Math.round(1 / exp)}s` : `${exp}s`;
+        const exposure = parsedExif.ExposureTime;
+        shutterSpeed =
+          exposure < 1 && exposure > 0 ? `1/${Math.round(1 / exposure)}s` : `${exposure}s`;
       }
 
       let iso: string | undefined;
@@ -307,12 +314,12 @@ export async function getAllAlbums(): Promise<PhotoAlbum[]> {
 
       let gps: PhotoItem["gps"];
       if (typeof gpsData?.latitude === "number" && typeof gpsData?.longitude === "number") {
-        const lat = gpsData.latitude;
-        const lon = gpsData.longitude;
+        const latitude = gpsData.latitude;
+        const longitude = gpsData.longitude;
         gps = {
-          latitude: lat,
-          longitude: lon,
-          mapsUrl: `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}#map=16/${lat}/${lon}`,
+          latitude,
+          longitude,
+          mapsUrl: `https://www.openstreetmap.org/?mlat=${latitude}&mlon=${longitude}#map=16/${latitude}/${longitude}`,
         };
       }
 
@@ -350,7 +357,7 @@ export async function getAllAlbums(): Promise<PhotoAlbum[]> {
       });
     }
 
-    photos.sort((a, b) => a.date.getTime() - b.date.getTime());
+    photos.sort((former, latter) => former.date.getTime() - latter.date.getTime());
 
     const earliestDate = photos.length > 0 ? photos[0].date : new Date();
     const albumDate = dateSuffix
@@ -406,9 +413,9 @@ export async function getAllAlbums(): Promise<PhotoAlbum[]> {
   }
 
   albums.sort(
-    (a, b) =>
-      b.date.getTime() - a.date.getTime() ||
-      (b.photos[0]?.date.getTime() ?? 0) - (a.photos[0]?.date.getTime() ?? 0),
+    (former, latter) =>
+      latter.date.getTime() - former.date.getTime() ||
+      (latter.photos[0]?.date.getTime() ?? 0) - (former.photos[0]?.date.getTime() ?? 0),
   );
 
   // stamps are numbered in the order the trips happened, oldest first
