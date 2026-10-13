@@ -1,6 +1,6 @@
 // the engawa scene
 
-import { mix, hash, rng, lerp, smooth, polygonPath } from "../core.js";
+import { SCENE_WIDTH, mix, hash, rng, lerp, smooth, polygonPath } from "../core.js";
 import {
   jitter,
   wobblyPolygon,
@@ -27,7 +27,7 @@ import { teaCup, hangingLamp, seasonLook, SNOW, snowCap, arcTop, falling, koro }
 
 // veranda of old house
 function sceneEngawa(tones, hour, mini, seasonKey, opts = {}) {
-  const width = 1100,
+  const width = SCENE_WIDTH,
     height = 640,
     light = hourLight(tones, hour, seasonKey, opts.sun),
     look = seasonLook(tones, seasonKey),
@@ -145,7 +145,7 @@ function sceneEngawa(tones, hour, mini, seasonKey, opts = {}) {
         [860, 395],
         [950, 430],
         [1010, 470],
-        [1100, 520],
+        [width, 520],
       ],
       1.5,
     ),
@@ -787,7 +787,7 @@ function sceneEngawa(tones, hour, mini, seasonKey, opts = {}) {
       look.snow ? height : 560,
     );
     if (!look.snow) {
-      falling(air, airRand, look.s, look.fall, 9, 560, 1100, 380, 560);
+      falling(air, airRand, look.s, look.fall, 9, 560, width, 380, 560);
       for (let k = 0; k < 5; k++) {
         const [x, y] = boardMap(0.55 + airRand() * 0.4, 0.05 + airRand() * 0.35);
         falling(air, airRand, look.s, look.fall, 1, x, x + 2, y, y + 2);

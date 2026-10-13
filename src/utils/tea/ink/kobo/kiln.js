@@ -1,6 +1,6 @@
 // the kiln step
 
-import { mix, hash, rng, roundCoord } from "../core.js";
+import { SCENE_WIDTH, mix, hash, rng, roundCoord } from "../core.js";
 import {
   jitter,
   wobblyPolygon,
@@ -163,7 +163,7 @@ function tongs(group, rand, x, y, tones) {
 
 function sceneKiln(tones) {
   const rand = rng(hash("tea/kiln")),
-    width = 1100,
+    width = SCENE_WIDTH,
     height = 460,
     groups = [],
     y = 330;

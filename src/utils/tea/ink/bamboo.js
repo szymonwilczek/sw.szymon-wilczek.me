@@ -1,6 +1,6 @@
 // bamboo: leaves, culms, clumps
 
-import { mix, hash, rng, roundCoord, lerp, smooth } from "./core.js";
+import { SCENE_WIDTH, mix, hash, rng, roundCoord, lerp, smooth } from "./core.js";
 import {
   jitter,
   wobblyPolygon,
@@ -268,7 +268,7 @@ function bambooClump(groups, rand, x, y, tones, scale, cut) {
 // the toy
 function sceneBamboo(tones) {
   const rand = rng(hash("tea/bamboo")),
-    width = 1100,
+    width = SCENE_WIDTH,
     height = 560,
     groups = [],
     clips = [];

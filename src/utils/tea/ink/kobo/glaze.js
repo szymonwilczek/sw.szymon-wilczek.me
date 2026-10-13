@@ -1,6 +1,6 @@
 // the glaze and paint steps
 
-import { mix, hash, rng } from "../core.js";
+import { SCENE_WIDTH, mix, hash, rng } from "../core.js";
 import {
   wobblyBox,
   wobblySegment,
@@ -18,7 +18,7 @@ import { note, kanji } from "./steps.js";
 // glaze shelf
 function sceneGlazes(tones) {
   const rand = rng(hash("tea/glazes")),
-    width = 1100,
+    width = SCENE_WIDTH,
     height = 300,
     group = newGroup();
   GLAZES(tones)
@@ -35,7 +35,7 @@ function sceneGlazes(tones) {
 // painting on the banding wheel
 function scenePaint(tones) {
   const rand = rng(hash("tea/paint")),
-    width = 1100,
+    width = SCENE_WIDTH,
     height = 620,
     groups = [],
     group = newGroup();

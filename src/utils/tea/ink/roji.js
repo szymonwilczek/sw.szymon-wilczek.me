@@ -1,6 +1,6 @@
 // the roji garden scene
 
-import { mix, hash, rng } from "./core.js";
+import { SCENE_WIDTH, mix, hash, rng } from "./core.js";
 import {
   wobblyPolygon,
   wobblySegment,
@@ -31,7 +31,7 @@ import {
 function sceneGarden16(tones, stage, opt = {}) {
   const open = stage === "open";
   const rand = rng(hash("tea/garden16")),
-    width = 1100,
+    width = SCENE_WIDTH,
     height = 690,
     groups = [],
     clips = [];

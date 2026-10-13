@@ -1,6 +1,6 @@
 // the drying shelf and the piece card
 
-import { hash, rng, roundCoord } from "../core.js";
+import { SCENE_WIDTH, hash, rng, roundCoord } from "../core.js";
 import {
   wobblyPolygon,
   wobblyBox,
@@ -41,7 +41,7 @@ function dashed(group, rand, x0, y0, x1, y1, tones) {
 // shelf in the waiting room
 function sceneShelf(tones, opt = {}) {
   const rand = rng(hash("tea/shelf")),
-    width = 1100,
+    width = SCENE_WIDTH,
     height = 700,
     groups = [],
     group = newGroup(),
@@ -151,7 +151,7 @@ function sceneShelf(tones, opt = {}) {
 // one piece taken off the shelf
 function scenePieceCard(tones) {
   const rand = rng(hash("tea/card")),
-    width = 1100,
+    width = SCENE_WIDTH,
     height = 460,
     group = newGroup();
   const spec = Object.assign(demoSpec("shelf13"), PROFILES.bowl);

@@ -1,6 +1,6 @@
 // the wheel and shapes steps
 
-import { hash, rng } from "../core.js";
+import { SCENE_WIDTH, hash, rng } from "../core.js";
 import { wobblyLine, wobblyRing, newGroup, addLine, inked, brushStroke } from "../pen.js";
 import { CLAYS, PROFILES } from "../ceramics.js";
 import { wheel, spin, wetClay, fingertip, arrowLine } from "../tools.js";
@@ -9,7 +9,7 @@ import { note, frames } from "./steps.js";
 // throwing
 function sceneWheel(tones) {
   const rand = rng(hash("tea/wheel")),
-    width = 1100,
+    width = SCENE_WIDTH,
     height = 470,
     groups = [],
     y = 330,
@@ -180,7 +180,7 @@ function sceneWheel(tones) {
 // what the same lump can become
 function sceneShapes(tones) {
   const rand = rng(hash("tea/shapes")),
-    width = 1100,
+    width = SCENE_WIDTH,
     height = 420,
     group = newGroup(),
     y = 300;

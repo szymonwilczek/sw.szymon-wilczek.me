@@ -1,5 +1,7 @@
 // colours, svg output, seeded randomness and the small maths every drawing shares
 
+const SCENE_WIDTH = 1100;
+
 const THEME_VARS = {
   paper: "var(--paper)",
   tape: "var(--tape)",
@@ -187,6 +189,7 @@ const polygonPath = (points) =>
   "M" + points.map(([x, y]) => `${roundCoord(x)} ${roundCoord(y)}`).join(" L") + " Z";
 
 export {
+  SCENE_WIDTH,
   THEME_VARS,
   mix,
   toneVars,

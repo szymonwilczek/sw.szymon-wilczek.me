@@ -1,6 +1,6 @@
 // labels, hotspots and the workshop scene the kobo steps start from
 
-import { mix, hash, rng, roundCoord } from "../core.js";
+import { SCENE_WIDTH, mix, hash, rng, roundCoord } from "../core.js";
 import { wobblySegment, wobblyRing, newGroup, addWash, addLine, addText, inked } from "../pen.js";
 import { face, post } from "../architecture.js";
 import { obliqueScaled } from "../ceramics.js";
@@ -28,7 +28,7 @@ const kanji = (group, x, y, text, tones, fontSize) =>
 
 function frames(group, rand, labels, tones, H) {
   const count = labels.length,
-    width = 1100 / count;
+    width = SCENE_WIDTH / count;
   labels.forEach(([glyph, caption], i) => {
     kanji(group, i * width + 26, 44, glyph, tones);
     note(group, i * width + 26 + 30 + caption.length * 3.6, 44, caption, tones, 17, 0.75);
@@ -55,7 +55,7 @@ function hotspot(group, rand, x, y, glyph, caption, tones) {
 // inside the workshop, once the roof has lifted
 function sceneWorkshop(tones) {
   const rand = rng(hash("tea/workshop")),
-    width = 1100,
+    width = SCENE_WIDTH,
     height = 560,
     groups = [];
   const project = obliqueScaled(40, 500, 2.55),
