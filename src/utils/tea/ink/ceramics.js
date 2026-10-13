@@ -4,7 +4,6 @@ import { mix, hash, rng, lerp } from "./core.js";
 import {
   jitter,
   wobblyPolygon,
-  wobblyBox,
   wobblyLine,
   wobblyRing,
   addLine,
@@ -78,6 +77,7 @@ const PAINTS = (tones) => [
 ];
 
 const HANDLE_REACH = 0.55;
+const HANDLE_THICKNESS = 7;
 
 /** How far a piece reaches left and right of its centre once drawn */
 function pieceSpan(spec, scale) {
@@ -145,6 +145,14 @@ const PROFILES = {
   },
 };
 
+/** The clay, and the glaze as this firing left it (each firing shifts it a little) */
+function firedColours(tones, spec, fireRand) {
+  const clay = CLAYS(tones)[spec.clay || 0];
+  let glaze = spec.glaze && !spec.glaze.none ? GLAZES(tones)[spec.glaze.c] : null;
+  if (glaze) glaze = mix(glaze, fireRand() < 0.5 ? tones.ink : tones.paper, fireRand() * 0.12);
+  return { clay, glaze };
+}
+
 function piece(group, rand, cx, cy, scale, tones, spec) {
   const profile = spec.prof,
     rimRadius = profile[profile.length - 1][0] * scale,
@@ -154,9 +162,7 @@ function piece(group, rand, cx, cy, scale, tones, spec) {
   const bodyRadius = (down) => radiusAt(profile, 1 - down) * scale,
     squash = 0.3,
     shallow = height < rimRadius * 0.45;
-  const clay = CLAYS(tones)[spec.clay || 0];
-  let glaze = spec.glaze && !spec.glaze.none ? GLAZES(tones)[spec.glaze.c] : null;
-  if (glaze) glaze = mix(glaze, fireRand() < 0.5 ? tones.ink : tones.paper, fireRand() * 0.12);
+  const { clay, glaze } = firedColours(tones, spec, fireRand);
   const side = (sign, from, to) =>
     Array.from({ length: 13 }, (_, i) => {
       const down = lerp(from, to, i / 12);
@@ -301,22 +307,6 @@ function piece(group, rand, cx, cy, scale, tones, spec) {
     }
   }
   if (!shallow) paint();
-  if (spec.seal) {
-    const spot = frontPoint(0.62, 0.8);
-    addSolid(
-      group,
-      wobblyBox(
-        rand,
-        spot[0] - 3 * scale,
-        spot[1] - 3 * scale,
-        spot[0] + 3 * scale,
-        spot[1] + 3 * scale,
-        0.2,
-      ),
-      tones.red,
-      0.85,
-    );
-  }
   const sheen = side(-1, 0.1, shallow ? 0.6 : 0.75).map(([x, y]) => [x + rimRadius * 0.16, y]);
   addLine(group, wobblyLine(rand, sheen, 0.2), tones.paper, 1.8 * scale, 0.3, true);
   addLine(group, wobblyLine(rand, bodyPts, 0.2), tones.ink, 1.2, 0.95);
@@ -367,7 +357,7 @@ function piece(group, rand, cx, cy, scale, tones, spec) {
       [handleBottom[0] + reach * 0.55, handleBottom[1] + 2 * scale],
       handleBottom,
     ];
-    brushStroke(group, rand, handle, 7 * scale, glaze || clay, 1, {
+    brushStroke(group, rand, handle, HANDLE_THICKNESS * scale, glaze || clay, 1, {
       blunt: true,
       tip: 0.9,
       head: 0.9,
@@ -399,6 +389,112 @@ function piece(group, rand, cx, cy, scale, tones, spec) {
     const points = spec.kin.map(([across, down]) => frontPoint(across, down));
     addLine(group, wobblyLine(rand, points, 0.3), tones.gold, 2.2 * scale, 0.95, true);
     addLine(group, wobblyLine(rand, points, 0.3), tones.ink, 0.5, 0.45);
+  }
+}
+
+// the piece turned over, seen from straight below
+const FOOT_RING_SHARE = 0.18;
+const FOOT_SHADOW_OFFSET = 5;
+const WALL_SAMPLES = 24;
+const TRIM_MARKS = 3;
+const KILN_GRIT = 6;
+const SEAL_FILL = 0.55;
+const HANDLE_ROOT_SHARE = 0.8;
+const HANDLE_STEPS = 6;
+
+/** The widest the wall gets between two depths, 0 at the rim and 1 at the foot */
+function widestBetween(profile, from, to) {
+  return Math.max(
+    ...Array.from({ length: WALL_SAMPLES + 1 }, (_, i) =>
+      radiusAt(profile, 1 - lerp(from, to, i / WALL_SAMPLES)),
+    ),
+  );
+}
+
+/** Side of the seal pressed inside the foot ring */
+function footSealSize(spec, scale) {
+  const innerRadius = spec.prof[0][0] * scale * (1 - FOOT_RING_SHARE);
+  return innerRadius * Math.SQRT2 * SEAL_FILL;
+}
+
+function pieceFoot(group, rand, cx, cy, scale, tones, spec) {
+  const profile = spec.prof,
+    fireRand = rng(spec.fire || 1);
+  const { clay, glaze } = firedColours(tones, spec, fireRand);
+  const widest = widestBetween(profile, 0, 1) * scale,
+    footRadius = profile[0][0] * scale,
+    innerRadius = footRadius * (1 - FOOT_RING_SHARE),
+    rimRadius = profile[profile.length - 1][0] * scale;
+  const bareRadius = glaze ? widestBetween(profile, spec.glaze.dip, 1) * scale : widest;
+  const disc = (radius, wobble = 0.3) => wobblyRing(rand, cx, cy, radius, radius, wobble, 18);
+
+  addSolid(
+    group,
+    wobblyRing(
+      rand,
+      cx + FOOT_SHADOW_OFFSET * scale,
+      cy + FOOT_SHADOW_OFFSET * scale,
+      widest,
+      widest,
+      0.4,
+      16,
+    ),
+    tones.ink,
+    0.16,
+  );
+  if (spec.handle) {
+    const root = cx + widest * HANDLE_ROOT_SHARE,
+      end = cx + widest + rimRadius * HANDLE_REACH,
+      halfThick = (HANDLE_THICKNESS / 2) * scale;
+    const edge = (sign) =>
+      Array.from({ length: HANDLE_STEPS + 1 }, (_, i) => [
+        lerp(root, end - halfThick, i / HANDLE_STEPS),
+        cy + sign * halfThick,
+      ]);
+    const tip = Array.from({ length: HANDLE_STEPS + 1 }, (_, i) => {
+      const angle = -Math.PI / 2 + (Math.PI * i) / HANDLE_STEPS;
+      return [end - halfThick + Math.cos(angle) * halfThick, cy + Math.sin(angle) * halfThick];
+    });
+    const outline = [...edge(-1), ...tip.slice(1, -1), ...edge(1).reverse()];
+    addSolid(group, wobblyPolygon(rand, outline, 0.2), glaze || clay, 1);
+    addLine(group, wobblyLine(rand, outline, 0.2), tones.ink, 1, 0.85);
+  }
+  const wall = disc(widest);
+  addSolid(group, wall, glaze || clay, 1);
+  if (bareRadius < widest) addSolid(group, disc(bareRadius), clay, 1);
+  addLine(group, wall, tones.ink, 1.2, 0.95);
+  addSolid(group, disc(footRadius, 0.2), mix(clay, tones.ink, 0.15), 1);
+  addLine(group, disc(footRadius, 0.2), tones.ink, 0.9, 0.85);
+  const recess = disc(innerRadius, 0.2);
+  addSolid(group, recess, mix(clay, tones.ink, 0.06), 1);
+  addLine(group, recess, tones.ink, 0.8, 0.7);
+  for (let mark = 0; mark < TRIM_MARKS; mark++) {
+    const start = fireRand() * Math.PI * 2,
+      from = innerRadius * (0.85 - mark * 0.22);
+    const scrape = Array.from({ length: 9 }, (_, i) => {
+      const angle = start + i * 0.35,
+        radius = from - i * innerRadius * 0.02;
+      return [cx + Math.cos(angle) * radius, cy + Math.sin(angle) * radius];
+    });
+    addLine(group, wobblyLine(rand, scrape, 0.2), tones.ink, 0.6, 0.25);
+  }
+  for (let speck = 0; speck < KILN_GRIT; speck++) {
+    const angle = fireRand() * Math.PI * 2,
+      radius = lerp(innerRadius, footRadius, 0.3 + fireRand() * 0.4);
+    addSolid(
+      group,
+      wobblyRing(
+        rand,
+        cx + Math.cos(angle) * radius,
+        cy + Math.sin(angle) * radius,
+        0.5 + fireRand(),
+        0.5 + fireRand(),
+        0.1,
+        5,
+      ),
+      mix(clay, tones.ink, 0.5),
+      0.6,
+    );
   }
 }
 
@@ -457,7 +553,6 @@ function demoSpec(name, kind) {
           ]
         : null,
     paint,
-    seal: true,
   };
 }
 
@@ -471,6 +566,8 @@ export {
   radiusAt,
   PROFILES,
   piece,
+  pieceFoot,
+  footSealSize,
   pieceSpan,
   demoSpec,
 };

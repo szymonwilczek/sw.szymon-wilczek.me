@@ -176,7 +176,6 @@ export function turned(spec: PieceSpec, turn = 0) {
     paint: runs.filter((stroke) => stroke.pts.length > 1),
     kin: crack.length > 1 ? crack : null,
     glaze: spec.glaze ? { ...spec.glaze, none: false } : { c: 0, dip: 0, drips: [], none: true },
-    seal: true,
   };
 }
 

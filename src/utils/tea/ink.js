@@ -67,6 +67,9 @@ export {
 export {
   CLAYS,
   piece,
+  pieceFoot,
+  footSealSize,
+  pieceSpan,
   radiusAt,
   GLAZES,
   PAINTS,

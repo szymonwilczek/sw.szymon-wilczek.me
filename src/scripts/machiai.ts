@@ -15,7 +15,7 @@ import {
 } from "../utils/tea/ink.js";
 import { turned, sealOf, pieceWords, type PieceSpec } from "../utils/tea/pottery";
 import { mine } from "../utils/tea/inbox";
-import { tones, stage, drag, frame, fit } from "./kobo/stage";
+import { tones, stage, drag, frame, fit, fitUnderside, underside } from "./kobo/stage";
 
 // a guest's piece I've approved approved is on the shelf already
 const same = (first: PieceSpec, second: PieceSpec) =>
@@ -69,6 +69,9 @@ function shelf(
 const WIDTH = 1100,
   HEIGHT = 460;
 const CARD = { x0: 700, y0: 70, x1: 1040, y1: 400 };
+const PIECE_AT = { x: 330, y: 400 };
+const UNDERSIDE_AT = { x: 330, y: 235 };
+const UNDERSIDE_ROOM = 165;
 
 function hands(host: HTMLElement, spec: PieceSpec, theirs: boolean, back: () => void) {
   const rand = rng(hash("machiai/card"));
@@ -143,25 +146,47 @@ function hands(host: HTMLElement, spec: PieceSpec, theirs: boolean, back: () => 
 
   const view = stage(host, WIDTH, HEIGHT, ["手", "in your hands"], [card]);
   const size = fit(spec, 420, 330, 4);
-  let turn = 0;
+  const undersideSize = fitUnderside(spec, UNDERSIDE_ROOM, size);
+  let turn = 0,
+    upsideDown = false,
+    turningOver = false;
   const draw = () => {
-    const group = newGroup();
-    piece(
-      group,
-      rng(hash("piece/" + spec.name + spec.fire)),
-      330,
-      400,
-      size,
-      tones,
-      turned(spec, turn),
-    );
-    view.draw([group]);
+    if (upsideDown) {
+      view.draw(
+        underside(spec, UNDERSIDE_AT.x, UNDERSIDE_AT.y, undersideSize, turn, {
+          seal: sealOf(spec.name),
+          turningOver,
+        }),
+      );
+    } else {
+      const group = newGroup({ cls: turningOver ? "kobo-turn-over" : "" });
+      piece(
+        group,
+        rng(hash("piece/" + spec.name + spec.fire)),
+        PIECE_AT.x,
+        PIECE_AT.y,
+        size,
+        tones,
+        turned(spec, turn),
+      );
+      view.draw([group]);
+    }
+    turningOver = false;
   };
   const redraw = frame(draw);
   view.say("drag to turn it in your hands.");
   view.button("← put it back", back, "quiet");
   view.button("↺ turn", () => ((turn -= 0.5), redraw()));
   view.button("turn ↻", () => ((turn += 0.5), redraw()));
+  const over = view.button("turn it over", () => {
+    upsideDown = !upsideDown;
+    turningOver = true;
+    over.textContent = upsideDown ? "set it upright" : "turn it over";
+    view.say(
+      upsideDown ? "the foot, and the seal pressed into it." : "drag to turn it in your hands.",
+    );
+    redraw();
+  });
   let from: [number, number] | null = null;
   const widest = Math.max(...spec.prof.map(([radius]) => radius)) * size;
   drag(view, {

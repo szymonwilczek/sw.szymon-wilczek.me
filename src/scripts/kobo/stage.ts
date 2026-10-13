@@ -1,4 +1,16 @@
-import { groupSvg, toSvg, toneVars, FILTERS } from "../../utils/tea/ink.js";
+import {
+  groupSvg,
+  toSvg,
+  toneVars,
+  FILTERS,
+  newGroup,
+  rng,
+  hash,
+  pieceFoot,
+  pieceSpan,
+  footSealSize,
+  hanko,
+} from "../../utils/tea/ink.js";
 import { turned, type PieceSpec } from "../../utils/tea/pottery";
 
 export type Point = [number, number];
@@ -183,12 +195,55 @@ export const wait = (delay: number) =>
 export { toSvg };
 
 // the piece as the drawing code wants it, turned to face you
-export function look(spec: Work["spec"], turn = 0, sealed = false) {
-  return { ...turned({ ...spec, name: "", sign: [], made: "" }, turn), seal: sealed };
+export function look(spec: Work["spec"], turn = 0) {
+  return turned({ ...spec, name: "", sign: [], made: "" }, turn);
 }
 
 // a scale that fits the piece in a box of w x h drawing units
 export function fit(spec: Work["spec"], width: number, height: number, maxScale = 3) {
   const widest = Math.max(...spec.prof.map(([radius]) => radius)) * (spec.handle ? 1.35 : 1);
   return Math.min(maxScale, width / (widest * 2), height / (spec.H + widest * 0.6));
+}
+
+const DEGREES_PER_TURN = 90;
+
+export interface Underside {
+  seal?: string;
+  turningOver?: boolean;
+  stamping?: boolean;
+}
+
+/** A scale that fits the piece, turned over, inside a circle of this radius */
+export function fitUnderside(spec: Work["spec"], radius: number, maxScale: number) {
+  return Math.min(maxScale, radius / pieceSpan(spec, 1).right);
+}
+
+/** The piece turned over: its foot, turned round as the piece is, and the seal on it */
+export function underside(
+  spec: Work["spec"],
+  centerX: number,
+  centerY: number,
+  scale: number,
+  turn: number,
+  { seal, turningOver, stamping }: Underside = {},
+) {
+  const turnedRound = {
+    tf: `rotate(${-turn * DEGREES_PER_TURN}deg)`,
+    to: `${centerX}px ${centerY}px`,
+  };
+  const turnOver = turningOver ? "kobo-turn-over" : "";
+  const foot = newGroup({ ...turnedRound, cls: turnOver });
+  pieceFoot(foot, rng(hash("foot/" + spec.fire)), centerX, centerY, scale, tones, spec);
+  if (!seal) return [foot];
+  const pressed = newGroup({ ...turnedRound, cls: stamping ? "kobo-stamp" : turnOver });
+  hanko(
+    pressed,
+    rng(hash("seal/" + seal)),
+    centerX,
+    centerY,
+    footSealSize(spec, scale),
+    seal,
+    tones,
+  );
+  return [foot, pressed];
 }

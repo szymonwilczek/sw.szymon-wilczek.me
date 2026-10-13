@@ -472,13 +472,51 @@ const garden = sceneGarden16(toneVars(), "start", {
     }
   }
 
+  .kobo {
+    --turn-over-time: 0.5s;
+    --stamp-time: 0.7s;
+    --stamp-lift: 1.6;
+    --stamp-squash: 0.94;
+  }
+
+  .kobo :global(.kobo-turn-over) {
+    animation: kobo-turn-over var(--turn-over-time) cubic-bezier(0.3, 0.6, 0.4, 1) both;
+  }
+
+  @keyframes kobo-turn-over {
+    from {
+      scale: 1 0;
+    }
+  }
+
+  .kobo :global(.kobo-stamp) {
+    animation: kobo-stamp var(--stamp-time) cubic-bezier(0.5, 0, 0.7, 0.4) both;
+  }
+
+  @keyframes kobo-stamp {
+    from {
+      scale: var(--stamp-lift);
+      opacity: 0;
+    }
+    65% {
+      scale: var(--stamp-squash);
+      opacity: 1;
+      animation-timing-function: ease-out;
+    }
+    to {
+      scale: 1;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .roji > svg {
       transition: none;
     }
 
     .kobo,
-    .kobo :global(.now) {
+    .kobo :global(.now),
+    .kobo :global(.kobo-turn-over),
+    .kobo :global(.kobo-stamp) {
       animation: none;
     }
   }

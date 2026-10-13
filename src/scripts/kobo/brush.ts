@@ -26,7 +26,19 @@ import {
   type UV,
 } from "../../utils/tea/pottery";
 import { keep, send } from "../../utils/tea/inbox";
-import { tones, stage, drag, frame, look, fit, clamp, type Work, type Point } from "./stage";
+import {
+  tones,
+  stage,
+  drag,
+  frame,
+  look,
+  fit,
+  fitUnderside,
+  underside,
+  clamp,
+  type Work,
+  type Point,
+} from "./stage";
 
 const WIDTH = 1100,
   HEIGHT = 560;
@@ -37,6 +49,8 @@ const DISH_AT = (index: number): Point => [
   110 + Math.floor(index / 3) * 120,
 ];
 const NAME_CARD = { x0: 700, y0: 330, x1: 1060, y1: 500 };
+const UNDERSIDE_AT = { x: WHEEL_X, y: 290 };
+const UNDERSIDE_ROOM = 190;
 const PIGMENT_KANJI = ["呉須", "鬼板", "弁柄", "白化粧", "緑青", "黄土", "臙脂", "墨", "金彩"];
 const SQUASH = 0.3;
 const SIZES: [string, number][] = [
@@ -54,6 +68,7 @@ export function run(host: HTMLElement, work: Work, done: (w: Work) => void) {
   const foot = WHEEL_Y - 12;
   const rimY = foot - height;
   const shallow = height < rimRadius * 0.45;
+  const undersideSize = fitUnderside(spec, UNDERSIDE_ROOM, scale);
 
   const wheelRand = rng(hash("kobo/banding"));
   const base = newGroup();
@@ -88,7 +103,7 @@ export function run(host: HTMLElement, work: Work, done: (w: Work) => void) {
   spin(base, wheelRand, WHEEL_X, WHEEL_Y + 6, 150, 34, tones);
   const view = stage(host, WIDTH, HEIGHT, ["筆", "the brush and the seal"], [base]);
 
-  let phase: "paint" | "sign" = "paint";
+  let phase: "paint" | "sign" | "seal" = "paint";
   let turn = 0,
     pigment = 0,
     size = 1,
@@ -98,7 +113,10 @@ export function run(host: HTMLElement, work: Work, done: (w: Work) => void) {
     name = "",
     sign: [number, number][][] = [],
     penLine: [number, number][] | null = null,
-    brushAt: Point | null = null;
+    brushAt: Point | null = null,
+    stamped = false,
+    turningOver = false,
+    stamping = false;
 
   // drawing point under (x, y)
   const bodyRadius = (level: number) => radiusAt(spec.prof, 1 - level) * scale;
@@ -135,19 +153,30 @@ export function run(host: HTMLElement, work: Work, done: (w: Work) => void) {
 
   function draw() {
     const groups = [];
-    const group = newGroup();
-    const paint: Stroke[] =
-      stroke && stroke.pts.length > 1 ? [...spec.paint, laid(stroke)] : spec.paint;
-    piece(
-      group,
-      rng(hash("kobo/mine")),
-      WHEEL_X,
-      foot,
-      scale,
-      tones,
-      look({ ...spec, paint }, turn, phase === "sign"),
-    );
-    groups.push(group);
+    if (phase === "seal")
+      groups.push(
+        ...underside(spec, UNDERSIDE_AT.x, UNDERSIDE_AT.y, undersideSize, turn, {
+          seal: stamped ? sealOf(name) : undefined,
+          turningOver,
+          stamping,
+        }),
+      );
+    else {
+      const group = newGroup({ cls: turningOver ? "kobo-turn-over" : "" });
+      const paint: Stroke[] =
+        stroke && stroke.pts.length > 1 ? [...spec.paint, laid(stroke)] : spec.paint;
+      piece(
+        group,
+        rng(hash("kobo/mine")),
+        WHEEL_X,
+        foot,
+        scale,
+        tones,
+        look({ ...spec, paint }, turn),
+      );
+      groups.push(group);
+    }
+    turningOver = stamping = false;
     const rand = rng(hash("kobo/brush"));
     const side = newGroup();
     if (phase === "paint") {
@@ -238,7 +267,7 @@ export function run(host: HTMLElement, work: Work, done: (w: Work) => void) {
           font: "'Yuji Syuku', serif",
           fill: tones.paper,
         });
-        note(side, sealX, sealY + 62, "your seal, pressed on the foot", tones, 14, 0.6);
+        note(side, sealX, sealY + 62, "your seal, for the foot", tones, 14, 0.6);
       }
     }
     groups.push(side);
@@ -249,7 +278,25 @@ export function run(host: HTMLElement, work: Work, done: (w: Work) => void) {
   function say() {
     view.clearUi();
     view.button("← back to the workshop", back, "quiet");
-    if (phase === "paint") {
+    if (phase === "seal") {
+      view.say(
+        stamped ? "it carries your seal now." : "the foot takes no paint. press your seal into it.",
+      );
+      view.button(
+        "back to the card",
+        () => ((phase = "sign"), (turningOver = true), say(), redraw()),
+        "quiet",
+      );
+      view.button("↺ turn", () => ((turn = wrap(turn - 0.5)), redraw()));
+      view.button("turn ↻", () => ((turn = wrap(turn + 0.5)), redraw()));
+      if (stamped) view.button("put it on the shelf", give);
+      else
+        view.button("press the seal", () => {
+          stamped = stamping = true;
+          say();
+          redraw();
+        });
+    } else if (phase === "paint") {
       view.say(
         steady
           ? "paint on it. the line keeps one width. turn the wheel to reach round the back."
@@ -296,7 +343,14 @@ export function run(host: HTMLElement, work: Work, done: (w: Work) => void) {
       view.root.querySelector(".kobo-do")!.append(label);
       view.button("write it again", () => ((sign = []), redraw()), "quiet");
       view.button("back to the brush", () => ((phase = "paint"), say(), redraw()), "quiet");
-      const finish = view.button("put it on the shelf", give);
+      const finish = view.button("turn it over", () => {
+        phase = "seal";
+        stamped = false;
+        turningOver = true;
+        turn = 0;
+        say();
+        redraw();
+      });
       finish.disabled = !name;
     }
   }
@@ -347,6 +401,11 @@ export function run(host: HTMLElement, work: Work, done: (w: Work) => void) {
 
   drag(view, {
     down(point) {
+      if (phase === "seal") {
+        if (point[0] > NAME_CARD.x0) return false;
+        spinFrom = [point[0], turn];
+        return;
+      }
       if (phase === "sign") {
         if (
           point[0] < NAME_CARD.x0 ||
