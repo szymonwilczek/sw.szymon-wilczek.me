@@ -18,18 +18,51 @@
 <script>
   const row = document.querySelector<HTMLElement>(".pebble-row");
   const pebble = row?.querySelector<HTMLButtonElement>(".pebble");
+  const stone = row?.querySelector<SVGSVGElement>(".pebble-stone");
 
-  // only long pages get one: more than two and a half screens of scrolling
+  const LONG_PAGE_SCREENS = 2.5; // only pages longer than this get a pebble
+  const STONE_RADIUS = 16; // px, how far it travels for one radian of turn
+  const ARRIVE_WHEN_SHOWN = 0.6; // share of the row on screen before it rolls in
+
+  const still = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+
   function measure() {
-    if (row) row.hidden = document.documentElement.scrollHeight < innerHeight * 2.5;
+    if (row) row.hidden = document.documentElement.scrollHeight < innerHeight * LONG_PAGE_SCREENS;
+  }
+
+  function rollIn() {
+    if (!row || !stone || still()) {
+      row?.classList.add("is-here");
+      return;
+    }
+    const distance = innerWidth - stone.getBoundingClientRect().left;
+    const turn = (distance / STONE_RADIUS) * (180 / Math.PI);
+    row.style.setProperty("--roll-from", `${distance}px`);
+    row.style.setProperty("--turn-from", `${turn}deg`);
+    row.classList.add("is-arriving");
+    stone.addEventListener("animationend", () => row.classList.add("is-here"), { once: true });
+  }
+
+  if (row && "IntersectionObserver" in window) {
+    const watch = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry?.isIntersecting) return;
+        watch.disconnect();
+        rollIn();
+      },
+      { threshold: ARRIVE_WHEN_SHOWN },
+    );
+    watch.observe(row);
+  } else {
+    row?.classList.add("is-here");
   }
 
   pebble?.addEventListener("click", () => {
-    const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    row?.classList.add("is-here");
     pebble.classList.remove("is-rolling");
     void pebble.offsetWidth;
-    if (!still) pebble.classList.add("is-rolling");
-    window.scrollTo({ top: 0, behavior: still ? "auto" : "smooth" });
+    if (!still()) pebble.classList.add("is-rolling");
+    window.scrollTo({ top: 0, behavior: still() ? "auto" : "smooth" });
   });
 
   measure();
@@ -38,6 +71,9 @@
 
 <style>
   .pebble-row {
+    --arrive-time: 1.2s;
+    --appear-time: 0.45s;
+    --arrow-rise: 6px;
     display: flex;
     justify-content: flex-end;
     margin-top: 5rem;
@@ -105,6 +141,42 @@
 
   .pebble:hover .pebble-label {
     color: var(--fg-main);
+  }
+
+  .pebble-row:not(.is-arriving, .is-here) .pebble-stone {
+    visibility: hidden;
+  }
+
+  .pebble-arrow,
+  .pebble-label {
+    opacity: 0;
+    transition:
+      opacity var(--appear-time) ease,
+      translate var(--appear-time) ease;
+  }
+
+  .pebble-arrow {
+    translate: 0 var(--arrow-rise);
+  }
+
+  .is-here .pebble-arrow,
+  .is-here .pebble-label {
+    opacity: 1;
+    translate: 0 0;
+  }
+
+  .is-here .pebble-label {
+    transition-delay: calc(var(--appear-time) / 2);
+  }
+
+  .is-arriving .pebble-stone {
+    animation: pebble-arrive var(--arrive-time) cubic-bezier(0.2, 0.7, 0.3, 1);
+  }
+
+  @keyframes pebble-arrive {
+    from {
+      transform: translateX(var(--roll-from)) rotate(var(--turn-from));
+    }
   }
 
   .is-rolling .pebble-stone {
