@@ -1,6 +1,6 @@
 // the tea, the lamp, the koro and the weather on the eaves
 
-import { mix, roundCoord, lerp } from "../core.js";
+import { mix, lerp, rng, hash } from "../core.js";
 import {
   TREMBLE_FILTER,
   wobblyPolygon,
@@ -15,6 +15,7 @@ import {
   addText,
   inked,
   brushStroke,
+  brushWash,
 } from "../pen.js";
 import { steam } from "../garden.js";
 
@@ -407,32 +408,134 @@ function koro(groups, group, rand, x, y, tones, mini, burnt, unlit) {
   addSolid(group, wobblyRing(rand, tip[0], tip[1] + 1, 1.6, 1.6, 0, 6), tones.red, 1);
   addSolid(group, wobblyRing(rand, x + 6, y - 13, 3, 1, 0.2, 6), tones.stone, 0.8);
 
-  // one ribbon of smoke
-  const [tipX, tipY] = tip,
-    spine = [];
-  for (let i = 0; i <= 9; i++)
-    spine.push([tipX + Math.sin(i * 0.75) * (2 + i * 1.9), tipY - i * 15]);
-  const widthAt = (i) => 0.6 + i * 0.55,
-    left = spine.map(([spineX, spineY], i) => [spineX - widthAt(i), spineY]),
-    right = spine.map(([spineX, spineY], i) => [spineX + widthAt(i) * 0.6, spineY]).reverse(),
-    ribbon = (shift) =>
-      `${wobblyLine(rand, left.map(shift), 0.3)} L${wobblyLine(rand, right.map(shift), 0.3).slice(1)} Z`,
-    id = `koro-smoke-${Math.round(tipX)}-${Math.round(tipY)}`,
-    fill = `url(#${id})`,
-    defs = `<defs><linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="0" y1="${roundCoord(tipY)}" x2="0" y2="${roundCoord(tipY - 135)}"><stop offset="0" style="stop-color:${tones.inkSoft}" stop-opacity="0.8"/><stop offset="1" style="stop-color:${tones.inkSoft}" stop-opacity="0"/></linearGradient></defs>`;
-  [
-    ["9s 0s", 0.8, ([px, py]) => [px, py]],
-    ["12s -5s", 0.45, ([px, py]) => [px + 3, tipY + (py - tipY) * 1.05 - 6]],
-  ].forEach(([timing, opacity, shift], layer) => {
-    const [dur, delay] = timing.split(" "),
-      smoke = newGroup({
-        anim: mini ? "none" : `rib ${dur} ease-in-out ${delay} infinite`,
-        to: `${roundCoord(tipX)}px ${roundCoord(tipY)}px`,
-        defs: layer ? "" : defs,
-      });
-    groups.push(smoke);
-    addSolid(smoke, ribbon(shift), fill, opacity);
-  });
+  smoke(groups, tip, tones, mini);
+}
+
+// incense smoke
+const SMOKE_SEED = "koro/smoke"; // the same curls at every redraw, so they never restart
+const THREAD_RISE = 40; // how far the smoke climbs as one thread before it breaks
+const THREAD_STEPS = 6;
+const THREAD_LEAN = 1.5; // the thread bends a little with the air at its top
+const THREAD_WIGGLE = 0.25;
+const THREAD_WIDTH = 0.8;
+const THREAD_INK = 0.7;
+const THREAD_BLEED = { width: 2.6, ink: 0.22 }; // the soft halo around the thread
+const THREAD_SWAY = "sway 7s ease-in-out infinite";
+
+const WISPS = 8; // curls rising at once, spread evenly over one breath of smoke
+const SMOKE_SECONDS = 12; // how long one curl takes to rise and thin out
+const SMOKE_PACE_SPREAD = 0.15; // curls rise at slightly different paces
+const SMOKE_EASE = "cubic-bezier(0.35, 0.4, 0.6, 1)"; // fast off the ember, slowing as it cools
+const WISP_LENGTH = { min: 18, max: 30 };
+const WISP_STEPS = 6;
+const WISP_OVERLAP = 8; // a curl is born a little way down the thread, so the two never part
+const WISP_SWAY = { min: 2, max: 5 }; // how far a curl snakes from side to side
+const WISP_WAVES = { min: 1, max: 2.2 }; // half-waves along one curl
+const WISP_CURL = { min: 2, max: 5 }; // radius of the eddy a curl ends in
+const WISP_CURL_TURN = { min: 0.4, max: 1.5 }; // of a half turn
+const WISP_CURL_STEPS = 4;
+const WISP_POOL = { spread: 1.6, ink: 0.14 }; // the ink bleeding out round a curl, by its sway
+const WISP_WIDTH = 2.4;
+const WISP_WASH = 0.55;
+const WISP_CORE = { width: 0.6, ink: 0.45 };
+const WISP_DRIFT = { min: -4, max: 14 };
+const WISP_RISE = { min: 70, max: 95 };
+const WISP_TURN = { min: -14, max: 14 };
+
+const RISE_FROM_BASE = "transform-box:fill-box;transform-origin:50% 100%";
+const STILL_RISE_SHARE = 0.5;
+
+function between(rand, { min, max }) {
+  return lerp(min, max, rand());
+}
+
+function smokeThread(groups, rand, [tipX, tipY], tones, still) {
+  const points = [];
+  for (let step = 0; step <= THREAD_STEPS; step++) {
+    const along = step / THREAD_STEPS;
+    points.push([tipX + THREAD_LEAN * along * along, tipY - THREAD_RISE * along]);
+  }
+  const thread = still ? newGroup() : newGroup({ anim: THREAD_SWAY, vars: RISE_FROM_BASE });
+  brushWash(thread, rand, points, THREAD_BLEED.width, tones.inkSoft, THREAD_BLEED.ink);
+  addLine(thread, wobblyLine(rand, points, THREAD_WIGGLE), tones.inkSoft, THREAD_WIDTH, THREAD_INK);
+  groups.push(thread);
+  return points.at(-1);
+}
+
+function wispPoints(rand, [baseX, baseY], side, length, swayBy) {
+  const points = [],
+    waves = between(rand, WISP_WAVES);
+  for (let step = 0; step <= WISP_STEPS; step++) {
+    const along = step / WISP_STEPS,
+      sway = side * swayBy * Math.sin(along * Math.PI * waves) * along;
+    points.push([baseX + sway, baseY - length * along]);
+  }
+
+  // the end rolls over into a small eddy
+  const [endX, endY] = points.at(-1),
+    curl = between(rand, WISP_CURL),
+    turn = between(rand, WISP_CURL_TURN),
+    centerX = endX - side * curl;
+  for (let step = 1; step <= WISP_CURL_STEPS; step++) {
+    const angle = (step / WISP_CURL_STEPS) * turn * Math.PI;
+    points.push([centerX + side * curl * Math.cos(angle), endY - curl * Math.sin(angle)]);
+  }
+  return points;
+}
+
+// still: each curl set down where it would be at its share of the way up
+function stillWisp(wisp, drift, rise) {
+  const share = wisp / WISPS;
+  return {
+    group: newGroup({ op: 1 - share }),
+    shift: [drift * share, -rise * share * STILL_RISE_SHARE],
+  };
+}
+
+function risingWisp(rand, wisp, drift, rise) {
+  const seconds = SMOKE_SECONDS * (1 + SMOKE_PACE_SPREAD * (rand() * 2 - 1)),
+    delay = (-wisp / WISPS) * seconds,
+    turn = between(rand, WISP_TURN);
+  return {
+    group: newGroup({
+      cls: "rising",
+      anim: `koro-smoke ${seconds.toFixed(2)}s ${SMOKE_EASE} ${delay.toFixed(2)}s infinite`,
+      vars: `${RISE_FROM_BASE};--drift:${drift.toFixed(1)}px;--rise:${rise.toFixed(1)}px;--turn:${turn.toFixed(1)}deg`,
+    }),
+    shift: [0, 0],
+  };
+}
+
+function smoke(groups, tip, tones, still) {
+  const rand = rng(hash(SMOKE_SEED)),
+    [threadX, threadY] = smokeThread(groups, rand, tip, tones, still);
+  for (let wisp = 0; wisp < WISPS; wisp++) {
+    const drift = between(rand, WISP_DRIFT),
+      rise = between(rand, WISP_RISE),
+      { group, shift } = still ? stillWisp(wisp, drift, rise) : risingWisp(rand, wisp, drift, rise),
+      [baseX, baseY] = [threadX + shift[0], threadY + WISP_OVERLAP + shift[1]],
+      length = between(rand, WISP_LENGTH),
+      swayBy = between(rand, WISP_SWAY),
+      points = wispPoints(rand, [baseX, baseY], rand() < 0.5 ? 1 : -1, length, swayBy),
+      poolRadius = swayBy * WISP_POOL.spread;
+    addWash(
+      group,
+      rand,
+      wobblyRing(rand, baseX, baseY - length / 2, poolRadius, length / 2, 0.4, 8),
+      tones.inkSoft,
+      WISP_POOL.ink,
+      "url(#bk-pool)",
+    );
+    brushWash(group, rand, points, WISP_WIDTH, tones.inkSoft, WISP_WASH);
+    addLine(
+      group,
+      wobblyLine(rand, points, THREAD_WIGGLE),
+      tones.inkSoft,
+      WISP_CORE.width,
+      WISP_CORE.ink,
+    );
+    groups.push(group);
+  }
 }
 
 export { teaCup, hangingLamp, seasonLook, SNOW, snowCap, arcTop, falling, koro };
