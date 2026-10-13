@@ -143,19 +143,22 @@ function arrowLine(group, rand, points, tones, opacity) {
 // glaze bucket, seen a little from above
 function bucket(group, rand, cx, cy, scale, tones, glaze, label) {
   const scaled = (v) => v * scale;
+  const rimRadius = 30,
+    footRadius = 26,
+    depth = 36;
   addSolid(
     group,
-    wobblyRing(rand, cx + scaled(3), cy + scaled(4), scaled(30), scaled(8), 0.3, 10),
+    wobblyRing(rand, cx + scaled(3), cy + scaled(4), scaled(rimRadius), scaled(8), 0.3, 10),
     tones.ink,
     0.15,
   );
   const outline = wobblyPolygon(
     rand,
     [
-      [cx - scaled(30), cy - scaled(36)],
-      [cx - scaled(26), cy],
-      [cx + scaled(26), cy],
-      [cx + scaled(30), cy - scaled(36)],
+      [cx - scaled(rimRadius), cy - scaled(depth)],
+      [cx - scaled(footRadius), cy],
+      [cx + scaled(footRadius), cy],
+      [cx + scaled(rimRadius), cy - scaled(depth)],
     ],
     0.4,
   );
@@ -167,9 +170,9 @@ function bucket(group, rand, cx, cy, scale, tones, glaze, label) {
       wobblyLine(
         rand,
         [
-          [cx - scaled(30 - 4 * band), cy - scaled(36 * (1 - band))],
-          [cx, cy - scaled(36 * (1 - band)) + scaled(4)],
-          [cx + scaled(30 - 4 * band), cy - scaled(36 * (1 - band))],
+          [cx - scaled(rimRadius - 4 * band), cy - scaled(depth * (1 - band))],
+          [cx, cy - scaled(depth * (1 - band)) + scaled(4)],
+          [cx + scaled(rimRadius - 4 * band), cy - scaled(depth * (1 - band))],
         ],
         0.2,
       ),
@@ -179,11 +182,11 @@ function bucket(group, rand, cx, cy, scale, tones, glaze, label) {
       true,
     ),
   );
-  const rim = wobblyRing(rand, cx, cy - scaled(36), scaled(30), scaled(8), 0.2, 14);
+  const rim = wobblyRing(rand, cx, cy - scaled(depth), scaled(rimRadius), scaled(8), 0.2, 14);
   addSolid(group, rim, tones.woodDk, 1);
   addSolid(
     group,
-    wobblyRing(rand, cx, cy - scaled(35), scaled(27), scaled(6.5), 0.2, 14),
+    wobblyRing(rand, cx, cy - scaled(depth - 1), scaled(27), scaled(6.5), 0.2, 14),
     glaze,
     1,
   );
