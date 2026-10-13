@@ -11,81 +11,87 @@ import {
   PROFILES,
   radiusAt,
 } from "../../utils/tea/ink.js";
-import { K, stage, look, fit, wait, type Work } from "./stage";
+import { tones, stage, look, fit, wait, type Work } from "./stage";
 
-const W = 1100,
-  H = 380,
-  Y = 300;
+const WIDTH = 1100,
+  HEIGHT = 380,
+  PLANK_Y = 300;
 
-export function run(host: HTMLElement, w: Work, done: (w: Work) => void, back: () => void) {
-  const r = rng(hash("kobo/shelf"));
+export function run(host: HTMLElement, work: Work, done: (w: Work) => void, back: () => void) {
+  const rand = rng(hash("kobo/shelf"));
   const wall = newGroup();
-  inked(wall, r, wobblyBox(r, 150, 30, 950, 360, 1), K.plaster, K.ink, 1.1);
-  for (let k = 0; k < 30; k++)
+  inked(wall, rand, wobblyBox(rand, 150, 30, 950, 360, 1), tones.plaster, tones.ink, 1.1);
+  for (let spot = 0; spot < 30; spot++)
     addSolid(
       wall,
-      wobblyRing(r, 170 + r() * 760, 50 + r() * 290, 1 + r() * 2, 0.6 + r(), 0.3, 6),
-      K.plasterDk,
+      wobblyRing(rand, 170 + rand() * 760, 50 + rand() * 290, 1 + rand() * 2, 0.6 + rand(), 0.3, 6),
+      tones.plasterDk,
       0.3,
     );
   const plank = newGroup();
   inked(
     plank,
-    r,
+    rand,
     wobblyPolygon(
-      r,
+      rand,
       [
-        [180, Y],
-        [920, Y],
-        [936, Y - 14],
-        [196, Y - 14],
+        [180, PLANK_Y],
+        [920, PLANK_Y],
+        [936, PLANK_Y - 14],
+        [196, PLANK_Y - 14],
       ],
       0.5,
     ),
-    K.woodLt,
-    K.ink,
+    tones.woodLt,
+    tones.ink,
     1.1,
   );
   const others = newGroup();
-  (["cup", "hira", "yunomi", "bowl"] as const).forEach((k, i) => {
+  (["cup", "hira", "yunomi", "bowl"] as const).forEach((kind, i) => {
     const x = [250, 360, 750, 860][i];
-    const foot = (radiusAt(PROFILES[k].prof, 0) * 0.3 + 5) * 0.8;
-    piece(others, r, x, Y - 5 - foot, 0.8, K, {
-      ...PROFILES[k],
+    const foot = (radiusAt(PROFILES[kind].prof, 0) * 0.3 + 5) * 0.8;
+    piece(others, rand, x, PLANK_Y - 5 - foot, 0.8, tones, {
+      ...PROFILES[kind],
       clay: (i * 3) % 4,
       glaze: { none: true },
       fire: 20 + i,
     });
   });
   const mine = newGroup({ cls: "kobo-wet" });
-  const s = fit(w.spec, 260, 240, 2.4);
-  const foot = (radiusAt(w.spec.prof, 0) * 0.3 + 5) * s;
-  piece(mine, rng(hash("kobo/mine")), 550, Y - 2 - foot, s, K, look(w.spec));
+  const scale = fit(work.spec, 260, 240, 2.4);
+  const foot = (radiusAt(work.spec.prof, 0) * 0.3 + 5) * scale;
+  piece(mine, rng(hash("kobo/mine")), 550, PLANK_Y - 2 - foot, scale, tones, look(work.spec));
   const edge = newGroup();
-  inked(edge, r, wobblyBox(r, 180, Y, 920, Y + 9, 0.4), K.wood, K.ink, 1);
+  inked(edge, rand, wobblyBox(rand, 180, PLANK_Y, 920, PLANK_Y + 9, 0.4), tones.wood, tones.ink, 1);
 
-  const st = stage(host, W, H, ["棚", "the drying shelf"], [wall, plank, others, mine, edge]);
-  const wet = st.svg.querySelector<SVGGElement>(".kobo-wet")!;
+  const view = stage(
+    host,
+    WIDTH,
+    HEIGHT,
+    ["棚", "the drying shelf"],
+    [wall, plank, others, mine, edge],
+  );
+  const wet = view.svg.querySelector<SVGGElement>(".kobo-wet")!;
   wet.style.transition = "filter 4s ease-in";
   wet.style.filter = "brightness(0.78) saturate(1.2)";
 
   function first() {
-    st.clearUi();
-    st.button("← back to the workshop", back, "quiet");
-    st.say("still wet and soft. it needs a night to dry before the kiln.");
-    st.button("leave it to dry", async () => {
-      st.clearUi();
+    view.clearUi();
+    view.button("← back to the workshop", back, "quiet");
+    view.say("still wet and soft. it needs a night to dry before the kiln.");
+    view.button("leave it to dry", async () => {
+      view.clearUi();
       wet.style.filter = "none";
-      st.say("leather-hard by evening…");
+      view.say("leather-hard by evening…");
       await wait(2200);
-      st.say("leather-hard by evening… bone dry by morning.");
+      view.say("leather-hard by evening… bone dry by morning.");
       await wait(1800);
-      st.clearUi();
-      st.button("carry it out to the kiln", () => done({ ...w, step: "bisque" }));
+      view.clearUi();
+      view.button("carry it out to the kiln", () => done({ ...work, step: "bisque" }));
     });
-    st.button(
+    view.button(
       "take it now, still damp",
-      () => done({ ...w, step: "bisque", flaw: w.flaw + 0.25 }),
+      () => done({ ...work, step: "bisque", flaw: work.flaw + 0.25 }),
       "quiet",
     );
   }

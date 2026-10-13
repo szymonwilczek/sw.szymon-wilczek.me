@@ -10,106 +10,121 @@ import {
   GLAZES,
   GLAZE_NAMES,
 } from "../../utils/tea/ink.js";
-import { K, stage, drag, frame, look, fit, clamp, markup, type Work, type P } from "./stage";
+import {
+  tones,
+  stage,
+  drag,
+  frame,
+  look,
+  fit,
+  clamp,
+  markup,
+  type Work,
+  type Point,
+} from "./stage";
 
-const W = 1100,
-  H = 520;
-const BX = 550,
-  BY = 470,
-  BS = 3,
-  SURFACE = BY - 36 * BS + 1;
+const WIDTH = 1100,
+  HEIGHT = 520;
+const BUCKET_X = 550,
+  BUCKET_Y = 470,
+  BUCKET_SCALE = 3,
+  SURFACE = BUCKET_Y - 36 * BUCKET_SCALE + 1;
 const KANJI = ["天目", "志野", "飴", "青磁", "瑠璃", "織部", "朱"];
 
-export function run(host: HTMLElement, w: Work, done: (w: Work) => void, back: () => void) {
-  const st = stage(
+export function run(host: HTMLElement, work: Work, done: (w: Work) => void, back: () => void) {
+  const view = stage(
     host,
-    W,
-    H,
+    WIDTH,
+    HEIGHT,
     ["釉", "the glazes"],
     [],
-    `<clipPath id="kobo-above"><rect width="${W}" height="${SURFACE}"/></clipPath>`,
+    `<clipPath id="kobo-above"><rect width="${WIDTH}" height="${SURFACE}"/></clipPath>`,
   );
-  const spec = w.spec;
+  const spec = work.spec;
   let phase: "choose" | "dip" | "drip" = "choose";
-  let c = 0,
+  let glazeIndex = 0,
     sink = 0, // how far the piece is pushed down, in drawing units
     dip = 0,
     drips: [number, number, number][] = [],
     growing = -1;
-  const ps = fit(spec, 200, 210, 2.2);
-  const big = fit(spec, 320, 300, 3.2);
-  const rest = SURFACE - 40; // where the rim hangs before the dip
+  const dipScale = fit(spec, 200, 210, 2.2);
+  const dripScale = fit(spec, 320, 300, 3.2);
+  const restY = SURFACE - 40; // where the rim hangs before the dip
 
   function draw() {
-    const r = rng(hash("kobo/glaze"));
+    const rand = rng(hash("kobo/glaze"));
     const groups = [];
     if (phase === "choose") {
-      const g = newGroup();
-      GLAZES(K).forEach((col: string, i: number) => {
+      const group = newGroup();
+      GLAZES(tones).forEach((color: string, i: number) => {
         const x = 110 + i * 147;
-        bucket(g, r, x, 290, 1.7, K, col);
-        note(g, x, 342, GLAZE_NAMES[i], K, 16, 0.75);
-        kanji(g, x, 372, KANJI[i], K, 15);
+        bucket(group, rand, x, 290, 1.7, tones, color);
+        note(group, x, 342, GLAZE_NAMES[i], tones, 16, 0.75);
+        kanji(group, x, 372, KANJI[i], tones, 15);
       });
-      groups.push(g);
+      groups.push(group);
     } else if (phase === "dip") {
-      const b = newGroup();
-      bucket(b, r, BX, BY, BS, K, GLAZES(K)[c]);
-      groups.push(b);
-      const hs = spec.H * ps,
-        rim = rest + sink,
-        mid = rim - hs / 2;
-      const flip = newGroup({ tf: `rotate(180deg)`, to: `${BX}px ${Math.round(mid)}px` });
+      const bucketGroup = newGroup();
+      bucket(bucketGroup, rand, BUCKET_X, BUCKET_Y, BUCKET_SCALE, tones, GLAZES(tones)[glazeIndex]);
+      groups.push(bucketGroup);
+      const pieceHeight = spec.H * dipScale,
+        rimY = restY + sink,
+        middleY = rimY - pieceHeight / 2;
+      const flip = newGroup({ tf: `rotate(180deg)`, to: `${BUCKET_X}px ${Math.round(middleY)}px` });
       piece(
         flip,
         rng(hash("kobo/mine")),
-        BX,
-        rim,
-        ps,
-        K,
-        look({ ...spec, glaze: dip > 0 ? { c, dip, drips: [] } : null }),
+        BUCKET_X,
+        rimY,
+        dipScale,
+        tones,
+        look({ ...spec, glaze: dip > 0 ? { c: glazeIndex, dip, drips: [] } : null }),
       );
       flip.solid.shift(); // its shadow, which would hang in the air
 
       // clip stays upright outside the turned piece
-      const t = newGroup();
-      tongs(t, r, BX, rim - hs - 2, K);
-      st.live.innerHTML =
-        markup(groups) + `<g clip-path="url(#kobo-above)">${markup([flip])}</g>` + markup([t]);
+      const tongsGroup = newGroup();
+      tongs(tongsGroup, rand, BUCKET_X, rimY - pieceHeight - 2, tones);
+      view.live.innerHTML =
+        markup(groups) +
+        `<g clip-path="url(#kobo-above)">${markup([flip])}</g>` +
+        markup([tongsGroup]);
       return;
     } else {
-      const g = newGroup();
+      const group = newGroup();
       piece(
-        g,
+        group,
         rng(hash("kobo/mine")),
-        BX,
+        BUCKET_X,
         440,
-        big,
-        K,
-        look({ ...spec, glaze: { c, dip, drips } }),
+        dripScale,
+        tones,
+        look({ ...spec, glaze: { c: glazeIndex, dip, drips } }),
       );
-      groups.push(g);
+      groups.push(group);
     }
-    st.draw(groups);
+    view.draw(groups);
   }
   const redraw = frame(draw);
 
   function say() {
-    st.clearUi();
-    st.button("← back to the workshop", back, "quiet");
+    view.clearUi();
+    view.button("← back to the workshop", back, "quiet");
     if (phase === "choose") {
-      st.say("choose a glaze. each comes out of the kiln its own way.");
-      GLAZES(K).forEach((_: string, i: number) =>
-        st.over(`${GLAZE_NAMES[i]} glaze`, 110 + i * 147, 290, 120, 140, () => {
-          c = i;
+      view.say("choose a glaze. each comes out of the kiln its own way.");
+      GLAZES(tones).forEach((_: string, i: number) =>
+        view.over(`${GLAZE_NAMES[i]} glaze`, 110 + i * 147, 290, 120, 140, () => {
+          glazeIndex = i;
           phase = "dip";
           say();
           redraw();
         }),
       );
     } else if (phase === "dip") {
-      st.say(`${GLAZE_NAMES[c]}. drag the piece down into the bucket; let go to lift it out.`);
-      st.button(
+      view.say(
+        `${GLAZE_NAMES[glazeIndex]}. drag the piece down into the bucket; let go to lift it out.`,
+      );
+      view.button(
         "another glaze",
         () => {
           phase = "choose";
@@ -120,8 +135,8 @@ export function run(host: HTMLElement, w: Work, done: (w: Work) => void, back: (
         "quiet",
       );
     } else {
-      st.say("hold your finger on the piece where you want the glaze to run.");
-      st.button(
+      view.say("hold your finger on the piece where you want the glaze to run.");
+      view.button(
         "dip it again",
         () => {
           phase = "dip";
@@ -132,16 +147,16 @@ export function run(host: HTMLElement, w: Work, done: (w: Work) => void, back: (
         },
         "quiet",
       );
-      st.button("into the kiln", () =>
+      view.button("into the kiln", () =>
         done({
-          ...w,
+          ...work,
           step: "fire",
           spec: {
             ...spec,
             glaze: {
-              c,
+              c: glazeIndex,
               dip: round(dip),
-              drips: drips.map((d) => d.map(round) as [number, number, number]),
+              drips: drips.map((drip) => drip.map(round) as [number, number, number]),
             },
           },
         }),
@@ -150,40 +165,41 @@ export function run(host: HTMLElement, w: Work, done: (w: Work) => void, back: (
   }
 
   // drip being held grows until the finger lifts
-  let last = 0;
-  function grow(t: number) {
-    if (growing < 0 || !st.root.isConnected) return;
-    const dt = last ? Math.min(0.05, (t - last) / 1000) : 0;
-    last = t;
-    const d = drips[growing];
-    d[1] = clamp(d[1] + dt * 0.2, 0, 0.4);
+  let lastTime = 0;
+  function grow(time: number) {
+    if (growing < 0 || !view.root.isConnected) return;
+    const elapsed = lastTime ? Math.min(0.05, (time - lastTime) / 1000) : 0;
+    lastTime = time;
+    const drip = drips[growing];
+    drip[1] = clamp(drip[1] + elapsed * 0.2, 0, 0.4);
     draw();
     requestAnimationFrame(grow);
   }
 
-  let from: P = [0, 0];
-  drag(st, {
-    down(p) {
-      from = p;
+  let start: Point = [0, 0];
+  drag(view, {
+    down(point) {
+      start = point;
       if (phase === "choose") return false;
       if (phase === "drip") {
-        const rw = Math.max(...spec.prof.map(([r]) => r)) * big;
-        const u = (p[0] - BX) / rw;
-        if (Math.abs(u) > 1 || p[1] < 440 - spec.H * big - 30 || p[1] > 460) return false;
+        const widest = Math.max(...spec.prof.map(([radius]) => radius)) * dripScale;
+        const across = (point[0] - BUCKET_X) / widest;
+        if (Math.abs(across) > 1 || point[1] < 440 - spec.H * dripScale - 30 || point[1] > 460)
+          return false;
         if (drips.length >= 6) {
-          st.say("that is plenty of drips.");
+          view.say("that is plenty of drips.");
           return false;
         }
-        drips.push([clamp(u, -0.95, 0.95), 0.02, 0.06 + Math.random() * 0.04]);
+        drips.push([clamp(across, -0.95, 0.95), 0.02, 0.06 + Math.random() * 0.04]);
         growing = drips.length - 1;
-        last = 0;
+        lastTime = 0;
         requestAnimationFrame(grow);
       }
     },
-    move(p) {
+    move(point) {
       if (phase !== "dip") return;
-      sink = clamp(p[1] - from[1], 0, spec.H * ps + 40);
-      dip = Math.max(dip, clamp((rest + sink - SURFACE) / (spec.H * ps), 0, 1));
+      sink = clamp(point[1] - start[1], 0, spec.H * dipScale + 40);
+      dip = Math.max(dip, clamp((restY + sink - SURFACE) / (spec.H * dipScale), 0, 1));
       redraw();
     },
     up() {
@@ -191,7 +207,7 @@ export function run(host: HTMLElement, w: Work, done: (w: Work) => void, back: (
       if (phase !== "dip") return;
       sink = 0;
       if (dip < 0.05) {
-        st.say("deeper: it has to go into the glaze.");
+        view.say("deeper: it has to go into the glaze.");
         dip = 0;
         redraw();
         return;
@@ -206,4 +222,4 @@ export function run(host: HTMLElement, w: Work, done: (w: Work) => void, back: (
   draw();
 }
 
-const round = (x: number) => Math.round(x * 100) / 100;
+const round = (value: number) => Math.round(value * 100) / 100;

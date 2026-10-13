@@ -13,14 +13,14 @@ import {
   spin,
 } from "../../utils/tea/ink.js";
 import { CLAY_NAMES } from "../../utils/tea/pottery";
-import { K, stage, drag, frame, clamp, still, type Work, type P } from "./stage";
+import { tones, stage, drag, frame, clamp, still, type Work, type Point } from "./stage";
 
-const W = 1100,
-  H = 480;
-const CX = 550,
+const WIDTH = 1100,
+  HEIGHT = 480;
+const CENTER_X = 550,
   HEAD = 280, // the wheel head
-  WS = 2.2,
-  CS = 2; // clay scale: one unit of the piece is two of the drawing
+  WHEEL_SCALE = 2.2,
+  CLAY_SCALE = 2; // clay scale: one unit of the piece is two of the drawing
 const FOOT = HEAD - 4;
 const LUMP: [number, number][] = [
   [30, 0],
@@ -34,115 +34,140 @@ const OPENED: [number, number][] = [
   [32, 0.9],
   [26, 1],
 ];
-const VS = [0, 0.3, 0.7, 1];
+const LEVELS = [0, 0.3, 0.7, 1];
 
 // the wall pulled to height h: the same clay, narrower as it rises
-const pulled = (h: number): [number, number][] => {
-  const f = Math.sqrt(34 / h);
-  return [26, 27, 25.5, 23].map((r, i) => [Math.max(8, r * f), VS[i]]);
+const pulled = (height: number): [number, number][] => {
+  const narrowing = Math.sqrt(34 / height);
+  return [26, 27, 25.5, 23].map((radius, i) => [Math.max(8, radius * narrowing), LEVELS[i]]);
 };
-export const kindOf = (h: number, handle: boolean) =>
-  h < 20 ? "a plate" : handle ? "a cup" : h < 50 ? "a bowl" : "a tall cup";
+export const kindOf = (height: number, handle: boolean) =>
+  height < 20 ? "a plate" : handle ? "a cup" : height < 50 ? "a bowl" : "a tall cup";
 
-export function run(host: HTMLElement, w: Work, done: (w: Work) => void, back: () => void) {
+export function run(host: HTMLElement, work: Work, done: (w: Work) => void, back: () => void) {
   const base = newGroup();
-  wheel(base, rng(hash("kobo/wheel")), CX, HEAD, WS, K);
-  spin(base, rng(hash("kobo/spin")), CX, HEAD + 10, 120, 30, K);
-  const s = stage(host, W, H, ["轆轤", "the wheel"], [base]);
+  wheel(base, rng(hash("kobo/wheel")), CENTER_X, HEAD, WHEEL_SCALE, tones);
+  spin(base, rng(hash("kobo/spin")), CENTER_X, HEAD + 10, 120, 30, tones);
+  const view = stage(host, WIDTH, HEIGHT, ["轆轤", "the wheel"], [base]);
 
   type Phase = "clay" | "centre" | "open" | "pull" | "shape";
   let phase: Phase = "clay";
-  let wob = 1,
+  let wobble = 1,
     pressing = false,
     depth = 0,
-    h = 34,
-    prof = LUMP,
+    height = 34,
+    profile = LUMP,
     handle = false;
-  const spec = w.spec;
+  const spec = work.spec;
 
   const lump = () => {
     if (phase === "clay" || phase === "centre") return { prof: LUMP, H: 40 };
     if (phase === "open") return { prof: OPENED, H: 34 };
-    return { prof, H: h };
+    return { prof: profile, H: height };
   };
 
   function draw() {
-    const r = rng(hash("kobo/clay"));
+    const rand = rng(hash("kobo/clay"));
     const groups = [];
     if (phase === "clay") {
-      const g = newGroup();
-      CLAYS(K).forEach((c: string, i: number) => {
-        const x = CX + (i - 1.5) * 120;
-        addSolid(g, wobblyRing(r, x + 4, 152, 34, 8, 0.4, 10), K.ink, 0.14);
-        addSolid(g, wobblyRing(r, x, 130, 30, 22, 3, 10), c, 1);
-        addLine(g, wobblyRing(r, x, 130, 30, 22, 3, 10), K.ink, 1.1, 0.85);
-        note(g, x, 182, CLAY_NAMES[i], K, 15, 0.7);
+      const group = newGroup();
+      CLAYS(tones).forEach((color: string, i: number) => {
+        const x = CENTER_X + (i - 1.5) * 120;
+        addSolid(group, wobblyRing(rand, x + 4, 152, 34, 8, 0.4, 10), tones.ink, 0.14);
+        addSolid(group, wobblyRing(rand, x, 130, 30, 22, 3, 10), color, 1);
+        addLine(group, wobblyRing(rand, x, 130, 30, 22, 3, 10), tones.ink, 1.1, 0.85);
+        note(group, x, 182, CLAY_NAMES[i], tones, 15, 0.7);
       });
-      groups.push(g);
+      groups.push(group);
     } else {
-      const { prof: p, H: ht } = lump();
-      const c = newGroup({ cls: "kobo-clay" });
-      piece(c, r, CX, FOOT, CS, K, {
-        prof: p,
-        H: ht,
+      const { prof: shape, H: lumpHeight } = lump();
+      const clay = newGroup({ cls: "kobo-clay" });
+      piece(clay, rand, CENTER_X, FOOT, CLAY_SCALE, tones, {
+        prof: shape,
+        H: lumpHeight,
         clay: spec.clay,
         glaze: { none: true },
         fire: 3,
         handle,
       });
-      groups.push(c);
-      const top = FOOT - ht * CS;
-      const f = newGroup();
+      groups.push(clay);
+      const rimY = FOOT - lumpHeight * CLAY_SCALE;
+      const fingers = newGroup();
       if (phase === "centre" && pressing) {
-        const half = p[1][0] * CS + 18;
-        fingertip(f, r, CX - half, FOOT - ht * CS * 0.5, K);
-        fingertip(f, r, CX + half, FOOT - ht * CS * 0.5, K);
+        const half = shape[1][0] * CLAY_SCALE + 18;
+        fingertip(fingers, rand, CENTER_X - half, FOOT - lumpHeight * CLAY_SCALE * 0.5, tones);
+        fingertip(fingers, rand, CENTER_X + half, FOOT - lumpHeight * CLAY_SCALE * 0.5, tones);
       }
       if (phase === "open" && depth > 0) {
-        const rx = (5 + Math.min(depth, 1.2) * 16) * CS;
-        addSolid(f, wobblyRing(r, CX, top + 2, rx, rx * 0.28, 0.4, 14), K.ink, 0.28 + depth * 0.2);
-        fingertip(f, r, CX, top - 8 + depth * 30, K);
+        const holeRadius = (5 + Math.min(depth, 1.2) * 16) * CLAY_SCALE;
+        addSolid(
+          fingers,
+          wobblyRing(rand, CENTER_X, rimY + 2, holeRadius, holeRadius * 0.28, 0.4, 14),
+          tones.ink,
+          0.28 + depth * 0.2,
+        );
+        fingertip(fingers, rand, CENTER_X, rimY - 8 + depth * 30, tones);
       }
       if (phase === "pull" && pressing) {
-        const rr = p[2][0] * CS;
-        fingertip(f, r, CX + rr + 14, top + ht * CS * 0.3, K);
+        const radius = shape[2][0] * CLAY_SCALE;
+        fingertip(
+          fingers,
+          rand,
+          CENTER_X + radius + 14,
+          rimY + lumpHeight * CLAY_SCALE * 0.3,
+          tones,
+        );
       }
       if (phase === "shape") {
-        p.forEach(([rr, v]) => {
-          const at = dot(rr, v);
-          addSolid(f, wobblyRing(r, at[0], at[1], 7, 7, 0.3, 10), K.paper, 1);
-          addLine(f, wobblyRing(r, at[0], at[1], 7, 7, 0.3, 10), K.ink, 1.2, 0.9);
+        shape.forEach(([radius, level]) => {
+          const handlePoint = handleAt(radius, level);
+          addSolid(
+            fingers,
+            wobblyRing(rand, handlePoint[0], handlePoint[1], 7, 7, 0.3, 10),
+            tones.paper,
+            1,
+          );
+          addLine(
+            fingers,
+            wobblyRing(rand, handlePoint[0], handlePoint[1], 7, 7, 0.3, 10),
+            tones.ink,
+            1.2,
+            0.9,
+          );
         });
       }
-      groups.push(f);
+      groups.push(fingers);
     }
-    s.draw(groups);
+    view.draw(groups);
     shake();
   }
   const redraw = frame(draw);
-  const dot = (rr: number, v: number): P => [CX + rr * CS, FOOT - v * h * CS];
+  const handleAt = (radius: number, level: number): Point => [
+    CENTER_X + radius * CLAY_SCALE,
+    FOOT - level * height * CLAY_SCALE,
+  ];
 
   // the lump runs out of true until it is held still
-  let t0 = performance.now(),
-    phi = 0;
+  let lastTime = performance.now(),
+    angle = 0;
   function shake() {
-    const c = s.live.querySelector<SVGGElement>(".kobo-clay");
-    if (!c) return;
-    const k = phase === "centre" ? wob : 0;
-    c.setAttribute(
+    const clay = view.live.querySelector<SVGGElement>(".kobo-clay");
+    if (!clay) return;
+    const sway = phase === "centre" ? wobble : 0;
+    clay.setAttribute(
       "transform",
-      `translate(${(Math.sin(phi) * 9 * k).toFixed(1)} 0) skewX(${(Math.sin(phi + 1) * 5 * k).toFixed(1)})`,
+      `translate(${(Math.sin(angle) * 9 * sway).toFixed(1)} 0) skewX(${(Math.sin(angle + 1) * 5 * sway).toFixed(1)})`,
     );
-    c.style.transformOrigin = `${CX}px ${FOOT}px`;
+    clay.style.transformOrigin = `${CENTER_X}px ${FOOT}px`;
   }
-  function tick(t: number) {
-    if (!s.root.isConnected) return;
-    const dt = Math.min(0.05, (t - t0) / 1000);
-    t0 = t;
-    phi += dt * (still() ? 0 : 9);
+  function tick(time: number) {
+    if (!view.root.isConnected) return;
+    const step = Math.min(0.05, (time - lastTime) / 1000);
+    lastTime = time;
+    angle += step * (still() ? 0 : 9);
     if (phase === "centre") {
-      wob = clamp(wob + (pressing ? -0.32 : 0.04) * dt, 0, 1);
-      if (wob === 0) {
+      wobble = clamp(wobble + (pressing ? -0.32 : 0.04) * step, 0, 1);
+      if (wobble === 0) {
         phase = "open";
         pressing = false;
         say();
@@ -155,12 +180,12 @@ export function run(host: HTMLElement, w: Work, done: (w: Work) => void, back: (
   requestAnimationFrame(tick);
 
   function say() {
-    s.clearUi();
-    s.button("← back to the workshop", back, "quiet");
+    view.clearUi();
+    view.button("← back to the workshop", back, "quiet");
     if (phase === "clay") {
-      s.say("choose a clay.");
-      CLAYS(K).forEach((_: string, i: number) =>
-        s.over(`${CLAY_NAMES[i]} clay`, CX + (i - 1.5) * 120, 144, 90, 90, () => {
+      view.say("choose a clay.");
+      CLAYS(tones).forEach((_: string, i: number) =>
+        view.over(`${CLAY_NAMES[i]} clay`, CENTER_X + (i - 1.5) * 120, 144, 90, 90, () => {
           spec.clay = i;
           phase = "centre";
           say();
@@ -168,33 +193,35 @@ export function run(host: HTMLElement, w: Work, done: (w: Work) => void, back: (
         }),
       );
     } else if (phase === "centre") {
-      s.say("一 · it runs out of true. hold it, press and keep pressing, until it spins still.");
+      view.say("一 · it runs out of true. hold it, press and keep pressing, until it spins still.");
     } else if (phase === "open") {
-      s.say("二 · press your thumb down into the middle. not too deep.");
+      view.say("二 · press your thumb down into the middle. not too deep.");
     } else if (phase === "pull") {
-      s.say(`三 · drag up to pull the wall, down to press it low. now: ${kindOf(h, false)}.`);
-      s.button("shape it", () => {
+      view.say(
+        `三 · drag up to pull the wall, down to press it low. now: ${kindOf(height, false)}.`,
+      );
+      view.button("shape it", () => {
         phase = "shape";
-        prof = prof.map(([r], i) => [r, VS[i]]);
+        profile = profile.map(([radius], i) => [radius, LEVELS[i]]);
         say();
         redraw();
       });
     } else {
-      s.say(`四 · drag the dots out or in. ${kindOf(h, handle)}.`);
-      if (h >= 40)
-        s.button(handle ? "take the handle off" : "pull a handle", () => {
+      view.say(`四 · drag the dots out or in. ${kindOf(height, handle)}.`);
+      if (height >= 40)
+        view.button(handle ? "take the handle off" : "pull a handle", () => {
           handle = !handle;
           say();
           redraw();
         });
-      s.button("cut it off the wheel", () => {
+      view.button("cut it off the wheel", () => {
         done({
-          ...w,
+          ...work,
           step: "shelf",
           spec: {
             ...spec,
-            prof: prof.map(([r, v]) => [Math.round(r), v]),
-            H: Math.round(h),
+            prof: profile.map(([radius, level]) => [Math.round(radius), level]),
+            H: Math.round(height),
             handle,
           },
         });
@@ -202,46 +229,53 @@ export function run(host: HTMLElement, w: Work, done: (w: Work) => void, back: (
     }
   }
 
-  let from: P = [0, 0],
-    h0 = h,
+  let start: Point = [0, 0],
+    startHeight = height,
     grab = -1,
     began: Phase = phase,
     tallOnce = false;
-  drag(s, {
-    down(p) {
-      from = p;
+  drag(view, {
+    down(point) {
+      start = point;
       began = phase;
       if (phase === "clay") return false;
       if (phase === "centre") pressing = true;
-      if (phase === "pull") ((h0 = h), (pressing = true));
+      if (phase === "pull") ((startHeight = height), (pressing = true));
       if (phase === "shape") {
         grab = -1;
         let best = 40;
-        prof.forEach(([rr, v], i) => {
-          const d = Math.hypot(p[0] - dot(rr, v)[0], p[1] - dot(rr, v)[1]);
-          if (d < best) ((best = d), (grab = i));
+        profile.forEach(([radius, level], i) => {
+          const distance = Math.hypot(
+            point[0] - handleAt(radius, level)[0],
+            point[1] - handleAt(radius, level)[1],
+          );
+          if (distance < best) ((best = distance), (grab = i));
         });
         if (grab < 0) return false;
       }
       redraw();
     },
-    move(p) {
-      if (phase === "open") depth = clamp((p[1] - from[1]) / 80, 0, 1.3);
+    move(point) {
+      if (phase === "open") depth = clamp((point[1] - start[1]) / 80, 0, 1.3);
       if (phase === "pull") {
-        h = clamp(h0 + (from[1] - p[1]) / CS, 12, 76);
-        prof = pulled(h);
-        s.say(`三 · drag up to pull the wall, down to press it low. now: ${kindOf(h, false)}.`);
+        height = clamp(startHeight + (start[1] - point[1]) / CLAY_SCALE, 12, 76);
+        profile = pulled(height);
+        view.say(
+          `三 · drag up to pull the wall, down to press it low. now: ${kindOf(height, false)}.`,
+        );
       }
       if (phase === "shape" && grab >= 0) {
-        const rr = clamp(Math.abs(p[0] - CX) / CS, 8, 96);
-        const near = [prof[grab - 1]?.[0], prof[grab + 1]?.[0]].filter((x) => x !== undefined);
-        prof[grab] = [
+        const radius = clamp(Math.abs(point[0] - CENTER_X) / CLAY_SCALE, 8, 96);
+        const near = [profile[grab - 1]?.[0], profile[grab + 1]?.[0]].filter(
+          (neighbour) => neighbour !== undefined,
+        );
+        profile[grab] = [
           clamp(
-            rr,
-            Math.max(8, ...near.map((x) => x - 36)),
-            Math.min(96, ...near.map((x) => x + 36)),
+            radius,
+            Math.max(8, ...near.map((neighbour) => neighbour - 36)),
+            Math.min(96, ...near.map((neighbour) => neighbour + 36)),
           ),
-          prof[grab][1],
+          profile[grab][1],
         ];
       }
       redraw();
@@ -250,24 +284,24 @@ export function run(host: HTMLElement, w: Work, done: (w: Work) => void, back: (
       pressing = false;
       if (phase === "open" && began === "open") {
         if (depth < 0.35) {
-          s.say("二 · a little deeper.");
+          view.say("二 · a little deeper.");
           depth = 0;
         } else {
           if (depth > 1) {
-            w.flaw += 0.2;
-            s.say("too deep: the floor is thin now. it may crack in the kiln.");
+            work.flaw += 0.2;
+            view.say("too deep: the floor is thin now. it may crack in the kiln.");
           }
           const deep = depth > 1;
           phase = "pull";
-          prof = pulled(h);
+          profile = pulled(height);
           if (!deep) say();
           else setTimeout(say, 1800);
         }
       }
-      if (phase === "pull" && began === "pull" && h > 70 && !tallOnce) {
+      if (phase === "pull" && began === "pull" && height > 70 && !tallOnce) {
         tallOnce = true;
-        w.flaw += 0.1;
-        s.say("the wall is very thin up there. careful.");
+        work.flaw += 0.1;
+        view.say("the wall is very thin up there. careful.");
       }
       grab = -1;
       redraw();

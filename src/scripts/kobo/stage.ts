@@ -1,8 +1,8 @@
 import { groupSvg, toSvg, toneVars, FILTERS } from "../../utils/tea/ink.js";
 import { turned, type PieceSpec } from "../../utils/tea/pottery";
 
-export type P = [number, number];
-export const K = toneVars();
+export type Point = [number, number];
+export const tones = toneVars();
 export const still = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 // where a piece is on its way through the workshop
@@ -33,34 +33,34 @@ export function fresh(): Work {
 }
 export function load(): Work {
   try {
-    const w = JSON.parse(localStorage.getItem(WORK) || "null");
-    if (w && w.step && w.spec) return w;
+    const saved = JSON.parse(localStorage.getItem(WORK) || "null");
+    if (saved && saved.step && saved.spec) return saved;
   } catch {
     // a spoilt draft starts again
   }
   return fresh();
 }
-export const save = (w: Work) => localStorage.setItem(WORK, JSON.stringify(w));
+export const save = (work: Work) => localStorage.setItem(WORK, JSON.stringify(work));
 export const clear = () => localStorage.removeItem(WORK);
 
 // a group the drawing code can draw into
-export type Grp = ReturnType<typeof import("../../utils/tea/ink.js").newGroup>;
-export const markup = (groups: Grp[]) => groups.map((g) => groupSvg(g)).join("");
+export type InkGroup = ReturnType<typeof import("../../utils/tea/ink.js").newGroup>;
+export const markup = (groups: InkGroup[]) => groups.map((group) => groupSvg(group)).join("");
 
 export interface Stage {
   root: HTMLElement;
   svg: SVGSVGElement;
   live: SVGGElement;
-  draw(groups: Grp[]): void;
-  at(e: { clientX: number; clientY: number }): P;
+  draw(groups: InkGroup[]): void;
+  at(event: { clientX: number; clientY: number }): Point;
   say(html: string): void;
   button(label: string, onClick: () => void, cls?: string): HTMLButtonElement;
   over(
     label: string,
     x: number,
     y: number,
-    w: number,
-    h: number,
+    width: number,
+    height: number,
     onClick: () => void,
   ): HTMLButtonElement;
   clearUi(): void;
@@ -68,10 +68,10 @@ export interface Stage {
 
 export function stage(
   host: HTMLElement,
-  W: number,
-  H: number,
+  viewWidth: number,
+  viewHeight: number,
   title: [string, string],
-  still: Grp[],
+  still: InkGroup[],
   defs = "",
 ): Stage {
   host.innerHTML = "";
@@ -79,7 +79,7 @@ export function stage(
   root.className = "kobo-stage";
   root.innerHTML =
     `<p class="kobo-title"><span class="kobo-kan" lang="ja">${title[0]}</span> <span class="hand">${title[1]}</span></p>` +
-    `<div class="kobo-art"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${title[1]}">` +
+    `<div class="kobo-art"><svg viewBox="0 0 ${viewWidth} ${viewHeight}" role="img" aria-label="${title[1]}">` +
     `<defs>${FILTERS}${defs}</defs>${markup(still)}<g class="kobo-live"></g></svg></div>` +
     `<p class="kobo-say hand" aria-live="polite"></p><p class="kobo-do"></p>`;
   host.append(root);
@@ -93,86 +93,93 @@ export function stage(
     svg,
     live,
     draw: (groups) => (live.innerHTML = markup(groups)),
-    at(e) {
-      const p = new DOMPoint(e.clientX, e.clientY).matrixTransform(svg.getScreenCTM()!.inverse());
-      return [p.x, p.y];
+    at(event) {
+      const point = new DOMPoint(event.clientX, event.clientY).matrixTransform(
+        svg.getScreenCTM()!.inverse(),
+      );
+      return [point.x, point.y];
     },
     say: (html) => (sayEl.innerHTML = html),
     button(label, onClick, cls = "") {
-      const b = document.createElement("button");
-      b.type = "button";
-      b.className = `kobo-btn hand ${cls}`;
-      b.textContent = label;
-      b.addEventListener("click", onClick);
-      doEl.append(b);
-      return b;
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = `kobo-btn hand ${cls}`;
+      button.textContent = label;
+      button.addEventListener("click", onClick);
+      doEl.append(button);
+      return button;
     },
 
     // invisible button over part of the drawing,
     // centred on (x, y) in drawing units
-    over(label, x, y, w, h, onClick) {
-      const b = document.createElement("button");
-      b.type = "button";
-      b.className = "kobo-over";
-      b.setAttribute("aria-label", label);
-      b.style.cssText = `left:${(x / W) * 100}%;top:${(y / H) * 100}%;width:${(w / W) * 100}%;height:${(h / H) * 100}%`;
-      b.addEventListener("click", onClick);
-      art.append(b);
-      return b;
+    over(label, x, y, width, height, onClick) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "kobo-over";
+      button.setAttribute("aria-label", label);
+      button.style.cssText = `left:${(x / viewWidth) * 100}%;top:${(y / viewHeight) * 100}%;width:${(width / viewWidth) * 100}%;height:${(height / viewHeight) * 100}%`;
+      button.addEventListener("click", onClick);
+      art.append(button);
+      return button;
     },
     clearUi() {
       doEl.innerHTML = "";
-      art.querySelectorAll(".kobo-over").forEach((b) => b.remove());
+      art.querySelectorAll(".kobo-over").forEach((overlay) => overlay.remove());
     },
   };
 }
 
 // a drag on the drawing
 export function drag(
-  s: Stage,
-  on: {
-    down?: (p: P, e: PointerEvent) => boolean | void;
-    move?: (p: P, e: PointerEvent) => void;
-    up?: (p: P) => void;
+  view: Stage,
+  handlers: {
+    down?: (point: Point, event: PointerEvent) => boolean | void;
+    move?: (point: Point, event: PointerEvent) => void;
+    up?: (point: Point) => void;
   },
 ) {
   let held = false;
-  const el = s.svg;
-  el.addEventListener("pointerdown", (e) => {
-    if (on.down && on.down(s.at(e), e) === false) return;
+  const surface = view.svg;
+  surface.addEventListener("pointerdown", (event) => {
+    if (handlers.down && handlers.down(view.at(event), event) === false) return;
     held = true;
     try {
-      el.setPointerCapture(e.pointerId);
+      surface.setPointerCapture(event.pointerId);
     } catch {
       /* a synthetic pointer */
     }
-    e.preventDefault();
+    event.preventDefault();
   });
-  el.addEventListener("pointermove", (e) => held && on.move?.(s.at(e), e));
-  const end = (e: PointerEvent) => {
+  surface.addEventListener(
+    "pointermove",
+    (event) => held && handlers.move?.(view.at(event), event),
+  );
+  const release = (event: PointerEvent) => {
     if (!held) return;
     held = false;
-    on.up?.(s.at(e));
+    handlers.up?.(view.at(event));
   };
-  el.addEventListener("pointerup", end);
-  el.addEventListener("pointercancel", end);
+  surface.addEventListener("pointerup", release);
+  surface.addEventListener("pointercancel", release);
 }
 
 // redraw at most once a frame
-export function frame(f: () => void) {
+export function frame(render: () => void) {
   let queued = false;
   return () => {
     if (queued) return;
     queued = true;
     requestAnimationFrame(() => {
       queued = false;
-      f();
+      render();
     });
   };
 }
 
-export const clamp = (x: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, x));
-export const wait = (ms: number) => new Promise((r) => setTimeout(r, still() ? 0 : ms));
+export const clamp = (value: number, min: number, max: number) =>
+  Math.min(max, Math.max(min, value));
+export const wait = (delay: number) =>
+  new Promise((resolve) => setTimeout(resolve, still() ? 0 : delay));
 export { toSvg };
 
 // the piece as the drawing code wants it, turned to face you
@@ -181,7 +188,7 @@ export function look(spec: Work["spec"], turn = 0, sealed = false) {
 }
 
 // a scale that fits the piece in a box of w x h drawing units
-export function fit(spec: Work["spec"], w: number, h: number, most = 3) {
-  const rw = Math.max(...spec.prof.map(([r]) => r)) * (spec.handle ? 1.35 : 1);
-  return Math.min(most, w / (rw * 2), h / (spec.H + rw * 0.6));
+export function fit(spec: Work["spec"], width: number, height: number, maxScale = 3) {
+  const widest = Math.max(...spec.prof.map(([radius]) => radius)) * (spec.handle ? 1.35 : 1);
+  return Math.min(maxScale, width / (widest * 2), height / (spec.H + widest * 0.6));
 }

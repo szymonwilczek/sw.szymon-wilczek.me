@@ -15,7 +15,7 @@ import {
 } from "../utils/tea/ink.js";
 import { turned, sealOf, pieceWords, type PieceSpec } from "../utils/tea/pottery";
 import { mine } from "../utils/tea/inbox";
-import { K, stage, drag, frame, fit } from "./kobo/stage";
+import { tones, stage, drag, frame, fit } from "./kobo/stage";
 
 // a guest's piece I've approved approved is on the shelf already
 const same = (a: PieceSpec, b: PieceSpec) =>
@@ -27,7 +27,7 @@ export function enter(host: HTMLElement, approved: PieceSpec[], leave: () => voi
 }
 
 function shelf(host: HTMLElement, approved: PieceSpec[], own: PieceSpec[], leave: () => void) {
-  const scene = sceneShelf(K, {
+  const scene = sceneShelf(tones, {
     pieces: approved.map((p) => turned(p)),
     own: own.map((p) => turned(p)),
   });
@@ -62,7 +62,14 @@ const CARD = { x0: 700, y0: 70, x1: 1040, y1: 400 };
 function hands(host: HTMLElement, p: PieceSpec, theirs: boolean, back: () => void) {
   const r = rng(hash("machiai/card"));
   const card = newGroup();
-  inked(card, r, wobblyBox(r, CARD.x0, CARD.y0, CARD.x1, CARD.y1, 0.8), K.paper, K.ink, 1.1);
+  inked(
+    card,
+    r,
+    wobblyBox(r, CARD.x0, CARD.y0, CARD.x1, CARD.y1, 0.8),
+    tones.paper,
+    tones.ink,
+    1.1,
+  );
   const mx = (CARD.x0 + CARD.x1) / 2;
   // the name as they wrote it, else in a hand like theirs
   if (p.sign.length) {
@@ -74,7 +81,7 @@ function hands(host: HTMLElement, p: PieceSpec, theirs: boolean, back: () => voi
         r,
         line.map(([u, v]) => [mx - bw / 2 - 20 + u * bw, CARD.y0 + 6 + v * bh]),
         2.4,
-        K.ink,
+        tones.ink,
         0.88,
         { tip: 0.3, head: 0.2 },
       ),
@@ -85,21 +92,21 @@ function hands(host: HTMLElement, p: PieceSpec, theirs: boolean, back: () => voi
       tr: `translate(${mx - 20} ${CARD.y0 + 60})`,
       fs: 30,
       font: "Kalam, cursive",
-      fill: K.ink,
+      fill: tones.ink,
       o: 0.85,
     });
   const sx = CARD.x1 - 36,
     sy = CARD.y0 + 40;
-  addSolid(card, wobblyBox(r, sx - 18, sy - 18, sx + 18, sy + 18, 0.4), K.red, 0.88);
+  addSolid(card, wobblyBox(r, sx - 18, sy - 18, sx + 18, sy + 18, 0.4), tones.red, 0.88);
   addText(card, {
     t: sealOf(p.name),
     tr: `translate(${sx} ${sy})`,
     fs: 22,
     font: "'Yuji Syuku', serif",
-    fill: K.paper,
+    fill: tones.paper,
   });
-  note(card, mx, CARD.y0 + 130, p.name, K, 18, 0.8);
-  pieceWords(p).forEach((t, k) => note(card, mx, CARD.y0 + 175 + k * 30, t, K, 16, 0.7));
+  note(card, mx, CARD.y0 + 130, p.name, tones, 18, 0.8);
+  pieceWords(p).forEach((t, k) => note(card, mx, CARD.y0 + 175 + k * 30, t, tones, 16, 0.7));
   const day = new Date(p.made + "T12:00:00");
   if (!isNaN(+day))
     note(
@@ -107,18 +114,18 @@ function hands(host: HTMLElement, p: PieceSpec, theirs: boolean, back: () => voi
       mx,
       CARD.y1 - 40,
       day.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }),
-      K,
+      tones,
       16,
       0.6,
     );
-  if (theirs) note(card, mx, CARD.y1 + 34, "仮 · yours, waiting for the host", K, 14, 0.6);
+  if (theirs) note(card, mx, CARD.y1 + 34, "仮 · yours, waiting for the host", tones, 14, 0.6);
 
   const st = stage(host, W, H, ["手", "in your hands"], [card]);
   const s = fit(p, 420, 330, 4);
   let turn = 0;
   const draw = () => {
     const g = newGroup();
-    piece(g, rng(hash("piece/" + p.name + p.fire)), 330, 400, s, K, turned(p, turn));
+    piece(g, rng(hash("piece/" + p.name + p.fire)), 330, 400, s, tones, turned(p, turn));
     st.draw([g]);
   };
   const redraw = frame(draw);
