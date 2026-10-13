@@ -20,7 +20,9 @@ export const GET: APIRoute = async ({ site }) => {
 
   let content = `# Szymon Wilczek - Complete Content Corpus
 
-> This file contains the complete full-text corpus of technical writings, essays, and architectural reflections published on ${site!.host} by Szymon Wilczek.
+> The full text of every essay published on ${site!.host} by Szymon Wilczek (Linux kernel, C, GNU Emacs), newest first. Org markup is kept as written. The map of the rest of the site is at ${siteUrl}/llms.txt.
+
+When quoting, cite the essay's URL given in its header below.
 
 ---
 `;
@@ -50,5 +52,7 @@ ${body.trim()}
 `;
   }
 
-  return new Response(content.trim() + "\n");
+  return new Response(content.trim() + "\n", {
+    headers: { "Content-Type": "text/plain; charset=utf-8" },
+  });
 };
