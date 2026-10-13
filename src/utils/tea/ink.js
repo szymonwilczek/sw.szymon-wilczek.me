@@ -1839,59 +1839,55 @@ function wheel(group, rand, cx, cy, scale, tones) {
     tones.ink,
     0.14,
   );
-  const flywheel = wobblyRing(rand, cx, cy + scaled(62), scaled(70), scaled(18), 0.5, 18);
-  addSolid(
-    group,
-    wobblyBox(rand, cx - scaled(70), cy + scaled(62), cx + scaled(70), cy + scaled(70), 0.4),
-    tones.woodDk,
-    1,
-  );
-  addSolid(group, flywheel, tones.wood, 1);
-  addLine(group, flywheel, tones.ink, 1.2, 0.9);
-  addLine(
-    group,
+  const arc = (centerY, radiusX, radiusY, from, to, wobble) =>
     wobblyLine(
       rand,
-      [
-        [cx - scaled(70), cy + scaled(62)],
-        [cx - scaled(70), cy + scaled(70)],
-      ],
-      0.2,
-    ),
-    tones.ink,
-    1,
-    0.8,
-  );
-  addLine(
-    group,
-    wobblyLine(
-      rand,
-      [
-        [cx + scaled(70), cy + scaled(62)],
-        [cx + scaled(70), cy + scaled(70)],
-      ],
-      0.2,
-    ),
-    tones.ink,
-    1,
-    0.8,
-  );
-  inked(
-    group,
-    rand,
-    wobblyBox(rand, cx - scaled(5), cy + scaled(4), cx + scaled(5), cy + scaled(60), 0.3),
-    tones.woodDk,
-    tones.ink,
-    1,
-  );
+      Array.from({ length: 13 }, (_, i) => {
+        const angle = lerp(from, to, i / 12);
+        return [cx + Math.cos(angle) * radiusX, centerY + Math.sin(angle) * radiusY];
+      }),
+      wobble * 0.4,
+    );
+  const sides = (halfWidth, top, bottom, wobble, steps) =>
+    [-1, 1]
+      .map((side) =>
+        wobblySegment(
+          rand,
+          [cx + side * halfWidth, top],
+          [cx + side * halfWidth, bottom],
+          wobble,
+          steps,
+        ),
+      )
+      .join(" ");
+  const disc = (top, radiusX, radiusY, thickness, wobble, fill) => {
+    const bottom = top + thickness;
+    addSolid(group, wobblyBox(rand, cx - radiusX, top, cx + radiusX, bottom, 0), tones.woodDk, 1);
+    addSolid(group, wobblyRing(rand, cx, bottom, radiusX, radiusY, 0, 18), tones.woodDk, 1);
+    addLine(group, arc(bottom, radiusX, radiusY, 0, Math.PI, wobble), tones.ink, 1, 0.8);
+    addLine(group, sides(radiusX, top, bottom, 0.2, 1), tones.ink, 1, 0.8);
+    const face = wobblyRing(rand, cx, top, radiusX, radiusY, wobble, 18);
+    addSolid(group, face, fill, 1);
+    return face;
+  };
+  const flywheelTop = cy + scaled(62);
+  disc(flywheelTop, scaled(70), scaled(18), scaled(8), 0.5, tones.wood);
+  const behindShaft = Math.asin(6 / 70);
+  for (const [from, to] of [
+    [0, Math.PI],
+    [Math.PI, 1.5 * Math.PI - behindShaft],
+    [1.5 * Math.PI + behindShaft, 2 * Math.PI],
+  ])
+    addLine(group, arc(flywheelTop, scaled(70), scaled(18), from, to, 0.5), tones.ink, 1.2, 0.9);
+  // shaft stands on the flywheel and runs up under the head
   addSolid(
     group,
-    wobblyBox(rand, cx - scaled(46), cy, cx + scaled(46), cy + scaled(7), 0.3),
+    wobblyBox(rand, cx - scaled(5), cy + scaled(4), cx + scaled(5), cy + scaled(62), 0),
     tones.woodDk,
     1,
   );
-  const head = wobblyRing(rand, cx, cy, scaled(46), scaled(13), 0.3, 18);
-  addSolid(group, head, tones.woodLt, 1);
+  addLine(group, sides(scaled(5), cy + scaled(19), cy + scaled(62), 0.3, 3), tones.ink, 1, 0.85);
+  const head = disc(cy, scaled(46), scaled(13), scaled(7), 0.3, tones.woodLt);
   addLine(group, head, tones.ink, 1.2, 0.95);
   addLine(group, wobblyRing(rand, cx, cy, scaled(30), scaled(8.5), 0.3, 16), tones.ink, 0.6, 0.4);
 }
@@ -2571,8 +2567,10 @@ function workshopInside(groups, rand, project, tones, scale) {
   groups.push(wheelGroup);
   const wheelAt = project(84, 62, 0);
   wheel(wheelGroup, rand, wheelAt[0], wheelAt[1] - 18 * scale, 0.42 * scale, tones);
+  const clayGroup = newGroup();
+  groups.push(clayGroup);
   wetClay(
-    wheelGroup,
+    clayGroup,
     rand,
     wheelAt[0],
     wheelAt[1] - 20 * scale,
