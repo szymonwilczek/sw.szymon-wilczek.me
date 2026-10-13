@@ -4,7 +4,7 @@ main = "src/index.ts"
 compatibility_date = "2026-10-01"
 
 [vars]
-ORIGINS = "https://www.szymon-wilczek.me,http://localhost:4321"
+ORIGINS = "https://szymon-wilczek.me,https://sw.szymon-wilczek.me,http://localhost:4321"
 
 [[d1_databases]]
 binding = "DB"
