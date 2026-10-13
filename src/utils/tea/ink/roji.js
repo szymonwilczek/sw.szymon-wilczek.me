@@ -28,6 +28,10 @@ import {
   workshopInside,
 } from "./workshop.js";
 
+const KILN_X = 830;
+const KILN_Y = 612;
+const CLOUD = { left: 712, right: 1062, y: 128, height: 34 };
+
 function sceneGarden16(tones, stage, opt = {}) {
   const open = stage === "open";
   const rand = rng(hash("tea/garden16")),
@@ -202,7 +206,7 @@ function sceneGarden16(tones, stage, opt = {}) {
   const bench = newGroup();
   dryingBench(bench, rand, workshopProject, 8, 104, -26, tones, 0.3);
   groups.push(bench);
-  noborigama(groups, rand, 870, 612, tones, open);
+  noborigama(groups, rand, KILN_X, KILN_Y, tones, open);
   const bamboo = [];
   bambooClump(bamboo, rng(hash("bb")), 250, 404, tones, 1, opt.cut);
   groups.push({ cls: "roji-bamboo", groups: bamboo });
@@ -401,7 +405,17 @@ function sceneGarden16(tones, stage, opt = {}) {
   }
   const clouds = newGroup({ washO: 0.5 }),
     grey = mix(tones.inkSoft, tones.paper, 0.55);
-  mist(clouds, rand, 760, 1110, 128, 34, grey, 0.7, mix(grey, tones.ink, 0.25));
+  mist(
+    clouds,
+    rand,
+    CLOUD.left,
+    CLOUD.right,
+    CLOUD.y,
+    CLOUD.height,
+    grey,
+    0.7,
+    mix(grey, tones.ink, 0.25),
+  );
   groups.push(clouds);
   return { W: width, H: height, groups, clips };
 }
