@@ -9,10 +9,10 @@ const MAX_RECOMMENDED_SIZE_BYTES = 2.0 * 1024 * 1024; // 2.0 MB
 
 function formatBytes(bytes) {
   if (bytes === 0) return "0 B";
-  const k = 1024;
+  const unit = 1024;
   const sizes = ["B", "KB", "MB", "GB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
+  const i = Math.floor(Math.log(bytes) / Math.log(unit));
+  return `${parseFloat((bytes / Math.pow(unit, i)).toFixed(2))} ${sizes[i]}`;
 }
 
 function getTrackedGitRepoSize() {
@@ -50,8 +50,10 @@ async function main() {
 
   const albums = fs
     .readdirSync(imagesBaseDir, { withFileTypes: true })
-    .filter((d) => d.isDirectory() && d.name !== "thumbs" && !d.name.startsWith("."))
-    .map((d) => d.name);
+    .filter(
+      (entry) => entry.isDirectory() && entry.name !== "thumbs" && !entry.name.startsWith("."),
+    )
+    .map((entry) => entry.name);
 
   console.log(
     `Standard: Max ${MAX_RECOMMENDED_DIMENSION}px (2.5K)\nTarget size < 2.0MB per photo\nWebP Thumbnails in thumbs/`,
@@ -71,7 +73,7 @@ async function main() {
     const albumPath = path.join(imagesBaseDir, album);
     const files = fs
       .readdirSync(albumPath)
-      .filter((f) => /\.(jpe?g|png)$/i.test(f) && !f.startsWith("."));
+      .filter((name) => /\.(jpe?g|png)$/i.test(name) && !name.startsWith("."));
 
     let albumBytes = 0;
     let albumUnoptimizedCount = 0;
@@ -80,8 +82,8 @@ async function main() {
     for (const file of files) {
       totalPhotos++;
       const filePath = path.join(albumPath, file);
-      const ext = path.extname(file);
-      const base = path.basename(file, ext);
+      const extension = path.extname(file);
+      const base = path.basename(file, extension);
       const thumbPath = path.join(albumPath, "thumbs", `${base}.webp`);
       const coverPath = path.join(albumPath, "thumbs", `${base}-600.webp`);
 
@@ -128,8 +130,8 @@ async function main() {
         } else {
           totalOptimized++;
         }
-      } catch (err) {
-        console.error(`Error reading metadata for ${file}:`, err.message);
+      } catch (error) {
+        console.error(`Error reading metadata for ${file}:`, error.message);
       }
     }
 
@@ -175,7 +177,7 @@ async function main() {
   console.log(`Remaining Capacity:      ${formatBytes(remainingQuota)} until 1GB guideline`);
 }
 
-main().catch((err) => {
-  console.error("Fatal audit error:", err);
+main().catch((error) => {
+  console.error("Fatal audit error:", error);
   process.exit(1);
 });

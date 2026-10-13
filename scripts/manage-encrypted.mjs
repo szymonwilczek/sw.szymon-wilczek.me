@@ -51,15 +51,19 @@ function calculateSha256(buffer) {
   return crypto.createHash("sha256").update(buffer).digest("hex");
 }
 
-function encryptAesGcm(bufferOrString, pass) {
+function encryptAesGcm(bufferOrString, secret) {
   const salt = crypto.randomBytes(16);
   const iv = crypto.randomBytes(12);
-  const key = crypto.pbkdf2Sync(pass, salt, 100000, 32, "sha256");
+  const key = crypto.pbkdf2Sync(secret, salt, 100000, 32, "sha256");
   const cipher = crypto.createCipheriv("aes-256-gcm", key, iv);
 
-  const inputBuf =
+  const inputBuffer =
     typeof bufferOrString === "string" ? Buffer.from(bufferOrString, "utf-8") : bufferOrString;
-  const encrypted = Buffer.concat([cipher.update(inputBuf), cipher.final(), cipher.getAuthTag()]);
+  const encrypted = Buffer.concat([
+    cipher.update(inputBuffer),
+    cipher.final(),
+    cipher.getAuthTag(),
+  ]);
 
   return {
     ciphertext: encrypted.toString("base64"),
@@ -88,7 +92,7 @@ const binaryExtensions = [
 
 function isBinaryFile(filePath) {
   const lower = filePath.toLowerCase();
-  return binaryExtensions.some((ext) => lower.endsWith(ext));
+  return binaryExtensions.some((extension) => lower.endsWith(extension));
 }
 
 if (command === "vault") {
@@ -104,13 +108,13 @@ if (command === "vault") {
       extraArgs.join(" ") || defaultTitle.charAt(0).toUpperCase() + defaultTitle.slice(1);
     const slug = slugify(title) || "secret-file-" + Date.now();
 
-    const fileBuf = fs.readFileSync(inputPath);
-    const sha256 = calculateSha256(fileBuf);
-    const filesize = formatBytes(fileBuf.length);
+    const fileBuffer = fs.readFileSync(inputPath);
+    const sha256 = calculateSha256(fileBuffer);
+    const filesize = formatBytes(fileBuffer.length);
 
-    const enc = encryptAesGcm(fileBuf, passphrase);
+    const encrypted = encryptAesGcm(fileBuffer, passphrase);
     const encFilename = `${filename}.enc`;
-    fs.writeFileSync(path.join(downloadsDir, encFilename), enc.rawEncrypted);
+    fs.writeFileSync(path.join(downloadsDir, encFilename), encrypted.rawEncrypted);
 
     const data = {
       title,
@@ -121,8 +125,8 @@ if (command === "vault") {
       filesize,
       sha256,
       encryptedUrl: `/downloads/${encFilename}`,
-      iv: enc.iv,
-      salt: enc.salt,
+      iv: encrypted.iv,
+      salt: encrypted.salt,
     };
 
     fs.writeFileSync(path.join(targetDir, `${slug}.json`), JSON.stringify(data, null, 2) + "\n");
@@ -148,7 +152,7 @@ if (command === "vault") {
     const title = extraArgs.join(" ") || defaultTitle;
     const slug = slugify(title) || "secret-doc-" + Date.now();
 
-    const enc = encryptAesGcm(content, passphrase);
+    const encrypted = encryptAesGcm(content, passphrase);
 
     const data = {
       title,
@@ -156,9 +160,9 @@ if (command === "vault") {
       date: new Date().toISOString().split("T")[0],
       type: "note",
       filename,
-      ciphertext: enc.ciphertext,
-      iv: enc.iv,
-      salt: enc.salt,
+      ciphertext: encrypted.ciphertext,
+      iv: encrypted.iv,
+      salt: encrypted.salt,
     };
 
     fs.writeFileSync(path.join(targetDir, `${slug}.json`), JSON.stringify(data, null, 2) + "\n");
@@ -175,9 +179,9 @@ if (command === "vault") {
 
   const filename = path.basename(inputPath);
   const slug = slugify(filename.replace(/\./g, "-"));
-  const fileBuf = fs.readFileSync(inputPath);
-  const sha256 = calculateSha256(fileBuf);
-  const filesize = formatBytes(fileBuf.length);
+  const fileBuffer = fs.readFileSync(inputPath);
+  const sha256 = calculateSha256(fileBuffer);
+  const filesize = formatBytes(fileBuffer.length);
   const category = extraArgs.join(" ") || "General";
 
   const downloadsDir = path.join(rootDir, "public", "downloads");
@@ -187,9 +191,9 @@ if (command === "vault") {
   fs.mkdirSync(filesContentDir, { recursive: true });
 
   if (passphrase && passphrase.trim().length > 0) {
-    const enc = encryptAesGcm(fileBuf, passphrase);
+    const encrypted = encryptAesGcm(fileBuffer, passphrase);
     const encFilename = `${filename}.enc`;
-    fs.writeFileSync(path.join(downloadsDir, encFilename), enc.rawEncrypted);
+    fs.writeFileSync(path.join(downloadsDir, encFilename), encrypted.rawEncrypted);
 
     const docData = {
       title: filename.replace(/[-_]/g, " "),
@@ -201,8 +205,8 @@ if (command === "vault") {
       date: new Date().toISOString().split("T")[0],
       encrypted: true,
       encryptedUrl: `/downloads/${encFilename}`,
-      salt: enc.salt,
-      iv: enc.iv,
+      salt: encrypted.salt,
+      iv: encrypted.iv,
     };
 
     fs.writeFileSync(

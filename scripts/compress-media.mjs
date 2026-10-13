@@ -9,10 +9,10 @@ const JPEG_QUALITY = 85;
 
 function formatBytes(bytes) {
   if (bytes === 0) return "0 B";
-  const k = 1024;
+  const unit = 1024;
   const sizes = ["B", "KB", "MB", "GB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
+  const i = Math.floor(Math.log(bytes) / Math.log(unit));
+  return `${parseFloat((bytes / Math.pow(unit, i)).toFixed(2))} ${sizes[i]}`;
 }
 
 function getTrackedGitRepoSize() {
@@ -42,10 +42,10 @@ function renderProgressBar(usedBytes, totalBytes, length = 36) {
 }
 
 async function generateThumbnail(filePath, force = false) {
-  const dir = path.dirname(filePath);
-  const ext = path.extname(filePath);
-  const base = path.basename(filePath, ext);
-  const thumbsDir = path.join(dir, "thumbs");
+  const directory = path.dirname(filePath);
+  const extension = path.extname(filePath);
+  const base = path.basename(filePath, extension);
+  const thumbsDir = path.join(directory, "thumbs");
 
   if (!fs.existsSync(thumbsDir)) {
     fs.mkdirSync(thumbsDir, { recursive: true });
@@ -173,11 +173,12 @@ async function main() {
     }
     const stat = fs.statSync(targetPath);
     if (stat.isDirectory()) {
-      const walk = (d) => {
-        for (const e of fs.readdirSync(d, { withFileTypes: true })) {
-          const full = path.join(d, e.name);
-          if (e.isDirectory() && e.name !== "thumbs" && !e.name.startsWith(".")) walk(full);
-          else if (/\.(jpe?g|png)$/i.test(e.name) && !e.name.startsWith("."))
+      const walk = (directory) => {
+        for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+          const full = path.join(directory, entry.name);
+          if (entry.isDirectory() && entry.name !== "thumbs" && !entry.name.startsWith("."))
+            walk(full);
+          else if (/\.(jpe?g|png)$/i.test(entry.name) && !entry.name.startsWith("."))
             filesToProcess.push(full);
         }
       };
@@ -187,11 +188,12 @@ async function main() {
     }
   } else {
     if (fs.existsSync(imagesBaseDir)) {
-      const walk = (d) => {
-        for (const e of fs.readdirSync(d, { withFileTypes: true })) {
-          const full = path.join(d, e.name);
-          if (e.isDirectory() && e.name !== "thumbs" && !e.name.startsWith(".")) walk(full);
-          else if (/\.(jpe?g|png)$/i.test(e.name) && !e.name.startsWith("."))
+      const walk = (directory) => {
+        for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+          const full = path.join(directory, entry.name);
+          if (entry.isDirectory() && entry.name !== "thumbs" && !entry.name.startsWith("."))
+            walk(full);
+          else if (/\.(jpe?g|png)$/i.test(entry.name) && !entry.name.startsWith("."))
             filesToProcess.push(full);
         }
       };
@@ -210,23 +212,23 @@ async function main() {
   for (const file of filesToProcess) {
     const relPath = path.relative(process.cwd(), file);
     try {
-      const res = await compressImageFile(file, isExplicitTarget);
-      totalOld += res.oldSize;
-      totalNew += res.newSize;
+      const result = await compressImageFile(file, isExplicitTarget);
+      totalOld += result.oldSize;
+      totalNew += result.newSize;
 
-      if (res.skipped) {
+      if (result.skipped) {
         skippedCount++;
-        console.log(`  [OK] ${relPath} (${formatBytes(res.oldSize)} - already optimized)`);
+        console.log(`  [OK] ${relPath} (${formatBytes(result.oldSize)} - already optimized)`);
       } else {
         processedCount++;
-        const saved = res.oldSize - res.newSize;
-        const pct = ((saved / res.oldSize) * 100).toFixed(1);
+        const saved = result.oldSize - result.newSize;
+        const percent = ((saved / result.oldSize) * 100).toFixed(1);
         console.log(
-          `  [OPTIMIZED] ${relPath}: ${formatBytes(res.oldSize)} -> ${formatBytes(res.newSize)} (-${pct}%)`,
+          `  [OPTIMIZED] ${relPath}: ${formatBytes(result.oldSize)} -> ${formatBytes(result.newSize)} (-${percent}%)`,
         );
       }
-    } catch (err) {
-      console.error(`  [ERROR] Failed to compress ${relPath}:`, err.message);
+    } catch (error) {
+      console.error(`  [ERROR] Failed to compress ${relPath}:`, error.message);
     }
   }
 
@@ -250,7 +252,7 @@ async function main() {
   console.log(`Remaining Capacity:      ${formatBytes(remainingQuota)}`);
 }
 
-main().catch((err) => {
-  console.error("Fatal error:", err);
+main().catch((error) => {
+  console.error("Fatal error:", error);
   process.exit(1);
 });

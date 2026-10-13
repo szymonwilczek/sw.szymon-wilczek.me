@@ -10,14 +10,18 @@ const preloadGarden = {
   hooks: {
     "astro:build:done": async ({ dir }) => {
       const root = fileURLToPath(dir);
-      const chunk = (await readdir(join(root, "_astro"))).find((f) => /^garden\..*\.js$/.test(f));
+      const chunk = (await readdir(join(root, "_astro"))).find((name) =>
+        /^garden\..*\.js$/.test(name),
+      );
       if (!chunk) return;
       const link = `<link rel="modulepreload" href="/_astro/${chunk}">`;
-      const files = (await readdir(root, { recursive: true })).filter((f) => f.endsWith(".html"));
-      for (const f of files) {
-        const html = await readFile(join(root, f), "utf8");
+      const files = (await readdir(root, { recursive: true })).filter((name) =>
+        name.endsWith(".html"),
+      );
+      for (const file of files) {
+        const html = await readFile(join(root, file), "utf8");
         if (!html.includes('<script type="module"')) continue;
-        await writeFile(join(root, f), html.replace("</head>", `${link}</head>`));
+        await writeFile(join(root, file), html.replace("</head>", `${link}</head>`));
       }
     },
   },

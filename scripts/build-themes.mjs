@@ -58,11 +58,11 @@ function rank(list, value) {
   return i === -1 ? list.length : i;
 }
 
-function compareThemes(a, b) {
+function compareThemes(former, latter) {
   return (
-    rank(FAMILY_ORDER, a.family) - rank(FAMILY_ORDER, b.family) ||
-    a.family.localeCompare(b.family) ||
-    rank(VARIANT_ORDER, a.variant) - rank(VARIANT_ORDER, b.variant)
+    rank(FAMILY_ORDER, former.family) - rank(FAMILY_ORDER, latter.family) ||
+    former.family.localeCompare(latter.family) ||
+    rank(VARIANT_ORDER, former.variant) - rank(VARIANT_ORDER, latter.variant)
   );
 }
 
