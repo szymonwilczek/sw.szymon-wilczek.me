@@ -5,7 +5,7 @@ import WaxSeal from "../../components/WaxSeal.astro";
 import { getCollection } from "astro:content";
 
 const files = (await getCollection("files")).sort(
-  (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
+  (former, latter) => latter.data.date.valueOf() - former.data.date.valueOf(),
 );
 
 // the same numbers the tags carry on /files
@@ -117,9 +117,9 @@ const tags = files.map((file, i) => ({
   }
 
   function progress(fraction: number) {
-    const pct = Math.round(fraction * 100);
+    const percent = Math.round(fraction * 100);
     cards.reading.style.setProperty("--done", String(fraction));
-    cards.reading.querySelector(".pct")!.textContent = String(pct);
+    cards.reading.querySelector(".pct")!.textContent = String(percent);
   }
 
   /** Reads the file in chunks so the brush can follow, then hashes it whole */
@@ -135,24 +135,26 @@ const tags = files.map((file, i) => ({
       progress(file.size ? read / file.size : 1);
     }
     const digest = await crypto.subtle.digest("SHA-256", bytes);
-    return Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, "0")).join("");
+    return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join(
+      "",
+    );
   }
 
   async function check(file: File) {
     progress(0);
     show("reading", file.name);
-    const sum = await hash(file);
-    const tag = tags.find((t) => t.sha256 === sum);
+    const checksum = await hash(file);
+    const tag = tags.find((candidate) => candidate.sha256 === checksum);
     if (tag) {
       show("match", file.name);
       cards.match.querySelector(".card-tag")!.textContent =
         `Matches tag No. ${tag.num} — ${tag.title}`;
-      cards.match.querySelector(".hash mark")!.textContent = sum.slice(0, 16);
-      cards.match.querySelector(".hash span")!.textContent = sum.slice(16);
+      cards.match.querySelector(".hash mark")!.textContent = checksum.slice(0, 16);
+      cards.match.querySelector(".hash span")!.textContent = checksum.slice(16);
       earn("合");
     } else {
       show("mismatch", file.name);
-      cards.mismatch.querySelector(".hash s")!.textContent = sum;
+      cards.mismatch.querySelector(".hash s")!.textContent = checksum;
     }
   }
 

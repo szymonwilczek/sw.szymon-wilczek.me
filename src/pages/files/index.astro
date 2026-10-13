@@ -8,7 +8,7 @@ import { getCollection } from "astro:content";
 import { dottedDate } from "../../utils/format";
 
 const files = (await getCollection("files")).sort(
-  (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
+  (former, latter) => latter.data.date.valueOf() - former.data.date.valueOf(),
 );
 
 const TILTS = [-0.4, 0.5, -0.2];
@@ -131,16 +131,16 @@ const TILTS = [-0.4, 0.5, -0.2];
 </BaseLayout>
 
 <script>
-  function bytes(b64: string) {
-    return Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+  function bytes(base64: string) {
+    return Uint8Array.from(atob(base64), (character) => character.charCodeAt(0));
   }
 
   // AES-256-GCM with a PBKDF2 key, decrypted in the browser and saved
   async function unseal(form: HTMLFormElement, passphrase: string) {
     const { url, salt, iv, filename } = form.dataset;
-    const resp = await fetch(url!);
-    if (!resp.ok) throw new Error("fetch");
-    const data = await resp.arrayBuffer();
+    const response = await fetch(url!);
+    if (!response.ok) throw new Error("fetch");
+    const data = await response.arrayBuffer();
 
     const material = await crypto.subtle.importKey(
       "raw",
@@ -159,10 +159,10 @@ const TILTS = [-0.4, 0.5, -0.2];
     const plain = await crypto.subtle.decrypt({ name: "AES-GCM", iv: bytes(iv!) }, key, data);
 
     const href = URL.createObjectURL(new Blob([plain], { type: "application/octet-stream" }));
-    const a = document.createElement("a");
-    a.href = href;
-    a.download = filename!;
-    a.click();
+    const link = document.createElement("a");
+    link.href = href;
+    link.download = filename!;
+    link.click();
     setTimeout(() => URL.revokeObjectURL(href), 3000);
   }
 
@@ -181,8 +181,8 @@ const TILTS = [-0.4, 0.5, -0.2];
       if (!form.hidden) input.focus();
     });
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
       submit.disabled = true;
       status.textContent = "breaking the seal…";
       try {
