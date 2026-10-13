@@ -1510,6 +1510,11 @@ const PAINTS = (tones) => [
   mix(tones.earth, tones.ink, 0.55),
   tones.red,
   tones.paper,
+  mix(mix(tones.mossDk, tones.water, 0.4), tones.ink, 0.25),
+  mix(tones.gold, tones.maple, 0.2),
+  mix(tones.red, tones.lacquer, 0.35),
+  mix(tones.ink, tones.deep, 0.3),
+  mix(tones.brass, tones.gold, 0.3),
 ];
 function radiusAt(profile, y) {
   for (let i = 1; i < profile.length; i++)
@@ -3861,14 +3866,16 @@ function scenePaint(tones) {
       ["弁柄", "bengara red"],
       ["白化粧", "white slip"],
     ];
-  PAINTS(tones).forEach((color, i) => {
-    const x = 760 + (i % 2) * 150,
-      y = 120 + Math.floor(i / 2) * 130;
-    inked(palette, rand, wobblyRing(rand, x, y, 44, 14, 0.3, 14), tones.paper, tones.ink, 1.1);
-    addSolid(palette, wobblyRing(rand, x - 2, y + 1, 30, 8, 0.6, 12), color, 0.95);
-    kanji(palette, x, y + 40, names[i][0], tones, 15);
-    note(palette, x, y + 60, names[i][1], tones, 13, 0.6);
-  });
+  PAINTS(tones)
+    .slice(0, 4)
+    .forEach((color, i) => {
+      const x = 760 + (i % 2) * 150,
+        y = 120 + Math.floor(i / 2) * 130;
+      inked(palette, rand, wobblyRing(rand, x, y, 44, 14, 0.3, 14), tones.paper, tones.ink, 1.1);
+      addSolid(palette, wobblyRing(rand, x - 2, y + 1, 30, 8, 0.6, 12), color, 0.95);
+      kanji(palette, x, y + 40, names[i][0], tones, 15);
+      note(palette, x, y + 60, names[i][1], tones, 13, 0.6);
+    });
   groups.push(palette);
   // the seal for the foot, and name in hand
   const seal = newGroup(),

@@ -17,7 +17,7 @@ export type UV = [number, number];
 export interface Stroke {
   pts: UV[];
   w: number; // brush width, 0.5..12
-  c: number; // pigment: gosu, iron, bengara, white slip
+  c: number; // pigment: gosu, iron, bengara, white slip, copper, ochre, enji, sumi, gold
   s?: number; // tip: pointed (left out), flat, dry
 }
 
@@ -43,7 +43,17 @@ export interface PieceSpec {
 }
 
 export const CLAY_NAMES = ["buff", "red", "dark", "white"];
-export const PIGMENT_NAMES = ["gosu blue", "iron brown", "bengara red", "white slip"];
+export const PIGMENT_NAMES = [
+  "gosu blue",
+  "iron brown",
+  "bengara red",
+  "white slip",
+  "copper green",
+  "ochre yellow",
+  "enji crimson",
+  "sumi black",
+  "gold",
+];
 export const TIP_NAMES = ["pointed", "flat", "dry"];
 export { GLAZE_NAMES, PROFILES as PROF };
 

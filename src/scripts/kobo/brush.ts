@@ -33,11 +33,11 @@ const WIDTH = 1100,
 const WHEEL_X = 360,
   WHEEL_Y = 500;
 const DISH_AT = (index: number): Point => [
-  800 + (index % 2) * 150,
-  110 + Math.floor(index / 2) * 120,
+  770 + (index % 3) * 120,
+  110 + Math.floor(index / 3) * 120,
 ];
 const NAME_CARD = { x0: 700, y0: 330, x1: 1060, y1: 500 };
-const PIGMENT_KANJI = ["呉須", "鬼板", "弁柄", "白化粧"];
+const PIGMENT_KANJI = ["呉須", "鬼板", "弁柄", "白化粧", "緑青", "黄土", "臙脂", "墨", "金彩"];
 const SQUASH = 0.3;
 const SIZES: [string, number][] = [
   ["fine", 0.45],
