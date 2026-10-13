@@ -210,6 +210,8 @@ function sceneGarden16(tones, stage, opt = {}) {
   // waiting room
   const waitingProject = oblique(36, 664),
     waitingRoom = newGroup({ cls: "roji-machiai" }),
+    waitingWidth = 214,
+    waitingDepth = 80,
     waitingHeight = 178;
   addWash(
     waitingRoom,
@@ -218,9 +220,9 @@ function sceneGarden16(tones, stage, opt = {}) {
       rand,
       projectAll(waitingProject, [
         [-10, -10, 0],
-        [224, -10, 0],
-        [224, 90, 0],
-        [-10, 90, 0],
+        [waitingWidth + 10, -10, 0],
+        [waitingWidth + 10, waitingDepth + 10, 0],
+        [-10, waitingDepth + 10, 0],
       ]),
       3,
     ),
@@ -234,8 +236,8 @@ function sceneGarden16(tones, stage, opt = {}) {
     waitingProject,
     [
       [0, 0, 0],
-      [0, 80, 0],
-      [0, 80, waitingHeight],
+      [0, waitingDepth, 0],
+      [0, waitingDepth, waitingHeight],
       [0, 0, waitingHeight],
     ],
     tones.plasterDk,
@@ -246,10 +248,10 @@ function sceneGarden16(tones, stage, opt = {}) {
     rand,
     waitingProject,
     [
-      [0, 80, 0],
-      [214, 80, 0],
-      [214, 80, waitingHeight],
-      [0, 80, waitingHeight],
+      [0, waitingDepth, 0],
+      [waitingWidth, waitingDepth, 0],
+      [waitingWidth, waitingDepth, waitingHeight],
+      [0, waitingDepth, waitingHeight],
     ],
     tones.plaster,
     tones,
@@ -260,9 +262,9 @@ function sceneGarden16(tones, stage, opt = {}) {
     waitingProject,
     [
       [0, 0, 0],
-      [214, 0, 0],
-      [214, 80, 0],
-      [0, 80, 0],
+      [waitingWidth, 0, 0],
+      [waitingWidth, waitingDepth, 0],
+      [0, waitingDepth, 0],
     ],
     tones.earth,
     tones,
@@ -270,17 +272,17 @@ function sceneGarden16(tones, stage, opt = {}) {
     1.2,
   );
   post(waitingRoom, rand, waitingProject, 0, 0, 0, waitingHeight, tones);
-  post(waitingRoom, rand, waitingProject, 0, 80, 0, waitingHeight, tones);
-  post(waitingRoom, rand, waitingProject, 214, 80, 0, waitingHeight, tones);
+  post(waitingRoom, rand, waitingProject, 0, waitingDepth, 0, waitingHeight, tones);
+  post(waitingRoom, rand, waitingProject, waitingWidth, waitingDepth, 0, waitingHeight, tones);
   face(
     waitingRoom,
     rand,
     waitingProject,
     [
-      [0, 80, waitingHeight],
-      [214, 80, waitingHeight],
-      [214, 84, waitingHeight],
-      [0, 84, waitingHeight],
+      [0, waitingDepth, waitingHeight],
+      [waitingWidth, waitingDepth, waitingHeight],
+      [waitingWidth, waitingDepth + 4, waitingHeight],
+      [0, waitingDepth + 4, waitingHeight],
     ],
     tones.wood,
     tones,
@@ -291,10 +293,10 @@ function sceneGarden16(tones, stage, opt = {}) {
     rand,
     waitingProject,
     [
-      [156, 80, 66],
-      [202, 80, 66],
-      [202, 80, 116],
-      [156, 80, 116],
+      [156, waitingDepth, 66],
+      [202, waitingDepth, 66],
+      [202, waitingDepth, 116],
+      [156, waitingDepth, 116],
     ],
     tones.glowSoft,
     tones,
@@ -303,7 +305,13 @@ function sceneGarden16(tones, stage, opt = {}) {
   for (let x = 162; x < 202; x += 8)
     addLine(
       waitingRoom,
-      wobblySegment(rand, waitingProject(x, 80, 67), waitingProject(x, 80, 115), 0.2, 1),
+      wobblySegment(
+        rand,
+        waitingProject(x, waitingDepth, 67),
+        waitingProject(x, waitingDepth, 115),
+        0.2,
+        1,
+      ),
       tones.bamboo,
       1.2,
       0.8,
@@ -317,10 +325,10 @@ function sceneGarden16(tones, stage, opt = {}) {
     wobblyPolygon(
       rand,
       projectAll(waitingProject, [
-        [14, 80, 24],
-        [144, 80, 24],
-        [144, 80, 168],
-        [14, 80, 168],
+        [14, waitingDepth, 24],
+        [144, waitingDepth, 24],
+        [144, waitingDepth, 168],
+        [14, waitingDepth, 168],
       ]),
       3,
     ),
@@ -334,8 +342,8 @@ function sceneGarden16(tones, stage, opt = {}) {
       rand,
       waitingProject,
       [
-        [16, 80, y],
-        [142, 80, y],
+        [16, waitingDepth, y],
+        [142, waitingDepth, y],
         [142, 70, y],
         [16, 70, y],
       ],
