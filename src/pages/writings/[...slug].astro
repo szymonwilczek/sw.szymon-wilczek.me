@@ -44,6 +44,7 @@ const postImage = imageMatch ? imageMatch[1] : `/og/${slug}.png`;
   tags={post.data.tags}
   image={postImage}
   imageAlt={post.data.title}
+  wordCount={stats.words}
 >
   <header class="article-head">
     <p class="crumbs" data-host={Astro.site!.host}>

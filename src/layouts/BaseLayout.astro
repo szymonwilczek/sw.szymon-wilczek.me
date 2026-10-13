@@ -26,11 +26,14 @@ export interface Props {
   breadcrumbs?: Array<{ name: string; url: string }>;
   prevUrl?: string;
   nextUrl?: string;
+  collection?: boolean;
+  wordCount?: number;
+  graph?: Record<string, unknown>[];
 }
 
 const {
   title = "Szymon Wilczek",
-  description = "Personal website, developer utilities, photography, and plain-text writings.",
+  description,
   image,
   imageAlt,
   type = "website",
@@ -43,6 +46,9 @@ const {
   breadcrumbs,
   prevUrl,
   nextUrl,
+  collection,
+  wordCount,
+  graph,
 } = Astro.props;
 ---
 
@@ -112,6 +118,9 @@ const {
       breadcrumbs={breadcrumbs}
       prevUrl={prevUrl}
       nextUrl={nextUrl}
+      collection={collection}
+      wordCount={wordCount}
+      graph={graph}
     />
 
     <script is:inline define:vars={{ themeIds, moreThemes }}>

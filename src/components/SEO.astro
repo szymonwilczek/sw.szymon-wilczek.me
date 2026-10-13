@@ -14,11 +14,17 @@ export interface Props {
   breadcrumbs?: Array<{ name: string; url: string }>;
   prevUrl?: string;
   nextUrl?: string;
+  collection?: boolean;
+  wordCount?: number;
+  graph?: Record<string, unknown>[];
 }
+
+const SITE_DESCRIPTION =
+  "The garden of Szymon Wilczek: low-level computing, Linux and Emacs, open-source projects, photographs, and small rooms drawn in ink.";
 
 const {
   title = "Szymon Wilczek",
-  description = "Personal website, developer utilities, photography, and plain-text writings.",
+  description = SITE_DESCRIPTION,
   image = "/og-default.png",
   imageAlt = "Szymon Wilczek - Software Engineer",
   type = "website",
@@ -31,6 +37,9 @@ const {
   breadcrumbs,
   prevUrl,
   nextUrl,
+  collection = false,
+  wordCount,
+  graph = [],
 } = Astro.props;
 
 const siteUrl = Astro.site!.origin;
@@ -41,6 +50,9 @@ const ogImageURL = new URL(
   siteUrl,
 );
 
+const ogImageSize =
+  image === "/og-default.png" || image.startsWith("/og/") ? { width: 1200, height: 630 } : {};
+
 const robotsContent = noindex
   ? "noindex, nofollow"
   : "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1";
@@ -48,14 +60,13 @@ const robotsContent = noindex
 const defaultKeywords = [
   "Szymon Wilczek",
   "software engineer",
-  "low-level programming",
-  "linux",
-  "emacs",
-  "neovim",
-  "sovereign computing",
-  "c",
+  "systems programming",
+  "C",
+  "Linux",
+  "GNU Emacs",
+  "open source",
   "typography",
-  "ghostty",
+  "photography",
 ];
 const allKeywords = Array.from(new Set([...tags, ...defaultKeywords]));
 
@@ -77,55 +88,63 @@ if (!breadcrumbItems && Astro.url.pathname !== "/") {
   }
 }
 
-const personSchema = {
-  "@context": "https://schema.org",
+// One JSON-LD graph per page
+const personId = `${siteUrl}/#identity`;
+const websiteId = `${siteUrl}/#website`;
+const pageId = `${canonicalURL.href}#webpage`;
+const breadcrumbId = `${canonicalURL.href}#breadcrumb`;
+
+const person = {
   "@type": "Person",
-  "@id": `${siteUrl}/#identity`,
+  "@id": personId,
   name: "Szymon Wilczek",
   givenName: "Szymon",
   familyName: "Wilczek",
-  url: siteUrl,
-  image: `${siteUrl}/avatar.png`,
-  jobTitle: "Software Engineer",
-  alumniOf: {
-    "@type": "EducationalOrganization",
-    name: "Silesian University of Technology",
+  url: `${siteUrl}/`,
+  image: {
+    "@type": "ImageObject",
+    "@id": `${siteUrl}/#avatar`,
+    url: `${siteUrl}/avatar.png`,
+    width: 1254,
+    height: 1254,
   },
-  sameAs: [
-    "https://github.com/szymonwilczek",
-    "https://szymon-wilczek.me",
-    "https://linkedin.com/in/szymon-wilczek",
-  ],
+  email: "mailto:swilczek.lx@gmail.com",
+  jobTitle: "Software Engineer",
+  description:
+    "Software engineer working close to the metal: C, Linux and GNU Emacs, open-source tools, typography and photography.",
+  alumniOf: {
+    "@type": "CollegeOrUniversity",
+    name: "Silesian University of Technology",
+    sameAs: "https://en.wikipedia.org/wiki/Silesian_University_of_Technology",
+  },
+  sameAs: ["https://github.com/szymonwilczek"],
   knowsAbout: [
-    "Systems Programming",
-    "GNU Emacs",
-    "Neovim",
-    "Typography & Type Design",
-    "Linux Systems",
-    "Sovereign Computing",
+    "Systems programming",
     "C",
+    "Linux",
+    "GNU Emacs",
+    "Open-source software",
+    "Typography and type design",
+    "Photography",
   ],
 };
 
-const websiteSchema = {
-  "@context": "https://schema.org",
+const website = {
   "@type": "WebSite",
-  "@id": `${siteUrl}/#website`,
+  "@id": websiteId,
   url: `${siteUrl}/`,
   name: "Szymon Wilczek",
-  description:
-    "Personal hypermedia space, developer utilities, photography, and plain-text essays.",
-  publisher: {
-    "@id": `${siteUrl}/#identity`,
-  },
-  inLanguage: "en-US",
+  description: SITE_DESCRIPTION,
+  author: { "@id": personId },
+  publisher: { "@id": personId },
+  inLanguage: "en",
 };
 
-const breadcrumbSchema =
+const breadcrumb =
   breadcrumbItems && breadcrumbItems.length > 1
     ? {
-        "@context": "https://schema.org",
         "@type": "BreadcrumbList",
+        "@id": breadcrumbId,
         itemListElement: breadcrumbItems.map((item, index) => ({
           "@type": "ListItem",
           position: index + 1,
@@ -135,37 +154,52 @@ const breadcrumbSchema =
       }
     : null;
 
-const articleSchema =
+const PAGE_TYPES = { website: "WebPage", article: "WebPage", profile: "ProfilePage" } as const;
+
+const webpage = {
+  "@type": PAGE_TYPES[type],
+  ...(collection ? { "@type": ["WebPage", "CollectionPage"] } : {}),
+  "@id": pageId,
+  url: canonicalURL.href,
+  name: pageTitle,
+  description,
+  isPartOf: { "@id": websiteId },
+  about: { "@id": personId },
+  inLanguage: "en",
+  primaryImageOfPage: { "@type": "ImageObject", url: ogImageURL.href },
+  ...(breadcrumb ? { breadcrumb: { "@id": breadcrumbId } } : {}),
+  ...(type === "profile" ? { mainEntity: { "@id": personId } } : {}),
+  ...(type === "article" ? { mainEntity: { "@id": `${canonicalURL.href}#article` } } : {}),
+  ...(pubDate ? { datePublished: pubDate.toISOString() } : {}),
+  ...(updatedDate ? { dateModified: updatedDate.toISOString() } : {}),
+};
+
+const article =
   type === "article"
     ? {
-        "@context": "https://schema.org",
         "@type": "BlogPosting",
-        "@id": `${canonicalURL.toString()}#article`,
-        mainEntityOfPage: {
-          "@type": "WebPage",
-          "@id": canonicalURL.toString(),
-        },
+        "@id": `${canonicalURL.href}#article`,
+        mainEntityOfPage: { "@id": pageId },
+        isPartOf: { "@id": websiteId },
         headline: title,
         name: title,
-        description: description,
-        image: ogImageURL.toString(),
-        datePublished: pubDate ? pubDate.toISOString() : undefined,
-        dateModified: updatedDate
-          ? updatedDate.toISOString()
-          : pubDate
-            ? pubDate.toISOString()
-            : undefined,
-        author: {
-          "@id": `${siteUrl}/#identity`,
-        },
-        publisher: {
-          "@id": `${siteUrl}/#identity`,
-        },
-        keywords: tags.length > 0 ? tags.join(", ") : undefined,
+        description,
+        image: { "@type": "ImageObject", url: ogImageURL.href, ...ogImageSize },
+        datePublished: pubDate?.toISOString(),
+        dateModified: (updatedDate ?? pubDate)?.toISOString(),
+        author: { "@id": personId },
+        publisher: { "@id": personId },
+        keywords: tags.length > 0 ? tags : undefined,
         articleSection: category || "Essay",
-        inLanguage: "en-US",
+        wordCount,
+        inLanguage: "en",
       }
     : null;
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [person, website, webpage, breadcrumb, article, ...graph].filter(Boolean),
+};
 ---
 
 <title>{pageTitle}</title>
@@ -177,7 +211,8 @@ const articleSchema =
 <meta name="keywords" content={allKeywords.join(", ")} />
 <meta name="robots" content={robotsContent} />
 <meta name="googlebot" content={robotsContent} />
-<meta name="theme-color" content="#18181b" />
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#dad8cf" />
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#101414" />
 
 <link rel="canonical" href={canonicalURL} />
 
@@ -192,6 +227,8 @@ const articleSchema =
 <meta property="og:description" content={description} />
 <meta property="og:image" content={ogImageURL} />
 <meta property="og:image:alt" content={imageAlt} />
+{ogImageSize.width && <meta property="og:image:width" content={String(ogImageSize.width)} />}
+{ogImageSize.height && <meta property="og:image:height" content={String(ogImageSize.height)} />}
 
 {type === "article" && pubDate && (
   <meta property="article:published_time" content={pubDate.toISOString()} />
@@ -215,13 +252,9 @@ const articleSchema =
 <link rel="icon" type="image/x-icon" href="/favicon.ico" />
 <link rel="alternate" type="application/rss+xml" title="Szymon Wilczek RSS Feed" href="/rss.xml" />
 <link rel="alternate" type="text/plain" href="/llms.txt" title="LLM Context" />
+<link rel="alternate" type="text/plain" href="/llms-full.txt" title="LLM Full Text" />
+<link rel="author" href="/about/" />
+<link rel="me" href="https://github.com/szymonwilczek" />
 <link rel="sitemap" href="/sitemap-index.xml" />
 
-<script is:inline type="application/ld+json" set:html={JSON.stringify(personSchema)} />
-<script is:inline type="application/ld+json" set:html={JSON.stringify(websiteSchema)} />
-{breadcrumbSchema && (
-  <script is:inline type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
-)}
-{articleSchema && (
-  <script is:inline type="application/ld+json" set:html={JSON.stringify(articleSchema)} />
-)}
+<script is:inline type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
