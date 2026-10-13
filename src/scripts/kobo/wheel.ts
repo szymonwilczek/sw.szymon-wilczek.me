@@ -12,7 +12,7 @@ import {
   note,
   spin,
 } from "../../utils/tea/ink.js";
-import { CLAY_NAMES } from "../../utils/tea/pottery";
+import { CLAY_NAMES, kindOf } from "../../utils/tea/pottery";
 import { tones, stage, drag, frame, clamp, still, type Work, type Point } from "./stage";
 
 const WIDTH = 1100,
@@ -36,13 +36,17 @@ const OPENED: [number, number][] = [
 ];
 const LEVELS = [0, 0.3, 0.7, 1];
 
-// the wall pulled to height h: the same clay, narrower as it rises
+// the wall pulled to height h: the same clay, narrower as it rises, opening out when kept low
 const pulled = (height: number): [number, number][] => {
-  const narrowing = Math.sqrt(34 / height);
-  return [26, 27, 25.5, 23].map((radius, i) => [Math.max(8, radius * narrowing), LEVELS[i]]);
+  const narrowing = Math.sqrt(34 / height),
+    flare = clamp((44 - height) / 20, 0, 1);
+  return [26, 27, 25.5, 23].map((radius, i) => [
+    Math.max(8, radius * narrowing + [0, 0, 5, 14][i] * flare),
+    LEVELS[i],
+  ]);
 };
-export const kindOf = (height: number, handle: boolean) =>
-  height < 20 ? "a plate" : handle ? "a cup" : height < 50 ? "a bowl" : "a tall cup";
+const named = (shape: [number, number][], height: number, handle: boolean) =>
+  `a ${kindOf({ prof: shape, H: height, handle })}`;
 
 export function run(host: HTMLElement, work: Work, done: (w: Work) => void, back: () => void) {
   const base = newGroup();
@@ -198,7 +202,7 @@ export function run(host: HTMLElement, work: Work, done: (w: Work) => void, back
       view.say("二 · press your thumb down into the middle. not too deep.");
     } else if (phase === "pull") {
       view.say(
-        `三 · drag up to pull the wall, down to press it low. now: ${kindOf(height, false)}.`,
+        `三 · drag up to pull the wall, down to press it low. now: ${named(profile, height, false)}.`,
       );
       view.button("shape it", () => {
         phase = "shape";
@@ -207,13 +211,23 @@ export function run(host: HTMLElement, work: Work, done: (w: Work) => void, back
         redraw();
       });
     } else {
-      view.say(`四 · drag the dots out or in. ${kindOf(height, handle)}.`);
-      if (height >= 40)
+      view.say(`四 · drag the dots out or in. ${named(profile, height, handle)}.`);
+      if (height >= 24)
         view.button(handle ? "take the handle off" : "pull a handle", () => {
           handle = !handle;
           say();
           redraw();
         });
+      view.button(
+        "true the wall straight",
+        () => {
+          const rim = profile[profile.length - 1][0];
+          profile = profile.map(([, level]) => [Math.max(8, rim * (0.88 + level * 0.12)), level]);
+          say();
+          redraw();
+        },
+        "quiet",
+      );
       view.button("cut it off the wheel", () => {
         done({
           ...work,
@@ -261,7 +275,7 @@ export function run(host: HTMLElement, work: Work, done: (w: Work) => void, back
         height = clamp(startHeight + (start[1] - point[1]) / CLAY_SCALE, 12, 76);
         profile = pulled(height);
         view.say(
-          `三 · drag up to pull the wall, down to press it low. now: ${kindOf(height, false)}.`,
+          `三 · drag up to pull the wall, down to press it low. now: ${named(profile, height, false)}.`,
         );
       }
       if (phase === "shape" && grab >= 0) {
@@ -277,6 +291,7 @@ export function run(host: HTMLElement, work: Work, done: (w: Work) => void, back
           ),
           profile[grab][1],
         ];
+        view.say(`四 · drag the dots out or in. ${named(profile, height, handle)}.`);
       }
       redraw();
     },

@@ -192,9 +192,23 @@ export function pieceSvg(spec: PieceSpec, turn = 0, scale = 1.5) {
   return { W: width, H: height, svg: toSvg({ W: width, H: height, groups: [group], clips: [] }) };
 }
 
+// what a piece is, read from its shape
+export function kindOf(spec: Pick<PieceSpec, "prof" | "H" | "handle">): string {
+  const radii = spec.prof.map(([radius]) => radius);
+  const rim = radii[radii.length - 1],
+    foot = radii[0],
+    widest = Math.max(...radii);
+  if (spec.H < 20 || spec.H < rim * 0.4) return "plate";
+  if (spec.handle) return spec.H > rim * 2.4 ? "tall mug" : "cup";
+  if (spec.H >= 40 && rim < widest * 0.72) return "vase";
+  if (spec.H < rim * 1.15 && rim > foot * 1.15) return "bowl";
+  if (spec.H > rim * 2) return "yunomi";
+  return spec.H < rim * 1.3 ? "teacup" : "cup";
+}
+
 // what the card under a piece says
 export function pieceWords(spec: PieceSpec): string[] {
-  const kind = spec.H < 20 ? "plate" : spec.handle ? "cup" : spec.H < 50 ? "bowl" : "yunomi";
+  const kind = kindOf(spec);
   return [
     `${kind} · ${CLAY_NAMES[spec.clay]} clay`,
     spec.glaze ? `${GLAZE_NAMES[spec.glaze.c]} glaze` : "unglazed",
