@@ -1,4 +1,4 @@
-const ns = "http://www.w3.org/2000/svg";
+const SVG_NS = "http://www.w3.org/2000/svg";
 const fonts = new Map<string, Promise<string>>();
 
 // face as a data URL
@@ -7,13 +7,13 @@ const dataOf = (url: string) => {
     fonts.set(
       url,
       fetch(url)
-        .then((r) => r.blob())
+        .then((response) => response.blob())
         .then(
-          (b) =>
-            new Promise<string>((ok) => {
-              const fr = new FileReader();
-              fr.onload = () => ok(fr.result as string);
-              fr.readAsDataURL(b);
+          (blob) =>
+            new Promise<string>((resolve) => {
+              const reader = new FileReader();
+              reader.onload = () => resolve(reader.result as string);
+              reader.readAsDataURL(blob);
             }),
         ),
     );
@@ -30,180 +30,180 @@ async function facesFor(families: Set<string>) {
     } catch {
       continue;
     }
-    for (const r of list)
-      if (r instanceof CSSFontFaceRule) {
-        const fam = r.style.getPropertyValue("font-family").replace(/["']/g, "").trim();
-        if (families.has(fam)) rules.push(r);
+    for (const rule of list)
+      if (rule instanceof CSSFontFaceRule) {
+        const family = rule.style.getPropertyValue("font-family").replace(/["']/g, "").trim();
+        if (families.has(family)) rules.push(rule);
       }
   }
-  const css = await Promise.all(
-    rules.map(async (r) => {
-      const url = /url\(["']?([^"')]+)/.exec(r.style.getPropertyValue("src"))?.[1];
+  const faces = await Promise.all(
+    rules.map(async (rule) => {
+      const url = /url\(["']?([^"')]+)/.exec(rule.style.getPropertyValue("src"))?.[1];
       if (!url) return "";
-      const src = await dataOf(new URL(url, location.href).href).catch(() => "");
-      return src ? r.cssText.replace(/src:[^;]+;/, `src: url("${src}");`) : "";
+      const source = await dataOf(new URL(url, location.href).href).catch(() => "");
+      return source ? rule.cssText.replace(/src:[^;]+;/, `src: url("${source}");`) : "";
     }),
   );
-  return css.join("\n");
+  return faces.join("\n");
 }
 
 // CSS cubic-bezier, so the drawn circle keeps the frame's own pace
 function bezier(x1: number, y1: number, x2: number, y2: number) {
-  const at = (a: number, b: number, t: number) =>
-    3 * a * t * (1 - t) ** 2 + 3 * b * t * t * (1 - t) + t ** 3;
-  return (x: number) => {
-    let lo = 0,
-      hi = 1;
+  const point = (start: number, control: number, share: number) =>
+    3 * start * share * (1 - share) ** 2 + 3 * control * share * share * (1 - share) + share ** 3;
+  return (input: number) => {
+    let low = 0,
+      high = 1;
     for (let i = 0; i < 24; i++) {
-      const t = (lo + hi) / 2;
-      if (at(x1, x2, t) < x) lo = t;
-      else hi = t;
+      const mid = (low + high) / 2;
+      if (point(x1, x2, mid) < input) low = mid;
+      else high = mid;
     }
-    return at(y1, y2, (lo + hi) / 2);
+    return point(y1, y2, (low + high) / 2);
   };
 }
 const OPEN = bezier(0.2, 0.7, 0.2, 1);
 
-export function stillOf(fig: HTMLElement) {
-  const svg = fig.querySelector("svg")!;
-  const sheets = () => [...fig.querySelectorAll<SVGSVGElement>(":scope > svg")];
-  const box = document.createElement("div");
-  box.className = "still";
-  box.setAttribute("aria-hidden", "true");
+export function stillOf(figure: HTMLElement) {
+  const svg = figure.querySelector("svg")!;
+  const sheets = () => [...figure.querySelectorAll<SVGSVGElement>(":scope > svg")];
+  const holder = document.createElement("div");
+  holder.className = "still";
+  holder.setAttribute("aria-hidden", "true");
   const sharp = document.createElement("canvas");
   const soft = document.createElement("canvas");
   soft.className = "soft";
   const iris = document.createElement("canvas");
   iris.className = "iris";
-  box.append(sharp, soft, iris);
+  holder.append(sharp, soft, iris);
   let made = "";
   let making: Promise<boolean> | null = null;
 
   function size() {
-    const vb = svg.viewBox.baseVal;
-    const fit = Math.min(screen.width, (screen.height * vb.width) / vb.height);
-    let w = Math.max(fig.clientWidth, fit) * devicePixelRatio;
-    const cap = Math.sqrt(8e6 / (vb.height / vb.width));
-    w = Math.round(Math.min(w, cap, 4096));
-    return [w, Math.round((w * vb.height) / vb.width)];
+    const viewBox = svg.viewBox.baseVal;
+    const fitted = Math.min(screen.width, (screen.height * viewBox.width) / viewBox.height);
+    let width = Math.max(figure.clientWidth, fitted) * devicePixelRatio;
+    const maxWidth = Math.sqrt(8e6 / (viewBox.height / viewBox.width));
+    width = Math.round(Math.min(width, maxWidth, 4096));
+    return [width, Math.round((width * viewBox.height) / viewBox.width)];
   }
 
   // what the picture depends on: the drawing, its tones, its size
-  function key() {
-    const css = getComputedStyle(fig);
-    const tones = [...fig.style]
-      .filter((p) => p.startsWith("--"))
-      .map((p) => css.getPropertyValue(p));
+  function cacheKey() {
+    const style = getComputedStyle(figure);
+    const tones = [...figure.style]
+      .filter((prop) => prop.startsWith("--"))
+      .map((prop) => style.getPropertyValue(prop));
     return `${size()}|${tones}|${sheets()
-      .map((s) => s.innerHTML)
+      .map((sheet) => sheet.innerHTML)
       .join("")}`;
   }
 
-  async function make(k: string) {
-    const [w, h] = size();
+  async function make(stamp: string) {
+    const [width, height] = size();
     const copy = svg.cloneNode(true) as SVGSVGElement;
 
-    for (const s of sheets().slice(1))
-      copy.append(...[...s.children].map((c) => c.cloneNode(true)));
+    for (const sheet of sheets().slice(1))
+      copy.append(...[...sheet.children].map((child) => child.cloneNode(true)));
 
-    copy.setAttribute("xmlns", ns);
-    copy.setAttribute("width", String(w));
-    copy.setAttribute("height", String(h));
+    copy.setAttribute("xmlns", SVG_NS);
+    copy.setAttribute("width", String(width));
+    copy.setAttribute("height", String(height));
 
-    const css = getComputedStyle(fig);
-    const tones = [...fig.style]
-      .filter((p) => p.startsWith("--"))
-      .map((p) => `${p}:${css.getPropertyValue(p)}`)
+    const computed = getComputedStyle(figure);
+    const tones = [...figure.style]
+      .filter((prop) => prop.startsWith("--"))
+      .map((prop) => `${prop}:${computed.getPropertyValue(prop)}`)
       .join(";");
 
     copy.setAttribute("style", tones);
 
     const families = new Set<string>();
-    fig.querySelectorAll(":scope > svg text").forEach((t) =>
-      getComputedStyle(t)
+    figure.querySelectorAll(":scope > svg text").forEach((text) =>
+      getComputedStyle(text)
         .fontFamily.split(",")
-        .forEach((f) => families.add(f.replace(/["']/g, "").trim())),
+        .forEach((family) => families.add(family.replace(/["']/g, "").trim())),
     );
 
-    const style = document.createElementNS(ns, "style");
+    const style = document.createElementNS(SVG_NS, "style");
     style.textContent = await facesFor(families);
     copy.prepend(style);
 
-    const url = URL.createObjectURL(
+    const blobUrl = URL.createObjectURL(
       new Blob([new XMLSerializer().serializeToString(copy)], { type: "image/svg+xml" }),
     );
 
     try {
-      const img = new Image();
-      img.src = url;
-      await img.decode();
+      const image = new Image();
+      image.src = blobUrl;
+      await image.decode();
 
-      if (key() !== k) return false;
-      for (const c of [sharp, soft, iris]) [c.width, c.height] = [w, h];
-      sharp.getContext("2d")!.drawImage(img, 0, 0, w, h);
+      if (cacheKey() !== stamp) return false;
+      for (const canvas of [sharp, soft, iris]) [canvas.width, canvas.height] = [width, height];
+      sharp.getContext("2d")!.drawImage(image, 0, 0, width, height);
 
-      const px = (2 * w) / fig.clientWidth;
-      const ctx = soft.getContext("2d")!;
-      if ("filter" in (ctx as object)) {
-        ctx.filter = `blur(${px}px)`;
-        ctx.drawImage(sharp, 0, 0);
+      const pixelScale = (2 * width) / figure.clientWidth;
+      const softCtx = soft.getContext("2d")!;
+      if ("filter" in (softCtx as object)) {
+        softCtx.filter = `blur(${pixelScale}px)`;
+        softCtx.drawImage(sharp, 0, 0);
       } else {
         // no canvas filters: small and back up is a blur too
-        const s = Math.max(1, px * 1.5);
-        const tmp = new OffscreenCanvas(Math.ceil(w / s), Math.ceil(h / s));
-        tmp.getContext("2d")!.drawImage(sharp, 0, 0, tmp.width, tmp.height);
-        ctx.drawImage(tmp, 0, 0, w, h);
+        const shrink = Math.max(1, pixelScale * 1.5);
+        const small = new OffscreenCanvas(Math.ceil(width / shrink), Math.ceil(height / shrink));
+        small.getContext("2d")!.drawImage(sharp, 0, 0, small.width, small.height);
+        softCtx.drawImage(small, 0, 0, width, height);
       }
-      made = k;
+      made = stamp;
       return true;
     } finally {
-      URL.revokeObjectURL(url);
+      URL.revokeObjectURL(blobUrl);
     }
   }
 
   return {
     prepare(): Promise<boolean> {
-      const k = key();
-      if (made === k) return Promise.resolve(true);
-      making ??= make(k)
+      const stamp = cacheKey();
+      if (made === stamp) return Promise.resolve(true);
+      making ??= make(stamp)
         .catch(() => false)
         .finally(() => (making = null));
       return making;
     },
     get ready() {
-      return made !== "" && made === key();
+      return made !== "" && made === cacheKey();
     },
     show() {
-      sheets().at(-1)!.after(box);
-      fig.classList.add("stilled");
+      sheets().at(-1)!.after(holder);
+      figure.classList.add("stilled");
     },
     open() {
-      const a = fig
+      const opening = figure
         .getAnimations()
-        .find((x) => (x as CSSAnimation).animationName === "radio-open-still");
-      if (!box.isConnected || !a) return;
-      const [w, h] = [sharp.width, sharp.height];
-      const ctx = iris.getContext("2d")!;
-      const r = (0.75 * Math.hypot(w, h)) / Math.SQRT2;
-      const span = Number(a.effect?.getComputedTiming().duration) || 900;
+        .find((animation) => (animation as CSSAnimation).animationName === "radio-open-still");
+      if (!holder.isConnected || !opening) return;
+      const [width, height] = [sharp.width, sharp.height];
+      const irisCtx = iris.getContext("2d")!;
+      const radius = (0.75 * Math.hypot(width, height)) / Math.SQRT2;
+      const span = Number(opening.effect?.getComputedTiming().duration) || 900;
       const frame = () => {
-        if (!fig.classList.contains("radio-opening")) return;
-        const t = Math.min(1, (Number(a.currentTime) || 0) / span);
-        ctx.clearRect(0, 0, w, h);
-        ctx.save();
-        ctx.beginPath();
-        ctx.arc(w / 2, h * 0.6, r * OPEN(t), 0, 2 * Math.PI);
-        ctx.clip();
-        ctx.drawImage(sharp, 0, 0);
-        ctx.restore();
+        if (!figure.classList.contains("radio-opening")) return;
+        const progress = Math.min(1, (Number(opening.currentTime) || 0) / span);
+        irisCtx.clearRect(0, 0, width, height);
+        irisCtx.save();
+        irisCtx.beginPath();
+        irisCtx.arc(width / 2, height * 0.6, radius * OPEN(progress), 0, 2 * Math.PI);
+        irisCtx.clip();
+        irisCtx.drawImage(sharp, 0, 0);
+        irisCtx.restore();
         requestAnimationFrame(frame);
       };
       frame();
     },
     hide() {
-      if (!box.isConnected) return;
-      fig.classList.remove("stilled");
-      requestAnimationFrame(() => requestAnimationFrame(() => box.remove()));
+      if (!holder.isConnected) return;
+      figure.classList.remove("stilled");
+      requestAnimationFrame(() => requestAnimationFrame(() => holder.remove()));
     },
   };
 }

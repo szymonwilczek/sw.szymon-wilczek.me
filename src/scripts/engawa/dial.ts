@@ -2,13 +2,13 @@ import { SEASONS, seasonOf } from "../../utils/engawa/sky";
 import type { View } from "./scene";
 
 // enso's centre
-const CX = 1050,
-  CY = 98;
+const CENTER_X = 1050,
+  CENTER_Y = 98;
 
-export function dialOf(fig: HTMLElement, scene: { view: View; draw: () => void }) {
-  const dial = fig.querySelector<HTMLButtonElement>(".dial")!;
-  const season = fig.querySelector<HTMLButtonElement>(".season")!;
-  const svg = fig.querySelector("svg")!;
+export function dialOf(figure: HTMLElement, scene: { view: View; draw: () => void }) {
+  const dial = figure.querySelector<HTMLButtonElement>(".dial")!;
+  const season = figure.querySelector<HTMLButtonElement>(".season")!;
+  const svg = figure.querySelector("svg")!;
   const { view } = scene;
 
   let queued = false;
@@ -22,25 +22,25 @@ export function dialOf(fig: HTMLElement, scene: { view: View; draw: () => void }
   };
 
   // pointer's angle round the centre, as an hour
-  function hourAt(e: PointerEvent): number {
-    const box = svg.getBoundingClientRect();
-    const x = ((e.clientX - box.left) / box.width) * 1100 - CX;
-    const y = ((e.clientY - box.top) / box.height) * 640 - CY;
-    const a = Math.atan2(x, -y);
-    return ((((a / (Math.PI * 2)) * 24) % 24) + 24) % 24;
+  function hourAt(event: PointerEvent): number {
+    const bounds = svg.getBoundingClientRect();
+    const x = ((event.clientX - bounds.left) / bounds.width) * 1100 - CENTER_X;
+    const y = ((event.clientY - bounds.top) / bounds.height) * 640 - CENTER_Y;
+    const angle = Math.atan2(x, -y);
+    return ((((angle / (Math.PI * 2)) * 24) % 24) + 24) % 24;
   }
 
   let dragging = false,
     moved = false;
-  dial.addEventListener("pointerdown", (e) => {
+  dial.addEventListener("pointerdown", (event) => {
     dragging = true;
     moved = false;
-    dial.setPointerCapture(e.pointerId);
+    dial.setPointerCapture(event.pointerId);
   });
-  dial.addEventListener("pointermove", (e) => {
+  dial.addEventListener("pointermove", (event) => {
     if (!dragging) return;
     moved = true;
-    view.hourSet = hourAt(e);
+    view.hourSet = hourAt(event);
     redraw();
   });
   dial.addEventListener("pointerup", () => {
@@ -51,15 +51,15 @@ export function dialOf(fig: HTMLElement, scene: { view: View; draw: () => void }
     view.hourSet = null;
     redraw();
   });
-  dial.addEventListener("keydown", (e) => {
+  dial.addEventListener("keydown", (event) => {
     const step = (<Record<string, number>>{
       ArrowRight: 0.25,
       ArrowUp: 0.25,
       ArrowLeft: -0.25,
       ArrowDown: -0.25,
-    })[e.key];
+    })[event.key];
     if (step === undefined) return;
-    e.preventDefault();
+    event.preventDefault();
     view.hourSet = ((((view.hourSet ?? view.hour) + step) % 24) + 24) % 24;
     redraw();
   });

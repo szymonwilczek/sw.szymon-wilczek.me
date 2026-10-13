@@ -5,9 +5,9 @@ const DISC = "engawa:disc";
 const VOLUME = "engawa:volume";
 
 export function radioOf(hour: () => number) {
-  let ctx: AudioContext | null = null;
-  let out: GainNode;
-  let lp: BiquadFilterNode;
+  let audio: AudioContext | null = null;
+  let output: GainNode;
+  let lowpass: BiquadFilterNode;
   let depth: GainNode;
   let level: GainNode;
   let kit: Kit;
@@ -17,192 +17,204 @@ export function radioOf(hour: () => number) {
   let timer = 0;
   let next = 0;
   let step = 0;
-  let on = false;
+  let playing = false;
   let disc = Math.min(DISCS.length - 1, Math.max(0, Number(localStorage.getItem(DISC)) || 0));
-  let vol = Math.min(1, Math.max(0, Number(localStorage.getItem(VOLUME) ?? 0.8) || 0));
-  const listeners: ((on: boolean) => void)[] = [];
-  const louder: ((v: number) => void)[] = [];
+  let volumeLevel = Math.min(1, Math.max(0, Number(localStorage.getItem(VOLUME) ?? 0.8) || 0));
+  const listeners: ((isOn: boolean) => void)[] = [];
+  const louder: ((amount: number) => void)[] = [];
 
   function build() {
-    const c = (ctx = new AudioContext());
-    out = c.createGain();
-    out.gain.value = 0;
-    lp = c.createBiquadFilter();
-    lp.type = "lowpass";
-    lp.Q.value = 0.4;
-    const wow = c.createDelay(0.05);
-    wow.delayTime.value = 0.012;
-    const lfo = c.createOscillator();
-    depth = c.createGain();
-    lfo.frequency.value = 0.33;
-    lfo.connect(depth).connect(wow.delayTime);
-    lfo.start();
-    const glue = c.createDynamicsCompressor();
+    const context = (audio = new AudioContext());
+    output = context.createGain();
+    output.gain.value = 0;
+    lowpass = context.createBiquadFilter();
+    lowpass.type = "lowpass";
+    lowpass.Q.value = 0.4;
+    const flutter = context.createDelay(0.05);
+    flutter.delayTime.value = 0.012;
+    const flutterRate = context.createOscillator();
+    depth = context.createGain();
+    flutterRate.frequency.value = 0.33;
+    flutterRate.connect(depth).connect(flutter.delayTime);
+    flutterRate.start();
+    const glue = context.createDynamicsCompressor();
     glue.threshold.value = -20;
     glue.ratio.value = 3;
-    lp.connect(wow).connect(glue).connect(out).connect(c.destination);
-    const echo = c.createDelay(1),
-      fb = c.createGain(),
-      wet = c.createGain();
+    lowpass.connect(flutter).connect(glue).connect(output).connect(context.destination);
+    const echo = context.createDelay(1),
+      feedback = context.createGain(),
+      echoLevel = context.createGain();
     echo.delayTime.value = 0.43;
-    fb.gain.value = 0.32;
-    wet.gain.value = 0.35;
-    echo.connect(fb).connect(echo);
-    echo.connect(wet).connect(lp);
-    const noise = c.createBuffer(1, c.sampleRate * 2, c.sampleRate);
-    const d = noise.getChannelData(0);
-    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
-    level = c.createGain();
-    level.connect(lp);
-    kit = { ctx: c, bus: level, echo, noise };
-    surface = c.createGain();
-    surface.connect(out);
+    feedback.gain.value = 0.32;
+    echoLevel.gain.value = 0.35;
+    echo.connect(feedback).connect(echo);
+    echo.connect(echoLevel).connect(lowpass);
+    const noise = context.createBuffer(1, context.sampleRate * 2, context.sampleRate);
+    const samples = noise.getChannelData(0);
+    for (let i = 0; i < samples.length; i++) samples[i] = Math.random() * 2 - 1;
+    level = context.createGain();
+    level.connect(lowpass);
+    kit = { ctx: context, bus: level, echo, noise };
+    surface = context.createGain();
+    surface.connect(output);
   }
 
   function scratch() {
-    const c = ctx!;
-    const len = c.sampleRate * 6;
-    const buf = c.createBuffer(1, len, c.sampleRate);
-    const d = buf.getChannelData(0);
-    for (let i = 0; i < len; i++) {
-      d[i] = (Math.random() * 2 - 1) * 0.008;
+    const context = audio!;
+    const length = context.sampleRate * 6;
+    const buffer = context.createBuffer(1, length, context.sampleRate);
+    const samples = buffer.getChannelData(0);
+    for (let i = 0; i < length; i++) {
+      samples[i] = (Math.random() * 2 - 1) * 0.008;
       if (Math.random() < 0.00002) {
-        const amp = 0.06 + Math.random() * 0.12;
-        for (let k = 0; k < 30 && i + k < len; k++)
-          d[i + k] += amp * (Math.random() * 2 - 1) * Math.exp(-k / 5);
+        const amplitude = 0.06 + Math.random() * 0.12;
+        for (let offset = 0; offset < 30 && i + offset < length; offset++)
+          samples[i + offset] += amplitude * (Math.random() * 2 - 1) * Math.exp(-offset / 5);
       }
     }
-    const src = c.createBufferSource();
-    src.buffer = buf;
-    src.loop = true;
-    const bp = c.createBiquadFilter();
-    bp.type = "bandpass";
-    bp.frequency.value = 2400;
-    bp.Q.value = 0.5;
-    src.connect(bp).connect(surface);
-    src.start();
-    return src;
+    const source = context.createBufferSource();
+    source.buffer = buffer;
+    source.loop = true;
+    const bandpass = context.createBiquadFilter();
+    bandpass.type = "bandpass";
+    bandpass.frequency.value = 2400;
+    bandpass.Q.value = 0.5;
+    source.connect(bandpass).connect(surface);
+    source.start();
+    return source;
   }
 
   function schedule() {
-    const c = ctx!;
-    const d = DISCS[disc];
-    if (!d.play) return;
-    const h = hour();
-    const beat = 60 / d.bpm!(h);
-    while (next < c.currentTime + 0.15) {
-      const swing = step % 4 === 2 ? beat * (d.swing ?? 0.08) : 0;
-      d.play(kit, next + swing, step, beat, h);
+    const context = audio!;
+    const current = DISCS[disc];
+    if (!current.play) return;
+    const hourNow = hour();
+    const beat = 60 / current.bpm!(hourNow);
+    while (next < context.currentTime + 0.15) {
+      const swing = step % 4 === 2 ? beat * (current.swing ?? 0.08) : 0;
+      current.play(kit, next + swing, step, beat, hourNow);
       next += beat / 4;
       step++;
     }
   }
 
   function needle() {
-    const c = ctx!;
-    const d = DISCS[disc];
-    level.gain.value = d.level ?? 1;
-    lp.frequency.setTargetAtTime(d.src ? 12000 : (d.top ?? 2600), c.currentTime, 0.05);
-    depth.gain.setTargetAtTime(d.src ? 0 : (d.wow ?? 0.0018), c.currentTime, 0.05);
-    surface.gain.setTargetAtTime(d.src ? 0 : (d.crackle ?? 0.4), c.currentTime, 0.05);
+    const context = audio!;
+    const current = DISCS[disc];
+    level.gain.value = current.level ?? 1;
+    lowpass.frequency.setTargetAtTime(
+      current.src ? 12000 : (current.top ?? 2600),
+      context.currentTime,
+      0.05,
+    );
+    depth.gain.setTargetAtTime(
+      current.src ? 0 : (current.wow ?? 0.0018),
+      context.currentTime,
+      0.05,
+    );
+    surface.gain.setTargetAtTime(
+      current.src ? 0 : (current.crackle ?? 0.4),
+      context.currentTime,
+      0.05,
+    );
     clearInterval(timer);
     tape?.pause();
-    if (d.src) {
+    if (current.src) {
       if (!tape) {
         tape = new Audio();
         tape.crossOrigin = "anonymous";
         tape.loop = true;
-        c.createMediaElementSource(tape).connect(level);
+        context.createMediaElementSource(tape).connect(level);
       }
-      if (!tape.src.endsWith(d.src)) tape.src = d.src;
+      if (!tape.src.endsWith(current.src)) tape.src = current.src;
       tape.play().catch(() => {});
     } else {
-      next = c.currentTime + 0.1;
+      next = context.currentTime + 0.1;
       step = 0;
       timer = window.setInterval(schedule, 25);
     }
   }
 
   function start() {
-    if (!ctx) build();
-    const c = ctx!;
-    c.resume();
+    if (!audio) build();
+    const context = audio!;
+    context.resume();
     crackle ??= scratch();
     needle();
-    out.gain.cancelScheduledValues(c.currentTime);
-    out.gain.setTargetAtTime(vol, c.currentTime, 0.6);
-    on = true;
+    output.gain.cancelScheduledValues(context.currentTime);
+    output.gain.setTargetAtTime(volumeLevel, context.currentTime, 0.6);
+    playing = true;
     localStorage.setItem(SOUND, "on");
-    listeners.forEach((f) => f(true));
+    listeners.forEach((listener) => listener(true));
   }
 
   function stop() {
-    if (!ctx || !on) return;
-    const c = ctx;
-    out.gain.setTargetAtTime(0, c.currentTime, 0.3);
+    if (!audio || !playing) return;
+    const context = audio;
+    output.gain.setTargetAtTime(0, context.currentTime, 0.3);
     clearInterval(timer);
     setTimeout(() => {
-      if (on) return;
+      if (playing) return;
       tape?.pause();
-      c.suspend();
+      context.suspend();
     }, 1500);
-    on = false;
+    playing = false;
     localStorage.setItem(SOUND, "off");
-    listeners.forEach((f) => f(false));
+    listeners.forEach((listener) => listener(false));
   }
 
-  function put(i: number) {
+  function switchTo(i: number) {
     disc = i;
     localStorage.setItem(DISC, String(i));
-    if (!on) return start();
-    const c = ctx!;
-    out.gain.cancelScheduledValues(c.currentTime);
-    out.gain.setTargetAtTime(0, c.currentTime, 0.08);
+    if (!playing) return start();
+    const context = audio!;
+    output.gain.cancelScheduledValues(context.currentTime);
+    output.gain.setTargetAtTime(0, context.currentTime, 0.08);
     setTimeout(() => {
-      if (disc !== i || !on) return;
+      if (disc !== i || !playing) return;
       needle();
-      out.gain.cancelScheduledValues(c.currentTime);
-      out.gain.setTargetAtTime(vol, c.currentTime, 0.4);
-      listeners.forEach((f) => f(true));
+      output.gain.cancelScheduledValues(context.currentTime);
+      output.gain.setTargetAtTime(volumeLevel, context.currentTime, 0.4);
+      listeners.forEach((listener) => listener(true));
     }, 350);
   }
 
-  function volume(v: number) {
-    vol = Math.min(1, Math.max(0, v));
-    localStorage.setItem(VOLUME, String(vol));
-    if (ctx && on) out.gain.setTargetAtTime(vol, ctx.currentTime, 0.05);
-    louder.forEach((f) => f(vol));
+  function volume(amount: number) {
+    volumeLevel = Math.min(1, Math.max(0, amount));
+    localStorage.setItem(VOLUME, String(volumeLevel));
+    if (audio && playing) output.gain.setTargetAtTime(volumeLevel, audio.currentTime, 0.05);
+    louder.forEach((listener) => listener(volumeLevel));
   }
 
   return {
     start,
     stop,
-    put,
-    toggle: () => (on ? stop() : start()),
+    put: switchTo,
+    toggle: () => (playing ? stop() : start()),
     get on() {
-      return on;
+      return playing;
     },
     get disc() {
       return disc;
     },
     get ctx() {
-      return ctx;
+      return audio;
     },
     get out() {
-      return ctx ? out : null;
+      return audio ? output : null;
     },
     wanted: () => localStorage.getItem(SOUND) === "on",
-    onChange: (f: (on: boolean) => void) => listeners.push(f),
+    onChange: (listener: (isOn: boolean) => void) => listeners.push(listener),
     get volume() {
-      return vol;
+      return volumeLevel;
     },
     setVolume: volume,
-    onVolume: (f: (v: number) => void) => louder.push(f),
+    onVolume: (listener: (amount: number) => void) => louder.push(listener),
     about: () => {
-      const d = DISCS[disc];
-      return d.src ? `${d.title}, ${d.by}` : d.about(hour());
+      const current = DISCS[disc];
+      return current.src ? `${current.title}, ${current.by}` : current.about(hour());
     },
-    label: () => (on ? "止 · stop the record" : "針 · play the record"),
+    label: () => (playing ? "止 · stop the record" : "針 · play the record"),
   };
 }
 

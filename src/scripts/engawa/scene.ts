@@ -13,87 +13,92 @@ export interface View {
 }
 
 function split(markup: string) {
-  const out: string[] = [];
-  const re = /<(\/?)\w+[^>]*?(\/?)>/g;
+  const parts: string[] = [];
+  const tag = /<(\/?)\w+[^>]*?(\/?)>/g;
   let depth = 0,
     start = 0,
-    m: RegExpExecArray | null;
-  while ((m = re.exec(markup))) {
-    if (m[1]) {
-      if (--depth === 0) out.push(markup.slice(start, re.lastIndex));
-    } else if (!m[2]) {
-      if (depth++ === 0) start = m.index;
-    } else if (depth === 0) out.push(m[0]);
+    match: RegExpExecArray | null;
+  while ((match = tag.exec(markup))) {
+    if (match[1]) {
+      if (--depth === 0) parts.push(markup.slice(start, tag.lastIndex));
+    } else if (!match[2]) {
+      if (depth++ === 0) start = match.index;
+    } else if (depth === 0) parts.push(match[0]);
   }
-  return out;
+  return parts;
 }
 
-const inner = (el: string) => el.slice(el.indexOf(">") + 1, el.lastIndexOf("<"));
-const head = (el: string) => el.slice(0, el.indexOf(">"));
+const inner = (element: string) =>
+  element.slice(element.indexOf(">") + 1, element.lastIndexOf("<"));
+const head = (element: string) => element.slice(0, element.indexOf(">"));
 
 function parse(markup: string) {
-  const box = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  box.innerHTML = markup;
-  return box.firstElementChild!;
+  const parser = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  parser.innerHTML = markup;
+  return parser.firstElementChild!;
 }
 
 function patcher(svg: SVGSVGElement) {
   let last: { el: string; subs: string[] }[] = [];
   return (markup: string) => {
-    const top = split(markup);
-    if (top.length !== last.length || svg.children.length !== last.length) {
+    const layers = split(markup);
+    if (layers.length !== last.length || svg.children.length !== last.length) {
       svg.innerHTML = markup;
-      last = top.map((el) => ({ el, subs: split(inner(el)) }));
+      last = layers.map((element) => ({ el: element, subs: split(inner(element)) }));
       return;
     }
-    top.forEach((el, i) => {
-      const was = last[i];
-      if (el === was.el) return;
+    layers.forEach((element, i) => {
+      const previous = last[i];
+      if (element === previous.el) return;
       const node = svg.children[i];
-      const subs = split(inner(el));
+      const subs = split(inner(element));
       if (
-        head(el) !== head(was.el) ||
-        subs.length !== was.subs.length ||
+        head(element) !== head(previous.el) ||
+        subs.length !== previous.subs.length ||
         node.children.length !== subs.length
       )
-        node.replaceWith(parse(el));
-      else subs.forEach((s, j) => s !== was.subs[j] && node.children[j].replaceWith(parse(s)));
-      last[i] = { el, subs };
+        node.replaceWith(parse(element));
+      else
+        subs.forEach(
+          (sub, index) =>
+            sub !== previous.subs[index] && node.children[index].replaceWith(parse(sub)),
+        );
+      last[i] = { el: element, subs };
     });
   };
 }
 
 // drawing as sheets laid one over another, each its own <svg>
 function layered(svg: SVGSVGElement) {
-  const sheets: { svg: SVGSVGElement; patch: (m: string) => void }[] = [];
+  const sheets: { svg: SVGSVGElement; patch: (markup: string) => void }[] = [];
   let kinds = "";
-  const kind = (el: string) =>
-    / data-still/.test(head(el)) ? "s" : /animation:/.test(head(el)) ? "m" : "c";
+  const kind = (element: string) =>
+    / data-still/.test(head(element)) ? "s" : /animation:/.test(head(element)) ? "m" : "c";
   return (markup: string) => {
     const runs: { kind: string; els: string[] }[] = [];
-    split(markup).forEach((el) => {
-      const k = el.startsWith("<defs") ? "c" : kind(el);
-      if (runs.at(-1)?.kind === k) runs.at(-1)!.els.push(el);
-      else runs.push({ kind: k, els: [el] });
+    split(markup).forEach((element) => {
+      const layerKind = element.startsWith("<defs") ? "c" : kind(element);
+      if (runs.at(-1)?.kind === layerKind) runs.at(-1)!.els.push(element);
+      else runs.push({ kind: layerKind, els: [element] });
     });
-    const now = runs.map((r) => r.kind).join("");
-    if (now !== kinds) {
-      kinds = now;
-      sheets.splice(0).forEach((s, i) => i && s.svg.remove());
-      runs.forEach((r, i) => {
-        let el = svg;
+    const pattern = runs.map((run) => run.kind).join("");
+    if (pattern !== kinds) {
+      kinds = pattern;
+      sheets.splice(0).forEach((sheet, i) => i && sheet.svg.remove());
+      runs.forEach((run, i) => {
+        let host = svg;
         if (i) {
-          el = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-          el.setAttribute("viewBox", svg.getAttribute("viewBox")!);
-          el.setAttribute("class", "sheet");
-          el.setAttribute("aria-hidden", "true");
-          if (r.kind === "s") el.setAttribute("data-still", "");
-          sheets[i - 1].svg.after(el);
+          host = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+          host.setAttribute("viewBox", svg.getAttribute("viewBox")!);
+          host.setAttribute("class", "sheet");
+          host.setAttribute("aria-hidden", "true");
+          if (run.kind === "s") host.setAttribute("data-still", "");
+          sheets[i - 1].svg.after(host);
         }
-        sheets.push({ svg: el, patch: patcher(el) });
+        sheets.push({ svg: host, patch: patcher(host) });
       });
     }
-    runs.forEach((r, i) => sheets[i].patch(r.els.join("")));
+    runs.forEach((run, i) => sheets[i].patch(run.els.join("")));
   };
 }
 
@@ -108,25 +113,25 @@ export function sceneOf(svg: SVGSVGElement) {
     disc: Number(localStorage.getItem("engawa:disc")) || 0,
     lifted: null,
   };
-  const listeners: ((v: View) => void)[] = [];
+  const listeners: ((current: View) => void)[] = [];
   const patch = layered(svg);
 
   function draw() {
-    const sky = skyOf(new Date());
-    view.hour = view.hourSet ?? sky.hour;
-    view.season = view.seasonSet ?? sky.season;
-    const sun = view.seasonSet ? undefined : (sky.sun ?? undefined);
-    const inc = view.incense;
-    const out = sceneEngawa(toneVars(), view.hour, false, view.season, {
-      sun,
-      burnt: inc ? inc.burnt : 0,
-      unlit: !inc?.lit,
+    const skyNow = skyOf(new Date());
+    view.hour = view.hourSet ?? skyNow.hour;
+    view.season = view.seasonSet ?? skyNow.season;
+    const sunTimes = view.seasonSet ? undefined : (skyNow.sun ?? undefined);
+    const incense = view.incense;
+    const drawn = sceneEngawa(toneVars(), view.hour, false, view.season, {
+      sun: sunTimes,
+      burnt: incense ? incense.burnt : 0,
+      unlit: !incense?.lit,
       lamp: view.lamp ?? undefined,
       disc: view.disc,
       lifted: view.lifted ?? undefined,
     });
-    patch(toSvg(out, true));
-    listeners.forEach((f) => f(view));
+    patch(toSvg(drawn, true));
+    listeners.forEach((listener) => listener(view));
   }
 
   draw();
@@ -134,6 +139,6 @@ export function sceneOf(svg: SVGSVGElement) {
   return {
     view,
     draw,
-    on: (f: (v: View) => void) => listeners.push(f),
+    on: (listener: (current: View) => void) => listeners.push(listener),
   };
 }

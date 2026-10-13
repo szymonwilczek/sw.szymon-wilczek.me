@@ -5,131 +5,142 @@ type Ear = { ctx: AudioContext | null; out: GainNode | null; on: boolean };
 export function gardenOf(radio: Ear, view: View, burning: () => boolean) {
   let noise: AudioBuffer | null = null;
   let cicadas: { stop: () => void } | null = null;
-  const chance = (p: number) => Math.random() < p;
+  const chance = (probability: number) => Math.random() < probability;
 
-  function white(c: AudioContext) {
+  function white(audio: AudioContext) {
     if (noise) return noise;
-    noise = c.createBuffer(1, c.sampleRate * 2, c.sampleRate);
-    const d = noise.getChannelData(0);
-    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    noise = audio.createBuffer(1, audio.sampleRate * 2, audio.sampleRate);
+    const samples = noise.getChannelData(0);
+    for (let i = 0; i < samples.length; i++) samples[i] = Math.random() * 2 - 1;
     return noise;
   }
 
-  function tone(c: AudioContext, out: AudioNode, t: number, f: number, v: number, d: number) {
-    const o = c.createOscillator(),
-      g = c.createGain();
-    o.frequency.value = f;
-    g.gain.setValueAtTime(0, t);
-    g.gain.linearRampToValueAtTime(v, t + 0.005);
-    g.gain.exponentialRampToValueAtTime(0.0001, t + d);
-    o.connect(g).connect(out);
-    o.start(t);
-    o.stop(t + d + 0.02);
-    return o;
+  function tone(
+    audio: AudioContext,
+    output: AudioNode,
+    time: number,
+    frequency: number,
+    peak: number,
+    duration: number,
+  ) {
+    const osc = audio.createOscillator(),
+      gain = audio.createGain();
+    osc.frequency.value = frequency;
+    gain.gain.setValueAtTime(0, time);
+    gain.gain.linearRampToValueAtTime(peak, time + 0.005);
+    gain.gain.exponentialRampToValueAtTime(0.0001, time + duration);
+    osc.connect(gain).connect(output);
+    osc.start(time);
+    osc.stop(time + duration + 0.02);
+    return osc;
   }
 
   function hiss(
-    c: AudioContext,
-    out: AudioNode,
-    t: number,
-    f: number,
-    q: number,
-    v: number,
-    a: number,
-    d: number,
+    audio: AudioContext,
+    output: AudioNode,
+    time: number,
+    frequency: number,
+    resonance: number,
+    peak: number,
+    attack: number,
+    duration: number,
   ) {
-    const s = c.createBufferSource(),
-      b = c.createBiquadFilter(),
-      g = c.createGain();
-    s.buffer = white(c);
-    b.type = "bandpass";
-    b.frequency.value = f;
-    b.Q.value = q;
-    g.gain.setValueAtTime(0, t);
-    g.gain.linearRampToValueAtTime(v, t + a);
-    g.gain.exponentialRampToValueAtTime(0.0001, t + a + d);
-    s.connect(b).connect(g).connect(out);
-    s.start(t, Math.random());
-    s.stop(t + a + d + 0.05);
+    const source = audio.createBufferSource(),
+      bandpass = audio.createBiquadFilter(),
+      gain = audio.createGain();
+    source.buffer = white(audio);
+    bandpass.type = "bandpass";
+    bandpass.frequency.value = frequency;
+    bandpass.Q.value = resonance;
+    gain.gain.setValueAtTime(0, time);
+    gain.gain.linearRampToValueAtTime(peak, time + attack);
+    gain.gain.exponentialRampToValueAtTime(0.0001, time + attack + duration);
+    source.connect(bandpass).connect(gain).connect(output);
+    source.start(time, Math.random());
+    source.stop(time + attack + duration + 0.05);
   }
 
-  function furin(c: AudioContext, out: AudioNode, t: number) {
-    const f = 2350 + Math.random() * 120;
-    [1, 2.76, 5.4].forEach((m, i) => tone(c, out, t, f * m, 0.03 / (i + 1), 2.2 - i * 0.6));
+  function furin(audio: AudioContext, output: AudioNode, time: number) {
+    const frequency = 2350 + Math.random() * 120;
+    [1, 2.76, 5.4].forEach((ratio, i) =>
+      tone(audio, output, time, frequency * ratio, 0.03 / (i + 1), 2.2 - i * 0.6),
+    );
     if (chance(0.5))
-      [1, 2.76].forEach((m, i) => tone(c, out, t + 0.35, f * m, 0.015 / (i + 1), 1.4));
+      [1, 2.76].forEach((ratio, i) =>
+        tone(audio, output, time + 0.35, frequency * ratio, 0.015 / (i + 1), 1.4),
+      );
   }
 
-  function warbler(c: AudioContext, out: AudioNode, t: number) {
-    const o = c.createOscillator(),
-      g = c.createGain();
-    o.frequency.setValueAtTime(1500, t);
-    o.frequency.linearRampToValueAtTime(1600, t + 0.9);
-    o.frequency.setValueAtTime(2600, t + 1.05);
-    o.frequency.exponentialRampToValueAtTime(3600, t + 1.25);
-    o.frequency.exponentialRampToValueAtTime(2200, t + 1.45);
-    g.gain.setValueAtTime(0, t);
-    g.gain.linearRampToValueAtTime(0.02, t + 0.15);
-    g.gain.setValueAtTime(0.02, t + 0.85);
-    g.gain.linearRampToValueAtTime(0, t + 0.95);
-    g.gain.linearRampToValueAtTime(0.025, t + 1.08);
-    g.gain.exponentialRampToValueAtTime(0.0001, t + 1.5);
-    o.connect(g).connect(out);
-    o.start(t);
-    o.stop(t + 1.6);
+  function warbler(audio: AudioContext, output: AudioNode, time: number) {
+    const osc = audio.createOscillator(),
+      gain = audio.createGain();
+    osc.frequency.setValueAtTime(1500, time);
+    osc.frequency.linearRampToValueAtTime(1600, time + 0.9);
+    osc.frequency.setValueAtTime(2600, time + 1.05);
+    osc.frequency.exponentialRampToValueAtTime(3600, time + 1.25);
+    osc.frequency.exponentialRampToValueAtTime(2200, time + 1.45);
+    gain.gain.setValueAtTime(0, time);
+    gain.gain.linearRampToValueAtTime(0.02, time + 0.15);
+    gain.gain.setValueAtTime(0.02, time + 0.85);
+    gain.gain.linearRampToValueAtTime(0, time + 0.95);
+    gain.gain.linearRampToValueAtTime(0.025, time + 1.08);
+    gain.gain.exponentialRampToValueAtTime(0.0001, time + 1.5);
+    osc.connect(gain).connect(output);
+    osc.start(time);
+    osc.stop(time + 1.6);
   }
 
-  function cricket(c: AudioContext, out: AudioNode, t: number) {
-    const f = 4200 + Math.random() * 400;
-    const n = 2 + Math.floor(Math.random() * 3);
-    for (let i = 0; i < n; i++) tone(c, out, t + i * 0.06, f, 0.012, 0.04);
+  function cricket(audio: AudioContext, output: AudioNode, time: number) {
+    const frequency = 4200 + Math.random() * 400;
+    const chirps = 2 + Math.floor(Math.random() * 3);
+    for (let i = 0; i < chirps; i++) tone(audio, output, time + i * 0.06, frequency, 0.012, 0.04);
   }
 
-  function cicada(c: AudioContext, out: AudioNode) {
-    const s = c.createBufferSource(),
-      b = c.createBiquadFilter(),
-      g = c.createGain(),
-      swell = c.createGain(),
-      lfo = c.createOscillator(),
-      ld = c.createGain(),
-      slow = c.createOscillator(),
-      sd = c.createGain();
-    s.buffer = white(c);
-    s.loop = true;
-    b.type = "bandpass";
-    b.frequency.value = 5200;
-    b.Q.value = 3;
-    g.gain.value = 0.006;
-    lfo.frequency.value = 38;
-    ld.gain.value = 0.005;
-    lfo.connect(ld).connect(g.gain);
+  function cicada(audio: AudioContext, output: AudioNode) {
+    const source = audio.createBufferSource(),
+      bandpass = audio.createBiquadFilter(),
+      gain = audio.createGain(),
+      swell = audio.createGain(),
+      pulse = audio.createOscillator(),
+      pulseDepth = audio.createGain(),
+      slow = audio.createOscillator(),
+      swellDepth = audio.createGain();
+    source.buffer = white(audio);
+    source.loop = true;
+    bandpass.type = "bandpass";
+    bandpass.frequency.value = 5200;
+    bandpass.Q.value = 3;
+    gain.gain.value = 0.006;
+    pulse.frequency.value = 38;
+    pulseDepth.gain.value = 0.005;
+    pulse.connect(pulseDepth).connect(gain.gain);
     swell.gain.value = 0.6;
     slow.frequency.value = 0.07;
-    sd.gain.value = 0.4;
-    slow.connect(sd).connect(swell.gain);
-    s.connect(b).connect(g).connect(swell).connect(out);
-    [s, lfo, slow].forEach((n) => n.start());
-    return { stop: () => [s, lfo, slow].forEach((n) => n.stop()) };
+    swellDepth.gain.value = 0.4;
+    slow.connect(swellDepth).connect(swell.gain);
+    source.connect(bandpass).connect(gain).connect(swell).connect(output);
+    [source, pulse, slow].forEach((node) => node.start());
+    return { stop: () => [source, pulse, slow].forEach((node) => node.stop()) };
   }
 
   function tick() {
-    const c = radio.ctx,
-      out = radio.out;
-    if (!c || !out || !radio.on) {
+    const audio = radio.ctx,
+      output = radio.out;
+    if (!audio || !output || !radio.on) {
       cicadas?.stop();
       cicadas = null;
       return;
     }
-    const t = c.currentTime + 0.05 + Math.random() * 0.8;
-    const h = view.hour,
-      s = view.season;
-    if (burning() && chance(0.35)) hiss(c, out, t, 2400, 2, 0.02, 0.002, 0.03);
-    if ((s === "haru" || s === "natsu") && chance(1 / 14)) furin(c, out, t);
-    if (s === "haru" && h >= 5 && h < 10 && chance(1 / 18)) warbler(c, out, t);
-    if (s === "aki" && (h >= 19 || h < 5) && chance(0.3)) cricket(c, out, t);
-    if (s === "fuyu" && chance(1 / 50)) hiss(c, out, t, 500, 0.7, 0.03, 0.4, 1.4);
-    const dusk = s === "natsu" && h >= 16 && h < 20;
-    if (dusk && !cicadas) cicadas = cicada(c, out);
+    const time = audio.currentTime + 0.05 + Math.random() * 0.8;
+    const hour = view.hour,
+      season = view.season;
+    if (burning() && chance(0.35)) hiss(audio, output, time, 2400, 2, 0.02, 0.002, 0.03);
+    if ((season === "haru" || season === "natsu") && chance(1 / 14)) furin(audio, output, time);
+    if (season === "haru" && hour >= 5 && hour < 10 && chance(1 / 18)) warbler(audio, output, time);
+    if (season === "aki" && (hour >= 19 || hour < 5) && chance(0.3)) cricket(audio, output, time);
+    if (season === "fuyu" && chance(1 / 50)) hiss(audio, output, time, 500, 0.7, 0.03, 0.4, 1.4);
+    const dusk = season === "natsu" && hour >= 16 && hour < 20;
+    if (dusk && !cicadas) cicadas = cicada(audio, output);
     if (!dusk && cicadas) {
       cicadas.stop();
       cicadas = null;

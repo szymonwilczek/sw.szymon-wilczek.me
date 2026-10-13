@@ -1,8 +1,8 @@
 import { cardShell, toSvg, toneVars } from "../../utils/tea/ink.js";
 import type { View } from "./scene";
 
-const W = 540,
-  H = 762;
+const WIDTH = 540,
+  HEIGHT = 762;
 
 // make writes the card's words once it opens;
 // update, if given, follows the scene
@@ -13,19 +13,19 @@ export interface Fill {
 }
 
 export function cardsOf(
-  fig: HTMLElement,
-  scene: { view: View; on: (f: (v: View) => void) => void },
+  figure: HTMLElement,
+  scene: { view: View; on: (listener: (view: View) => void) => void },
 ) {
   const fills = new Map<string, Fill>();
   const layer = document.createElement("div");
   layer.className = "cards";
   layer.innerHTML = `<article class="card" role="dialog" aria-modal="false" tabindex="-1">
-    <svg viewBox="0 0 ${W} ${H}" aria-hidden="true"></svg>
+    <svg viewBox="0 0 ${WIDTH} ${HEIGHT}" aria-hidden="true"></svg>
     <button type="button" class="card-close" aria-label="Put the card away"></button>
     <div class="card-body"></div>
   </article>`;
   layer.hidden = true;
-  fig.append(layer);
+  figure.append(layer);
   const card = layer.querySelector<HTMLElement>(".card")!;
   const svg = card.querySelector("svg")!;
   const body = card.querySelector<HTMLElement>(".card-body")!;
@@ -33,12 +33,12 @@ export function cardsOf(
   let from: HTMLElement | null = null;
 
   function paint(key: string) {
-    const v = scene.view;
-    const shell = cardShell(toneVars(), key, H - 22, {
-      season: v.season,
-      burnt: v.incense?.burnt ?? 0,
-      lit: v.incense?.lit ?? false,
-      disc: v.disc,
+    const view = scene.view;
+    const shell = cardShell(toneVars(), key, HEIGHT - 22, {
+      season: view.season,
+      burnt: view.incense?.burnt ?? 0,
+      lit: view.incense?.lit ?? false,
+      disc: view.disc,
     });
     svg.innerHTML = toSvg(shell, true);
   }
@@ -69,14 +69,14 @@ export function cardsOf(
   }
 
   card.querySelector(".card-close")!.addEventListener("click", hide);
-  addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && open !== null) hide();
+  addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && open !== null) hide();
   });
   // drawing follows the hour, the season and the incense
-  scene.on((v) => {
+  scene.on((view) => {
     if (open === null) return;
     paint(open);
-    fills.get(open)?.update?.(v);
+    fills.get(open)?.update?.(view);
   });
 
   return {
@@ -85,6 +85,6 @@ export function cardsOf(
     get open() {
       return open;
     },
-    fill: (key: string, f: Fill) => fills.set(key, f),
+    fill: (key: string, filler: Fill) => fills.set(key, filler),
   };
 }

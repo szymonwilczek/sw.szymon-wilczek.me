@@ -4,13 +4,14 @@ import type { Fill } from "./cards";
 import type { Radio } from "./radio";
 import type { View } from "./scene";
 
-const NUM = ["一", "二", "三", "四", "五"];
+const NUMERALS = ["一", "二", "三", "四", "五"];
 const FLOOR = [435, 615];
 
-const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
+const escapeHtml = (text: string) =>
+  text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
 
 export function crateOf(
-  fig: HTMLElement,
+  figure: HTMLElement,
   scene: { view: View; draw: () => void },
   radio: Radio,
   hide: () => void,
@@ -19,32 +20,32 @@ export function crateOf(
   let body: HTMLElement | null = null;
   let flying = false;
 
-  function credit(k: number) {
-    const d = DISCS[k];
-    if (!d.credit) return `<p class="card-small card-dim">${esc(d.by)}</p>`;
-    const c = d.credit;
-    return `<p class="card-small">a record by ${esc(d.by)}, <a href="${c.url}" target="_blank" rel="noopener">from itch.io</a>
-      <br><span class="card-dim">under <a href="${c.licenceUrl}" target="_blank" rel="noopener">${c.licence}</a></span></p>`;
+  function credit(index: number) {
+    const disc = DISCS[index];
+    if (!disc.credit) return `<p class="card-small card-dim">${escapeHtml(disc.by)}</p>`;
+    const creditInfo = disc.credit;
+    return `<p class="card-small">a record by ${escapeHtml(disc.by)}, <a href="${creditInfo.url}" target="_blank" rel="noopener">from itch.io</a>
+      <br><span class="card-dim">under <a href="${creditInfo.licenceUrl}" target="_blank" rel="noopener">${creditInfo.licence}</a></span></p>`;
   }
 
   function paint() {
     if (!body) return;
-    const h = scene.view.hour;
-    body.innerHTML = `<ol class="crate-list">${DISCS.map((d, k) => {
-      const open = k === pick,
-        on = k === radio.disc;
+    const hour = scene.view.hour;
+    body.innerHTML = `<ol class="crate-list">${DISCS.map((disc, index) => {
+      const open = index === pick,
+        playing = index === radio.disc;
       return `<li${open ? ' class="picked"' : ""}>
-        <button type="button" class="crate-name" data-k="${k}" aria-expanded="${open}"><span class="card-kanji-s">${NUM[k]}</span> ${d.jp} · ${esc(d.title)}${on ? ` <span class="card-small card-dim">· on the player</span>` : ""}</button>
+        <button type="button" class="crate-name" data-k="${index}" aria-expanded="${open}"><span class="card-kanji-s">${NUMERALS[index]}</span> ${disc.jp} · ${escapeHtml(disc.title)}${playing ? ` <span class="card-small card-dim">· on the player</span>` : ""}</button>
         ${
           open
-            ? `<p class="card-small">${esc(d.about(h))}</p>${credit(k)}
-          <button type="button" class="card-knob crate-put">${on ? radio.label() : "置 · put it on"}</button>`
+            ? `<p class="card-small">${escapeHtml(disc.about(hour))}</p>${credit(index)}
+          <button type="button" class="card-knob crate-put">${playing ? radio.label() : "置 · put it on"}</button>`
             : ""
         }</li>`;
     }).join("")}</ol>`;
-    body.querySelectorAll<HTMLButtonElement>(".crate-name").forEach((b) =>
-      b.addEventListener("click", () => {
-        pick = Number(b.dataset.k);
+    body.querySelectorAll<HTMLButtonElement>(".crate-name").forEach((button) =>
+      button.addEventListener("click", () => {
+        pick = Number(button.dataset.k);
         paint();
         body?.querySelector<HTMLButtonElement>(`.crate-name[data-k="${pick}"]`)?.focus();
       }),
@@ -53,52 +54,54 @@ export function crateOf(
       if (pick === radio.disc) {
         radio.toggle();
         paint();
-      } else put(pick);
+      } else pullOut(pick);
     });
   }
 
-  function put(k: number) {
+  function pullOut(index: number) {
     hide();
     if (flying) return;
     if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      scene.view.disc = k;
+      scene.view.disc = index;
       scene.draw();
-      radio.put(k);
+      radio.put(index);
       return;
     }
     flying = true;
-    const out = crateSleeve(toneVars(), k);
+    const sleeve = crateSleeve(toneVars(), index);
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    svg.setAttribute("viewBox", `0 0 ${out.W} ${out.H}`);
+    svg.setAttribute("viewBox", `0 0 ${sleeve.W} ${sleeve.H}`);
     svg.setAttribute("aria-hidden", "true");
     svg.classList.add("sheet");
-    svg.innerHTML = toSvg(out, false);
-    [...fig.querySelectorAll(":scope > svg")].pop()!.after(svg);
-    scene.view.disc = k;
-    scene.view.lifted = k;
+    svg.innerHTML = toSvg(sleeve, false);
+    [...figure.querySelectorAll(":scope > svg")].pop()!.after(svg);
+    scene.view.disc = index;
+    scene.view.lifted = index;
     scene.draw();
-    const g = svg.lastElementChild as SVGGElement;
-    g.style.transformBox = "fill-box";
-    g.style.transformOrigin = "center";
-    const [dx, dy] = [FLOOR[0] - out.from[0], FLOOR[1] - out.from[1]];
-    g.animate(
-      [
-        { transform: "none" },
-        { transform: `translate(${dx}px, ${dy}px) rotate(-7deg) scale(0.9, 0.52)` },
-      ],
-      { duration: 1100, easing: "cubic-bezier(.45,.05,.3,1)", fill: "forwards" },
-    ).finished.then(() => {
-      scene.view.lifted = null;
-      scene.draw();
-      svg.remove();
-      flying = false;
-      radio.put(k);
-    });
+    const group = svg.lastElementChild as SVGGElement;
+    group.style.transformBox = "fill-box";
+    group.style.transformOrigin = "center";
+    const [shiftX, shiftY] = [FLOOR[0] - sleeve.from[0], FLOOR[1] - sleeve.from[1]];
+    group
+      .animate(
+        [
+          { transform: "none" },
+          { transform: `translate(${shiftX}px, ${shiftY}px) rotate(-7deg) scale(0.9, 0.52)` },
+        ],
+        { duration: 1100, easing: "cubic-bezier(.45,.05,.3,1)", fill: "forwards" },
+      )
+      .finished.then(() => {
+        scene.view.lifted = null;
+        scene.draw();
+        svg.remove();
+        flying = false;
+        radio.put(index);
+      });
   }
 
   const fill: Fill = {
-    make(b) {
-      body = b;
+    make(panel) {
+      body = panel;
       paint();
     },
     update: paint,
@@ -110,8 +113,8 @@ export function crateOf(
 
   return {
     fill,
-    choose(k: number | null) {
-      pick = k ?? radio.disc;
+    choose(index: number | null) {
+      pick = index ?? radio.disc;
       paint();
     },
   };

@@ -16,12 +16,12 @@ interface Now {
 }
 
 let last: { at: number; now: Now } | null = null;
-async function ask(): Promise<Now> {
+async function fetchNow(): Promise<Now> {
   if (!WORKER_URL) return { playing: false };
   if (last && Date.now() - last.at < 25_000) return last.now;
   try {
-    const res = await fetch(`${WORKER_URL}/now`);
-    const now = res.ok ? ((await res.json()) as Now) : { playing: false };
+    const response = await fetch(`${WORKER_URL}/now`);
+    const now = response.ok ? ((await response.json()) as Now) : { playing: false };
     last = { at: Date.now(), now };
     return now;
   } catch {
@@ -29,17 +29,18 @@ async function ask(): Promise<Now> {
   }
 }
 
-function ago(iso: string): string {
-  const min = Math.round((Date.now() - Date.parse(iso)) / 60_000);
-  if (min < 2) return "a moment ago";
-  if (min < 60) return `${min} min ago`;
-  const h = Math.round(min / 60);
-  if (h < 24) return `${h} hour${h > 1 ? "s" : ""} ago`;
-  const d = Math.round(h / 24);
-  return `${d} day${d > 1 ? "s" : ""} ago`;
+function timeAgo(stamp: string): string {
+  const minutes = Math.round((Date.now() - Date.parse(stamp)) / 60_000);
+  if (minutes < 2) return "a moment ago";
+  if (minutes < 60) return `${minutes} min ago`;
+  const hours = Math.round(minutes / 60);
+  if (hours < 24) return `${hours} hour${hours > 1 ? "s" : ""} ago`;
+  const days = Math.round(hours / 24);
+  return `${days} day${days > 1 ? "s" : ""} ago`;
 }
 
-const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
+const escapeHtml = (text: string) =>
+  text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
 
 export function recordOf(radio: Radio, crate: () => void): Fill {
   let body: HTMLElement | null = null;
@@ -47,17 +48,17 @@ export function recordOf(radio: Radio, crate: () => void): Fill {
 
   async function paint() {
     if (!body) return;
-    const now = await ask();
+    const now = await fetchNow();
     if (!body) return;
     const disc = DISCS[radio.disc];
     const said = now.track
       ? `<div class="rec-now">
-          ${now.art ? `<img src="${esc(now.art)}" alt="" width="96" height="96" loading="lazy">` : ""}
+          ${now.art ? `<img src="${escapeHtml(now.art)}" alt="" width="96" height="96" loading="lazy">` : ""}
           <div>
-            <p class="card-small">${now.playing ? "the host is listening to" : `the host last played, ${now.at ? ago(now.at) : "a while ago"}`}</p>
-            <p class="card-big">${esc(now.track)}</p>
-            <p>${esc((now.artists || []).join(", "))}${now.album ? ` <span class="card-dim">· ${esc(now.album)}</span>` : ""}</p>
-            ${now.url ? `<p><a href="${esc(now.url)}" target="_blank" rel="noopener">on Spotify ↗</a></p>` : ""}
+            <p class="card-small">${now.playing ? "the host is listening to" : `the host last played, ${now.at ? timeAgo(now.at) : "a while ago"}`}</p>
+            <p class="card-big">${escapeHtml(now.track)}</p>
+            <p>${escapeHtml((now.artists || []).join(", "))}${now.album ? ` <span class="card-dim">· ${escapeHtml(now.album)}</span>` : ""}</p>
+            ${now.url ? `<p><a href="${escapeHtml(now.url)}" target="_blank" rel="noopener">on Spotify ↗</a></p>` : ""}
           </div>
         </div>
         ${
@@ -67,11 +68,11 @@ export function recordOf(radio: Radio, crate: () => void): Fill {
         }`
       : `<p class="card-small">on the turntable</p>
         <p class="card-big">${disc.title}</p>
-        <p>${esc(disc.src ? disc.about(0) : radio.about())}</p>
-        <p class="card-dim">${disc.credit ? `${esc(disc.by)} · <a href="${disc.credit.licenceUrl}" target="_blank" rel="noopener">${disc.credit.licence}</a>` : "The house's own record, made as it plays."} When the host is listening to something, it shows here.</p>`;
+        <p>${escapeHtml(disc.src ? disc.about(0) : radio.about())}</p>
+        <p class="card-dim">${disc.credit ? `${escapeHtml(disc.by)} · <a href="${disc.credit.licenceUrl}" target="_blank" rel="noopener">${disc.credit.licence}</a>` : "The house's own record, made as it plays."} When the host is listening to something, it shows here.</p>`;
     body.innerHTML = `${said}
       <p class="rec-radio"><button type="button" class="card-knob">${radio.label()}</button>
-      <br><span class="card-small card-dim">${disc.jp} · ${esc(disc.title)}, or another from <button type="button" class="card-link">the crate</button></span></p>`;
+      <br><span class="card-small card-dim">${disc.jp} · ${escapeHtml(disc.title)}, or another from <button type="button" class="card-link">the crate</button></span></p>`;
     body.querySelector(".card-link")!.addEventListener("click", crate);
     body.querySelector(".rec-radio button")!.addEventListener("click", () => {
       radio.toggle();
@@ -80,8 +81,8 @@ export function recordOf(radio: Radio, crate: () => void): Fill {
   }
 
   return {
-    make(b) {
-      body = b;
+    make(panel) {
+      body = panel;
       paint();
       clearInterval(timer);
       timer = window.setInterval(paint, 30_000);
