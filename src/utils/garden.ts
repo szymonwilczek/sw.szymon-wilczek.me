@@ -44,7 +44,7 @@ export interface GardenState {
   sparrow: number;
 }
 
-const KEY = "garden";
+const STORAGE_KEY = "garden";
 
 function empty(): GardenState {
   return { seals: {}, paths: [], read: [], stops: {}, doors: [], sparrow: 0 };
@@ -52,7 +52,7 @@ function empty(): GardenState {
 
 export function load(): GardenState {
   try {
-    const raw = localStorage.getItem(KEY);
+    const raw = localStorage.getItem(STORAGE_KEY);
     return raw ? { ...empty(), ...JSON.parse(raw) } : empty();
   } catch {
     return empty();
@@ -61,7 +61,7 @@ export function load(): GardenState {
 
 function save(state: GardenState) {
   try {
-    localStorage.setItem(KEY, JSON.stringify(state));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   } catch {
     // private window or blocked storage: the garden simply forgets
   }
@@ -76,7 +76,7 @@ export function update(change: (state: GardenState) => void): GardenState {
 
 export function reset() {
   try {
-    localStorage.removeItem(KEY);
+    localStorage.removeItem(STORAGE_KEY);
   } catch {
     // nothing to forget
   }
@@ -84,13 +84,13 @@ export function reset() {
 
 /** Date as the seal book writes it */
 export function stampDate(date = new Date()): string {
-  const pad = (n: number) => String(n).padStart(2, "0");
+  const pad = (value: number) => String(value).padStart(2, "0");
   return `${date.getFullYear()}·${pad(date.getMonth() + 1)}·${pad(date.getDate())}`;
 }
 
 /** Stamps a seal once */
 export function earn(glyph: string): boolean {
-  if (!SEALS.some((s) => s.glyph === glyph)) return false;
+  if (!SEALS.some((seal) => seal.glyph === glyph)) return false;
   let fresh = false;
   update((state) => {
     if (state.seals[glyph]) return;

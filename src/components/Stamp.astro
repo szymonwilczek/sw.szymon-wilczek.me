@@ -13,7 +13,15 @@ interface Props {
   class?: string;
 }
 
-const { slug, terrain, country, num, label, size = 132, class: className } = Astro.props;
+const {
+  slug,
+  terrain,
+  country,
+  num: stampNumber,
+  label,
+  size = 132,
+  class: className,
+} = Astro.props;
 const stamp = makeStamp({ slug, terrain });
 const id = `stamp-${stamp.seed.toString(36)}`;
 const noise = stamp.seed % 1000;
@@ -105,7 +113,7 @@ const fills = {
     {country}
   </text>
   <text x="91" y="94.6" text-anchor="end" class="stamp-num">
-    {num}
+    {stampNumber}
   </text>
   <rect
     width="100"
