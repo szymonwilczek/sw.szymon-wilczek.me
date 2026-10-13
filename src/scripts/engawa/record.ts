@@ -69,7 +69,7 @@ export function recordOf(radio: Radio, crate: () => void): Fill {
       : `<p class="card-small">on the turntable</p>
         <p class="card-big">${disc.title}</p>
         <p>${escapeHtml(disc.src ? disc.about(0) : radio.about())}</p>
-        <p class="card-dim">${disc.credit ? `${escapeHtml(disc.by)} · <a href="${disc.credit.licenceUrl}" target="_blank" rel="noopener">${disc.credit.licence}</a>` : "The house's own record, made as it plays."} When the host is listening to something, it shows here.</p>`;
+        <p class="card-dim">${disc.credit ? `${escapeHtml(disc.by)} · <a href="${disc.credit.licenceUrl}" target="_blank" rel="noopener">${disc.credit.licence}</a>` : "The house's own record, made as it plays."}</p>`;
     body.innerHTML = `${said}
       <p class="rec-radio"><button type="button" class="card-knob">${radio.label()}</button>
       <br><span class="card-small card-dim">${disc.jp} · ${escapeHtml(disc.title)}, or another from <button type="button" class="card-link">the crate</button></span></p>`;
