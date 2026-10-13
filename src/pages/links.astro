@@ -6,9 +6,9 @@ import { kin, sheets, threads } from "../utils/en";
 
 const list = threads(LINKS);
 const kinship = kin(list);
-const tied = LINKS.filter((l) => l.mutual).length;
+const tied = LINKS.filter((link) => link.mutual).length;
 const { wide, narrow } = sheets(LINKS.length);
-const pct = (n: number, of: number) => `${((n / of) * 100).toFixed(1)}%`;
+const percent = (part: number, whole: number) => `${((part / whole) * 100).toFixed(1)}%`;
 ---
 
 <BaseLayout
@@ -39,7 +39,7 @@ const pct = (n: number, of: number) => `${((n / of) * 100).toFixed(1)}%`;
   <section
     class="en"
     aria-label="Sites I am tied to"
-    style={`--wme-l: ${pct(wide.me[0], wide.w)}; --wme-t: ${pct(wide.me[1], wide.h)}; --nme-l: ${pct(narrow.me[0], narrow.w)}; --nme-t: ${pct(narrow.me[1], narrow.h)}`}
+    style={`--wme-l: ${percent(wide.me[0], wide.w)}; --wme-t: ${percent(wide.me[1], wide.h)}; --nme-l: ${percent(narrow.me[0], narrow.w)}; --nme-t: ${percent(narrow.me[1], narrow.h)}`}
   >
     {[
       ["wide", wide],
@@ -50,15 +50,15 @@ const pct = (n: number, of: number) => `${((n / of) * 100).toFixed(1)}%`;
         viewBox={`0 0 ${(sheet as typeof wide).w} ${(sheet as typeof wide).h}`}
         aria-hidden="true"
       >
-        {kinship.map((k) => (
-          <path class="thread kin" data-kin={k.ends} d={key === "wide" ? k.wide : k.narrow} />
+        {kinship.map((tie) => (
+          <path class="thread kin" data-kin={tie.ends} d={key === "wide" ? tie.wide : tie.narrow} />
         ))}
-        {list.map((l, i) => {
-          const at = key === "wide" ? l.wide : l.narrow;
+        {list.map((link, i) => {
+          const spot = key === "wide" ? link.wide : link.narrow;
           return (
             <>
-              <path class="thread" data-i={i} data-taut={at.taut} d={at.slack} />
-              {l.mutual && <path class="knot" data-i={i} d={at.knot} />}
+              <path class="thread" data-i={i} data-taut={spot.taut} d={spot.slack} />
+              {link.mutual && <path class="knot" data-i={i} d={spot.knot} />}
             </>
           );
         })}
@@ -73,23 +73,23 @@ const pct = (n: number, of: number) => `${((n / of) * 100).toFixed(1)}%`;
     </svg>
 
     <ul class="cards">
-      {list.map((l, i) => (
+      {list.map((link, i) => (
         <li
-          style={`--wl: ${l.wide.l}%; --wt: ${l.wide.t}%; --nl: ${l.narrow.l}%; --nt: ${l.narrow.t}%; --r: ${l.rot}deg`}
+          style={`--wl: ${link.wide.l}%; --wt: ${link.wide.t}%; --nl: ${link.narrow.l}%; --nt: ${link.narrow.t}%; --r: ${link.rot}deg`}
         >
-          <a class="card" href={l.url} data-i={i}>
+          <a class="card" href={link.url} data-i={i}>
             <span
               class="seal"
               aria-hidden="true"
-              style={`--ink: var(${l.ink}); --shape: ${l.shape}`}
+              style={`--ink: var(${link.ink}); --shape: ${link.shape}`}
             >
-              {l.initial}
+              {link.initial}
             </span>
             <span class="who">
-              <span class="name">{l.name}</span>
-              <span class="domain">{l.domain}</span>
+              <span class="name">{link.name}</span>
+              <span class="domain">{link.domain}</span>
               <span class="how hand">
-                {l.mutual ? "tied both ways" : "tied from here"}
+                {link.mutual ? "tied both ways" : "tied from here"}
               </span>
             </span>
           </a>
@@ -118,9 +118,10 @@ const pct = (n: number, of: number) => `${((n / of) * 100).toFixed(1)}%`;
   const pull = (i: string | null) => {
     section.classList.toggle("pulling", i !== null);
     for (const line of lines) {
-      const up = line.dataset.i === i || (i !== null && !!line.dataset.kin?.split(" ").includes(i));
-      line.classList.toggle("up", up);
-      if (line.dataset.taut) line.style.d = up ? `path("${line.dataset.taut}")` : "";
+      const pulled =
+        line.dataset.i === i || (i !== null && !!line.dataset.kin?.split(" ").includes(i));
+      line.classList.toggle("up", pulled);
+      if (line.dataset.taut) line.style.d = pulled ? `path("${line.dataset.taut}")` : "";
     }
   };
 
@@ -137,10 +138,10 @@ const pct = (n: number, of: number) => `${((n / of) * 100).toFixed(1)}%`;
     card.addEventListener("focus", () => pull(i));
     card.addEventListener("blur", () => pull(null));
     card.addEventListener("pointerdown", () => nod(card));
-    card.addEventListener("keydown", (e) => e.key === "Enter" && nod(card));
-    card.addEventListener("click", (e) => {
+    card.addEventListener("keydown", (event) => event.key === "Enter" && nod(card));
+    card.addEventListener("click", (event) => {
       if (card.getAttribute("href") !== "#") return;
-      e.preventDefault();
+      event.preventDefault();
       pull(i);
     });
   }
