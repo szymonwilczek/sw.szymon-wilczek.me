@@ -21,7 +21,7 @@ export interface Stroke {
 }
 
 export interface Glaze {
-  c: number; // tenmoku, shino, ame, seiji, ruri, oribe, shu
+  c: number; // tenmoku, shino, ame, seiji, ruri, oribe, shu, kaki, namako, kinyo, kiseto, haiyu
   dip: number; // how far down from the rim it went, 0..1
   drips: [u: number, len: number, w: number][];
 }

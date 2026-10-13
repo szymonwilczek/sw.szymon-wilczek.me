@@ -9,6 +9,7 @@ import {
   kanji,
   GLAZES,
   GLAZE_NAMES,
+  GLAZE_KANJI,
 } from "../../utils/tea/ink.js";
 import {
   tones,
@@ -29,7 +30,10 @@ const BUCKET_X = 550,
   BUCKET_Y = 470,
   BUCKET_SCALE = 3,
   SURFACE = BUCKET_Y - 36 * BUCKET_SCALE + 1;
-const KANJI = ["天目", "志野", "飴", "青磁", "瑠璃", "織部", "朱"];
+const BUCKET_AT = (index: number): Point => [
+  140 + (index % 6) * 164,
+  190 + Math.floor(index / 6) * 200,
+];
 
 export function run(host: HTMLElement, work: Work, done: (w: Work) => void, back: () => void) {
   const view = stage(
@@ -57,10 +61,10 @@ export function run(host: HTMLElement, work: Work, done: (w: Work) => void, back
     if (phase === "choose") {
       const group = newGroup();
       GLAZES(tones).forEach((color: string, i: number) => {
-        const x = 110 + i * 147;
-        bucket(group, rand, x, 290, 1.7, tones, color);
-        note(group, x, 342, GLAZE_NAMES[i], tones, 16, 0.75);
-        kanji(group, x, 372, KANJI[i], tones, 15);
+        const [x, y] = BUCKET_AT(i);
+        bucket(group, rand, x, y, 1.7, tones, color);
+        note(group, x, y + 52, GLAZE_NAMES[i], tones, 16, 0.75);
+        kanji(group, x, y + 82, GLAZE_KANJI[i], tones, 15);
       });
       groups.push(group);
     } else if (phase === "dip") {
@@ -113,7 +117,7 @@ export function run(host: HTMLElement, work: Work, done: (w: Work) => void, back
     if (phase === "choose") {
       view.say("choose a glaze. each comes out of the kiln its own way.");
       GLAZES(tones).forEach((_: string, i: number) =>
-        view.over(`${GLAZE_NAMES[i]} glaze`, 110 + i * 147, 290, 120, 140, () => {
+        view.over(`${GLAZE_NAMES[i]} glaze`, ...BUCKET_AT(i), 120, 140, () => {
           glazeIndex = i;
           phase = "dip";
           say();

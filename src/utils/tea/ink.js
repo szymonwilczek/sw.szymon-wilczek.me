@@ -1471,8 +1471,40 @@ const GLAZES = (tones) => [
   mix(tones.water, tones.ink, 0.2),
   mix(tones.moss, tones.bamboo, 0.15),
   mix(tones.red, tones.earth, 0.35),
+  mix(tones.maple, tones.earth, 0.45),
+  mix(tones.water, tones.stone, 0.45),
+  mix(tones.water, tones.red, 0.35),
+  mix(tones.gold, tones.thatch, 0.35),
+  mix(tones.mossDk, tones.stone, 0.5),
 ];
-const GLAZE_NAMES = ["tenmoku", "shino", "ame", "seiji", "ruri", "oribe", "shu"];
+const GLAZE_NAMES = [
+  "tenmoku",
+  "shino",
+  "ame",
+  "seiji",
+  "ruri",
+  "oribe",
+  "shu",
+  "kaki",
+  "namako",
+  "kinyo",
+  "kiseto",
+  "haiyu",
+];
+const GLAZE_KANJI = [
+  "天目",
+  "志野",
+  "飴",
+  "青磁",
+  "瑠璃",
+  "織部",
+  "朱",
+  "柿",
+  "海鼠",
+  "鈞窯",
+  "黄瀬戸",
+  "灰釉",
+];
 const PAINTS = (tones) => [
   mix(tones.water, tones.ink, 0.45),
   mix(tones.earth, tones.ink, 0.55),
@@ -3703,14 +3735,14 @@ function sceneGlazes(tones) {
     width = 1100,
     height = 300,
     group = newGroup();
-  GLAZES(tones).forEach((color, i) => {
-    const x = 110 + i * 147;
-    bucket(group, rand, x, 170, 1.7, tones, color);
-    note(group, x, 222, GLAZE_NAMES[i], tones, 16, 0.75);
-  });
-  ["天目", "志野", "飴", "青磁", "瑠璃", "織部", "朱"].forEach((glyph, i) =>
-    kanji(group, 110 + i * 147, 250, glyph, tones, 15),
-  );
+  GLAZES(tones)
+    .slice(0, 7)
+    .forEach((color, i) => {
+      const x = 110 + i * 147;
+      bucket(group, rand, x, 170, 1.7, tones, color);
+      note(group, x, 222, GLAZE_NAMES[i], tones, 16, 0.75);
+    });
+  GLAZE_KANJI.slice(0, 7).forEach((glyph, i) => kanji(group, 110 + i * 147, 250, glyph, tones, 15));
   return { W: width, H: height, groups: [group], clips: [] };
 }
 // painting on the banding wheel
@@ -6356,6 +6388,7 @@ export {
   wheel,
   wobblyBox,
   GLAZE_NAMES,
+  GLAZE_KANJI,
   PROFILES,
   demoSpec,
   spin,
