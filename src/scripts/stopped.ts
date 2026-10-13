@@ -29,28 +29,28 @@ function ago(when: number): string {
 
 /** The paragraph the reader is on: the last one whose top passed 40% of the screen */
 function current(): number {
-  let at = -1;
+  let paragraph = -1;
   for (let i = 0; i < paragraphs.length; i++) {
-    if (paragraphs[i].getBoundingClientRect().top < innerHeight * 0.4) at = i;
+    if (paragraphs[i].getBoundingClientRect().top < innerHeight * 0.4) paragraph = i;
     else break;
   }
-  return at;
+  return paragraph;
 }
 
 function remember() {
-  const at = current();
-  if (at < 3) return;
+  const paragraph = current();
+  if (paragraph < 3) return;
 
   // near the end there is nothing left to come back to
-  const done = at >= paragraphs.length - 3;
+  const done = paragraph >= paragraphs.length - 3;
   update((state) => {
     if (done) delete state.stops[slug];
-    else state.stops[slug] = { at, when: Date.now() };
+    else state.stops[slug] = { at: paragraph, when: Date.now() };
   });
 }
 
-function mark(at: number, when: number) {
-  const target = paragraphs[at];
+function mark(paragraph: number, when: number) {
+  const target = paragraphs[paragraph];
   if (!target || !body) return;
   const text = `you were here, ${ago(when)}`;
 
@@ -64,15 +64,15 @@ function mark(at: number, when: number) {
   leaf.style.top = `${target.offsetTop}px`;
   body.append(leaf);
 
-  const go = document.createElement("button");
-  go.type = "button";
-  go.className = "stop-go hand";
-  go.innerHTML = `${LEAF}<span>${text} — continue ↓</span>`;
-  go.addEventListener("click", () => {
+  const continueButton = document.createElement("button");
+  continueButton.type = "button";
+  continueButton.className = "stop-go hand";
+  continueButton.innerHTML = `${LEAF}<span>${text} — continue ↓</span>`;
+  continueButton.addEventListener("click", () => {
     target.scrollIntoView({ behavior: "smooth", block: "center" });
-    go.remove();
+    continueButton.remove();
   });
-  document.querySelector(".article-meta")?.after(go);
+  document.querySelector(".article-meta")?.after(continueButton);
 
   // once the reader is past the paragraph, the leaf blows away
   const passed = new IntersectionObserver((entries) => {
@@ -80,7 +80,7 @@ function mark(at: number, when: number) {
     if (entry.isIntersecting || entry.boundingClientRect.top > 0) return;
     passed.disconnect();
     leaf.classList.add("is-gone");
-    go.remove();
+    continueButton.remove();
     leaf.addEventListener("animationend", () => leaf.remove());
   });
   passed.observe(target);

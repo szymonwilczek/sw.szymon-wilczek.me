@@ -9,16 +9,16 @@ let faded: string | null = null;
 
 function fade() {
   if (!iconHref) return;
-  const img = new Image();
-  img.onload = () => {
+  const image = new Image();
+  image.onload = () => {
     const canvas = document.createElement("canvas");
     canvas.width = canvas.height = 64;
-    const ctx = canvas.getContext("2d")!;
-    ctx.globalAlpha = 0.35;
-    ctx.drawImage(img, 0, 0, 64, 64);
+    const context = canvas.getContext("2d")!;
+    context.globalAlpha = 0.35;
+    context.drawImage(image, 0, 0, 64, 64);
     faded = canvas.toDataURL("image/png");
   };
-  img.src = iconHref;
+  image.src = iconHref;
 }
 
 document.addEventListener("visibilitychange", () => {

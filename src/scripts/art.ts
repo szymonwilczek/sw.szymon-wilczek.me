@@ -3,16 +3,16 @@
 const cache = new Map<string, Promise<Element>>();
 
 export async function fillArt(svg: SVGSVGElement) {
-  const url = svg.dataset.art!;
-  if (!cache.has(url))
+  const artUrl = svg.dataset.art!;
+  if (!cache.has(artUrl))
     cache.set(
-      url,
-      fetch(url, { priority: "low" })
-        .then((r) => r.text())
-        .then((t) => new DOMParser().parseFromString(t, "image/svg+xml").documentElement),
+      artUrl,
+      fetch(artUrl, { priority: "low" })
+        .then((response) => response.text())
+        .then((text) => new DOMParser().parseFromString(text, "image/svg+xml").documentElement),
     );
-  const art = await cache.get(url)!;
+  const art = await cache.get(artUrl)!;
   for (const { name, value } of art.attributes)
     if (name.startsWith("data-")) svg.setAttribute(name, value);
-  svg.replaceChildren(...[...art.childNodes].map((n) => document.importNode(n, true)));
+  svg.replaceChildren(...[...art.childNodes].map((node) => document.importNode(node, true)));
 }

@@ -32,8 +32,8 @@ function echo(text: string) {
 function loosen() {
   const seen = new Set<Text>();
   for (const block of document.querySelectorAll<HTMLElement>(BLOCKS)) {
-    const r = block.getBoundingClientRect();
-    if (r.bottom < 0 || r.top > innerHeight || block.closest(SKIP)) continue;
+    const box = block.getBoundingClientRect();
+    if (box.bottom < 0 || box.top > innerHeight || block.closest(SKIP)) continue;
     const walk = document.createTreeWalker(block, NodeFilter.SHOW_TEXT);
     while (walk.nextNode()) {
       const text = walk.currentNode as Text;
@@ -42,15 +42,15 @@ function loosen() {
   }
   for (const text of seen) {
     const bits = document.createDocumentFragment();
-    for (const bit of text.data.split(/(\s+)/)) {
-      if (!bit) continue;
-      if (/^\s+$/.test(bit)) {
-        bits.append(bit);
+    for (const piece of text.data.split(/(\s+)/)) {
+      if (!piece) continue;
+      if (/^\s+$/.test(piece)) {
+        bits.append(piece);
         continue;
       }
       const word = document.createElement("span");
       word.className = "zw";
-      word.textContent = bit;
+      word.textContent = piece;
       bits.append(word);
       words.push(word);
     }
@@ -64,11 +64,11 @@ function wander() {
   for (const word of words) {
     if (Math.random() < 0.35) continue;
     const drip = Math.random() < 0.05 ? reach * 3 : 0;
-    const x = (Math.random() - 0.5) * reach;
-    const y = (Math.random() - 0.5) * reach * 0.6 + drip;
+    const shiftX = (Math.random() - 0.5) * reach;
+    const shiftY = (Math.random() - 0.5) * reach * 0.6 + drip;
     const turn = (Math.random() - 0.5) * reach;
     word.style.transitionDelay = `${Math.random() * 1.5}s`;
-    word.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) rotate(${turn.toFixed(1)}deg)`;
+    word.style.transform = `translate(${shiftX.toFixed(1)}px, ${shiftY.toFixed(1)}px) rotate(${turn.toFixed(1)}deg)`;
     word.style.opacity = drip ? "0.5" : "";
   }
   timer = window.setTimeout(wander, ROUND);

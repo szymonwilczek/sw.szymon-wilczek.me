@@ -32,32 +32,32 @@ let slip: HTMLElement | null = null;
 let owner: Element | null = null;
 
 /** A seal-sized drawing holding exactly one kanji from the glossary */
-function sealOf(el: Element): string | null {
-  const texts = el.querySelectorAll("text");
-  const r = el.getBoundingClientRect();
-  if (texts.length !== 1 || r.width > 120 || r.height > 120) return null;
-  const ch = texts[0].textContent?.trim() ?? "";
-  return GLOSSARY[ch] ? ch : null;
+function sealOf(element: Element): string | null {
+  const texts = element.querySelectorAll("text");
+  const box = element.getBoundingClientRect();
+  if (texts.length !== 1 || box.width > 120 || box.height > 120) return null;
+  const glyph = texts[0].textContent?.trim() ?? "";
+  return GLOSSARY[glyph] ? glyph : null;
 }
 
 /** The element that carries a kanji: a seal's <svg>, or a lone glyph in text */
-function kanjiOf(el: Element | null): [Element, string] | null {
-  if (!el || el.closest(".kanji-slip, .minibuffer")) return null;
-  const svg = el.closest("svg");
+function kanjiOf(element: Element | null): [Element, string] | null {
+  if (!element || element.closest(".kanji-slip, .minibuffer")) return null;
+  const svg = element.closest("svg");
   if (svg) {
-    const ch = sealOf(svg);
-    if (ch) return [svg, ch];
-    const group = el.closest("g");
+    const glyph = sealOf(svg);
+    if (glyph) return [svg, glyph];
+    const group = element.closest("g");
     const inner = group && svg.contains(group) ? sealOf(group) : null;
     return inner ? [group!, inner] : null;
   }
-  const ch = el.textContent?.trim() ?? "";
-  if (el.children.length === 0 && GLOSSARY[ch]) return [el, ch];
+  const character = element.textContent?.trim() ?? "";
+  if (element.children.length === 0 && GLOSSARY[character]) return [element, character];
   return null;
 }
 
-function show(el: Element, ch: string) {
-  const [reading, meaning, strokes, note] = GLOSSARY[ch];
+function show(element: Element, glyph: string) {
+  const [reading, meaning, strokes, note] = GLOSSARY[glyph];
   if (!slip) {
     slip = document.createElement("div");
     slip.className = "kanji-slip paper";
@@ -73,14 +73,14 @@ function show(el: Element, ch: string) {
   foot.textContent = [`${strokes} strokes`, note].filter(Boolean).join(" · ");
   slip.append(head, foot);
 
-  const r = el.getBoundingClientRect();
-  const w = slip.offsetWidth;
-  const left = Math.min(Math.max(8, r.left + r.width / 2 - w / 2), innerWidth - w - 8);
-  const below = r.bottom + 10 + slip.offsetHeight < innerHeight;
+  const box = element.getBoundingClientRect();
+  const width = slip.offsetWidth;
+  const left = Math.min(Math.max(8, box.left + box.width / 2 - width / 2), innerWidth - width - 8);
+  const below = box.bottom + 10 + slip.offsetHeight < innerHeight;
   slip.style.left = `${left}px`;
-  slip.style.top = `${below ? r.bottom + 10 : r.top - slip.offsetHeight - 10}px`;
+  slip.style.top = `${below ? box.bottom + 10 : box.top - slip.offsetHeight - 10}px`;
   slip.classList.add("is-shown");
-  owner = el;
+  owner = element;
 }
 
 function hide() {

@@ -14,19 +14,19 @@ function plain(href: string): string {
 window.addEventListener("beforeprint", () => {
   const main = document.getElementById("main-content");
   if (!main || added.length > 0) return;
-  const end = main.querySelector(".article-body") ?? main;
+  const listParent = main.querySelector(".article-body") ?? main;
 
   const numbers = new Map<string, number>();
-  main.querySelectorAll<HTMLAnchorElement>("a[href]").forEach((a) => {
-    if (a.closest(".adjacent, .source, .crumbs, .footnotes-section, .stop-go")) return;
-    const href = a.href;
+  main.querySelectorAll<HTMLAnchorElement>("a[href]").forEach((link) => {
+    if (link.closest(".adjacent, .source, .crumbs, .footnotes-section, .stop-go")) return;
+    const href = link.href;
     if (!/^https?:/.test(href) || href.split("#")[0] === location.href.split("#")[0]) return;
     if (!numbers.has(href)) numbers.set(href, numbers.size + 1);
-    const ref = document.createElement("span");
-    ref.className = "print-ref";
-    ref.textContent = String(numbers.get(href));
-    a.after(ref);
-    added.push(ref);
+    const marker = document.createElement("span");
+    marker.className = "print-ref";
+    marker.textContent = String(numbers.get(href));
+    link.after(marker);
+    added.push(marker);
   });
 
   if (numbers.size > 0) {
@@ -34,11 +34,11 @@ window.addEventListener("beforeprint", () => {
     list.className = "print-links print-only";
     list.innerHTML = "<h2>Links</h2><ol></ol>";
     for (const href of numbers.keys()) {
-      const li = document.createElement("li");
-      li.textContent = plain(href);
-      list.querySelector("ol")!.append(li);
+      const item = document.createElement("li");
+      item.textContent = plain(href);
+      list.querySelector("ol")!.append(item);
     }
-    end.append(list);
+    listParent.append(list);
     added.push(list);
   }
 
@@ -49,10 +49,10 @@ window.addEventListener("beforeprint", () => {
   const seal = document.createElement("span");
   seal.innerHTML = SEAL;
   stamp.append(where, seal);
-  end.append(stamp);
+  listParent.append(stamp);
   added.push(stamp);
 });
 
 window.addEventListener("afterprint", () => {
-  added.splice(0).forEach((el) => el.remove());
+  added.splice(0).forEach((element) => element.remove());
 });

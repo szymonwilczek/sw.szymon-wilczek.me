@@ -16,7 +16,7 @@ function count() {
 }
 
 async function stamp(glyph: string) {
-  const page = SEALS.find((s) => s.glyph === glyph);
+  const page = SEALS.find((seal) => seal.glyph === glyph);
   const press = document.createElement("div");
   press.className = "stamp-press";
   press.setAttribute("role", "status");
@@ -31,7 +31,7 @@ async function stamp(glyph: string) {
   const counter = document.querySelector<HTMLElement>(".seal-count");
   if (still.matches) {
     await press.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 200, fill: "both" }).finished;
-    await new Promise((r) => setTimeout(r, 1600));
+    await new Promise((resolve) => setTimeout(resolve, 1600));
     await press.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 300, fill: "both" }).finished;
   } else {
     const seal = press.querySelector("svg")!;
@@ -43,19 +43,20 @@ async function stamp(glyph: string) {
       ],
       { duration: 420, easing: "cubic-bezier(.3,.7,.4,1)", fill: "both" },
     ).finished;
-    await new Promise((r) => setTimeout(r, 1200));
+    await new Promise((resolve) => setTimeout(resolve, 1200));
     note.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 200, fill: "both" });
 
     // toward the counter, or the bottom corner when the footer is out of view
     const from = seal.getBoundingClientRect();
-    const to = counter && !counter.hidden ? counter.getBoundingClientRect() : null;
-    const tx = (to ? to.left + 6 : innerWidth - 40) - (from.left + from.width / 2);
-    const ty =
-      Math.min(to ? to.top + 6 : innerHeight, innerHeight - 20) - (from.top + from.height / 2);
+    const landing = counter && !counter.hidden ? counter.getBoundingClientRect() : null;
+    const shiftX = (landing ? landing.left + 6 : innerWidth - 40) - (from.left + from.width / 2);
+    const shiftY =
+      Math.min(landing ? landing.top + 6 : innerHeight, innerHeight - 20) -
+      (from.top + from.height / 2);
     await seal.animate(
       [
         { transform: "translate(0, 0) scale(1)", opacity: 1 },
-        { transform: `translate(${tx}px, ${ty}px) scale(0.22)`, opacity: 0.6 },
+        { transform: `translate(${shiftX}px, ${shiftY}px) scale(0.22)`, opacity: 0.6 },
       ],
       { duration: 700, easing: "cubic-bezier(.5,0,.7,.4)", fill: "both" },
     ).finished;
