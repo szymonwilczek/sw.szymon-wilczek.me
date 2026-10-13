@@ -1,4 +1,4 @@
-export const KEY_HASH = "";
+export const KEY_HASH = "58524e6fc3d45e5ab2d242adc1551bfc67792181fec380bf76cbbc8433358ab0";
 
 // the same answer however it is typed
 export const normalKey = (s: string): string =>
