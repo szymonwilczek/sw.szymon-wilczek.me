@@ -155,16 +155,18 @@ import { artUrl } from "../utils/art";
       0,
       base.length,
     );
-    const now = base.map((line) => line.map((): Point => [0, 0]));
+    const shown = base.map((line) => line.map((): Point => [0, 0]));
     const want = base.map((line) => line.map((): Point => [0, 0]));
     const kept = svg.querySelector<SVGGElement>(".sand-kept")!;
     const teeth = svg.querySelector<SVGGElement>(".sand-rake")!;
     const still = matchMedia("(prefers-reduced-motion: reduce)");
-    const KEY = "sand-ring-pts";
+    const RING_KEY = "sand-ring-pts";
 
-    const toSand = (e: PointerEvent): Point => {
-      const p = new DOMPoint(e.clientX, e.clientY).matrixTransform(svg.getScreenCTM()!.inverse());
-      return [p.x, p.y];
+    const toSand = (event: PointerEvent): Point => {
+      const point = new DOMPoint(event.clientX, event.clientY).matrixTransform(
+        svg.getScreenCTM()!.inverse(),
+      );
+      return [point.x, point.y];
     };
 
     const ringPath = (stroke: Point[]) =>
@@ -173,43 +175,43 @@ import { artUrl } from "../utils/art";
         false,
       );
 
-    function keepRing(d: string) {
+    function keepRing(path: string) {
       const ring = document.createElementNS("http://www.w3.org/2000/svg", "path");
-      ring.setAttribute("d", d);
+      ring.setAttribute("d", path);
       kept.append(ring);
     }
 
-    const nearSmall = ([px, py]: Point) => {
+    const nearSmall = ([pointX, pointY]: Point) => {
       const { x, y, rx, ry } = SMALL_STONE;
-      const r = Math.hypot((px - x) / rx, (py - y) / ry);
-      return r >= 1 && r <= 5;
+      const distance = Math.hypot((pointX - x) / rx, (pointY - y) / ry);
+      return distance >= 1 && distance <= 5;
     };
 
     try {
       sessionStorage.removeItem("sand-ring");
-      const saved: unknown = JSON.parse(sessionStorage.getItem(KEY) ?? "null");
-      const isPoint = (q: unknown): q is Point =>
-        Array.isArray(q) && q.length === 2 && q.every(Number.isFinite);
+      const saved: unknown = JSON.parse(sessionStorage.getItem(RING_KEY) ?? "null");
+      const isPoint = (value: unknown): value is Point =>
+        Array.isArray(value) && value.length === 2 && value.every(Number.isFinite);
       if (
         Array.isArray(saved) &&
         saved.length > 2 &&
-        saved.every((q) => isPoint(q) && nearSmall(q))
+        saved.every((point) => isPoint(point) && nearSmall(point))
       )
         keepRing(ringPath(saved));
-      else sessionStorage.removeItem(KEY);
+      else sessionStorage.removeItem(RING_KEY);
     } catch {
       // the ring is only for this visit anyway
     }
 
     // nothing is pushed into a stone
-    function aroundStones(x: number, y: number, o: Point) {
-      for (const s of STONE_SHAPES) {
-        const ex = (x + o[0] - s.x) / (s.rx + 4);
-        const ey = (y + o[1] - s.y) / (s.ry + 4);
-        const e = Math.hypot(ex, ey);
-        if (e < 1 && e > 0.001) {
-          o[0] = s.x + (x + o[0] - s.x) / e - x;
-          o[1] = s.y + (y + o[1] - s.y) / e - y;
+    function aroundStones(x: number, y: number, offset: Point) {
+      for (const stone of STONE_SHAPES) {
+        const scaledX = (x + offset[0] - stone.x) / (stone.rx + 4);
+        const scaledY = (y + offset[1] - stone.y) / (stone.ry + 4);
+        const scaled = Math.hypot(scaledX, scaledY);
+        if (scaled < 1 && scaled > 0.001) {
+          offset[0] = stone.x + (x + offset[0] - stone.x) / scaled - x;
+          offset[1] = stone.y + (y + offset[1] - stone.y) / scaled - y;
         }
       }
     }
@@ -217,36 +219,36 @@ import { artUrl } from "../utils/art";
     // rake drags every line and ring near it the way it moves
     const REACH = 30;
     let last: Point | null = null;
-    function rake(p: Point) {
-      const [px, py] = p;
-      const [vx, vy] = last ? [px - last[0], py - last[1]] : [0, 0];
-      last = p;
-      const len = Math.hypot(vx, vy);
-      if (len > 0.5) {
-        const ux = vx / len;
-        const uy = vy / len;
-        teeth.querySelectorAll("circle").forEach((c, k) => {
-          c.setAttribute("cx", (px - uy * (k - 2) * 6).toFixed(1));
-          c.setAttribute("cy", (py + ux * (k - 2) * 6).toFixed(1));
+    function rake(point: Point) {
+      const [rakeX, rakeY] = point;
+      const [moveX, moveY] = last ? [rakeX - last[0], rakeY - last[1]] : [0, 0];
+      last = point;
+      const moved = Math.hypot(moveX, moveY);
+      if (moved > 0.5) {
+        const dirX = moveX / moved;
+        const dirY = moveY / moved;
+        teeth.querySelectorAll("circle").forEach((tooth, toothIndex) => {
+          tooth.setAttribute("cx", (rakeX - dirY * (toothIndex - 2) * 6).toFixed(1));
+          tooth.setAttribute("cy", (rakeY + dirX * (toothIndex - 2) * 6).toFixed(1));
         });
         teeth.classList.add("on");
       }
-      base.forEach((line, l) => {
+      base.forEach((line, lineIndex) => {
         line.forEach(([x, y], i) => {
-          const o = want[l][i];
-          const dx = x + o[0] - px;
-          if (Math.abs(dx) > REACH) return;
-          const dist = Math.hypot(dx, y + o[1] - py);
+          const offset = want[lineIndex][i];
+          const gapX = x + offset[0] - rakeX;
+          if (Math.abs(gapX) > REACH) return;
+          const dist = Math.hypot(gapX, y + offset[1] - rakeY);
           if (dist > REACH) return;
           const fall = (1 - dist / REACH) ** 2;
-          o[0] += vx * fall * 0.6;
-          o[1] += vy * fall * 0.6;
-          const m = Math.hypot(o[0], o[1]);
-          if (m > 16) {
-            o[0] *= 16 / m;
-            o[1] *= 16 / m;
+          offset[0] += moveX * fall * 0.6;
+          offset[1] += moveY * fall * 0.6;
+          const magnitude = Math.hypot(offset[0], offset[1]);
+          if (magnitude > 16) {
+            offset[0] *= 16 / magnitude;
+            offset[1] *= 16 / magnitude;
           }
-          aroundStones(x, y, o);
+          aroundStones(x, y, offset);
         });
       });
       wake();
@@ -257,40 +259,40 @@ import { artUrl } from "../utils/art";
     let settleFrom = 0;
 
     function draw() {
-      const t = performance.now();
+      const time = performance.now();
       // after a few still seconds the rake comes back: slow, then all at once
-      if (t - lastMove > 3000) {
-        if (!settleFrom) settleFrom = t;
-        const k = still.matches ? 1 : Math.min(1, ((t - settleFrom) / 2600) ** 3);
+      if (time - lastMove > 3000) {
+        if (!settleFrom) settleFrom = time;
+        const tug = still.matches ? 1 : Math.min(1, ((time - settleFrom) / 2600) ** 3);
         for (const line of want) {
-          for (const o of line) {
-            o[0] *= 1 - k;
-            o[1] *= 1 - k;
+          for (const offset of line) {
+            offset[0] *= 1 - tug;
+            offset[1] *= 1 - tug;
           }
         }
       }
       let moving = false;
-      base.forEach((line, l) => {
+      base.forEach((line, lineIndex) => {
         let changed = false;
-        const pts = line.map(([x, y], i) => {
-          const n = now[l][i];
-          const w = want[l][i];
-          for (const a of [0, 1]) {
-            const d = w[a] - n[a];
-            if (Math.abs(d) > 0.05) {
-              n[a] += still.matches ? d : d * 0.3;
+        const points = line.map(([x, y], i) => {
+          const current = shown[lineIndex][i];
+          const wanted = want[lineIndex][i];
+          for (const axis of [0, 1]) {
+            const gap = wanted[axis] - current[axis];
+            if (Math.abs(gap) > 0.05) {
+              current[axis] += still.matches ? gap : gap * 0.3;
               changed = true;
-            } else n[a] = w[a];
+            } else current[axis] = wanted[axis];
           }
-          return [x + n[0], y + n[1]] as Point;
+          return [x + current[0], y + current[1]] as Point;
         });
         if (changed) {
           moving = true;
-          paths[l].setAttribute("d", smooth(pts, false));
+          paths[lineIndex].setAttribute("d", smooth(points, false));
         }
       });
       const resting = want.every((line) =>
-        line.every((o) => Math.abs(o[0]) < 0.05 && Math.abs(o[1]) < 0.05),
+        line.every((offset) => Math.abs(offset[0]) < 0.05 && Math.abs(offset[1]) < 0.05),
       );
       if (moving || !resting) frameId = requestAnimationFrame(draw);
       else frameId = 0;
@@ -310,36 +312,36 @@ import { artUrl } from "../utils/art";
       let from = 0;
       let prev: number | null = null;
       for (let i = 0; i < stroke.length; i++) {
-        const [px, py] = stroke[i];
-        const nx = (px - x) / rx;
-        const ny = (py - y) / ry;
-        if (!nearSmall([px, py])) {
+        const [pointX, pointY] = stroke[i];
+        const unitX = (pointX - x) / rx;
+        const unitY = (pointY - y) / ry;
+        if (!nearSmall([pointX, pointY])) {
           prev = null;
           sweep = 0;
           continue;
         }
-        const a = Math.atan2(ny, nx);
+        const angle = Math.atan2(unitY, unitX);
         if (prev === null) from = i;
-        else sweep += ((a - prev + 3 * Math.PI) % (2 * Math.PI)) - Math.PI;
-        prev = a;
+        else sweep += ((angle - prev + 3 * Math.PI) % (2 * Math.PI)) - Math.PI;
+        prev = angle;
         if (Math.abs(sweep) > (345 * Math.PI) / 180) return stroke.slice(from, i + 1);
       }
       return null;
     }
 
     let down = false;
-    svg.addEventListener("pointerdown", (e) => {
+    svg.addEventListener("pointerdown", (event) => {
       down = true;
       last = null;
-      stroke = [toSand(e)];
-      svg.setPointerCapture(e.pointerId);
+      stroke = [toSand(event)];
+      svg.setPointerCapture(event.pointerId);
       rake(stroke[0]);
     });
-    svg.addEventListener("pointermove", (e) => {
+    svg.addEventListener("pointermove", (event) => {
       if (!down) return;
-      const p = toSand(e);
-      stroke.push(p);
-      rake(p);
+      const point = toSand(event);
+      stroke.push(point);
+      rake(point);
     });
     const lift = () => {
       if (!down) return;
@@ -348,11 +350,11 @@ import { artUrl } from "../utils/art";
       teeth.classList.remove("on");
       const loop = ring();
       if (loop && !kept.childElementCount) {
-        const d = ringPath(loop);
-        keepRing(d);
+        const path = ringPath(loop);
+        keepRing(path);
         try {
           sessionStorage.setItem(
-            KEY,
+            RING_KEY,
             JSON.stringify(loop.map(([x, y]) => [+x.toFixed(1), +y.toFixed(1)])),
           );
         } catch {

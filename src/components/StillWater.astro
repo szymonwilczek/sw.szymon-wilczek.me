@@ -13,7 +13,7 @@ const layouts = [
 ---
 
 <figure class="still-water">
-  {layouts.map(({ name, L, media }) => (
+  {layouts.map(({ name, L: layout, media }) => (
     <>
       <link
         rel="preload"
@@ -25,7 +25,7 @@ const layouts = [
       />
       <svg
         class={`water water-${name}`}
-        viewBox={`0 0 ${L.W} ${L.H}`}
+        viewBox={`0 0 ${layout.W} ${layout.H}`}
         role="img"
         aria-label="Still water with stones and a maple leaf. Move across it and the surface bends; tap to drop a pebble."
         data-layout={name}
@@ -213,59 +213,60 @@ const layouts = [
   const LIFE = 3600;
   const WAVE = 36; // crest to crest
   const BAND = 26; // how wide the train of crests is
-  const NS = "http://www.w3.org/2000/svg";
+  const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
   const still = matchMedia("(prefers-reduced-motion: reduce)");
-  const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
-  const f = (n: number) => n.toFixed(1);
+  const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
+  const fixed = (value: number) => value.toFixed(1);
 
   function setup(svg: SVGSVGElement) {
-    const L = LAYOUTS[svg.dataset.layout as "wide" | "tall"];
+    const layout = LAYOUTS[svg.dataset.layout as "wide" | "tall"];
     const lines: Point[][] = JSON.parse(svg.dataset.lines ?? "[]");
     const linePaths = [...svg.querySelectorAll<SVGPathElement>(".water-lines path")];
     const calm: Array<[number, number, number]> = JSON.parse(svg.dataset.calm ?? "[]");
     const calmPaths = [...svg.querySelectorAll<SVGPathElement>(".water-glints path")];
     const ringLayer = svg.querySelector<SVGGElement>(".water-rings")!;
     const pads = [...svg.querySelectorAll<SVGGElement>(".pad")];
-    const padAt = L.pads.map(([x, y]) => [x, y]);
+    const padAt = layout.pads.map(([x, y]) => [x, y]);
     const leafEl = svg.querySelector<SVGGElement>(".water-leaf")!;
     const seal = svg.querySelector<SVGGElement>(".water-seal")!;
-    const leaf = { x: L.leaf[0], y: L.leaf[1], vx: 0, vy: 0, a: -0.4 };
+    const leaf = { x: layout.leaf[0], y: layout.leaf[1], vx: 0, vy: 0, a: -0.4 };
     let rings: Ring[] = [];
     let now = 0;
 
     if (load().seals["波"]) seal.classList.add("on");
 
-    function swell(r: Ring, x: number, y: number) {
-      const age = now - r.born;
-      const d = Math.hypot(x - r.x, (y - r.y) / FLAT);
-      const off = d - age * SPEED;
-      if (Math.abs(off) > BAND * 1.6) return 0;
+    function swell(ring: Ring, x: number, y: number) {
+      const age = now - ring.born;
+      const distance = Math.hypot(x - ring.x, (y - ring.y) / FLAT);
+      const fromCrest = distance - age * SPEED;
+      if (Math.abs(fromCrest) > BAND * 1.6) return 0;
       const fade = (1 - age / LIFE) ** 2;
-      const front = Math.exp(-((off / BAND) ** 2));
-      return (r.a * fade * front) / Math.sqrt(1 + (age * SPEED) / 40);
+      const front = Math.exp(-((fromCrest / BAND) ** 2));
+      return (ring.a * fade * front) / Math.sqrt(1 + (age * SPEED) / 40);
     }
 
     const lift = (x: number, y: number) => {
-      let h = 0;
-      for (const r of rings) {
-        const s = swell(r, x, y);
-        if (s) {
-          const d = Math.hypot(x - r.x, (y - r.y) / FLAT);
-          h += s * Math.sin(((d - (now - r.born) * SPEED) / WAVE) * Math.PI * 2);
+      let height = 0;
+      for (const ring of rings) {
+        const strength = swell(ring, x, y);
+        if (strength) {
+          const distance = Math.hypot(x - ring.x, (y - ring.y) / FLAT);
+          height +=
+            strength * Math.sin(((distance - (now - ring.born) * SPEED) / WAVE) * Math.PI * 2);
         }
       }
-      return clamp(h, -2.5, 2.5);
+      return clamp(height, -2.5, 2.5);
     };
 
     function drift() {
-      for (const r of rings) {
-        const s = swell(r, leaf.x, leaf.y);
-        if (!s) continue;
-        const dx = leaf.x - r.x;
-        const dy = (leaf.y - r.y) / FLAT;
-        const d = Math.hypot(dx, dy) || 1;
-        leaf.vx += (dx / d) * s * 0.05;
-        leaf.vy += (dy / d) * s * 0.05 * FLAT;
+      for (const ring of rings) {
+        const strength = swell(ring, leaf.x, leaf.y);
+        if (!strength) continue;
+        const awayX = leaf.x - ring.x;
+        const awayY = (leaf.y - ring.y) / FLAT;
+        const distance = Math.hypot(awayX, awayY) || 1;
+        leaf.vx += (awayX / distance) * strength * 0.05;
+        leaf.vy += (awayY / distance) * strength * 0.05 * FLAT;
       }
       leaf.vx *= 0.975;
       leaf.vy *= 0.975;
@@ -274,139 +275,146 @@ const layouts = [
       return Math.abs(leaf.vx) + Math.abs(leaf.vy) > 0.01;
     }
 
-    function move(nx: number, ny: number) {
-      if (inPond(L, nx, ny) && inPond(L, nx + 16, ny) && !inStone(L, nx, ny, 6)) {
-        leaf.x = nx;
-        leaf.y = ny;
+    function move(nextX: number, nextY: number) {
+      if (
+        inPond(layout, nextX, nextY) &&
+        inPond(layout, nextX + 16, nextY) &&
+        !inStone(layout, nextX, nextY, 6)
+      ) {
+        leaf.x = nextX;
+        leaf.y = nextY;
       } else {
         leaf.vx *= -0.3;
         leaf.vy *= -0.3;
       }
-      if (leaf.x > L.goal.x && leaf.y < L.goal.y && earn("波")) seal.classList.add("on");
+      if (leaf.x > layout.goal.x && leaf.y < layout.goal.y && earn("波")) seal.classList.add("on");
     }
 
     function draw() {
-      lines.forEach((pts, l) => {
-        linePaths[l].setAttribute(
+      lines.forEach((points, lineIndex) => {
+        linePaths[lineIndex].setAttribute(
           "d",
           smooth(
-            pts.map(([x, y]): Point => [x, y + lift(x, y)]),
+            points.map(([x, y]): Point => [x, y + lift(x, y)]),
             false,
           ),
         );
       });
 
-      calm.forEach(([x, y, len], c) => {
-        calmPaths[c].setAttribute(
+      calm.forEach(([x, y, length], glintIndex) => {
+        calmPaths[glintIndex].setAttribute(
           "d",
-          `M${f(x)} ${f(y + lift(x, y))} q${f(len / 2)} -1.2 ${f(len)} 0`,
+          `M${fixed(x)} ${fixed(y + lift(x, y))} q${fixed(length / 2)} -1.2 ${fixed(length)} 0`,
         );
       });
 
       ringLayer.replaceChildren(
-        ...rings.flatMap((r) => {
-          const age = now - r.born;
-          const rx = age * SPEED;
+        ...rings.flatMap((ring) => {
+          const age = now - ring.born;
+          const radius = age * SPEED;
           const fade = (1 - age / LIFE) ** 2;
           return [0, WAVE].flatMap((back) => {
-            if (rx - back < 2) return [];
-            const e = document.createElementNS(NS, "ellipse");
-            e.setAttribute("cx", f(r.x));
-            e.setAttribute("cy", f(r.y));
-            e.setAttribute("rx", f(rx - back));
-            e.setAttribute("ry", f((rx - back) * FLAT));
-            e.setAttribute(
+            if (radius - back < 2) return [];
+            const ellipse = document.createElementNS(SVG_NAMESPACE, "ellipse");
+            ellipse.setAttribute("cx", fixed(ring.x));
+            ellipse.setAttribute("cy", fixed(ring.y));
+            ellipse.setAttribute("rx", fixed(radius - back));
+            ellipse.setAttribute("ry", fixed((radius - back) * FLAT));
+            ellipse.setAttribute(
               "opacity",
-              (fade * Math.min(1, r.a / 1.6) * (back ? 0.45 : 0.9)).toFixed(2),
+              (fade * Math.min(1, ring.a / 1.6) * (back ? 0.45 : 0.9)).toFixed(2),
             );
-            return [e];
+            return [ellipse];
           });
         }),
       );
 
-      pads.forEach((p, n) => {
-        const [x, y] = padAt[n];
-        p.setAttribute("transform", `translate(${x} ${f(y + lift(x, y) * 0.6)})`);
+      pads.forEach((pad, padIndex) => {
+        const [x, y] = padAt[padIndex];
+        pad.setAttribute("transform", `translate(${x} ${fixed(y + lift(x, y) * 0.6)})`);
       });
       leafEl.setAttribute(
         "transform",
-        `translate(${f(leaf.x)} ${f(leaf.y + lift(leaf.x, leaf.y) * 0.5)}) rotate(${f((leaf.a * 180) / Math.PI)})`,
+        `translate(${fixed(leaf.x)} ${fixed(leaf.y + lift(leaf.x, leaf.y) * 0.5)}) rotate(${fixed((leaf.a * 180) / Math.PI)})`,
       );
     }
 
     let frame = 0;
-    function loop(t: number) {
+    function loop(time: number) {
       frame = 0;
-      now = t;
-      rings = rings.filter((r) => t - r.born < LIFE);
+      now = time;
+      rings = rings.filter((ring) => time - ring.born < LIFE);
       const moving = drift();
       draw();
       if (rings.length || moving) frame = requestAnimationFrame(loop);
     }
 
-    function drop(x: number, y: number, a: number) {
-      rings.push({ x, y, born: performance.now(), a });
+    function drop(x: number, y: number, strength: number) {
+      rings.push({ x, y, born: performance.now(), a: strength });
       if (rings.length > 40) rings.shift();
       if (!frame) frame = requestAnimationFrame(loop);
     }
 
-    const toWater = (e: PointerEvent): Point => {
-      const p = new DOMPoint(e.clientX, e.clientY).matrixTransform(svg.getScreenCTM()!.inverse());
-      return [p.x, p.y];
+    const toWater = (event: PointerEvent): Point => {
+      const point = new DOMPoint(event.clientX, event.clientY).matrixTransform(
+        svg.getScreenCTM()!.inverse(),
+      );
+      return [point.x, point.y];
     };
 
     function stillRing([x, y]: Point) {
-      const r = document.createElementNS(NS, "ellipse");
-      r.setAttribute("cx", f(x));
-      r.setAttribute("cy", f(y));
-      r.setAttribute("rx", "18");
-      r.setAttribute("ry", "8");
-      ringLayer.append(r);
-      setTimeout(() => r.remove(), 1200);
-      const d = Math.hypot(leaf.x - x, leaf.y - y);
-      if (d < 70 && d > 0.1) {
-        move(leaf.x + ((leaf.x - x) / d) * 30, leaf.y + ((leaf.y - y) / d) * 30);
+      const ripple = document.createElementNS(SVG_NAMESPACE, "ellipse");
+      ripple.setAttribute("cx", fixed(x));
+      ripple.setAttribute("cy", fixed(y));
+      ripple.setAttribute("rx", "18");
+      ripple.setAttribute("ry", "8");
+      ringLayer.append(ripple);
+      setTimeout(() => ripple.remove(), 1200);
+      const distance = Math.hypot(leaf.x - x, leaf.y - y);
+      if (distance < 70 && distance > 0.1) {
+        move(leaf.x + ((leaf.x - x) / distance) * 30, leaf.y + ((leaf.y - y) / distance) * 30);
         draw();
       }
     }
 
     let last: Point | null = null;
-    svg.addEventListener("pointermove", (e) => {
+    svg.addEventListener("pointermove", (event) => {
       if (still.matches) return;
-      const q = toWater(e);
+      const point = toWater(event);
       if (!last) {
-        last = q;
+        last = point;
         return;
       }
-      const d = Math.hypot(q[0] - last[0], q[1] - last[1]);
-      if (d < 28) return;
-      if (inPond(L, q[0], q[1])) drop(q[0], q[1], Math.min(0.5 + d * 0.012, 1.1));
-      last = q;
+      const distance = Math.hypot(point[0] - last[0], point[1] - last[1]);
+      if (distance < 28) return;
+      if (inPond(layout, point[0], point[1]))
+        drop(point[0], point[1], Math.min(0.5 + distance * 0.012, 1.1));
+      last = point;
     });
-    svg.addEventListener("pointerdown", (e) => {
-      const q = toWater(e);
-      if (still.matches) return stillRing(q);
-      if (inPond(L, q[0], q[1])) {
-        drop(q[0], q[1], 2.4);
-        setTimeout(() => drop(q[0], q[1], 1), 220);
+    svg.addEventListener("pointerdown", (event) => {
+      const point = toWater(event);
+      if (still.matches) return stillRing(point);
+      if (inPond(layout, point[0], point[1])) {
+        drop(point[0], point[1], 2.4);
+        setTimeout(() => drop(point[0], point[1], 1), 220);
       }
-      last = e.pointerType === "mouse" ? q : null;
+      last = event.pointerType === "mouse" ? point : null;
     });
     const leave = () => (last = null);
     svg.addEventListener("pointerleave", leave);
-    svg.addEventListener("pointerup", (e) => e.pointerType !== "mouse" && leave());
+    svg.addEventListener("pointerup", (event) => event.pointerType !== "mouse" && leave());
     svg.addEventListener("pointercancel", leave);
   }
 
   document.querySelectorAll<SVGSVGElement>(".still-water .water").forEach((svg) => {
-    const mq = matchMedia(svg.dataset.media!);
+    const media = matchMedia(svg.dataset.media!);
     let filled = false;
     const fill = () => {
-      if (filled || !mq.matches) return;
+      if (filled || !media.matches) return;
       filled = true;
       fillArt(svg).then(() => setup(svg));
     };
     fill();
-    mq.addEventListener("change", fill);
+    media.addEventListener("change", fill);
   });
 </script>

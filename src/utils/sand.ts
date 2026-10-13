@@ -21,21 +21,21 @@ export interface Sand {
   stones: SandStone[];
 }
 
-const f = (n: number) => Math.round(n * 10) / 10;
+const round1 = (value: number) => Math.round(value * 10) / 10;
 
-export function smooth(pts: Point[], closed: boolean): string {
-  if (pts.length < 2) return "";
-  const P = closed
-    ? [pts[pts.length - 1], ...pts, pts[0], pts[1]]
-    : [pts[0], ...pts, pts[pts.length - 1]];
-  let d = `M${f(P[1][0])} ${f(P[1][1])}`;
-  for (let i = 1; i < P.length - 2; i++) {
-    const [p0, p1, p2, p3] = [P[i - 1], P[i], P[i + 1], P[i + 2]];
-    d +=
-      ` C${f(p1[0] + (p2[0] - p0[0]) / 6)} ${f(p1[1] + (p2[1] - p0[1]) / 6)}` +
-      ` ${f(p2[0] - (p3[0] - p1[0]) / 6)} ${f(p2[1] - (p3[1] - p1[1]) / 6)} ${f(p2[0])} ${f(p2[1])}`;
+export function smooth(points: Point[], closed: boolean): string {
+  if (points.length < 2) return "";
+  const padded = closed
+    ? [points[points.length - 1], ...points, points[0], points[1]]
+    : [points[0], ...points, points[points.length - 1]];
+  let path = `M${round1(padded[1][0])} ${round1(padded[1][1])}`;
+  for (let i = 1; i < padded.length - 2; i++) {
+    const [before, from, to, after] = [padded[i - 1], padded[i], padded[i + 1], padded[i + 2]];
+    path +=
+      ` C${round1(from[0] + (to[0] - before[0]) / 6)} ${round1(from[1] + (to[1] - before[1]) / 6)}` +
+      ` ${round1(to[0] - (after[0] - from[0]) / 6)} ${round1(to[1] - (after[1] - from[1]) / 6)} ${round1(to[0])} ${round1(to[1])}`;
   }
-  return closed ? `${d} Z` : d;
+  return closed ? `${path} Z` : path;
 }
 
 const STONES = [
@@ -52,20 +52,28 @@ export const SMALL_STONE = STONES[1];
 
 export function makeSand(): Sand {
   let seed = 7;
-  const rnd = () => {
+  const rand = () => {
     seed = (seed * 16807) % 2147483647;
     return (seed - 1) / 2147483646;
   };
-  const jit = (n: number) => (rnd() - 0.5) * 2 * n;
+  const jitter = (amount: number) => (rand() - 0.5) * 2 * amount;
 
-  function blob(cx: number, cy: number, rx: number, ry: number, rough: number, n = 9, rot = 0) {
-    const pts: Point[] = [];
-    for (let i = 0; i < n; i++) {
-      const a = rot + (i / n) * Math.PI * 2;
-      const k = 1 + jit(rough);
-      pts.push([cx + Math.cos(a) * rx * k, cy + Math.sin(a) * ry * k]);
+  function blob(
+    cx: number,
+    cy: number,
+    rx: number,
+    ry: number,
+    rough: number,
+    corners = 9,
+    rotation = 0,
+  ) {
+    const points: Point[] = [];
+    for (let i = 0; i < corners; i++) {
+      const angle = rotation + (i / corners) * Math.PI * 2;
+      const wobble = 1 + jitter(rough);
+      points.push([cx + Math.cos(angle) * rx * wobble, cy + Math.sin(angle) * ry * wobble]);
     }
-    return smooth(pts, true);
+    return smooth(points, true);
   }
 
   // passes of a rake, each a little uneven;
@@ -73,90 +81,99 @@ export function makeSand(): Sand {
   const lines: Sand["lines"] = [];
   let y = 9;
   while (y < 184) {
-    const pass = 3 + Math.round(rnd());
-    const tooth = 7.4 + jit(0.8);
-    const tilt = jit(2.4);
-    const w = 0.9 + rnd() * 0.5;
-    for (let t = 0; t < pass && y < 184; t++, y += tooth + jit(0.7)) {
+    const pass = 3 + Math.round(rand());
+    const tooth = 7.4 + jitter(0.8);
+    const tilt = jitter(2.4);
+    const width = 0.9 + rand() * 0.5;
+    for (let stroke = 0; stroke < pass && y < 184; stroke++, y += tooth + jitter(0.7)) {
       const segs: Point[][] = [];
-      const start = -6 + jit(6);
-      const end = 1006 + jit(6);
-      let seg: Point[] = [];
-      for (let x = start; x <= end; x += 11 + jit(2.5)) {
-        const yy = y + tilt * (x / 1000) + Math.sin(x / 170 + y * 0.3) * 1.1 + jit(0.45);
-        const hit = STONES.some((s) => {
-          const R = s.rx + s.rings[s.rings.length - 1] + 6 + jit(3);
-          return ((x - s.x) / R) ** 2 + ((yy - s.y) / (R * 0.78)) ** 2 < 1;
+      const start = -6 + jitter(6);
+      const end = 1006 + jitter(6);
+      let segment: Point[] = [];
+      for (let x = start; x <= end; x += 11 + jitter(2.5)) {
+        const pointY = y + tilt * (x / 1000) + Math.sin(x / 170 + y * 0.3) * 1.1 + jitter(0.45);
+        const hit = STONES.some((stone) => {
+          const reach = stone.rx + stone.rings[stone.rings.length - 1] + 6 + jitter(3);
+          return ((x - stone.x) / reach) ** 2 + ((pointY - stone.y) / (reach * 0.78)) ** 2 < 1;
         });
         if (hit) {
-          if (seg.length > 1) segs.push(seg);
-          seg = [];
+          if (segment.length > 1) segs.push(segment);
+          segment = [];
           continue;
         }
-        seg.push([f(x), f(yy)]);
+        segment.push([round1(x), round1(pointY)]);
       }
-      if (seg.length > 1) segs.push(seg);
-      for (const s of segs) lines.push({ pts: s, w: f(w + jit(0.12)), o: f(0.5 + rnd() * 0.25) });
+      if (segment.length > 1) segs.push(segment);
+      for (const run of segs)
+        lines.push({ pts: run, w: round1(width + jitter(0.12)), o: round1(0.5 + rand() * 0.25) });
     }
-    y += 2 + rnd() * 3;
+    y += 2 + rand() * 3;
   }
 
   const rings: Sand["rings"] = [];
-  for (const s of STONES) {
-    for (const g of s.rings) {
-      const n = 40;
-      const ox = jit(1.6);
-      const oy = jit(1.2);
-      const pts: Point[] = [];
-      const a0 = rnd() * Math.PI * 2;
-      const sweep = Math.PI * 2 * (0.94 + rnd() * 0.1);
-      for (let i = 0; i <= n; i++) {
-        const a = a0 + (i / n) * sweep;
-        const r = 1 + jit(0.015);
-        pts.push([
-          f(s.x + ox + Math.cos(a) * (s.rx + g) * r),
-          f(s.y + oy + Math.sin(a) * (s.ry + g * 0.78) * r),
+  for (const stone of STONES) {
+    for (const gap of stone.rings) {
+      const steps = 40;
+      const shiftX = jitter(1.6);
+      const shiftY = jitter(1.2);
+      const points: Point[] = [];
+      const startAngle = rand() * Math.PI * 2;
+      const sweep = Math.PI * 2 * (0.94 + rand() * 0.1);
+      for (let i = 0; i <= steps; i++) {
+        const angle = startAngle + (i / steps) * sweep;
+        const wobble = 1 + jitter(0.015);
+        points.push([
+          round1(stone.x + shiftX + Math.cos(angle) * (stone.rx + gap) * wobble),
+          round1(stone.y + shiftY + Math.sin(angle) * (stone.ry + gap * 0.78) * wobble),
         ]);
       }
-      rings.push({ pts, w: f(0.9 + rnd() * 0.5), o: f(0.5 + rnd() * 0.25) });
+      rings.push({ pts: points, w: round1(0.9 + rand() * 0.5), o: round1(0.5 + rand() * 0.25) });
     }
   }
 
-  const stones = STONES.map((s, i) => ({
-    x: s.x,
-    y: s.y,
-    rx: s.rx,
-    ry: s.ry,
-    d: blob(s.x, s.y, s.rx, s.ry, 0.12, 8 + i, rnd()),
-    shadow: blob(s.x + 5, s.y + 6, s.rx * 1.02, s.ry * 0.9, 0.1, 8, rnd()),
+  const stones = STONES.map((stone, i) => ({
+    x: stone.x,
+    y: stone.y,
+    rx: stone.rx,
+    ry: stone.ry,
+    d: blob(stone.x, stone.y, stone.rx, stone.ry, 0.12, 8 + i, rand()),
+    shadow: blob(stone.x + 5, stone.y + 6, stone.rx * 1.02, stone.ry * 0.9, 0.1, 8, rand()),
     facet: smooth(
       [
-        [s.x - s.rx * 0.5, s.y - s.ry * 0.2],
-        [s.x - s.rx * 0.1, s.y - s.ry * 0.45],
-        [s.x + s.rx * 0.35, s.y - s.ry * 0.3],
+        [stone.x - stone.rx * 0.5, stone.y - stone.ry * 0.2],
+        [stone.x - stone.rx * 0.1, stone.y - stone.ry * 0.45],
+        [stone.x + stone.rx * 0.35, stone.y - stone.ry * 0.3],
       ],
       false,
     ),
     moss:
       i === 1
         ? ""
-        : blob(s.x - s.rx * 0.35, s.y - s.ry * 0.62, s.rx * 0.32, s.ry * 0.22, 0.3, 7, rnd()),
+        : blob(
+            stone.x - stone.rx * 0.35,
+            stone.y - stone.ry * 0.62,
+            stone.rx * 0.32,
+            stone.ry * 0.22,
+            0.3,
+            7,
+            rand(),
+          ),
   }));
 
   const grains = Array.from({ length: 70 }, () => ({
-    x: f(rnd() * 1000),
-    y: f(6 + rnd() * 178),
-    r: f(0.4 + rnd() * 0.7),
+    x: round1(rand() * 1000),
+    y: round1(6 + rand() * 178),
+    r: round1(0.4 + rand() * 0.7),
   }));
 
   // ragged edge of the sand bed
   const top: Point[] = [];
-  const bot: Point[] = [];
+  const bottom: Point[] = [];
   for (let x = 0; x <= 1000; x += 50) {
-    top.push([x, 2 + jit(2)]);
-    bot.push([1000 - x, 188 + jit(2)]);
+    top.push([x, 2 + jitter(2)]);
+    bottom.push([1000 - x, 188 + jitter(2)]);
   }
-  const edge = smooth([...top, [1003, 95], ...bot, [-3, 95]], true);
+  const edge = smooth([...top, [1003, 95], ...bottom, [-3, 95]], true);
 
   return { edge, grains, lines, rings, stones };
 }
