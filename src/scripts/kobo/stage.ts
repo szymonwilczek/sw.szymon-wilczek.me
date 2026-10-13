@@ -1,8 +1,8 @@
-import { groupSvg, toSvg, tones2, FILTERS } from "../../utils/tea/ink.js";
+import { groupSvg, toSvg, toneVars, FILTERS } from "../../utils/tea/ink.js";
 import { turned, type PieceSpec } from "../../utils/tea/pottery";
 
 export type P = [number, number];
-export const K = tones2();
+export const K = toneVars();
 export const still = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 // where a piece is on its way through the workshop
@@ -44,7 +44,7 @@ export const save = (w: Work) => localStorage.setItem(WORK, JSON.stringify(w));
 export const clear = () => localStorage.removeItem(WORK);
 
 // a group the drawing code can draw into
-export type Grp = ReturnType<typeof import("../../utils/tea/ink.js").G>;
+export type Grp = ReturnType<typeof import("../../utils/tea/ink.js").newGroup>;
 export const markup = (groups: Grp[]) => groups.map((g) => groupSvg(g)).join("");
 
 export interface Stage {

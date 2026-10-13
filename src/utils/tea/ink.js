@@ -1,4 +1,4 @@
-const C = {
+const THEME_VARS = {
   paper: "var(--paper)",
   tape: "var(--tape)",
   leaf: "var(--leaf)",
@@ -11,222 +11,237 @@ const C = {
   cursor: "var(--cursor)",
   fgLink: "var(--fg-link)",
 };
-const mix = (a, b, t) => `color-mix(in oklab, ${a}, ${b} ${Math.round(t * 100)}%)`;
-const dk = (light, dark) => `light-dark(${light}, ${dark})`;
+const mix = (from, into, amount) =>
+  `color-mix(in oklab, ${from}, ${into} ${Math.round(amount * 100)}%)`;
+const lightDark = (light, dark) => `light-dark(${light}, ${dark})`;
 
-function toneMix(c = C) {
-  const wood = mix(c.tape, c.redWarmer, 0.38),
-    plaster = mix(c.tape, c.paper, 0.45);
+function toneMix(vars = THEME_VARS) {
+  const wood = mix(vars.tape, vars.redWarmer, 0.38),
+    plaster = mix(vars.tape, vars.paper, 0.45);
   return {
-    ink: mix(c.fgMain, c.paper, 0.1),
-    inkSoft: mix(c.fgMain, c.paper, 0.45),
+    ink: mix(vars.fgMain, vars.paper, 0.1),
+    inkSoft: mix(vars.fgMain, vars.paper, 0.45),
     wood,
-    woodDk: mix(wood, c.fgMain, 0.35),
-    woodLt: mix(wood, c.paper, 0.4),
+    woodDk: mix(wood, vars.fgMain, 0.35),
+    woodLt: mix(wood, vars.paper, 0.4),
     plaster,
-    plasterDk: mix(plaster, c.fgMain, 0.1),
-    fusuma: mix(c.paper, c.tape, 0.3),
-    tatami: mix(c.leaf, c.tape, 0.5),
-    heri: mix(c.sea, c.fgMain, 0.55),
-    iron: mix(c.fgMain, c.sea, 0.3),
-    deep: dk(mix(c.fgMain, c.bgMain, 0.2), mix(c.bgMain, "#000", 0.5)),
-    glow: mix(c.cursor, c.paper, 0.5),
-    glowLine: dk(mix(c.paper, c.cursor, 0.2), mix(c.fgMain, c.cursor, 0.3)),
-    mount: mix(c.sea, c.fgMain, 0.32),
-    mountLt: mix(c.sea, c.paper, 0.35),
-    cloth: mix(c.sea, c.fgMain, 0.4),
-    gold: mix(c.accent0, c.paper, 0.25),
-    bamboo: mix(c.leaf, c.accent0, 0.5),
-    rope: mix(c.tape, c.fgMain, 0.35),
-    fukusa: mix(c.red, c.paper, 0.4),
-    pool: dk(mix(c.paper, c.fgMain, 0.14), mix(c.paper, c.fgMain, 0.3)),
-    fibre: mix(c.fgMain, c.tape, 0.55),
-    paper: c.paper,
-    red: c.red,
-    silk: { A: c.fgLink, B: c.red },
-    stone: mix(c.fgMain, c.paper, 0.62),
-    stoneDk: mix(c.fgMain, c.paper, 0.38),
-    moss: mix(c.leaf, c.paper, 0.35),
-    mossDk: mix(c.leaf, c.fgMain, 0.25),
-    earth: mix(c.tape, c.redWarmer, 0.18),
-    thatch: mix(c.tape, c.leaf, 0.22),
-    thatchDk: mix(mix(c.tape, c.leaf, 0.22), c.fgMain, 0.45),
-    maple: mix(c.red, c.redWarmer, 0.35),
-    lacquer: dk(mix(c.fgMain, c.red, 0.12), mix(c.fgMain, c.red, 0.25)),
-    brass: mix(c.accent0, c.tape, 0.35),
-    kura: dk(mix(c.paper, c.fgMain, 0.04), mix(c.paper, c.fgMain, 0.12)),
-    water: mix(c.sea, c.fgMain, 0.5),
-    glowSoft: mix(c.paper, c.accent0, 0.16),
-    mistC: mix(c.paper, c.bgMain, 0.4),
-    cord: mix(c.fgMain, c.red, 0.15),
+    plasterDk: mix(plaster, vars.fgMain, 0.1),
+    fusuma: mix(vars.paper, vars.tape, 0.3),
+    tatami: mix(vars.leaf, vars.tape, 0.5),
+    heri: mix(vars.sea, vars.fgMain, 0.55),
+    iron: mix(vars.fgMain, vars.sea, 0.3),
+    deep: lightDark(mix(vars.fgMain, vars.bgMain, 0.2), mix(vars.bgMain, "#000", 0.5)),
+    glow: mix(vars.cursor, vars.paper, 0.5),
+    glowLine: lightDark(mix(vars.paper, vars.cursor, 0.2), mix(vars.fgMain, vars.cursor, 0.3)),
+    mount: mix(vars.sea, vars.fgMain, 0.32),
+    mountLt: mix(vars.sea, vars.paper, 0.35),
+    cloth: mix(vars.sea, vars.fgMain, 0.4),
+    gold: mix(vars.accent0, vars.paper, 0.25),
+    bamboo: mix(vars.leaf, vars.accent0, 0.5),
+    rope: mix(vars.tape, vars.fgMain, 0.35),
+    fukusa: mix(vars.red, vars.paper, 0.4),
+    pool: lightDark(mix(vars.paper, vars.fgMain, 0.14), mix(vars.paper, vars.fgMain, 0.3)),
+    fibre: mix(vars.fgMain, vars.tape, 0.55),
+    paper: vars.paper,
+    red: vars.red,
+    silk: { A: vars.fgLink, B: vars.red },
+    stone: mix(vars.fgMain, vars.paper, 0.62),
+    stoneDk: mix(vars.fgMain, vars.paper, 0.38),
+    moss: mix(vars.leaf, vars.paper, 0.35),
+    mossDk: mix(vars.leaf, vars.fgMain, 0.25),
+    earth: mix(vars.tape, vars.redWarmer, 0.18),
+    thatch: mix(vars.tape, vars.leaf, 0.22),
+    thatchDk: mix(mix(vars.tape, vars.leaf, 0.22), vars.fgMain, 0.45),
+    maple: mix(vars.red, vars.redWarmer, 0.35),
+    lacquer: lightDark(mix(vars.fgMain, vars.red, 0.12), mix(vars.fgMain, vars.red, 0.25)),
+    brass: mix(vars.accent0, vars.tape, 0.35),
+    kura: lightDark(mix(vars.paper, vars.fgMain, 0.04), mix(vars.paper, vars.fgMain, 0.12)),
+    water: mix(vars.sea, vars.fgMain, 0.5),
+    glowSoft: mix(vars.paper, vars.accent0, 0.16),
+    mistC: mix(vars.paper, vars.bgMain, 0.4),
+    cord: mix(vars.fgMain, vars.red, 0.15),
   };
 }
 
 const TONES = toneMix();
-const tones2 = () =>
+const toneVars = () =>
   Object.fromEntries(
-    Object.entries(TONES).map(([k, v]) => [
-      k,
-      typeof v === "string"
-        ? `var(--tk-${k})`
-        : Object.fromEntries(Object.keys(v).map((s) => [s, `var(--tk-${k}${s})`])),
+    Object.entries(TONES).map(([key, value]) => [
+      key,
+      typeof value === "string"
+        ? `var(--tk-${key})`
+        : Object.fromEntries(
+            Object.keys(value).map((shade) => [shade, `var(--tk-${key}${shade})`]),
+          ),
     ]),
   );
 const TONE_CSS = Object.entries(TONES)
-  .flatMap(([k, v]) =>
-    typeof v === "string" ? [[k, v]] : Object.entries(v).map(([s, x]) => [k + s, x]),
+  .flatMap(([key, value]) =>
+    typeof value === "string"
+      ? [[key, value]]
+      : Object.entries(value).map(([shade, color]) => [key + shade, color]),
   )
-  .map(([k, v]) => `--tk-${k}: ${v};`)
+  .map(([key, value]) => `--tk-${key}: ${value};`)
   .join(" ");
 
 const FILTERS = `<filter id="bk-tremble" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="0.09" numOctaves="2" seed="7"/><feDisplacementMap in="SourceGraphic" scale="1.6"/></filter><filter id="bk-wash" x="-15%" y="-15%" width="130%" height="130%"><feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="3" seed="5"/><feDisplacementMap in="SourceGraphic" scale="6"/><feGaussianBlur stdDeviation="0.9"/></filter><filter id="bk-bleed" x="-30%" y="-30%" width="160%" height="160%"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="3" seed="9"/><feDisplacementMap in="SourceGraphic" scale="11"/><feGaussianBlur stdDeviation="1.6"/></filter><filter id="bk-pool" x="-30%" y="-80%" width="160%" height="260%"><feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="3"/><feDisplacementMap in="SourceGraphic" scale="14"/><feGaussianBlur stdDeviation="4"/></filter>`;
 
-const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
+const escapeXml = (value) =>
+  String(value).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
 
-function groupSvg(g, attrs = "") {
-  if (g.groups)
-    return `<g class="${g.cls}"${attrs}>${g.groups.map((x) => groupSvg(x)).join("")}</g>`;
-  if (g.cls) attrs += ` class="${g.cls}"`;
+function groupSvg(group, attrs = "") {
+  if (group.groups)
+    return `<g class="${group.cls}"${attrs}>${group.groups.map((child) => groupSvg(child)).join("")}</g>`;
+  if (group.cls) attrs += ` class="${group.cls}"`;
 
   // the same at every hour: a page may keep it apart from what the hour redraws
-  if (g.still) attrs += " data-still";
+  if (group.still) attrs += " data-still";
   const style = [
-    g.tf !== "none" && `transform:${g.tf}`,
-    g.to !== "0px 0px" && `transform-origin:${g.to}`,
-    g.anim !== "none" && `animation:${g.anim}`,
-    g.op !== 1 && `opacity:${g.op}`,
-    g.vars,
+    group.tf !== "none" && `transform:${group.tf}`,
+    group.to !== "0px 0px" && `transform-origin:${group.to}`,
+    group.anim !== "none" && `animation:${group.anim}`,
+    group.op !== 1 && `opacity:${group.op}`,
+    group.vars,
   ]
     .filter(Boolean)
     .join(";");
-  const wash = g.wash
+  const wash = group.wash
     .map(
-      (w) =>
-        `<path d="${w.d}" fill="${w.fill}" opacity="${w.o}" fill-rule="evenodd" transform="${w.t}" filter="${w.f}"/>`,
+      (part) =>
+        `<path d="${part.d}" fill="${part.fill}" opacity="${part.o}" fill-rule="evenodd" transform="${part.t}" filter="${part.f}"/>`,
     )
     .join("");
-  const solid = g.solid
+  const solid = group.solid
     .map(
-      (s) =>
-        `<path d="${s.d}" fill="${s.fill}" opacity="${s.o}" fill-rule="evenodd"${s.f ? ` filter="${s.f}"` : ""}/>`,
+      (part) =>
+        `<path d="${part.d}" fill="${part.fill}" opacity="${part.o}" fill-rule="evenodd"${part.f ? ` filter="${part.f}"` : ""}/>`,
     )
     .join("");
-  const line = g.line
+  const line = group.line
     .map(
-      (l) =>
-        `<path d="${l.d}" fill="none" stroke="${l.c}" stroke-width="${l.w}" opacity="${l.o}" stroke-linecap="round" stroke-linejoin="round"${l.f ? ` filter="${l.f}"` : ""}/>`,
+      (part) =>
+        `<path d="${part.d}" fill="none" stroke="${part.c}" stroke-width="${part.w}" opacity="${part.o}" stroke-linecap="round" stroke-linejoin="round"${part.f ? ` filter="${part.f}"` : ""}/>`,
     )
     .join("");
-  const text = g.text
+  const text = group.text
     .map(
-      (t) =>
-        `<text transform="${t.tr}" font-size="${t.fs}" fill="${t.fill}" opacity="${t.o}" text-anchor="${t.an || "middle"}" dominant-baseline="central" style="font-family:${t.font};writing-mode:${t.wm};letter-spacing:${t.ls}">${esc(t.t)}</text>`,
+      (part) =>
+        `<text transform="${part.tr}" font-size="${part.fs}" fill="${part.fill}" opacity="${part.o}" text-anchor="${part.an || "middle"}" dominant-baseline="central" style="font-family:${part.font};writing-mode:${part.wm};letter-spacing:${part.ls}">${escapeXml(part.t)}</text>`,
     )
     .join("");
-  return `<g${attrs}${g.clip ? ` clip-path="${g.clip}"` : ""}${style ? ` style="${style}"` : ""}>${g.defs || ""}${wash ? `<g opacity="${g.washO}">${wash}</g>` : ""}${solid}${line}${text}</g>`;
+  return `<g${attrs}${group.clip ? ` clip-path="${group.clip}"` : ""}${style ? ` style="${style}"` : ""}>${group.defs || ""}${wash ? `<g opacity="${group.washO}">${wash}</g>` : ""}${solid}${line}${text}</g>`;
 }
 
-function toSvg(out, filters = false) {
-  const clips = (out.clips || [])
-    .map((c) => `<clipPath id="${c.id}"><path d="${c.d}"/></clipPath>`)
+function toSvg(scene, filters = false) {
+  const clips = (scene.clips || [])
+    .map((clip) => `<clipPath id="${clip.id}"><path d="${clip.d}"/></clipPath>`)
     .join("");
   const defs = (filters ? FILTERS : "") + clips;
-  return (defs ? `<defs>${defs}</defs>` : "") + out.groups.map((g) => groupSvg(g)).join("");
+  return (
+    (defs ? `<defs>${defs}</defs>` : "") + scene.groups.map((group) => groupSvg(group)).join("")
+  );
 }
 
-function hash(s) {
-  let h = 2166136261;
-  for (const ch of s) {
-    h ^= ch.charCodeAt(0);
-    h = Math.imul(h, 16777619);
+function hash(text) {
+  let acc = 2166136261;
+  for (const char of text) {
+    acc ^= char.charCodeAt(0);
+    acc = Math.imul(acc, 16777619);
   }
-  return h >>> 0;
+  return acc >>> 0;
 }
 
 function rng(seed) {
-  let a = seed;
+  let state = seed;
   return () => {
-    a |= 0;
-    a = (a + 0x6d2b79f5) | 0;
-    let t = Math.imul(a ^ (a >>> 15), 1 | a);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    state |= 0;
+    state = (state + 0x6d2b79f5) | 0;
+    let mixed = Math.imul(state ^ (state >>> 15), 1 | state);
+    mixed = (mixed + Math.imul(mixed ^ (mixed >>> 7), 61 | mixed)) ^ mixed;
+    return ((mixed ^ (mixed >>> 14)) >>> 0) / 4294967296;
   };
 }
 
-let PREC = 1;
-const setPrec = (p) => (PREC = p);
-const f1 = (n) => Math.round(n * PREC) / PREC;
+let PRECISION = 1;
+const setPrecision = (precision) => (PRECISION = precision);
+const roundCoord = (value) => Math.round(value * PRECISION) / PRECISION;
 const lerp = (a, b, t) => a + (b - a) * t;
-function smooth(pts, closed) {
-  const p = closed
-    ? [pts[pts.length - 1], ...pts, pts[0], pts[1]]
-    : [pts[0], ...pts, pts[pts.length - 1]];
-  let d = `M${f1(p[1][0])} ${f1(p[1][1])}`;
-  for (let i = 1; i < p.length - 2; i++) {
-    const [x0, y0] = p[i - 1],
-      [x1, y1] = p[i],
-      [x2, y2] = p[i + 1],
-      [x3, y3] = p[i + 2];
-    d += ` C${f1(x1 + (x2 - x0) / 6)} ${f1(y1 + (y2 - y0) / 6)} ${f1(x2 - (x3 - x1) / 6)} ${f1(y2 - (y3 - y1) / 6)} ${f1(x2)} ${f1(y2)}`;
+function smooth(points, closed) {
+  const padded = closed
+    ? [points[points.length - 1], ...points, points[0], points[1]]
+    : [points[0], ...points, points[points.length - 1]];
+  let path = `M${roundCoord(padded[1][0])} ${roundCoord(padded[1][1])}`;
+  for (let i = 1; i < padded.length - 2; i++) {
+    const [x0, y0] = padded[i - 1],
+      [x1, y1] = padded[i],
+      [x2, y2] = padded[i + 1],
+      [x3, y3] = padded[i + 2];
+    path += ` C${roundCoord(x1 + (x2 - x0) / 6)} ${roundCoord(y1 + (y2 - y0) / 6)} ${roundCoord(x2 - (x3 - x1) / 6)} ${roundCoord(y2 - (y3 - y1) / 6)} ${roundCoord(x2)} ${roundCoord(y2)}`;
   }
-  return closed ? d + " Z" : d;
+  return closed ? path + " Z" : path;
 }
 
-const poly = (pts) => "M" + pts.map(([x, y]) => `${f1(x)} ${f1(y)}`).join(" L") + " Z";
+const polygonPath = (points) =>
+  "M" + points.map(([x, y]) => `${roundCoord(x)} ${roundCoord(y)}`).join(" L") + " Z";
 // ink kit
-const TREM = "url(#bk-tremble)";
-const WASH = "url(#bk-wash)";
-const J = (r, a) => (r() - 0.5) * 2 * a;
-function wpoly(r, pts, j) {
-  const p = pts.map(([x, y]) => [x + J(r, j * 0.5), y + J(r, j * 0.5)]);
-  let d = `M${f1(p[0][0])} ${f1(p[0][1])}`;
-  for (let i = 0; i < p.length; i++) {
-    const a = p[i],
-      b = p[(i + 1) % p.length];
-    d += ` Q${f1((a[0] + b[0]) / 2 + J(r, j))} ${f1((a[1] + b[1]) / 2 + J(r, j))} ${f1(b[0])} ${f1(b[1])}`;
+const TREMBLE_FILTER = "url(#bk-tremble)";
+const WASH_FILTER = "url(#bk-wash)";
+const jitter = (rand, amount) => (rand() - 0.5) * 2 * amount;
+function wobblyPolygon(rand, points, wobble) {
+  const shaken = points.map(([x, y]) => [
+    x + jitter(rand, wobble * 0.5),
+    y + jitter(rand, wobble * 0.5),
+  ]);
+  let path = `M${roundCoord(shaken[0][0])} ${roundCoord(shaken[0][1])}`;
+  for (let i = 0; i < shaken.length; i++) {
+    const current = shaken[i],
+      next = shaken[(i + 1) % shaken.length];
+    path += ` Q${roundCoord((current[0] + next[0]) / 2 + jitter(rand, wobble))} ${roundCoord((current[1] + next[1]) / 2 + jitter(rand, wobble))} ${roundCoord(next[0])} ${roundCoord(next[1])}`;
   }
-  return d + " Z";
+  return path + " Z";
 }
 
-const wbox = (r, x0, y0, x1, y1, j) =>
-  wpoly(
-    r,
+const wobblyBox = (rand, x0, y0, x1, y1, wobble) =>
+  wobblyPolygon(
+    rand,
     [
       [x0, y0],
       [x1, y0],
       [x1, y1],
       [x0, y1],
     ],
-    j,
+    wobble,
   );
 
-const wline = (r, pts, j) =>
+const wobblyLine = (rand, points, wobble) =>
   smooth(
-    pts.map(([x, y]) => [x + J(r, j), y + J(r, j)]),
+    points.map(([x, y]) => [x + jitter(rand, wobble), y + jitter(rand, wobble)]),
     false,
   );
 
-const wseg = (r, a, b, j, n) =>
-  wline(
-    r,
-    Array.from({ length: (n || 3) + 1 }, (_, i) => [
-      lerp(a[0], b[0], i / (n || 3)),
-      lerp(a[1], b[1], i / (n || 3)),
+const wobblySegment = (rand, from, to, wobble, steps) =>
+  wobblyLine(
+    rand,
+    Array.from({ length: (steps || 3) + 1 }, (_, i) => [
+      lerp(from[0], to[0], i / (steps || 3)),
+      lerp(from[1], to[1], i / (steps || 3)),
     ]),
-    j,
+    wobble,
   );
 
-const wring = (r, cx, cy, rx, ry, j, n) =>
+const wobblyRing = (rand, cx, cy, rx, ry, wobble, steps) =>
   smooth(
-    Array.from({ length: n || 12 }, (_, i) => {
-      const a = (i / (n || 12)) * Math.PI * 2;
-      return [cx + Math.cos(a) * (rx + J(r, j)), cy + Math.sin(a) * (ry + J(r, j))];
+    Array.from({ length: steps || 12 }, (_, i) => {
+      const angle = (i / (steps || 12)) * Math.PI * 2;
+      return [
+        cx + Math.cos(angle) * (rx + jitter(rand, wobble)),
+        cy + Math.sin(angle) * (ry + jitter(rand, wobble)),
+      ];
     }),
     true,
   );
 
-function G(o) {
+function newGroup(overrides) {
   return Object.assign(
     {
       tf: "none",
@@ -242,30 +257,36 @@ function G(o) {
       line: [],
       text: [],
     },
-    o || {},
+    overrides || {},
   );
 }
 
-function Wa(g, r, d, fill, o, f) {
-  g.wash.push({
-    d,
+function addWash(group, rand, path, fill, opacity, filter) {
+  group.wash.push({
+    d: path,
     fill,
-    o: o ?? 1,
-    f: f || WASH,
-    t: `translate(${f1(1 + r() * 2)} ${f1(0.8 + r() * 1.8)})`,
+    o: opacity ?? 1,
+    f: filter || WASH_FILTER,
+    t: `translate(${roundCoord(1 + rand() * 2)} ${roundCoord(0.8 + rand() * 1.8)})`,
   });
 }
 
-function Ln(g, d, c, w, o, plain) {
-  g.line.push({ d, c, w: w ?? 1.3, o: o ?? 1, f: plain ? "" : TREM });
+function addLine(group, path, color, width, opacity, plain) {
+  group.line.push({
+    d: path,
+    c: color,
+    w: width ?? 1.3,
+    o: opacity ?? 1,
+    f: plain ? "" : TREMBLE_FILTER,
+  });
 }
 
-function So(g, d, fill, o, f) {
-  g.solid.push({ d, fill, o: o ?? 1, f: f || "" });
+function addSolid(group, path, fill, opacity, filter) {
+  group.solid.push({ d: path, fill, o: opacity ?? 1, f: filter || "" });
 }
 
-function Tx(g, o) {
-  g.text.push(
+function addText(group, props) {
+  group.text.push(
     Object.assign(
       {
         tr: "",
@@ -277,720 +298,961 @@ function Tx(g, o) {
         ls: "0",
         an: "middle",
       },
-      o,
+      props,
     ),
   );
 }
 
-function inked(g, r, d, fill, ink, w) {
-  Wa(g, r, d, fill);
-  Ln(g, d, ink, w ?? 1.3);
+function inked(group, rand, path, fill, ink, width) {
+  addWash(group, rand, path, fill);
+  addLine(group, path, ink, width ?? 1.3);
 }
 
-const quadMap = (a, b, c2, d) => (s, t) => {
-  const tx = lerp(a[0], b[0], s),
-    ty = lerp(a[1], b[1], s),
-    bx = lerp(d[0], c2[0], s),
-    by = lerp(d[1], c2[1], s);
-  return [lerp(tx, bx, t), lerp(ty, by, t)];
+const quadMap = (topLeft, topRight, bottomRight, bottomLeft) => (across, down) => {
+  const topX = lerp(topLeft[0], topRight[0], across),
+    topY = lerp(topLeft[1], topRight[1], across),
+    bottomX = lerp(bottomLeft[0], bottomRight[0], across),
+    bottomY = lerp(bottomLeft[1], bottomRight[1], across);
+  return [lerp(topX, bottomX, down), lerp(topY, bottomY, down)];
 };
 
 // brush stroke
-function brushD(r, pts, w, o) {
-  o = o || {};
-  const P = [];
-  for (let i = 0; i < pts.length - 1; i++)
-    for (let k = 0; k < 4; k++)
-      P.push([lerp(pts[i][0], pts[i + 1][0], k / 4), lerp(pts[i][1], pts[i + 1][1], k / 4)]);
-  P.push(pts[pts.length - 1]);
-  const n = P.length,
-    L = [],
-    R = [],
-    ta = o.tailAt ?? 0.7,
-    tip = o.tip ?? 0.1;
-  for (let i = 0; i < n; i++) {
-    const a = P[Math.max(0, i - 1)],
-      b = P[Math.min(n - 1, i + 1)],
-      l = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1;
-    const nx = -(b[1] - a[1]) / l,
-      ny = (b[0] - a[0]) / l,
-      t = i / (n - 1);
-    const head = o.blunt ? 1 : Math.min(1, (o.head ?? 0.4) + t * 5);
-    const tail = t > ta ? lerp(1, tip, (t - ta) / (1 - ta)) : 1;
-    const ww = (w * head * tail * (0.86 + 0.28 * r())) / 2;
-    L.push([P[i][0] + nx * ww, P[i][1] + ny * ww]);
-    R.push([P[i][0] - nx * ww, P[i][1] - ny * ww]);
+function brushPath(rand, points, width, opts) {
+  opts = opts || {};
+  const samples = [];
+  for (let i = 0; i < points.length - 1; i++)
+    for (let step = 0; step < 4; step++)
+      samples.push([
+        lerp(points[i][0], points[i + 1][0], step / 4),
+        lerp(points[i][1], points[i + 1][1], step / 4),
+      ]);
+  samples.push(points[points.length - 1]);
+  const count = samples.length,
+    leftEdge = [],
+    rightEdge = [],
+    tailStart = opts.tailAt ?? 0.7,
+    tip = opts.tip ?? 0.1;
+  for (let i = 0; i < count; i++) {
+    const prev = samples[Math.max(0, i - 1)],
+      next = samples[Math.min(count - 1, i + 1)],
+      length = Math.hypot(next[0] - prev[0], next[1] - prev[1]) || 1;
+    const nx = -(next[1] - prev[1]) / length,
+      ny = (next[0] - prev[0]) / length,
+      progress = i / (count - 1);
+    const head = opts.blunt ? 1 : Math.min(1, (opts.head ?? 0.4) + progress * 5);
+    const tail = progress > tailStart ? lerp(1, tip, (progress - tailStart) / (1 - tailStart)) : 1;
+    const halfWidth = (width * head * tail * (0.86 + 0.28 * rand())) / 2;
+    leftEdge.push([samples[i][0] + nx * halfWidth, samples[i][1] + ny * halfWidth]);
+    rightEdge.push([samples[i][0] - nx * halfWidth, samples[i][1] - ny * halfWidth]);
   }
-  return smooth(L.concat(R.reverse()), true);
+  return smooth(leftEdge.concat(rightEdge.reverse()), true);
 }
-function Br(g, r, pts, w, color, op, o) {
-  So(g, brushD(r, pts, w, o), color, op ?? 0.92, TREM);
+function brushStroke(group, rand, points, width, color, opacity, opts) {
+  addSolid(group, brushPath(rand, points, width, opts), color, opacity ?? 0.92, TREMBLE_FILTER);
 }
-function BrW(g, r, pts, w, color, op, o) {
-  Wa(g, r, brushD(r, pts, w, o), color, op ?? 0.8, "url(#bk-bleed)");
+function brushWash(group, rand, points, width, color, opacity, opts) {
+  addWash(
+    group,
+    rand,
+    brushPath(rand, points, width, opts),
+    color,
+    opacity ?? 0.8,
+    "url(#bk-bleed)",
+  );
 }
-function dry(g, r, pts, w, color, op) {
-  for (let k = 0; k < 5; k++) {
-    const off = (k / 4 - 0.5) * w;
-    const q = pts.map(([x, y], i) => {
-      const a = pts[Math.max(0, i - 1)],
-        b = pts[Math.min(pts.length - 1, i + 1)],
-        l = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1;
-      return [x - ((b[1] - a[1]) / l) * off, y + ((b[0] - a[0]) / l) * off];
+function dryBrush(group, rand, points, width, color, opacity) {
+  for (let bristle = 0; bristle < 5; bristle++) {
+    const offset = (bristle / 4 - 0.5) * width;
+    const shifted = points.map(([x, y], i) => {
+      const prev = points[Math.max(0, i - 1)],
+        next = points[Math.min(points.length - 1, i + 1)],
+        length = Math.hypot(next[0] - prev[0], next[1] - prev[1]) || 1;
+      return [
+        x - ((next[1] - prev[1]) / length) * offset,
+        y + ((next[0] - prev[0]) / length) * offset,
+      ];
     });
-    const cut = Math.floor(q.length * (0.55 + r() * 0.45));
-    Ln(
-      g,
-      wline(r, q.slice(0, Math.max(2, cut)), 0.4),
+    const kept = Math.floor(shifted.length * (0.55 + rand() * 0.45));
+    addLine(
+      group,
+      wobblyLine(rand, shifted.slice(0, Math.max(2, kept)), 0.4),
       color,
-      0.6 + r() * 0.9,
-      (op ?? 0.8) * (0.5 + r() * 0.5),
+      0.6 + rand() * 0.9,
+      (opacity ?? 0.8) * (0.5 + rand() * 0.5),
       true,
     );
   }
 }
 // band of mist
-function mistD(r, x0, x1, y, h) {
-  const n = 22,
-    pts = [];
-  for (let i = 0; i < n; i++) {
-    const a = (i / n) * Math.PI * 2,
-      c = Math.cos(a),
-      s = Math.sin(a);
-    pts.push([
-      (x0 + x1) / 2 + (c * (x1 - x0)) / 2 + J(r, 6),
-      y + s * (h / 2) * (0.7 + 0.3 * Math.abs(c)) + J(r, h * 0.12),
+function mistPath(rand, x0, x1, y, height) {
+  const steps = 22,
+    points = [];
+  for (let i = 0; i < steps; i++) {
+    const angle = (i / steps) * Math.PI * 2,
+      cos = Math.cos(angle),
+      sin = Math.sin(angle);
+    points.push([
+      (x0 + x1) / 2 + (cos * (x1 - x0)) / 2 + jitter(rand, 6),
+      y + sin * (height / 2) * (0.7 + 0.3 * Math.abs(cos)) + jitter(rand, height * 0.12),
     ]);
   }
-  return smooth(pts, true);
+  return smooth(points, true);
 }
-function mist(g, r, x0, x1, y, h, fill, op, edge) {
-  Wa(g, r, mistD(r, x0, x1, y, h), fill, op ?? 0.8, "url(#bk-bleed)");
-  if (edge) Ln(g, mistD(r, x0 + 4, x1 - 4, y, h * 0.92), edge, 0.9, 0.55);
+function mist(group, rand, x0, x1, y, height, fill, opacity, edge) {
+  addWash(group, rand, mistPath(rand, x0, x1, y, height), fill, opacity ?? 0.8, "url(#bk-bleed)");
+  if (edge) addLine(group, mistPath(rand, x0 + 4, x1 - 4, y, height * 0.92), edge, 0.9, 0.55);
 }
-const OB = (ox, oy, kx, ky) => (x, z, y) => [
-  ox + x + z * (kx ?? 0.6),
-  oy - z * (ky ?? 0.42) - (y || 0),
+const oblique = (ox, oy, slantX, slantY) => (x, z, y) => [
+  ox + x + z * (slantX ?? 0.6),
+  oy - z * (slantY ?? 0.42) - (y || 0),
 ];
-const quad = (P, pts) => pts.map(([x, z, y]) => P(x, z, y));
-function stone(g, r, cx, cy, rx, ry, K, op) {
-  const d = wring(r, cx, cy, rx, ry, Math.min(rx, ry) * 0.12, 10);
-  Wa(g, r, d, K.stone, op ?? 0.95);
-  Wa(
-    g,
-    r,
-    wring(r, cx + rx * 0.15, cy + ry * 0.3, rx * 0.75, ry * 0.5, 0.6, 8),
-    K.stoneDk,
+const projectAll = (project, points) => points.map(([x, z, y]) => project(x, z, y));
+function stone(group, rand, cx, cy, rx, ry, tones, opacity) {
+  const outline = wobblyRing(rand, cx, cy, rx, ry, Math.min(rx, ry) * 0.12, 10);
+  addWash(group, rand, outline, tones.stone, opacity ?? 0.95);
+  addWash(
+    group,
+    rand,
+    wobblyRing(rand, cx + rx * 0.15, cy + ry * 0.3, rx * 0.75, ry * 0.5, 0.6, 8),
+    tones.stoneDk,
     0.4,
     "url(#bk-bleed)",
   );
   const top = [];
   for (let i = 0; i <= 6; i++) {
-    const a = Math.PI * (1.05 + (i / 6) * 0.95);
-    top.push([cx + Math.cos(a) * rx, cy + Math.sin(a) * ry]);
+    const angle = Math.PI * (1.05 + (i / 6) * 0.95);
+    top.push([cx + Math.cos(angle) * rx, cy + Math.sin(angle) * ry]);
   }
-  Ln(g, wline(r, top, 0.6), K.ink, 1.2, 0.8);
+  addLine(group, wobblyLine(rand, top, 0.6), tones.ink, 1.2, 0.8);
 }
-function steppingStones(g, r, pts, K, sz) {
-  pts.forEach(([x, y], i) => {
-    const s = (sz || 1) * (0.85 + r() * 0.35);
-    stone(g, r, x, y, 22 * s, 9 * s, K);
+function steppingStones(group, rand, points, tones, size) {
+  points.forEach(([x, y], i) => {
+    const scale = (size || 1) * (0.85 + rand() * 0.35);
+    stone(group, rand, x, y, 22 * scale, 9 * scale, tones);
   });
 }
-function maple(g, r, cx, cy, rad, n, K) {
-  for (let i = 0; i < n; i++) {
-    const a = r() * Math.PI * 2,
-      d = Math.sqrt(r()) * rad,
-      x = cx + Math.cos(a) * d,
-      y = cy + Math.sin(a) * d * 0.6;
-    So(
-      g,
-      wring(r, x, y, 2.4 + r() * 3, 2 + r() * 2.4, 0.5, 6),
-      r() < 0.25 ? K.redWarmer || K.maple : K.maple,
-      0.4 + r() * 0.45,
+function maple(group, rand, cx, cy, radius, count, tones) {
+  for (let i = 0; i < count; i++) {
+    const angle = rand() * Math.PI * 2,
+      distance = Math.sqrt(rand()) * radius,
+      x = cx + Math.cos(angle) * distance,
+      y = cy + Math.sin(angle) * distance * 0.6;
+    addSolid(
+      group,
+      wobblyRing(rand, x, y, 2.4 + rand() * 3, 2 + rand() * 2.4, 0.5, 6),
+      rand() < 0.25 ? tones.redWarmer || tones.maple : tones.maple,
+      0.4 + rand() * 0.45,
       "url(#bk-bleed)",
     );
   }
 }
-function lantern(g, r, x, yb, s, K, lit) {
-  const S = (v) => v * s;
-  Wa(g, r, wring(r, x + S(8), yb + S(3), S(34), S(7), 1, 10), K.pool, 0.7, "url(#bk-pool)");
+function lantern(group, rand, x, baseY, scale, tones, lit) {
+  const scaled = (v) => v * scale;
+  addWash(
+    group,
+    rand,
+    wobblyRing(rand, x + scaled(8), baseY + scaled(3), scaled(34), scaled(7), 1, 10),
+    tones.pool,
+    0.7,
+    "url(#bk-pool)",
+  );
   inked(
-    g,
-    r,
-    wpoly(
-      r,
+    group,
+    rand,
+    wobblyPolygon(
+      rand,
       [
-        [x - S(20), yb],
-        [x + S(20), yb],
-        [x + S(15), yb - S(10)],
-        [x - S(15), yb - S(10)],
+        [x - scaled(20), baseY],
+        [x + scaled(20), baseY],
+        [x + scaled(15), baseY - scaled(10)],
+        [x - scaled(15), baseY - scaled(10)],
       ],
       0.8,
     ),
-    K.stone,
-    K.ink,
+    tones.stone,
+    tones.ink,
     1.2,
   );
-  inked(g, r, wbox(r, x - S(6), yb - S(48), x + S(6), yb - S(10), 0.6), K.stone, K.ink, 1.1);
   inked(
-    g,
-    r,
-    wpoly(
-      r,
+    group,
+    rand,
+    wobblyBox(rand, x - scaled(6), baseY - scaled(48), x + scaled(6), baseY - scaled(10), 0.6),
+    tones.stone,
+    tones.ink,
+    1.1,
+  );
+  inked(
+    group,
+    rand,
+    wobblyPolygon(
+      rand,
       [
-        [x - S(17), yb - S(48)],
-        [x + S(17), yb - S(48)],
-        [x + S(13), yb - S(56)],
-        [x - S(13), yb - S(56)],
+        [x - scaled(17), baseY - scaled(48)],
+        [x + scaled(17), baseY - scaled(48)],
+        [x + scaled(13), baseY - scaled(56)],
+        [x - scaled(13), baseY - scaled(56)],
       ],
       0.6,
     ),
-    K.stone,
-    K.ink,
+    tones.stone,
+    tones.ink,
     1.1,
   );
-  inked(g, r, wbox(r, x - S(13), yb - S(80), x + S(13), yb - S(56), 0.6), K.stone, K.ink, 1.2);
-  So(
-    g,
-    wbox(r, x - S(7), yb - S(76), x + S(7), yb - S(60), 0.4),
-    lit ? K.glow : K.deep,
+  inked(
+    group,
+    rand,
+    wobblyBox(rand, x - scaled(13), baseY - scaled(80), x + scaled(13), baseY - scaled(56), 0.6),
+    tones.stone,
+    tones.ink,
+    1.2,
+  );
+  addSolid(
+    group,
+    wobblyBox(rand, x - scaled(7), baseY - scaled(76), x + scaled(7), baseY - scaled(60), 0.4),
+    lit ? tones.glow : tones.deep,
     lit ? 0.9 : 0.85,
   );
-  if (lit) Wa(g, r, wring(r, x, yb - S(68), S(22), S(18), 1, 10), K.glowSoft, 0.5, "url(#bk-pool)");
+  if (lit)
+    addWash(
+      group,
+      rand,
+      wobblyRing(rand, x, baseY - scaled(68), scaled(22), scaled(18), 1, 10),
+      tones.glowSoft,
+      0.5,
+      "url(#bk-pool)",
+    );
   inked(
-    g,
-    r,
+    group,
+    rand,
     smooth(
       [
-        [x - S(30), yb - S(78)],
-        [x - S(14), yb - S(86)],
-        [x, yb - S(98)],
-        [x + S(14), yb - S(86)],
-        [x + S(30), yb - S(78)],
-        [x + S(26), yb - S(82)],
-        [x, yb - S(90)],
-        [x - S(26), yb - S(82)],
+        [x - scaled(30), baseY - scaled(78)],
+        [x - scaled(14), baseY - scaled(86)],
+        [x, baseY - scaled(98)],
+        [x + scaled(14), baseY - scaled(86)],
+        [x + scaled(30), baseY - scaled(78)],
+        [x + scaled(26), baseY - scaled(82)],
+        [x, baseY - scaled(90)],
+        [x - scaled(26), baseY - scaled(82)],
       ],
       true,
     ),
-    K.stone,
-    K.ink,
+    tones.stone,
+    tones.ink,
     1.3,
   );
-  inked(g, r, wring(r, x, yb - S(104), S(5), S(6), 0.4, 8), K.stone, K.ink, 1);
-  So(g, wring(r, x - S(14), yb - S(84), S(9), S(3), 0.6, 8), K.moss, 0.6, "url(#bk-bleed)");
+  inked(
+    group,
+    rand,
+    wobblyRing(rand, x, baseY - scaled(104), scaled(5), scaled(6), 0.4, 8),
+    tones.stone,
+    tones.ink,
+    1,
+  );
+  addSolid(
+    group,
+    wobblyRing(rand, x - scaled(14), baseY - scaled(84), scaled(9), scaled(3), 0.6, 8),
+    tones.moss,
+    0.6,
+    "url(#bk-bleed)",
+  );
 }
-function thatchStrokes(g, r, P0, P1, Q0, Q1, n, K) {
+function thatchStrokes(group, rand, ridgeFrom, ridgeTo, eaveFrom, eaveTo, count, tones) {
   // strokes run from the ridge edge
-  for (let i = 0; i < n; i++) {
-    const f = (i + r() * 0.8) / n,
-      a = [lerp(P0[0], P1[0], f), lerp(P0[1], P1[1], f)],
-      b = [lerp(Q0[0], Q1[0], f), lerp(Q0[1], Q1[1], f)];
-    const s = r() * 0.3,
-      e = 0.55 + r() * 0.45;
-    Ln(
-      g,
-      wseg(
-        r,
-        [lerp(a[0], b[0], s), lerp(a[1], b[1], s)],
-        [lerp(a[0], b[0], e), lerp(a[1], b[1], e)],
+  for (let i = 0; i < count; i++) {
+    const along = (i + rand() * 0.8) / count,
+      ridgePoint = [lerp(ridgeFrom[0], ridgeTo[0], along), lerp(ridgeFrom[1], ridgeTo[1], along)],
+      eavePoint = [lerp(eaveFrom[0], eaveTo[0], along), lerp(eaveFrom[1], eaveTo[1], along)];
+    const start = rand() * 0.3,
+      end = 0.55 + rand() * 0.45;
+    addLine(
+      group,
+      wobblySegment(
+        rand,
+        [lerp(ridgePoint[0], eavePoint[0], start), lerp(ridgePoint[1], eavePoint[1], start)],
+        [lerp(ridgePoint[0], eavePoint[0], end), lerp(ridgePoint[1], eavePoint[1], end)],
         0.6,
         2,
       ),
-      i % 3 ? K.thatchDk : K.ink,
+      i % 3 ? tones.thatchDk : tones.ink,
       0.7,
-      0.35 + r() * 0.3,
+      0.35 + rand() * 0.3,
       true,
     );
   }
 }
-function cordTie(g, r, x, y, s, K) {
-  const S = (v) => v * s;
-  Ln(
-    g,
-    wline(
-      r,
+function cordTie(group, rand, x, y, scale, tones) {
+  const scaled = (v) => v * scale;
+  addLine(
+    group,
+    wobblyLine(
+      rand,
       [
-        [x - S(14), y - S(6)],
-        [x - S(4), y],
-        [x + S(8), y - S(5)],
-        [x + S(14), y + S(2)],
+        [x - scaled(14), y - scaled(6)],
+        [x - scaled(4), y],
+        [x + scaled(8), y - scaled(5)],
+        [x + scaled(14), y + scaled(2)],
       ],
       0.4,
     ),
-    K.ink,
-    S(3.4),
+    tones.ink,
+    scaled(3.4),
     0.9,
     true,
   );
-  Ln(
-    g,
-    wline(
-      r,
+  addLine(
+    group,
+    wobblyLine(
+      rand,
       [
-        [x - S(14), y - S(6)],
-        [x - S(4), y],
-        [x + S(8), y - S(5)],
-        [x + S(14), y + S(2)],
+        [x - scaled(14), y - scaled(6)],
+        [x - scaled(4), y],
+        [x + scaled(8), y - scaled(5)],
+        [x + scaled(14), y + scaled(2)],
       ],
       0.4,
     ),
-    K.red,
-    S(2),
+    tones.red,
+    scaled(2),
     1,
     true,
   );
   [
     [-1, 1],
     [1, 1],
-  ].forEach(([sx]) => {
-    Ln(
-      g,
-      wline(
-        r,
+  ].forEach(([side]) => {
+    addLine(
+      group,
+      wobblyLine(
+        rand,
         [
           [x, y],
-          [x + sx * S(5), y + S(9)],
-          [x + sx * S(3), y + S(18)],
+          [x + side * scaled(5), y + scaled(9)],
+          [x + side * scaled(3), y + scaled(18)],
         ],
         0.4,
       ),
-      K.red,
-      S(1.8),
+      tones.red,
+      scaled(1.8),
       0.95,
       true,
     );
   });
-  inked(g, r, wring(r, x, y + S(1), S(3.4), S(3), 0.2, 6), K.red, K.ink, 0.8);
+  inked(
+    group,
+    rand,
+    wobblyRing(rand, x, y + scaled(1), scaled(3.4), scaled(3), 0.2, 6),
+    tones.red,
+    tones.ink,
+    0.8,
+  );
 }
-function steam(groups, r, x, y, K, n) {
-  for (let k = 0; k < (n || 3); k++) {
-    const g = G({
-      anim: `steam ${5 + k * 1.3}s ease-in-out ${-k * 1.7}s infinite`,
+function steam(groups, rand, x, y, tones, count) {
+  for (let wisp = 0; wisp < (count || 3); wisp++) {
+    const group = newGroup({
+      anim: `steam ${5 + wisp * 1.3}s ease-in-out ${-wisp * 1.7}s infinite`,
       to: `${x}px ${y}px`,
       washO: 0.5,
     });
-    const sx = x + J(r, 6);
-    Ln(
-      g,
-      wline(
-        r,
+    const wispX = x + jitter(rand, 6);
+    addLine(
+      group,
+      wobblyLine(
+        rand,
         [
-          [sx, y],
-          [sx - 7, y - 18],
-          [sx + 5, y - 38],
-          [sx - 4, y - 58],
-          [sx + 6, y - 78],
+          [wispX, y],
+          [wispX - 7, y - 18],
+          [wispX + 5, y - 38],
+          [wispX - 4, y - 58],
+          [wispX + 6, y - 78],
         ],
         1.5,
       ),
-      K.inkSoft,
+      tones.inkSoft,
       1.6,
       0.5,
     );
-    groups.push(g);
+    groups.push(group);
   }
 }
 // shared pieces of architecture
-function face(g, r, P, pts, fill, K, w, j) {
-  const d = wpoly(r, quad(P, pts), j ?? 0.8);
-  So(g, d, mix(fill, K.paper, 0.25), 1);
-  inked(g, r, d, fill, K.ink, w ?? 1.2);
+function face(group, rand, project, points, fill, tones, width, wobble) {
+  const outline = wobblyPolygon(rand, projectAll(project, points), wobble ?? 0.8);
+  addSolid(group, outline, mix(fill, tones.paper, 0.25), 1);
+  inked(group, rand, outline, fill, tones.ink, width ?? 1.2);
 }
-function postV(g, r, P, x, z, y0, y1, K, w) {
-  Ln(g, wseg(r, P(x, z, y0), P(x, z, y1), 0.5, 3), K.woodDk, w ?? 4.5, 0.9, true);
-  Ln(g, wseg(r, P(x, z, y0), P(x, z, y1), 0.5, 3), K.ink, 1, 0.8);
+function post(group, rand, project, x, z, y0, y1, tones, width) {
+  addLine(
+    group,
+    wobblySegment(rand, project(x, z, y0), project(x, z, y1), 0.5, 3),
+    tones.woodDk,
+    width ?? 4.5,
+    0.9,
+    true,
+  );
+  addLine(
+    group,
+    wobblySegment(rand, project(x, z, y0), project(x, z, y1), 0.5, 3),
+    tones.ink,
+    1,
+    0.8,
+  );
 }
-function gableRoof(g, r, P, X, Z, Hh, RH, ov, K, kind) {
-  const e = Hh - 4,
-    top = Hh + RH,
-    zm = Z / 2;
-  const thatch = kind === "thatch",
-    fill = thatch ? K.thatch : K.iron;
-  So(
-    g,
-    wpoly(
-      r,
-      quad(P, [
-        [-ov, zm, top],
-        [X + ov, zm, top],
-        [X + ov, Z + ov, e],
-        [-ov, Z + ov, e],
+function gableRoof(
+  group,
+  rand,
+  project,
+  width,
+  depth,
+  wallHeight,
+  roofHeight,
+  overhang,
+  tones,
+  kind,
+) {
+  const eave = wallHeight - 4,
+    ridgeY = wallHeight + roofHeight,
+    midDepth = depth / 2;
+  const isThatch = kind === "thatch",
+    fill = isThatch ? tones.thatch : tones.iron;
+  addSolid(
+    group,
+    wobblyPolygon(
+      rand,
+      projectAll(project, [
+        [-overhang, midDepth, ridgeY],
+        [width + overhang, midDepth, ridgeY],
+        [width + overhang, depth + overhang, eave],
+        [-overhang, depth + overhang, eave],
       ]),
       1.5,
     ),
-    mix(fill, K.ink, 0.15),
+    mix(fill, tones.ink, 0.15),
     1,
   );
   face(
-    g,
-    r,
-    P,
+    group,
+    rand,
+    project,
     [
-      [X + ov * 0.4, -ov, e],
-      [X + ov * 0.4, Z + ov, e],
-      [X + ov * 0.4, zm, top - 6],
+      [width + overhang * 0.4, -overhang, eave],
+      [width + overhang * 0.4, depth + overhang, eave],
+      [width + overhang * 0.4, midDepth, ridgeY - 6],
     ],
-    thatch ? K.earth : K.kura,
-    K,
+    isThatch ? tones.earth : tones.kura,
+    tones,
     1.1,
     1,
   );
   face(
-    g,
-    r,
-    P,
+    group,
+    rand,
+    project,
     [
-      [-ov, -ov, e],
-      [X + ov, -ov, e],
-      [X + ov, zm, top],
-      [-ov, zm, top],
+      [-overhang, -overhang, eave],
+      [width + overhang, -overhang, eave],
+      [width + overhang, midDepth, ridgeY],
+      [-overhang, midDepth, ridgeY],
     ],
     fill,
-    K,
+    tones,
     1.3,
     1.5,
   );
-  if (thatch) {
+  if (isThatch) {
     thatchStrokes(
-      g,
-      r,
-      P(-ov, zm, top),
-      P(X + ov, zm, top),
-      P(-ov, -ov, e),
-      P(X + ov, -ov, e),
-      Math.round(X / 2.2),
-      K,
+      group,
+      rand,
+      project(-overhang, midDepth, ridgeY),
+      project(width + overhang, midDepth, ridgeY),
+      project(-overhang, -overhang, eave),
+      project(width + overhang, -overhang, eave),
+      Math.round(width / 2.2),
+      tones,
     );
     face(
-      g,
-      r,
-      P,
+      group,
+      rand,
+      project,
       [
-        [-ov, -ov, e],
-        [X + ov, -ov, e],
-        [X + ov, -ov, e - 14],
-        [-ov, -ov, e - 14],
+        [-overhang, -overhang, eave],
+        [width + overhang, -overhang, eave],
+        [width + overhang, -overhang, eave - 14],
+        [-overhang, -overhang, eave - 14],
       ],
-      K.thatchDk,
-      K,
+      tones.thatchDk,
+      tones,
       1.2,
       0.8,
     );
-    for (let x = -ov + 3; x < X + ov; x += 4 + r() * 3)
-      Ln(g, wseg(r, P(x, -ov, e - 1), P(x + J(r, 1), -ov, e - 13), 0.3, 1), K.ink, 0.6, 0.45, true);
-    Br(
-      g,
-      r,
-      [P(-ov - 4, zm, top + 3), P(X / 2, zm, top + 5), P(X + ov + 4, zm, top + 3)],
+    for (let x = -overhang + 3; x < width + overhang; x += 4 + rand() * 3)
+      addLine(
+        group,
+        wobblySegment(
+          rand,
+          project(x, -overhang, eave - 1),
+          project(x + jitter(rand, 1), -overhang, eave - 13),
+          0.3,
+          1,
+        ),
+        tones.ink,
+        0.6,
+        0.45,
+        true,
+      );
+    brushStroke(
+      group,
+      rand,
+      [
+        project(-overhang - 4, midDepth, ridgeY + 3),
+        project(width / 2, midDepth, ridgeY + 5),
+        project(width + overhang + 4, midDepth, ridgeY + 3),
+      ],
       9,
-      K.ink,
+      tones.ink,
       0.9,
       { blunt: true, tip: 0.6 },
     );
-    for (let x = 10; x < X; x += 34) {
-      const a = P(x, zm, top + 4);
-      Ln(
-        g,
-        `M${f1(a[0] - 6)} ${f1(a[1] - 9)} L${f1(a[0] + 6)} ${f1(a[1] + 3)} M${f1(a[0] + 6)} ${f1(a[1] - 9)} L${f1(a[0] - 6)} ${f1(a[1] + 3)}`,
-        K.ink,
+    for (let x = 10; x < width; x += 34) {
+      const point = project(x, midDepth, ridgeY + 4);
+      addLine(
+        group,
+        `M${roundCoord(point[0] - 6)} ${roundCoord(point[1] - 9)} L${roundCoord(point[0] + 6)} ${roundCoord(point[1] + 3)} M${roundCoord(point[0] + 6)} ${roundCoord(point[1] - 9)} L${roundCoord(point[0] - 6)} ${roundCoord(point[1] + 3)}`,
+        tones.ink,
         1.6,
         0.85,
       );
     }
   } else {
-    for (let x = -ov + 6; x < X + ov; x += 7)
-      Ln(g, wseg(r, P(x, zm, top - 1), P(x, -ov, e + 1), 0.4, 2), K.ink, 0.9, 0.55, true);
+    for (let x = -overhang + 6; x < width + overhang; x += 7)
+      addLine(
+        group,
+        wobblySegment(
+          rand,
+          project(x, midDepth, ridgeY - 1),
+          project(x, -overhang, eave + 1),
+          0.4,
+          2,
+        ),
+        tones.ink,
+        0.9,
+        0.55,
+        true,
+      );
     face(
-      g,
-      r,
-      P,
+      group,
+      rand,
+      project,
       [
-        [-ov, -ov, e],
-        [X + ov, -ov, e],
-        [X + ov, -ov, e - 6],
-        [-ov, -ov, e - 6],
+        [-overhang, -overhang, eave],
+        [width + overhang, -overhang, eave],
+        [width + overhang, -overhang, eave - 6],
+        [-overhang, -overhang, eave - 6],
       ],
-      K.ink,
-      K,
+      tones.ink,
+      tones,
       1,
       0.5,
     );
-    Br(
-      g,
-      r,
-      [P(-ov - 6, zm, top + 1), P(X / 2, zm, top + 2), P(X + ov + 6, zm, top + 1)],
+    brushStroke(
+      group,
+      rand,
+      [
+        project(-overhang - 6, midDepth, ridgeY + 1),
+        project(width / 2, midDepth, ridgeY + 2),
+        project(width + overhang + 6, midDepth, ridgeY + 1),
+      ],
       8,
-      K.ink,
+      tones.ink,
       0.95,
       { blunt: true, tip: 0.8 },
     );
     [
-      [-ov - 6, 1],
-      [X + ov + 6, -1],
-    ].forEach(([x, s]) => {
-      const a = P(x, zm, top + 2);
-      Br(
-        g,
-        r,
+      [-overhang - 6, 1],
+      [width + overhang + 6, -1],
+    ].forEach(([x, side]) => {
+      const point = project(x, midDepth, ridgeY + 2);
+      brushStroke(
+        group,
+        rand,
         [
-          [a[0], a[1] + 4],
-          [a[0] - s * 3, a[1] - 6],
-          [a[0] - s * 9, a[1] - 9],
+          [point[0], point[1] + 4],
+          [point[0] - side * 3, point[1] - 6],
+          [point[0] - side * 9, point[1] - 9],
         ],
         6,
-        K.ink,
+        tones.ink,
         0.9,
       );
     });
   }
 }
-function plaque(g, r, x, y, w, h, text, font, fs, K) {
-  inked(g, r, wbox(r, x - w / 2, y - h / 2, x + w / 2, y + h / 2, 0.5), K.woodLt, K.ink, 1);
-  Tx(g, { t: text, tr: `translate(${f1(x)} ${f1(y)})`, fs, font, fill: K.ink });
+function plaque(group, rand, x, y, width, height, text, font, fontSize, tones) {
+  inked(
+    group,
+    rand,
+    wobblyBox(rand, x - width / 2, y - height / 2, x + width / 2, y + height / 2, 0.5),
+    tones.woodLt,
+    tones.ink,
+    1,
+  );
+  addText(group, {
+    t: text,
+    tr: `translate(${roundCoord(x)} ${roundCoord(y)})`,
+    fs: fontSize,
+    font,
+    fill: tones.ink,
+  });
 }
 // flat stone on the path, a rope crossed over it, a small wooden box hanging at the front
-function stoneBody(g, r, x, y, s, K) {
-  const pts = [];
+function stoneBody(group, rand, x, y, scale, tones) {
+  const points = [];
   for (let i = 0; i < 16; i++) {
-    const a = (i / 16) * Math.PI * 2,
-      sn = Math.sin(a),
-      cs = Math.cos(a);
-    const rx = 13 * s * (1 + J(r, 0.08)),
-      up = 9 * s * (0.9 + 0.2 * r());
-    pts.push([
-      x + cs * rx + (sn < 0 ? -cs * cs * 1.2 * s : 0),
-      sn < 0 ? y + sn * up * (1 - 0.15 * cs) : y + sn * 3.5 * s,
+    const angle = (i / 16) * Math.PI * 2,
+      sin = Math.sin(angle),
+      cos = Math.cos(angle);
+    const rx = 13 * scale * (1 + jitter(rand, 0.08)),
+      rise = 9 * scale * (0.9 + 0.2 * rand());
+    points.push([
+      x + cos * rx + (sin < 0 ? -cos * cos * 1.2 * scale : 0),
+      sin < 0 ? y + sin * rise * (1 - 0.15 * cos) : y + sin * 3.5 * scale,
     ]);
   }
-  const d = smooth(pts, true);
-  So(g, wring(r, x + 3 * s, y + 2.5 * s, 14 * s, 3.4 * s, 0.6, 10), K.ink, 0.22, "url(#bk-bleed)");
-  So(g, d, mix(K.stone, K.paper, 0.5), 1);
-  So(
-    g,
-    `M${f1(x - 12 * s)} ${f1(y - 1 * s)} Q${f1(x)} ${f1(y + 2 * s)} ${f1(x + 12 * s)} ${f1(y - 2 * s)} Q${f1(x + 10 * s)} ${f1(y + 3 * s)} ${f1(x)} ${f1(y + 3.4 * s)} Q${f1(x - 10 * s)} ${f1(y + 3 * s)} ${f1(x - 12 * s)} ${f1(y - 1 * s)} Z`,
-    K.stone,
+  const outline = smooth(points, true);
+  addSolid(
+    group,
+    wobblyRing(rand, x + 3 * scale, y + 2.5 * scale, 14 * scale, 3.4 * scale, 0.6, 10),
+    tones.ink,
+    0.22,
+    "url(#bk-bleed)",
+  );
+  addSolid(group, outline, mix(tones.stone, tones.paper, 0.5), 1);
+  addSolid(
+    group,
+    `M${roundCoord(x - 12 * scale)} ${roundCoord(y - 1 * scale)} Q${roundCoord(x)} ${roundCoord(y + 2 * scale)} ${roundCoord(x + 12 * scale)} ${roundCoord(y - 2 * scale)} Q${roundCoord(x + 10 * scale)} ${roundCoord(y + 3 * scale)} ${roundCoord(x)} ${roundCoord(y + 3.4 * scale)} Q${roundCoord(x - 10 * scale)} ${roundCoord(y + 3 * scale)} ${roundCoord(x - 12 * scale)} ${roundCoord(y - 1 * scale)} Z`,
+    tones.stone,
     0.55,
   );
-  Ln(g, d, K.ink, 1.3, 0.9);
-  return d;
+  addLine(group, outline, tones.ink, 1.3, 0.9);
+  return outline;
 }
-function sekiStone(groups, r, x, y, s, K, open) {
-  const g = G(),
-    S = (v) => v * s;
+function sekiStone(groups, rand, x, y, scale, tones, open) {
+  const group = newGroup(),
+    scaled = (v) => v * scale;
   if (!open) {
-    stone(g, r, x + S(2), y + S(3), S(24), S(9), K);
-    groups.push(g);
-    const k = G();
-    stoneBody(k, r, x, y, s, K);
-    const rope = (pts) => {
-      Ln(k, wline(r, pts, 0.2), K.ink, S(2), 0.95, true);
-      Ln(k, wline(r, pts, 0.15), K.cord, S(0.8), 0.9, true);
+    stone(group, rand, x + scaled(2), y + scaled(3), scaled(24), scaled(9), tones);
+    groups.push(group);
+    const tied = newGroup();
+    stoneBody(tied, rand, x, y, scale, tones);
+    const rope = (points) => {
+      addLine(tied, wobblyLine(rand, points, 0.2), tones.ink, scaled(2), 0.95, true);
+      addLine(tied, wobblyLine(rand, points, 0.15), tones.cord, scaled(0.8), 0.9, true);
     };
     rope([
-      [x - S(12.5), y + S(1)],
-      [x - S(9), y - S(5.5)],
-      [x - S(1), y - S(8.6)],
-      [x + S(7), y - S(6.4)],
-      [x + S(12.5), y],
+      [x - scaled(12.5), y + scaled(1)],
+      [x - scaled(9), y - scaled(5.5)],
+      [x - scaled(1), y - scaled(8.6)],
+      [x + scaled(7), y - scaled(6.4)],
+      [x + scaled(12.5), y],
     ]);
     rope([
-      [x + S(1.6), y + S(3.4)],
-      [x + S(1), y - S(3)],
-      [x - S(1), y - S(8.6)],
+      [x + scaled(1.6), y + scaled(3.4)],
+      [x + scaled(1), y - scaled(3)],
+      [x - scaled(1), y - scaled(8.6)],
     ]);
-    [-1, 1].forEach((sg) =>
-      Ln(
-        k,
-        wline(
-          r,
+    [-1, 1].forEach((side) =>
+      addLine(
+        tied,
+        wobblyLine(
+          rand,
           [
-            [x - S(1), y - S(9)],
-            [x + sg * S(4.5), y - S(13)],
-            [x + sg * S(7), y - S(11)],
-            [x + sg * S(3), y - S(9)],
+            [x - scaled(1), y - scaled(9)],
+            [x + side * scaled(4.5), y - scaled(13)],
+            [x + side * scaled(7), y - scaled(11)],
+            [x + side * scaled(3), y - scaled(9)],
           ],
           0.15,
         ),
-        K.ink,
-        S(1.3),
+        tones.ink,
+        scaled(1.3),
         0.9,
         true,
       ),
     );
-    So(k, wring(r, x - S(1), y - S(9), S(1.8), S(1.5), 0.15, 6), K.ink, 0.95);
-    groups.push(k);
-    const b = G(),
-      bx = x + S(2.4),
-      by = y + S(2.4);
-    Ln(
-      b,
-      wline(
-        r,
+    addSolid(
+      tied,
+      wobblyRing(rand, x - scaled(1), y - scaled(9), scaled(1.8), scaled(1.5), 0.15, 6),
+      tones.ink,
+      0.95,
+    );
+    groups.push(tied);
+    const box = newGroup(),
+      boxX = x + scaled(2.4),
+      boxY = y + scaled(2.4);
+    addLine(
+      box,
+      wobblyLine(
+        rand,
         [
-          [x + S(1.6), y + S(2.6)],
-          [bx, by + S(2)],
+          [x + scaled(1.6), y + scaled(2.6)],
+          [boxX, boxY + scaled(2)],
         ],
         0.1,
       ),
-      K.ink,
-      S(1.2),
+      tones.ink,
+      scaled(1.2),
       0.9,
       true,
     );
-    So(b, wbox(r, bx - S(5.5), by + S(2), bx + S(5.5), by + S(13), 0.3), K.wood, 1);
-    Ln(b, wbox(r, bx - S(5.5), by + S(2), bx + S(5.5), by + S(13), 0.3), K.ink, 1.1, 0.95);
-    Ln(b, wseg(r, [bx - S(5.5), by + S(4.6)], [bx + S(5.5), by + S(4.6)], 0.2, 1), K.ink, 0.7, 0.6);
-    So(b, wbox(r, bx - S(2.6), by + S(6.4), bx + S(2.6), by + S(11.4), 0.2), K.brass, 1);
-    So(
-      b,
-      `${wring(r, bx, by + S(8.2), S(1), S(1), 0.1, 6)} ${wbox(r, bx - S(0.4), by + S(8.2), bx + S(0.4), by + S(10.6), 0.1)}`,
-      K.deep,
+    addSolid(
+      box,
+      wobblyBox(
+        rand,
+        boxX - scaled(5.5),
+        boxY + scaled(2),
+        boxX + scaled(5.5),
+        boxY + scaled(13),
+        0.3,
+      ),
+      tones.wood,
+      1,
+    );
+    addLine(
+      box,
+      wobblyBox(
+        rand,
+        boxX - scaled(5.5),
+        boxY + scaled(2),
+        boxX + scaled(5.5),
+        boxY + scaled(13),
+        0.3,
+      ),
+      tones.ink,
+      1.1,
       0.95,
     );
-    groups.push(b);
+    addLine(
+      box,
+      wobblySegment(
+        rand,
+        [boxX - scaled(5.5), boxY + scaled(4.6)],
+        [boxX + scaled(5.5), boxY + scaled(4.6)],
+        0.2,
+        1,
+      ),
+      tones.ink,
+      0.7,
+      0.6,
+    );
+    addSolid(
+      box,
+      wobblyBox(
+        rand,
+        boxX - scaled(2.6),
+        boxY + scaled(6.4),
+        boxX + scaled(2.6),
+        boxY + scaled(11.4),
+        0.2,
+      ),
+      tones.brass,
+      1,
+    );
+    addSolid(
+      box,
+      `${wobblyRing(rand, boxX, boxY + scaled(8.2), scaled(1), scaled(1), 0.1, 6)} ${wobblyBox(rand, boxX - scaled(0.4), boxY + scaled(8.2), boxX + scaled(0.4), boxY + scaled(10.6), 0.1)}`,
+      tones.deep,
+      0.95,
+    );
+    groups.push(box);
   } else {
-    stone(g, r, x + S(2), y + S(3), S(24), S(9), K);
+    stone(group, rand, x + scaled(2), y + scaled(3), scaled(24), scaled(9), tones);
     const rope = [
-      [x - S(18), y + S(4)],
-      [x - S(9), y + S(8)],
-      [x + S(3), y + S(7)],
-      [x + S(10), y + S(2)],
-      [x + S(4), y - S(1)],
-      [x - S(8), y + S(1)],
+      [x - scaled(18), y + scaled(4)],
+      [x - scaled(9), y + scaled(8)],
+      [x + scaled(3), y + scaled(7)],
+      [x + scaled(10), y + scaled(2)],
+      [x + scaled(4), y - scaled(1)],
+      [x - scaled(8), y + scaled(1)],
     ];
-    Ln(g, wline(r, rope, 0.3), K.ink, S(2.6), 0.9, true);
-    Ln(g, wline(r, rope, 0.2), K.cord, S(1), 0.85, true);
-    stoneBody(g, r, x + S(30), y + S(9), s, K);
-    groups.push(g);
-    const b = G(),
-      bx = x - S(14),
-      by = y + S(10);
-    So(b, wbox(r, bx - S(6), by - S(4), bx + S(6), by + S(5), 0.3), K.wood, 1);
-    So(b, wbox(r, bx - S(4.6), by - S(3), bx + S(4.6), by - S(0.5), 0.2), K.deep, 0.9);
-    Ln(b, wbox(r, bx - S(6), by - S(4), bx + S(6), by + S(5), 0.3), K.ink, 1.1, 0.95);
-    const lid = wpoly(
-      r,
+    addLine(group, wobblyLine(rand, rope, 0.3), tones.ink, scaled(2.6), 0.9, true);
+    addLine(group, wobblyLine(rand, rope, 0.2), tones.cord, scaled(1), 0.85, true);
+    stoneBody(group, rand, x + scaled(30), y + scaled(9), scale, tones);
+    groups.push(group);
+    const box = newGroup(),
+      boxX = x - scaled(14),
+      boxY = y + scaled(10);
+    addSolid(
+      box,
+      wobblyBox(rand, boxX - scaled(6), boxY - scaled(4), boxX + scaled(6), boxY + scaled(5), 0.3),
+      tones.wood,
+      1,
+    );
+    addSolid(
+      box,
+      wobblyBox(
+        rand,
+        boxX - scaled(4.6),
+        boxY - scaled(3),
+        boxX + scaled(4.6),
+        boxY - scaled(0.5),
+        0.2,
+      ),
+      tones.deep,
+      0.9,
+    );
+    addLine(
+      box,
+      wobblyBox(rand, boxX - scaled(6), boxY - scaled(4), boxX + scaled(6), boxY + scaled(5), 0.3),
+      tones.ink,
+      1.1,
+      0.95,
+    );
+    const lid = wobblyPolygon(
+      rand,
       [
-        [bx - S(6), by - S(4)],
-        [bx + S(6), by - S(4)],
-        [bx + S(8), by - S(9)],
-        [bx - S(3), by - S(10)],
+        [boxX - scaled(6), boxY - scaled(4)],
+        [boxX + scaled(6), boxY - scaled(4)],
+        [boxX + scaled(8), boxY - scaled(9)],
+        [boxX - scaled(3), boxY - scaled(10)],
       ],
       0.3,
     );
-    So(b, lid, K.woodLt, 1);
-    Ln(b, lid, K.ink, 1, 0.9);
-    groups.push(b);
+    addSolid(box, lid, tones.woodLt, 1);
+    addLine(box, lid, tones.ink, 1, 0.9);
+    groups.push(box);
   }
 }
 // bamboo
-function leafD(x, y, ang, L, W) {
-  const ux = Math.cos(ang),
-    uy = Math.sin(ang),
-    nx = -uy,
-    ny = ux;
-  const tx = x + ux * L,
-    ty = y + uy * L;
-  const a = [x + ux * L * 0.32 + nx * W, y + uy * L * 0.32 + ny * W],
-    b = [x + ux * L * 0.4 - nx * W * 0.75, y + uy * L * 0.4 - ny * W * 0.75];
-  return `M${f1(x)} ${f1(y)} Q${f1(a[0])} ${f1(a[1])} ${f1(tx)} ${f1(ty)} Q${f1(b[0])} ${f1(b[1])} ${f1(x)} ${f1(y)} Z`;
+function leafPath(x, y, angle, length, width) {
+  const dirX = Math.cos(angle),
+    dirY = Math.sin(angle),
+    normalX = -dirY,
+    normalY = dirX;
+  const tipX = x + dirX * length,
+    tipY = y + dirY * length;
+  const leftBulge = [
+      x + dirX * length * 0.32 + normalX * width,
+      y + dirY * length * 0.32 + normalY * width,
+    ],
+    rightBulge = [
+      x + dirX * length * 0.4 - normalX * width * 0.75,
+      y + dirY * length * 0.4 - normalY * width * 0.75,
+    ];
+  return `M${roundCoord(x)} ${roundCoord(y)} Q${roundCoord(leftBulge[0])} ${roundCoord(leftBulge[1])} ${roundCoord(tipX)} ${roundCoord(tipY)} Q${roundCoord(rightBulge[0])} ${roundCoord(rightBulge[1])} ${roundCoord(x)} ${roundCoord(y)} Z`;
 }
-function leafSpray(g, r, x, y, s, K, dir) {
-  const n = 2 + Math.floor(r() * 3),
-    leaf = mix(K.mossDk, K.ink, 0.35);
-  for (let k = 0; k < n; k++) {
-    const ang = Math.PI * (0.5 - dir * (0.12 + 0.3 * (k / Math.max(1, n - 1))) + J(r, 0.05));
-    const d = leafD(x, y, ang, s * (18 + r() * 9), s * (2.8 + r() * 1.2));
-    So(g, d, leaf, 0.72);
-    Ln(g, d, K.ink, 0.6, 0.6);
+function leafSpray(group, rand, x, y, scale, tones, dir) {
+  const count = 2 + Math.floor(rand() * 3),
+    leafColor = mix(tones.mossDk, tones.ink, 0.35);
+  for (let k = 0; k < count; k++) {
+    const angle =
+      Math.PI * (0.5 - dir * (0.12 + 0.3 * (k / Math.max(1, count - 1))) + jitter(rand, 0.05));
+    const path = leafPath(x, y, angle, scale * (18 + rand() * 9), scale * (2.8 + rand() * 1.2));
+    addSolid(group, path, leafColor, 0.72);
+    addLine(group, path, tones.ink, 0.6, 0.6);
   }
 }
-function culmGeo(c) {
-  const { x0, y0, h, lean, w } = c;
-  const at = (t) => [x0 + lean * t * t, y0 - h * t];
-  const wid = (t) => w * (1 - 0.35 * t);
+function culmGeometry(culm) {
+  const { x0, y0, h: height, lean, w: width } = culm;
+  const pointAt = (along) => [x0 + lean * along * along, y0 - height * along];
+  const widthAt = (along) => width * (1 - 0.35 * along);
   return {
-    at,
-    wid,
-    edge: (t, sg) => {
-      const [x, y] = at(t);
-      return [x + (sg * wid(t)) / 2, y];
+    at: pointAt,
+    wid: widthAt,
+    edge: (along, side) => {
+      const [x, y] = pointAt(along);
+      return [x + (side * widthAt(along)) / 2, y];
     },
   };
 }
-function culmPart(g, r, c, K, t0, t1, cutLow, cutTop) {
-  const G0 = culmGeo(c),
-    n = c.nodes;
-  const l0 = t0,
-    r0 = t0 + (cutLow || 0),
-    l1 = t1,
-    r1 = t1 + (cutTop || 0);
-  const side = (a, b, sg) => Array.from({ length: 7 }, (_, i) => G0.edge(lerp(a, b, i / 6), sg));
-  const L = side(l0, l1, -1),
-    R = side(r0, r1, 1);
-  const body = wpoly(r, [...L, ...R.slice().reverse()], 0.3);
-  Wa(g, r, body, mix(K.bamboo, K.mossDk, 0.22), 0.9);
-  Ln(g, wline(r, L, 0.25), K.ink, 1.2, 0.9);
-  Ln(g, wline(r, R, 0.25), K.ink, 1.2, 0.9);
-  Ln(
-    g,
-    wline(r, side(l0 + (l1 - l0) * 0.05, l1 - (l1 - l0) * 0.05, -0.45), 0.2),
-    K.paper,
+function culmPart(group, rand, culm, tones, t0, t1, cutLow, cutTop) {
+  const geometry = culmGeometry(culm),
+    nodes = culm.nodes;
+  const leftFrom = t0,
+    rightFrom = t0 + (cutLow || 0),
+    leftTo = t1,
+    rightTo = t1 + (cutTop || 0);
+  const edgePoints = (from, to, side) =>
+    Array.from({ length: 7 }, (_, i) => geometry.edge(lerp(from, to, i / 6), side));
+  const leftEdge = edgePoints(leftFrom, leftTo, -1),
+    rightEdge = edgePoints(rightFrom, rightTo, 1);
+  const outline = wobblyPolygon(rand, [...leftEdge, ...rightEdge.slice().reverse()], 0.3);
+  addWash(group, rand, outline, mix(tones.bamboo, tones.mossDk, 0.22), 0.9);
+  addLine(group, wobblyLine(rand, leftEdge, 0.25), tones.ink, 1.2, 0.9);
+  addLine(group, wobblyLine(rand, rightEdge, 0.25), tones.ink, 1.2, 0.9);
+  addLine(
+    group,
+    wobblyLine(
+      rand,
+      edgePoints(leftFrom + (leftTo - leftFrom) * 0.05, leftTo - (leftTo - leftFrom) * 0.05, -0.45),
+      0.2,
+    ),
+    tones.paper,
     1.4,
     0.45,
     true,
   );
-  for (let k = 1; k < n; k++) {
-    const t = k / n;
-    if (t <= Math.max(l0, r0) + 0.01 || t >= Math.min(l1, r1) - 0.01) continue;
-    const a = G0.edge(t, -1.25),
-      b = G0.edge(t, 1.25),
-      m = G0.at(t);
-    Ln(g, wline(r, [a, [m[0], m[1] + 1.2], b], 0.15), K.ink, 1.4, 0.9);
-    Ln(g, wline(r, [G0.edge(t + 0.012, -1), G0.edge(t + 0.012, 1)], 0.15), K.ink, 0.7, 0.55);
+  for (let node = 1; node < nodes; node++) {
+    const along = node / nodes;
+    if (along <= Math.max(leftFrom, rightFrom) + 0.01 || along >= Math.min(leftTo, rightTo) - 0.01)
+      continue;
+    const from = geometry.edge(along, -1.25),
+      to = geometry.edge(along, 1.25),
+      mid = geometry.at(along);
+    addLine(group, wobblyLine(rand, [from, [mid[0], mid[1] + 1.2], to], 0.15), tones.ink, 1.4, 0.9);
+    addLine(
+      group,
+      wobblyLine(rand, [geometry.edge(along + 0.012, -1), geometry.edge(along + 0.012, 1)], 0.15),
+      tones.ink,
+      0.7,
+      0.55,
+    );
   }
-  return { L, R };
+  return { L: leftEdge, R: rightEdge };
 }
 // the hollow you see at a slanted cut
-function cutFace(g, r, a, b, w, K) {
-  const cx = (a[0] + b[0]) / 2,
-    cy = (a[1] + b[1]) / 2,
-    ux = (b[0] - a[0]) / 2,
-    uy = (b[1] - a[1]) / 2;
-  const ring = (k) =>
+function cutFace(group, rand, left, right, width, tones) {
+  const cx = (left[0] + right[0]) / 2,
+    cy = (left[1] + right[1]) / 2,
+    halfX = (right[0] - left[0]) / 2,
+    halfY = (right[1] - left[1]) / 2;
+  const ring = (scale) =>
     Array.from({ length: 16 }, (_, i) => {
-      const t = (i / 16) * Math.PI * 2;
+      const angle = (i / 16) * Math.PI * 2;
       return [
-        cx + ux * Math.cos(t) * k + 0 * uy,
-        cy + uy * Math.cos(t) * k - Math.sin(t) * w * 0.32 * k,
+        cx + halfX * Math.cos(angle) * scale + 0 * halfY,
+        cy + halfY * Math.cos(angle) * scale - Math.sin(angle) * width * 0.32 * scale,
       ];
     });
   const outer = smooth(ring(1), true),
     inner = smooth(ring(0.72), true);
-  So(g, outer, mix(K.bamboo, K.paper, 0.55), 1);
-  So(g, inner, mix(K.deep, K.bamboo, 0.25), 0.9);
-  Ln(g, outer, K.ink, 1.1, 0.95);
-  Ln(g, inner, K.ink, 0.7, 0.6);
+  addSolid(group, outer, mix(tones.bamboo, tones.paper, 0.55), 1);
+  addSolid(group, inner, mix(tones.deep, tones.bamboo, 0.25), 0.9);
+  addLine(group, outer, tones.ink, 1.1, 0.95);
+  addLine(group, inner, tones.ink, 0.7, 0.6);
 }
-function culmTop(g, r, c, K, s) {
-  const G0 = culmGeo(c),
-    top = G0.at(1);
-  const tw = [
-    top,
-    [top[0] + c.lean * 0.12, top[1] - 10 * s],
-    [top[0] + c.lean * 0.2 + 3 * s, top[1] - 22 * s],
+function culmTop(group, rand, culm, tones, scale) {
+  const geometry = culmGeometry(culm),
+    tip = geometry.at(1);
+  const twig = [
+    tip,
+    [tip[0] + culm.lean * 0.12, tip[1] - 10 * scale],
+    [tip[0] + culm.lean * 0.2 + 3 * scale, tip[1] - 22 * scale],
   ];
-  Ln(g, wline(r, tw, 0.2), K.ink, 1.3, 0.85);
-  leafSpray(g, r, tw[2][0], tw[2][1], s, K, c.lean >= 0 ? 1 : -1);
-  [1, 2].forEach((k) => {
-    const t = 1 - k / c.nodes,
-      p = G0.edge(t, k % 2 ? 1 : -1),
-      sg = k % 2 ? 1 : -1;
-    const end = [p[0] + sg * 14 * s, p[1] - 9 * s];
-    Ln(g, wline(r, [p, [p[0] + sg * 7 * s, p[1] - 6 * s], end], 0.2), K.ink, 1, 0.8);
-    leafSpray(g, r, end[0], end[1], s * 0.9, K, sg);
+  addLine(group, wobblyLine(rand, twig, 0.2), tones.ink, 1.3, 0.85);
+  leafSpray(group, rand, twig[2][0], twig[2][1], scale, tones, culm.lean >= 0 ? 1 : -1);
+  [1, 2].forEach((branch) => {
+    const along = 1 - branch / culm.nodes,
+      base = geometry.edge(along, branch % 2 ? 1 : -1),
+      side = branch % 2 ? 1 : -1;
+    const end = [base[0] + side * 14 * scale, base[1] - 9 * scale];
+    addLine(
+      group,
+      wobblyLine(rand, [base, [base[0] + side * 7 * scale, base[1] - 6 * scale], end], 0.2),
+      tones.ink,
+      1,
+      0.8,
+    );
+    leafSpray(group, rand, end[0], end[1], scale * 0.9, tones, side);
   });
 }
 const CULMS = [
@@ -1003,167 +1265,231 @@ const CULMS = [
   [54, 140, 22, 7],
 ];
 // where an edge of a culm meets the swipe line
-function edgeHit(c, line, sg) {
-  const G0 = culmGeo(c),
-    [a, b] = line,
-    f = (t) => {
-      const [x, y] = G0.edge(t, sg);
-      return y - (a[1] + ((b[1] - a[1]) * (x - a[0])) / (b[0] - a[0]));
+function edgeHit(culm, line, side) {
+  const geometry = culmGeometry(culm),
+    [lineFrom, lineTo] = line,
+    gap = (along) => {
+      const [x, y] = geometry.edge(along, side);
+      return (
+        y -
+        (lineFrom[1] + ((lineTo[1] - lineFrom[1]) * (x - lineFrom[0])) / (lineTo[0] - lineFrom[0]))
+      );
     };
   let lo = 0,
     hi = 1;
-  if (f(lo) * f(hi) > 0) return null;
-  for (let k = 0; k < 30; k++) {
-    const m = (lo + hi) / 2;
-    if (f(lo) * f(m) <= 0) hi = m;
-    else lo = m;
+  if (gap(lo) * gap(hi) > 0) return null;
+  for (let step = 0; step < 30; step++) {
+    const mid = (lo + hi) / 2;
+    if (gap(lo) * gap(mid) <= 0) hi = mid;
+    else lo = mid;
   }
   return (lo + hi) / 2;
 }
 // cut: { line: [a, b], phase }
-function bambooClump(groups, r, x, y, K, s, cut) {
-  s = s || 1;
-  const base = G();
-  Wa(
+function bambooClump(groups, rand, x, y, tones, scale, cut) {
+  scale = scale || 1;
+  const base = newGroup();
+  addWash(
     base,
-    r,
-    wring(r, x + 10 * s, y + 4 * s, 64 * s, 10 * s, 2, 12),
-    K.pool,
+    rand,
+    wobblyRing(rand, x + 10 * scale, y + 4 * scale, 64 * scale, 10 * scale, 2, 12),
+    tones.pool,
     0.55,
     "url(#bk-pool)",
   );
-  Wa(base, r, wring(r, x + 6 * s, y + 2 * s, 50 * s, 7 * s, 2, 12), K.moss, 0.35, "url(#bk-pool)");
+  addWash(
+    base,
+    rand,
+    wobblyRing(rand, x + 6 * scale, y + 2 * scale, 50 * scale, 7 * scale, 2, 12),
+    tones.moss,
+    0.35,
+    "url(#bk-pool)",
+  );
   groups.push(base);
-  const late = [],
-    lr = rng(hash("bamboo/fall"));
-  CULMS.map((q, i) => [q, i])
-    .sort((a, b) => a[0][3] - b[0][3])
-    .forEach(([[dx, h, lean, w], i]) => {
-      const c = {
-        x0: x + dx * s,
-        y0: y + (i % 2) * 3 * s,
-        h: h * s,
-        lean: lean * s,
-        w: w * s,
-        nodes: Math.max(4, Math.round(h / 30)),
+  const fallLater = [],
+    fallRand = rng(hash("bamboo/fall"));
+  CULMS.map((spec, i) => [spec, i])
+    .sort((first, second) => first[0][3] - second[0][3])
+    .forEach(([[offsetX, height, lean, width], i]) => {
+      const culm = {
+        x0: x + offsetX * scale,
+        y0: y + (i % 2) * 3 * scale,
+        h: height * scale,
+        lean: lean * scale,
+        w: width * scale,
+        nodes: Math.max(4, Math.round(height / 30)),
       };
-      const g = G();
-      const tl = cut && edgeHit(c, cut.line, -1),
-        tr = cut && edgeHit(c, cut.line, 1);
-      if (tl != null && tr != null && tl > 0.04 && tr > 0.04 && Math.max(tl, tr) < 0.96) {
-        const k = culmPart(g, r, c, K, 0, tl, 0, tr - tl);
-        groups.push(g);
-        const f = G();
-        cutFace(f, r, k.L[6], k.R[6], c.w, K);
-        groups.push(f);
-        const right = i % 2 === 0,
-          sg = right ? 1 : -1,
-          piv = right ? k.R[6] : k.L[6],
-          j = Math.floor(i / 2);
+      const group = newGroup();
+      const cutLeft = cut && edgeHit(culm, cut.line, -1),
+        cutRight = cut && edgeHit(culm, cut.line, 1);
+      if (
+        cutLeft != null &&
+        cutRight != null &&
+        cutLeft > 0.04 &&
+        cutRight > 0.04 &&
+        Math.max(cutLeft, cutRight) < 0.96
+      ) {
+        const stump = culmPart(group, rand, culm, tones, 0, cutLeft, 0, cutRight - cutLeft);
+        groups.push(group);
+        const cutGroup = newGroup();
+        cutFace(cutGroup, rand, stump.L[6], stump.R[6], culm.w, tones);
+        groups.push(cutGroup);
+        const toRight = i % 2 === 0,
+          side = toRight ? 1 : -1,
+          pivot = toRight ? stump.R[6] : stump.L[6],
+          pair = Math.floor(i / 2);
         let tf,
           vars = "";
         if (cut.phase === "down") {
-          const tx = x - sg * (100 - j * 22) * s,
-            ty = y + (10 + ((i * 5) % 7) * 7) * s;
-          vars = `--tx:${f1(tx - piv[0])}px;--ty:${f1(ty - piv[1])}px;--r:${f1(sg * (70 + lr() * 34))}deg;--d:${f1(((i * 7) % 4) * 0.05)}s`;
+          const landX = x - side * (100 - pair * 22) * scale,
+            landY = y + (10 + ((i * 5) % 7) * 7) * scale;
+          vars = `--tx:${roundCoord(landX - pivot[0])}px;--ty:${roundCoord(landY - pivot[1])}px;--r:${roundCoord(side * (70 + fallRand() * 34))}deg;--d:${roundCoord(((i * 7) % 4) * 0.05)}s`;
           tf = "translate(var(--tx), var(--ty)) rotate(var(--r))";
-        } else tf = `rotate(${sg * (6 + lr() * 14)}deg)`;
-        const p = G({ tf, vars, to: `${f1(piv[0])}px ${f1(piv[1])}px`, cls: "fall" });
-        culmPart(p, r, c, K, tl, 1, tr - tl, 0);
-        culmTop(p, r, c, K, s);
-        late.push([cut.phase === "down" ? 0 : 1, p]);
+        } else tf = `rotate(${side * (6 + fallRand() * 14)}deg)`;
+        const fallGroup = newGroup({
+          tf,
+          vars,
+          to: `${roundCoord(pivot[0])}px ${roundCoord(pivot[1])}px`,
+          cls: "fall",
+        });
+        culmPart(fallGroup, rand, culm, tones, cutLeft, 1, cutRight - cutLeft, 0);
+        culmTop(fallGroup, rand, culm, tones, scale);
+        fallLater.push([cut.phase === "down" ? 0 : 1, fallGroup]);
       } else {
-        culmPart(g, r, c, K, 0, 1);
-        culmTop(g, r, c, K, s);
-        groups.push(g);
+        culmPart(group, rand, culm, tones, 0, 1);
+        culmTop(group, rand, culm, tones, scale);
+        groups.push(group);
       }
     });
-  late.forEach(([, p]) => groups.push(p));
+  fallLater.forEach(([, fallGroup]) => groups.push(fallGroup));
 }
 // the toy
-function sceneBamboo(K) {
-  const r = rng(hash("tea/bamboo")),
-    W = 1100,
-    H = 560,
+function sceneBamboo(tones) {
+  const rand = rng(hash("tea/bamboo")),
+    width = 1100,
+    height = 560,
     groups = [],
     clips = [];
-  const cx = [190, 560, 920],
-    y = 470,
-    s = 1.45,
-    line = (c) => [
-      [c - 170, 362],
-      [c + 170, 318],
+  const centers = [190, 560, 920],
+    groundY = 470,
+    scale = 1.45,
+    swipe = (center) => [
+      [center - 170, 362],
+      [center + 170, 318],
     ];
-  const frame = G();
-  [0, 1, 2].forEach((k) => {
-    Tx(frame, {
-      t: ["一", "二", "三"][k],
-      tr: `translate(${cx[k] - 150} 40)`,
+  const frame = newGroup();
+  [0, 1, 2].forEach((index) => {
+    addText(frame, {
+      t: ["一", "二", "三"][index],
+      tr: `translate(${centers[index] - 150} 40)`,
       fs: 22,
       font: "'Yuji Syuku', serif",
-      fill: K.ink,
+      fill: tones.ink,
       o: 0.8,
     });
   });
   groups.push(frame);
-  bambooClump(groups, rng(hash("bb")), cx[0], y, K, s);
-  bambooClump(groups, rng(hash("bb")), cx[1], y, K, s, { phase: "fall", line: line(cx[1]) });
-  bambooClump(groups, rng(hash("bb")), cx[2], y, K, s, { phase: "down", line: line(cx[2]) });
-  // fingers trail
-  const sw = G(),
-    [a, b] = line(cx[1]);
-  BrW(sw, r, [a, [lerp(a[0], b[0], 0.5), lerp(a[1], b[1], 0.5) - 3], b], 10, K.gold, 0.55);
-  Br(sw, r, [a, [lerp(a[0], b[0], 0.5), lerp(a[1], b[1], 0.5) - 3], b], 2.4, K.ink, 0.5, {
-    tip: 0.05,
-    head: 0.1,
+  bambooClump(groups, rng(hash("bb")), centers[0], groundY, tones, scale);
+  bambooClump(groups, rng(hash("bb")), centers[1], groundY, tones, scale, {
+    phase: "fall",
+    line: swipe(centers[1]),
   });
-  Ln(sw, wring(r, b[0] + 14, b[1] - 2, 11, 11, 0.4, 12), K.ink, 1, 0.55);
-  groups.push(sw);
-  const fallen = G();
+  bambooClump(groups, rng(hash("bb")), centers[2], groundY, tones, scale, {
+    phase: "down",
+    line: swipe(centers[2]),
+  });
+  // fingers trail
+  const trail = newGroup(),
+    [swipeFrom, swipeTo] = swipe(centers[1]);
+  brushWash(
+    trail,
+    rand,
+    [
+      swipeFrom,
+      [lerp(swipeFrom[0], swipeTo[0], 0.5), lerp(swipeFrom[1], swipeTo[1], 0.5) - 3],
+      swipeTo,
+    ],
+    10,
+    tones.gold,
+    0.55,
+  );
+  brushStroke(
+    trail,
+    rand,
+    [
+      swipeFrom,
+      [lerp(swipeFrom[0], swipeTo[0], 0.5), lerp(swipeFrom[1], swipeTo[1], 0.5) - 3],
+      swipeTo,
+    ],
+    2.4,
+    tones.ink,
+    0.5,
+    {
+      tip: 0.05,
+      head: 0.1,
+    },
+  );
+  addLine(
+    trail,
+    wobblyRing(rand, swipeTo[0] + 14, swipeTo[1] - 2, 11, 11, 0.4, 12),
+    tones.ink,
+    1,
+    0.55,
+  );
+  groups.push(trail);
+  const fallen = newGroup();
   [
-    [cx[2] - 150, y + 30, 0.2],
-    [cx[2] - 70, y + 50, 2.9],
-    [cx[2] + 130, y + 44, 0.5],
-    [cx[2] + 20, y + 62, 2.6],
-    [cx[2] - 110, y + 70, 0.9],
-  ].forEach(([x, yy, ang]) => {
-    const d = leafD(x, yy, ang, 18, 3.4);
-    Wa(fallen, r, d, mix(K.mossDk, K.gold, 0.4), 0.9);
-    Ln(fallen, d, K.ink, 0.7, 0.7);
+    [centers[2] - 150, groundY + 30, 0.2],
+    [centers[2] - 70, groundY + 50, 2.9],
+    [centers[2] + 130, groundY + 44, 0.5],
+    [centers[2] + 20, groundY + 62, 2.6],
+    [centers[2] - 110, groundY + 70, 0.9],
+  ].forEach(([x, leafY, angle]) => {
+    const path = leafPath(x, leafY, angle, 18, 3.4);
+    addWash(fallen, rand, path, mix(tones.mossDk, tones.gold, 0.4), 0.9);
+    addLine(fallen, path, tones.ink, 0.7, 0.7);
   });
   groups.push(fallen);
-  return { W, H, groups, clips };
+  return { W: width, H: height, groups, clips };
 }
 // the same oblique projection, zoomed in
-const ZP = (ox, oy, s) => (x, z, y) => [ox + (x + z * 0.6) * s, oy - (z * 0.42 + (y || 0)) * s];
-const CLAYS = (K) => [
-  mix(K.earth, K.paper, 0.25),
-  mix(K.earth, K.red, 0.3),
-  mix(K.earth, K.ink, 0.45),
-  mix(K.paper, K.plaster, 0.25),
+const obliqueScaled = (ox, oy, scale) => (x, z, y) => [
+  ox + (x + z * 0.6) * scale,
+  oy - (z * 0.42 + (y || 0)) * scale,
 ];
-const GLAZES = (K) => [
-  mix(K.ink, K.lacquer, 0.3),
-  mix(K.paper, K.plaster, 0.35),
-  mix(K.gold, K.earth, 0.5),
-  mix(K.moss, K.paper, 0.45),
-  mix(K.water, K.ink, 0.2),
-  mix(K.moss, K.bamboo, 0.15),
-  mix(K.red, K.earth, 0.35),
+const CLAYS = (tones) => [
+  mix(tones.earth, tones.paper, 0.25),
+  mix(tones.earth, tones.red, 0.3),
+  mix(tones.earth, tones.ink, 0.45),
+  mix(tones.paper, tones.plaster, 0.25),
+];
+const GLAZES = (tones) => [
+  mix(tones.ink, tones.lacquer, 0.3),
+  mix(tones.paper, tones.plaster, 0.35),
+  mix(tones.gold, tones.earth, 0.5),
+  mix(tones.moss, tones.paper, 0.45),
+  mix(tones.water, tones.ink, 0.2),
+  mix(tones.moss, tones.bamboo, 0.15),
+  mix(tones.red, tones.earth, 0.35),
 ];
 const GLAZE_NAMES = ["tenmoku", "shino", "ame", "seiji", "ruri", "oribe", "shu"];
-const PAINTS = (K) => [mix(K.water, K.ink, 0.45), mix(K.earth, K.ink, 0.55), K.red, K.paper];
-function radAt(prof, y) {
-  for (let i = 1; i < prof.length; i++)
-    if (y <= prof[i][1])
+const PAINTS = (tones) => [
+  mix(tones.water, tones.ink, 0.45),
+  mix(tones.earth, tones.ink, 0.55),
+  tones.red,
+  tones.paper,
+];
+function radiusAt(profile, y) {
+  for (let i = 1; i < profile.length; i++)
+    if (y <= profile[i][1])
       return lerp(
-        prof[i - 1][0],
-        prof[i][0],
-        (y - prof[i - 1][1]) / Math.max(1e-6, prof[i][1] - prof[i - 1][1]),
+        profile[i - 1][0],
+        profile[i][0],
+        (y - profile[i - 1][1]) / Math.max(1e-6, profile[i][1] - profile[i - 1][1]),
       );
-  return prof[prof.length - 1][0];
+  return profile[profile.length - 1][0];
 }
-const PROF = {
+const PROFILES = {
   cup: {
     prof: [
       [22, 0],
@@ -1210,223 +1536,294 @@ const PROF = {
     H: 12,
   },
 };
-function piece(g, r, cx, cy, s, K, spec) {
-  const prof = spec.prof,
-    rw = prof[prof.length - 1][0] * s,
-    h = spec.H * s,
-    top = cy - h,
-    q = rng(spec.fire || 1);
-  const R = (v) => radAt(prof, 1 - v) * s,
-    el = 0.3,
-    shallow = h < rw * 0.45;
-  const clay = CLAYS(K)[spec.clay || 0];
-  let glaze = spec.glaze && !spec.glaze.none ? GLAZES(K)[spec.glaze.c] : null;
-  if (glaze) glaze = mix(glaze, q() < 0.5 ? K.ink : K.paper, q() * 0.12);
-  const side = (sg, v0, v1) =>
+function piece(group, rand, cx, cy, scale, tones, spec) {
+  const profile = spec.prof,
+    rimRadius = profile[profile.length - 1][0] * scale,
+    height = spec.H * scale,
+    rimY = cy - height,
+    fireRand = rng(spec.fire || 1);
+  const bodyRadius = (down) => radiusAt(profile, 1 - down) * scale,
+    squash = 0.3,
+    shallow = height < rimRadius * 0.45;
+  const clay = CLAYS(tones)[spec.clay || 0];
+  let glaze = spec.glaze && !spec.glaze.none ? GLAZES(tones)[spec.glaze.c] : null;
+  if (glaze) glaze = mix(glaze, fireRand() < 0.5 ? tones.ink : tones.paper, fireRand() * 0.12);
+  const side = (sign, from, to) =>
     Array.from({ length: 13 }, (_, i) => {
-      const v = lerp(v0, v1, i / 12);
-      return [cx + sg * R(v), top + v * h];
+      const down = lerp(from, to, i / 12);
+      return [cx + sign * bodyRadius(down), rimY + down * height];
     });
-  const arc = (rad, y, n, lower) =>
-    Array.from({ length: n + 1 }, (_, i) => {
-      const u = -1 + (2 * i) / n;
-      return [cx + u * rad, y + (lower ? 1 : -1) * rad * el * Math.sqrt(Math.max(0, 1 - u * u))];
+  const arc = (radius, y, steps, below) =>
+    Array.from({ length: steps + 1 }, (_, i) => {
+      const across = -1 + (2 * i) / steps;
+      return [
+        cx + across * radius,
+        y + (below ? 1 : -1) * radius * squash * Math.sqrt(Math.max(0, 1 - across * across)),
+      ];
     });
-  const front = (u, v) => [
-    cx + u * R(v) * 0.97,
-    top + v * h + R(v) * el * Math.sqrt(Math.max(0, 1 - u * u)),
+  const frontPoint = (across, down) => [
+    cx + across * bodyRadius(down) * 0.97,
+    rimY + down * height + bodyRadius(down) * squash * Math.sqrt(Math.max(0, 1 - across * across)),
   ];
-  const rf = R(1);
+  const footRadius = bodyRadius(1);
   const paint = () =>
-    (spec.paint || []).forEach((st) => {
-      const pts = st.pts.map(([u, v]) => (shallow ? inside(u, v) : front(u, v)));
-      Br(g, r, pts, st.w * s, PAINTS(K)[st.c], 0.88, { tip: 0.25, head: 0.15 });
+    (spec.paint || []).forEach((stroke) => {
+      const points = stroke.pts.map(([across, down]) =>
+        shallow ? insidePoint(across, down) : frontPoint(across, down),
+      );
+      brushStroke(group, rand, points, stroke.w * scale, PAINTS(tones)[stroke.c], 0.88, {
+        tip: 0.25,
+        head: 0.15,
+      });
     });
-  const inside = (u, v) => {
-    const y = v * 2 - 1,
-      k = Math.sqrt(Math.max(0, 1 - y * y));
-    return [cx + u * k * rw * 0.82, top + y * rw * el * 0.78];
+  const insidePoint = (across, down) => {
+    const y = down * 2 - 1,
+      halfWidth = Math.sqrt(Math.max(0, 1 - y * y));
+    return [cx + across * halfWidth * rimRadius * 0.82, rimY + y * rimRadius * squash * 0.78];
   };
   // shadow, foot ring, then the body
-  So(g, wring(r, cx + 5 * s, cy + rf * el + 6 * s, rw * 0.95, rw * el * 0.6, 0.4, 12), K.ink, 0.16);
-  const fu = Array.from({ length: 11 }, (_, i) => -0.8 + i * 0.16),
-    fy = (u) => cy + rf * el * Math.sqrt(1 - u * u);
-  const footTop = fu.map((u) => [cx + u * rf, fy(u) - 1]),
-    footBot = fu.map((u) => [cx + u * rf * 0.97, fy(u) + 5 * s]);
-  So(g, wpoly(r, [...footTop, ...footBot.reverse()], 0.2), mix(clay, K.ink, 0.15), 1);
-  Ln(
-    g,
-    wline(r, [footTop[0], ...footBot.slice().reverse(), footTop[footTop.length - 1]], 0.2),
-    K.ink,
+  addSolid(
+    group,
+    wobblyRing(
+      rand,
+      cx + 5 * scale,
+      cy + footRadius * squash + 6 * scale,
+      rimRadius * 0.95,
+      rimRadius * squash * 0.6,
+      0.4,
+      12,
+    ),
+    tones.ink,
+    0.16,
+  );
+  const footSteps = Array.from({ length: 11 }, (_, i) => -0.8 + i * 0.16),
+    footY = (across) => cy + footRadius * squash * Math.sqrt(1 - across * across);
+  const footTop = footSteps.map((across) => [cx + across * footRadius, footY(across) - 1]),
+    footBot = footSteps.map((across) => [
+      cx + across * footRadius * 0.97,
+      footY(across) + 5 * scale,
+    ]);
+  addSolid(
+    group,
+    wobblyPolygon(rand, [...footTop, ...footBot.reverse()], 0.2),
+    mix(clay, tones.ink, 0.15),
+    1,
+  );
+  addLine(
+    group,
+    wobblyLine(rand, [footTop[0], ...footBot.slice().reverse(), footTop[footTop.length - 1]], 0.2),
+    tones.ink,
     0.9,
     0.85,
   );
   const bodyPts = [
     ...side(-1, 0, 1),
-    ...arc(rf, cy, 14, true).slice(1, -1),
+    ...arc(footRadius, cy, 14, true).slice(1, -1),
     ...side(1, 0, 1).reverse(),
   ];
-  const body = wpoly(r, bodyPts, 0.2);
-  So(g, body, clay, 1);
+  const body = wobblyPolygon(rand, bodyPts, 0.2);
+  addSolid(group, body, clay, 1);
   for (let k = 0; k < 7; k++) {
-    const u = J(q, 0.8),
-      v = 0.75 + q() * 0.2,
-      p = front(u, v);
-    So(g, wring(r, p[0], p[1], 0.5 + q(), 0.4 + q() * 0.6, 0.1, 5), mix(clay, K.ink, 0.5), 0.6);
+    const across = jitter(fireRand, 0.8),
+      down = 0.75 + fireRand() * 0.2,
+      spot = frontPoint(across, down);
+    addSolid(
+      group,
+      wobblyRing(rand, spot[0], spot[1], 0.5 + fireRand(), 0.4 + fireRand() * 0.6, 0.1, 5),
+      mix(clay, tones.ink, 0.5),
+      0.6,
+    );
   }
   if (glaze) {
     const dip = spec.glaze.dip,
       drips = spec.glaze.drips || [];
     const edge = Array.from({ length: 41 }, (_, i) => {
-      const u = -1 + i / 20,
-        p = front(u, dip);
-      let y = p[1] + Math.sin(u * 8 + (spec.fire || 0)) * 1.2 * s;
-      drips.forEach(([du, L, w]) => {
-        const k = (u - du) / w;
-        y += L * h * Math.exp(-k * k * 3);
+      const across = -1 + i / 20,
+        spot = frontPoint(across, dip);
+      let y = spot[1] + Math.sin(across * 8 + (spec.fire || 0)) * 1.2 * scale;
+      drips.forEach(([dripAt, length, width]) => {
+        const distance = (across - dripAt) / width;
+        y += length * height * Math.exp(-distance * distance * 3);
       });
       return [
-        cx + u * R(dip) * 0.995,
-        Math.min(y, cy + rf * el * Math.sqrt(Math.max(0, 1 - u * u)) - 2 * s),
+        cx + across * bodyRadius(dip) * 0.995,
+        Math.min(
+          y,
+          cy + footRadius * squash * Math.sqrt(Math.max(0, 1 - across * across)) - 2 * scale,
+        ),
       ];
     });
-    const gl = wpoly(r, [...side(-1, 0, dip), ...edge, ...side(1, 0, dip).reverse()], 0.2);
-    So(g, gl, glaze, 0.97);
-    Ln(g, wline(r, edge, 0.2), mix(glaze, K.ink, 0.4), 0.8, 0.6);
+    const glazed = wobblyPolygon(
+      rand,
+      [...side(-1, 0, dip), ...edge, ...side(1, 0, dip).reverse()],
+      0.2,
+    );
+    addSolid(group, glazed, glaze, 0.97);
+    addLine(group, wobblyLine(rand, edge, 0.2), mix(glaze, tones.ink, 0.4), 0.8, 0.6);
     // what the kiln did
-    for (let k = 0; k < 4 + Math.floor(q() * 8); k++) {
-      const p = front(J(q, 0.8), q() * dip * 0.9);
-      So(
-        g,
-        wring(r, p[0], p[1], 0.5 + q() * 0.9, 0.5 + q() * 0.7, 0.1, 5),
-        mix(glaze, q() < 0.5 ? K.ink : K.paper, 0.5),
+    for (let k = 0; k < 4 + Math.floor(fireRand() * 8); k++) {
+      const spot = frontPoint(jitter(fireRand, 0.8), fireRand() * dip * 0.9);
+      addSolid(
+        group,
+        wobblyRing(rand, spot[0], spot[1], 0.5 + fireRand() * 0.9, 0.5 + fireRand() * 0.7, 0.1, 5),
+        mix(glaze, fireRand() < 0.5 ? tones.ink : tones.paper, 0.5),
         0.7,
       );
     }
   }
   if (!shallow) paint();
   if (spec.seal) {
-    const p = front(0.62, 0.8);
-    So(g, wbox(r, p[0] - 3 * s, p[1] - 3 * s, p[0] + 3 * s, p[1] + 3 * s, 0.2), K.red, 0.85);
+    const spot = frontPoint(0.62, 0.8);
+    addSolid(
+      group,
+      wobblyBox(
+        rand,
+        spot[0] - 3 * scale,
+        spot[1] - 3 * scale,
+        spot[0] + 3 * scale,
+        spot[1] + 3 * scale,
+        0.2,
+      ),
+      tones.red,
+      0.85,
+    );
   }
-  const sheen = side(-1, 0.1, shallow ? 0.6 : 0.75).map(([x, y]) => [x + rw * 0.16, y]);
-  Ln(g, wline(r, sheen, 0.2), K.paper, 1.8 * s, 0.3, true);
-  Ln(g, wline(r, bodyPts, 0.2), K.ink, 1.2, 0.95);
+  const sheen = side(-1, 0.1, shallow ? 0.6 : 0.75).map(([x, y]) => [x + rimRadius * 0.16, y]);
+  addLine(group, wobblyLine(rand, sheen, 0.2), tones.paper, 1.8 * scale, 0.3, true);
+  addLine(group, wobblyLine(rand, bodyPts, 0.2), tones.ink, 1.2, 0.95);
   // mouth, inside wall and, if it is shallow enough, floor
-  const mouth = wring(r, cx, top, rw, rw * el, 0.25, 22);
-  const inner = glaze ? mix(glaze, K.ink, 0.22) : mix(clay, K.ink, 0.15);
-  So(g, mouth, inner, 1);
+  const mouth = wobblyRing(rand, cx, rimY, rimRadius, rimRadius * squash, 0.25, 22);
+  const inner = glaze ? mix(glaze, tones.ink, 0.22) : mix(clay, tones.ink, 0.15);
+  addSolid(group, mouth, inner, 1);
   if (shallow) {
-    const fr = R(1) * 0.95;
-    So(
-      g,
-      wring(r, cx, top + h * 0.85, fr, fr * el, 0.2, 16),
-      glaze ? mix(glaze, K.paper, 0.06) : clay,
+    const floorRadius = bodyRadius(1) * 0.95;
+    addSolid(
+      group,
+      wobblyRing(rand, cx, rimY + height * 0.85, floorRadius, floorRadius * squash, 0.2, 16),
+      glaze ? mix(glaze, tones.paper, 0.06) : clay,
       1,
     );
   }
-  So(
-    g,
-    wring(r, cx - rw * 0.05, top - rw * el * 0.12, rw * 0.9, rw * el * 0.8, 0.2, 18),
-    glaze ? mix(glaze, K.paper, 0.08) : mix(clay, K.paper, 0.1),
+  addSolid(
+    group,
+    wobblyRing(
+      rand,
+      cx - rimRadius * 0.05,
+      rimY - rimRadius * squash * 0.12,
+      rimRadius * 0.9,
+      rimRadius * squash * 0.8,
+      0.2,
+      18,
+    ),
+    glaze ? mix(glaze, tones.paper, 0.08) : mix(clay, tones.paper, 0.1),
     0.35,
   );
   if (shallow) paint();
-  Ln(g, mouth, K.ink, 1.2, 0.95);
-  Ln(g, wring(r, cx, top + 1.2 * s, rw * 0.94, rw * el * 0.88, 0.2, 18), K.ink, 0.5, 0.35);
+  addLine(group, mouth, tones.ink, 1.2, 0.95);
+  addLine(
+    group,
+    wobblyRing(rand, cx, rimY + 1.2 * scale, rimRadius * 0.94, rimRadius * squash * 0.88, 0.2, 18),
+    tones.ink,
+    0.5,
+    0.35,
+  );
   if (spec.handle) {
-    const a = [cx + R(0.22), top + 0.22 * h],
-      b = [cx + R(0.72), top + 0.72 * h],
-      o = rw * 0.55;
-    const hp = [
-      a,
-      [a[0] + o * 0.75, a[1] - 3 * s],
-      [a[0] + o, lerp(a[1], b[1], 0.45)],
-      [b[0] + o * 0.55, b[1] + 2 * s],
-      b,
+    const handleTop = [cx + bodyRadius(0.22), rimY + 0.22 * height],
+      handleBottom = [cx + bodyRadius(0.72), rimY + 0.72 * height],
+      reach = rimRadius * 0.55;
+    const handle = [
+      handleTop,
+      [handleTop[0] + reach * 0.75, handleTop[1] - 3 * scale],
+      [handleTop[0] + reach, lerp(handleTop[1], handleBottom[1], 0.45)],
+      [handleBottom[0] + reach * 0.55, handleBottom[1] + 2 * scale],
+      handleBottom,
     ];
-    Br(g, r, hp, 7 * s, glaze || clay, 1, { blunt: true, tip: 0.9, head: 0.9 });
-    Ln(
-      g,
-      wline(
-        r,
-        hp.map(([x, y], i) => [x + (i && i < 4 ? 3.2 * s : 0), y]),
+    brushStroke(group, rand, handle, 7 * scale, glaze || clay, 1, {
+      blunt: true,
+      tip: 0.9,
+      head: 0.9,
+    });
+    addLine(
+      group,
+      wobblyLine(
+        rand,
+        handle.map(([x, y], i) => [x + (i && i < 4 ? 3.2 * scale : 0), y]),
         0.2,
       ),
-      K.ink,
+      tones.ink,
       1,
       0.85,
     );
-    Ln(
-      g,
-      wline(
-        r,
-        hp.map(([x, y], i) => [x - (i && i < 4 ? 3.2 * s : 0), y]),
+    addLine(
+      group,
+      wobblyLine(
+        rand,
+        handle.map(([x, y], i) => [x - (i && i < 4 ? 3.2 * scale : 0), y]),
         0.2,
       ),
-      K.ink,
+      tones.ink,
       1,
       0.85,
     );
   }
   if (spec.kin) {
-    const pts = spec.kin.map(([u, v]) => front(u, v));
-    Ln(g, wline(r, pts, 0.3), K.gold, 2.2 * s, 0.95, true);
-    Ln(g, wline(r, pts, 0.3), K.ink, 0.5, 0.45);
+    const points = spec.kin.map(([across, down]) => frontPoint(across, down));
+    addLine(group, wobblyLine(rand, points, 0.3), tones.gold, 2.2 * scale, 0.95, true);
+    addLine(group, wobblyLine(rand, points, 0.3), tones.ink, 0.5, 0.45);
   }
 }
 // guest's piece
 function demoSpec(name, kind) {
-  const q = rng(hash("piece/" + name)),
-    base = PROF[kind || ["cup", "yunomi", "bowl", "hira", "plate"][Math.floor(q() * 5)]];
-  const prof = base.prof.map(([rr, y], i) => [rr * (1 + J(q, 0.08)), y]);
+  const rand = rng(hash("piece/" + name)),
+    base = PROFILES[kind || ["cup", "yunomi", "bowl", "hira", "plate"][Math.floor(rand() * 5)]];
+  const prof = base.prof.map(([radius, y], i) => [radius * (1 + jitter(rand, 0.08)), y]);
   const paint = [];
-  if (q() < 0.6) {
-    const v = 0.2 + q() * 0.3;
+  if (rand() < 0.6) {
+    const height = 0.2 + rand() * 0.3;
     paint.push({
       pts: [
-        [-0.7, v + J(q, 0.05)],
-        [-0.2, v - 0.08],
-        [0.3, v + 0.06],
-        [0.7, v - 0.02],
+        [-0.7, height + jitter(rand, 0.05)],
+        [-0.2, height - 0.08],
+        [0.3, height + 0.06],
+        [0.7, height - 0.02],
       ],
-      w: 2 + q() * 3,
-      c: Math.floor(q() * 3),
+      w: 2 + rand() * 3,
+      c: Math.floor(rand() * 3),
     });
   }
-  if (q() < 0.4) {
-    const u = J(q, 0.5);
+  if (rand() < 0.4) {
+    const across = jitter(rand, 0.5);
     paint.push({
       pts: [
-        [u, 0.12],
-        [u + 0.05, 0.3],
-        [u - 0.02, 0.5],
+        [across, 0.12],
+        [across + 0.05, 0.3],
+        [across - 0.02, 0.5],
       ],
-      w: 3 + q() * 2,
-      c: Math.floor(q() * 3),
+      w: 3 + rand() * 2,
+      c: Math.floor(rand() * 3),
     });
   }
   return {
     prof,
-    H: base.H * (1 + J(q, 0.1)),
+    H: base.H * (1 + jitter(rand, 0.1)),
     handle: base.handle,
-    clay: Math.floor(q() * 4),
-    fire: Math.floor(q() * 1e6),
+    clay: Math.floor(rand() * 4),
+    fire: Math.floor(rand() * 1e6),
     glaze: {
-      c: Math.floor(q() * 7),
-      dip: 0.45 + q() * 0.35,
-      drips: Array.from({ length: Math.floor(q() * 4) }, () => [
-        J(q, 0.8),
-        0.1 + q() * 0.2,
-        0.06 + q() * 0.06,
+      c: Math.floor(rand() * 7),
+      dip: 0.45 + rand() * 0.35,
+      drips: Array.from({ length: Math.floor(rand() * 4) }, () => [
+        jitter(rand, 0.8),
+        0.1 + rand() * 0.2,
+        0.06 + rand() * 0.06,
       ]),
     },
     kin:
-      q() < 0.2
+      rand() < 0.2
         ? [
-            [J(q, 0.4), 0],
-            [J(q, 0.4), 0.2],
-            [J(q, 0.4), 0.45],
+            [jitter(rand, 0.4), 0],
+            [jitter(rand, 0.4), 0.2],
+            [jitter(rand, 0.4), 0.45],
           ]
         : null,
     paint,
@@ -1434,602 +1831,753 @@ function demoSpec(name, kind) {
   };
 }
 // kick wheel
-function wheel(g, r, cx, cy, s, K) {
-  const S = (v) => v * s;
-  So(g, wring(r, cx + S(6), cy + S(74), S(78), S(14), 0.5, 14), K.ink, 0.14);
-  const fly = wring(r, cx, cy + S(62), S(70), S(18), 0.5, 18);
-  So(g, wbox(r, cx - S(70), cy + S(62), cx + S(70), cy + S(70), 0.4), K.woodDk, 1);
-  So(g, fly, K.wood, 1);
-  Ln(g, fly, K.ink, 1.2, 0.9);
-  Ln(
-    g,
-    wline(
-      r,
+function wheel(group, rand, cx, cy, scale, tones) {
+  const scaled = (v) => v * scale;
+  addSolid(
+    group,
+    wobblyRing(rand, cx + scaled(6), cy + scaled(74), scaled(78), scaled(14), 0.5, 14),
+    tones.ink,
+    0.14,
+  );
+  const flywheel = wobblyRing(rand, cx, cy + scaled(62), scaled(70), scaled(18), 0.5, 18);
+  addSolid(
+    group,
+    wobblyBox(rand, cx - scaled(70), cy + scaled(62), cx + scaled(70), cy + scaled(70), 0.4),
+    tones.woodDk,
+    1,
+  );
+  addSolid(group, flywheel, tones.wood, 1);
+  addLine(group, flywheel, tones.ink, 1.2, 0.9);
+  addLine(
+    group,
+    wobblyLine(
+      rand,
       [
-        [cx - S(70), cy + S(62)],
-        [cx - S(70), cy + S(70)],
+        [cx - scaled(70), cy + scaled(62)],
+        [cx - scaled(70), cy + scaled(70)],
       ],
       0.2,
     ),
-    K.ink,
+    tones.ink,
     1,
     0.8,
   );
-  Ln(
-    g,
-    wline(
-      r,
+  addLine(
+    group,
+    wobblyLine(
+      rand,
       [
-        [cx + S(70), cy + S(62)],
-        [cx + S(70), cy + S(70)],
+        [cx + scaled(70), cy + scaled(62)],
+        [cx + scaled(70), cy + scaled(70)],
       ],
       0.2,
     ),
-    K.ink,
+    tones.ink,
     1,
     0.8,
   );
-  inked(g, r, wbox(r, cx - S(5), cy + S(4), cx + S(5), cy + S(60), 0.3), K.woodDk, K.ink, 1);
-  So(g, wbox(r, cx - S(46), cy, cx + S(46), cy + S(7), 0.3), K.woodDk, 1);
-  const head = wring(r, cx, cy, S(46), S(13), 0.3, 18);
-  So(g, head, K.woodLt, 1);
-  Ln(g, head, K.ink, 1.2, 0.95);
-  Ln(g, wring(r, cx, cy, S(30), S(8.5), 0.3, 16), K.ink, 0.6, 0.4);
+  inked(
+    group,
+    rand,
+    wobblyBox(rand, cx - scaled(5), cy + scaled(4), cx + scaled(5), cy + scaled(60), 0.3),
+    tones.woodDk,
+    tones.ink,
+    1,
+  );
+  addSolid(
+    group,
+    wobblyBox(rand, cx - scaled(46), cy, cx + scaled(46), cy + scaled(7), 0.3),
+    tones.woodDk,
+    1,
+  );
+  const head = wobblyRing(rand, cx, cy, scaled(46), scaled(13), 0.3, 18);
+  addSolid(group, head, tones.woodLt, 1);
+  addLine(group, head, tones.ink, 1.2, 0.95);
+  addLine(group, wobblyRing(rand, cx, cy, scaled(30), scaled(8.5), 0.3, 16), tones.ink, 0.6, 0.4);
 }
 // spin mark round the wheel head
-function spin(g, r, cx, cy, rx, ry, K) {
-  const pts = Array.from({ length: 12 }, (_, i) => {
-    const t = Math.PI * (0.15 + (i / 11) * 0.7);
-    return [cx + Math.cos(t) * rx, cy + Math.sin(t) * ry];
+function spin(group, rand, cx, cy, rx, ry, tones) {
+  const points = Array.from({ length: 12 }, (_, i) => {
+    const angle = Math.PI * (0.15 + (i / 11) * 0.7);
+    return [cx + Math.cos(angle) * rx, cy + Math.sin(angle) * ry];
   });
-  Ln(g, wline(r, pts, 0.3), K.ink, 1, 0.45);
-  const e = pts[0];
-  Ln(
-    g,
-    `M${f1(e[0] + 6)} ${f1(e[1] - 6)} L${f1(e[0])} ${f1(e[1])} L${f1(e[0] + 9)} ${f1(e[1] + 2)}`,
-    K.ink,
+  addLine(group, wobblyLine(rand, points, 0.3), tones.ink, 1, 0.45);
+  const start = points[0];
+  addLine(
+    group,
+    `M${roundCoord(start[0] + 6)} ${roundCoord(start[1] - 6)} L${roundCoord(start[0])} ${roundCoord(start[1])} L${roundCoord(start[0] + 9)} ${roundCoord(start[1] + 2)}`,
+    tones.ink,
     1,
     0.5,
   );
 }
 // lump of clay at some stage of the throw
-function wetClay(g, r, cx, cy, s, K, prof, H) {
-  piece(g, r, cx, cy, s, K, { prof, H, clay: 0, glaze: { none: true }, fire: 3 });
+function wetClay(group, rand, cx, cy, s, tones, profile, height) {
+  piece(group, rand, cx, cy, s, tones, {
+    prof: profile,
+    H: height,
+    clay: 0,
+    glaze: { none: true },
+    fire: 3,
+  });
 }
-function fingertip(g, r, x, y, K, label) {
-  Ln(g, wring(r, x, y, 11, 11, 0.4, 12), K.ink, 1, 0.6);
-  Wa(g, r, wring(r, x, y, 14, 14, 1, 12), K.gold, 0.35, "url(#bk-bleed)");
+function fingertip(group, rand, x, y, tones, label) {
+  addLine(group, wobblyRing(rand, x, y, 11, 11, 0.4, 12), tones.ink, 1, 0.6);
+  addWash(group, rand, wobblyRing(rand, x, y, 14, 14, 1, 12), tones.gold, 0.35, "url(#bk-bleed)");
   if (label)
-    Tx(g, {
+    addText(group, {
       t: label,
-      tr: `translate(${f1(x)} ${f1(y - 20)})`,
+      tr: `translate(${roundCoord(x)} ${roundCoord(y - 20)})`,
       fs: 13,
       font: "Kalam, cursive",
-      fill: K.ink,
+      fill: tones.ink,
       o: 0.6,
     });
 }
-function arrowLine(g, r, pts, K, o) {
-  Br(g, r, pts, 2, K.ink, o ?? 0.55, { tip: 0.05, head: 0.1 });
-  const a = pts[pts.length - 2],
-    b = pts[pts.length - 1],
-    ang = Math.atan2(b[1] - a[1], b[0] - a[0]);
-  const w = (d) => [b[0] - 9 * Math.cos(ang + d), b[1] - 9 * Math.sin(ang + d)];
-  Ln(
-    g,
-    `M${f1(w(0.5)[0])} ${f1(w(0.5)[1])} L${f1(b[0])} ${f1(b[1])} L${f1(w(-0.5)[0])} ${f1(w(-0.5)[1])}`,
-    K.ink,
+function arrowLine(group, rand, points, tones, opacity) {
+  brushStroke(group, rand, points, 2, tones.ink, opacity ?? 0.55, { tip: 0.05, head: 0.1 });
+  const prev = points[points.length - 2],
+    tip = points[points.length - 1],
+    angle = Math.atan2(tip[1] - prev[1], tip[0] - prev[0]);
+  const barb = (splay) => [
+    tip[0] - 9 * Math.cos(angle + splay),
+    tip[1] - 9 * Math.sin(angle + splay),
+  ];
+  addLine(
+    group,
+    `M${roundCoord(barb(0.5)[0])} ${roundCoord(barb(0.5)[1])} L${roundCoord(tip[0])} ${roundCoord(tip[1])} L${roundCoord(barb(-0.5)[0])} ${roundCoord(barb(-0.5)[1])}`,
+    tones.ink,
     1.3,
-    o ?? 0.55,
+    opacity ?? 0.55,
   );
 }
 // glaze bucket, seen a little from above
-function bucket(g, r, cx, cy, s, K, glaze, label) {
-  const S = (v) => v * s;
-  So(g, wring(r, cx + S(3), cy + S(4), S(30), S(8), 0.3, 10), K.ink, 0.15);
-  const body = wpoly(
-    r,
+function bucket(group, rand, cx, cy, scale, tones, glaze, label) {
+  const scaled = (v) => v * scale;
+  addSolid(
+    group,
+    wobblyRing(rand, cx + scaled(3), cy + scaled(4), scaled(30), scaled(8), 0.3, 10),
+    tones.ink,
+    0.15,
+  );
+  const outline = wobblyPolygon(
+    rand,
     [
-      [cx - S(30), cy - S(36)],
-      [cx - S(26), cy],
-      [cx + S(26), cy],
-      [cx + S(30), cy - S(36)],
+      [cx - scaled(30), cy - scaled(36)],
+      [cx - scaled(26), cy],
+      [cx + scaled(26), cy],
+      [cx + scaled(30), cy - scaled(36)],
     ],
     0.4,
   );
-  So(g, body, K.wood, 1);
-  Ln(g, body.slice(0, body.lastIndexOf(" Q")), K.ink, 1.1, 0.9);
-  [0.3, 0.75].forEach((t) =>
-    Ln(
-      g,
-      wline(
-        r,
+  addSolid(group, outline, tones.wood, 1);
+  addLine(group, outline.slice(0, outline.lastIndexOf(" Q")), tones.ink, 1.1, 0.9);
+  [0.3, 0.75].forEach((band) =>
+    addLine(
+      group,
+      wobblyLine(
+        rand,
         [
-          [cx - S(30 - 4 * t), cy - S(36 * (1 - t))],
-          [cx, cy - S(36 * (1 - t)) + S(4)],
-          [cx + S(30 - 4 * t), cy - S(36 * (1 - t))],
+          [cx - scaled(30 - 4 * band), cy - scaled(36 * (1 - band))],
+          [cx, cy - scaled(36 * (1 - band)) + scaled(4)],
+          [cx + scaled(30 - 4 * band), cy - scaled(36 * (1 - band))],
         ],
         0.2,
       ),
-      K.rope,
+      tones.rope,
       2,
       0.9,
       true,
     ),
   );
-  const top = wring(r, cx, cy - S(36), S(30), S(8), 0.2, 14);
-  So(g, top, K.woodDk, 1);
-  So(g, wring(r, cx, cy - S(35), S(27), S(6.5), 0.2, 14), glaze, 1);
-  Ln(g, top, K.ink, 1.1, 0.9);
+  const rim = wobblyRing(rand, cx, cy - scaled(36), scaled(30), scaled(8), 0.2, 14);
+  addSolid(group, rim, tones.woodDk, 1);
+  addSolid(
+    group,
+    wobblyRing(rand, cx, cy - scaled(35), scaled(27), scaled(6.5), 0.2, 14),
+    glaze,
+    1,
+  );
+  addLine(group, rim, tones.ink, 1.1, 0.9);
   if (label)
-    Tx(g, {
+    addText(group, {
       t: label,
-      tr: `translate(${f1(cx)} ${f1(cy + S(20))})`,
+      tr: `translate(${roundCoord(cx)} ${roundCoord(cy + scaled(20))})`,
       fs: 12,
       font: "Kalam, cursive",
-      fill: K.ink,
+      fill: tones.ink,
       o: 0.6,
     });
 }
 // brush, held at an angle
-function brushTool(g, r, x, y, ang, L, K, ink) {
-  const ux = Math.cos(ang),
-    uy = Math.sin(ang),
-    e = [x + ux * L, y + uy * L],
-    m = [x + ux * L * 0.18, y + uy * L * 0.18];
-  Br(g, r, [m, e], 5, K.bamboo, 0.95, { blunt: true, tip: 0.9 });
-  Ln(g, wline(r, [m, e], 0.2), K.ink, 0.7, 0.5);
-  Br(g, r, [[x, y], m], 7, ink || K.ink, 0.95, { tip: 0.05, head: 0.9 });
+function brushTool(group, rand, x, y, angle, length, tones, ink) {
+  const dirX = Math.cos(angle),
+    dirY = Math.sin(angle),
+    end = [x + dirX * length, y + dirY * length],
+    ferrule = [x + dirX * length * 0.18, y + dirY * length * 0.18];
+  brushStroke(group, rand, [ferrule, end], 5, tones.bamboo, 0.95, { blunt: true, tip: 0.9 });
+  addLine(group, wobblyLine(rand, [ferrule, end], 0.2), tones.ink, 0.7, 0.5);
+  brushStroke(group, rand, [[x, y], ferrule], 7, ink || tones.ink, 0.95, { tip: 0.05, head: 0.9 });
 }
 // pottery workshop, its climbing kiln, and the shelf in the waiting room
-const KX = 300,
-  KZ = 140,
-  KH = 100;
+const WORKSHOP_WIDTH = 300,
+  WORKSHOP_DEPTH = 140,
+  WORKSHOP_HEIGHT = 100;
 // short indigo curtain in the doorway, split in three
-function noren(g, r, P, x0, x1, yTop, drop, K, text) {
-  const ind = mix(K.water, K.ink, 0.45),
-    n = 3,
-    w = (x1 - x0) / n;
-  for (let k = 0; k < n; k++) {
-    const a = x0 + k * w + 0.6,
-      b = x0 + (k + 1) * w - 0.6;
-    const d = wpoly(
-      r,
-      quad(P, [
-        [a, 0, yTop],
-        [b, 0, yTop],
-        [b, 0, yTop - drop - J(r, 1)],
-        [a, 0, yTop - drop - J(r, 1)],
+function noren(group, rand, project, x0, x1, topY, drop, tones, text) {
+  const indigo = mix(tones.water, tones.ink, 0.45),
+    panels = 3,
+    panelWidth = (x1 - x0) / panels;
+  for (let panel = 0; panel < panels; panel++) {
+    const left = x0 + panel * panelWidth + 0.6,
+      right = x0 + (panel + 1) * panelWidth - 0.6;
+    const outline = wobblyPolygon(
+      rand,
+      projectAll(project, [
+        [left, 0, topY],
+        [right, 0, topY],
+        [right, 0, topY - drop - jitter(rand, 1)],
+        [left, 0, topY - drop - jitter(rand, 1)],
       ]),
       0.5,
     );
-    So(g, d, ind, 0.95);
-    Ln(g, d, K.ink, 0.9, 0.85);
+    addSolid(group, outline, indigo, 0.95);
+    addLine(group, outline, tones.ink, 0.9, 0.85);
   }
-  Ln(g, wseg(r, P(x0 - 4, 0, yTop + 1), P(x1 + 4, 0, yTop + 1), 0.3, 2), K.woodDk, 2.4, 0.95, true);
-  const c = P((x0 + x1) / 2, 0, yTop - drop * 0.45),
-    sz = Math.abs(P(0, 0, 0)[1] - P(0, 0, drop)[1]) * 0.42;
-  Tx(g, {
+  addLine(
+    group,
+    wobblySegment(rand, project(x0 - 4, 0, topY + 1), project(x1 + 4, 0, topY + 1), 0.3, 2),
+    tones.woodDk,
+    2.4,
+    0.95,
+    true,
+  );
+  const center = project((x0 + x1) / 2, 0, topY - drop * 0.45),
+    size = Math.abs(project(0, 0, 0)[1] - project(0, 0, drop)[1]) * 0.42;
+  addText(group, {
     t: text,
-    tr: `translate(${f1(c[0])} ${f1(c[1])})`,
-    fs: sz,
+    tr: `translate(${roundCoord(center[0])} ${roundCoord(center[1])})`,
+    fs: size,
     font: "'Yuji Syuku', serif",
-    fill: K.paper,
+    fill: tones.paper,
     o: 0.9,
   });
 }
-function workshopWalls(g, r, P, K) {
+function workshopWalls(group, rand, project, tones) {
   face(
-    g,
-    r,
-    P,
+    group,
+    rand,
+    project,
     [
-      [KX, 0, 0],
-      [KX, KZ, 0],
-      [KX, KZ, KH],
-      [KX, 0, KH],
+      [WORKSHOP_WIDTH, 0, 0],
+      [WORKSHOP_WIDTH, WORKSHOP_DEPTH, 0],
+      [WORKSHOP_WIDTH, WORKSHOP_DEPTH, WORKSHOP_HEIGHT],
+      [WORKSHOP_WIDTH, 0, WORKSHOP_HEIGHT],
     ],
-    K.plasterDk,
-    K,
+    tones.plasterDk,
+    tones,
   );
   face(
-    g,
-    r,
-    P,
+    group,
+    rand,
+    project,
     [
       [0, 0, 0],
-      [KX, 0, 0],
-      [KX, 0, KH],
-      [0, 0, KH],
+      [WORKSHOP_WIDTH, 0, 0],
+      [WORKSHOP_WIDTH, 0, WORKSHOP_HEIGHT],
+      [0, 0, WORKSHOP_HEIGHT],
     ],
-    K.plaster,
-    K,
+    tones.plaster,
+    tones,
   );
   face(
-    g,
-    r,
-    P,
+    group,
+    rand,
+    project,
     [
       [0, 0, 0],
-      [KX, 0, 0],
-      [KX, 0, 46],
+      [WORKSHOP_WIDTH, 0, 0],
+      [WORKSHOP_WIDTH, 0, 46],
       [0, 0, 46],
     ],
-    K.wood,
-    K,
+    tones.wood,
+    tones,
     1.1,
   );
   face(
-    g,
-    r,
-    P,
+    group,
+    rand,
+    project,
     [
-      [KX, 0, 0],
-      [KX, KZ, 0],
-      [KX, KZ, 46],
-      [KX, 0, 46],
+      [WORKSHOP_WIDTH, 0, 0],
+      [WORKSHOP_WIDTH, WORKSHOP_DEPTH, 0],
+      [WORKSHOP_WIDTH, WORKSHOP_DEPTH, 46],
+      [WORKSHOP_WIDTH, 0, 46],
     ],
-    mix(K.wood, K.ink, 0.15),
-    K,
+    mix(tones.wood, tones.ink, 0.15),
+    tones,
     1.1,
   );
-  for (let x = 7; x < KX; x += 9)
-    Ln(g, wseg(r, P(x, 0, 1), P(x, 0, 45), 0.3, 2), K.woodDk, 0.8, 0.55, true);
-  for (let z = 7; z < KZ; z += 9)
-    Ln(g, wseg(r, P(KX, z, 1), P(KX, z, 45), 0.3, 2), K.woodDk, 0.8, 0.5, true);
+  for (let x = 7; x < WORKSHOP_WIDTH; x += 9)
+    addLine(
+      group,
+      wobblySegment(rand, project(x, 0, 1), project(x, 0, 45), 0.3, 2),
+      tones.woodDk,
+      0.8,
+      0.55,
+      true,
+    );
+  for (let z = 7; z < WORKSHOP_DEPTH; z += 9)
+    addLine(
+      group,
+      wobblySegment(rand, project(WORKSHOP_WIDTH, z, 1), project(WORKSHOP_WIDTH, z, 45), 0.3, 2),
+      tones.woodDk,
+      0.8,
+      0.5,
+      true,
+    );
   // the doorway, open, with the noren
   face(
-    g,
-    r,
-    P,
+    group,
+    rand,
+    project,
     [
       [118, 0, 0],
       [186, 0, 0],
       [186, 0, 76],
       [118, 0, 76],
     ],
-    K.deep,
-    K,
+    tones.deep,
+    tones,
     1,
   );
-  noren(g, r, P, 118, 186, 76, 34, K, "陶");
+  noren(group, rand, project, 118, 186, 76, 34, tones, "陶");
   [
     [32, 84],
     [222, 272],
-  ].forEach(([a, b]) => {
+  ].forEach(([left, right]) => {
     face(
-      g,
-      r,
-      P,
+      group,
+      rand,
+      project,
       [
-        [a, 0, 54],
-        [b, 0, 54],
-        [b, 0, 82],
-        [a, 0, 82],
+        [left, 0, 54],
+        [right, 0, 54],
+        [right, 0, 82],
+        [left, 0, 82],
       ],
-      K.deep,
-      K,
+      tones.deep,
+      tones,
       0.9,
     );
-    for (let x = a + 6; x < b; x += 7)
-      Ln(g, wseg(r, P(x, 0, 55), P(x, 0, 81), 0.2, 1), K.bamboo, 1.6, 0.9, true);
+    for (let x = left + 6; x < right; x += 7)
+      addLine(
+        group,
+        wobblySegment(rand, project(x, 0, 55), project(x, 0, 81), 0.2, 1),
+        tones.bamboo,
+        1.6,
+        0.9,
+        true,
+      );
   });
-  [0, 118, 186, KX].forEach((x) => postV(g, r, P, x, 0, 0, KH, K, 5));
-  postV(g, r, P, KX, KZ, 0, KH, K, 5);
-  Ln(g, wseg(r, P(0, 0, 46), P(KX, 0, 46), 0.3, 2), K.woodDk, 3, 0.9, true);
+  [0, 118, 186, WORKSHOP_WIDTH].forEach((x) =>
+    post(group, rand, project, x, 0, 0, WORKSHOP_HEIGHT, tones, 5),
+  );
+  post(group, rand, project, WORKSHOP_WIDTH, WORKSHOP_DEPTH, 0, WORKSHOP_HEIGHT, tones, 5);
+  addLine(
+    group,
+    wobblySegment(rand, project(0, 0, 46), project(WORKSHOP_WIDTH, 0, 46), 0.3, 2),
+    tones.woodDk,
+    3,
+    0.9,
+    true,
+  );
 }
 // a long plank on two blocks, with bisque drying in the sun
-function dryingBench(g, r, P, x0, x1, z, K, s) {
+function dryingBench(group, rand, project, x0, x1, z, tones, scale) {
   face(
-    g,
-    r,
-    P,
+    group,
+    rand,
+    project,
     [
       [x0, z, 12],
       [x1, z, 12],
       [x1, z + 10, 12],
       [x0, z + 10, 12],
     ],
-    K.woodLt,
-    K,
+    tones.woodLt,
+    tones,
     1,
   );
   face(
-    g,
-    r,
-    P,
+    group,
+    rand,
+    project,
     [
       [x0, z, 9],
       [x1, z, 9],
       [x1, z, 12],
       [x0, z, 12],
     ],
-    K.wood,
-    K,
+    tones.wood,
+    tones,
     0.9,
   );
   [x0 + 6, x1 - 10].forEach((x) =>
     face(
-      g,
-      r,
-      P,
+      group,
+      rand,
+      project,
       [
         [x, z, 0],
         [x + 5, z, 0],
         [x + 5, z, 9],
         [x, z, 9],
       ],
-      K.woodDk,
-      K,
+      tones.woodDk,
+      tones,
       0.8,
     ),
   );
-  ["cup", "bowl", "yunomi", "hira", "bowl"].forEach((k, i) => {
-    const p = P(lerp(x0 + 10, x1 - 10, i / 4), z + 5, 12);
+  ["cup", "bowl", "yunomi", "hira", "bowl"].forEach((kind, i) => {
+    const spot = project(lerp(x0 + 10, x1 - 10, i / 4), z + 5, 12);
     piece(
-      g,
-      r,
-      p[0],
-      p[1] - 1,
-      s,
-      K,
-      Object.assign({ clay: [0, 3, 0, 1, 3][i], glaze: { none: true }, fire: 11 + i }, PROF[k]),
+      group,
+      rand,
+      spot[0],
+      spot[1] - 1,
+      scale,
+      tones,
+      Object.assign(
+        { clay: [0, 3, 0, 1, 3][i], glaze: { none: true }, fire: 11 + i },
+        PROFILES[kind],
+      ),
     );
   });
 }
 // climbing kiln
-function noborigama(groups, r, bx, by, K, lit) {
-  const n = 4,
-    W0 = 92,
-    HH = 46,
-    DZ = 46,
-    RISE = 17,
-    brick = mix(K.earth, K.kura, 0.35);
-  const P = (x, z, y) => [bx + x + z * 0.6, by - z * 0.42 - y];
-  const g = G();
-  Wa(
-    g,
-    r,
-    wpoly(
-      r,
-      quad(P, [
+function noborigama(groups, rand, baseX, baseY, tones, lit) {
+  const chambers = 4,
+    chamberWidth = 92,
+    archHeight = 46,
+    chamberDepth = 46,
+    rise = 17,
+    brick = mix(tones.earth, tones.kura, 0.35);
+  const project = (x, z, y) => [baseX + x + z * 0.6, baseY - z * 0.42 - y];
+  const group = newGroup();
+  addWash(
+    group,
+    rand,
+    wobblyPolygon(
+      rand,
+      projectAll(project, [
         [-30, -30, 0],
-        [W0 + 30, -30, 0],
-        [W0 + 30, n * DZ + 40, n * RISE],
-        [-30, n * DZ + 40, n * RISE],
+        [chamberWidth + 30, -30, 0],
+        [chamberWidth + 30, chambers * chamberDepth + 40, chambers * rise],
+        [-30, chambers * chamberDepth + 40, chambers * rise],
       ]),
       4,
     ),
-    K.earth,
+    tones.earth,
     0.3,
     "url(#bk-pool)",
   );
-  groups.push(g);
+  groups.push(group);
   // chimney at the top end of the slope
-  const ch = G(),
-    CZ = n * DZ + 4,
-    CY = n * RISE,
-    cx0 = W0 / 2 - 10;
+  const chimney = newGroup(),
+    chimneyZ = chambers * chamberDepth + 4,
+    chimneyY = chambers * rise,
+    chimneyX = chamberWidth / 2 - 10;
   face(
-    ch,
-    r,
-    P,
+    chimney,
+    rand,
+    project,
     [
-      [cx0, CZ, CY],
-      [cx0 + 20, CZ, CY],
-      [cx0 + 20, CZ, CY + 140],
-      [cx0, CZ, CY + 140],
+      [chimneyX, chimneyZ, chimneyY],
+      [chimneyX + 20, chimneyZ, chimneyY],
+      [chimneyX + 20, chimneyZ, chimneyY + 140],
+      [chimneyX, chimneyZ, chimneyY + 140],
     ],
     brick,
-    K,
+    tones,
     1.1,
   );
   face(
-    ch,
-    r,
-    P,
+    chimney,
+    rand,
+    project,
     [
-      [cx0 + 20, CZ, CY],
-      [cx0 + 20, CZ + 20, CY],
-      [cx0 + 20, CZ + 20, CY + 140],
-      [cx0 + 20, CZ, CY + 140],
+      [chimneyX + 20, chimneyZ, chimneyY],
+      [chimneyX + 20, chimneyZ + 20, chimneyY],
+      [chimneyX + 20, chimneyZ + 20, chimneyY + 140],
+      [chimneyX + 20, chimneyZ, chimneyY + 140],
     ],
-    mix(brick, K.ink, 0.2),
-    K,
+    mix(brick, tones.ink, 0.2),
+    tones,
     1.1,
   );
   for (let y = 10; y < 140; y += 10)
-    Ln(ch, wseg(r, P(cx0, CZ, CY + y), P(cx0 + 20, CZ, CY + y), 0.2, 1), K.ink, 0.5, 0.35);
-  groups.push(ch);
-  const smoke = G({ washO: 0.5 }),
-    s0 = P(cx0 + 12, CZ + 8, CY + 146);
-  const sm = [
-    s0,
-    [s0[0] - 12, s0[1] - 40],
-    [s0[0] + 10, s0[1] - 80],
-    [s0[0] - 6, s0[1] - 120],
-    [s0[0] - 40, s0[1] - 160],
+    addLine(
+      chimney,
+      wobblySegment(
+        rand,
+        project(chimneyX, chimneyZ, chimneyY + y),
+        project(chimneyX + 20, chimneyZ, chimneyY + y),
+        0.2,
+        1,
+      ),
+      tones.ink,
+      0.5,
+      0.35,
+    );
+  groups.push(chimney);
+  const smoke = newGroup({ washO: 0.5 }),
+    smokeFrom = project(chimneyX + 12, chimneyZ + 8, chimneyY + 146);
+  const smokePath = [
+    smokeFrom,
+    [smokeFrom[0] - 12, smokeFrom[1] - 40],
+    [smokeFrom[0] + 10, smokeFrom[1] - 80],
+    [smokeFrom[0] - 6, smokeFrom[1] - 120],
+    [smokeFrom[0] - 40, smokeFrom[1] - 160],
   ];
-  BrW(smoke, r, sm, lit ? 24 : 12, mix(K.inkSoft, K.paper, 0.5), lit ? 0.55 : 0.3);
-  Br(smoke, r, sm, 1.4, K.inkSoft, 0.35, { tip: 0.1, head: 0.05 });
+  brushWash(
+    smoke,
+    rand,
+    smokePath,
+    lit ? 24 : 12,
+    mix(tones.inkSoft, tones.paper, 0.5),
+    lit ? 0.55 : 0.3,
+  );
+  brushStroke(smoke, rand, smokePath, 1.4, tones.inkSoft, 0.35, { tip: 0.1, head: 0.05 });
   groups.push(smoke);
-  for (let i = n - 1; i >= 0; i--) {
-    const z0 = i * DZ,
-      y0 = i * RISE,
-      k = G();
-    const arch = (z, m) =>
-      Array.from({ length: (m || 12) + 1 }, (_, j) => {
-        const a = Math.PI * (j / (m || 12));
-        return P((W0 / 2) * (1 - Math.cos(a)), z, y0 + Math.sin(a) * HH);
+  for (let i = chambers - 1; i >= 0; i--) {
+    const chamberZ = i * chamberDepth,
+      chamberY = i * rise,
+      chamberGroup = newGroup();
+    const arch = (z, steps) =>
+      Array.from({ length: (steps || 12) + 1 }, (_, step) => {
+        const angle = Math.PI * (step / (steps || 12));
+        return project(
+          (chamberWidth / 2) * (1 - Math.cos(angle)),
+          z,
+          chamberY + Math.sin(angle) * archHeight,
+        );
       });
-    const fr = arch(z0),
-      bk = arch(z0 + DZ);
+    const frontArch = arch(chamberZ),
+      backArch = arch(chamberZ + chamberDepth);
     // barrel roof, then the front face of this chamber
-    So(k, wpoly(r, [...fr.slice(3), ...bk.slice(3).reverse()], 0.4), mix(brick, K.paper, 0.18), 1);
-    for (let j = 1; j < 4; j++)
-      Ln(k, wline(r, arch(z0 + (DZ * j) / 4).slice(4), 0.3), K.ink, 0.6, 0.4);
-    Ln(k, wline(r, bk.slice(4), 0.4), K.ink, 1, 0.8);
-    Ln(k, wline(r, [fr[12], bk[12]], 0.3), K.ink, 1, 0.85);
-    const frD = wpoly(r, [...fr, P(0, z0, y0)], 0.4);
-    So(k, frD, mix(brick, K.ink, 0.1), 1);
-    Ln(k, wline(r, fr, 0.4), K.ink, 1.3, 0.95);
-    Ln(k, wline(r, [fr[0], fr[12]], 0.3), K.ink, 1, 0.9);
+    addSolid(
+      chamberGroup,
+      wobblyPolygon(rand, [...frontArch.slice(3), ...backArch.slice(3).reverse()], 0.4),
+      mix(brick, tones.paper, 0.18),
+      1,
+    );
+    for (let rib = 1; rib < 4; rib++)
+      addLine(
+        chamberGroup,
+        wobblyLine(rand, arch(chamberZ + (chamberDepth * rib) / 4).slice(4), 0.3),
+        tones.ink,
+        0.6,
+        0.4,
+      );
+    addLine(chamberGroup, wobblyLine(rand, backArch.slice(4), 0.4), tones.ink, 1, 0.8);
+    addLine(chamberGroup, wobblyLine(rand, [frontArch[12], backArch[12]], 0.3), tones.ink, 1, 0.85);
+    const frontFace = wobblyPolygon(rand, [...frontArch, project(0, chamberZ, chamberY)], 0.4);
+    addSolid(chamberGroup, frontFace, mix(brick, tones.ink, 0.1), 1);
+    addLine(chamberGroup, wobblyLine(rand, frontArch, 0.4), tones.ink, 1.3, 0.95);
+    addLine(chamberGroup, wobblyLine(rand, [frontArch[0], frontArch[12]], 0.3), tones.ink, 1, 0.9);
     // bricked-up door in the face, with a stoking hole in it
-    const glow = lit && i < 3,
-      sh = P(W0 * 0.93, z0 + DZ * 0.5, y0 + HH * 0.42);
-    if (glow) Wa(k, r, wring(r, sh[0], sh[1], 16, 12, 2, 10), K.gold, 0.6, "url(#bk-bleed)");
-    So(k, wring(r, sh[0], sh[1], 4, 5.5, 0.3, 9), glow ? mix(K.gold, K.red, 0.4) : K.deep, 1);
-    Ln(k, wring(r, sh[0], sh[1], 4, 5.5, 0.3, 9), K.ink, 0.9, 0.9);
-    groups.push(k);
+    const glowing = lit && i < 3,
+      stokeHole = project(
+        chamberWidth * 0.93,
+        chamberZ + chamberDepth * 0.5,
+        chamberY + archHeight * 0.42,
+      );
+    if (glowing)
+      addWash(
+        chamberGroup,
+        rand,
+        wobblyRing(rand, stokeHole[0], stokeHole[1], 16, 12, 2, 10),
+        tones.gold,
+        0.6,
+        "url(#bk-bleed)",
+      );
+    addSolid(
+      chamberGroup,
+      wobblyRing(rand, stokeHole[0], stokeHole[1], 4, 5.5, 0.3, 9),
+      glowing ? mix(tones.gold, tones.red, 0.4) : tones.deep,
+      1,
+    );
+    addLine(
+      chamberGroup,
+      wobblyRing(rand, stokeHole[0], stokeHole[1], 4, 5.5, 0.3, 9),
+      tones.ink,
+      0.9,
+      0.9,
+    );
+    groups.push(chamberGroup);
   }
   // the firebox at the foot
-  const fb = G(),
-    m = P(W0 / 2, -10, 0);
-  if (lit) Wa(fb, r, wring(r, m[0], m[1] - 10, 30, 20, 3, 10), K.gold, 0.65, "url(#bk-bleed)");
+  const firebox = newGroup(),
+    mouth = project(chamberWidth / 2, -10, 0);
+  if (lit)
+    addWash(
+      firebox,
+      rand,
+      wobblyRing(rand, mouth[0], mouth[1] - 10, 30, 20, 3, 10),
+      tones.gold,
+      0.65,
+      "url(#bk-bleed)",
+    );
   inked(
-    fb,
-    r,
-    wpoly(
-      r,
+    firebox,
+    rand,
+    wobblyPolygon(
+      rand,
       [
-        [m[0] - 32, m[1] + 4],
-        [m[0] - 26, m[1] - 24],
-        [m[0] + 26, m[1] - 24],
-        [m[0] + 32, m[1] + 4],
+        [mouth[0] - 32, mouth[1] + 4],
+        [mouth[0] - 26, mouth[1] - 24],
+        [mouth[0] + 26, mouth[1] - 24],
+        [mouth[0] + 32, mouth[1] + 4],
       ],
       0.6,
     ),
-    mix(brick, K.ink, 0.1),
-    K.ink,
+    mix(brick, tones.ink, 0.1),
+    tones.ink,
     1.2,
   );
-  So(
-    fb,
-    wpoly(
-      r,
+  addSolid(
+    firebox,
+    wobblyPolygon(
+      rand,
       [
-        [m[0] - 12, m[1] + 2],
-        [m[0] - 10, m[1] - 15],
-        [m[0] + 10, m[1] - 15],
-        [m[0] + 12, m[1] + 2],
+        [mouth[0] - 12, mouth[1] + 2],
+        [mouth[0] - 10, mouth[1] - 15],
+        [mouth[0] + 10, mouth[1] - 15],
+        [mouth[0] + 12, mouth[1] + 2],
       ],
       0.4,
     ),
-    lit ? mix(K.gold, K.red, 0.35) : K.deep,
+    lit ? mix(tones.gold, tones.red, 0.35) : tones.deep,
     1,
   );
-  groups.push(fb);
+  groups.push(firebox);
 }
 // what you see from above when the workshop roof is lifted
-function workshopInside(groups, r, P, K, sc) {
-  sc = sc || 1;
-  const g = G();
-  groups.push(g);
+function workshopInside(groups, rand, project, tones, scale) {
+  scale = scale || 1;
+  const group = newGroup();
+  groups.push(group);
   face(
-    g,
-    r,
-    P,
+    group,
+    rand,
+    project,
     [
       [0, 0, 0],
-      [KX, 0, 0],
-      [KX, KZ, 0],
-      [0, KZ, 0],
+      [WORKSHOP_WIDTH, 0, 0],
+      [WORKSHOP_WIDTH, WORKSHOP_DEPTH, 0],
+      [0, WORKSHOP_DEPTH, 0],
     ],
-    mix(K.earth, K.paper, 0.35),
-    K,
+    mix(tones.earth, tones.paper, 0.35),
+    tones,
     1,
     1,
   );
   for (let k = 0; k < 60; k++) {
-    const p = P(r() * KX, r() * KZ, 0);
-    So(g, wring(r, p[0], p[1], 0.6 * sc, 0.4 * sc, 0.1, 5), K.earth, 0.4);
+    const spot = project(rand() * WORKSHOP_WIDTH, rand() * WORKSHOP_DEPTH, 0);
+    addSolid(
+      group,
+      wobblyRing(rand, spot[0], spot[1], 0.6 * scale, 0.4 * scale, 0.1, 5),
+      tones.earth,
+      0.4,
+    );
   }
   face(
-    g,
-    r,
-    P,
+    group,
+    rand,
+    project,
     [
       [0, 0, 0],
-      [0, KZ, 0],
-      [0, KZ, KH],
-      [0, 0, KH],
+      [0, WORKSHOP_DEPTH, 0],
+      [0, WORKSHOP_DEPTH, WORKSHOP_HEIGHT],
+      [0, 0, WORKSHOP_HEIGHT],
     ],
-    K.plasterDk,
-    K,
+    tones.plasterDk,
+    tones,
   );
   face(
-    g,
-    r,
-    P,
+    group,
+    rand,
+    project,
     [
-      [0, KZ, 0],
-      [KX, KZ, 0],
-      [KX, KZ, KH],
-      [0, KZ, KH],
+      [0, WORKSHOP_DEPTH, 0],
+      [WORKSHOP_WIDTH, WORKSHOP_DEPTH, 0],
+      [WORKSHOP_WIDTH, WORKSHOP_DEPTH, WORKSHOP_HEIGHT],
+      [0, WORKSHOP_DEPTH, WORKSHOP_HEIGHT],
     ],
-    K.plaster,
-    K,
+    tones.plaster,
+    tones,
   );
-  const wall = groups.length;
+  const wallCount = groups.length;
   // shelves of bisque along the back wall
   [30, 58].forEach((y, row) => {
-    const plank = G();
+    const plank = newGroup();
     groups.push(plank);
     face(
       plank,
-      r,
-      P,
+      rand,
+      project,
       [
-        [14, KZ, y],
-        [150, KZ, y],
-        [150, KZ - 12, y],
-        [14, KZ - 12, y],
+        [14, WORKSHOP_DEPTH, y],
+        [150, WORKSHOP_DEPTH, y],
+        [150, WORKSHOP_DEPTH - 12, y],
+        [14, WORKSHOP_DEPTH - 12, y],
       ],
-      K.woodLt,
-      K,
+      tones.woodLt,
+      tones,
       0.9,
     );
     for (let i = 0; i < 6; i++) {
-      const p = P(24 + i * 22, KZ - 6, y);
-      const pc = G();
-      groups.push(pc);
-      const pf = PROF[["cup", "bowl", "yunomi", "hira", "bowl", "cup"][(i + row) % 6]],
-        ps = 0.28 * sc;
+      const spot = project(24 + i * 22, WORKSHOP_DEPTH - 6, y);
+      const pot = newGroup();
+      groups.push(pot);
+      const profile = PROFILES[["cup", "bowl", "yunomi", "hira", "bowl", "cup"][(i + row) % 6]],
+        potScale = 0.28 * scale;
       piece(
-        pc,
-        r,
-        p[0],
-        p[1] - (radAt(pf.prof, 0) * 0.3 + 5) * ps,
-        ps,
-        K,
+        pot,
+        rand,
+        spot[0],
+        spot[1] - (radiusAt(profile.prof, 0) * 0.3 + 5) * potScale,
+        potScale,
+        tones,
         Object.assign(
           { clay: (i + row) % 2 ? 0 : 3, glaze: { none: true }, fire: i + row * 7 },
-          pf,
+          profile,
         ),
       );
     }
   });
   // glaze buckets on the right
-  GLAZES(K)
+  GLAZES(tones)
     .slice(0, 5)
-    .forEach((gc, i) => {
-      const p = P(196 + i * 20, KZ - 18 - (i % 2) * 12, 0);
-      const bk = G();
-      groups.push(bk);
-      bucket(bk, r, p[0], p[1], 0.36 * sc, K, gc);
+    .forEach((glazeColor, i) => {
+      const spot = project(196 + i * 20, WORKSHOP_DEPTH - 18 - (i % 2) * 12, 0);
+      const bucketGroup = newGroup();
+      groups.push(bucketGroup);
+      bucket(bucketGroup, rand, spot[0], spot[1], 0.36 * scale, tones, glazeColor);
     });
   // the kick wheel in the middle, with a lump of clay
-  const wg = G();
-  groups.push(wg);
-  const wp = P(84, 62, 0);
-  wheel(wg, r, wp[0], wp[1] - 18 * sc, 0.42 * sc, K);
+  const wheelGroup = newGroup();
+  groups.push(wheelGroup);
+  const wheelAt = project(84, 62, 0);
+  wheel(wheelGroup, rand, wheelAt[0], wheelAt[1] - 18 * scale, 0.42 * scale, tones);
   wetClay(
-    wg,
-    r,
-    wp[0],
-    wp[1] - 20 * sc,
-    0.3 * sc,
-    K,
+    wheelGroup,
+    rand,
+    wheelAt[0],
+    wheelAt[1] - 20 * scale,
+    0.3 * scale,
+    tones,
     [
       [18, 0],
       [22, 0.4],
@@ -2037,77 +2585,103 @@ function workshopInside(groups, r, P, K, sc) {
     ],
     30,
   );
-  So(wg, wring(r, wp[0] - 34 * sc, wp[1] + 6 * sc, 9 * sc, 4 * sc, 0.3, 8), K.woodDk, 0.95);
+  addSolid(
+    wheelGroup,
+    wobblyRing(rand, wheelAt[0] - 34 * scale, wheelAt[1] + 6 * scale, 9 * scale, 4 * scale, 0.3, 8),
+    tones.woodDk,
+    0.95,
+  );
   // the painting table by the right window
-  const t = G();
-  groups.push(t);
+  const table = newGroup();
+  groups.push(table);
   face(
-    t,
-    r,
-    P,
+    table,
+    rand,
+    project,
     [
       [200, 30, 18],
       [280, 30, 18],
       [280, 70, 18],
       [200, 70, 18],
     ],
-    K.woodLt,
-    K,
+    tones.woodLt,
+    tones,
     1,
   );
   [
     [200, 30],
     [280, 30],
-  ].forEach(([x, z]) => postV(t, r, P, x, z, 0, 18, K, 3));
-  const tp = P(226, 50, 18);
-  const tb = G();
-  groups.push(tb);
+  ].forEach(([x, z]) => post(table, rand, project, x, z, 0, 18, tones, 3));
+  const tableTop = project(226, 50, 18);
+  const tableItems = newGroup();
+  groups.push(tableItems);
   piece(
-    tb,
-    r,
-    tp[0],
-    tp[1],
-    0.3 * sc,
-    K,
-    Object.assign({ clay: 3, glaze: { c: 1, dip: 0.7 }, fire: 4 }, PROF.bowl),
+    tableItems,
+    rand,
+    tableTop[0],
+    tableTop[1],
+    0.3 * scale,
+    tones,
+    Object.assign({ clay: 3, glaze: { c: 1, dip: 0.7 }, fire: 4 }, PROFILES.bowl),
   );
-  brushTool(tb, r, tp[0] + 22 * sc, tp[1] - 4 * sc, -0.4, 20 * sc, K, PAINTS(K)[0]);
+  brushTool(
+    tableItems,
+    rand,
+    tableTop[0] + 22 * scale,
+    tableTop[1] - 4 * scale,
+    -0.4,
+    20 * scale,
+    tones,
+    PAINTS(tones)[0],
+  );
   [0, 1, 2].forEach((i) => {
-    const p = P(256 + i * 7, 42, 18);
-    So(tb, wring(r, p[0], p[1], 3 * sc, 1.5 * sc, 0.2, 8), PAINTS(K)[i], 0.95);
+    const spot = project(256 + i * 7, 42, 18);
+    addSolid(
+      tableItems,
+      wobblyRing(rand, spot[0], spot[1], 3 * scale, 1.5 * scale, 0.2, 8),
+      PAINTS(tones)[i],
+      0.95,
+    );
   });
-  return wall;
+  return wallCount;
 }
-function sceneGarden16(K, stage, opt = {}) {
+function sceneGarden16(tones, stage, opt = {}) {
   const open = stage === "open";
-  const r = rng(hash("tea/garden16")),
-    W = 1100,
-    H = 690,
+  const rand = rng(hash("tea/garden16")),
+    width = 1100,
+    height = 690,
     groups = [],
     clips = [];
-  const ground = G({ washO: 0.35 });
+  const ground = newGroup({ washO: 0.35 });
   [
     [240, 470, 220, 50],
     [700, 640, 240, 34],
     [900, 470, 140, 40],
   ].forEach(([x, y, rx, ry]) =>
-    Wa(ground, r, wring(r, x, y, rx, ry, ry * 0.3, 12), K.moss, 0.22, "url(#bk-pool)"),
+    addWash(
+      ground,
+      rand,
+      wobblyRing(rand, x, y, rx, ry, ry * 0.3, 12),
+      tones.moss,
+      0.22,
+      "url(#bk-pool)",
+    ),
   );
   for (let i = 0; i < 120; i++) {
-    const x = r() * W,
-      y = 120 + r() * (H - 130);
-    So(
+    const x = rand() * width,
+      y = 120 + rand() * (height - 130);
+    addSolid(
       ground,
-      wring(r, x, y, 0.9 + r() * 1.2, 0.7 + r() * 0.8, 0.3, 6),
-      K.mossDk,
-      0.1 + r() * 0.15,
+      wobblyRing(rand, x, y, 0.9 + rand() * 1.2, 0.7 + rand() * 0.8, 0.3, 6),
+      tones.mossDk,
+      0.1 + rand() * 0.15,
     );
   }
   groups.push(ground);
-  const path = G();
+  const path = newGroup();
   steppingStones(
     path,
-    r,
+    rand,
     [
       [420, 686],
       [446, 648],
@@ -2120,111 +2694,146 @@ function sceneGarden16(K, stage, opt = {}) {
       [330, 668],
       [280, 676],
     ],
-    K,
+    tones,
     0.9,
   );
   groups.push(path);
 
   // workshop
-  const PW = OB(470, 452),
-    WS = G();
-  Wa(
-    WS,
-    r,
-    wpoly(
-      r,
-      quad(PW, [
+  const workshopProject = oblique(470, 452),
+    workshopShadow = newGroup();
+  addWash(
+    workshopShadow,
+    rand,
+    wobblyPolygon(
+      rand,
+      projectAll(workshopProject, [
         [-14, -16, 0],
-        [KX + 16, -16, 0],
-        [KX + 16, KZ + 12, 0],
-        [-14, KZ + 12, 0],
+        [WORKSHOP_WIDTH + 16, -16, 0],
+        [WORKSHOP_WIDTH + 16, WORKSHOP_DEPTH + 12, 0],
+        [-14, WORKSHOP_DEPTH + 12, 0],
       ]),
       3,
     ),
-    K.pool,
+    tones.pool,
     0.6,
     "url(#bk-pool)",
   );
-  groups.push(WS);
+  groups.push(workshopShadow);
   if (!open) {
-    const walls = G();
-    workshopWalls(walls, r, PW, K);
+    const walls = newGroup();
+    workshopWalls(walls, rand, workshopProject, tones);
     groups.push(walls);
-    const roof = G({ cls: "roji-roof" });
-    gableRoof(roof, r, PW, KX, KZ, KH, 72, 20, K, "thatch");
-    plaque(roof, r, ...PW(152, -20, KH - 14), 40, 16, "工房", "'Yuji Syuku', serif", 11, K);
+    const roof = newGroup({ cls: "roji-roof" });
+    gableRoof(
+      roof,
+      rand,
+      workshopProject,
+      WORKSHOP_WIDTH,
+      WORKSHOP_DEPTH,
+      WORKSHOP_HEIGHT,
+      72,
+      20,
+      tones,
+      "thatch",
+    );
+    plaque(
+      roof,
+      rand,
+      ...workshopProject(152, -20, WORKSHOP_HEIGHT - 14),
+      40,
+      16,
+      "工房",
+      "'Yuji Syuku', serif",
+      11,
+      tones,
+    );
     groups.push(roof);
   } else {
-    workshopInside(groups, r, PW, K);
-    const fW = G();
+    workshopInside(groups, rand, workshopProject, tones);
+    const lowWalls = newGroup();
     face(
-      fW,
-      r,
-      PW,
+      lowWalls,
+      rand,
+      workshopProject,
       [
-        [KX, 0, 0],
-        [KX, KZ, 0],
-        [KX, KZ, 26],
-        [KX, 0, 26],
+        [WORKSHOP_WIDTH, 0, 0],
+        [WORKSHOP_WIDTH, WORKSHOP_DEPTH, 0],
+        [WORKSHOP_WIDTH, WORKSHOP_DEPTH, 26],
+        [WORKSHOP_WIDTH, 0, 26],
       ],
-      mix(K.wood, K.ink, 0.15),
-      K,
+      mix(tones.wood, tones.ink, 0.15),
+      tones,
       1.1,
     );
     face(
-      fW,
-      r,
-      PW,
+      lowWalls,
+      rand,
+      workshopProject,
       [
         [0, 0, 0],
         [118, 0, 0],
         [118, 0, 22],
         [0, 0, 22],
       ],
-      K.wood,
-      K,
+      tones.wood,
+      tones,
       1.1,
     );
     face(
-      fW,
-      r,
-      PW,
+      lowWalls,
+      rand,
+      workshopProject,
       [
         [186, 0, 0],
-        [KX, 0, 0],
-        [KX, 0, 22],
+        [WORKSHOP_WIDTH, 0, 0],
+        [WORKSHOP_WIDTH, 0, 22],
         [186, 0, 22],
       ],
-      K.wood,
-      K,
+      tones.wood,
+      tones,
       1.1,
     );
-    [0, 118, 186, KX].forEach((x) => postV(fW, r, PW, x, 0, 0, 22, K, 5));
+    [0, 118, 186, WORKSHOP_WIDTH].forEach((x) =>
+      post(lowWalls, rand, workshopProject, x, 0, 0, 22, tones, 5),
+    );
     [
-      [0, KZ],
-      [KX, KZ],
-    ].forEach(([x, z]) => postV(fW, r, PW, x, z, 0, KH, K, 5));
-    plaque(fW, r, ...PW(152, -6, 14), 36, 14, "工房", "'Yuji Syuku', serif", 10, K);
-    groups.push(fW);
+      [0, WORKSHOP_DEPTH],
+      [WORKSHOP_WIDTH, WORKSHOP_DEPTH],
+    ].forEach(([x, z]) =>
+      post(lowWalls, rand, workshopProject, x, z, 0, WORKSHOP_HEIGHT, tones, 5),
+    );
+    plaque(
+      lowWalls,
+      rand,
+      ...workshopProject(152, -6, 14),
+      36,
+      14,
+      "工房",
+      "'Yuji Syuku', serif",
+      10,
+      tones,
+    );
+    groups.push(lowWalls);
   }
-  const bench = G();
-  dryingBench(bench, r, PW, 8, 104, -26, K, 0.3);
+  const bench = newGroup();
+  dryingBench(bench, rand, workshopProject, 8, 104, -26, tones, 0.3);
   groups.push(bench);
-  noborigama(groups, r, 870, 612, K, open);
-  const bb = [];
-  bambooClump(bb, rng(hash("bb")), 250, 404, K, 1, opt.cut);
-  groups.push({ cls: "roji-bamboo", groups: bb });
+  noborigama(groups, rand, 870, 612, tones, open);
+  const bamboo = [];
+  bambooClump(bamboo, rng(hash("bb")), 250, 404, tones, 1, opt.cut);
+  groups.push({ cls: "roji-bamboo", groups: bamboo });
 
   // waiting room
-  const PM = OB(36, 664),
-    MA = G({ cls: "roji-machiai" }),
-    MH = 178;
-  Wa(
-    MA,
-    r,
-    wpoly(
-      r,
-      quad(PM, [
+  const waitingProject = oblique(36, 664),
+    waitingRoom = newGroup({ cls: "roji-machiai" }),
+    waitingHeight = 178;
+  addWash(
+    waitingRoom,
+    rand,
+    wobblyPolygon(
+      rand,
+      projectAll(waitingProject, [
         [-10, -10, 0],
         [224, -10, 0],
         [224, 90, 0],
@@ -2232,92 +2841,99 @@ function sceneGarden16(K, stage, opt = {}) {
       ]),
       3,
     ),
-    K.pool,
+    tones.pool,
     0.6,
     "url(#bk-pool)",
   );
   face(
-    MA,
-    r,
-    PM,
+    waitingRoom,
+    rand,
+    waitingProject,
     [
       [0, 0, 0],
       [0, 80, 0],
-      [0, 80, MH],
-      [0, 0, MH],
+      [0, 80, waitingHeight],
+      [0, 0, waitingHeight],
     ],
-    K.plasterDk,
-    K,
+    tones.plasterDk,
+    tones,
   );
   face(
-    MA,
-    r,
-    PM,
+    waitingRoom,
+    rand,
+    waitingProject,
     [
       [0, 80, 0],
       [214, 80, 0],
-      [214, 80, MH],
-      [0, 80, MH],
+      [214, 80, waitingHeight],
+      [0, 80, waitingHeight],
     ],
-    K.plaster,
-    K,
+    tones.plaster,
+    tones,
   );
   face(
-    MA,
-    r,
-    PM,
+    waitingRoom,
+    rand,
+    waitingProject,
     [
       [0, 0, 0],
       [214, 0, 0],
       [214, 80, 0],
       [0, 80, 0],
     ],
-    K.earth,
-    K,
+    tones.earth,
+    tones,
     1,
     1.2,
   );
-  postV(MA, r, PM, 0, 0, 0, MH, K);
-  postV(MA, r, PM, 0, 80, 0, MH, K);
-  postV(MA, r, PM, 214, 80, 0, MH, K);
+  post(waitingRoom, rand, waitingProject, 0, 0, 0, waitingHeight, tones);
+  post(waitingRoom, rand, waitingProject, 0, 80, 0, waitingHeight, tones);
+  post(waitingRoom, rand, waitingProject, 214, 80, 0, waitingHeight, tones);
   face(
-    MA,
-    r,
-    PM,
+    waitingRoom,
+    rand,
+    waitingProject,
     [
-      [0, 80, MH],
-      [214, 80, MH],
-      [214, 84, MH],
-      [0, 84, MH],
+      [0, 80, waitingHeight],
+      [214, 80, waitingHeight],
+      [214, 84, waitingHeight],
+      [0, 84, waitingHeight],
     ],
-    K.wood,
-    K,
+    tones.wood,
+    tones,
     1,
   );
   face(
-    MA,
-    r,
-    PM,
+    waitingRoom,
+    rand,
+    waitingProject,
     [
       [156, 80, 66],
       [202, 80, 66],
       [202, 80, 116],
       [156, 80, 116],
     ],
-    K.glowSoft,
-    K,
+    tones.glowSoft,
+    tones,
     0.9,
   );
   for (let x = 162; x < 202; x += 8)
-    Ln(MA, wseg(r, PM(x, 80, 67), PM(x, 80, 115), 0.2, 1), K.bamboo, 1.2, 0.8, true);
-  groups.push(MA);
-  const shelf = G();
-  Wa(
+    addLine(
+      waitingRoom,
+      wobblySegment(rand, waitingProject(x, 80, 67), waitingProject(x, 80, 115), 0.2, 1),
+      tones.bamboo,
+      1.2,
+      0.8,
+      true,
+    );
+  groups.push(waitingRoom);
+  const shelf = newGroup();
+  addWash(
     shelf,
-    r,
-    wpoly(
-      r,
-      quad(PM, [
+    rand,
+    wobblyPolygon(
+      rand,
+      projectAll(waitingProject, [
         [14, 80, 24],
         [144, 80, 24],
         [144, 80, 168],
@@ -2325,230 +2941,244 @@ function sceneGarden16(K, stage, opt = {}) {
       ]),
       3,
     ),
-    K.glowSoft,
+    tones.glowSoft,
     0.45,
     "url(#bk-bleed)",
   );
   [36, 82, 128].forEach((y, row) => {
     face(
       shelf,
-      r,
-      PM,
+      rand,
+      waitingProject,
       [
         [16, 80, y],
         [142, 80, y],
         [142, 70, y],
         [16, 70, y],
       ],
-      K.woodLt,
-      K,
+      tones.woodLt,
+      tones,
       0.9,
     );
     for (let i = 0; i < 5; i++) {
-      const p = PM(28 + i * 26, 75, y);
+      const spot = waitingProject(28 + i * 26, 75, y);
       const spec = opt.shelf ? opt.shelf(row * 5 + i) : demoSpec("g" + row + i);
-      if (spec) piece(shelf, r, p[0], p[1] - 1, 0.24, K, spec);
+      if (spec) piece(shelf, rand, spot[0], spot[1] - 1, 0.24, tones, spec);
     }
   });
   groups.push(shelf);
-  const MB = G();
+  const waitingBench = newGroup();
   face(
-    MB,
-    r,
-    PM,
+    waitingBench,
+    rand,
+    waitingProject,
     [
       [10, 26, 0],
       [204, 26, 0],
       [204, 26, 18],
       [10, 26, 18],
     ],
-    K.woodDk,
-    K,
+    tones.woodDk,
+    tones,
     1.1,
   );
   face(
-    MB,
-    r,
-    PM,
+    waitingBench,
+    rand,
+    waitingProject,
     [
       [10, 26, 18],
       [204, 26, 18],
       [204, 56, 18],
       [10, 56, 18],
     ],
-    K.wood,
-    K,
+    tones.wood,
+    tones,
     1.1,
   );
-  groups.push(MB);
+  groups.push(waitingBench);
 
   // one stone, before the workshop door
   if (open) {
-    const fs = G();
-    stone(fs, r, 664, 506, 30, 11, K);
-    groups.push(fs);
+    const doorStone = newGroup();
+    stone(doorStone, rand, 664, 506, 30, 11, tones);
+    groups.push(doorStone);
   } else {
-    const st = [];
-    sekiStone(st, r, 640, 504, 1.15, K, false);
-    groups.push({ cls: "roji-stone", groups: st });
+    const seki = [];
+    sekiStone(seki, rand, 640, 504, 1.15, tones, false);
+    groups.push({ cls: "roji-stone", groups: seki });
   }
-  const clouds = G({ washO: 0.5 }),
-    grey = mix(K.inkSoft, K.paper, 0.55);
-  mist(clouds, r, 760, 1110, 128, 34, grey, 0.7, mix(grey, K.ink, 0.25));
+  const clouds = newGroup({ washO: 0.5 }),
+    grey = mix(tones.inkSoft, tones.paper, 0.55);
+  mist(clouds, rand, 760, 1110, 128, 34, grey, 0.7, mix(grey, tones.ink, 0.25));
   groups.push(clouds);
-  return { W, H, groups, clips };
+  return { W: width, H: height, groups, clips };
 }
 // workshop, step by step
-const note = (g, x, y, t, K, fs, o) =>
-  Tx(g, {
-    t,
-    tr: `translate(${f1(x)} ${f1(y)})`,
-    fs: fs || 15,
+const note = (group, x, y, text, tones, fontSize, opacity) =>
+  addText(group, {
+    t: text,
+    tr: `translate(${roundCoord(x)} ${roundCoord(y)})`,
+    fs: fontSize || 15,
     font: "Kalam, cursive",
-    fill: K.ink,
-    o: o ?? 0.65,
+    fill: tones.ink,
+    o: opacity ?? 0.65,
   });
-const kan = (g, x, y, t, K, fs) =>
-  Tx(g, {
-    t,
-    tr: `translate(${f1(x)} ${f1(y)})`,
-    fs: fs || 24,
+const kanji = (group, x, y, text, tones, fontSize) =>
+  addText(group, {
+    t: text,
+    tr: `translate(${roundCoord(x)} ${roundCoord(y)})`,
+    fs: fontSize || 24,
     font: "'Yuji Syuku', serif",
-    fill: K.ink,
+    fill: tones.ink,
     o: 0.85,
   });
-function frames(g, r, labels, K, H) {
-  const n = labels.length,
-    w = 1100 / n;
-  labels.forEach(([j, t], i) => {
-    kan(g, i * w + 26, 44, j, K);
-    note(g, i * w + 26 + 30 + t.length * 3.6, 44, t, K, 17, 0.75);
-    if (i) Ln(g, wseg(r, [i * w, 80], [i * w, H - 30], 0.6, 3), K.ink, 0.8, 0.18);
+function frames(group, rand, labels, tones, H) {
+  const count = labels.length,
+    width = 1100 / count;
+  labels.forEach(([glyph, caption], i) => {
+    kanji(group, i * width + 26, 44, glyph, tones);
+    note(group, i * width + 26 + 30 + caption.length * 3.6, 44, caption, tones, 17, 0.75);
+    if (i)
+      addLine(
+        group,
+        wobblySegment(rand, [i * width, 80], [i * width, H - 30], 0.6, 3),
+        tones.ink,
+        0.8,
+        0.18,
+      );
   });
-  return (i) => i * w + w / 2;
+  return (i) => i * width + width / 2;
 }
 // hotspot in the workshop
-function spot(g, r, x, y, j, t, K) {
-  Wa(g, r, wring(r, x, y, 40, 26, 3, 12), K.gold, 0.32, "url(#bk-bleed)");
-  inked(g, r, wring(r, x, y - 64, 15, 15, 0.4, 12), K.paper, K.ink, 1);
-  kan(g, x, y - 63, j, K, 16);
-  note(g, x, y - 38, t, K, 13, 0.7);
+function hotspot(group, rand, x, y, glyph, caption, tones) {
+  addWash(group, rand, wobblyRing(rand, x, y, 40, 26, 3, 12), tones.gold, 0.32, "url(#bk-bleed)");
+  inked(group, rand, wobblyRing(rand, x, y - 64, 15, 15, 0.4, 12), tones.paper, tones.ink, 1);
+  kanji(group, x, y - 63, glyph, tones, 16);
+  note(group, x, y - 38, caption, tones, 13, 0.7);
 }
 // inside the workshop, once the roof has lifted
-function sceneWorkshop(K) {
-  const r = rng(hash("tea/workshop")),
-    W = 1100,
-    H = 560,
+function sceneWorkshop(tones) {
+  const rand = rng(hash("tea/workshop")),
+    width = 1100,
+    height = 560,
     groups = [];
-  const P = ZP(40, 500, 2.55),
-    sc = 2.55;
-  const ui = G({ cls: "kobo-back" });
-  note(ui, 110, 34, "← back to the garden", K, 17, 0.75);
-  groups.push(ui);
-  const wall = workshopInside(groups, r, P, K, sc);
-  const door = G();
+  const project = obliqueScaled(40, 500, 2.55),
+    scale = 2.55;
+  const backLink = newGroup({ cls: "kobo-back" });
+  note(backLink, 110, 34, "← back to the garden", tones, 17, 0.75);
+  groups.push(backLink);
+  const wallCount = workshopInside(groups, rand, project, tones, scale);
+  const door = newGroup();
   face(
     door,
-    r,
-    P,
+    rand,
+    project,
     [
-      [160, KZ, 0],
-      [190, KZ, 0],
-      [190, KZ, 72],
-      [160, KZ, 72],
+      [160, WORKSHOP_DEPTH, 0],
+      [190, WORKSHOP_DEPTH, 0],
+      [190, WORKSHOP_DEPTH, 72],
+      [160, WORKSHOP_DEPTH, 72],
     ],
-    K.glowSoft,
-    K,
+    tones.glowSoft,
+    tones,
     1,
   );
-  const dp = P(175, KZ, 30);
-  Wa(door, r, wring(r, dp[0], dp[1], 30, 70, 3, 10), K.gold, 0.4, "url(#bk-bleed)");
-  groups.splice(wall, 0, door);
-  const front = G();
+  const doorAt = project(175, WORKSHOP_DEPTH, 30);
+  addWash(
+    door,
+    rand,
+    wobblyRing(rand, doorAt[0], doorAt[1], 30, 70, 3, 10),
+    tones.gold,
+    0.4,
+    "url(#bk-bleed)",
+  );
+  groups.splice(wallCount, 0, door);
+  const front = newGroup();
   face(
     front,
-    r,
-    P,
+    rand,
+    project,
     [
-      [KX, 0, 0],
-      [KX, KZ, 0],
-      [KX, KZ, 16],
-      [KX, 0, 16],
+      [WORKSHOP_WIDTH, 0, 0],
+      [WORKSHOP_WIDTH, WORKSHOP_DEPTH, 0],
+      [WORKSHOP_WIDTH, WORKSHOP_DEPTH, 16],
+      [WORKSHOP_WIDTH, 0, 16],
     ],
-    mix(K.wood, K.ink, 0.15),
-    K,
+    mix(tones.wood, tones.ink, 0.15),
+    tones,
     1.1,
   );
   face(
     front,
-    r,
-    P,
+    rand,
+    project,
     [
       [0, 0, 0],
-      [KX, 0, 0],
-      [KX, 0, 12],
+      [WORKSHOP_WIDTH, 0, 0],
+      [WORKSHOP_WIDTH, 0, 12],
       [0, 0, 12],
     ],
-    K.wood,
-    K,
+    tones.wood,
+    tones,
     1.1,
   );
-  [0, KX].forEach((x) => postV(front, r, P, x, 0, 0, 12, K, 9));
+  [0, WORKSHOP_WIDTH].forEach((x) => post(front, rand, project, x, 0, 0, 12, tones, 9));
   [
-    [0, KZ],
-    [KX, KZ],
-  ].forEach(([x, z]) => postV(front, r, P, x, z, 0, KH, K, 9));
+    [0, WORKSHOP_DEPTH],
+    [WORKSHOP_WIDTH, WORKSHOP_DEPTH],
+  ].forEach(([x, z]) => post(front, rand, project, x, z, 0, WORKSHOP_HEIGHT, tones, 9));
   groups.push(front);
 
   const spots = [
     ["wheel", 60, 40, 6, "轆", "the wheel"],
-    ["shelf", 84, KZ - 12, 72, "棚", "drying shelf"],
-    ["glaze", 236, KZ - 24, 14, "釉", "glazes"],
+    ["shelf", 84, WORKSHOP_DEPTH - 12, 72, "棚", "drying shelf"],
+    ["glaze", 236, WORKSHOP_DEPTH - 24, 14, "釉", "glazes"],
     ["brush", 196, 14, 14, "筆", "brush & seal"],
-    ["kiln", 175, KZ, 65, "窯", "out to the kiln"],
-  ].map(([id, x, z, y, j, t]) => {
-    const [px, py] = P(x, z, y),
-      tag = G({ cls: "kobo-" + id });
-    spot(tag, r, px, py, j, t, K);
-    groups.push(tag);
-    return { id, x: Math.round(px), y: Math.round(py) };
+    ["kiln", 175, WORKSHOP_DEPTH, 65, "窯", "out to the kiln"],
+  ].map(([id, x, z, y, glyph, caption]) => {
+    const [spotX, spotY] = project(x, z, y),
+      hotspotGroup = newGroup({ cls: "kobo-" + id });
+    hotspot(hotspotGroup, rand, spotX, spotY, glyph, caption, tones);
+    groups.push(hotspotGroup);
+    return { id, x: Math.round(spotX), y: Math.round(spotY) };
   });
-  return { W, H, groups, clips: [], spots };
+  return { W: width, H: height, groups, clips: [], spots };
 }
 // throwing
-function sceneWheel(K) {
-  const r = rng(hash("tea/wheel")),
-    W = 1100,
-    H = 470,
+function sceneWheel(tones) {
+  const rand = rng(hash("tea/wheel")),
+    width = 1100,
+    height = 470,
     groups = [],
     y = 330,
-    s = 1.25;
-  const lab = G(),
-    X = frames(
-      lab,
-      r,
+    scale = 1.25;
+  const labels = newGroup(),
+    centerOf = frames(
+      labels,
+      rand,
       [
         ["一", "centre"],
         ["二", "open"],
         ["三", "pull up"],
         ["四", "shape"],
       ],
-      K,
-      H,
+      tones,
+      height,
     );
-  groups.push(lab);
-  const f = [0, 1, 2, 3].map(() => G());
-  f.forEach((g, i) => {
-    wheel(g, r, X(i), y, s, K);
+  groups.push(labels);
+  const panels = [0, 1, 2, 3].map(() => newGroup());
+  panels.forEach((group, i) => {
+    wheel(group, rand, centerOf(i), y, scale, tones);
   });
   // wobbly lump
   wetClay(
-    f[0],
-    r,
-    X(0) + 3,
+    panels[0],
+    rand,
+    centerOf(0) + 3,
     y - 2,
-    s,
-    K,
+    scale,
+    tones,
     [
       [30, 0],
       [36, 0.35],
@@ -2557,36 +3187,36 @@ function sceneWheel(K) {
     ],
     40,
   );
-  fingertip(f[0], r, X(0) - 66, y - 34, K);
-  fingertip(f[0], r, X(0) + 66, y - 34, K);
+  fingertip(panels[0], rand, centerOf(0) - 66, y - 34, tones);
+  fingertip(panels[0], rand, centerOf(0) + 66, y - 34, tones);
   arrowLine(
-    f[0],
-    r,
+    panels[0],
+    rand,
     [
-      [X(0) - 100, y - 34],
-      [X(0) - 80, y - 34],
+      [centerOf(0) - 100, y - 34],
+      [centerOf(0) - 80, y - 34],
     ],
-    K,
+    tones,
   );
   arrowLine(
-    f[0],
-    r,
+    panels[0],
+    rand,
     [
-      [X(0) + 100, y - 34],
-      [X(0) + 80, y - 34],
+      [centerOf(0) + 100, y - 34],
+      [centerOf(0) + 80, y - 34],
     ],
-    K,
+    tones,
   );
-  spin(f[0], r, X(0), y + 8, 74, 20, K);
-  note(f[0], X(0), y + 124, "hold both sides still while it spins", K);
+  spin(panels[0], rand, centerOf(0), y + 8, 74, 20, tones);
+  note(panels[0], centerOf(0), y + 124, "hold both sides still while it spins", tones);
   // press a thumb into the middle
   wetClay(
-    f[1],
-    r,
-    X(1),
+    panels[1],
+    rand,
+    centerOf(1),
     y - 2,
-    s,
-    K,
+    scale,
+    tones,
     [
       [30, 0],
       [33, 0.4],
@@ -2595,40 +3225,40 @@ function sceneWheel(K) {
     ],
     34,
   );
-  fingertip(f[1], r, X(1), y - 64, K);
+  fingertip(panels[1], rand, centerOf(1), y - 64, tones);
   arrowLine(
-    f[1],
-    r,
+    panels[1],
+    rand,
     [
-      [X(1), y - 120],
-      [X(1), y - 80],
+      [centerOf(1), y - 120],
+      [centerOf(1), y - 80],
     ],
-    K,
+    tones,
   );
-  spin(f[1], r, X(1), y + 8, 74, 20, K);
-  note(f[1], X(1), y + 124, "press down, not too deep", K);
+  spin(panels[1], rand, centerOf(1), y + 8, 74, 20, tones);
+  note(panels[1], centerOf(1), y + 124, "press down, not too deep", tones);
   // pull the wall up between two fingers
-  Ln(
-    f[2],
-    wline(
-      r,
+  addLine(
+    panels[2],
+    wobblyLine(
+      rand,
       [
-        [X(2) - 40, y - 2],
-        [X(2) - 42, y - 42],
+        [centerOf(2) - 40, y - 2],
+        [centerOf(2) - 42, y - 42],
       ],
       0.4,
     ),
-    K.ink,
+    tones.ink,
     1,
     0.25,
   );
   wetClay(
-    f[2],
-    r,
-    X(2),
+    panels[2],
+    rand,
+    centerOf(2),
     y - 2,
-    s,
-    K,
+    scale,
+    tones,
     [
       [26, 0],
       [27, 0.4],
@@ -2637,53 +3267,60 @@ function sceneWheel(K) {
     ],
     70,
   );
-  fingertip(f[2], r, X(2) + 38, y - 70, K);
+  fingertip(panels[2], rand, centerOf(2) + 38, y - 70, tones);
   arrowLine(
-    f[2],
-    r,
+    panels[2],
+    rand,
     [
-      [X(2) + 60, y - 30],
-      [X(2) + 60, y - 110],
+      [centerOf(2) + 60, y - 30],
+      [centerOf(2) + 60, y - 110],
     ],
-    K,
+    tones,
   );
-  spin(f[2], r, X(2), y + 8, 74, 20, K);
-  note(f[2], X(2), y + 124, "drag upward along the wall", K);
+  spin(panels[2], rand, centerOf(2), y + 8, 74, 20, tones);
+  note(panels[2], centerOf(2), y + 124, "drag upward along the wall", tones);
   // drag the profile out or in; dots show where your finger can catch it
-  const prof = [
+  const profile = [
     [24, 0],
     [38, 0.25],
     [50, 0.65],
     [54, 1],
   ];
-  wetClay(f[3], r, X(3), y - 2, s, K, prof, 46);
-  const H3 = 46 * s,
-    top3 = y - 2 - H3;
-  prof.forEach(([rr, v]) => {
-    const p = [X(3) + rr * s, top3 + (1 - v) * H3];
-    inked(f[3], r, wring(r, p[0], p[1], 3.5, 3.5, 0.2, 8), K.paper, K.ink, 1);
+  wetClay(panels[3], rand, centerOf(3), y - 2, scale, tones, profile, 46);
+  const lumpHeight = 46 * scale,
+    lumpTop = y - 2 - lumpHeight;
+  profile.forEach(([radius, level]) => {
+    const dot = [centerOf(3) + radius * scale, lumpTop + (1 - level) * lumpHeight];
+    inked(
+      panels[3],
+      rand,
+      wobblyRing(rand, dot[0], dot[1], 3.5, 3.5, 0.2, 8),
+      tones.paper,
+      tones.ink,
+      1,
+    );
   });
-  fingertip(f[3], r, X(3) + 50 * s + 10, top3 + 0.35 * H3, K);
+  fingertip(panels[3], rand, centerOf(3) + 50 * scale + 10, lumpTop + 0.35 * lumpHeight, tones);
   arrowLine(
-    f[3],
-    r,
+    panels[3],
+    rand,
     [
-      [X(3) + 40, top3 + 20],
-      [X(3) + 92, top3 + 6],
+      [centerOf(3) + 40, lumpTop + 20],
+      [centerOf(3) + 92, lumpTop + 6],
     ],
-    K,
+    tones,
   );
-  spin(f[3], r, X(3), y + 8, 74, 20, K);
-  note(f[3], X(3), y + 124, "pull out for a bowl, in for a cup", K);
-  f.forEach((g) => groups.push(g));
-  return { W, H, groups, clips: [] };
+  spin(panels[3], rand, centerOf(3), y + 8, 74, 20, tones);
+  note(panels[3], centerOf(3), y + 124, "pull out for a bowl, in for a cup", tones);
+  panels.forEach((group) => groups.push(group));
+  return { W: width, H: height, groups, clips: [] };
 }
 // what the same lump can become
-function sceneShapes(K) {
-  const r = rng(hash("tea/shapes")),
-    W = 1100,
-    H = 420,
-    g = G(),
+function sceneShapes(tones) {
+  const rand = rng(hash("tea/shapes")),
+    width = 1100,
+    height = 420,
+    group = newGroup(),
     y = 300;
   [
     ["plate", "press down and out", 0.95],
@@ -2691,124 +3328,167 @@ function sceneShapes(K) {
     ["bowl", "a tea bowl", 1.4],
     ["yunomi", "a tall cup", 1.5],
     ["cup", "a cup, with a handle", 1.5],
-  ].forEach(([k, t, s], i) => {
+  ].forEach(([kind, caption, scale], i) => {
     const x = 110 + i * 220;
-    wetClay(g, r, x, y, s, K, PROF[k].prof, PROF[k].H);
-    note(g, x, y + 80, t, K);
+    wetClay(group, rand, x, y, scale, tones, PROFILES[kind].prof, PROFILES[kind].H);
+    note(group, x, y + 80, caption, tones);
   });
   // handle
-  const hx = 990,
-    hy = 150;
-  Br(
-    g,
-    r,
+  const handleX = 990,
+    handleY = 150;
+  brushStroke(
+    group,
+    rand,
     [
-      [hx - 60, hy - 60],
-      [hx - 40, hy - 40],
-      [hx - 30, hy - 12],
+      [handleX - 60, handleY - 60],
+      [handleX - 40, handleY - 40],
+      [handleX - 30, handleY - 12],
     ],
     7,
-    CLAYS(K)[0],
+    CLAYS(tones)[0],
     1,
     { blunt: true, tip: 0.6 },
   );
-  Ln(
-    g,
-    wline(
-      r,
+  addLine(
+    group,
+    wobblyLine(
+      rand,
       [
-        [hx - 60, hy - 60],
-        [hx - 40, hy - 40],
-        [hx - 30, hy - 12],
+        [handleX - 60, handleY - 60],
+        [handleX - 40, handleY - 40],
+        [handleX - 30, handleY - 12],
       ],
       0.3,
     ),
-    K.ink,
+    tones.ink,
     0.8,
     0.6,
   );
-  fingertip(g, r, hx - 66, hy - 66, K);
+  fingertip(group, rand, handleX - 66, handleY - 66, tones);
   arrowLine(
-    g,
-    r,
+    group,
+    rand,
     [
-      [hx - 20, hy - 10],
-      [hx - 8, y - 70],
+      [handleX - 20, handleY - 10],
+      [handleX - 8, y - 70],
     ],
-    K,
+    tones,
     0.45,
   );
-  note(g, hx - 40, hy - 92, "pull a handle", K, 13);
-  return { W, H, groups: [g], clips: [] };
+  note(group, handleX - 40, handleY - 92, "pull a handle", tones, 13);
+  return { W: width, H: height, groups: [group], clips: [] };
 }
 // inside one chamber of the kiln
-function chamber(g, r, cx, cy, w, h, K, heat) {
-  const fl = [mix(K.red, K.ink, 0.2), mix(K.red, K.gold, 0.4), K.gold, mix(K.gold, K.paper, 0.6)][
-    heat
-  ];
+function chamber(group, rand, cx, cy, width, height, tones, heat) {
+  const flame = [
+    mix(tones.red, tones.ink, 0.2),
+    mix(tones.red, tones.gold, 0.4),
+    tones.gold,
+    mix(tones.gold, tones.paper, 0.6),
+  ][heat];
   const arch = Array.from({ length: 17 }, (_, i) => {
-    const a = Math.PI * (i / 16);
-    return [cx - (Math.cos(a) * w) / 2, cy - Math.sin(a) * h];
+    const angle = Math.PI * (i / 16);
+    return [cx - (Math.cos(angle) * width) / 2, cy - Math.sin(angle) * height];
   });
-  So(
-    g,
-    wpoly(r, [...arch, [cx + w / 2 + 14, cy + 12], [cx - w / 2 - 14, cy + 12]], 0.5),
-    mix(K.earth, K.kura, 0.35),
+  addSolid(
+    group,
+    wobblyPolygon(
+      rand,
+      [...arch, [cx + width / 2 + 14, cy + 12], [cx - width / 2 - 14, cy + 12]],
+      0.5,
+    ),
+    mix(tones.earth, tones.kura, 0.35),
     1,
   );
-  So(g, wpoly(r, arch, 0.4), mix(K.deep, fl, 0.35), 1);
-  Wa(g, r, wring(r, cx, cy - h * 0.35, w * 0.45, h * 0.6, 3, 12), fl, 0.75, "url(#bk-bleed)");
-  Ln(g, wline(r, arch, 0.4), K.ink, 1.4, 0.95);
-  for (let k = 1; k < 4; k++)
-    Ln(
-      g,
-      wline(
-        r,
+  addSolid(group, wobblyPolygon(rand, arch, 0.4), mix(tones.deep, flame, 0.35), 1);
+  addWash(
+    group,
+    rand,
+    wobblyRing(rand, cx, cy - height * 0.35, width * 0.45, height * 0.6, 3, 12),
+    flame,
+    0.75,
+    "url(#bk-bleed)",
+  );
+  addLine(group, wobblyLine(rand, arch, 0.4), tones.ink, 1.4, 0.95);
+  for (let ring = 1; ring < 4; ring++)
+    addLine(
+      group,
+      wobblyLine(
+        rand,
         arch
-          .map(([x, y]) => [cx + (x - cx) * (1 + k * 0.07), cy + (y - cy) * (1 + k * 0.08)])
+          .map(([x, y]) => [cx + (x - cx) * (1 + ring * 0.07), cy + (y - cy) * (1 + ring * 0.08)])
           .slice(1, 16),
         0.3,
       ),
-      K.ink,
+      tones.ink,
       0.6,
       0.4,
     );
-  Ln(g, wseg(r, [cx - w / 2, cy], [cx + w / 2, cy], 0.4, 2), K.ink, 1.2, 0.9);
-  [cy - h * 0.48].forEach((sy) => {
+  addLine(
+    group,
+    wobblySegment(rand, [cx - width / 2, cy], [cx + width / 2, cy], 0.4, 2),
+    tones.ink,
+    1.2,
+    0.9,
+  );
+  [cy - height * 0.48].forEach((shelfY) => {
     inked(
-      g,
-      r,
-      wbox(r, cx - w * 0.4, sy, cx + w * 0.4, sy + 5, 0.3),
-      mix(K.earth, K.paper, 0.2),
-      K.ink,
+      group,
+      rand,
+      wobblyBox(rand, cx - width * 0.4, shelfY, cx + width * 0.4, shelfY + 5, 0.3),
+      mix(tones.earth, tones.paper, 0.2),
+      tones.ink,
       0.9,
     );
-    [cx - w * 0.3, cx + w * 0.3].forEach((x) =>
-      Ln(g, wseg(r, [x, sy + 5], [x, cy], 0.3, 2), K.ink, 3, 0.6, true),
+    [cx - width * 0.3, cx + width * 0.3].forEach((x) =>
+      addLine(
+        group,
+        wobblySegment(rand, [x, shelfY + 5], [x, cy], 0.3, 2),
+        tones.ink,
+        3,
+        0.6,
+        true,
+      ),
     );
   });
 }
-function heatBar(g, r, x, y, w, K, at, lo, hi) {
-  const cs = [mix(K.red, K.ink, 0.2), mix(K.red, K.gold, 0.4), K.gold, mix(K.gold, K.paper, 0.6)];
-  cs.forEach((c, i) =>
-    So(g, wbox(r, x + (i * w) / 4, y, x + ((i + 1) * w) / 4, y + 10, 0.2), c, 0.85),
+function heatBar(group, rand, x, y, width, tones, current, bandFrom, bandTo) {
+  const colors = [
+    mix(tones.red, tones.ink, 0.2),
+    mix(tones.red, tones.gold, 0.4),
+    tones.gold,
+    mix(tones.gold, tones.paper, 0.6),
+  ];
+  colors.forEach((color, i) =>
+    addSolid(
+      group,
+      wobblyBox(rand, x + (i * width) / 4, y, x + ((i + 1) * width) / 4, y + 10, 0.2),
+      color,
+      0.85,
+    ),
   );
-  Ln(g, wbox(r, x, y, x + w, y + 10, 0.3), K.ink, 1, 0.8);
-  Ln(g, wbox(r, x + lo * w, y - 4, x + hi * w, y + 14, 0.3), K.ink, 1.4, 0.9);
-  Ln(
-    g,
-    `M${f1(x + at * w)} ${f1(y - 10)} L${f1(x + at * w - 5)} ${f1(y - 18)} L${f1(x + at * w + 5)} ${f1(y - 18)} Z`,
-    K.ink,
+  addLine(group, wobblyBox(rand, x, y, x + width, y + 10, 0.3), tones.ink, 1, 0.8);
+  addLine(
+    group,
+    wobblyBox(rand, x + bandFrom * width, y - 4, x + bandTo * width, y + 14, 0.3),
+    tones.ink,
+    1.4,
+    0.9,
+  );
+  addLine(
+    group,
+    `M${roundCoord(x + current * width)} ${roundCoord(y - 10)} L${roundCoord(x + current * width - 5)} ${roundCoord(y - 18)} L${roundCoord(x + current * width + 5)} ${roundCoord(y - 18)} Z`,
+    tones.ink,
     1.2,
     0.9,
   );
 }
 // tongs holding a piece upside down by its foot
-function tongs(g, r, x, y, K) {
-  Ln(
-    g,
-    wline(
-      r,
+function tongs(group, rand, x, y, tones) {
+  addLine(
+    group,
+    wobblyLine(
+      rand,
       [
         [x - 6, y - 8],
         [x - 18, y - 70],
@@ -2816,15 +3496,15 @@ function tongs(g, r, x, y, K) {
       ],
       0.3,
     ),
-    K.iron,
+    tones.iron,
     3,
     0.95,
     true,
   );
-  Ln(
-    g,
-    wline(
-      r,
+  addLine(
+    group,
+    wobblyLine(
+      rand,
       [
         [x + 6, y - 8],
         [x + 18, y - 70],
@@ -2832,79 +3512,106 @@ function tongs(g, r, x, y, K) {
       ],
       0.3,
     ),
-    K.iron,
+    tones.iron,
     3,
     0.95,
     true,
   );
 }
-function sceneKiln(K) {
-  const r = rng(hash("tea/kiln")),
-    W = 1100,
-    H = 460,
+function sceneKiln(tones) {
+  const rand = rng(hash("tea/kiln")),
+    width = 1100,
+    height = 460,
     groups = [],
     y = 330;
-  const lab = G(),
-    X = frames(
-      lab,
-      r,
+  const labels = newGroup(),
+    centerOf = frames(
+      labels,
+      rand,
       [
         ["一", "first firing"],
         ["二", "dip"],
         ["三", "drip"],
         ["四", "glaze firing"],
       ],
-      K,
-      H,
+      tones,
+      height,
     );
-  groups.push(lab);
-  const sp = Object.assign({ clay: 0, fire: 21 }, PROF.bowl);
+  groups.push(labels);
+  const spec = Object.assign({ clay: 0, fire: 21 }, PROFILES.bowl);
   // bisque
-  const a = G();
-  chamber(a, r, X(0), y, 190, 150, K, 2);
-  piece(a, r, X(0) - 34, y - 78, 0.5, K, Object.assign({}, sp, { glaze: { none: true } }));
+  const bisque = newGroup();
+  chamber(bisque, rand, centerOf(0), y, 190, 150, tones, 2);
   piece(
-    a,
-    r,
-    X(0) + 34,
+    bisque,
+    rand,
+    centerOf(0) - 34,
     y - 78,
     0.5,
-    K,
-    Object.assign({ clay: 3, glaze: { none: true }, fire: 2 }, PROF.cup),
+    tones,
+    Object.assign({}, spec, { glaze: { none: true } }),
   );
-  piece(a, r, X(0), y - 2, 0.62, K, Object.assign({}, sp, { glaze: { none: true }, clay: 1 }));
-  heatBar(a, r, X(0) - 90, y + 50, 180, K, 0.64, 0.5, 0.75);
-  note(a, X(0), y + 92, "tap to stoke · keep it in the band", K);
-  groups.push(a);
-  // dip it upside down
-  const b = G();
-  bucket(b, r, X(1), y + 30, 2.4, K, GLAZES(K)[3]);
-  const flip = G({ tf: "rotate(180deg)", to: `${f1(X(1))}px ${f1(y - 54)}px` });
-  piece(flip, r, X(1), y - 54, 0.85, K, Object.assign({}, sp, { glaze: { c: 3, dip: 0.55 } }));
-  groups.push(b, flip);
-  const b2 = G();
-  tongs(b2, r, X(1), y - 112, K);
-  arrowLine(
-    b2,
-    r,
-    [
-      [X(1) + 86, y - 120],
-      [X(1) + 86, y - 64],
-    ],
-    K,
-  );
-  note(b2, X(1), y + 92, "drag down · let go to lift", K);
-  groups.push(b2);
-  // hold it tilted and the glaze runs in drips
-  const c = G();
   piece(
-    c,
-    r,
-    X(2),
+    bisque,
+    rand,
+    centerOf(0) + 34,
+    y - 78,
+    0.5,
+    tones,
+    Object.assign({ clay: 3, glaze: { none: true }, fire: 2 }, PROFILES.cup),
+  );
+  piece(
+    bisque,
+    rand,
+    centerOf(0),
+    y - 2,
+    0.62,
+    tones,
+    Object.assign({}, spec, { glaze: { none: true }, clay: 1 }),
+  );
+  heatBar(bisque, rand, centerOf(0) - 90, y + 50, 180, tones, 0.64, 0.5, 0.75);
+  note(bisque, centerOf(0), y + 92, "tap to stoke · keep it in the band", tones);
+  groups.push(bisque);
+  // dip it upside down
+  const dip = newGroup();
+  bucket(dip, rand, centerOf(1), y + 30, 2.4, tones, GLAZES(tones)[3]);
+  const flip = newGroup({
+    tf: "rotate(180deg)",
+    to: `${roundCoord(centerOf(1))}px ${roundCoord(y - 54)}px`,
+  });
+  piece(
+    flip,
+    rand,
+    centerOf(1),
+    y - 54,
+    0.85,
+    tones,
+    Object.assign({}, spec, { glaze: { c: 3, dip: 0.55 } }),
+  );
+  groups.push(dip, flip);
+  const tongsGroup = newGroup();
+  tongs(tongsGroup, rand, centerOf(1), y - 112, tones);
+  arrowLine(
+    tongsGroup,
+    rand,
+    [
+      [centerOf(1) + 86, y - 120],
+      [centerOf(1) + 86, y - 64],
+    ],
+    tones,
+  );
+  note(tongsGroup, centerOf(1), y + 92, "drag down · let go to lift", tones);
+  groups.push(tongsGroup);
+  // hold it tilted and the glaze runs in drips
+  const tilted = newGroup();
+  piece(
+    tilted,
+    rand,
+    centerOf(2),
     y,
     1.25,
-    K,
-    Object.assign({}, sp, {
+    tones,
+    Object.assign({}, spec, {
       glaze: {
         c: 2,
         dip: 0.42,
@@ -2916,35 +3623,35 @@ function sceneKiln(K) {
       },
     }),
   );
-  fingertip(c, r, X(2) + 30, y - 120, K);
+  fingertip(tilted, rand, centerOf(2) + 30, y - 120, tones);
   arrowLine(
-    c,
-    r,
+    tilted,
+    rand,
     [
-      [X(2) + 30, y - 100],
-      [X(2) + 30, y - 66],
+      [centerOf(2) + 30, y - 100],
+      [centerOf(2) + 30, y - 66],
     ],
-    K,
+    tones,
   );
-  note(c, X(2), y + 92, "hold where you want it to run", K);
-  groups.push(c);
+  note(tilted, centerOf(2), y + 92, "hold where you want it to run", tones);
+  groups.push(tilted);
   // same glaze, three firings
-  const d = G();
+  const firings = newGroup();
   [
     [-70, 31],
     [0, 32],
     [70, 33],
-  ].forEach(([dx, f], i) =>
+  ].forEach(([offsetX, fire], i) =>
     piece(
-      d,
-      r,
-      X(3) + dx,
+      firings,
+      rand,
+      centerOf(3) + offsetX,
       y - (i === 1 ? 26 : 0),
       0.55,
-      K,
-      Object.assign({}, sp, {
-        fire: f,
-        glaze: { c: 0, dip: 0.6, drips: [[J(rng(f), 0.6), 0.2, 0.08]] },
+      tones,
+      Object.assign({}, spec, {
+        fire: fire,
+        glaze: { c: 0, dip: 0.6, drips: [[jitter(rng(fire), 0.6), 0.2, 0.08]] },
         kin:
           i === 2
             ? [
@@ -2956,51 +3663,70 @@ function sceneKiln(K) {
       }),
     ),
   );
-  note(d, X(3), y + 72, "the kiln decides the rest", K);
-  note(d, X(3), y + 92, "a crack is mended in gold", K, 13, 0.55);
-  groups.push(d);
-  return { W, H, groups, clips: [] };
+  note(firings, centerOf(3), y + 72, "the kiln decides the rest", tones);
+  note(firings, centerOf(3), y + 92, "a crack is mended in gold", tones, 13, 0.55);
+  groups.push(firings);
+  return { W: width, H: height, groups, clips: [] };
 }
 // glaze shelf
-function sceneGlazes(K) {
-  const r = rng(hash("tea/glazes")),
-    W = 1100,
-    H = 300,
-    g = G();
-  GLAZES(K).forEach((c, i) => {
+function sceneGlazes(tones) {
+  const rand = rng(hash("tea/glazes")),
+    width = 1100,
+    height = 300,
+    group = newGroup();
+  GLAZES(tones).forEach((color, i) => {
     const x = 110 + i * 147;
-    bucket(g, r, x, 170, 1.7, K, c);
-    note(g, x, 222, GLAZE_NAMES[i], K, 16, 0.75);
+    bucket(group, rand, x, 170, 1.7, tones, color);
+    note(group, x, 222, GLAZE_NAMES[i], tones, 16, 0.75);
   });
-  ["天目", "志野", "飴", "青磁", "瑠璃", "織部", "朱"].forEach((j, i) =>
-    kan(g, 110 + i * 147, 250, j, K, 15),
+  ["天目", "志野", "飴", "青磁", "瑠璃", "織部", "朱"].forEach((glyph, i) =>
+    kanji(group, 110 + i * 147, 250, glyph, tones, 15),
   );
-  return { W, H, groups: [g], clips: [] };
+  return { W: width, H: height, groups: [group], clips: [] };
 }
 // painting on the banding wheel
-function scenePaint(K) {
-  const r = rng(hash("tea/paint")),
-    W = 1100,
-    H = 620,
+function scenePaint(tones) {
+  const rand = rng(hash("tea/paint")),
+    width = 1100,
+    height = 620,
     groups = [],
-    g = G();
-  const bx = 380,
-    by = 470;
+    group = newGroup();
+  const wheelX = 380,
+    wheelY = 470;
   // banding wheel
-  So(g, wring(r, bx + 6, by + 38, 150, 22, 0.5, 14), K.ink, 0.14);
-  inked(g, r, wbox(r, bx - 24, by + 8, bx + 24, by + 34, 0.4), K.iron, K.ink, 1);
-  So(g, wbox(r, bx - 130, by, bx + 130, by + 8, 0.4), mix(K.iron, K.ink, 0.25), 1);
-  inked(g, r, wring(r, bx, by, 130, 26, 0.4, 18), mix(K.iron, K.paper, 0.2), K.ink, 1.2);
-  spin(g, r, bx, by + 6, 150, 34, K);
-  groups.push(g);
-  const bw = G();
+  addSolid(group, wobblyRing(rand, wheelX + 6, wheelY + 38, 150, 22, 0.5, 14), tones.ink, 0.14);
+  inked(
+    group,
+    rand,
+    wobblyBox(rand, wheelX - 24, wheelY + 8, wheelX + 24, wheelY + 34, 0.4),
+    tones.iron,
+    tones.ink,
+    1,
+  );
+  addSolid(
+    group,
+    wobblyBox(rand, wheelX - 130, wheelY, wheelX + 130, wheelY + 8, 0.4),
+    mix(tones.iron, tones.ink, 0.25),
+    1,
+  );
+  inked(
+    group,
+    rand,
+    wobblyRing(rand, wheelX, wheelY, 130, 26, 0.4, 18),
+    mix(tones.iron, tones.paper, 0.2),
+    tones.ink,
+    1.2,
+  );
+  spin(group, rand, wheelX, wheelY + 6, 150, 34, tones);
+  groups.push(group);
+  const bowl = newGroup();
   piece(
-    bw,
-    r,
-    bx,
-    by - 12,
+    bowl,
+    rand,
+    wheelX,
+    wheelY - 12,
     3.4,
-    K,
+    tones,
     Object.assign(
       {
         clay: 3,
@@ -3038,121 +3764,141 @@ function scenePaint(K) {
           },
         ],
       },
-      PROF.bowl,
+      PROFILES.bowl,
     ),
   );
-  groups.push(bw);
-  const br = G();
-  brushTool(br, r, bx + 134, by - 128, -0.95, 150, K, PAINTS(K)[0]);
-  note(br, bx + 160, by - 270, "slow is thick, fast is thin", K);
-  groups.push(br);
+  groups.push(bowl);
+  const brush = newGroup();
+  brushTool(brush, rand, wheelX + 134, wheelY - 128, -0.95, 150, tones, PAINTS(tones)[0]);
+  note(brush, wheelX + 160, wheelY - 270, "slow is thick, fast is thin", tones);
+  groups.push(brush);
   // palette: four dishes, each with its name
-  const pal = G(),
+  const palette = newGroup(),
     names = [
       ["呉須", "gosu blue"],
       ["鬼板", "iron brown"],
       ["弁柄", "bengara red"],
       ["白化粧", "white slip"],
     ];
-  PAINTS(K).forEach((c, i) => {
+  PAINTS(tones).forEach((color, i) => {
     const x = 760 + (i % 2) * 150,
       y = 120 + Math.floor(i / 2) * 130;
-    inked(pal, r, wring(r, x, y, 44, 14, 0.3, 14), K.paper, K.ink, 1.1);
-    So(pal, wring(r, x - 2, y + 1, 30, 8, 0.6, 12), c, 0.95);
-    kan(pal, x, y + 40, names[i][0], K, 15);
-    note(pal, x, y + 60, names[i][1], K, 13, 0.6);
+    inked(palette, rand, wobblyRing(rand, x, y, 44, 14, 0.3, 14), tones.paper, tones.ink, 1.1);
+    addSolid(palette, wobblyRing(rand, x - 2, y + 1, 30, 8, 0.6, 12), color, 0.95);
+    kanji(palette, x, y + 40, names[i][0], tones, 15);
+    note(palette, x, y + 60, names[i][1], tones, 13, 0.6);
   });
-  groups.push(pal);
+  groups.push(palette);
   // the seal for the foot, and name in hand
-  const sl = G(),
-    sx = 830,
-    sy = 450;
-  inked(sl, r, wbox(r, sx - 18, sy - 90, sx + 18, sy - 20, 0.4), K.woodLt, K.ink, 1.1);
-  So(sl, wbox(r, sx - 22, sy - 20, sx + 22, sy, 0.4), K.red, 0.9);
-  So(sl, wbox(r, sx + 60, sy - 34, sx + 104, sy + 10, 0.6), K.red, 0.88);
-  kan(sl, sx + 82, sy - 10, "空", K, 30);
-  Tx(sl, {
+  const seal = newGroup(),
+    sealX = 830,
+    sealY = 450;
+  inked(
+    seal,
+    rand,
+    wobblyBox(rand, sealX - 18, sealY - 90, sealX + 18, sealY - 20, 0.4),
+    tones.woodLt,
+    tones.ink,
+    1.1,
+  );
+  addSolid(seal, wobblyBox(rand, sealX - 22, sealY - 20, sealX + 22, sealY, 0.4), tones.red, 0.9);
+  addSolid(
+    seal,
+    wobblyBox(rand, sealX + 60, sealY - 34, sealX + 104, sealY + 10, 0.6),
+    tones.red,
+    0.88,
+  );
+  kanji(seal, sealX + 82, sealY - 10, "空", tones, 30);
+  addText(seal, {
     t: "空",
-    tr: `translate(${sx + 82} ${sy - 10})`,
+    tr: `translate(${sealX + 82} ${sealY - 10})`,
     fs: 30,
     font: "'Yuji Syuku', serif",
-    fill: K.paper,
+    fill: tones.paper,
   });
-  note(sl, sx + 40, sy + 46, "a seal from your name", K);
-  Tx(sl, {
+  note(seal, sealX + 40, sealY + 46, "a seal from your name", tones);
+  addText(seal, {
     t: "Sora",
-    tr: `translate(${sx + 40} ${sy + 96})`,
+    tr: `translate(${sealX + 40} ${sealY + 96})`,
     fs: 30,
     font: "Kalam, cursive",
-    fill: K.ink,
+    fill: tones.ink,
     o: 0.85,
   });
-  Ln(sl, wseg(r, [sx - 30, sy + 106], [sx + 110, sy + 106], 0.6, 3), K.ink, 0.8, 0.4);
-  note(sl, sx + 40, sy + 128, "and your name, written by hand", K, 13, 0.55);
-  groups.push(sl);
-  return { W, H, groups, clips: [] };
+  addLine(
+    seal,
+    wobblySegment(rand, [sealX - 30, sealY + 106], [sealX + 110, sealY + 106], 0.6, 3),
+    tones.ink,
+    0.8,
+    0.4,
+  );
+  note(seal, sealX + 40, sealY + 128, "and your name, written by hand", tones, 13, 0.55);
+  groups.push(seal);
+  return { W: width, H: height, groups, clips: [] };
 }
 
 // frame of short dashes, for what is not quite there yet
-function dashed(g, r, x0, y0, x1, y1, K) {
-  const side = (a, b) => {
-    const n = Math.max(2, Math.round(Math.hypot(b[0] - a[0], b[1] - a[1]) / 12));
-    for (let k = 0; k < n; k += 2) {
-      const t0 = k / n,
-        t1 = Math.min(1, (k + 1) / n);
-      const at = (t) => [
-        f1(a[0] + (b[0] - a[0]) * t + (r() - 0.5)),
-        f1(a[1] + (b[1] - a[1]) * t + (r() - 0.5)),
+function dashed(group, rand, x0, y0, x1, y1, tones) {
+  const edge = (from, to) => {
+    const dashes = Math.max(2, Math.round(Math.hypot(to[0] - from[0], to[1] - from[1]) / 12));
+    for (let dash = 0; dash < dashes; dash += 2) {
+      const dashFrom = dash / dashes,
+        dashTo = Math.min(1, (dash + 1) / dashes);
+      const pointAt = (along) => [
+        roundCoord(from[0] + (to[0] - from[0]) * along + (rand() - 0.5)),
+        roundCoord(from[1] + (to[1] - from[1]) * along + (rand() - 0.5)),
       ];
-      const [p, q] = [at(t0), at(t1)];
-      Ln(g, `M${p[0]} ${p[1]}L${q[0]} ${q[1]}`, K.ink, 1, 0.5, true);
+      const [start, end] = [pointAt(dashFrom), pointAt(dashTo)];
+      addLine(group, `M${start[0]} ${start[1]}L${end[0]} ${end[1]}`, tones.ink, 1, 0.5, true);
     }
   };
-  side([x0, y0], [x1, y0]);
-  side([x1, y0], [x1, y1]);
-  side([x1, y1], [x0, y1]);
-  side([x0, y1], [x0, y0]);
+  edge([x0, y0], [x1, y0]);
+  edge([x1, y0], [x1, y1]);
+  edge([x1, y1], [x0, y1]);
+  edge([x0, y1], [x0, y0]);
 }
 
 // shelf in the waiting room
-function sceneShelf(K, opt = {}) {
-  const r = rng(hash("tea/shelf")),
-    W = 1100,
-    H = 700,
+function sceneShelf(tones, opt = {}) {
+  const rand = rng(hash("tea/shelf")),
+    width = 1100,
+    height = 700,
     groups = [],
-    g = G(),
+    group = newGroup(),
     spots = [];
-  note(g, 110, 34, "← back to the garden", K, 17, 0.75);
-  inked(g, r, wbox(r, 40, 70, 1060, 680, 1), K.plaster, K.ink, 1.2);
-  for (let k = 0; k < 40; k++)
-    So(
-      g,
-      wring(r, 60 + r() * 980, 90 + r() * 570, 1 + r() * 2, 0.6 + r(), 0.3, 6),
-      K.plasterDk,
+  note(group, 110, 34, "← back to the garden", tones, 17, 0.75);
+  inked(group, rand, wobblyBox(rand, 40, 70, 1060, 680, 1), tones.plaster, tones.ink, 1.2);
+  for (let slot = 0; slot < 40; slot++)
+    addSolid(
+      group,
+      wobblyRing(rand, 60 + rand() * 980, 90 + rand() * 570, 1 + rand() * 2, 0.6 + rand(), 0.3, 6),
+      tones.plasterDk,
       0.3,
     );
-  inked(g, r, wbox(r, 900, 110, 1020, 290, 1), K.glowSoft, K.ink, 1);
+  inked(group, rand, wobblyBox(rand, 900, 110, 1020, 290, 1), tones.glowSoft, tones.ink, 1);
   for (let x = 914; x < 1020; x += 16)
-    Ln(g, wseg(r, [x, 112], [x, 288], 0.3, 2), K.bamboo, 2.4, 0.85, true);
-  groups.push(g);
+    addLine(group, wobblySegment(rand, [x, 112], [x, 288], 0.3, 2), tones.bamboo, 2.4, 0.85, true);
+  groups.push(group);
   const rows = [220, 410, 600];
-  const list =
+  const pieces =
     opt.pieces ||
     rows.flatMap((_, row) => [0, 1, 2, 3, 4, 5].map((i) => demoSpec("shelf" + row + i)));
-  const own = opt.pieces ? opt.own || [] : [Object.assign(demoSpec("Sora", "bowl"), { kin: null })];
+  const guestPieces = opt.pieces
+    ? opt.own || []
+    : [Object.assign(demoSpec("Sora", "bowl"), { kin: null })];
   // the newest of the guest's own sits apart by the window
-  const last = own.length ? own[own.length - 1] : null;
-  const all = [
-    ...list.map((spec) => ({ spec })),
-    ...own.slice(0, -1).map((spec) => ({ spec, own: true })),
+  const newest = guestPieces.length ? guestPieces[guestPieces.length - 1] : null;
+  const placed = [
+    ...pieces.map((spec) => ({ spec })),
+    ...guestPieces.slice(0, -1).map((spec) => ({ spec, own: true })),
   ].slice(-18);
   rows.forEach((y, row) => {
-    const sh = G();
+    const shelf = newGroup();
     inked(
-      sh,
-      r,
-      wpoly(
-        r,
+      shelf,
+      rand,
+      wobblyPolygon(
+        rand,
         [
           [70, y],
           [860, y],
@@ -3161,104 +3907,125 @@ function sceneShelf(K, opt = {}) {
         ],
         0.5,
       ),
-      K.woodLt,
-      K.ink,
+      tones.woodLt,
+      tones.ink,
       1.1,
     );
-    inked(sh, r, wbox(r, 70, y, 860, y + 9, 0.4), K.wood, K.ink, 1);
+    inked(shelf, rand, wobblyBox(rand, 70, y, 860, y + 9, 0.4), tones.wood, tones.ink, 1);
     [100, 830].forEach((x) =>
-      inked(sh, r, wbox(r, x - 6, y + 9, x + 6, y + 30, 0.3), K.woodDk, K.ink, 0.9),
+      inked(
+        shelf,
+        rand,
+        wobblyBox(rand, x - 6, y + 9, x + 6, y + 30, 0.3),
+        tones.woodDk,
+        tones.ink,
+        0.9,
+      ),
     );
-    groups.push(sh);
-    const ps = G();
+    groups.push(shelf);
+    const piecesGroup = newGroup();
     for (let i = 0; i < 6; i++) {
-      const k = row * 6 + i,
-        at = all[k];
-      if (!at) continue;
+      const slot = row * 6 + i,
+        entry = placed[slot];
+      if (!entry) continue;
       const x = 140 + i * 130,
-        spec = at.spec,
-        s = spec.H < 20 ? 0.62 : 0.75;
-      if (opt.sel === k)
-        Wa(ps, r, wring(r, x, y - 40, 70, 60, 3, 12), K.gold, 0.45, "url(#bk-bleed)");
-      if (at.own) {
-        dashed(ps, r, x - 60, y - 120, x + 60, y + 4, K);
-        kan(ps, x - 44, y - 104, "仮", K, 14);
+        spec = entry.spec,
+        scale = spec.H < 20 ? 0.62 : 0.75;
+      if (opt.sel === slot)
+        addWash(
+          piecesGroup,
+          rand,
+          wobblyRing(rand, x, y - 40, 70, 60, 3, 12),
+          tones.gold,
+          0.45,
+          "url(#bk-bleed)",
+        );
+      if (entry.own) {
+        dashed(piecesGroup, rand, x - 60, y - 120, x + 60, y + 4, tones);
+        kanji(piecesGroup, x - 44, y - 104, "仮", tones, 14);
       }
-      piece(ps, r, x, y - 14, s, K, spec);
-      spots.push({ i: k, x, y: y - 50, own: !!at.own });
+      piece(piecesGroup, rand, x, y - 14, scale, tones, spec);
+      spots.push({ i: slot, x, y: y - 50, own: !!entry.own });
     }
-    groups.push(ps);
+    groups.push(piecesGroup);
   });
 
-  if (!list.length && !own.length) note(g, 465, 400, "nothing on the shelf yet", K, 18, 0.5);
+  if (!pieces.length && !guestPieces.length)
+    note(group, 465, 400, "nothing on the shelf yet", tones, 18, 0.5);
 
   // author's own piece, waiting for me :)
-  if (last) {
-    const o = G(),
-      ox = 970,
-      oy = 600;
-    dashed(o, r, ox - 66, oy - 130, ox + 66, oy + 40, K);
-    piece(o, r, ox, oy - 14, last.H < 20 ? 0.62 : 0.75, K, last);
-    kan(o, ox - 46, oy - 110, "仮", K, 16);
-    note(o, ox, oy + 62, "yours · waiting for the host", K, 13, 0.6);
-    groups.push(o);
-    spots.push({ i: all.length, x: ox, y: oy - 50, own: true });
+  if (newest) {
+    const newestGroup = newGroup(),
+      newestX = 970,
+      newestY = 600;
+    dashed(newestGroup, rand, newestX - 66, newestY - 130, newestX + 66, newestY + 40, tones);
+    piece(newestGroup, rand, newestX, newestY - 14, newest.H < 20 ? 0.62 : 0.75, tones, newest);
+    kanji(newestGroup, newestX - 46, newestY - 110, "仮", tones, 16);
+    note(newestGroup, newestX, newestY + 62, "yours · waiting for the host", tones, 13, 0.6);
+    groups.push(newestGroup);
+    spots.push({ i: placed.length, x: newestX, y: newestY - 50, own: true });
   }
-  return { W, H, groups, clips: [], spots };
+  return { W: width, H: height, groups, clips: [], spots };
 }
 // one piece taken off the shelf
-function scenePieceCard(K) {
-  const r = rng(hash("tea/card")),
-    W = 1100,
-    H = 460,
-    g = G();
-  const spec = Object.assign(demoSpec("shelf13"), PROF.bowl);
+function scenePieceCard(tones) {
+  const rand = rng(hash("tea/card")),
+    width = 1100,
+    height = 460,
+    group = newGroup();
+  const spec = Object.assign(demoSpec("shelf13"), PROFILES.bowl);
   const views = [-0.6, 0, 0.6];
-  views.forEach((t, i) => {
-    const sp = Object.assign({}, spec, {
+  views.forEach((turn, i) => {
+    const turned = Object.assign({}, spec, {
       paint: (spec.paint || [])
-        .map((st) => ({
-          ...st,
-          pts: st.pts.map(([u, v]) => [u + t, v]).filter(([u]) => u > -1 && u < 1),
+        .map((stroke) => ({
+          ...stroke,
+          pts: stroke.pts.map(([u, v]) => [u + turn, v]).filter(([u]) => u > -1 && u < 1),
         }))
-        .filter((st) => st.pts.length > 1),
+        .filter((stroke) => stroke.pts.length > 1),
     });
-    piece(g, r, 170 + i * 230, 330, i === 1 ? 2.1 : 1.5, K, sp);
+    piece(group, rand, 170 + i * 230, 330, i === 1 ? 2.1 : 1.5, tones, turned);
   });
   arrowLine(
-    g,
-    r,
+    group,
+    rand,
     [
       [210, 410],
       [270, 420],
       [330, 410],
     ],
-    K,
+    tones,
     0.45,
   );
   arrowLine(
-    g,
-    r,
+    group,
+    rand,
     [
       [590, 410],
       [530, 420],
       [470, 410],
     ],
-    K,
+    tones,
     0.45,
   );
-  note(g, 400, 445, "drag to turn it in your hands", K, 13, 0.55);
-  inked(g, r, wbox(r, 780, 110, 1040, 380, 0.8), K.paper, K.ink, 1.1);
-  Tx(g, {
+  note(group, 400, 445, "drag to turn it in your hands", tones, 13, 0.55);
+  inked(group, rand, wobblyBox(rand, 780, 110, 1040, 380, 0.8), tones.paper, tones.ink, 1.1);
+  addText(group, {
     t: "Hana",
     tr: "translate(910 160)",
     fs: 30,
     font: "Kalam, cursive",
-    fill: K.ink,
+    fill: tones.ink,
     o: 0.85,
   });
-  So(g, wbox(r, 990, 128, 1022, 160, 0.4), K.red, 0.88);
-  Tx(g, { t: "花", tr: "translate(1006 145)", fs: 20, font: "'Yuji Syuku', serif", fill: K.paper });
+  addSolid(group, wobblyBox(rand, 990, 128, 1022, 160, 0.4), tones.red, 0.88);
+  addText(group, {
+    t: "花",
+    tr: "translate(1006 145)",
+    fs: 20,
+    font: "'Yuji Syuku', serif",
+    fill: tones.paper,
+  });
   [
     [
       `${spec.H < 20 ? "plate" : spec.handle ? "cup" : "bowl"} · ${["buff", "red", "dark", "white"][spec.clay]} clay`,
@@ -3267,8 +4034,8 @@ function scenePieceCard(K) {
     [`${GLAZE_NAMES[spec.glaze.c]} glaze, dipped`, 240],
     ["fired twice in the climbing kiln", 270],
     ["12 October 2026", 320],
-  ].forEach(([t, y]) => note(g, 910, y, t, K, 16, 0.7));
-  return { W, H, groups: [g], clips: [] };
+  ].forEach(([text, y]) => note(group, 910, y, text, tones, 16, 0.7));
+  return { W: width, H: height, groups: [group], clips: [] };
 }
 
 // the terrace the enso leads to
@@ -3285,242 +4052,415 @@ const SKY = [
   [21, "#22283a", "#3a3a52"],
   [24, "#1c2132", "#262c40"],
 ];
-const sstep = (a, b, x) => {
-  const t = Math.max(0, Math.min(1, (x - a) / (b - a)));
+const smoothstep = (edge0, edge1, x) => {
+  const t = Math.max(0, Math.min(1, (x - edge0) / (edge1 - edge0)));
   return t * t * (3 - 2 * t);
 };
-const hhmm = (h) => `${Math.floor(h)}:${String(Math.round((h % 1) * 60)).padStart(2, "0")}`;
-const STARL = "#f3eedf";
+const clockLabel = (hour) =>
+  `${Math.floor(hour)}:${String(Math.round((hour % 1) * 60)).padStart(2, "0")}`;
+const STARLIGHT = "#f3eedf";
 const SEASONS = {
   haru: { jp: "春", en: "spring", rise: 5.9, set: 19.3 },
   natsu: { jp: "夏", en: "summer", rise: 4.3, set: 21.0 },
   aki: { jp: "秋", en: "autumn", rise: 7.0, set: 18.0 },
   fuyu: { jp: "冬", en: "winter", rise: 7.7, set: 15.5 },
 };
-function solarH(h, S) {
-  if (!S) return h;
-  if (h < S.rise) return (h * 5.6) / S.rise;
-  if (h < S.set) return 5.6 + ((h - S.rise) * 14) / (S.set - S.rise);
-  return 19.6 + ((h - S.set) * 4.4) / (24 - S.set);
+function solarHour(hour, season) {
+  if (!season) return hour;
+  if (hour < season.rise) return (hour * 5.6) / season.rise;
+  if (hour < season.set) return 5.6 + ((hour - season.rise) * 14) / (season.set - season.rise);
+  return 19.6 + ((hour - season.set) * 4.4) / (24 - season.set);
 }
-function hourLight(K, real, sk, sun) {
-  real = ((real % 24) + 24) % 24;
-  const S = sun && SEASONS[sk] ? { ...SEASONS[sk], ...sun } : SEASONS[sk],
-    h = solarH(real, S);
+function hourLight(tones, hour, seasonKey, sunTimes) {
+  hour = ((hour % 24) + 24) % 24;
+  const season =
+      sunTimes && SEASONS[seasonKey] ? { ...SEASONS[seasonKey], ...sunTimes } : SEASONS[seasonKey],
+    solarTime = solarHour(hour, season);
   let i = 0;
-  while (i < SKY.length - 2 && SKY[i + 1][0] <= h) i++;
-  const [h0, a0, b0] = SKY[i],
-    [h1, a1, b1] = SKY[i + 1],
-    t = (h - h0) / (h1 - h0);
-  const top0 = mix(mix(a0, a1, t), K.paper, 0.15),
-    low0 = mix(mix(b0, b1, t), K.paper, 0.15);
-  const st = (h - 5.6) / (19.6 - 5.6),
-    up = st > 0 && st < 1,
-    alt = up ? Math.sin(Math.PI * st) : 0;
-  const night = h < 12 ? 1 - sstep(4.8, 6.6, h) : sstep(18.6, 20.8, h);
+  while (i < SKY.length - 2 && SKY[i + 1][0] <= solarTime) i++;
+  const [fromHour, fromTop, fromLow] = SKY[i],
+    [toHour, toTop, toLow] = SKY[i + 1],
+    blend = (solarTime - fromHour) / (toHour - fromHour);
+  const baseTop = mix(mix(fromTop, toTop, blend), tones.paper, 0.15),
+    baseLow = mix(mix(fromLow, toLow, blend), tones.paper, 0.15);
+  const dayProgress = (solarTime - 5.6) / (19.6 - 5.6),
+    sunUp = dayProgress > 0 && dayProgress < 1,
+    altitude = sunUp ? Math.sin(Math.PI * dayProgress) : 0;
+  const night =
+    solarTime < 12 ? 1 - smoothstep(4.8, 6.6, solarTime) : smoothstep(18.6, 20.8, solarTime);
   const gold = Math.min(
     1,
-    Math.max(0, 1 - Math.abs(h - 18.5) / 1.4) + 0.6 * Math.max(0, 1 - Math.abs(h - 6.4) / 1.1),
+    Math.max(0, 1 - Math.abs(solarTime - 18.5) / 1.4) +
+      0.6 * Math.max(0, 1 - Math.abs(solarTime - 6.4) / 1.1),
   );
-  const mt = ((((h - 18.5) % 24) + 24) % 24) / 12,
-    mUp = mt < 1;
-  const grey = sk === "fuyu" ? 0.22 : 0,
-    top = mix(top0, "#c4c8cf", grey),
-    low = mix(low0, "#d8d8d4", grey);
+  const moonProgress = ((((solarTime - 18.5) % 24) + 24) % 24) / 12,
+    moonUp = moonProgress < 1;
+  const overcast = seasonKey === "fuyu" ? 0.22 : 0,
+    top = mix(baseTop, "#c4c8cf", overcast),
+    low = mix(baseLow, "#d8d8d4", overcast);
   return {
-    h: real,
-    hc: h,
-    sk,
-    S,
+    h: hour,
+    hc: solarTime,
+    sk: seasonKey,
+    S: season,
     top,
     low,
-    st,
-    up,
-    alt,
+    st: dayProgress,
+    up: sunUp,
+    alt: altitude,
     night,
     gold,
-    mt,
-    mUp,
-    malt: mUp ? Math.sin(Math.PI * mt) : 0,
-    lamp: Math.max(night, h > 12 ? sstep(17.8, 19.2, h) : 0),
-    sunC: mix(mix("#f7e7b8", "#e0603a", gold), K.paper, 0.1),
-    far: mix(mix(K.mount, K.paper, 0.35), top, 0.45),
-    mid: mix(K.mount, low, 0.25),
-    cloud: mix(mix(mix(low, K.paper, 0.5), "#e9967a", 0.55 * gold), top, 0.5 * night),
+    mt: moonProgress,
+    mUp: moonUp,
+    malt: moonUp ? Math.sin(Math.PI * moonProgress) : 0,
+    lamp: Math.max(night, solarTime > 12 ? smoothstep(17.8, 19.2, solarTime) : 0),
+    sunC: mix(mix("#f7e7b8", "#e0603a", gold), tones.paper, 0.1),
+    far: mix(mix(tones.mount, tones.paper, 0.35), top, 0.45),
+    mid: mix(tones.mount, low, 0.25),
+    cloud: mix(mix(mix(low, tones.paper, 0.5), "#e9967a", 0.55 * gold), top, 0.5 * night),
   };
 }
-function skyWash(g, r, W, y1, L) {
-  for (let k = 0; k < 10; k++)
-    So(
-      g,
-      wbox(r, -20, (y1 * k) / 10 - 8, W + 20, (y1 * (k + 1)) / 10 + 8, 2),
-      mix(L.top, L.low, Math.pow(k / 9, 1.4)),
+function skyWash(group, rand, width, bottom, light) {
+  for (let band = 0; band < 10; band++)
+    addSolid(
+      group,
+      wobblyBox(rand, -20, (bottom * band) / 10 - 8, width + 20, (bottom * (band + 1)) / 10 + 8, 2),
+      mix(light.top, light.low, Math.pow(band / 9, 1.4)),
       1,
     );
 }
-const arcAt = (t, alt, x0, x1, yH, yTop) => [lerp(x0, x1, t), yH - alt * (yH - yTop)];
+const arcAt = (progress, altitude, x0, x1, horizonY, peakY) => [
+  lerp(x0, x1, progress),
+  horizonY - altitude * (horizonY - peakY),
+];
 
-function sunDisc(g, r, x, y, rad, L) {
-  Wa(
-    g,
-    r,
-    wring(r, x, y, rad * 2.8, rad * 2.8, 2, 12),
-    mix(L.sunC, L.low, 0.3),
+function sunDisc(group, rand, x, y, radius, light) {
+  addWash(
+    group,
+    rand,
+    wobblyRing(rand, x, y, radius * 2.8, radius * 2.8, 2, 12),
+    mix(light.sunC, light.low, 0.3),
     0.4,
     "url(#bk-pool)",
   );
-  So(g, wring(r, x, y, rad, rad, rad * 0.05, 14), L.sunC, 0.95, TREM);
+  addSolid(
+    group,
+    wobblyRing(rand, x, y, radius, radius, radius * 0.05, 14),
+    light.sunC,
+    0.95,
+    TREMBLE_FILTER,
+  );
 }
 
-function moonDisc(g, r, x, y, rad, bite, L, op) {
-  Wa(g, r, wring(r, x, y, rad * 2, rad * 2, 2, 12), STARL, 0.1 * op, "url(#bk-pool)");
-  So(g, wring(r, x, y, rad, rad, 0.6, 14), mix(STARL, "#f6e2a8", 0.25), op, TREM);
-  So(
-    g,
-    wring(r, x - rad * 0.3, y - rad * 0.15, rad * 0.28, rad * 0.22, 0.4, 8),
-    mix(STARL, L.top, 0.25),
-    0.45 * op,
+function moonDisc(group, rand, x, y, radius, bite, light, opacity) {
+  addWash(
+    group,
+    rand,
+    wobblyRing(rand, x, y, radius * 2, radius * 2, 2, 12),
+    STARLIGHT,
+    0.1 * opacity,
+    "url(#bk-pool)",
+  );
+  addSolid(
+    group,
+    wobblyRing(rand, x, y, radius, radius, 0.6, 14),
+    mix(STARLIGHT, "#f6e2a8", 0.25),
+    opacity,
+    TREMBLE_FILTER,
+  );
+  addSolid(
+    group,
+    wobblyRing(rand, x - radius * 0.3, y - radius * 0.15, radius * 0.28, radius * 0.22, 0.4, 8),
+    mix(STARLIGHT, light.top, 0.25),
+    0.45 * opacity,
   );
   if (bite)
-    So(
-      g,
-      wring(r, x + rad * bite, y - rad * 0.08, rad * 1.02, rad * 1.04, 0.4, 14),
-      L.top,
-      0.92 * op,
+    addSolid(
+      group,
+      wobblyRing(rand, x + radius * bite, y - radius * 0.08, radius * 1.02, radius * 1.04, 0.4, 14),
+      light.top,
+      0.92 * opacity,
     );
 }
-function stars(g, r, W, yH, n, op) {
-  for (let k = 0; k < n; k++) {
-    const s = 0.7 + r() * 1.3;
-    So(g, wring(r, r() * W, r() * yH, s, s, 0, 5), STARL, op * (0.35 + r() * 0.65));
+function stars(group, rand, width, horizonY, count, opacity) {
+  for (let k = 0; k < count; k++) {
+    const size = 0.7 + rand() * 1.3;
+    addSolid(
+      group,
+      wobblyRing(rand, rand() * width, rand() * horizonY, size, size, 0, 5),
+      STARLIGHT,
+      opacity * (0.35 + rand() * 0.65),
+    );
   }
 }
-function ridge(g, r, x0, x1, y, amp, fill, op, ink) {
-  const p1 = r() * 6,
-    p2 = r() * 6,
-    top = [];
+function ridge(group, rand, x0, x1, y, amplitude, fill, opacity, ink) {
+  const phase1 = rand() * 6,
+    phase2 = rand() * 6,
+    crest = [];
   for (let i = 0; i <= 16; i++) {
-    const t = i / 16;
-    top.push([
-      lerp(x0, x1, t),
-      y - amp * (0.55 + 0.3 * Math.sin(t * 5.3 + p1) + 0.2 * Math.sin(t * 11.7 + p2)),
+    const along = i / 16;
+    crest.push([
+      lerp(x0, x1, along),
+      y -
+        amplitude *
+          (0.55 + 0.3 * Math.sin(along * 5.3 + phase1) + 0.2 * Math.sin(along * 11.7 + phase2)),
     ]);
   }
-  const d = smooth(top, false) + ` L${f1(x1)} ${f1(y + 80)} L${f1(x0)} ${f1(y + 80)} Z`;
-  So(g, d, fill, (op ?? 0.9) * 0.8);
-  Wa(g, r, d, fill, op ?? 0.9, "url(#bk-bleed)");
-  if (ink) Ln(g, wline(r, top, 0.8), ink, 1, 0.45);
+  const outline =
+    smooth(crest, false) +
+    ` L${roundCoord(x1)} ${roundCoord(y + 80)} L${roundCoord(x0)} ${roundCoord(y + 80)} Z`;
+  addSolid(group, outline, fill, (opacity ?? 0.9) * 0.8);
+  addWash(group, rand, outline, fill, opacity ?? 0.9, "url(#bk-bleed)");
+  if (ink) addLine(group, wobblyLine(rand, crest, 0.8), ink, 1, 0.45);
 }
 
-function skyLayer(groups, K, L, key, W, yH, moonR) {
-  const g = G({ washO: 1 }),
-    r = rng(hash("terrace/sky/" + key));
-  groups.push(g);
-  skyWash(g, r, W, yH + 30, L);
-  if (L.night > 0.05) stars(g, rng(hash("stars/" + key)), W, yH * 0.85, 70, L.night);
-  const sp = arcAt(L.st, L.alt, -80, W + 80, yH + 10, 70);
-  if (L.up) sunDisc(g, r, sp[0], sp[1], 22 + 8 * (1 - L.alt), L);
-  const mp = arcAt(L.mt, L.malt, W + 60, -60, yH + 10, 90);
-  if (L.mUp) moonDisc(g, r, mp[0], mp[1], moonR || 17, 0.55, L, Math.max(0.25, L.night));
-  const rc = rng(hash("clouds/" + key));
+function skyLayer(groups, tones, light, key, width, horizonY, moonRadius) {
+  const group = newGroup({ washO: 1 }),
+    rand = rng(hash("terrace/sky/" + key));
+  groups.push(group);
+  skyWash(group, rand, width, horizonY + 30, light);
+  if (light.night > 0.05)
+    stars(group, rng(hash("stars/" + key)), width, horizonY * 0.85, 70, light.night);
+  const sunAt = arcAt(light.st, light.alt, -80, width + 80, horizonY + 10, 70);
+  if (light.up) sunDisc(group, rand, sunAt[0], sunAt[1], 22 + 8 * (1 - light.alt), light);
+  const moonAt = arcAt(light.mt, light.malt, width + 60, -60, horizonY + 10, 90);
+  if (light.mUp)
+    moonDisc(
+      group,
+      rand,
+      moonAt[0],
+      moonAt[1],
+      moonRadius || 17,
+      0.55,
+      light,
+      Math.max(0.25, light.night),
+    );
+  const cloudRand = rng(hash("clouds/" + key));
   [
     [0.08, 0.42, 120, 14],
     [0.55, 0.9, 175, 10],
     [0.3, 0.52, 60, 8],
-  ].forEach(([a, b, y, h]) => mist(g, rc, a * W, b * W, y, h, L.cloud, 0.75));
-  return { sp, mp };
+  ].forEach(([from, to, y, height]) =>
+    mist(group, cloudRand, from * width, to * width, y, height, light.cloud, 0.75),
+  );
+  return { sp: sunAt, mp: moonAt };
 }
-function veil(groups, W, H, L) {
-  const g = G({ washO: 1 }),
-    d = poly([
+function veil(groups, width, height, light) {
+  const group = newGroup({ washO: 1 }),
+    fullFrame = polygonPath([
       [0, 0],
-      [W, 0],
-      [W, H],
-      [0, H],
+      [width, 0],
+      [width, height],
+      [0, height],
     ]);
-  if (L.night > 0) So(g, d, "#141a2c", 0.5 * L.night);
-  if (L.gold > 0) So(g, d, "#e8904c", 0.12 * L.gold);
-  if (L.hc > 5 && L.hc < 9 && L.night < 0.5) So(g, d, "#9fb4d8", 0.07);
-  groups.push(g);
+  if (light.night > 0) addSolid(group, fullFrame, "#141a2c", 0.5 * light.night);
+  if (light.gold > 0) addSolid(group, fullFrame, "#e8904c", 0.12 * light.gold);
+  if (light.hc > 5 && light.hc < 9 && light.night < 0.5)
+    addSolid(group, fullFrame, "#9fb4d8", 0.07);
+  groups.push(group);
 }
 
-function ensoDial(groups, K, L, cx, cy, rad) {
-  const g = G(),
-    r = rng(hash("enso-dial")),
-    inkC = mix(K.ink, STARL, L.night);
-  groups.push(g);
-  const pts = [];
+function ensoDial(groups, tones, light, cx, cy, radius) {
+  const group = newGroup(),
+    rand = rng(hash("enso-dial")),
+    inkColor = mix(tones.ink, STARLIGHT, light.night);
+  groups.push(group);
+  const points = [];
   for (let i = 0; i <= 28; i++) {
-    const a = -Math.PI / 2 + 0.3 + (i / 28) * (Math.PI * 2 - 0.55);
-    pts.push([
-      cx + Math.cos(a) * rad * (1 + J(r, 0.025)),
-      cy + Math.sin(a) * rad * (1 + J(r, 0.025)),
+    const angle = -Math.PI / 2 + 0.3 + (i / 28) * (Math.PI * 2 - 0.55);
+    points.push([
+      cx + Math.cos(angle) * radius * (1 + jitter(rand, 0.025)),
+      cy + Math.sin(angle) * radius * (1 + jitter(rand, 0.025)),
     ]);
   }
-  Br(g, r, pts, rad * 0.17, inkC, 0.8, { head: 0.7, tailAt: 0.72, tip: 0.15 });
-  const a = -Math.PI / 2 + (L.h / 24) * Math.PI * 2;
+  brushStroke(group, rand, points, radius * 0.17, inkColor, 0.8, {
+    head: 0.7,
+    tailAt: 0.72,
+    tip: 0.15,
+  });
+  const handAngle = -Math.PI / 2 + (light.h / 24) * Math.PI * 2;
   inked(
-    g,
-    r,
-    wring(r, cx + Math.cos(a) * rad, cy + Math.sin(a) * rad, 6, 6, 0.5, 8),
-    K.red,
-    inkC,
+    group,
+    rand,
+    wobblyRing(
+      rand,
+      cx + Math.cos(handAngle) * radius,
+      cy + Math.sin(handAngle) * radius,
+      6,
+      6,
+      0.5,
+      8,
+    ),
+    tones.red,
+    inkColor,
     1,
   );
-  Tx(g, { t: hhmm(L.h), tr: `translate(${f1(cx)} ${f1(cy)})`, fs: 17, fill: inkC, o: 0.8 });
-  if (L.S)
-    Tx(g, {
-      t: L.S.jp,
-      tr: `translate(${f1(cx)} ${f1(cy + rad + 24)})`,
+  addText(group, {
+    t: clockLabel(light.h),
+    tr: `translate(${roundCoord(cx)} ${roundCoord(cy)})`,
+    fs: 17,
+    fill: inkColor,
+    o: 0.8,
+  });
+  if (light.S)
+    addText(group, {
+      t: light.S.jp,
+      tr: `translate(${roundCoord(cx)} ${roundCoord(cy + radius + 24)})`,
       fs: 20,
       font: "'Yuji Syuku', serif",
-      fill: K.red,
+      fill: tones.red,
       o: 0.9,
     });
 }
 
-function slab(g, r, d, fill, K, w) {
-  So(g, d, mix(fill, K.paper, 0.3), 1);
-  Wa(g, r, d, fill, 0.7);
-  Ln(g, d, K.ink, w ?? 1.5);
+function slab(group, rand, path, fill, tones, width) {
+  addSolid(group, path, mix(fill, tones.paper, 0.3), 1);
+  addWash(group, rand, path, fill, 0.7);
+  addLine(group, path, tones.ink, width ?? 1.5);
 }
-function lampGlow(g, r, x, y, rx, ry, K, op) {
-  Wa(g, r, wring(r, x, y, rx, ry, 2, 12), K.glow, 0.5 * op, "url(#bk-pool)");
-  Wa(g, r, wring(r, x, y, rx * 0.5, ry * 0.5, 1, 10), K.glowSoft, 0.6 * op, "url(#bk-pool)");
+function lampGlow(group, rand, x, y, rx, ry, tones, opacity) {
+  addWash(
+    group,
+    rand,
+    wobblyRing(rand, x, y, rx, ry, 2, 12),
+    tones.glow,
+    0.5 * opacity,
+    "url(#bk-pool)",
+  );
+  addWash(
+    group,
+    rand,
+    wobblyRing(rand, x, y, rx * 0.5, ry * 0.5, 1, 10),
+    tones.glowSoft,
+    0.6 * opacity,
+    "url(#bk-pool)",
+  );
 }
-function fireflies(g, r, x0, x1, y0, y1, n, op) {
-  for (let k = 0; k < n; k++) {
-    const x = lerp(x0, x1, r()),
-      y = lerp(y0, y1, r());
-    Wa(g, r, wring(r, x, y, 7, 7, 1, 8), "#e9f2a0", 0.35 * op, "url(#bk-pool)");
-    So(g, wring(r, x, y, 1.6, 1.6, 0, 5), "#f4f8c8", op);
+function fireflies(group, rand, x0, x1, y0, y1, count, opacity) {
+  for (let k = 0; k < count; k++) {
+    const x = lerp(x0, x1, rand()),
+      y = lerp(y0, y1, rand());
+    addWash(
+      group,
+      rand,
+      wobblyRing(rand, x, y, 7, 7, 1, 8),
+      "#e9f2a0",
+      0.35 * opacity,
+      "url(#bk-pool)",
+    );
+    addSolid(group, wobblyRing(rand, x, y, 1.6, 1.6, 0, 5), "#f4f8c8", opacity);
   }
 }
 
-function recordPlayer(g, r, x, y, s, K, L, disc = 0) {
-  const S = (v) => v * s,
-    P = (a, b) => [x + S(a), y + S(b)];
-  Wa(g, r, wring(r, x + S(10), y + S(22), S(98), S(14), 1, 10), K.pool, 0.8, "url(#bk-pool)");
-  inked(g, r, wpoly(r, [P(-78, -60), P(66, -80), P(70, -10), P(-74, 8)], 0.8), K.cloth, K.ink, 1.3);
-  Ln(g, wpoly(r, [P(-68, -50), P(58, -68), P(61, -14), P(-65, 0)], 0.6), K.ink, 0.8, 0.5);
-  inked(g, r, wpoly(r, [P(-86, 4), P(74, -14), P(96, 6), P(-66, 28)], 0.8), K.woodLt, K.ink, 1.3);
-  inked(g, r, wpoly(r, [P(-66, 28), P(96, 6), P(96, 18), P(-66, 41)], 0.6), K.woodDk, K.ink, 1.2);
-  inked(g, r, wring(r, x - S(4), y + S(9), S(56), S(13), 0.6, 16), K.iron, K.ink, 1.1);
-  So(g, wring(r, x - S(4), y + S(8), S(51), S(11.5), 0.4, 16), mix(K.ink, "#000000", 0.3), 0.95);
+function recordPlayer(group, rand, x, y, scale, tones, light, disc = 0) {
+  const scaled = (v) => v * scale,
+    at = (dx, dy) => [x + scaled(dx), y + scaled(dy)];
+  addWash(
+    group,
+    rand,
+    wobblyRing(rand, x + scaled(10), y + scaled(22), scaled(98), scaled(14), 1, 10),
+    tones.pool,
+    0.8,
+    "url(#bk-pool)",
+  );
+  inked(
+    group,
+    rand,
+    wobblyPolygon(rand, [at(-78, -60), at(66, -80), at(70, -10), at(-74, 8)], 0.8),
+    tones.cloth,
+    tones.ink,
+    1.3,
+  );
+  addLine(
+    group,
+    wobblyPolygon(rand, [at(-68, -50), at(58, -68), at(61, -14), at(-65, 0)], 0.6),
+    tones.ink,
+    0.8,
+    0.5,
+  );
+  inked(
+    group,
+    rand,
+    wobblyPolygon(rand, [at(-86, 4), at(74, -14), at(96, 6), at(-66, 28)], 0.8),
+    tones.woodLt,
+    tones.ink,
+    1.3,
+  );
+  inked(
+    group,
+    rand,
+    wobblyPolygon(rand, [at(-66, 28), at(96, 6), at(96, 18), at(-66, 41)], 0.6),
+    tones.woodDk,
+    tones.ink,
+    1.2,
+  );
+  inked(
+    group,
+    rand,
+    wobblyRing(rand, x - scaled(4), y + scaled(9), scaled(56), scaled(13), 0.6, 16),
+    tones.iron,
+    tones.ink,
+    1.1,
+  );
+  addSolid(
+    group,
+    wobblyRing(rand, x - scaled(4), y + scaled(8), scaled(51), scaled(11.5), 0.4, 16),
+    mix(tones.ink, "#000000", 0.3),
+    0.95,
+  );
   for (let k = 1; k < 4; k++)
-    Ln(
-      g,
-      wring(r, x - S(4), y + S(8), S(51 - k * 9), S(11.5 - k * 2), 0.2, 14),
-      mix(K.ink, STARL, 0.35),
+    addLine(
+      group,
+      wobblyRing(
+        rand,
+        x - scaled(4),
+        y + scaled(8),
+        scaled(51 - k * 9),
+        scaled(11.5 - k * 2),
+        0.2,
+        14,
+      ),
+      mix(tones.ink, STARLIGHT, 0.35),
       0.5,
       0.45,
       true,
     );
-  So(g, wring(r, x - S(4), y + S(8), S(13), S(3.2), 0.2, 10), K[DISC_LOOK[disc][1]], 0.95);
-  So(g, wring(r, x - S(4), y + S(8), S(1.4), S(0.6), 0.1, 6), K.ink, 1);
-  Ln(g, wline(r, [P(70, -2), P(66, 6), P(40, 9), P(16, 10)], 0.3), K.ink, S(2.4), 0.95, true);
-  inked(g, r, wring(r, x + S(70), y - S(2), S(6), S(3), 0.2, 8), K.iron, K.ink, 1);
-  inked(g, r, wbox(r, x + S(10), y + S(7), x + S(18), y + S(12), 0.2), K.iron, K.ink, 0.8);
+  addSolid(
+    group,
+    wobblyRing(rand, x - scaled(4), y + scaled(8), scaled(13), scaled(3.2), 0.2, 10),
+    tones[DISC_LOOK[disc][1]],
+    0.95,
+  );
+  addSolid(
+    group,
+    wobblyRing(rand, x - scaled(4), y + scaled(8), scaled(1.4), scaled(0.6), 0.1, 6),
+    tones.ink,
+    1,
+  );
+  addLine(
+    group,
+    wobblyLine(rand, [at(70, -2), at(66, 6), at(40, 9), at(16, 10)], 0.3),
+    tones.ink,
+    scaled(2.4),
+    0.95,
+    true,
+  );
+  inked(
+    group,
+    rand,
+    wobblyRing(rand, x + scaled(70), y - scaled(2), scaled(6), scaled(3), 0.2, 8),
+    tones.iron,
+    tones.ink,
+    1,
+  );
+  inked(
+    group,
+    rand,
+    wobblyBox(rand, x + scaled(10), y + scaled(7), x + scaled(18), y + scaled(12), 0.2),
+    tones.iron,
+    tones.ink,
+    0.8,
+  );
 }
 // records in the crate, in the order the house radio keeps them (discs.ts)
 const DISC_LOOK = [
@@ -3532,82 +4472,106 @@ const DISC_LOOK = [
 ];
 
 // a sleeve, standing or lying; each record has a face of its own
-function sleeve(g, r, pts, K, disc) {
-  const q = quadMap(...pts),
-    d = wpoly(r, pts, 0.6),
-    fill = K[DISC_LOOK[disc][0]],
-    P = (u, v) => q(u, v);
-  So(g, d, mix(fill, K.paper, 0.15), 1);
-  Wa(g, r, d, fill, 0.5);
+function sleeve(group, rand, points, tones, disc) {
+  const mapQuad = quadMap(...points),
+    outline = wobblyPolygon(rand, points, 0.6),
+    fill = tones[DISC_LOOK[disc][0]],
+    at = (u, v) => mapQuad(u, v);
+  addSolid(group, outline, mix(fill, tones.paper, 0.15), 1);
+  addWash(group, rand, outline, fill, 0.5);
   if (disc === 0) {
-    So(g, wring(r, ...P(0.62, 0.36), 9, 9, 0.5, 10), K.gold, 0.95);
-    Ln(g, wline(r, [P(0.12, 0.78), P(0.5, 0.74), P(0.88, 0.79)], 0.5), K.paper, 0.9, 0.6);
+    addSolid(group, wobblyRing(rand, ...at(0.62, 0.36), 9, 9, 0.5, 10), tones.gold, 0.95);
+    addLine(
+      group,
+      wobblyLine(rand, [at(0.12, 0.78), at(0.5, 0.74), at(0.88, 0.79)], 0.5),
+      tones.paper,
+      0.9,
+      0.6,
+    );
   } else if (disc === 1) {
     for (let k = 0; k < 4; k++)
-      Ln(
-        g,
-        wline(r, [P(0.1, 0.2 + k * 0.17), P(0.9, 0.18 + k * 0.17)], 0.5),
-        K.paper,
+      addLine(
+        group,
+        wobblyLine(rand, [at(0.1, 0.2 + k * 0.17), at(0.9, 0.18 + k * 0.17)], 0.5),
+        tones.paper,
         1.4,
         0.55,
         true,
       );
   } else if (disc === 2) {
-    Ln(
-      g,
-      wline(r, [P(0.2, 0.75), P(0.4, 0.3), P(0.55, 0.62), P(0.8, 0.22)], 0.8),
-      K.ink,
+    addLine(
+      group,
+      wobblyLine(rand, [at(0.2, 0.75), at(0.4, 0.3), at(0.55, 0.62), at(0.8, 0.22)], 0.8),
+      tones.ink,
       2.4,
       0.85,
     );
   } else if (disc === 3) {
-    So(g, wpoly(r, [P(0, 0.5), P(1, 0.5), P(1, 1), P(0, 1)], 0.3), K.cloth, 0.55);
-    So(g, wring(r, ...P(0.5, 0.48), 10, 10, 0.4, 12), K.red, 0.85);
+    addSolid(
+      group,
+      wobblyPolygon(rand, [at(0, 0.5), at(1, 0.5), at(1, 1), at(0, 1)], 0.3),
+      tones.cloth,
+      0.55,
+    );
+    addSolid(group, wobblyRing(rand, ...at(0.5, 0.48), 10, 10, 0.4, 12), tones.red, 0.85);
     for (let k = 0; k < 3; k++)
-      Ln(
-        g,
-        wline(r, [P(0.08, 0.6 + k * 0.1), P(0.92, 0.6 + k * 0.1)], 0.3),
-        K.paper,
+      addLine(
+        group,
+        wobblyLine(rand, [at(0.08, 0.6 + k * 0.1), at(0.92, 0.6 + k * 0.1)], 0.3),
+        tones.paper,
         0.9,
         0.6,
         true,
       );
-    Ln(g, wline(r, [P(0.12, 1), P(0.2, 0.55), P(0.26, 0.25)], 0.4), K.ink, 1.4, 0.9);
-    Ln(
-      g,
-      `M${P(0.26, 0.25)} Q${P(0.4, 0.15)} ${P(0.5, 0.28)} M${P(0.26, 0.25)} Q${P(0.12, 0.12)} ${P(0.02, 0.3)}`,
-      K.ink,
+    addLine(
+      group,
+      wobblyLine(rand, [at(0.12, 1), at(0.2, 0.55), at(0.26, 0.25)], 0.4),
+      tones.ink,
+      1.4,
+      0.9,
+    );
+    addLine(
+      group,
+      `M${at(0.26, 0.25)} Q${at(0.4, 0.15)} ${at(0.5, 0.28)} M${at(0.26, 0.25)} Q${at(0.12, 0.12)} ${at(0.02, 0.3)}`,
+      tones.ink,
       1.2,
       0.9,
       true,
     );
   } else {
-    Ln(
-      g,
-      wpoly(r, [P(0.12, 0.14), P(0.88, 0.14), P(0.88, 0.5), P(0.12, 0.5)], 0.4),
-      K.ink,
+    addLine(
+      group,
+      wobblyPolygon(rand, [at(0.12, 0.14), at(0.88, 0.14), at(0.88, 0.5), at(0.12, 0.5)], 0.4),
+      tones.ink,
       0.8,
       0.7,
     );
     for (let k = 0; k < 3; k++)
-      Ln(
-        g,
-        wline(r, [P(0.2, 0.24 + k * 0.08), P(0.8 - k * 0.1, 0.24 + k * 0.08)], 0.2),
-        K.ink,
+      addLine(
+        group,
+        wobblyLine(rand, [at(0.2, 0.24 + k * 0.08), at(0.8 - k * 0.1, 0.24 + k * 0.08)], 0.2),
+        tones.ink,
         1.1,
         0.75,
         true,
       );
-    Ln(g, wline(r, [P(0.15, 0.85), P(0.6, 0.85)], 0.2), K.ink, 0.8, 0.6, true);
-    So(g, wring(r, ...P(0.75, 0.75), 5, 5, 0.3, 8), K.red, 0.85);
+    addLine(
+      group,
+      wobblyLine(rand, [at(0.15, 0.85), at(0.6, 0.85)], 0.2),
+      tones.ink,
+      0.8,
+      0.6,
+      true,
+    );
+    addSolid(group, wobblyRing(rand, ...at(0.75, 0.75), 5, 5, 0.3, 8), tones.red, 0.85);
   }
-  Ln(g, d, K.ink, 1.1);
+  addLine(group, outline, tones.ink, 1.1);
 }
 
 // wooden crate of records at the far left of the boards
-const inCrate = (k) => {
-  const x = 28 + k * 5,
-    y = 552 - k * 13;
+const inCrate = (slot) => {
+  const x = 28 + slot * 5,
+    y = 552 - slot * 13;
   return [
     [x, y],
     [x + 78, y - 4],
@@ -3616,26 +4580,26 @@ const inCrate = (k) => {
   ];
 };
 
-function crateSleeve(K, k) {
-  const g = G();
-  const r = rng(hash("terrace/engawa/crate/" + k));
-  sleeve(g, r, inCrate(k), K, k);
-  const [[x, y]] = inCrate(k);
-  return { W: 1100, H: 640, groups: [g], clips: [], from: [x + 40, y + 30] };
+function crateSleeve(tones, slot) {
+  const group = newGroup();
+  const rand = rng(hash("terrace/engawa/crate/" + slot));
+  sleeve(group, rand, inCrate(slot), tones, slot);
+  const [[x, y]] = inCrate(slot);
+  return { W: 1100, H: 640, groups: [group], clips: [], from: [x + 40, y + 30] };
 }
-function crate(groups, r, K, disc, lifted) {
-  const back = G(),
+function crate(groups, rand, tones, disc, lifted) {
+  const back = newGroup(),
     x0 = 18,
     x1 = 118,
     y0 = 566,
     y1 = 628;
   groups.push(back);
-  Wa(back, r, wring(r, 72, 634, 70, 10, 1, 10), K.pool, 0.8, "url(#bk-pool)");
+  addWash(back, rand, wobblyRing(rand, 72, 634, 70, 10, 1, 10), tones.pool, 0.8, "url(#bk-pool)");
   slab(
     back,
-    r,
-    wpoly(
-      r,
+    rand,
+    wobblyPolygon(
+      rand,
       [
         [x0 + 10, y0 - 12],
         [x1 + 8, y0 - 18],
@@ -3644,19 +4608,19 @@ function crate(groups, r, K, disc, lifted) {
       ],
       0.5,
     ),
-    K.woodDk,
-    K,
+    tones.woodDk,
+    tones,
     1.1,
   );
-  for (let k = DISC_LOOK.length - 1; k >= 0; k--) {
-    const g = G({ op: k === disc || k === lifted ? 0.18 : 1 });
-    groups.push(g);
-    sleeve(g, r, inCrate(k), K, k);
+  for (let slot = DISC_LOOK.length - 1; slot >= 0; slot--) {
+    const group = newGroup({ op: slot === disc || slot === lifted ? 0.18 : 1 });
+    groups.push(group);
+    sleeve(group, rand, inCrate(slot), tones, slot);
   }
-  const g = G();
-  groups.push(g);
-  const d = wpoly(
-    r,
+  const crateGroup = newGroup();
+  groups.push(crateGroup);
+  const front = wobblyPolygon(
+    rand,
     [
       [x0, y0 + 4],
       [x1, y0 - 2],
@@ -3665,12 +4629,12 @@ function crate(groups, r, K, disc, lifted) {
     ],
     0.5,
   );
-  slab(g, r, d, K.wood, K, 1.3);
+  slab(crateGroup, rand, front, tones.wood, tones, 1.3);
   slab(
-    g,
-    r,
-    wpoly(
-      r,
+    crateGroup,
+    rand,
+    wobblyPolygon(
+      rand,
       [
         [x1, y0 - 2],
         [x1 + 8, y0 - 18],
@@ -3679,54 +4643,61 @@ function crate(groups, r, K, disc, lifted) {
       ],
       0.5,
     ),
-    K.woodDk,
-    K,
+    tones.woodDk,
+    tones,
     1.1,
   );
-  Ln(
-    g,
-    wline(
-      r,
+  addLine(
+    crateGroup,
+    wobblyLine(
+      rand,
       [
         [x0 + 1, y0 + 24],
         [x1 + 1, y0 + 19],
       ],
       0.4,
     ),
-    K.woodDk,
+    tones.woodDk,
     0.9,
     0.6,
   );
-  Ln(
-    g,
-    wline(
-      r,
+  addLine(
+    crateGroup,
+    wobblyLine(
+      rand,
       [
         [x0 + 1, y0 + 44],
         [x1 + 2, y0 + 39],
       ],
       0.4,
     ),
-    K.woodDk,
+    tones.woodDk,
     0.9,
     0.6,
   );
-  So(g, wring(r, (x0 + x1) / 2, y0 + 12, 12, 3.2, 0.3, 10), K.ink, 0.8);
-  Tx(g, {
+  addSolid(crateGroup, wobblyRing(rand, (x0 + x1) / 2, y0 + 12, 12, 3.2, 0.3, 10), tones.ink, 0.8);
+  addText(crateGroup, {
     t: "盤",
     tr: `translate(${x0 + 14} ${y1 - 12}) rotate(-3)`,
     fs: 10,
     font: "'Yuji Syuku', serif",
-    fill: K.red,
+    fill: tones.red,
   });
 }
-function teaCup(groups, g, r, x, y, K, mini) {
-  Wa(g, r, wring(r, x + 4, y + 2, 16, 4, 0.6, 8), K.pool, 0.8, "url(#bk-pool)");
+function teaCup(groups, group, rand, x, y, tones, mini) {
+  addWash(
+    group,
+    rand,
+    wobblyRing(rand, x + 4, y + 2, 16, 4, 0.6, 8),
+    tones.pool,
+    0.8,
+    "url(#bk-pool)",
+  );
   inked(
-    g,
-    r,
-    wpoly(
-      r,
+    group,
+    rand,
+    wobblyPolygon(
+      rand,
       [
         [x - 10, y - 22],
         [x + 10, y - 22],
@@ -3735,184 +4706,267 @@ function teaCup(groups, g, r, x, y, K, mini) {
       ],
       0.6,
     ),
-    mix(K.stone, K.moss, 0.35),
-    K.ink,
+    mix(tones.stone, tones.moss, 0.35),
+    tones.ink,
     1.1,
   );
-  Ln(g, wring(r, x, y - 22, 10, 2.6, 0.3, 8), K.ink, 0.9, 0.8);
-  if (!mini) steam(groups, r, x, y - 28, K, 2);
+  addLine(group, wobblyRing(rand, x, y - 22, 10, 2.6, 0.3, 8), tones.ink, 0.9, 0.8);
+  if (!mini) steam(groups, rand, x, y - 28, tones, 2);
 }
 
-function hangingLamp(g, lg, pg, r, x, top, K, lit, glow, m, edge) {
-  const y0 = 196,
-    y1 = 262,
-    cy = (y0 + y1) / 2;
+function hangingLamp(
+  group,
+  lightGroup,
+  poolGroup,
+  rand,
+  x,
+  beamY,
+  tones,
+  lit,
+  glow,
+  boardMap,
+  edgeY,
+) {
+  const lampTop = 196,
+    lampBottom = 262,
+    cy = (lampTop + lampBottom) / 2;
   // the cord, tied round the beam
-  Ln(
-    g,
-    wline(
-      r,
+  addLine(
+    group,
+    wobblyLine(
+      rand,
       [
-        [x, top - 2],
-        [x + 0.6, (top + y0) / 2],
-        [x, y0 - 4],
+        [x, beamY - 2],
+        [x + 0.6, (beamY + lampTop) / 2],
+        [x, lampTop - 4],
       ],
       0.2,
     ),
-    K.ink,
+    tones.ink,
     0.9,
     0.85,
     true,
   );
-  Ln(g, wring(r, x, top, 2.6, 2, 0.1, 8), K.ink, 0.9, 0.9, true);
-  const front = wbox(r, x - 19, y0 + 8, x + 13, y1, 0.4),
-    side = wpoly(
-      r,
+  addLine(group, wobblyRing(rand, x, beamY, 2.6, 2, 0.1, 8), tones.ink, 0.9, 0.9, true);
+  const front = wobblyBox(rand, x - 19, lampTop + 8, x + 13, lampBottom, 0.4),
+    side = wobblyPolygon(
+      rand,
       [
-        [x + 13, y0 + 8],
-        [x + 21, y0 + 8],
-        [x + 21, y1 - 3],
-        [x + 13, y1],
+        [x + 13, lampTop + 8],
+        [x + 21, lampTop + 8],
+        [x + 21, lampBottom - 3],
+        [x + 13, lampBottom],
       ],
       0.3,
     ),
-    on = lit * glow;
+    brightness = lit * glow;
 
   // the paper unlit
-  So(g, front, mix(K.fusuma, K.paper, 0.35), 1);
-  So(g, side, mix(K.fusuma, K.ink, 0.12), 1);
-  Wa(g, r, front, K.tape || K.gold, 0.22);
-  So(g, wring(r, x - 3, y1 - 9, 8, 2.4, 0.3, 8), K.ink, 0.14);
-  Ln(g, wseg(r, [x - 3, y1 - 11], [x - 2, y1 - 17], 0.2, 2), K.ink, 0.8, 0.2, true);
+  addSolid(group, front, mix(tones.fusuma, tones.paper, 0.35), 1);
+  addSolid(group, side, mix(tones.fusuma, tones.ink, 0.12), 1);
+  addWash(group, rand, front, tones.tape || tones.gold, 0.22);
+  addSolid(group, wobblyRing(rand, x - 3, lampBottom - 9, 8, 2.4, 0.3, 8), tones.ink, 0.14);
+  addLine(
+    group,
+    wobblySegment(rand, [x - 3, lampBottom - 11], [x - 2, lampBottom - 17], 0.2, 2),
+    tones.ink,
+    0.8,
+    0.2,
+    true,
+  );
 
-  const face = (q, o) => {
-    Ln(q, wseg(r, [x - 19, cy], [x + 13, cy], 0.3, 2), K.woodDk, 0.7, o, true);
-    Ln(q, wseg(r, [x - 3, y0 + 9], [x - 3, y1 - 1], 0.2, 2), K.woodDk, 0.5, o * 0.6, true);
-    Tx(q, {
+  const lampFace = (aim, opacity) => {
+    addLine(
+      aim,
+      wobblySegment(rand, [x - 19, cy], [x + 13, cy], 0.3, 2),
+      tones.woodDk,
+      0.7,
+      opacity,
+      true,
+    );
+    addLine(
+      aim,
+      wobblySegment(rand, [x - 3, lampTop + 9], [x - 3, lampBottom - 1], 0.2, 2),
+      tones.woodDk,
+      0.5,
+      opacity * 0.6,
+      true,
+    );
+    addText(aim, {
       t: "縁",
       tr: `translate(${x - 3} ${cy + 8})`,
       fs: 20,
       font: "'Yuji Syuku', serif",
-      fill: K.ink,
-      o: 0.4 + o,
+      fill: tones.ink,
+      o: 0.4 + opacity,
     });
-    Ln(q, front, K.ink, 1.1);
-    Ln(q, side, K.ink, 1);
+    addLine(aim, front, tones.ink, 1.1);
+    addLine(aim, side, tones.ink, 1);
   };
-  face(g, 0.35);
+  lampFace(group, 0.35);
   // the roof board over it and the foot under it, wood
-  const roof = wpoly(
-      r,
+  const roof = wobblyPolygon(
+      rand,
       [
-        [x - 26, y0 + 8],
-        [x - 20, y0 - 1],
-        [x + 22, y0 - 1],
-        [x + 28, y0 + 8],
+        [x - 26, lampTop + 8],
+        [x - 20, lampTop - 1],
+        [x + 22, lampTop - 1],
+        [x + 28, lampTop + 8],
       ],
       0.4,
     ),
-    foot = wbox(r, x - 21, y1 - 1, x + 22, y1 + 4, 0.3);
-  So(g, roof, mix(K.woodDk, K.paper, 0.15), 1);
-  So(g, foot, mix(K.woodDk, K.paper, 0.2), 1);
-  Ln(g, roof, K.ink, 1.1);
-  Ln(g, foot, K.ink, 1);
+    foot = wobblyBox(rand, x - 21, lampBottom - 1, x + 22, lampBottom + 4, 0.3);
+  addSolid(group, roof, mix(tones.woodDk, tones.paper, 0.15), 1);
+  addSolid(group, foot, mix(tones.woodDk, tones.paper, 0.2), 1);
+  addLine(group, roof, tones.ink, 1.1);
+  addLine(group, foot, tones.ink, 1);
 
   // lit
-  if (on > 0.05) {
-    Wa(lg, r, wring(r, x, cy, 30, 40, 2, 12), K.glow, 0.18 * on, "url(#bk-pool)");
-    So(lg, front, mix(K.glow, K.glowSoft, 0.45), on);
-    So(lg, side, K.glow, on * 0.9);
-    So(
-      lg,
-      wring(r, x - 3, y1 - 20, 12, 14, 2, 10),
-      mix(K.glowSoft, K.paper, 0.6),
-      on * 0.85,
+  if (brightness > 0.05) {
+    addWash(
+      lightGroup,
+      rand,
+      wobblyRing(rand, x, cy, 30, 40, 2, 12),
+      tones.glow,
+      0.18 * brightness,
       "url(#bk-pool)",
     );
-    face(lg, 0.5 * on);
+    addSolid(lightGroup, front, mix(tones.glow, tones.glowSoft, 0.45), brightness);
+    addSolid(lightGroup, side, tones.glow, brightness * 0.9);
+    addSolid(
+      lightGroup,
+      wobblyRing(rand, x - 3, lampBottom - 20, 12, 14, 2, 10),
+      mix(tones.glowSoft, tones.paper, 0.6),
+      brightness * 0.85,
+      "url(#bk-pool)",
+    );
+    lampFace(lightGroup, 0.5 * brightness);
   }
-  if (on <= 0.05) return;
+  if (brightness <= 0.05) return;
 
   // the boards
-  const h = edge(x) - cy,
-    D = 210,
-    at = (px, z) => m(Math.max(0, Math.min(1, (px + 10) / 845)), Math.pow(Math.min(1, z / D), 1.3));
-  const F = [0.14, 0.26, 0.42, 0.62, 0.85],
-    peak = 0.5 * on;
-  F.forEach((f, i) => {
-    const rho = h * Math.sqrt(Math.pow(f, -2 / 3) - 1),
-      pts = [];
+  const height = edgeY(x) - cy,
+    depth = 210,
+    boardAt = (px, z) =>
+      boardMap(Math.max(0, Math.min(1, (px + 10) / 845)), Math.pow(Math.min(1, z / depth), 1.3));
+  const ringStops = [0.14, 0.26, 0.42, 0.62, 0.85],
+    peak = 0.5 * brightness;
+  ringStops.forEach((share, i) => {
+    const reach = height * Math.sqrt(Math.pow(share, -2 / 3) - 1),
+      points = [];
     for (let k = 0; k <= 16; k++) {
-      const a = (k / 16) * Math.PI;
-      pts.push(at(x + rho * Math.cos(a), rho * Math.sin(a)));
+      const angle = (k / 16) * Math.PI;
+      points.push(boardAt(x + reach * Math.cos(angle), reach * Math.sin(angle)));
     }
-    Wa(pg, r, wpoly(r, pts, 3), K.glow, peak * (f - (F[i - 1] ?? 0)) * 1.6);
+    addWash(
+      poolGroup,
+      rand,
+      wobblyPolygon(rand, points, 3),
+      tones.glow,
+      peak * (share - (ringStops[i - 1] ?? 0)) * 1.6,
+    );
   });
 
   // a little of it reaches the garden beyond the edge, lower and further off
-  Wa(pg, r, wring(r, x + 6, edge(x) - 14, h * 0.7, 9, 2, 10), K.glow, 0.1 * on, "url(#bk-pool)");
-  const dx = 782 - x;
-  [0.6, 1.2, 2].forEach((k, i) =>
-    Ln(
-      lg,
-      wseg(r, [783, cy - dx * k * 0.8], [783, Math.min(edge(790), cy + dx * k)], 0.3, 3),
-      K.glowSoft,
+  addWash(
+    poolGroup,
+    rand,
+    wobblyRing(rand, x + 6, edgeY(x) - 14, height * 0.7, 9, 2, 10),
+    tones.glow,
+    0.1 * brightness,
+    "url(#bk-pool)",
+  );
+  const toPost = 782 - x;
+  [0.6, 1.2, 2].forEach((reach, i) =>
+    addLine(
+      lightGroup,
+      wobblySegment(
+        rand,
+        [783, cy - toPost * reach * 0.8],
+        [783, Math.min(edgeY(790), cy + toPost * reach)],
+        0.3,
+        3,
+      ),
+      tones.glowSoft,
       1.4,
-      [0.5, 0.3, 0.16][i] * on,
+      [0.5, 0.3, 0.16][i] * brightness,
       true,
     ),
   );
-  [0.3, 0.6, 1].forEach((k, i) => {
-    const w = (cy - top) * k;
-    Ln(
-      lg,
-      wseg(r, [x - w, top + 4 + w * 0.04], [x + w, top + 4 - w * 0.04], 0.3, 3),
-      K.glowSoft,
+  [0.3, 0.6, 1].forEach((reach, i) => {
+    const halfWidth = (cy - beamY) * reach;
+    addLine(
+      lightGroup,
+      wobblySegment(
+        rand,
+        [x - halfWidth, beamY + 4 + halfWidth * 0.04],
+        [x + halfWidth, beamY + 4 - halfWidth * 0.04],
+        0.3,
+        3,
+      ),
+      tones.glowSoft,
       1.2,
-      [0.5, 0.3, 0.15][i] * on,
+      [0.5, 0.3, 0.15][i] * brightness,
       true,
     );
   });
-  Wa(lg, r, wring(r, x, top - 16, 150, 18, 2, 12), K.glow, 0.12 * on, "url(#bk-pool)");
-  Ln(lg, wseg(r, [615, 470], [619, 537], 0.3, 3), K.glowSoft, 1.3, 0.4 * on, true);
+  addWash(
+    lightGroup,
+    rand,
+    wobblyRing(rand, x, beamY - 16, 150, 18, 2, 12),
+    tones.glow,
+    0.12 * brightness,
+    "url(#bk-pool)",
+  );
+  addLine(
+    lightGroup,
+    wobblySegment(rand, [615, 470], [619, 537], 0.3, 3),
+    tones.glowSoft,
+    1.3,
+    0.4 * brightness,
+    true,
+  );
 }
 
-function seasonLook(K, sk) {
-  const s = sk || "aki";
+function seasonLook(tones, seasonKey) {
+  const season = seasonKey || "aki";
   return {
-    s,
-    snow: s === "fuyu",
+    s: season,
+    snow: season === "fuyu",
     ground: {
-      haru: mix(K.moss, "#a9c27a", 0.18),
-      natsu: mix(K.moss, K.mossDk, 0.3),
-      aki: mix(mix(K.moss, K.mossDk, 0.25), K.earth, 0.16),
-      fuyu: mix(K.moss, K.paper, 0.72),
-    }[s],
+      haru: mix(tones.moss, "#a9c27a", 0.18),
+      natsu: mix(tones.moss, tones.mossDk, 0.3),
+      aki: mix(mix(tones.moss, tones.mossDk, 0.25), tones.earth, 0.16),
+      fuyu: mix(tones.moss, tones.paper, 0.72),
+    }[season],
     mound:
-      s === "fuyu"
-        ? mix(K.mossDk, K.paper, 0.35)
-        : s === "aki"
-          ? mix(K.mossDk, K.earth, 0.15)
-          : K.mossDk,
+      season === "fuyu"
+        ? mix(tones.mossDk, tones.paper, 0.35)
+        : season === "aki"
+          ? mix(tones.mossDk, tones.earth, 0.15)
+          : tones.mossDk,
     crown: {
       haru: { maple: "#e7b3bd", redWarmer: "#f4dade" },
-      natsu: { maple: mix(K.mossDk, "#4c7a30", 0.45), redWarmer: mix(K.moss, "#9cc25a", 0.4) },
+      natsu: {
+        maple: mix(tones.mossDk, "#4c7a30", 0.45),
+        redWarmer: mix(tones.moss, "#9cc25a", 0.4),
+      },
       aki: {},
       fuyu: null,
-    }[s],
-    fall: { haru: "#efc4cc", natsu: null, aki: K.maple, fuyu: "#f6f4ee" }[s],
-    blind: { haru: 236, natsu: 300, aki: 236, fuyu: 0 }[s],
-    chime: { haru: "風", natsu: "涼" }[s] || null,
+    }[season],
+    fall: { haru: "#efc4cc", natsu: null, aki: tones.maple, fuyu: "#f6f4ee" }[season],
+    blind: { haru: 236, natsu: 300, aki: 236, fuyu: 0 }[season],
+    chime: { haru: "風", natsu: "涼" }[season] || null,
   };
 }
 const SNOW = "#f5f3ec";
-function snowCap(g, r, pts, w) {
-  Br(g, r, pts, w, SNOW, 0.97, { blunt: true, tip: 0.4 });
-  Ln(
-    g,
-    wline(
-      r,
-      pts.map(([x, y]) => [x, y + w * 0.35]),
+function snowCap(group, rand, points, width) {
+  brushStroke(group, rand, points, width, SNOW, 0.97, { blunt: true, tip: 0.4 });
+  addLine(
+    group,
+    wobblyLine(
+      rand,
+      points.map(([x, y]) => [x, y + width * 0.35]),
       0.3,
     ),
     "#9fb0c4",
@@ -3920,191 +4974,245 @@ function snowCap(g, r, pts, w) {
     0.5,
   );
 }
-function arcTop(cx, cy, rx, ry, n) {
-  const p = [];
-  for (let i = 0; i <= (n || 6); i++) {
-    const a = Math.PI * (1.08 + (i / (n || 6)) * 0.84);
-    p.push([cx + Math.cos(a) * rx, cy + Math.sin(a) * ry]);
+function arcTop(cx, cy, rx, ry, steps) {
+  const points = [];
+  for (let i = 0; i <= (steps || 6); i++) {
+    const angle = Math.PI * (1.08 + (i / (steps || 6)) * 0.84);
+    points.push([cx + Math.cos(angle) * rx, cy + Math.sin(angle) * ry]);
   }
-  return p;
+  return points;
 }
 
-function falling(g, r, kind, color, n, x0, x1, y0, y1) {
-  for (let k = 0; k < n; k++) {
-    const x = lerp(x0, x1, r()),
-      y = lerp(y0, y1, r()),
-      a = r() * 3;
+function falling(group, rand, kind, color, count, x0, x1, y0, y1) {
+  for (let k = 0; k < count; k++) {
+    const x = lerp(x0, x1, rand()),
+      y = lerp(y0, y1, rand()),
+      angle = rand() * 3;
     if (kind === "fuyu") {
-      const s = 1.1 + r() * 1.8;
-      So(g, wring(r, x, y, s, s, 0.2, 6), color, 0.75 + r() * 0.25);
+      const size = 1.1 + rand() * 1.8;
+      addSolid(group, wobblyRing(rand, x, y, size, size, 0.2, 6), color, 0.75 + rand() * 0.25);
       continue;
     }
     const rx = kind === "aki" ? 4 : 3.2,
       ry = kind === "aki" ? 2.6 : 1.7;
-    So(
-      g,
-      wpoly(
-        r,
+    addSolid(
+      group,
+      wobblyPolygon(
+        rand,
         [
-          [x - rx * Math.cos(a), y - rx * Math.sin(a)],
-          [x + ry * Math.sin(a), y - ry * Math.cos(a)],
-          [x + rx * Math.cos(a), y + rx * Math.sin(a)],
-          [x - ry * Math.sin(a), y + ry * Math.cos(a)],
+          [x - rx * Math.cos(angle), y - rx * Math.sin(angle)],
+          [x + ry * Math.sin(angle), y - ry * Math.cos(angle)],
+          [x + rx * Math.cos(angle), y + rx * Math.sin(angle)],
+          [x - ry * Math.sin(angle), y + ry * Math.cos(angle)],
         ],
         0.4,
       ),
       color,
-      0.8 + r() * 0.2,
-      TREM,
+      0.8 + rand() * 0.2,
+      TREMBLE_FILTER,
     );
   }
 }
 // small celadon burner
-function koro(groups, g, r, x, y, K, mini, burnt, unlit) {
-  Wa(g, r, wring(r, x + 3, y + 2, 22, 5, 0.6, 8), K.pool, 0.8, "url(#bk-pool)");
-  const body = `M${x - 17} ${y - 13} Q${x - 19} ${y - 1} ${x - 8} ${y + 1} L${x + 8} ${y + 1} Q${x + 19} ${y - 1} ${x + 17} ${y - 13} Z`;
+function koro(groups, group, rand, x, y, tones, mini, burnt, unlit) {
+  addWash(
+    group,
+    rand,
+    wobblyRing(rand, x + 3, y + 2, 22, 5, 0.6, 8),
+    tones.pool,
+    0.8,
+    "url(#bk-pool)",
+  );
+  const outline = `M${x - 17} ${y - 13} Q${x - 19} ${y - 1} ${x - 8} ${y + 1} L${x + 8} ${y + 1} Q${x + 19} ${y - 1} ${x + 17} ${y - 13} Z`;
   [
     [-11, 1],
     [0, 3],
     [11, 1],
   ].forEach(([dx, dy]) =>
     inked(
-      g,
-      r,
-      wbox(r, x + dx - 2, y + dy - 2, x + dx + 2, y + dy + 3, 0.2),
-      mix(K.mountLt, K.moss, 0.3),
-      K.ink,
+      group,
+      rand,
+      wobblyBox(rand, x + dx - 2, y + dy - 2, x + dx + 2, y + dy + 3, 0.2),
+      mix(tones.mountLt, tones.moss, 0.3),
+      tones.ink,
       0.8,
     ),
   );
-  So(g, body, mix(mix(K.mountLt, K.moss, 0.3), K.paper, 0.2), 1);
-  Ln(g, body, K.ink, 1.1, 0.95);
-  So(g, wring(r, x, y - 13, 17, 4, 0.3, 10), mix(K.stone, K.paper, 0.45), 1);
-  Ln(g, wring(r, x, y - 13, 17, 4, 0.3, 10), K.ink, 0.9, 0.85);
-  const len = 40 * (1 - (burnt ?? 0.35)),
-    tip = [x + 3 + len * 0.12, y - 13 - len];
-  Ln(g, wseg(r, [x + 3, y - 13], tip, 0.2, 1), mix(K.earth, K.ink, 0.25), 1.6, 0.95, true);
+  addSolid(group, outline, mix(mix(tones.mountLt, tones.moss, 0.3), tones.paper, 0.2), 1);
+  addLine(group, outline, tones.ink, 1.1, 0.95);
+  addSolid(
+    group,
+    wobblyRing(rand, x, y - 13, 17, 4, 0.3, 10),
+    mix(tones.stone, tones.paper, 0.45),
+    1,
+  );
+  addLine(group, wobblyRing(rand, x, y - 13, 17, 4, 0.3, 10), tones.ink, 0.9, 0.85);
+  const length = 40 * (1 - (burnt ?? 0.35)),
+    tip = [x + 3 + length * 0.12, y - 13 - length];
+  addLine(
+    group,
+    wobblySegment(rand, [x + 3, y - 13], tip, 0.2, 1),
+    mix(tones.earth, tones.ink, 0.25),
+    1.6,
+    0.95,
+    true,
+  );
   if (!unlit)
-    Ln(
-      g,
-      wline(r, [tip, [tip[0] + 2, tip[1] - 3], [tip[0] + 1, tip[1] - 6]], 0.2),
-      K.stone,
+    addLine(
+      group,
+      wobblyLine(rand, [tip, [tip[0] + 2, tip[1] - 3], [tip[0] + 1, tip[1] - 6]], 0.2),
+      tones.stone,
       1.4,
       0.8,
       true,
     );
   if (unlit) return;
-  So(g, wring(r, tip[0], tip[1] + 1, 1.6, 1.6, 0, 6), K.red, 1);
-  So(g, wring(r, x + 6, y - 13, 3, 1, 0.2, 6), K.stone, 0.8);
+  addSolid(group, wobblyRing(rand, tip[0], tip[1] + 1, 1.6, 1.6, 0, 6), tones.red, 1);
+  addSolid(group, wobblyRing(rand, x + 6, y - 13, 3, 1, 0.2, 6), tones.stone, 0.8);
 
   // one ribbon of smoke
-  const [tx, ty] = tip,
+  const [tipX, tipY] = tip,
     spine = [];
-  for (let i = 0; i <= 9; i++) spine.push([tx + Math.sin(i * 0.75) * (2 + i * 1.9), ty - i * 15]);
-  const w = (i) => 0.6 + i * 0.55,
-    left = spine.map(([sx, sy], i) => [sx - w(i), sy]),
-    right = spine.map(([sx, sy], i) => [sx + w(i) * 0.6, sy]).reverse(),
-    d = (f) => `${wline(r, left.map(f), 0.3)} L${wline(r, right.map(f), 0.3).slice(1)} Z`,
-    id = `koro-smoke-${Math.round(tx)}-${Math.round(ty)}`,
+  for (let i = 0; i <= 9; i++)
+    spine.push([tipX + Math.sin(i * 0.75) * (2 + i * 1.9), tipY - i * 15]);
+  const widthAt = (i) => 0.6 + i * 0.55,
+    left = spine.map(([spineX, spineY], i) => [spineX - widthAt(i), spineY]),
+    right = spine.map(([spineX, spineY], i) => [spineX + widthAt(i) * 0.6, spineY]).reverse(),
+    ribbon = (shift) =>
+      `${wobblyLine(rand, left.map(shift), 0.3)} L${wobblyLine(rand, right.map(shift), 0.3).slice(1)} Z`,
+    id = `koro-smoke-${Math.round(tipX)}-${Math.round(tipY)}`,
     fill = `url(#${id})`,
-    defs = `<defs><linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="0" y1="${f1(ty)}" x2="0" y2="${f1(ty - 135)}"><stop offset="0" style="stop-color:${K.inkSoft}" stop-opacity="0.8"/><stop offset="1" style="stop-color:${K.inkSoft}" stop-opacity="0"/></linearGradient></defs>`;
+    defs = `<defs><linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="0" y1="${roundCoord(tipY)}" x2="0" y2="${roundCoord(tipY - 135)}"><stop offset="0" style="stop-color:${tones.inkSoft}" stop-opacity="0.8"/><stop offset="1" style="stop-color:${tones.inkSoft}" stop-opacity="0"/></linearGradient></defs>`;
   [
     ["9s 0s", 0.8, ([px, py]) => [px, py]],
-    ["12s -5s", 0.45, ([px, py]) => [px + 3, ty + (py - ty) * 1.05 - 6]],
-  ].forEach(([t, o, f], k) => {
-    const [dur, delay] = t.split(" "),
-      sm = G({
+    ["12s -5s", 0.45, ([px, py]) => [px + 3, tipY + (py - tipY) * 1.05 - 6]],
+  ].forEach(([timing, opacity, shift], layer) => {
+    const [dur, delay] = timing.split(" "),
+      smoke = newGroup({
         anim: mini ? "none" : `rib ${dur} ease-in-out ${delay} infinite`,
-        to: `${f1(tx)}px ${f1(ty)}px`,
-        defs: k ? "" : defs,
+        to: `${roundCoord(tipX)}px ${roundCoord(tipY)}px`,
+        defs: layer ? "" : defs,
       });
-    groups.push(sm);
-    So(sm, d(f), fill, o);
+    groups.push(smoke);
+    addSolid(smoke, ribbon(shift), fill, opacity);
   });
 }
 // veranda of old house
-function sceneEngawa(K, hour, mini, sk, o = {}) {
-  const W = 1100,
-    H = 640,
-    L = hourLight(K, hour, sk, o.sun),
-    Z = seasonLook(K, sk),
+function sceneEngawa(tones, hour, mini, seasonKey, opts = {}) {
+  const width = 1100,
+    height = 640,
+    light = hourLight(tones, hour, seasonKey, opts.sun),
+    look = seasonLook(tones, seasonKey),
     groups = [],
     clips = [],
-    R = (k) => rng(hash("terrace/engawa/" + k));
-  const { mp } = skyLayer(groups, K, L, "engawa", W, 360);
-  const far = G(),
-    r = R("far");
+    randFor = (name) => rng(hash("terrace/engawa/" + name));
+  const { mp: moonAt } = skyLayer(groups, tones, light, "engawa", width, 360);
+  const far = newGroup(),
+    rand = randFor("far");
   groups.push(far);
-  ridge(far, r, -20, W + 20, 330, 90, Z.snow ? mix(L.far, SNOW, 0.35) : L.far, 0.85);
-  ridge(far, r, 300, W + 20, 365, 55, Z.snow ? mix(L.mid, SNOW, 0.3) : L.mid, 0.9, K.inkSoft);
-  mist(far, r, 260, 1000, 352, 22, mix(L.low, K.paper, 0.4), 0.35 + 0.4 * (L.hc < 9 ? 1 : 0));
+  ridge(
+    far,
+    rand,
+    -20,
+    width + 20,
+    330,
+    90,
+    look.snow ? mix(light.far, SNOW, 0.35) : light.far,
+    0.85,
+  );
+  ridge(
+    far,
+    rand,
+    300,
+    width + 20,
+    365,
+    55,
+    look.snow ? mix(light.mid, SNOW, 0.3) : light.mid,
+    0.9,
+    tones.inkSoft,
+  );
+  mist(
+    far,
+    rand,
+    260,
+    1000,
+    352,
+    22,
+    mix(light.low, tones.paper, 0.4),
+    0.35 + 0.4 * (light.hc < 9 ? 1 : 0),
+  );
 
-  const gw = G({ still: true }),
-    gg = G(),
-    gd = G({ still: true }),
-    rg = R("garden");
-  groups.push(gw, gg, gd);
-  So(gg, wbox(rg, -20, 362, W + 20, H + 20, 3), mix(Z.ground, L.low, 0.08), 1);
+  const gardenWash = newGroup({ still: true }),
+    gardenGround = newGroup(),
+    garden = newGroup({ still: true }),
+    gardenRand = randFor("garden");
+  groups.push(gardenWash, gardenGround, garden);
+  addSolid(
+    gardenGround,
+    wobblyBox(gardenRand, -20, 362, width + 20, height + 20, 3),
+    mix(look.ground, light.low, 0.08),
+    1,
+  );
   const mounds = [
     [880, 398, 64, 24],
     [1070, 432, 80, 30],
     [640, 468, 56, 22],
     [700, 452, 40, 18],
   ];
-  mounds.forEach(([x, y, a, b]) => {
+  mounds.forEach(([x, y, rx, ry]) => {
     inked(
-      gd,
-      rg,
+      garden,
+      gardenRand,
       smooth(
         [
-          [x - a, y + 4],
-          [x - a * 0.7, y - b * 0.8],
-          [x, y - b],
-          [x + a * 0.75, y - b * 0.7],
-          [x + a, y + 4],
+          [x - rx, y + 4],
+          [x - rx * 0.7, y - ry * 0.8],
+          [x, y - ry],
+          [x + rx * 0.75, y - ry * 0.7],
+          [x + rx, y + 4],
         ],
         false,
       ) + " Z",
-      Z.mound,
-      K.ink,
+      look.mound,
+      tones.ink,
       1.1,
     );
     for (let k = 0; k < 8; k++)
-      Ln(
-        gd,
-        wseg(
-          rg,
-          [x + J(rg, a * 0.7), y - b * 0.4 + J(rg, b * 0.3)],
-          [x + J(rg, a * 0.7) + 4, y - b * 0.4 + J(rg, b * 0.3) - 2],
+      addLine(
+        garden,
+        wobblySegment(
+          gardenRand,
+          [x + jitter(gardenRand, rx * 0.7), y - ry * 0.4 + jitter(gardenRand, ry * 0.3)],
+          [x + jitter(gardenRand, rx * 0.7) + 4, y - ry * 0.4 + jitter(gardenRand, ry * 0.3) - 2],
           0.2,
           1,
         ),
-        K.ink,
+        tones.ink,
         0.9,
         0.45,
         true,
       );
   });
-  Wa(
-    gd,
-    rg,
-    mistD(rg, 560, 1120, 420, 60),
-    Z.snow ? K.stone : K.mossDk,
-    Z.snow ? 0.25 : 0.5,
+  addWash(
+    garden,
+    gardenRand,
+    mistPath(gardenRand, 560, 1120, 420, 60),
+    look.snow ? tones.stone : tones.mossDk,
+    look.snow ? 0.25 : 0.5,
     "url(#bk-bleed)",
   );
-  Wa(
-    gd,
-    rg,
-    mistD(rg, 820, 1120, 520, 140),
-    Z.snow ? K.stone : K.mossDk,
-    Z.snow ? 0.2 : 0.45,
+  addWash(
+    garden,
+    gardenRand,
+    mistPath(gardenRand, 820, 1120, 520, 140),
+    look.snow ? tones.stone : tones.mossDk,
+    look.snow ? 0.2 : 0.45,
     "url(#bk-bleed)",
   );
-  Ln(
-    gd,
-    wline(
-      rg,
+  addLine(
+    garden,
+    wobblyLine(
+      gardenRand,
       [
         [860, 395],
         [950, 430],
@@ -4113,7 +5221,7 @@ function sceneEngawa(K, hour, mini, sk, o = {}) {
       ],
       1.5,
     ),
-    K.ink,
+    tones.ink,
     1,
     0.35,
   );
@@ -4122,12 +5230,12 @@ function sceneEngawa(K, hour, mini, sk, o = {}) {
     [960, 474, 30, 11],
     [1030, 510, 34, 12],
   ];
-  steps.forEach(([x, y, a, b]) => stone(gd, rg, x, y, a, b, K));
+  steps.forEach(([x, y, rx, ry]) => stone(garden, gardenRand, x, y, rx, ry, tones));
 
   // tree
-  Br(
-    gd,
-    rg,
+  brushStroke(
+    garden,
+    gardenRand,
     [
       [985, 420],
       [978, 360],
@@ -4135,45 +5243,45 @@ function sceneEngawa(K, hour, mini, sk, o = {}) {
       [970, 250],
     ],
     10,
-    K.ink,
+    tones.ink,
     0.9,
     { head: 0.9, tip: 0.5 },
   );
-  Br(
-    gd,
-    rg,
+  brushStroke(
+    garden,
+    gardenRand,
     [
       [982, 330],
       [1030, 300],
       [1070, 300],
     ],
     5,
-    K.ink,
+    tones.ink,
     0.85,
     { tip: 0.3 },
   );
-  Br(
-    gd,
-    rg,
+  brushStroke(
+    garden,
+    gardenRand,
     [
       [985, 290],
       [940, 262],
       [900, 262],
     ],
     4.5,
-    K.ink,
+    tones.ink,
     0.85,
     { tip: 0.3 },
   );
-  if (Z.crown)
+  if (look.crown)
     maple(
-      gd,
-      rg,
+      garden,
+      gardenRand,
       985,
       270,
-      Z.s === "natsu" ? 125 : 115,
-      Z.s === "natsu" ? 260 : Z.s === "haru" ? 210 : 170,
-      Object.assign({}, K, Z.crown),
+      look.s === "natsu" ? 125 : 115,
+      look.s === "natsu" ? 260 : look.s === "haru" ? 210 : 170,
+      Object.assign({}, tones, look.crown),
     );
   else {
     const ends = [
@@ -4185,33 +5293,33 @@ function sceneEngawa(K, hour, mini, sk, o = {}) {
     ];
     ends.forEach(([x, y], i) => {
       for (let k = 0; k < 3; k++) {
-        const a = -Math.PI / 2 + (i % 2 ? 0.9 : -0.9) * (0.3 + rg()),
-          l = 26 + rg() * 30;
-        const e = [x + Math.cos(a) * l, y + Math.sin(a) * l];
-        Br(
-          gd,
-          rg,
-          [[x, y], [lerp(x, e[0], 0.5) + J(rg, 4), lerp(y, e[1], 0.5)], e],
+        const angle = -Math.PI / 2 + (i % 2 ? 0.9 : -0.9) * (0.3 + gardenRand()),
+          length = 26 + gardenRand() * 30;
+        const end = [x + Math.cos(angle) * length, y + Math.sin(angle) * length];
+        brushStroke(
+          garden,
+          gardenRand,
+          [[x, y], [lerp(x, end[0], 0.5) + jitter(gardenRand, 4), lerp(y, end[1], 0.5)], end],
           2.2,
-          K.ink,
+          tones.ink,
           0.85,
           { tip: 0.2 },
         );
         if (k === 0)
           snowCap(
-            gd,
-            rg,
+            garden,
+            gardenRand,
             [
-              [lerp(x, e[0], 0.15), lerp(y, e[1], 0.15) - 2],
-              [lerp(x, e[0], 0.6), lerp(y, e[1], 0.6) - 2],
+              [lerp(x, end[0], 0.15), lerp(y, end[1], 0.15) - 2],
+              [lerp(x, end[0], 0.6), lerp(y, end[1], 0.6) - 2],
             ],
             2.6,
           );
       }
     });
     snowCap(
-      gd,
-      rg,
+      garden,
+      gardenRand,
       [
         [990, 327],
         [1030, 297],
@@ -4220,8 +5328,8 @@ function sceneEngawa(K, hour, mini, sk, o = {}) {
       3.4,
     );
     snowCap(
-      gd,
-      rg,
+      garden,
+      gardenRand,
       [
         [978, 287],
         [940, 259],
@@ -4230,28 +5338,30 @@ function sceneEngawa(K, hour, mini, sk, o = {}) {
       3.2,
     );
   }
-  const lights = G({ washO: 1 }),
-    rl = R("lights");
-  lantern(gd, rg, 820, 452, 0.62, K, L.lamp > 0.5);
-  if (Z.snow) {
-    mounds.forEach(([x, y, a, b]) =>
+  const lights = newGroup({ washO: 1 }),
+    lightsRand = randFor("lights");
+  lantern(garden, gardenRand, 820, 452, 0.62, tones, light.lamp > 0.5);
+  if (look.snow) {
+    mounds.forEach(([x, y, rx, ry]) =>
       snowCap(
-        gd,
-        rg,
+        garden,
+        gardenRand,
         [
-          [x - a * 0.8, y - b * 0.35],
-          [x - a * 0.5, y - b * 0.85],
-          [x, y - b - 1],
-          [x + a * 0.55, y - b * 0.78],
-          [x + a * 0.8, y - b * 0.3],
+          [x - rx * 0.8, y - ry * 0.35],
+          [x - rx * 0.5, y - ry * 0.85],
+          [x, y - ry - 1],
+          [x + rx * 0.55, y - ry * 0.78],
+          [x + rx * 0.8, y - ry * 0.3],
         ],
-        b * 0.5,
+        ry * 0.5,
       ),
     );
-    steps.forEach(([x, y, a, b]) => snowCap(gd, rg, arcTop(x, y - 1, a * 0.85, b * 0.9), b * 0.55));
+    steps.forEach(([x, y, rx, ry]) =>
+      snowCap(garden, gardenRand, arcTop(x, y - 1, rx * 0.85, ry * 0.9), ry * 0.55),
+    );
     snowCap(
-      gd,
-      rg,
+      garden,
+      gardenRand,
       [
         [802, 404],
         [811, 399],
@@ -4262,237 +5372,360 @@ function sceneEngawa(K, hour, mini, sk, o = {}) {
       5,
     );
   }
-  [gw.wash, gd.wash] = [gd.wash, []];
-  const hs = G({ still: true }),
-    rh = R("house");
-  groups.push(hs);
-  const eave = (x) => lerp(70, 22, (x + 10) / 1120),
-    beam = (x) => lerp(108, 74, (x + 10) / 820);
+  [gardenWash.wash, garden.wash] = [garden.wash, []];
+  const house = newGroup({ still: true }),
+    houseRand = randFor("house");
+  groups.push(house);
+  const eaveY = (x) => lerp(70, 22, (x + 10) / 1120),
+    beamY = (x) => lerp(108, 74, (x + 10) / 820);
   inked(
-    hs,
-    rh,
-    wpoly(
-      rh,
+    house,
+    houseRand,
+    wobblyPolygon(
+      houseRand,
       [
         [-10, -10],
-        [W + 10, -10],
-        [W + 10, eave(W + 10)],
-        [-10, eave(-10)],
+        [width + 10, -10],
+        [width + 10, eaveY(width + 10)],
+        [-10, eaveY(-10)],
       ],
       1,
     ),
-    mix(K.woodDk, K.ink, 0.25),
-    K.ink,
+    mix(tones.woodDk, tones.ink, 0.25),
+    tones.ink,
     1.4,
   );
-  for (let x = 20; x < W; x += 38) {
-    Ln(hs, wseg(rh, [x, eave(x) - 2], [x - 34, -10], 0.6, 2), K.ink, 2.2, 0.6, true);
-    inked(hs, rh, wbox(rh, x - 4, eave(x) - 7, x + 4, eave(x) + 1, 0.4), K.woodLt, K.ink, 0.8);
+  for (let x = 20; x < width; x += 38) {
+    addLine(
+      house,
+      wobblySegment(houseRand, [x, eaveY(x) - 2], [x - 34, -10], 0.6, 2),
+      tones.ink,
+      2.2,
+      0.6,
+      true,
+    );
+    inked(
+      house,
+      houseRand,
+      wobblyBox(houseRand, x - 4, eaveY(x) - 7, x + 4, eaveY(x) + 1, 0.4),
+      tones.woodLt,
+      tones.ink,
+      0.8,
+    );
   }
-  if (Z.snow) {
+  if (look.snow) {
     snowCap(
-      hs,
-      rh,
+      house,
+      houseRand,
       [
-        [-10, eave(-10) + 1],
-        [360, eave(360) + 2],
-        [740, eave(740) + 1],
-        [W + 10, eave(W + 10) + 2],
+        [-10, eaveY(-10) + 1],
+        [360, eaveY(360) + 2],
+        [740, eaveY(740) + 1],
+        [width + 10, eaveY(width + 10) + 2],
       ],
       7,
     );
-    for (let x = 40; x < W; x += 52 + rh() * 40) {
-      const y = eave(x) + 3,
-        l = 8 + rh() * 22;
-      So(
-        hs,
-        wpoly(
-          rh,
+    for (let x = 40; x < width; x += 52 + houseRand() * 40) {
+      const y = eaveY(x) + 3,
+        length = 8 + houseRand() * 22;
+      addSolid(
+        house,
+        wobblyPolygon(
+          houseRand,
           [
             [x - 2.5, y],
             [x + 2.5, y],
-            [x + 0.3, y + l],
+            [x + 0.3, y + length],
           ],
           0.2,
         ),
         mix(SNOW, "#bcd0e2", 0.4),
         0.95,
       );
-      Ln(hs, wseg(rh, [x - 2, y], [x, y + l], 0.1, 1), "#8fa3ba", 0.6, 0.6, true);
+      addLine(
+        house,
+        wobblySegment(houseRand, [x - 2, y], [x, y + length], 0.1, 1),
+        "#8fa3ba",
+        0.6,
+        0.6,
+        true,
+      );
     }
   }
-  const fl = { A: [-10, 548], B: [835, 490], C: [912, H + 10], D: [-10, H + 10] },
-    edge = (x) => lerp(548, 490, (x + 10) / 845);
-  inked(hs, rh, wbox(rh, -10, beam(-10) - 22, 140, 548, 0.8), K.fusuma, K.ink, 1.2);
-  for (let y = beam(-10); y < 548; y += 46)
-    Ln(hs, wseg(rh, [-10, y], [140, y - 6], 0.4, 2), K.woodDk, 0.9, 0.7, true);
-  for (let x = 18; x < 140; x += 34)
-    Ln(hs, wseg(rh, [x, beam(x) - 18], [x, 546], 0.4, 3), K.woodDk, 0.9, 0.7, true);
-  if (L.lamp > 0.05) So(lights, wbox(rl, -8, beam(-10) - 18, 136, 544, 0.6), K.glow, 0.5 * L.lamp);
+  const floor = { A: [-10, 548], B: [835, 490], C: [912, height + 10], D: [-10, height + 10] },
+    edgeY = (x) => lerp(548, 490, (x + 10) / 845);
   inked(
-    hs,
-    rh,
-    wpoly(
-      rh,
+    house,
+    houseRand,
+    wobblyBox(houseRand, -10, beamY(-10) - 22, 140, 548, 0.8),
+    tones.fusuma,
+    tones.ink,
+    1.2,
+  );
+  for (let y = beamY(-10); y < 548; y += 46)
+    addLine(
+      house,
+      wobblySegment(houseRand, [-10, y], [140, y - 6], 0.4, 2),
+      tones.woodDk,
+      0.9,
+      0.7,
+      true,
+    );
+  for (let x = 18; x < 140; x += 34)
+    addLine(
+      house,
+      wobblySegment(houseRand, [x, beamY(x) - 18], [x, 546], 0.4, 3),
+      tones.woodDk,
+      0.9,
+      0.7,
+      true,
+    );
+  if (light.lamp > 0.05)
+    addSolid(
+      lights,
+      wobblyBox(lightsRand, -8, beamY(-10) - 18, 136, 544, 0.6),
+      tones.glow,
+      0.5 * light.lamp,
+    );
+  inked(
+    house,
+    houseRand,
+    wobblyPolygon(
+      houseRand,
       [
-        [-10, beam(-10) - 14],
-        [840, beam(840) - 12],
-        [840, beam(840) + 4],
-        [-10, beam(-10) + 6],
+        [-10, beamY(-10) - 14],
+        [840, beamY(840) - 12],
+        [840, beamY(840) + 4],
+        [-10, beamY(-10) + 6],
       ],
       0.6,
     ),
-    K.wood,
-    K.ink,
+    tones.wood,
+    tones.ink,
     1.3,
   );
   [
     [150, 26],
     [790, 16],
-  ].forEach(([x, w]) =>
+  ].forEach(([x, span]) =>
     inked(
-      hs,
-      rh,
-      wbox(rh, x - w / 2, beam(x) - 10, x + w / 2, edge(x) + 4, 0.6),
-      x < 400 ? K.wood : mix(K.wood, K.ink, 0.1),
-      K.ink,
+      house,
+      houseRand,
+      wobblyBox(houseRand, x - span / 2, beamY(x) - 10, x + span / 2, edgeY(x) + 4, 0.6),
+      x < 400 ? tones.wood : mix(tones.wood, tones.ink, 0.1),
+      tones.ink,
       1.4,
     ),
   );
   // reed blind
-  const sx0 = 168,
-    sx1 = 470,
-    sb = Z.blind || beam(sx0) + 20;
-  if (Z.blind) {
-    Wa(
-      hs,
-      rh,
-      wpoly(
-        rh,
+  const blindLeft = 168,
+    blindRight = 470,
+    blindBottom = look.blind || beamY(blindLeft) + 20;
+  if (look.blind) {
+    addWash(
+      house,
+      houseRand,
+      wobblyPolygon(
+        houseRand,
         [
-          [sx0, beam(sx0) + 4],
-          [sx1, beam(sx1) + 4],
-          [sx1, sb - 6],
-          [sx0, sb - 2],
+          [blindLeft, beamY(blindLeft) + 4],
+          [blindRight, beamY(blindRight) + 4],
+          [blindRight, blindBottom - 6],
+          [blindLeft, blindBottom - 2],
         ],
         0.6,
       ),
-      K.bamboo,
+      tones.bamboo,
       0.55,
     );
-    for (let y = 0; y < sb - beam(sx0) - 6; y += 4.5)
-      Ln(
-        hs,
-        wseg(rh, [sx0, beam(sx0) + 6 + y], [sx1, beam(sx1) + 6 + y], 0.3, 3),
-        mix(K.bamboo, K.ink, 0.35),
+    for (let y = 0; y < blindBottom - beamY(blindLeft) - 6; y += 4.5)
+      addLine(
+        house,
+        wobblySegment(
+          houseRand,
+          [blindLeft, beamY(blindLeft) + 6 + y],
+          [blindRight, beamY(blindRight) + 6 + y],
+          0.3,
+          3,
+        ),
+        mix(tones.bamboo, tones.ink, 0.35),
         0.6,
         0.5,
         true,
       );
   }
   inked(
-    hs,
-    rh,
-    wpoly(
-      rh,
+    house,
+    houseRand,
+    wobblyPolygon(
+      houseRand,
       [
-        [sx0 - 4, sb - 8],
-        [sx1 + 4, sb - 12],
-        [sx1 + 4, sb + 6],
-        [sx0 - 4, sb + 10],
+        [blindLeft - 4, blindBottom - 8],
+        [blindRight + 4, blindBottom - 12],
+        [blindRight + 4, blindBottom + 6],
+        [blindLeft - 4, blindBottom + 10],
       ],
       0.8,
     ),
-    K.bamboo,
-    K.ink,
+    tones.bamboo,
+    tones.ink,
     1.2,
   );
-  [240, 400].forEach((x) => cordTie(hs, rh, x, sb - 1, 0.6, K));
+  [240, 400].forEach((x) => cordTie(house, houseRand, x, blindBottom - 1, 0.6, tones));
   // wind chime
-  const fx = 610,
-    fy = beam(fx);
-  if (Z.chime) {
-    const chime = G({
+  const chimeX = 610,
+    chimeY = beamY(chimeX);
+  if (look.chime) {
+    const chime = newGroup({
         anim: mini ? "none" : "sway 4.5s ease-in-out infinite",
-        to: `${fx}px ${fy}px`,
+        to: `${chimeX}px ${chimeY}px`,
       }),
-      rc = R("chime");
+      chimeRand = randFor("chime");
     groups.push(chime);
-    Ln(chime, wseg(rc, [fx, fy], [fx, fy + 52], 0.3, 2), K.ink, 0.8, 0.8, true);
+    addLine(
+      chime,
+      wobblySegment(chimeRand, [chimeX, chimeY], [chimeX, chimeY + 52], 0.3, 2),
+      tones.ink,
+      0.8,
+      0.8,
+      true,
+    );
     inked(
       chime,
-      rc,
+      chimeRand,
       smooth(
         [
-          [fx - 15, fy + 70],
-          [fx - 13, fy + 56],
-          [fx, fy + 50],
-          [fx + 13, fy + 56],
-          [fx + 15, fy + 70],
+          [chimeX - 15, chimeY + 70],
+          [chimeX - 13, chimeY + 56],
+          [chimeX, chimeY + 50],
+          [chimeX + 13, chimeY + 56],
+          [chimeX + 15, chimeY + 70],
         ],
         false,
       ) + " Z",
-      mix(K.mountLt, K.paper, 0.4),
-      K.ink,
+      mix(tones.mountLt, tones.paper, 0.4),
+      tones.ink,
       1.1,
     );
-    Ln(chime, wseg(rc, [fx, fy + 62], [fx, fy + 92], 0.3, 2), K.ink, 0.7, 0.8, true);
-    inked(chime, rc, wbox(rc, fx - 7, fy + 92, fx + 7, fy + 140, 0.4), K.paper, K.ink, 0.9);
-    Tx(chime, {
-      t: Z.chime,
-      tr: `translate(${fx} ${fy + 114})`,
+    addLine(
+      chime,
+      wobblySegment(chimeRand, [chimeX, chimeY + 62], [chimeX, chimeY + 92], 0.3, 2),
+      tones.ink,
+      0.7,
+      0.8,
+      true,
+    );
+    inked(
+      chime,
+      chimeRand,
+      wobblyBox(chimeRand, chimeX - 7, chimeY + 92, chimeX + 7, chimeY + 140, 0.4),
+      tones.paper,
+      tones.ink,
+      0.9,
+    );
+    addText(chime, {
+      t: look.chime,
+      tr: `translate(${chimeX} ${chimeY + 114})`,
       fs: 12,
       font: "'Yuji Syuku', serif",
-      fill: K.red,
+      fill: tones.red,
       o: 0.9,
     });
-  } else inked(hs, rh, wbox(rh, fx - 3, fy - 2, fx + 3, fy + 5, 0.2), K.iron, K.ink, 0.8);
+  } else
+    inked(
+      house,
+      houseRand,
+      wobblyBox(houseRand, chimeX - 3, chimeY - 2, chimeX + 3, chimeY + 5, 0.2),
+      tones.iron,
+      tones.ink,
+      0.8,
+    );
   // floor
-  const fg = G(),
-    rf = R("floor");
-  groups.push(fg);
-  const m = quadMap(fl.A, fl.B, fl.C, fl.D);
-  slab(fg, rf, wpoly(rf, [fl.A, fl.B, fl.C, fl.D], 1), K.woodLt, K);
+  const floorGroup = newGroup(),
+    floorRand = randFor("floor");
+  groups.push(floorGroup);
+  const boardMap = quadMap(floor.A, floor.B, floor.C, floor.D);
+  slab(
+    floorGroup,
+    floorRand,
+    wobblyPolygon(floorRand, [floor.A, floor.B, floor.C, floor.D], 1),
+    tones.woodLt,
+    tones,
+  );
   for (let k = 1; k < 9; k++) {
-    const t = Math.pow(k / 9, 1.3);
-    Ln(fg, wline(rf, [m(0, t), m(0.5, t), m(1, t)], 0.6), K.woodDk, 0.9, 0.6, true);
+    const depth = Math.pow(k / 9, 1.3);
+    addLine(
+      floorGroup,
+      wobblyLine(floorRand, [boardMap(0, depth), boardMap(0.5, depth), boardMap(1, depth)], 0.6),
+      tones.woodDk,
+      0.9,
+      0.6,
+      true,
+    );
   }
   for (let k = 0; k < 7; k++) {
-    const s = rf(),
-      t = Math.floor(rf() * 8) / 9;
-    const a = m(s, Math.pow(t, 1.3)),
-      b = m(s + 0.01, Math.pow(t + 1 / 9, 1.3));
-    Ln(fg, wseg(rf, a, b, 0.3, 1), K.woodDk, 0.8, 0.55, true);
+    const across = floorRand(),
+      band = Math.floor(floorRand() * 8) / 9;
+    const from = boardMap(across, Math.pow(band, 1.3)),
+      to = boardMap(across + 0.01, Math.pow(band + 1 / 9, 1.3));
+    addLine(floorGroup, wobblySegment(floorRand, from, to, 0.3, 1), tones.woodDk, 0.8, 0.55, true);
   }
-  Ln(fg, wline(rf, [fl.A, m(0.5, 0), fl.B], 0.6), K.ink, 2.4, 0.9);
-  const reach = L.up ? lerp(0.85, 0.15, L.alt) : 0;
-  So(
-    fg,
-    wpoly(rf, [m(0, reach), m(1, reach), m(1, 1.02), m(0, 1.02)], 1),
-    K.ink,
-    0.13 * (1 - L.night),
+  addLine(
+    floorGroup,
+    wobblyLine(floorRand, [floor.A, boardMap(0.5, 0), floor.B], 0.6),
+    tones.ink,
+    2.4,
+    0.9,
   );
-  if (L.up)
-    Wa(
-      fg,
-      rf,
-      wpoly(rf, [m(0, 0.01), m(1, 0.01), m(1, reach), m(0, reach)], 1),
-      mix(L.sunC, K.paper, 0.4),
-      0.35 * (0.4 + L.gold),
+  const reach = light.up ? lerp(0.85, 0.15, light.alt) : 0;
+  addSolid(
+    floorGroup,
+    wobblyPolygon(
+      floorRand,
+      [boardMap(0, reach), boardMap(1, reach), boardMap(1, 1.02), boardMap(0, 1.02)],
+      1,
+    ),
+    tones.ink,
+    0.13 * (1 - light.night),
+  );
+  if (light.up)
+    addWash(
+      floorGroup,
+      floorRand,
+      wobblyPolygon(
+        floorRand,
+        [boardMap(0, 0.01), boardMap(1, 0.01), boardMap(1, reach), boardMap(0, reach)],
+        1,
+      ),
+      mix(light.sunC, tones.paper, 0.4),
+      0.35 * (0.4 + light.gold),
       "url(#bk-bleed)",
     );
-  if (Z.snow) snowCap(fg, rf, [m(0.62, 0.02), m(0.8, 0.01), m(0.99, 0.015), m(1, 0.12)], 4);
-  inked(fg, rf, wring(rf, 960, 600, 46, 16, 2, 10), K.stone, K.ink, 1.3);
-  if (Z.snow) snowCap(fg, rf, arcTop(960, 599, 40, 14), 6);
+  if (look.snow)
+    snowCap(
+      floorGroup,
+      floorRand,
+      [boardMap(0.62, 0.02), boardMap(0.8, 0.01), boardMap(0.99, 0.015), boardMap(1, 0.12)],
+      4,
+    );
+  inked(
+    floorGroup,
+    floorRand,
+    wobblyRing(floorRand, 960, 600, 46, 16, 2, 10),
+    tones.stone,
+    tones.ink,
+    1.3,
+  );
+  if (look.snow) snowCap(floorGroup, floorRand, arcTop(960, 599, 40, 14), 6);
   [
     [940, 594],
     [968, 602],
   ].forEach(([x, y]) => {
     inked(
-      fg,
-      rf,
-      wpoly(
-        rf,
+      floorGroup,
+      floorRand,
+      wobblyPolygon(
+        floorRand,
         [
           [x - 9, y - 4],
           [x + 9, y - 6],
@@ -4501,14 +5734,14 @@ function sceneEngawa(K, hour, mini, sk, o = {}) {
         ],
         0.4,
       ),
-      K.wood,
-      K.ink,
+      tones.wood,
+      tones.ink,
       1,
     );
-    Ln(
-      fg,
-      wline(
-        rf,
+    addLine(
+      floorGroup,
+      wobblyLine(
+        floorRand,
         [
           [x - 5, y - 2],
           [x + 1, y - 5],
@@ -4516,59 +5749,62 @@ function sceneEngawa(K, hour, mini, sk, o = {}) {
         ],
         0.2,
       ),
-      K.red,
+      tones.red,
       1.4,
       0.95,
       true,
     );
   });
   // things on the boards
-  const ob = G(),
-    ro = R("things");
-  groups.push(ob);
-  if (L.up) {
-    const dx = Math.max(-260, Math.min(260, (150 - lerp(-80, W + 80, L.st)) * 0.5 * (1.2 - L.alt)));
-    Wa(
-      ob,
-      ro,
-      wpoly(
-        ro,
+  const things = newGroup(),
+    thingsRand = randFor("things");
+  groups.push(things);
+  if (light.up) {
+    const shadowShift = Math.max(
+      -260,
+      Math.min(260, (150 - lerp(-80, width + 80, light.st)) * 0.5 * (1.2 - light.alt)),
+    );
+    addWash(
+      things,
+      thingsRand,
+      wobblyPolygon(
+        thingsRand,
         [
-          [137, edge(137) + 2],
-          [163, edge(163) + 2],
-          [163 + dx, edge(163) + 70 * (1 - L.alt) + 12],
-          [137 + dx, edge(137) + 70 * (1 - L.alt) + 16],
+          [137, edgeY(137) + 2],
+          [163, edgeY(163) + 2],
+          [163 + shadowShift, edgeY(163) + 70 * (1 - light.alt) + 12],
+          [137 + shadowShift, edgeY(137) + 70 * (1 - light.alt) + 16],
         ],
         1,
       ),
-      K.ink,
-      0.22 * (1 - L.night),
+      tones.ink,
+      0.22 * (1 - light.night),
       "url(#bk-bleed)",
     );
   }
 
-  if (o.lifted == null)
+  if (opts.lifted == null)
     sleeve(
-      ob,
-      ro,
+      things,
+      thingsRand,
       [
         [400, 600],
         [462, 592],
         [470, 630],
         [404, 638],
       ],
-      K,
-      o.disc ?? 0,
+      tones,
+      opts.disc ?? 0,
     );
-  teaCup(groups, ob, ro, 360, 586, K, mini);
-  koro(groups, ob, ro, 424, 566, K, mini, o.burnt, o.unlit);
-  recordPlayer(ob, ro, 548, 548, 1, K, L, o.disc ?? 0);
-  crate(groups, R("crate"), K, o.disc ?? 0, o.lifted);
+  teaCup(groups, things, thingsRand, 360, 586, tones, mini);
+  koro(groups, things, thingsRand, 424, 566, tones, mini, opts.burnt, opts.unlit);
+  recordPlayer(things, thingsRand, 548, 548, 1, tones, light, opts.disc ?? 0);
+  crate(groups, randFor("crate"), tones, opts.disc ?? 0, opts.lifted);
 
   // hung from the beam right of the player
-  const LX = 700,
-    under = [LX, edge(LX)],
-    cast = ([px, py], k) => [px + (px - under[0]) * k, py + (py - under[1]) * k],
+  const lampX = 700,
+    under = [lampX, edgeY(lampX)],
+    cast = ([px, py], scale) => [px + (px - under[0]) * scale, py + (py - under[1]) * scale],
     shade = [
       cast([470, 550], 0.42),
       cast([482, 589], 0.1),
@@ -4577,14 +5813,14 @@ function sceneEngawa(K, hour, mini, sk, o = {}) {
       [616, 540],
       [470, 550],
     ],
-    lampPool = G({ washO: 1, clip: "url(#engawa-lamp-shade)" });
+    lampPool = newGroup({ washO: 1, clip: "url(#engawa-lamp-shade)" });
   clips.push({
     id: "engawa-lamp-shade",
-    d: poly([
+    d: polygonPath([
       [-20, -20],
-      [W + 20, -20],
-      [W + 20, H + 20],
-      [-20, H + 20],
+      [width + 20, -20],
+      [width + 20, height + 20],
+      [-20, height + 20],
       [-20, shade[0][1]],
       ...shade,
       shade[0],
@@ -4592,210 +5828,264 @@ function sceneEngawa(K, hour, mini, sk, o = {}) {
     ]),
   });
   hangingLamp(
-    ob,
+    things,
     lights,
     lampPool,
-    ro,
-    LX,
-    beam(LX),
-    K,
-    o.lamp ?? L.lamp,
-    0.35 + 0.65 * L.night,
-    m,
-    edge,
+    thingsRand,
+    lampX,
+    beamY(lampX),
+    tones,
+    opts.lamp ?? light.lamp,
+    0.35 + 0.65 * light.night,
+    boardMap,
+    edgeY,
   );
 
   // what the season puts in the air, and what has come down on the boards
-  if (Z.fall) {
-    const air = G(),
-      ra = R("air/" + Z.s);
+  if (look.fall) {
+    const air = newGroup(),
+      airRand = randFor("air/" + look.s);
     groups.push(air);
-    const n = Z.snow ? (mini ? 90 : 160) : mini ? 14 : 24;
-    falling(air, ra, Z.s, Z.fall, n, Z.snow ? 0 : 560, W, Z.snow ? 60 : 200, Z.snow ? H : 560);
-    if (!Z.snow) {
-      falling(air, ra, Z.s, Z.fall, 9, 560, 1100, 380, 560);
+    const count = look.snow ? (mini ? 90 : 160) : mini ? 14 : 24;
+    falling(
+      air,
+      airRand,
+      look.s,
+      look.fall,
+      count,
+      look.snow ? 0 : 560,
+      width,
+      look.snow ? 60 : 200,
+      look.snow ? height : 560,
+    );
+    if (!look.snow) {
+      falling(air, airRand, look.s, look.fall, 9, 560, 1100, 380, 560);
       for (let k = 0; k < 5; k++) {
-        const [x, y] = m(0.55 + ra() * 0.4, 0.05 + ra() * 0.35);
-        falling(air, ra, Z.s, Z.fall, 1, x, x + 2, y, y + 2);
+        const [x, y] = boardMap(0.55 + airRand() * 0.4, 0.05 + airRand() * 0.35);
+        falling(air, airRand, look.s, look.fall, 1, x, x + 2, y, y + 2);
       }
     }
   }
-  if (L.lamp > 0.5) lampGlow(lights, rl, 820, 410, 34, 26, K, L.lamp);
-  if (L.night > 0.4 && Z.s === "natsu") fireflies(lights, rl, 860, 1090, 380, 500, 9, L.night);
-  veil(groups, W, H, L);
+  if (light.lamp > 0.5) lampGlow(lights, lightsRand, 820, 410, 34, 26, tones, light.lamp);
+  if (light.night > 0.4 && look.s === "natsu")
+    fireflies(lights, lightsRand, 860, 1090, 380, 500, 9, light.night);
+  veil(groups, width, height, light);
   groups.push(lampPool, lights);
-  if (L.mUp && L.night > 0.3 && mp[0] > 860) {
-    const lm = G({ washO: 1 });
-    moonDisc(lm, rl, mp[0], mp[1], 17, 0.55, L, L.night * 0.9);
-    groups.push(lm);
+  if (light.mUp && light.night > 0.3 && moonAt[0] > 860) {
+    const moonGroup = newGroup({ washO: 1 });
+    moonDisc(moonGroup, lightsRand, moonAt[0], moonAt[1], 17, 0.55, light, light.night * 0.9);
+    groups.push(moonGroup);
   }
-  if (!mini) ensoDial(groups, K, L, 1050, 98, 32);
-  return { W, H, groups, clips };
+  if (!mini) ensoDial(groups, tones, light, 1050, 98, 32);
+  return { W: width, H: height, groups, clips };
 }
 
 // cards
-function washi(g, r, x, y, w, h, K, tilt) {
-  const pts = [],
-    tl = tilt || 0,
-    P = (px, py) => [x + px + py * tl, y + py - px * tl];
-  for (let i = 0; i <= 10; i++) pts.push(P((w * i) / 10 + J(r, 1.5), J(r, 1.2)));
-  for (let i = 1; i <= 8; i++) pts.push(P(w + J(r, 1.6), (h * i) / 9));
+function washi(group, rand, x, y, width, height, tones, tilt) {
+  const points = [],
+    slant = tilt || 0,
+    at = (px, py) => [x + px + py * slant, y + py - px * slant];
+  for (let i = 0; i <= 10; i++)
+    points.push(at((width * i) / 10 + jitter(rand, 1.5), jitter(rand, 1.2)));
+  for (let i = 1; i <= 8; i++) points.push(at(width + jitter(rand, 1.6), (height * i) / 9));
   for (let i = 0; i <= 22; i++)
-    pts.push(P(w - (w * i) / 22, h + J(r, 5) + Math.sin(i * 1.7) * 2.5));
-  for (let i = 8; i >= 1; i--) pts.push(P(J(r, 1.6), (h * i) / 9));
-  const d = poly(pts);
-  Wa(g, r, poly(pts.map(([a, b]) => [a + 7, b + 9])), K.pool, 0.9, "url(#bk-pool)");
-  So(g, d, mix(K.paper, K.gold, 0.08), 1, TREM);
-  Wa(g, r, d, mix(K.paper, K.tape || K.gold, 0.25), 0.35, "url(#bk-bleed)");
-  for (let k = 0; k < Math.round((w * h) / 9000); k++) {
-    const a = P(r() * w, r() * h);
-    Ln(
-      g,
-      wline(
-        r,
-        [a, [a[0] + 6 + r() * 10, a[1] + J(r, 4)], [a[0] + 12 + r() * 12, a[1] + J(r, 5)]],
+    points.push(at(width - (width * i) / 22, height + jitter(rand, 5) + Math.sin(i * 1.7) * 2.5));
+  for (let i = 8; i >= 1; i--) points.push(at(jitter(rand, 1.6), (height * i) / 9));
+  const outline = polygonPath(points);
+  addWash(
+    group,
+    rand,
+    polygonPath(points.map(([dx, dy]) => [dx + 7, dy + 9])),
+    tones.pool,
+    0.9,
+    "url(#bk-pool)",
+  );
+  addSolid(group, outline, mix(tones.paper, tones.gold, 0.08), 1, TREMBLE_FILTER);
+  addWash(
+    group,
+    rand,
+    outline,
+    mix(tones.paper, tones.tape || tones.gold, 0.25),
+    0.35,
+    "url(#bk-bleed)",
+  );
+  for (let k = 0; k < Math.round((width * height) / 9000); k++) {
+    const speck = at(rand() * width, rand() * height);
+    addLine(
+      group,
+      wobblyLine(
+        rand,
+        [
+          speck,
+          [speck[0] + 6 + rand() * 10, speck[1] + jitter(rand, 4)],
+          [speck[0] + 12 + rand() * 12, speck[1] + jitter(rand, 5)],
+        ],
         0.5,
       ),
-      K.inkSoft,
+      tones.inkSoft,
       0.5,
       0.18,
       true,
     );
   }
-  Ln(g, d, K.ink, 0.9, 0.55);
-  return P;
+  addLine(group, outline, tones.ink, 0.9, 0.55);
+  return at;
 }
-function hanko(g, r, x, y, sz, txt, K) {
-  So(g, wbox(r, x - sz / 2, y - sz / 2, x + sz / 2, y + sz / 2, sz * 0.04), K.red, 0.88, TREM);
-  Tx(g, {
-    t: txt,
-    tr: `translate(${f1(x)} ${f1(y)})`,
-    fs: sz * (txt.length > 1 ? 0.42 : 0.66),
+function hanko(group, rand, x, y, size, glyphs, tones) {
+  addSolid(
+    group,
+    wobblyBox(rand, x - size / 2, y - size / 2, x + size / 2, y + size / 2, size * 0.04),
+    tones.red,
+    0.88,
+    TREMBLE_FILTER,
+  );
+  addText(group, {
+    t: glyphs,
+    tr: `translate(${roundCoord(x)} ${roundCoord(y)})`,
+    fs: size * (glyphs.length > 1 ? 0.42 : 0.66),
     font: "'Yuji Syuku', serif",
-    fill: K.paper,
-    wm: txt.length > 1 ? "vertical-rl" : "horizontal-tb",
+    fill: tones.paper,
+    wm: glyphs.length > 1 ? "vertical-rl" : "horizontal-tb",
   });
 }
 // left-aligned lines
-function para(g, text, x, y, w, fs, K, o) {
-  const max = Math.floor(w / (fs * 0.47)),
+function paragraph(group, text, x, y, width, fontSize, tones, props) {
+  const maxChars = Math.floor(width / (fontSize * 0.47)),
     lines = [""];
-  text.split(" ").forEach((wd) => {
-    if ((lines[lines.length - 1] + " " + wd).trim().length > max) lines.push(wd);
-    else lines[lines.length - 1] = (lines[lines.length - 1] + " " + wd).trim();
+  text.split(" ").forEach((word) => {
+    if ((lines[lines.length - 1] + " " + word).trim().length > maxChars) lines.push(word);
+    else lines[lines.length - 1] = (lines[lines.length - 1] + " " + word).trim();
   });
-  lines.forEach((t, i) =>
-    Tx(
-      g,
+  lines.forEach((line, i) =>
+    addText(
+      group,
       Object.assign(
         {
-          t,
-          tr: `translate(${f1(x)} ${f1(y + i * fs * 1.45)})`,
-          fs,
-          fill: K.ink,
+          t: line,
+          tr: `translate(${roundCoord(x)} ${roundCoord(y + i * fontSize * 1.45)})`,
+          fs: fontSize,
+          fill: tones.ink,
           o: 0.85,
           an: "start",
         },
-        o || {},
+        props || {},
       ),
     ),
   );
-  return y + lines.length * fs * 1.45;
+  return y + lines.length * fontSize * 1.45;
 }
 // object drawn by its own scene code
-function vignette(groups, x, y, s, draw) {
-  const gs = [],
-    g = G();
-  gs.push(g);
-  draw(gs, g);
-  gs.forEach((q) => {
-    q.tf = `translate(${f1(x)}px, ${f1(y)}px) scale(${s})`;
-    q.to = "0px 0px";
-    q.anim = "none";
-    groups.push(q);
+function vignette(groups, x, y, scale, draw) {
+  const layers = [],
+    group = newGroup();
+  layers.push(group);
+  draw(layers, group);
+  layers.forEach((layer) => {
+    layer.tf = `translate(${roundCoord(x)}px, ${roundCoord(y)}px) scale(${scale})`;
+    layer.to = "0px 0px";
+    layer.anim = "none";
+    groups.push(layer);
   });
 }
 // frame every card shares
-function cardFrame(groups, K, key, x, y, w, h, jp, en, seal) {
-  const g = G(),
-    r = rng(hash("card/" + key));
-  groups.push(g);
-  washi(g, r, x, y, w, h, K, 0);
-  const pts = [];
+function cardFrame(groups, tones, key, x, y, width, height, jp, en, seal) {
+  const group = newGroup(),
+    rand = rng(hash("card/" + key));
+  groups.push(group);
+  washi(group, rand, x, y, width, height, tones, 0);
+  const points = [];
   for (let i = 0; i <= 22; i++) {
-    const a = -2.2 + (i / 22) * 5.6;
-    pts.push([x + 200 + Math.cos(a) * 118, y + 150 + Math.sin(a) * 104]);
+    const angle = -2.2 + (i / 22) * 5.6;
+    points.push([x + 200 + Math.cos(angle) * 118, y + 150 + Math.sin(angle) * 104]);
   }
-  BrW(g, r, pts, 20, K.inkSoft, 0.22, { tip: 0.2 });
-  Tx(g, {
+  brushWash(group, rand, points, 20, tones.inkSoft, 0.22, { tip: 0.2 });
+  addText(group, {
     t: jp,
-    tr: `translate(${f1(x + w - 46)} ${f1(y + 40 + jp.length * 22)})`,
+    tr: `translate(${roundCoord(x + width - 46)} ${roundCoord(y + 40 + jp.length * 22)})`,
     fs: 40,
     font: "'Yuji Syuku', serif",
-    fill: K.ink,
+    fill: tones.ink,
     wm: "vertical-rl",
     o: 0.92,
   });
-  Br(
-    g,
-    r,
+  brushStroke(
+    group,
+    rand,
     [
-      [x + w - 28, y + 26],
-      [x + w - 18, y + 36],
+      [x + width - 28, y + 26],
+      [x + width - 18, y + 36],
     ],
     2.6,
-    K.ink,
+    tones.ink,
     0.7,
   );
-  Br(
-    g,
-    r,
+  brushStroke(
+    group,
+    rand,
     [
-      [x + w - 18, y + 26],
-      [x + w - 28, y + 36],
+      [x + width - 18, y + 26],
+      [x + width - 28, y + 36],
     ],
     2.6,
-    K.ink,
+    tones.ink,
     0.7,
   );
-  Tx(g, { t: en, tr: `translate(${f1(x + 36)} ${f1(y + 296)})`, fs: 30, fill: K.ink, an: "start" });
-  Ln(
-    g,
-    wline(
-      r,
+  addText(group, {
+    t: en,
+    tr: `translate(${roundCoord(x + 36)} ${roundCoord(y + 296)})`,
+    fs: 30,
+    fill: tones.ink,
+    an: "start",
+  });
+  addLine(
+    group,
+    wobblyLine(
+      rand,
       [
         [x + 36, y + 318],
         [x + 200, y + 316],
-        [x + w - 120, y + 319],
+        [x + width - 120, y + 319],
       ],
       0.8,
     ),
-    K.ink,
+    tones.ink,
     1,
     0.35,
   );
-  if (seal) hanko(g, r, x + w - 50, y + h - 56, 38, seal, K);
-  const t = G();
-  groups.push(t);
-  return { g: t, r: rng(hash("card/" + key + "/t")), x0: x + 36, w: w - 72, y0: y + 352 };
+  if (seal) hanko(group, rand, x + width - 50, y + height - 56, 38, seal, tones);
+  const textGroup = newGroup();
+  groups.push(textGroup);
+  return {
+    g: textGroup,
+    r: rng(hash("card/" + key + "/t")),
+    x0: x + 36,
+    w: width - 72,
+    y0: y + 352,
+  };
 }
-function knob(g, r, x, y, jp, en, K, on) {
+function knob(group, rand, x, y, jp, en, tones, active) {
   inked(
-    g,
-    r,
-    wring(r, x, y, 21, 21, 1, 10),
-    on ? mix(K.red, K.paper, 0.75) : mix(K.paper, K.stone, 0.25),
-    K.ink,
+    group,
+    rand,
+    wobblyRing(rand, x, y, 21, 21, 1, 10),
+    active ? mix(tones.red, tones.paper, 0.75) : mix(tones.paper, tones.stone, 0.25),
+    tones.ink,
     1.1,
   );
-  Tx(g, {
+  addText(group, {
     t: jp,
-    tr: `translate(${f1(x)} ${f1(y)})`,
+    tr: `translate(${roundCoord(x)} ${roundCoord(y)})`,
     fs: 20,
     font: "'Yuji Syuku', serif",
-    fill: on ? K.red : K.ink,
+    fill: active ? tones.red : tones.ink,
   });
-  Tx(g, { t: en, tr: `translate(${f1(x)} ${f1(y + 36)})`, fs: 14, fill: K.ink, o: 0.7 });
+  addText(group, {
+    t: en,
+    tr: `translate(${roundCoord(x)} ${roundCoord(y + 36)})`,
+    fs: 14,
+    fill: tones.ink,
+    o: 0.7,
+  });
 }
 // one card for the site
 const CARD = {
@@ -4803,19 +6093,19 @@ const CARD = {
     "蓄音機",
     "the record player",
     null,
-    (gs, g, K) => {
-      const r = rng(hash("vig/rec"));
-      recordPlayer(g, r, 0, 0, 1, K, hourLight(K, 17.6, "aki"));
+    (layers, group, tones) => {
+      const rand = rng(hash("vig/rec"));
+      recordPlayer(group, rand, 0, 0, 1, tones, hourLight(tones, 17.6, "aki"));
       sleeve(
-        g,
-        r,
+        group,
+        rand,
         [
           [-118, -26],
           [-80, -36],
           [-76, 2],
           [-114, 10],
         ],
-        K,
+        tones,
         0,
       );
     },
@@ -4827,7 +6117,8 @@ const CARD = {
     "香炉",
     "incense",
     "香",
-    (gs, g, K, o) => koro(gs, g, rng(hash("vig/koro")), 0, 0, K, true, o.burnt ?? 0, !o.lit),
+    (layers, group, tones, opts) =>
+      koro(layers, group, rng(hash("vig/koro")), 0, 0, tones, true, opts.burnt ?? 0, !opts.lit),
     200,
     268,
     1.25,
@@ -4836,12 +6127,12 @@ const CARD = {
     "七十二候",
     "the season, small",
     "候",
-    (gs, g, K, o) => {
-      const r = rng(hash("vig/maple")),
-        Z = seasonLook(K, o.season);
-      Br(
-        g,
-        r,
+    (layers, group, tones, opts) => {
+      const rand = rng(hash("vig/maple")),
+        look = seasonLook(tones, opts.season);
+      brushStroke(
+        group,
+        rand,
         [
           [20, 210],
           [110, 160],
@@ -4849,31 +6140,31 @@ const CARD = {
           [300, 96],
         ],
         7,
-        K.ink,
+        tones.ink,
         0.9,
         { head: 0.9, tip: 0.3 },
       );
-      Br(
-        g,
-        r,
+      brushStroke(
+        group,
+        rand,
         [
           [150, 152],
           [190, 190],
           [240, 200],
         ],
         3.5,
-        K.ink,
+        tones.ink,
         0.85,
         { tip: 0.3 },
       );
-      if (Z.crown) {
-        const k = Object.assign({}, K, Z.crown);
-        maple(g, r, 230, 120, 70, 70, k);
-        maple(g, r, 210, 196, 40, 30, k);
+      if (look.crown) {
+        const crownTones = Object.assign({}, tones, look.crown);
+        maple(group, rand, 230, 120, 70, 70, crownTones);
+        maple(group, rand, 210, 196, 40, 30, crownTones);
       } else {
         snowCap(
-          g,
-          r,
+          group,
+          rand,
           [
             [40, 196],
             [110, 156],
@@ -4883,26 +6174,26 @@ const CARD = {
           4,
         );
       }
-      if (Z.s === "aki")
+      if (look.s === "aki")
         [
           [110, 60],
           [140, 44],
           [170, 32],
           [126, 76],
           [150, 90],
-        ].forEach(([gx, gy]) =>
-          Ln(
-            g,
-            wline(
-              r,
+        ].forEach(([gooseX, gooseY]) =>
+          addLine(
+            group,
+            wobblyLine(
+              rand,
               [
-                [gx - 8, gy + 3],
-                [gx, gy],
-                [gx + 9, gy + 4],
+                [gooseX - 8, gooseY + 3],
+                [gooseX, gooseY],
+                [gooseX + 9, gooseY + 4],
               ],
               0.4,
             ),
-            K.ink,
+            tones.ink,
             1.6,
             0.85,
             true,
@@ -4917,30 +6208,37 @@ const CARD = {
     "音盤",
     "the record crate",
     "箱",
-    (gs, g, K, o) => {
-      const r = rng(hash("vig/crate"));
-      Wa(g, r, wring(r, 0, 74, 170, 14, 1, 12), K.pool, 0.7, "url(#bk-pool)");
-      DISC_LOOK.forEach((_, k) => {
-        const a = ((k - 2) * 9 * Math.PI) / 180,
-          up = k === (o.disc ?? 0) ? 16 : 0,
-          cx = (k - 2) * 46,
-          at = ([u, v]) => [
-            cx + u * Math.cos(a) - v * Math.sin(a),
-            70 - up + u * Math.sin(a) + v * Math.cos(a),
+    (layers, group, tones, opts) => {
+      const rand = rng(hash("vig/crate"));
+      addWash(
+        group,
+        rand,
+        wobblyRing(rand, 0, 74, 170, 14, 1, 12),
+        tones.pool,
+        0.7,
+        "url(#bk-pool)",
+      );
+      DISC_LOOK.forEach((_, slot) => {
+        const tilt = ((slot - 2) * 9 * Math.PI) / 180,
+          lift = slot === (opts.disc ?? 0) ? 16 : 0,
+          cx = (slot - 2) * 46,
+          toDisc = ([u, v]) => [
+            cx + u * Math.cos(tilt) - v * Math.sin(tilt),
+            70 - lift + u * Math.sin(tilt) + v * Math.cos(tilt),
           ],
-          q = G();
-        gs.push(q);
+          sleeveGroup = newGroup();
+        layers.push(sleeveGroup);
         sleeve(
-          q,
-          r,
+          sleeveGroup,
+          rand,
           [
             [-36, -96],
             [36, -98],
             [37, -24],
             [-35, -22],
-          ].map(at),
-          K,
-          k,
+          ].map(toDisc),
+          tones,
+          slot,
         );
       });
     },
@@ -4952,7 +6250,7 @@ const CARD = {
     "灯籠",
     "today's sky",
     "空",
-    (gs, g, K) => lantern(g, rng(hash("vig/lantern")), 0, 0, 1, K, true),
+    (layers, group, tones) => lantern(group, rng(hash("vig/lantern")), 0, 0, 1, tones, true),
     200,
     262,
     2,
@@ -4961,86 +6259,88 @@ const CARD = {
     "茶",
     "the tea",
     "茶",
-    (gs, g, K) => teaCup(gs, g, rng(hash("vig/tea")), 0, 0, K, false),
+    (layers, group, tones) => teaCup(layers, group, rng(hash("vig/tea")), 0, 0, tones, false),
     210,
     280,
     2,
   ],
 };
-function cardShell(K, key, h, o) {
-  const [jp, en, seal, draw, vx, vy, vs] = CARD[key],
+function cardShell(tones, key, height, opts) {
+  const [jp, en, seal, draw, vignetteX, vignetteY, vignetteScale] = CARD[key],
     groups = [];
-  cardFrame(groups, K, key, 6, 6, 520, h, jp, en, seal);
-  vignette(groups, 6 + vx, 6 + vy, vs, (gs, g) => draw(gs, g, K, o || {}));
-  return { W: 540, H: h + 22, groups, clips: [], y0: 358 };
+  cardFrame(groups, tones, key, 6, 6, 520, height, jp, en, seal);
+  vignette(groups, 6 + vignetteX, 6 + vignetteY, vignetteScale, (layers, group) =>
+    draw(layers, group, tones, opts || {}),
+  );
+  return { W: 540, H: height + 22, groups, clips: [], y0: 358 };
 }
 
 export {
-  C,
+  THEME_VARS,
   mix,
-  tones2,
-  setPrec,
+  toneVars,
+  setPrecision,
   TONE_CSS,
   FILTERS,
   groupSvg,
   toSvg,
-  leafD,
-  f1,
+  leafPath,
+  roundCoord,
   leafSpray,
-  J,
-  So,
-  Ln,
-  TREM,
-  culmGeo,
+  jitter,
+  addSolid,
+  addLine,
+  TREMBLE_FILTER,
+  culmGeometry,
   culmPart,
   lerp,
-  wpoly,
-  Wa,
-  WASH,
-  wline,
+  wobblyPolygon,
+  addWash,
+  WASH_FILTER,
+  wobblyLine,
   smooth,
   cutFace,
   culmTop,
   CULMS,
   edgeHit,
   bambooClump,
-  G,
-  wring,
+  newGroup,
+  wobblyRing,
   rng,
   hash,
   sceneBamboo,
-  Tx,
-  dry,
+  addText,
+  dryBrush,
   fingertip,
-  BrW,
-  brushD,
-  Br,
+  brushWash,
+  brushPath,
+  brushStroke,
   CLAYS,
   piece,
-  radAt,
+  radiusAt,
   GLAZES,
   PAINTS,
-  spot,
+  hotspot,
   inked,
-  kan,
+  kanji,
   note,
   wheel,
-  wbox,
+  wobblyBox,
   GLAZE_NAMES,
-  PROF,
+  PROFILES,
   demoSpec,
   spin,
   wetClay,
   arrowLine,
   bucket,
   brushTool,
-  KX,
+  WORKSHOP_WIDTH,
   noren,
-  quad,
-  wseg,
+  projectAll,
+  wobblySegment,
   workshopWalls,
   face,
-  postV,
+  post,
   dryingBench,
   noborigama,
   chamber,
@@ -5048,7 +6348,7 @@ export {
   sceneGarden16,
   steppingStones,
   stone,
-  OB,
+  oblique,
   gableRoof,
   thatchStrokes,
   ridge,
@@ -5056,10 +6356,10 @@ export {
   sekiStone,
   stoneBody,
   mist,
-  mistD,
+  mistPath,
   frames,
   sceneWorkshop,
-  ZP,
+  obliqueScaled,
   sceneWheel,
   sceneShapes,
   heatBar,
@@ -5073,14 +6373,14 @@ export {
   sceneEngawa,
   hourLight,
   SEASONS,
-  solarH,
+  solarHour,
   SKY,
-  sstep,
+  smoothstep,
   seasonLook,
   maple,
   skyLayer,
   stars,
-  STARL,
+  STARLIGHT,
   skyWash,
   arcAt,
   sunDisc,
@@ -5103,12 +6403,12 @@ export {
   falling,
   fireflies,
   veil,
-  poly,
+  polygonPath,
   ensoDial,
-  hhmm,
+  clockLabel,
   washi,
   hanko,
-  para,
+  paragraph,
   vignette,
   cardFrame,
   knob,

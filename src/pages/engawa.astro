@@ -2,10 +2,10 @@
 // Veranda of an old house, looking out at a small garden
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Divider from "../components/Divider.astro";
-import { sceneEngawa, toSvg, tones2, TONE_CSS } from "../utils/tea/ink.js";
+import { sceneEngawa, toSvg, toneVars, TONE_CSS } from "../utils/tea/ink.js";
 import { DISCS } from "../scripts/engawa/discs";
 
-const first = sceneEngawa(tones2(), 17.6, false, "aki", { unlit: true, burnt: 0 });
+const first = sceneEngawa(toneVars(), 17.6, false, "aki", { unlit: true, burnt: 0 });
 const pct = (x: number, y: number, w: number, h: number) =>
   `left:${(x / 1100) * 100}%;top:${(y / 640) * 100}%;width:${(w / 1100) * 100}%;height:${(h / 640) * 100}%`;
 const THINGS = [
@@ -113,7 +113,7 @@ const SEASON = pct(1030, 140, 40, 30);
   import { gardenOf } from "../scripts/engawa/garden";
   import { broadcastOf } from "../scripts/engawa/broadcast";
   import { sliderOf } from "../scripts/engawa/volume";
-  import { hourLight, tones2 } from "../utils/tea/ink.js";
+  import { hourLight, toneVars } from "../utils/tea/ink.js";
 
   const fig = document.querySelector<HTMLElement>(".engawa")!;
   const scene = sceneOf(fig.querySelector("svg")!);
@@ -159,7 +159,7 @@ const SEASON = pct(1030, 140, 40, 30);
         // lit by hand, or put out
         const lit =
           scene.view.lamp ??
-          (hourLight(tones2(), scene.view.hour, scene.view.season).lamp > 0.5 ? 1 : 0);
+          (hourLight(toneVars(), scene.view.hour, scene.view.season).lamp > 0.5 ? 1 : 0);
         scene.view.lamp = lit ? 0 : 1;
         scene.draw();
       } else if (key === "crate") {

@@ -1,7 +1,7 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Divider from "../components/Divider.astro";
-import { sceneGarden16, toSvg, tones2, TONE_CSS } from "../utils/tea/ink.js";
+import { sceneGarden16, toSvg, toneVars, TONE_CSS } from "../utils/tea/ink.js";
 import { clean, turned } from "../utils/tea/pottery";
 import pieces from "../data/pieces.json";
 
@@ -16,7 +16,7 @@ const pct = (x: number, y: number, w: number, h: number) =>
 const DOOR = pct(474, 280, 390, 178);
 const SHUT = `left:${left(670)}%;top:${top(330)}%`;
 const MACHIAI = pct(22, 450, 292, 221);
-const garden = sceneGarden16(tones2(), "start", {
+const garden = sceneGarden16(toneVars(), "start", {
   shelf: (i: number) => (shelf[i] ? turned(shelf[i]) : null),
 });
 ---
@@ -91,11 +91,11 @@ const garden = sceneGarden16(tones2(), "start", {
 <script>
   import {
     bambooClump,
-    Br,
-    BrW,
-    G,
+    brushStroke,
+    brushWash,
+    newGroup,
     groupSvg,
-    tones2,
+    toneVars,
     rng,
     hash,
     sceneGarden16,
@@ -114,7 +114,7 @@ const garden = sceneGarden16(tones2(), "start", {
 
   function draw(cut: Cut, still: boolean) {
     const groups: object[] = [];
-    bambooClump(groups, rng(hash("bb")), CLUMP.x, CLUMP.y, tones2(), 1, cut);
+    bambooClump(groups, rng(hash("bb")), CLUMP.x, CLUMP.y, toneVars(), 1, cut);
     const old = svg.querySelector(".roji-bamboo")!;
     old.outerHTML = groupSvg({ cls: `roji-bamboo${still ? "" : " cutting"}`, groups });
   }
@@ -145,7 +145,7 @@ const garden = sceneGarden16(tones2(), "start", {
       await new Promise((r) => setTimeout(r, 1400));
     }
     const shelf: PieceSpec[] = JSON.parse(fig.dataset.shelf || "[]");
-    const garden = sceneGarden16(tones2(), "open", {
+    const garden = sceneGarden16(toneVars(), "open", {
       shelf: (i: number) => (shelf[i] ? turned(shelf[i]) : null),
       cut,
     });
@@ -227,14 +227,14 @@ const garden = sceneGarden16(tones2(), "start", {
   let trail: P[] = [];
   let slash: SVGGElement | null = null;
   let queued = false;
-  const ink = tones2();
+  const ink = toneVars();
   function paint() {
     queued = false;
     if (!slash || trail.length < 2) return;
-    const g = G(),
+    const g = newGroup(),
       r = rng(hash("slash"));
-    BrW(g, r, trail, 10, ink.gold, 0.55);
-    Br(g, r, trail, 2.4, ink.ink, 0.5, { tip: 0.05, head: 0.1 });
+    brushWash(g, r, trail, 10, ink.gold, 0.55);
+    brushStroke(g, r, trail, 2.4, ink.ink, 0.5, { tip: 0.05, head: 0.1 });
     slash.innerHTML = groupSvg(g);
   }
   function lift(cut: boolean) {
@@ -693,8 +693,7 @@ const garden = sceneGarden16(tones2(), "start", {
       animation-timing-function: cubic-bezier(0.2, 0.6, 0.4, 1);
     }
     74% {
-      transform: translate(var(--tx), calc(var(--ty) - 9px))
-        rotate(calc(var(--r) * 0.94));
+      transform: translate(var(--tx), calc(var(--ty) - 9px)) rotate(calc(var(--r) * 0.94));
       animation-timing-function: cubic-bezier(0.6, 0, 0.8, 0.4);
     }
     84% {
@@ -702,8 +701,7 @@ const garden = sceneGarden16(tones2(), "start", {
       animation-timing-function: cubic-bezier(0.2, 0.6, 0.4, 1);
     }
     90% {
-      transform: translate(var(--tx), calc(var(--ty) - 2px))
-        rotate(calc(var(--r) * 0.99));
+      transform: translate(var(--tx), calc(var(--ty) - 2px)) rotate(calc(var(--r) * 0.99));
       animation-timing-function: ease-in;
     }
     100% {

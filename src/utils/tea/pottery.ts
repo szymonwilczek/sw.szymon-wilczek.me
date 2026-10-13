@@ -1,4 +1,14 @@
-import { hash, rng, G, piece, toSvg, tones2, setPrec, PROF, GLAZE_NAMES } from "./ink.js";
+import {
+  hash,
+  rng,
+  newGroup,
+  piece,
+  toSvg,
+  toneVars,
+  setPrecision,
+  PROFILES,
+  GLAZE_NAMES,
+} from "./ink.js";
 
 // u runs around the body, -1..1 across the front, so a full turn is 4;
 // v runs down from the rim, 0..1
@@ -33,7 +43,7 @@ export interface PieceSpec {
 
 export const CLAY_NAMES = ["buff", "red", "dark", "white"];
 export const PIGMENT_NAMES = ["gosu blue", "iron brown", "bengara red", "white slip"];
-export { GLAZE_NAMES, PROF };
+export { GLAZE_NAMES, PROFILES as PROF };
 
 // ceiling on the JSON
 export const MAX_BYTES = 12_000;
@@ -147,10 +157,10 @@ export function pieceSvg(spec: PieceSpec, turn = 0, scale = 1.5) {
   const H = Math.ceil(spec.H * s + rw * 0.6 * s + 6 * s + 24);
   const cx = 12 + rw * s;
   const cy = 12 + spec.H * s + rw * 0.3 * s;
-  const g = G();
-  setPrec(rw * s < 60 ? 10 : 1);
-  piece(g, rng(hash("piece/" + spec.name + spec.fire)), cx, cy, s, tones2(), turned(spec, turn));
-  setPrec(1);
+  const g = newGroup();
+  setPrecision(rw * s < 60 ? 10 : 1);
+  piece(g, rng(hash("piece/" + spec.name + spec.fire)), cx, cy, s, toneVars(), turned(spec, turn));
+  setPrecision(1);
   return { W, H, svg: toSvg({ W, H, groups: [g], clips: [] }) };
 }
 

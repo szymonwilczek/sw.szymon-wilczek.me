@@ -1,14 +1,14 @@
 import {
-  G,
+  newGroup,
   rng,
   hash,
   wheel,
   piece,
   fingertip,
   CLAYS,
-  So,
-  Ln,
-  wring,
+  addSolid,
+  addLine,
+  wobblyRing,
   note,
   spin,
 } from "../../utils/tea/ink.js";
@@ -45,7 +45,7 @@ export const kindOf = (h: number, handle: boolean) =>
   h < 20 ? "a plate" : handle ? "a cup" : h < 50 ? "a bowl" : "a tall cup";
 
 export function run(host: HTMLElement, w: Work, done: (w: Work) => void, back: () => void) {
-  const base = G();
+  const base = newGroup();
   wheel(base, rng(hash("kobo/wheel")), CX, HEAD, WS, K);
   spin(base, rng(hash("kobo/spin")), CX, HEAD + 10, 120, 30, K);
   const s = stage(host, W, H, ["轆轤", "the wheel"], [base]);
@@ -70,18 +70,18 @@ export function run(host: HTMLElement, w: Work, done: (w: Work) => void, back: (
     const r = rng(hash("kobo/clay"));
     const groups = [];
     if (phase === "clay") {
-      const g = G();
+      const g = newGroup();
       CLAYS(K).forEach((c: string, i: number) => {
         const x = CX + (i - 1.5) * 120;
-        So(g, wring(r, x + 4, 152, 34, 8, 0.4, 10), K.ink, 0.14);
-        So(g, wring(r, x, 130, 30, 22, 3, 10), c, 1);
-        Ln(g, wring(r, x, 130, 30, 22, 3, 10), K.ink, 1.1, 0.85);
+        addSolid(g, wobblyRing(r, x + 4, 152, 34, 8, 0.4, 10), K.ink, 0.14);
+        addSolid(g, wobblyRing(r, x, 130, 30, 22, 3, 10), c, 1);
+        addLine(g, wobblyRing(r, x, 130, 30, 22, 3, 10), K.ink, 1.1, 0.85);
         note(g, x, 182, CLAY_NAMES[i], K, 15, 0.7);
       });
       groups.push(g);
     } else {
       const { prof: p, H: ht } = lump();
-      const c = G({ cls: "kobo-clay" });
+      const c = newGroup({ cls: "kobo-clay" });
       piece(c, r, CX, FOOT, CS, K, {
         prof: p,
         H: ht,
@@ -92,7 +92,7 @@ export function run(host: HTMLElement, w: Work, done: (w: Work) => void, back: (
       });
       groups.push(c);
       const top = FOOT - ht * CS;
-      const f = G();
+      const f = newGroup();
       if (phase === "centre" && pressing) {
         const half = p[1][0] * CS + 18;
         fingertip(f, r, CX - half, FOOT - ht * CS * 0.5, K);
@@ -100,7 +100,7 @@ export function run(host: HTMLElement, w: Work, done: (w: Work) => void, back: (
       }
       if (phase === "open" && depth > 0) {
         const rx = (5 + Math.min(depth, 1.2) * 16) * CS;
-        So(f, wring(r, CX, top + 2, rx, rx * 0.28, 0.4, 14), K.ink, 0.28 + depth * 0.2);
+        addSolid(f, wobblyRing(r, CX, top + 2, rx, rx * 0.28, 0.4, 14), K.ink, 0.28 + depth * 0.2);
         fingertip(f, r, CX, top - 8 + depth * 30, K);
       }
       if (phase === "pull" && pressing) {
@@ -110,8 +110,8 @@ export function run(host: HTMLElement, w: Work, done: (w: Work) => void, back: (
       if (phase === "shape") {
         p.forEach(([rr, v]) => {
           const at = dot(rr, v);
-          So(f, wring(r, at[0], at[1], 7, 7, 0.3, 10), K.paper, 1);
-          Ln(f, wring(r, at[0], at[1], 7, 7, 0.3, 10), K.ink, 1.2, 0.9);
+          addSolid(f, wobblyRing(r, at[0], at[1], 7, 7, 0.3, 10), K.paper, 1);
+          addLine(f, wobblyRing(r, at[0], at[1], 7, 7, 0.3, 10), K.ink, 1.2, 0.9);
         });
       }
       groups.push(f);

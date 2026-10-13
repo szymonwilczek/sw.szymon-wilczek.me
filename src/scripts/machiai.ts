@@ -1,15 +1,15 @@
 // shelf in the waiting room, close up
 
 import {
-  G,
+  newGroup,
   rng,
   hash,
   piece,
   inked,
-  wbox,
-  So,
-  Br,
-  Tx,
+  wobblyBox,
+  addSolid,
+  brushStroke,
+  addText,
   note,
   sceneShelf,
 } from "../utils/tea/ink.js";
@@ -61,15 +61,15 @@ const CARD = { x0: 700, y0: 70, x1: 1040, y1: 400 };
 
 function hands(host: HTMLElement, p: PieceSpec, theirs: boolean, back: () => void) {
   const r = rng(hash("machiai/card"));
-  const card = G();
-  inked(card, r, wbox(r, CARD.x0, CARD.y0, CARD.x1, CARD.y1, 0.8), K.paper, K.ink, 1.1);
+  const card = newGroup();
+  inked(card, r, wobblyBox(r, CARD.x0, CARD.y0, CARD.x1, CARD.y1, 0.8), K.paper, K.ink, 1.1);
   const mx = (CARD.x0 + CARD.x1) / 2;
   // the name as they wrote it, else in a hand like theirs
   if (p.sign.length) {
     const bw = 220,
       bh = (bw * 170) / 360;
     p.sign.forEach((line) =>
-      Br(
+      brushStroke(
         card,
         r,
         line.map(([u, v]) => [mx - bw / 2 - 20 + u * bw, CARD.y0 + 6 + v * bh]),
@@ -80,7 +80,7 @@ function hands(host: HTMLElement, p: PieceSpec, theirs: boolean, back: () => voi
       ),
     );
   } else
-    Tx(card, {
+    addText(card, {
       t: p.name,
       tr: `translate(${mx - 20} ${CARD.y0 + 60})`,
       fs: 30,
@@ -90,8 +90,8 @@ function hands(host: HTMLElement, p: PieceSpec, theirs: boolean, back: () => voi
     });
   const sx = CARD.x1 - 36,
     sy = CARD.y0 + 40;
-  So(card, wbox(r, sx - 18, sy - 18, sx + 18, sy + 18, 0.4), K.red, 0.88);
-  Tx(card, {
+  addSolid(card, wobblyBox(r, sx - 18, sy - 18, sx + 18, sy + 18, 0.4), K.red, 0.88);
+  addText(card, {
     t: sealOf(p.name),
     tr: `translate(${sx} ${sy})`,
     fs: 22,
@@ -117,7 +117,7 @@ function hands(host: HTMLElement, p: PieceSpec, theirs: boolean, back: () => voi
   const s = fit(p, 420, 330, 4);
   let turn = 0;
   const draw = () => {
-    const g = G();
+    const g = newGroup();
     piece(g, rng(hash("piece/" + p.name + p.fire)), 330, 400, s, K, turned(p, turn));
     st.draw([g]);
   };

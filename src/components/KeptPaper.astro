@@ -1,5 +1,5 @@
 ---
-import { FILTERS, hash, rng, smooth, wline, wring } from "../utils/tea/ink.js";
+import { FILTERS, hash, rng, smooth, wobblyLine, wobblyRing } from "../utils/tea/ink.js";
 
 interface Props {
   seed: string;
@@ -29,13 +29,13 @@ const outline = smooth(
   corners.flatMap((p, i) => edge(p, corners[(i + 1) % 4])),
   true,
 );
-const pool = wring(r, W / 2 + 8, H * 0.62, W * 0.47, H * 0.44, 4, 14);
+const pool = wobblyRing(r, W / 2 + 8, H * 0.62, W * 0.47, H * 0.44, 4, 14);
 const fibres = Array.from({ length: 7 }, () => {
   const x = 14 + r() * (W - 28),
     y = 14 + r() * (H - 28),
     l = 6 + r() * 14,
     a = r() * Math.PI;
-  return wline(
+  return wobblyLine(
     r,
     [
       [x, y],
@@ -52,7 +52,7 @@ const P2 = [0, c - 3];
 const T = [c * 0.14, c * 0.26];
 const F = [c * 0.64, c * 0.64];
 const flap = `M${P1} Q${f(c * 0.55)} ${f(c * 0.05)} ${T} Q${f(c * 0.2)} ${f(c * 0.7)} ${P2} Q${F} ${P1} Z`;
-const under = wring(r, c * 0.62, c * 0.62, c * 0.3, c * 0.18, 1, 10);
+const under = wobblyRing(r, c * 0.62, c * 0.62, c * 0.3, c * 0.18, 1, 10);
 ---
 
 <span class="kept-paper" aria-hidden="true">

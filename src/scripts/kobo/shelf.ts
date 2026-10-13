@@ -1,15 +1,15 @@
 import {
-  G,
+  newGroup,
   rng,
   hash,
   piece,
   inked,
-  wbox,
-  wpoly,
-  So,
-  wring,
-  PROF,
-  radAt,
+  wobblyBox,
+  wobblyPolygon,
+  addSolid,
+  wobblyRing,
+  PROFILES,
+  radiusAt,
 } from "../../utils/tea/ink.js";
 import { K, stage, look, fit, wait, type Work } from "./stage";
 
@@ -19,20 +19,20 @@ const W = 1100,
 
 export function run(host: HTMLElement, w: Work, done: (w: Work) => void, back: () => void) {
   const r = rng(hash("kobo/shelf"));
-  const wall = G();
-  inked(wall, r, wbox(r, 150, 30, 950, 360, 1), K.plaster, K.ink, 1.1);
+  const wall = newGroup();
+  inked(wall, r, wobblyBox(r, 150, 30, 950, 360, 1), K.plaster, K.ink, 1.1);
   for (let k = 0; k < 30; k++)
-    So(
+    addSolid(
       wall,
-      wring(r, 170 + r() * 760, 50 + r() * 290, 1 + r() * 2, 0.6 + r(), 0.3, 6),
+      wobblyRing(r, 170 + r() * 760, 50 + r() * 290, 1 + r() * 2, 0.6 + r(), 0.3, 6),
       K.plasterDk,
       0.3,
     );
-  const plank = G();
+  const plank = newGroup();
   inked(
     plank,
     r,
-    wpoly(
+    wobblyPolygon(
       r,
       [
         [180, Y],
@@ -46,23 +46,23 @@ export function run(host: HTMLElement, w: Work, done: (w: Work) => void, back: (
     K.ink,
     1.1,
   );
-  const others = G();
+  const others = newGroup();
   (["cup", "hira", "yunomi", "bowl"] as const).forEach((k, i) => {
     const x = [250, 360, 750, 860][i];
-    const foot = (radAt(PROF[k].prof, 0) * 0.3 + 5) * 0.8;
+    const foot = (radiusAt(PROFILES[k].prof, 0) * 0.3 + 5) * 0.8;
     piece(others, r, x, Y - 5 - foot, 0.8, K, {
-      ...PROF[k],
+      ...PROFILES[k],
       clay: (i * 3) % 4,
       glaze: { none: true },
       fire: 20 + i,
     });
   });
-  const mine = G({ cls: "kobo-wet" });
+  const mine = newGroup({ cls: "kobo-wet" });
   const s = fit(w.spec, 260, 240, 2.4);
-  const foot = (radAt(w.spec.prof, 0) * 0.3 + 5) * s;
+  const foot = (radiusAt(w.spec.prof, 0) * 0.3 + 5) * s;
   piece(mine, rng(hash("kobo/mine")), 550, Y - 2 - foot, s, K, look(w.spec));
-  const edge = G();
-  inked(edge, r, wbox(r, 180, Y, 920, Y + 9, 0.4), K.wood, K.ink, 1);
+  const edge = newGroup();
+  inked(edge, r, wobblyBox(r, 180, Y, 920, Y + 9, 0.4), K.wood, K.ink, 1);
 
   const st = stage(host, W, H, ["棚", "the drying shelf"], [wall, plank, others, mine, edge]);
   const wet = st.svg.querySelector<SVGGElement>(".kobo-wet")!;

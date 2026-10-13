@@ -1,4 +1,4 @@
-import { cardShell, toSvg, tones2 } from "../../utils/tea/ink.js";
+import { cardShell, toSvg, toneVars } from "../../utils/tea/ink.js";
 import type { View } from "./scene";
 
 const W = 540,
@@ -34,7 +34,7 @@ export function cardsOf(
 
   function paint(key: string) {
     const v = scene.view;
-    const shell = cardShell(tones2(), key, H - 22, {
+    const shell = cardShell(toneVars(), key, H - 22, {
       season: v.season,
       burnt: v.incense?.burnt ?? 0,
       lit: v.incense?.lit ?? false,

@@ -1,4 +1,4 @@
-import { sceneEngawa, toSvg, tones2 } from "../../utils/tea/ink.js";
+import { sceneEngawa, toSvg, toneVars } from "../../utils/tea/ink.js";
 import { skyOf, type Season } from "../../utils/engawa/sky";
 
 export interface View {
@@ -117,7 +117,7 @@ export function sceneOf(svg: SVGSVGElement) {
     view.season = view.seasonSet ?? sky.season;
     const sun = view.seasonSet ? undefined : (sky.sun ?? undefined);
     const inc = view.incense;
-    const out = sceneEngawa(tones2(), view.hour, false, view.season, {
+    const out = sceneEngawa(toneVars(), view.hour, false, view.season, {
       sun,
       burnt: inc ? inc.burnt : 0,
       unlit: !inc?.lit,

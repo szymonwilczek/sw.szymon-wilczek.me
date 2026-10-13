@@ -1,4 +1,4 @@
-import { crateSleeve, toSvg, tones2 } from "../../utils/tea/ink.js";
+import { crateSleeve, toSvg, toneVars } from "../../utils/tea/ink.js";
 import { DISCS } from "./discs";
 import type { Fill } from "./cards";
 import type { Radio } from "./radio";
@@ -67,7 +67,7 @@ export function crateOf(
       return;
     }
     flying = true;
-    const out = crateSleeve(tones2(), k);
+    const out = crateSleeve(toneVars(), k);
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     svg.setAttribute("viewBox", `0 0 ${out.W} ${out.H}`);
     svg.setAttribute("aria-hidden", "true");

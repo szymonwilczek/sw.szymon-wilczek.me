@@ -1,20 +1,20 @@
 import {
-  G,
+  newGroup,
   rng,
   hash,
   piece,
   inked,
-  wbox,
-  wring,
-  So,
-  Ln,
-  Br,
-  Tx,
-  kan,
+  wobblyBox,
+  wobblyRing,
+  addSolid,
+  addLine,
+  brushStroke,
+  addText,
+  kanji,
   note,
   spin,
   brushTool,
-  radAt,
+  radiusAt,
   PAINTS,
 } from "../../utils/tea/ink.js";
 import { clean, sealOf, PIGMENT_NAMES, type Stroke, type UV } from "../../utils/tea/pottery";
@@ -41,11 +41,11 @@ export function run(host: HTMLElement, w: Work, done: (w: Work) => void) {
   const shallow = h < rw * 0.45;
 
   const r0 = rng(hash("kobo/banding"));
-  const base = G();
-  So(base, wring(r0, BX + 6, BY + 38, 150, 22, 0.5, 14), K.ink, 0.14);
-  inked(base, r0, wbox(r0, BX - 24, BY + 8, BX + 24, BY + 34, 0.4), K.iron, K.ink, 1);
-  So(base, wbox(r0, BX - 130, BY, BX + 130, BY + 8, 0.4), K.ink, 0.3);
-  inked(base, r0, wring(r0, BX, BY, 130, 26, 0.4, 18), K.iron, K.ink, 1.2);
+  const base = newGroup();
+  addSolid(base, wobblyRing(r0, BX + 6, BY + 38, 150, 22, 0.5, 14), K.ink, 0.14);
+  inked(base, r0, wobblyBox(r0, BX - 24, BY + 8, BX + 24, BY + 34, 0.4), K.iron, K.ink, 1);
+  addSolid(base, wobblyBox(r0, BX - 130, BY, BX + 130, BY + 8, 0.4), K.ink, 0.3);
+  inked(base, r0, wobblyRing(r0, BX, BY, 130, 26, 0.4, 18), K.iron, K.ink, 1.2);
   spin(base, r0, BX, BY + 6, 150, 34, K);
   const st = stage(host, W, H, ["筆", "the brush and the seal"], [base]);
 
@@ -59,7 +59,7 @@ export function run(host: HTMLElement, w: Work, done: (w: Work) => void) {
     at: P | null = null;
 
   // drawing point under (x, y)
-  const R = (v: number) => radAt(spec.prof, 1 - v) * s;
+  const R = (v: number) => radiusAt(spec.prof, 1 - v) * s;
   function uvAt([x, y]: P): UV | null {
     if (shallow) {
       const yy = (y - top) / (rw * EL * 0.78);
@@ -86,7 +86,7 @@ export function run(host: HTMLElement, w: Work, done: (w: Work) => void) {
 
   function draw() {
     const groups = [];
-    const g = G();
+    const g = newGroup();
     const paint: Stroke[] =
       stroke && stroke.pts.length > 1
         ? [...spec.paint, { pts: stroke.pts, c: stroke.c, w: width(stroke) }]
@@ -102,28 +102,28 @@ export function run(host: HTMLElement, w: Work, done: (w: Work) => void) {
     );
     groups.push(g);
     const r = rng(hash("kobo/brush"));
-    const side = G();
+    const side = newGroup();
     if (phase === "paint") {
       PAINTS(K).forEach((c: string, i: number) => {
         const [x, y] = DISH(i);
-        inked(side, r, wring(r, x, y, 44, 14, 0.3, 14), K.paper, K.ink, i === ink ? 2 : 1.1);
-        So(side, wring(r, x - 2, y + 1, 30, 8, 0.6, 12), c, 0.95);
-        kan(side, x, y + 40, KAN[i], K, 15);
+        inked(side, r, wobblyRing(r, x, y, 44, 14, 0.3, 14), K.paper, K.ink, i === ink ? 2 : 1.1);
+        addSolid(side, wobblyRing(r, x - 2, y + 1, 30, 8, 0.6, 12), c, 0.95);
+        kanji(side, x, y + 40, KAN[i], K, 15);
         note(side, x, y + 60, PIGMENT_NAMES[i], K, 13, i === ink ? 0.9 : 0.55);
       });
       if (at) brushTool(side, r, at[0], at[1], -0.95, 150, K, PAINTS(K)[ink]);
       else brushTool(side, r, BX + rw + 40, top - 20, -0.95, 150, K, PAINTS(K)[ink]);
     } else {
       // card for the name, and seal that comes from it
-      inked(side, r, wbox(r, CARD.x0, CARD.y0, CARD.x1, CARD.y1, 0.8), K.paper, K.ink, 1.1);
-      Ln(side, `M${CARD.x0 + 30} ${CARD.y1 - 40}H${CARD.x1 - 30}`, K.ink, 0.8, 0.35);
+      inked(side, r, wobblyBox(r, CARD.x0, CARD.y0, CARD.x1, CARD.y1, 0.8), K.paper, K.ink, 1.1);
+      addLine(side, `M${CARD.x0 + 30} ${CARD.y1 - 40}H${CARD.x1 - 30}`, K.ink, 0.8, 0.35);
       if (!sign.length && !pen)
         note(side, (CARD.x0 + CARD.x1) / 2, CARD.y1 - 60, "write your name here", K, 16, 0.4);
       const bw = CARD.x1 - CARD.x0,
         bh = CARD.y1 - CARD.y0;
       [...sign, ...(pen ? [pen] : [])].forEach((line) => {
         if (line.length < 2) return;
-        Br(
+        brushStroke(
           side,
           r,
           line.map(([u, v]) => [CARD.x0 + u * bw, CARD.y0 + v * bh]),
@@ -136,8 +136,8 @@ export function run(host: HTMLElement, w: Work, done: (w: Work) => void) {
       if (name) {
         const sx = 880,
           sy = 200;
-        So(side, wbox(r, sx - 34, sy - 34, sx + 34, sy + 34, 0.6), K.red, 0.88);
-        Tx(side, {
+        addSolid(side, wobblyBox(r, sx - 34, sy - 34, sx + 34, sy + 34, 0.6), K.red, 0.88);
+        addText(side, {
           t: sealOf(name),
           tr: `translate(${sx} ${sy})`,
           fs: 44,

@@ -1,12 +1,12 @@
 import {
-  G,
+  newGroup,
   rng,
   hash,
   piece,
   bucket,
   tongs,
   note,
-  kan,
+  kanji,
   GLAZES,
   GLAZE_NAMES,
 } from "../../utils/tea/ink.js";
@@ -44,22 +44,22 @@ export function run(host: HTMLElement, w: Work, done: (w: Work) => void, back: (
     const r = rng(hash("kobo/glaze"));
     const groups = [];
     if (phase === "choose") {
-      const g = G();
+      const g = newGroup();
       GLAZES(K).forEach((col: string, i: number) => {
         const x = 110 + i * 147;
         bucket(g, r, x, 290, 1.7, K, col);
         note(g, x, 342, GLAZE_NAMES[i], K, 16, 0.75);
-        kan(g, x, 372, KANJI[i], K, 15);
+        kanji(g, x, 372, KANJI[i], K, 15);
       });
       groups.push(g);
     } else if (phase === "dip") {
-      const b = G();
+      const b = newGroup();
       bucket(b, r, BX, BY, BS, K, GLAZES(K)[c]);
       groups.push(b);
       const hs = spec.H * ps,
         rim = rest + sink,
         mid = rim - hs / 2;
-      const flip = G({ tf: `rotate(180deg)`, to: `${BX}px ${Math.round(mid)}px` });
+      const flip = newGroup({ tf: `rotate(180deg)`, to: `${BX}px ${Math.round(mid)}px` });
       piece(
         flip,
         rng(hash("kobo/mine")),
@@ -72,13 +72,13 @@ export function run(host: HTMLElement, w: Work, done: (w: Work) => void, back: (
       flip.solid.shift(); // its shadow, which would hang in the air
 
       // clip stays upright outside the turned piece
-      const t = G();
+      const t = newGroup();
       tongs(t, r, BX, rim - hs - 2, K);
       st.live.innerHTML =
         markup(groups) + `<g clip-path="url(#kobo-above)">${markup([flip])}</g>` + markup([t]);
       return;
     } else {
-      const g = G();
+      const g = newGroup();
       piece(
         g,
         rng(hash("kobo/mine")),

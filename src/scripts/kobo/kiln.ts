@@ -1,14 +1,14 @@
 import {
-  G,
+  newGroup,
   rng,
   hash,
   piece,
   chamber,
   heatBar,
-  So,
-  wring,
-  Wa,
-  PROF,
+  addSolid,
+  wobblyRing,
+  addWash,
+  PROFILES,
   groupSvg,
   note,
 } from "../../utils/tea/ink.js";
@@ -24,7 +24,7 @@ export function run(host: HTMLElement, w: Work, done: (w: Work) => void, back: (
   const glaze = w.step === "fire";
   const band = glaze ? { lo: 0.62, hi: 0.85, secs: 10 } : { lo: 0.5, hi: 0.75, secs: 8 };
   const s = fit(w.spec, 170, 170, 2.2);
-  const words = G();
+  const words = newGroup();
   note(words, BAR.x + 20, BAR.y + 28, "cold", K, 14, 0.6);
   note(words, BAR.x + BAR.w * ((band.lo + band.hi) / 2), BAR.y - 34, "keep it here", K, 15, 0.7);
   note(words, BAR.x + BAR.w - 26, BAR.y + 28, "too hot", K, 14, 0.6);
@@ -47,11 +47,11 @@ export function run(host: HTMLElement, w: Work, done: (w: Work) => void, back: (
     if (nb !== bin) {
       bin = nb;
       const r = rng(hash("kobo/kiln"));
-      const g = G();
+      const g = newGroup();
       chamber(g, r, CX, CY, 380, 290, K, bin);
       const others = [
-        { ...PROF.cup, clay: 3 },
-        { ...PROF.hira, clay: 0 },
+        { ...PROFILES.cup, clay: 3 },
+        { ...PROFILES.hira, clay: 0 },
       ];
       piece(g, r, CX - 152, CY - 2, 0.6, K, {
         ...others[0],
@@ -67,18 +67,25 @@ export function run(host: HTMLElement, w: Work, done: (w: Work) => void, back: (
       room = groupSvg(g);
     }
     const r = rng(hash("kobo/bar"));
-    const b = G();
+    const b = newGroup();
     heatBar(b, r, BAR.x, BAR.y, BAR.w, K, T, band.lo, band.hi);
 
     // how much of the firing is done
-    So(
+    addSolid(
       b,
       `M${BAR.x} ${BAR.y + 50}h${Math.round(BAR.w * p)}v4h-${Math.round(BAR.w * p)}z`,
       K.ink,
       0.6,
     );
     if (flash > 0)
-      Wa(b, r, wring(r, CX, CY - 30, 120, 70, 6, 12), K.gold, flash * 0.5, "url(#bk-bleed)");
+      addWash(
+        b,
+        r,
+        wobblyRing(r, CX, CY - 30, 120, 70, 6, 12),
+        K.gold,
+        flash * 0.5,
+        "url(#bk-bleed)",
+      );
     st.live.innerHTML = room + groupSvg(b);
   }
 
