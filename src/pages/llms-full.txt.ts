@@ -1,4 +1,4 @@
-import { getCollection } from "astro:content";
+import { getCollection, type CollectionEntry } from "astro:content";
 import type { APIRoute } from "astro";
 
 function cleanOrgBody(body: string): string {
@@ -11,7 +11,7 @@ function cleanOrgBody(body: string): string {
 export const GET: APIRoute = async ({ site }) => {
   const siteUrl = site ? site.toString().replace(/\/$/, "") : "https://sw.szymon-wilczek.me";
 
-  let writings = [];
+  let writings: CollectionEntry<"writings">[] = [];
   try {
     writings = (await getCollection("writings")).sort(
       (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
