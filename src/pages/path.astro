@@ -4,12 +4,12 @@ import Divider from "../components/Divider.astro";
 import { YEARS, CV } from "../data/years";
 import { stone } from "../utils/stones";
 
-const OFF = [0, 46, 14, 58];
-const steps = YEARS.map((y, i) => ({
-  ...y,
-  now: y.year === "now",
-  cx: 70 + OFF[i % OFF.length],
-  ink: stone(70 + OFF[i % OFF.length], 55, 1.9, y.moss, `path/${y.year}`),
+const OFFSETS = [0, 46, 14, 58];
+const steps = YEARS.map((period, i) => ({
+  ...period,
+  now: period.year === "now",
+  cx: 70 + OFFSETS[i % OFFSETS.length],
+  ink: stone(70 + OFFSETS[i % OFFSETS.length], 55, 1.9, period.moss, `path/${period.year}`),
 }));
 ---
 
@@ -57,33 +57,33 @@ const steps = YEARS.map((y, i) => ({
   </svg>
 
   <ol class="path">
-    {steps.map((y) => (
-      <li class:list={["step", { now: y.now }]}>
+    {steps.map((period) => (
+      <li class:list={["step", { now: period.now }]}>
         <h2 class="year">
-          <svg class="stone" viewBox="0 0 200 110" role="img" aria-label={y.year}>
-            <ellipse class="stone-shadow" {...y.ink.shadow} filter="url(#ps-wash)" />
-            <path class="stone-body" d={y.ink.body} filter="url(#ps-wash)" />
-            {y.ink.moss && (
+          <svg class="stone" viewBox="0 0 200 110" role="img" aria-label={period.year}>
+            <ellipse class="stone-shadow" {...period.ink.shadow} filter="url(#ps-wash)" />
+            <path class="stone-body" d={period.ink.body} filter="url(#ps-wash)" />
+            {period.ink.moss && (
               <path
                 class="stone-moss"
-                d={y.ink.moss}
-                opacity={y.ink.mossOpacity}
+                d={period.ink.moss}
+                opacity={period.ink.mossOpacity}
                 filter="url(#ps-wash)"
               />
             )}
-            <path class="stone-line" d={y.ink.body} filter="url(#ps-tremble)" />
-            {y.ink.tufts && <path class="stone-tufts" d={y.ink.tufts} />}
-            <text class="stone-year" x={y.cx} y={y.now ? 62 : 61} text-anchor="middle">
-              {y.year}
+            <path class="stone-line" d={period.ink.body} filter="url(#ps-tremble)" />
+            {period.ink.tufts && <path class="stone-tufts" d={period.ink.tufts} />}
+            <text class="stone-year" x={period.cx} y={period.now ? 62 : 61} text-anchor="middle">
+              {period.year}
             </text>
           </svg>
         </h2>
         <div class="said">
-          {y.steps.map((s) => (
+          {period.steps.map((step) => (
             <p>
-              {s.when && <span class="when">{s.when}</span>}
-              <span class="what">{s.what}</span>
-              <span class="why">{s.why}</span>
+              {step.when && <span class="when">{step.when}</span>}
+              <span class="what">{step.what}</span>
+              <span class="why">{step.why}</span>
             </p>
           ))}
         </div>

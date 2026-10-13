@@ -15,7 +15,7 @@ import { YEARS } from "../data/years";
 import { stone } from "../utils/stones";
 
 const writings = (await getCollection("writings"))
-  .sort((a, b) => a.data.pubDate.valueOf() - b.data.pubDate.valueOf())
+  .sort((former, latter) => former.data.pubDate.valueOf() - latter.data.pubDate.valueOf())
   .map((post) => ({
     slug: writingSlug(post.id),
     title: post.data.title,
@@ -24,15 +24,15 @@ const writings = (await getCollection("writings"))
 const albums = (await getAllAlbums()).slice().reverse();
 const files = await getCollection("files");
 const rings = weeks();
-const booksRead = readBooks().filter((b) => b.state === "read").length;
+const booksRead = readBooks().filter((book) => book.state === "read").length;
 
 // plants grow as tall as the essay is long
 const step = Math.min(50, 260 / Math.max(writings.length - 1, 1));
-const plants = writings.map((w, i) => {
+const plants = writings.map((writing, i) => {
   const x = Math.round(240 + i * step);
-  const top = 676 - 40 - Math.min(w.minutes, 40) * 8;
-  const mid = Math.round((676 + top) / 2);
-  return { ...w, x, x1: x + (i % 2 ? 8 : -8), top, mid };
+  const top = 676 - 40 - Math.min(writing.minutes, 40) * 8;
+  const midY = Math.round((676 + top) / 2);
+  return { ...writing, x, x1: x + (i % 2 ? 8 : -8), top, mid: midY };
 });
 
 // lilies on the pond, one per album
@@ -44,12 +44,12 @@ const PADS = [
   [706, 438, -12],
 ];
 const lilies = albums.map((album, i) => {
-  const [x, y, r] = PADS[i] ?? [
+  const [x, y, rotation] = PADS[i] ?? [
     610 + ((i * 47) % 190),
     340 + ((i * 31) % 110),
     ((i * 7) % 20) - 10,
   ];
-  return { ...album, x, y, r };
+  return { ...album, x, y, r: rotation };
 });
 
 const STONES = [0, 1, 2, 3, 4].map((i) => {
@@ -119,33 +119,36 @@ const PATHS = [
 
 // trees in their seasons
 let seed = 17;
-const rnd = () => {
+const rand = () => {
   seed = (seed * 16807) % 2147483647;
   return seed / 2147483647;
 };
-const jit = (n: number) => (rnd() * 2 - 1) * n;
+const jitter = (amount: number) => (rand() * 2 - 1) * amount;
 const CROWNS = [
   [152, 96, 26, 22],
   [992, 432, 24, 20],
   [710, 196, 24, 20],
 ];
-const BLOSSOMS = CROWNS.flatMap(([x, y, rx, ry]) =>
-  Array.from({ length: 9 }, () => [Math.round(x + jit(rx * 0.8)), Math.round(y + jit(ry * 0.7))]),
+const BLOSSOMS = CROWNS.flatMap(([x, y, radiusX, radiusY]) =>
+  Array.from({ length: 9 }, () => [
+    Math.round(x + jitter(radiusX * 0.8)),
+    Math.round(y + jitter(radiusY * 0.7)),
+  ]),
 );
-const FALLING = CROWNS.flatMap(([x, y, rx, ry]) =>
+const FALLING = CROWNS.flatMap(([x, y, radiusX, radiusY]) =>
   Array.from({ length: 4 }, (_, i) => [
-    Math.round(x + jit(rx * 1.4)),
-    Math.round(y + ry + 10 + i * 12 + jit(4)),
+    Math.round(x + jitter(radiusX * 1.4)),
+    Math.round(y + radiusY + 10 + i * 12 + jitter(4)),
   ]),
 );
 
 // sun and moon walk this arc over the top edge of the sheet
 const ARC = Array.from({ length: 13 }, (_, i) => {
-  const t = i / 12;
-  return `${Math.round(80 + 940 * t)} ${Math.round(20 - 140 * Math.sin(Math.PI * t))}`;
+  const along = i / 12;
+  return `${Math.round(80 + 940 * along)} ${Math.round(20 - 140 * Math.sin(Math.PI * along))}`;
 });
 
-const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
+const plural = (count: number, one: string, many: string) => `${count} ${count === 1 ? one : many}`;
 
 const PLACES = [
   {
@@ -186,7 +189,7 @@ const PLACES = [
     href: "/changelog/",
     title: "changelog · the stump",
     sub: `${plural(rings.length, "ring", "rings")} · ${plural(
-      rings.reduce((n, w) => n + w.n, 0),
+      rings.reduce((sum, week) => sum + week.n, 0),
       "commit",
       "commits",
     )}`,
@@ -194,7 +197,7 @@ const PLACES = [
   { href: "/seals/", title: "tracks?", sub: "the seal book" },
   { href: "/path/", title: "stepping stones", sub: "the years so far · the CV" },
 ];
-const place = (href: string) => PLACES.find((p) => p.href === href)!;
+const place = (href: string) => PLACES.find((spot) => spot.href === href)!;
 ---
 
 <BaseLayout
@@ -323,25 +326,31 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
             writings · {writings.length} essays
           </text>
         </a>
-        {plants.map((p) => (
+        {plants.map((plant) => (
           <a
-            href={`/writings/${p.slug}/`}
+            href={`/writings/${plant.slug}/`}
             class="place plant"
             data-area="/writings"
-            data-slug={p.slug}
-            data-title={p.title}
-            data-sub={`${p.minutes} min`}
+            data-slug={plant.slug}
+            data-title={plant.title}
+            data-sub={`${plant.minutes} min`}
           >
-            <rect class="hit" x={p.x - 18} y={p.top - 10} width="36" height={676 - p.top + 10} />
+            <rect
+              class="hit"
+              x={plant.x - 18}
+              y={plant.top - 10}
+              width="36"
+              height={676 - plant.top + 10}
+            />
             <path
               class="stem"
-              d={`M${p.x} 676 C ${p.x1} ${p.mid}, ${p.x} ${p.mid}, ${p.x} ${p.top}`}
+              d={`M${plant.x} 676 C ${plant.x1} ${plant.mid}, ${plant.x} ${plant.mid}, ${plant.x} ${plant.top}`}
             />
             <path
               class="leafy"
-              d={`M${p.x} ${p.mid + 10} c -10 -4, -16 -12, -16 -18 c 8 2, 14 8, 16 18 Z M ${p.x} ${p.mid - 14} c 10 -4, 16 -12, 16 -18 c -8 2, -14 8, -16 18 Z`}
+              d={`M${plant.x} ${plant.mid + 10} c -10 -4, -16 -12, -16 -18 c 8 2, 14 8, 16 18 Z M ${plant.x} ${plant.mid - 14} c 10 -4, 16 -12, 16 -18 c -8 2, -14 8, -16 18 Z`}
             />
-            <circle class="bud" cx={p.x} cy={p.top} r="3" />
+            <circle class="bud" cx={plant.x} cy={plant.top} r="3" />
           </a>
         ))}
 
@@ -861,19 +870,21 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
           data-title={place("/path/").title}
           data-sub={place("/path/").sub}
         >
-          {STONES.map((s) => (
+          {STONES.map((mapStone) => (
             <>
-              <path class="line fill-alt" d={s.ink.body} stroke-width="1.1" />
-              {s.ink.moss && <path class="stone-moss" d={s.ink.moss} opacity={s.ink.mossOpacity} />}
-              {s.ink.tufts && <path class="stone-tufts" d={s.ink.tufts} />}
-              {s.year && (
+              <path class="line fill-alt" d={mapStone.ink.body} stroke-width="1.1" />
+              {mapStone.ink.moss && (
+                <path class="stone-moss" d={mapStone.ink.moss} opacity={mapStone.ink.mossOpacity} />
+              )}
+              {mapStone.ink.tufts && <path class="stone-tufts" d={mapStone.ink.tufts} />}
+              {mapStone.year && (
                 <text
-                  class:list={["stone-year", { now: s.year === "now" }]}
-                  x={s.x}
-                  y={s.y + 3.5}
+                  class:list={["stone-year", { now: mapStone.year === "now" }]}
+                  x={mapStone.x}
+                  y={mapStone.y + 3.5}
                   text-anchor="middle"
                 >
-                  {s.year}
+                  {mapStone.year}
                 </text>
               )}
             </>
@@ -892,8 +903,8 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
         >
           <rect class="hit" x="970" y="300" width="96" height="320"></rect>
           <g class="paws">
-            {PAWS.map(([x, y, r]) => (
-              <g transform={`translate(${x} ${y}) rotate(${r})`}>
+            {PAWS.map(([x, y, rotation]) => (
+              <g transform={`translate(${x} ${y}) rotate(${rotation})`}>
                 <ellipse cx="0" cy="2" rx="2.6" ry="2.2" />
                 <circle cx="-2.6" cy="-2.4" r="1" />
                 <circle cx="0" cy="-3.4" r="1" />
@@ -943,8 +954,11 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
         <path class="line" d="M710 214 C 709 224, 711 232, 710 240" stroke-width="2"></path>
 
         <!-- the season -->
-        {KIGO.map(([x, y, r, s]) => (
-          <g transform={`translate(${x} ${y}) rotate(${r}) scale(${s})`} class="kigo-map">
+        {KIGO.map(([x, y, rotation, scale]) => (
+          <g
+            transform={`translate(${x} ${y}) rotate(${rotation}) scale(${scale})`}
+            class="kigo-map"
+          >
             <path class="kigo-autumn" d={GOOSE} />
             <path class="kigo-spring" d="M0 -6 C 5 -6, 7 0, 0 7 C -7 0, -5 -6, 0 -6 Z" />
             <circle class="kigo-winter" r="3.4" />
@@ -1017,26 +1031,31 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
   <section id="plain" class="plain" aria-label="The map as a list">
     <h2>The same, as a plain list</h2>
     <ul>
-      {PLACES.map((p) => (
+      {PLACES.map((spot) => (
         <li>
-          <a href={p.href} data-area={p.href === "/seals/" ? undefined : p.href.replace(/\/$/, "")}>
-            {p.title}
+          <a
+            href={spot.href}
+            data-area={spot.href === "/seals/" ? undefined : spot.href.replace(/\/$/, "")}
+          >
+            {spot.title}
           </a>{" "}
-          <span>— {p.sub}</span>
-          {p.href === "/writings/" && (
+          <span>— {spot.sub}</span>
+          {spot.href === "/writings/" && (
             <ul>
-              {writings.map((w) => (
+              {writings.map((writing) => (
                 <li>
-                  <a href={`/writings/${w.slug}/`}>{w.title}</a> <span>— {w.minutes} min</span>
+                  <a href={`/writings/${writing.slug}/`}>{writing.title}</a>
+                  <span>— {writing.minutes} min</span>
                 </li>
               ))}
             </ul>
           )}
-          {p.href === "/photos/" && (
+          {spot.href === "/photos/" && (
             <ul>
-              {albums.map((a) => (
+              {albums.map((album) => (
                 <li>
-                  <a href={`/photos/${a.slug}/`}>{a.title}</a> <span>— {a.photoCount} frames</span>
+                  <a href={`/photos/${album.slug}/`}>{album.title}</a>
+                  <span>— {album.photoCount} frames</span>
                 </li>
               ))}
             </ul>
@@ -1058,12 +1077,13 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
   earn("北");
 
   // places not walked yet stay grey; the lost corner only counts once you got lost
-  const walked = (to: string) => state.paths.some((p) => p === to || p.startsWith(`${to}/`));
-  document.querySelectorAll<HTMLElement | SVGElement>("[data-area]").forEach((el) => {
-    el.classList.toggle("unseen", !walked(el.dataset.area!));
+  const walked = (to: string) =>
+    state.paths.some((walkedPath) => walkedPath === to || walkedPath.startsWith(`${to}/`));
+  document.querySelectorAll<HTMLElement | SVGElement>("[data-area]").forEach((marked) => {
+    marked.classList.toggle("unseen", !walked(marked.dataset.area!));
   });
-  svg.querySelectorAll<SVGElement>("[data-seal-area]").forEach((el) => {
-    el.classList.toggle("unseen", !state.seals[el.dataset.sealArea!]);
+  svg.querySelectorAll<SVGElement>("[data-seal-area]").forEach((marked) => {
+    marked.classList.toggle("unseen", !state.seals[marked.dataset.sealArea!]);
   });
 
   // paths walked are inked, and so is the way to them from the gate
@@ -1106,61 +1126,61 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
     winter: [7.75, 15.75],
   };
   const NEW_MOON = Date.UTC(2000, 0, 6, 18, 14);
-  const pad = (n: number) => String(n).padStart(2, "0");
+  const twoDigits = (value: number) => String(value).padStart(2, "0");
   const clock = document.querySelector(".clock")!;
   let night = false;
 
-  function moonPath(p: number, r: number) {
-    const k = Math.cos(2 * Math.PI * p);
-    const rx = Math.abs(k) * r;
-    const [outer, inner] = p < 0.5 ? [1, k > 0 ? 0 : 1] : [0, k > 0 ? 1 : 0];
-    return `M0 ${-r} A ${r} ${r} 0 0 ${outer} 0 ${r} A ${rx} ${r} 0 0 ${inner} 0 ${-r} Z`;
+  function moonPath(phase: number, radius: number) {
+    const bulge = Math.cos(2 * Math.PI * phase);
+    const bulgeRadius = Math.abs(bulge) * radius;
+    const [outer, inner] = phase < 0.5 ? [1, bulge > 0 ? 0 : 1] : [0, bulge > 0 ? 1 : 0];
+    return `M0 ${-radius} A ${radius} ${radius} 0 0 ${outer} 0 ${radius} A ${bulgeRadius} ${radius} 0 0 ${inner} 0 ${-radius} Z`;
   }
 
   function sky() {
     const now = new Date();
     const asked = new URLSearchParams(location.search).get("hour");
-    const h = asked !== null ? Number(asked) % 24 : now.getHours() + now.getMinutes() / 60;
-    const s = season(now);
-    const [rise, set] = DAYLIGHT[s];
-    const day = h >= rise && h <= set;
-    const t = day
-      ? (h - rise) / (set - rise)
-      : (h > set ? h - set : h + 24 - set) / (24 - set + rise);
-    const lift = Math.sin(Math.PI * t);
-    const sx = 80 + 940 * t;
-    const sy = 20 - 140 * lift;
-    const dusk = Math.abs(h - rise) < 1 || Math.abs(h - set) < 1;
+    const hour = asked !== null ? Number(asked) % 24 : now.getHours() + now.getMinutes() / 60;
+    const currentSeason = season(now);
+    const [sunrise, sunset] = DAYLIGHT[currentSeason];
+    const day = hour >= sunrise && hour <= sunset;
+    const along = day
+      ? (hour - sunrise) / (sunset - sunrise)
+      : (hour > sunset ? hour - sunset : hour + 24 - sunset) / (24 - sunset + sunrise);
+    const lift = Math.sin(Math.PI * along);
+    const skyX = 80 + 940 * along;
+    const skyY = 20 - 140 * lift;
+    const dusk = Math.abs(hour - sunrise) < 1 || Math.abs(hour - sunset) < 1;
     const phase = ((((now.getTime() - NEW_MOON) / 86400000 / 29.530588853) % 1) + 1) % 1;
     const light = (1 - Math.cos(2 * Math.PI * phase)) / 2;
 
-    svg.querySelector(".sun")!.setAttribute("transform", `translate(${sx} ${sy})`);
+    svg.querySelector(".sun")!.setAttribute("transform", `translate(${skyX} ${skyY})`);
     const moon = svg.querySelector(".moon")!;
-    moon.setAttribute("transform", `translate(${sx} ${sy}) rotate(-20)`);
+    moon.setAttribute("transform", `translate(${skyX} ${skyY}) rotate(-20)`);
     moon.querySelector("path")!.setAttribute("d", moonPath(phase, 14));
     svg.classList.toggle("is-day", day);
     svg.classList.toggle("is-dusk", dusk);
     night = !day;
 
-    const len = day ? 18 + (1 - lift) * 120 : 40 + (1 - lift) * 60;
+    const shadowLength = day ? 18 + (1 - lift) * 120 : 40 + (1 - lift) * 60;
     const shade = day ? 0.06 + 0.06 * lift : 0.05 * light;
     svg.querySelectorAll<SVGPathElement>(".shadows path").forEach((path) => {
-      const [bx, by, w] = path.dataset.at!.split(" ").map(Number);
-      const l = w > 100 ? len * 0.5 : len;
-      const tx = bx + Math.max(-l, Math.min(l, (bx - sx) * 0.45));
-      const ty = by + l;
+      const [baseX, baseY, width] = path.dataset.at!.split(" ").map(Number);
+      const reach = width > 100 ? shadowLength * 0.5 : shadowLength;
+      const tipX = baseX + Math.max(-reach, Math.min(reach, (baseX - skyX) * 0.45));
+      const tipY = baseY + reach;
       path.setAttribute(
         "d",
-        `M${bx - w / 2} ${by} Q ${tx - w * 0.4} ${ty} ${tx} ${ty + 2} Q ${tx + w * 0.4} ${ty} ${bx + w / 2} ${by} Z`,
+        `M${baseX - width / 2} ${baseY} Q ${tipX - width * 0.4} ${tipY} ${tipX} ${tipY + 2} Q ${tipX + width * 0.4} ${tipY} ${baseX + width / 2} ${baseY} Z`,
       );
       path.style.opacity = String(shade);
     });
 
-    const kx = Math.max(610, Math.min(790, sx));
+    const glintX = Math.max(610, Math.min(790, skyX));
     svg
       .querySelector(".glint")!
-      .setAttribute("d", `M${kx - 8} 384 q 8 -2 16 0 M ${kx - 2} 398 q 6 -2 12 0`);
-    clock.textContent = `${pad(Math.floor(h))}:${pad(Math.floor((h % 1) * 60))} · ${s}${day ? (dusk ? " · dusk" : "") : " · night"}`;
+      .setAttribute("d", `M${glintX - 8} 384 q 8 -2 16 0 M ${glintX - 2} 398 q 6 -2 12 0`);
+    clock.textContent = `${twoDigits(Math.floor(hour))}:${twoDigits(Math.floor((hour % 1) * 60))} · ${currentSeason}${day ? (dusk ? " · dusk" : "") : " · night"}`;
     lamp();
   }
 
@@ -1171,12 +1191,14 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
   }
 
   function dusk() {
-    const bg = getComputedStyle(document.documentElement).getPropertyValue("--bg-main").trim();
+    const background = getComputedStyle(document.documentElement)
+      .getPropertyValue("--bg-main")
+      .trim();
     const probe = document.createElement("canvas").getContext("2d")!;
-    probe.fillStyle = bg;
+    probe.fillStyle = background;
     const hex = probe.fillStyle.startsWith("#") ? probe.fillStyle : "#ffffff";
-    const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
-    dark = 0.299 * r + 0.587 * g + 0.114 * b < 96;
+    const [red, green, blue] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+    dark = 0.299 * red + 0.587 * green + 0.114 * blue < 96;
     lamp();
   }
   dusk();
@@ -1188,9 +1210,9 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
   let touch = false;
 
   function show(place: Element) {
-    const el = place as HTMLElement;
-    tag.querySelector(".map-tag-title")!.textContent = el.dataset.title ?? "";
-    tag.querySelector(".map-tag-sub")!.textContent = el.dataset.sub ?? "";
+    const placeElement = place as HTMLElement;
+    tag.querySelector(".map-tag-title")!.textContent = placeElement.dataset.title ?? "";
+    tag.querySelector(".map-tag-sub")!.textContent = placeElement.dataset.sub ?? "";
     tag.hidden = false;
     const box = place.getBoundingClientRect();
     const frame = inner.getBoundingClientRect();
@@ -1206,27 +1228,27 @@ const place = (href: string) => PLACES.find((p) => p.href === href)!;
   }
 
   svg.querySelectorAll(".place").forEach((place) => {
-    place.addEventListener("pointerenter", (e) => {
-      if ((e as PointerEvent).pointerType === "mouse") show(place);
+    place.addEventListener("pointerenter", (event) => {
+      if ((event as PointerEvent).pointerType === "mouse") show(place);
     });
-    place.addEventListener("pointerleave", (e) => {
-      if ((e as PointerEvent).pointerType === "mouse") hide();
+    place.addEventListener("pointerleave", (event) => {
+      if ((event as PointerEvent).pointerType === "mouse") hide();
     });
     place.addEventListener("focus", () => show(place));
     place.addEventListener("blur", hide);
-    place.addEventListener("pointerdown", (e) => {
-      touch = (e as PointerEvent).pointerType !== "mouse";
+    place.addEventListener("pointerdown", (event) => {
+      touch = (event as PointerEvent).pointerType !== "mouse";
     });
-    place.addEventListener("click", (e) => {
+    place.addEventListener("click", (event) => {
       if (touch && shown !== place) {
-        e.preventDefault();
+        event.preventDefault();
         show(place);
       }
     });
   });
 
-  document.addEventListener("pointerdown", (e) => {
-    if (!(e.target as Element).closest(".place")) hide();
+  document.addEventListener("pointerdown", (event) => {
+    if (!(event.target as Element).closest(".place")) hide();
   });
 </script>
 

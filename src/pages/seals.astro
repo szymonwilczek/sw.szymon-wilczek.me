@@ -85,7 +85,7 @@ const TILTS = [-6, 4, -2, 7, -4, 3, -7, 5, -3, 6, -5, 2, -6, 4, -1];
     });
     const doors = book.querySelector(".page-doors");
     if (doors)
-      doors.textContent = `${state.doors.filter((d) => DOORS.includes(d)).length} of ${DOORS.length} ways in`;
+      doors.textContent = `${state.doors.filter((door) => DOORS.includes(door)).length} of ${DOORS.length} ways in`;
     document.querySelector(".tally-n")!.textContent = String(earned);
     return state;
   }
@@ -102,76 +102,76 @@ const TILTS = [-6, 4, -2, 7, -4, 3, -7, 5, -3, 6, -5, 2, -6, 4, -1];
   // book as one image
   document.querySelector(".save")!.addEventListener("click", async () => {
     const state = fill();
-    const css = getComputedStyle(document.documentElement);
-    const ink = (name: string) => css.getPropertyValue(name).trim();
+    const styles = getComputedStyle(document.documentElement);
+    const ink = (name: string) => styles.getPropertyValue(name).trim();
     const cols = 5;
     const rows = Math.ceil(SEALS.length / cols);
-    const W = 180;
-    const H = 260;
-    const pad = 40;
+    const cellWidth = 180;
+    const cellHeight = 260;
+    const margin = 40;
     const scale = 2;
     const canvas = document.createElement("canvas");
-    canvas.width = (cols * W + pad * 2) * scale;
-    canvas.height = (rows * H + pad * 2 + 40) * scale;
-    const ctx = canvas.getContext("2d")!;
-    ctx.scale(scale, scale);
+    canvas.width = (cols * cellWidth + margin * 2) * scale;
+    canvas.height = (rows * cellHeight + margin * 2 + 40) * scale;
+    const context = canvas.getContext("2d")!;
+    context.scale(scale, scale);
     await document.fonts.ready;
 
-    ctx.fillStyle = ink("--bg-main");
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    context.fillStyle = ink("--bg-main");
+    context.fillRect(0, 0, canvas.width, canvas.height);
     const seal = { edge: new Path2D(HANKO_EDGE), inner: new Path2D(HANKO_INNER) };
 
     SEALS.forEach((page, i) => {
-      const x = pad + (i % cols) * W;
-      const y = pad + Math.floor(i / cols) * H;
+      const x = margin + (i % cols) * cellWidth;
+      const y = margin + Math.floor(i / cols) * cellHeight;
       const date = state.seals[page.glyph];
-      ctx.fillStyle = i % 2 ? ink("--bg-main") : ink("--paper");
-      ctx.fillRect(x, y, W, H);
-      ctx.strokeStyle = ink("--border");
-      ctx.strokeRect(x + 0.5, y + 0.5, W, H);
+      context.fillStyle = i % 2 ? ink("--bg-main") : ink("--paper");
+      context.fillRect(x, y, cellWidth, cellHeight);
+      context.strokeStyle = ink("--border");
+      context.strokeRect(x + 0.5, y + 0.5, cellWidth, cellHeight);
 
-      ctx.fillStyle = ink("--fg-dim");
-      ctx.font = "10px 'Typus Mono 95', monospace";
-      ctx.textAlign = "center";
-      ctx.fillText(String(i + 1).padStart(2, "0"), x + W / 2, y + 22);
+      context.fillStyle = ink("--fg-dim");
+      context.font = "10px 'Typus Mono 95', monospace";
+      context.textAlign = "center";
+      context.fillText(String(i + 1).padStart(2, "0"), x + cellWidth / 2, y + 22);
 
-      ctx.save();
-      ctx.translate(x + W / 2, y + 92);
-      ctx.scale(72 / 46, 72 / 46);
-      ctx.translate(-23, -23);
+      context.save();
+      context.translate(x + cellWidth / 2, y + 92);
+      context.scale(72 / 46, 72 / 46);
+      context.translate(-23, -23);
       if (date) {
-        ctx.fillStyle = ink("--red");
-        ctx.fill(seal.edge);
-        ctx.globalAlpha = 0.6;
-        ctx.strokeStyle = ink("--paper");
-        ctx.stroke(seal.inner);
-        ctx.globalAlpha = 1;
-        ctx.fillStyle = ink("--paper");
-        ctx.font = "22px 'Yuji Syuku', serif";
-        ctx.fillText(page.glyph, 23, 31);
+        context.fillStyle = ink("--red");
+        context.fill(seal.edge);
+        context.globalAlpha = 0.6;
+        context.strokeStyle = ink("--paper");
+        context.stroke(seal.inner);
+        context.globalAlpha = 1;
+        context.fillStyle = ink("--paper");
+        context.font = "22px 'Yuji Syuku', serif";
+        context.fillText(page.glyph, 23, 31);
       } else {
-        ctx.setLineDash([2, 4]);
-        ctx.strokeStyle = ink("--border");
-        ctx.stroke(seal.edge);
+        context.setLineDash([2, 4]);
+        context.strokeStyle = ink("--border");
+        context.stroke(seal.edge);
       }
-      ctx.restore();
+      context.restore();
 
-      ctx.fillStyle = date ? ink("--fg-dim") : ink("--border");
-      ctx.font = "10px 'Typus Mono 95', monospace";
-      ctx.fillText(date ?? "····", x + W / 2, y + 170);
-      ctx.fillStyle = date ? ink("--fg-dim") : ink("--cursor");
-      ctx.font = "300 15px Kalam, cursive";
-      ctx.fillText(date ? page.note : page.hint, x + W / 2, y + 220);
+      context.fillStyle = date ? ink("--fg-dim") : ink("--border");
+      context.font = "10px 'Typus Mono 95', monospace";
+      context.fillText(date ?? "····", x + cellWidth / 2, y + 170);
+      context.fillStyle = date ? ink("--fg-dim") : ink("--cursor");
+      context.font = "300 15px Kalam, cursive";
+      context.fillText(date ? page.note : page.hint, x + cellWidth / 2, y + 220);
     });
 
     const earned = Object.keys(state.seals).length;
-    ctx.textAlign = "left";
-    ctx.fillStyle = ink("--fg-dim");
-    ctx.font = "11px 'Typus Mono 95', monospace";
-    ctx.fillText(
+    context.textAlign = "left";
+    context.fillStyle = ink("--fg-dim");
+    context.font = "11px 'Typus Mono 95', monospace";
+    context.fillText(
       `seal book · ${earned} of ${SEALS.length} · ${location.host}/seals`,
-      pad,
-      pad + rows * H + 28,
+      margin,
+      margin + rows * cellHeight + 28,
     );
 
     const link = document.createElement("a");

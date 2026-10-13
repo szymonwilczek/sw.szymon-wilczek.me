@@ -14,7 +14,7 @@ export interface Week {
 }
 
 const DAY = 86400000;
-const f1 = (n: number) => Math.round(n * 10) / 10;
+const round1 = (value: number) => Math.round(value * 10) / 10;
 
 const mondayOf = (day: Date) => new Date(day.valueOf() - ((day.getUTCDay() + 6) % 7) * DAY);
 
@@ -27,11 +27,11 @@ function isoWeek(monday: Date) {
 
 const span = (monday: Date) => {
   const sunday = new Date(monday.valueOf() + 6 * DAY);
-  const m1 = MONTHS[monday.getUTCMonth()];
-  const m2 = MONTHS[sunday.getUTCMonth()];
-  return m1 === m2
-    ? `${monday.getUTCDate()}–${sunday.getUTCDate()}·${m2}`
-    : `${monday.getUTCDate()}·${m1}–${sunday.getUTCDate()}·${m2}`;
+  const startMonth = MONTHS[monday.getUTCMonth()];
+  const endMonth = MONTHS[sunday.getUTCMonth()];
+  return startMonth === endMonth
+    ? `${monday.getUTCDate()}–${sunday.getUTCDate()}·${endMonth}`
+    : `${monday.getUTCDate()}·${startMonth}–${sunday.getUTCDate()}·${endMonth}`;
 };
 
 export function weeks(now = new Date()): Week[] {
@@ -51,97 +51,109 @@ export function weeks(now = new Date()): Week[] {
     .filter(Boolean)
     .map((line) => {
       const [date, subject] = line.split("\x1f");
-      const [y, m, d] = date.split("-").map(Number);
+      const [year, month, dayOfMonth] = date.split("-").map(Number);
       const area = subject.match(/^([\w./-]+):/)?.[1].split("/")[0] ?? "other";
-      const day = new Date(Date.UTC(y, m - 1, d));
+      const day = new Date(Date.UTC(year, month - 1, dayOfMonth));
       return { day, monday: mondayOf(day), area };
     });
   if (!commits.length) return [];
 
-  const first = commits.reduce((a, c) => Math.min(a, c.monday.valueOf()), Infinity);
+  const first = commits.reduce(
+    (earliest, commit) => Math.min(earliest, commit.monday.valueOf()),
+    Infinity,
+  );
   const today = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
   const last = mondayOf(new Date(today)).valueOf();
-  const out: Week[] = [];
-  for (let t = first; t <= last; t += 7 * DAY) {
-    const monday = new Date(t);
-    const these = commits.filter((c) => c.monday.valueOf() === t);
+  const result: Week[] = [];
+  for (let mondayTime = first; mondayTime <= last; mondayTime += 7 * DAY) {
+    const monday = new Date(mondayTime);
+    const these = commits.filter((commit) => commit.monday.valueOf() === mondayTime);
     const count = new Map<string, number>();
-    for (const c of these) count.set(c.area, (count.get(c.area) ?? 0) + 1);
-    out.push({
+    for (const commit of these) count.set(commit.area, (count.get(commit.area) ?? 0) + 1);
+    result.push({
       ...isoWeek(monday),
       monday,
       dates: span(monday),
       n: these.length,
-      areas: [...count].sort((a, b) => b[1] - a[1]).slice(0, 3),
-      growing: t === last,
-      since: these.length ? new Date(Math.min(...these.map((c) => c.day.valueOf()))) : null,
+      areas: [...count].sort((former, latter) => latter[1] - former[1]).slice(0, 3),
+      growing: mondayTime === last,
+      since: these.length
+        ? new Date(Math.min(...these.map((commit) => commit.day.valueOf())))
+        : null,
     });
   }
-  return out;
+  return result;
 }
 
-export function stump(list: Week[], C = 280, fit = 226) {
-  const N = 48;
-  const r = rng(hash("nenrin"));
-  const ph = [r() * 6.3, r() * 6.3];
-  const ecc = 0.16;
-  const phi = 2.2;
+export function stump(list: Week[], center = 280, fit = 226) {
+  const POINTS = 48;
+  const rand = rng(hash("nenrin"));
+  const phases = [rand() * 6.3, rand() * 6.3];
+  const eccentricity = 0.16;
+  const tiltAngle = 2.2;
 
-  let R = 12;
-  const raw = list.map((w) => (R += 4 + Math.sqrt(w.n) * 4.2));
-  const k = Math.min(1, fit / R);
-  const outer = R * k;
-  let acc: number[] = new Array(N).fill(0);
+  let totalRadius = 12;
+  const raw = list.map((week) => (totalRadius += 4 + Math.sqrt(week.n) * 4.2));
+  const scale = Math.min(1, fit / totalRadius);
+  const outer = totalRadius * scale;
+  let wobble: number[] = new Array(POINTS).fill(0);
 
-  const reach = (a: number, rad: number, wob: number[]) => {
-    const t = ((((a / (Math.PI * 2)) % 1) + 1) % 1) * N;
-    const i = Math.floor(t);
-    const w = wob[i % N] + (wob[(i + 1) % N] - wob[i % N]) * (t - i);
-    return rad * (1 + ecc * Math.cos(a - phi) * Math.min(1, rad / 120)) + w;
+  const reach = (angle: number, radius: number, wobbles: number[]) => {
+    const position = ((((angle / (Math.PI * 2)) % 1) + 1) % 1) * POINTS;
+    const i = Math.floor(position);
+    const offset =
+      wobbles[i % POINTS] + (wobbles[(i + 1) % POINTS] - wobbles[i % POINTS]) * (position - i);
+    return (
+      radius * (1 + eccentricity * Math.cos(angle - tiltAngle) * Math.min(1, radius / 120)) + offset
+    );
   };
 
-  const at = (a: number, q: number) =>
-    `${f1(C + Math.cos(a) * q)} ${f1(C + Math.sin(a) * q * 0.96)}`;
+  const pointAt = (angle: number, distance: number) =>
+    `${round1(center + Math.cos(angle) * distance)} ${round1(center + Math.sin(angle) * distance * 0.96)}`;
 
-  const shape = (rad: number, wob: number[]) =>
+  const shape = (radius: number, wobbles: number[]) =>
     smooth(
-      Array.from({ length: N }, (_, i): [number, number] => {
-        const a = (i / N) * Math.PI * 2;
-        const q = reach(a, rad, wob);
-        return [C + Math.cos(a) * q, C + Math.sin(a) * q * 0.96];
+      Array.from({ length: POINTS }, (_, i): [number, number] => {
+        const angle = (i / POINTS) * Math.PI * 2;
+        const distance = reach(angle, radius, wobbles);
+        return [center + Math.cos(angle) * distance, center + Math.sin(angle) * distance * 0.96];
       }),
       true,
     );
 
   const grow = () =>
-    acc.map((v, i) => {
-      const a = (i / N) * Math.PI * 2;
+    wobble.map((value, i) => {
+      const angle = (i / POINTS) * Math.PI * 2;
       return (
-        v + (Math.sin(a * 3 + ph[0]) * 0.6 + Math.sin(a * 5 + ph[1]) * 0.4 + (r() - 0.5) * 0.8) * k
+        value +
+        (Math.sin(angle * 3 + phases[0]) * 0.6 +
+          Math.sin(angle * 5 + phases[1]) * 0.4 +
+          (rand() - 0.5) * 0.8) *
+          scale
       );
     });
 
-  const pith = shape(6 * k, acc);
-  const rings = raw.map((rad) => {
-    acc = grow();
-    return shape(rad * k, acc);
+  const pith = shape(6 * scale, wobble);
+  const rings = raw.map((radius) => {
+    wobble = grow();
+    return shape(radius * scale, wobble);
   });
-  const barkWob = acc.map((v) => v * 1.3);
+  const barkWob = wobble.map((value) => value * 1.3);
   const bark = shape(outer + 16, barkWob);
-  const rim = (a: number, d: number) => reach(a, outer, acc) + d;
+  const rim = (angle: number, inset: number) => reach(angle, outer, wobble) + inset;
 
   let fissures = "";
-  for (let q = 0; q < 30; q++) {
-    const a = (q / 30) * Math.PI * 2 + r() * 0.1;
-    const tip = Math.min(reach(a, outer + 16, barkWob) - 1, rim(a, 12 + r() * 4));
-    fissures += `M${at(a, rim(a, 3))} L${at(a, tip)} `;
+  for (let fissure = 0; fissure < 30; fissure++) {
+    const angle = (fissure / 30) * Math.PI * 2 + rand() * 0.1;
+    const tip = Math.min(reach(angle, outer + 16, barkWob) - 1, rim(angle, 12 + rand() * 4));
+    fissures += `M${pointAt(angle, rim(angle, 3))} L${pointAt(angle, tip)} `;
   }
 
   // drying check
-  const ca = 0.6;
-  const cw = 0.05;
-  const crack = `M${at(ca - cw, rim(ca - cw, 18))} L${at(ca - cw * 0.4, rim(ca, 0) * 0.75)} L${at(ca + 0.01, rim(ca, 0) * 0.42)} L${at(ca + cw * 0.3, rim(ca, 0) * 0.75)} L${at(ca + cw, rim(ca + cw, 18))} Z`;
-  const gold = `M${at(ca, rim(ca, 14))} L${at(ca - cw * 0.1, rim(ca, 0) * 0.75)} L${at(ca + 0.01, rim(ca, 0) * 0.45)}`;
+  const crackAngle = 0.6;
+  const crackWidth = 0.05;
+  const crack = `M${pointAt(crackAngle - crackWidth, rim(crackAngle - crackWidth, 18))} L${pointAt(crackAngle - crackWidth * 0.4, rim(crackAngle, 0) * 0.75)} L${pointAt(crackAngle + 0.01, rim(crackAngle, 0) * 0.42)} L${pointAt(crackAngle + crackWidth * 0.3, rim(crackAngle, 0) * 0.75)} L${pointAt(crackAngle + crackWidth, rim(crackAngle + crackWidth, 18))} Z`;
+  const gold = `M${pointAt(crackAngle, rim(crackAngle, 14))} L${pointAt(crackAngle - crackWidth * 0.1, rim(crackAngle, 0) * 0.75)} L${pointAt(crackAngle + 0.01, rim(crackAngle, 0) * 0.45)}`;
 
   return { pith, rings, bark, fissures: fissures.trim(), crack, gold };
 }

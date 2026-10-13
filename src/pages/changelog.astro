@@ -6,19 +6,19 @@ import { stump, weeks, type Week } from "../utils/nenrin";
 
 const list = weeks();
 const { pith, rings, bark, fissures, crack, gold } = stump(list);
-const total = list.reduce((s, w) => s + w.n, 0);
+const total = list.reduce((sum, week) => sum + week.n, 0);
 const start = list[0]?.since;
 const since = start
   ? `${start.getUTCDate()}·${MONTHS[start.getUTCMonth()]}·${start.getUTCFullYear()}`
   : "";
 const shown = list.at(-1);
 
-const label = (w: Week) => `WEEK ${w.week} · ${w.dates}`;
-const say = (w: Week) =>
-  w.growing ? "this week, still growing" : w.n === 0 ? "a dry week, a hairline ring" : "";
-const areas = (w: Week) =>
-  w.areas.length
-    ? `mostly ${w.areas.map(([a, n]) => `${a} ${n}`).join(" · ")}`
+const label = (week: Week) => `WEEK ${week.week} · ${week.dates}`;
+const say = (week: Week) =>
+  week.growing ? "this week, still growing" : week.n === 0 ? "a dry week, a hairline ring" : "";
+const areas = (week: Week) =>
+  week.areas.length
+    ? `mostly ${week.areas.map(([area, count]) => `${area} ${count}`).join(" · ")}`
     : "nothing committed";
 const delay = (i: number) => (0.15 + (i / Math.max(1, list.length - 1)) * 1.6).toFixed(2);
 ---
@@ -79,21 +79,21 @@ const delay = (i: number) => (0.15 + (i / Math.max(1, list.length - 1)) * 1.6).t
         <path class="bark" d={bark}></path>
         <path class="fissures" d={fissures}></path>
         {list
-          .map((w, i) => (
+          .map((week, i) => (
             <g
               class:list={[
                 "ring",
-                { alt: i % 2 === 1, sap: w.growing, dry: w.n === 0, on: w === shown },
+                { alt: i % 2 === 1, sap: week.growing, dry: week.n === 0, on: week === shown },
               ]}
               tabindex="0"
               role="button"
-              aria-label={`week ${w.week}, ${w.dates}, ${w.n} commits`}
-              aria-pressed={w === shown ? "true" : "false"}
+              aria-label={`week ${week.week}, ${week.dates}, ${week.n} commits`}
+              aria-pressed={week === shown ? "true" : "false"}
               data-i={i}
-              data-k={label(w)}
-              data-n={w.n}
-              data-say={say(w)}
-              data-areas={areas(w)}
+              data-k={label(week)}
+              data-n={week.n}
+              data-say={say(week)}
+              data-areas={areas(week)}
               style={`animation-delay: ${delay(i)}s`}
             >
               <path d={rings[i]}></path>
@@ -120,11 +120,11 @@ const delay = (i: number) => (0.15 + (i / Math.max(1, list.length - 1)) * 1.6).t
       )}
       <ol class="weeks">
         {list
-          .map((w, i) => (
-            <li data-i={i} class:list={{ on: w === shown, dry: w.n === 0 }}>
-              <span>W{w.week}</span>
-              <span>{w.dates}</span>
-              <span class="n">{w.n}</span>
+          .map((week, i) => (
+            <li data-i={i} class:list={{ on: week === shown, dry: week.n === 0 }}>
+              <span>W{week.week}</span>
+              <span>{week.dates}</span>
+              <span class="n">{week.n}</span>
             </li>
           ))
           .reverse()}
@@ -138,23 +138,23 @@ const delay = (i: number) => (0.15 + (i / Math.max(1, list.length - 1)) * 1.6).t
   const rings = [...document.querySelectorAll<SVGGElement>(".ring")];
   const rows = [...document.querySelectorAll<HTMLLIElement>(".weeks li")];
   const card = document.querySelector<HTMLElement>(".card");
-  let chosen = rings.find((g) => g.ariaPressed === "true");
+  let chosen = rings.find((candidate) => candidate.ariaPressed === "true");
 
   // light a ring and its row, and read it out on the card
   const show = (ring: SVGGElement | undefined) => {
     if (!ring || !card) return;
-    const { i, k, n, say, areas } = ring.dataset;
-    for (const g of rings) g.classList.toggle("on", g === ring);
+    const { i, k: weekLabel, n: commitCount, say, areas } = ring.dataset;
+    for (const other of rings) other.classList.toggle("on", other === ring);
     for (const row of rows) row.classList.toggle("on", row.dataset.i === i);
-    card.querySelector(".card-k")!.textContent = k!;
-    card.querySelector(".card-n span")!.textContent = n!;
+    card.querySelector(".card-k")!.textContent = weekLabel!;
+    card.querySelector(".card-n span")!.textContent = commitCount!;
     card.querySelector(".card-say")!.textContent = say!;
     card.querySelector(".card-areas")!.textContent = areas!;
   };
 
   const pick = (ring: SVGGElement) => {
     chosen = ring;
-    for (const g of rings) g.setAttribute("aria-pressed", String(g === ring));
+    for (const other of rings) other.setAttribute("aria-pressed", String(other === ring));
     show(ring);
   };
 
@@ -164,15 +164,15 @@ const delay = (i: number) => (0.15 + (i / Math.max(1, list.length - 1)) * 1.6).t
     ring.addEventListener("pointerleave", () => show(chosen));
     ring.addEventListener("blur", () => show(chosen));
     ring.addEventListener("click", () => pick(ring));
-    ring.addEventListener("keydown", (e) => {
-      if (e.key !== "Enter" && e.key !== " ") return;
-      e.preventDefault();
+    ring.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      event.preventDefault();
       pick(ring);
     });
   }
 
   for (const row of rows) {
-    const ring = rings.find((g) => g.dataset.i === row.dataset.i)!;
+    const ring = rings.find((candidate) => candidate.dataset.i === row.dataset.i)!;
     row.addEventListener("pointerenter", () => show(ring));
     row.addEventListener("pointerleave", () => show(chosen));
     row.addEventListener("click", () => pick(ring));
