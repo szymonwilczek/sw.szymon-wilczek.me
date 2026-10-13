@@ -602,6 +602,11 @@ function workshopInside(groups, rand, project, tones, scale) {
     0.95,
   );
   // the painting table by the right window
+  const tableLeft = 200,
+    tableRight = 280,
+    tableNear = 30,
+    tableFar = 70,
+    tableHeight = 18;
   const table = newGroup();
   groups.push(table);
   face(
@@ -609,10 +614,10 @@ function workshopInside(groups, rand, project, tones, scale) {
     rand,
     project,
     [
-      [280, 30, 0],
-      [280, 70, 0],
-      [280, 70, 18],
-      [280, 30, 18],
+      [tableRight, tableNear, 0],
+      [tableRight, tableFar, 0],
+      [tableRight, tableFar, tableHeight],
+      [tableRight, tableNear, tableHeight],
     ],
     tones.wood,
     tones,
@@ -623,20 +628,20 @@ function workshopInside(groups, rand, project, tones, scale) {
     rand,
     project,
     [
-      [200, 30, 18],
-      [280, 30, 18],
-      [280, 70, 18],
-      [200, 70, 18],
+      [tableLeft, tableNear, tableHeight],
+      [tableRight, tableNear, tableHeight],
+      [tableRight, tableFar, tableHeight],
+      [tableLeft, tableFar, tableHeight],
     ],
     tones.woodLt,
     tones,
     1,
   );
   [
-    [200, 30],
-    [280, 30],
-  ].forEach(([x, z]) => post(table, rand, project, x, z, 0, 18, tones, 3));
-  const tableTop = project(226, 50, 18);
+    [tableLeft, tableNear],
+    [tableRight, tableNear],
+  ].forEach(([x, z]) => post(table, rand, project, x, z, 0, tableHeight, tones, 3));
+  const tableTop = project(226, 50, tableHeight);
   const tableItems = newGroup();
   groups.push(tableItems);
   piece(
@@ -649,8 +654,8 @@ function workshopInside(groups, rand, project, tones, scale) {
     Object.assign({ clay: 3, glaze: { c: 1, dip: 0.7 }, fire: 4 }, PROFILES.bowl),
   );
   // the brush lies along the table, a little shadow under it
-  const brushTip = project(246, 60, 18),
-    brushEnd = project(274, 60, 18),
+  const brushTip = project(246, 60, tableHeight),
+    brushEnd = project(274, 60, tableHeight),
     brushLength = Math.hypot(brushEnd[0] - brushTip[0], brushEnd[1] - brushTip[1]),
     lift = brushLength / 50;
   addLine(
@@ -671,7 +676,7 @@ function workshopInside(groups, rand, project, tones, scale) {
     PAINTS(tones)[0],
   );
   [0, 1, 2].forEach((i) => {
-    const spot = project(256 + i * 7, 42, 18);
+    const spot = project(256 + i * 7, 42, tableHeight);
     addSolid(
       tableItems,
       wobblyRing(rand, spot[0], spot[1], 3 * scale, 1.5 * scale, 0.2, 8),
