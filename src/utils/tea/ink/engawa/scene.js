@@ -380,17 +380,26 @@ function sceneEngawa(tones, hour, mini, seasonKey, opts = {}) {
       );
     }
   }
-  const floor = { A: [-10, 548], B: [835, 490], C: [912, height + 10], D: [-10, height + 10] },
-    edgeY = (x) => lerp(548, 490, (x + 10) / 845);
+
+  const edgeLeftY = 548,
+    edgeEndX = 835,
+    edgeEndY = 490;
+  const floor = {
+      A: [-10, edgeLeftY],
+      B: [edgeEndX, edgeEndY],
+      C: [912, height + 10],
+      D: [-10, height + 10],
+    },
+    edgeY = (x) => lerp(edgeLeftY, edgeEndY, (x + 10) / (edgeEndX + 10));
   inked(
     house,
     houseRand,
-    wobblyBox(houseRand, -10, beamY(-10) - 22, 140, 548, 0.8),
+    wobblyBox(houseRand, -10, beamY(-10) - 22, 140, edgeLeftY, 0.8),
     tones.fusuma,
     tones.ink,
     1.2,
   );
-  for (let y = beamY(-10); y < 548; y += 46)
+  for (let y = beamY(-10); y < edgeLeftY; y += 46)
     addLine(
       house,
       wobblySegment(houseRand, [-10, y], [140, y - 6], 0.4, 2),
