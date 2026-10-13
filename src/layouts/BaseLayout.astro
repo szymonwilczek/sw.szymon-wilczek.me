@@ -125,16 +125,16 @@ const {
 
     <script is:inline define:vars={{ themeIds, moreThemes }}>
       (function () {
-        var KEY = "au-theme";
+        var STORAGE_KEY = "au-theme";
         var DEFAULTS = { light: "salina-day", dark: "salina-night" };
         var root = document.documentElement;
         var light = window.matchMedia("(prefers-color-scheme: light)");
 
         function read() {
           try {
-            var stored = localStorage.getItem(KEY);
+            var stored = localStorage.getItem(STORAGE_KEY);
             return themeIds.indexOf(stored) === -1 ? "auto" : stored;
-          } catch (e) {
+          } catch (error) {
             return "auto";
           }
         }
@@ -171,14 +171,14 @@ const {
           document.head.insertBefore(sheet, document.querySelector("style"));
         }
 
-        function whenReady(theme, fn) {
+        function whenReady(theme, callback) {
           if (!ready(theme)) {
-            afterLoad = fn;
+            afterLoad = callback;
             fetchThemes();
             return;
           }
           afterLoad = null;
-          fn();
+          callback();
         }
 
         function apply(choice) {
@@ -212,15 +212,15 @@ const {
           }
           pouring = true;
           var button = document.getElementById("theme-toggle");
-          var r = button && button.getBoundingClientRect();
-          var visible = r && r.width > 0;
-          var x = visible ? r.left + r.width / 2 : innerWidth - 40;
-          var y = visible ? r.top + r.height / 2 : 40;
-          var far = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+          var rect = button && button.getBoundingClientRect();
+          var visible = rect && rect.width > 0;
+          var x = visible ? rect.left + rect.width / 2 : innerWidth - 40;
+          var y = visible ? rect.top + rect.height / 2 : 40;
+          var reach = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
 
           root.style.setProperty("--ink-x", x + "px");
           root.style.setProperty("--ink-y", y + "px");
-          root.style.setProperty("--ink-size", Math.ceil(far * 2.7) + "px");
+          root.style.setProperty("--ink-size", Math.ceil(reach * 2.7) + "px");
           root.classList.add("ink-flood");
           root.classList.toggle("ink-quick", job.quick);
 
@@ -237,9 +237,9 @@ const {
 
         function store(choice) {
           try {
-            if (choice === "auto") localStorage.removeItem(KEY);
-            else localStorage.setItem(KEY, choice);
-          } catch (e) {}
+            if (choice === "auto") localStorage.removeItem(STORAGE_KEY);
+            else localStorage.setItem(STORAGE_KEY, choice);
+          } catch (error) {}
         }
 
         function show(choice) {
@@ -288,7 +288,7 @@ const {
         try {
           localStorage.removeItem("theme");
           localStorage.removeItem("font-preference");
-        } catch (e) {}
+        } catch (error) {}
 
         light.addEventListener("change", function () {
           if (read() === "auto") apply("auto");
@@ -366,29 +366,29 @@ const {
             var wrapper = document.createElement("div");
             wrapper.className = "code-block-wrapper";
 
-            var btn = document.createElement("button");
-            btn.type = "button";
-            btn.className = "copy-code-btn";
-            btn.setAttribute("aria-label", "Copy code to clipboard");
-            btn.textContent = "Copy";
+            var button = document.createElement("button");
+            button.type = "button";
+            button.className = "copy-code-btn";
+            button.setAttribute("aria-label", "Copy code to clipboard");
+            button.textContent = "Copy";
 
-            btn.addEventListener("click", function () {
+            button.addEventListener("click", function () {
               var code = pre.querySelector("code") || pre;
               var text = code.innerText || code.textContent || "";
               navigator.clipboard.writeText(text.trim()).then(function () {
                 pressHanko(wrapper);
-                btn.setAttribute("aria-label", "Copied");
-                btn.classList.add("is-copied");
+                button.setAttribute("aria-label", "Copied");
+                button.classList.add("is-copied");
                 setTimeout(function () {
-                  btn.setAttribute("aria-label", "Copy code to clipboard");
-                  btn.classList.remove("is-copied");
+                  button.setAttribute("aria-label", "Copy code to clipboard");
+                  button.classList.remove("is-copied");
                 }, 2000);
               });
             });
 
             pre.parentNode.insertBefore(wrapper, pre);
             wrapper.appendChild(pre);
-            wrapper.appendChild(btn);
+            wrapper.appendChild(button);
           });
         }
 
