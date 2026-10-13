@@ -14,7 +14,9 @@ export async function GET(context: APIContext) {
     author: "swilczek.lx@gmail.com (Szymon Wilczek)",
   }));
 
-  const allItems = writingItems.sort((a, b) => b.pubDate.valueOf() - a.pubDate.valueOf());
+  const allItems = writingItems.sort(
+    (former, latter) => latter.pubDate.valueOf() - former.pubDate.valueOf(),
+  );
 
   return rss({
     title: "Szymon Wilczek",

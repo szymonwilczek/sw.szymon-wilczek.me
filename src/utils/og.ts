@@ -67,25 +67,25 @@ type Layout = keyof typeof INK_LAYERS;
 const paperCache = new Map<Layout, string>();
 
 function paper(layout: Layout): string {
-  let uri = paperCache.get(layout);
-  if (!uri) {
+  let dataUri = paperCache.get(layout);
+  if (!dataUri) {
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630"><defs>${FILTERS}</defs><rect width="1200" height="630" fill="${PAPER}"/><rect width="1200" height="630" filter="url(#fibre)" opacity="0.5"/>${INK_LAYERS[layout]}</svg>`;
     const png = new Resvg(svg).render().asPng();
-    uri = `data:image/png;base64,${Buffer.from(png).toString("base64")}`;
-    paperCache.set(layout, uri);
+    dataUri = `data:image/png;base64,${Buffer.from(png).toString("base64")}`;
+    paperCache.set(layout, dataUri);
   }
-  return uri;
+  return dataUri;
 }
 
 type El = { type: string; props: Record<string, unknown> };
 
-const el = (type: string, style: Record<string, unknown>, children?: unknown): El => ({
+const element = (type: string, style: Record<string, unknown>, children?: unknown): El => ({
   type,
   props: { style, children },
 });
 
 const seal = (size: number) =>
-  el(
+  element(
     "div",
     {
       width: size,
@@ -104,10 +104,10 @@ const seal = (size: number) =>
   );
 
 const mono = (fontSize: number, text: string) =>
-  el("div", { fontFamily: "Typus Mono 95", fontSize, letterSpacing: 0.7, color: DIM }, text);
+  element("div", { fontFamily: "Typus Mono 95", fontSize, letterSpacing: 0.7, color: DIM }, text);
 
 async function render(layout: Layout, children: El[]): Promise<Uint8Array<ArrayBuffer>> {
-  const card = el(
+  const card = element(
     "div",
     {
       position: "relative",
@@ -127,7 +127,7 @@ async function render(layout: Layout, children: El[]): Promise<Uint8Array<ArrayB
 
 export function homeCard(host: string): Promise<Uint8Array<ArrayBuffer>> {
   return render("home", [
-    el(
+    element(
       "div",
       {
         position: "absolute",
@@ -140,7 +140,7 @@ export function homeCard(host: string): Promise<Uint8Array<ArrayBuffer>> {
       },
       [
         mono(18, "~/garden"),
-        el(
+        element(
           "div",
           {
             display: "flex",
@@ -149,16 +149,16 @@ export function homeCard(host: string): Promise<Uint8Array<ArrayBuffer>> {
             fontSize: 84,
             lineHeight: 1.02,
           },
-          [el("span", {}, "Szymon"), el("span", {}, "Wilczek")],
+          [element("span", {}, "Szymon"), element("span", {}, "Wilczek")],
         ),
-        el(
+        element(
           "div",
           { fontFamily: "Kalam", fontWeight: 300, fontSize: 30, color: DIM },
           "Linux, C, GNU Emacs",
         ),
       ],
     ),
-    el(
+    element(
       "div",
       {
         position: "absolute",
@@ -181,7 +181,7 @@ export function essayCard(
 ): Promise<Uint8Array<ArrayBuffer>> {
   const day = date.toISOString().split("T")[0];
   return render("essay", [
-    el(
+    element(
       "div",
       {
         position: "absolute",
@@ -194,10 +194,10 @@ export function essayCard(
       },
       [
         mono(18, `${category.toLowerCase()} · ${day}`),
-        el("div", { fontWeight: 400, fontSize: 64, lineHeight: 1.12 }, title),
+        element("div", { fontWeight: 400, fontSize: 64, lineHeight: 1.12 }, title),
       ],
     ),
-    el(
+    element(
       "div",
       {
         position: "absolute",
@@ -210,8 +210,8 @@ export function essayCard(
       },
       [
         seal(46),
-        el("div", { fontFamily: "Kalam", fontWeight: 300, fontSize: 28 }, "Szymon Wilczek"),
-        el("div", { marginLeft: "auto", display: "flex" }, [mono(20, host)]),
+        element("div", { fontFamily: "Kalam", fontWeight: 300, fontSize: 28 }, "Szymon Wilczek"),
+        element("div", { marginLeft: "auto", display: "flex" }, [mono(20, host)]),
       ],
     ),
   ]);

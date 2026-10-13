@@ -12,25 +12,25 @@ export function parseOrgMetadata(content: string) {
       const match = trimmed.match(/^#\+([A-Za-z0-9_-]+):\s*(.*)$/);
       if (match) {
         const key = match[1].toLowerCase();
-        const val = match[2].trim();
+        const value = match[2].trim();
 
-        if (key === "title") meta.title = val;
-        else if (key === "date") meta.date = val;
-        else if (key === "pubdate") meta.pubDate = val;
-        else if (key === "description") meta.description = val;
-        else if (key === "category") meta.category = val;
-        else if (key === "tags") meta.tags = val;
-        else if (key === "status") meta.status = val;
-        else if (key === "repo") meta.repo = val;
-        else if (key === "location") meta.location = val;
-        else if (key === "camera") meta.camera = val;
-        else if (key === "lens") meta.lens = val;
-        else if (key === "aperture") meta.aperture = val;
-        else if (key === "shutterspeed") meta.shutterSpeed = val;
-        else if (key === "iso") meta.iso = val;
-        else if (key === "image") meta.image = val;
-        else if (key === "alt") meta.alt = val;
-        else meta[key] = val;
+        if (key === "title") meta.title = value;
+        else if (key === "date") meta.date = value;
+        else if (key === "pubdate") meta.pubDate = value;
+        else if (key === "description") meta.description = value;
+        else if (key === "category") meta.category = value;
+        else if (key === "tags") meta.tags = value;
+        else if (key === "status") meta.status = value;
+        else if (key === "repo") meta.repo = value;
+        else if (key === "location") meta.location = value;
+        else if (key === "camera") meta.camera = value;
+        else if (key === "lens") meta.lens = value;
+        else if (key === "aperture") meta.aperture = value;
+        else if (key === "shutterspeed") meta.shutterSpeed = value;
+        else if (key === "iso") meta.iso = value;
+        else if (key === "image") meta.image = value;
+        else if (key === "alt") meta.alt = value;
+        else meta[key] = value;
       }
     }
   }
@@ -52,38 +52,38 @@ export function orgContentLoader({ base }: { base: string }): Loader {
         if (!fs.existsSync(fullPath)) return;
         const filename = path.basename(fullPath);
         if (filename === ".gitkeep" || filename.startsWith(".")) return;
-        const ext = path.extname(filename).toLowerCase();
-        if (![".org", ".json", ".md", ".mdx"].includes(ext)) return;
-        const id = path.basename(filename, ext);
+        const extension = path.extname(filename).toLowerCase();
+        if (![".org", ".json", ".md", ".mdx"].includes(extension)) return;
+        const id = path.basename(filename, extension);
         const rawContent = fs.readFileSync(fullPath, "utf-8");
 
         let rawData: Record<string, any> = {};
         let body = "";
 
-        if (ext === ".org") {
+        if (extension === ".org") {
           rawData = parseOrgMetadata(rawContent);
           body = rawContent;
-        } else if (ext === ".json") {
+        } else if (extension === ".json") {
           try {
             rawData = JSON.parse(rawContent);
           } catch {
             return;
           }
           body = "";
-        } else if (ext === ".md" || ext === ".mdx") {
-          const fmMatch = rawContent.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n([\s\S]*)$/);
-          if (fmMatch) {
-            body = fmMatch[2];
-            const lines = fmMatch[1].split("\n");
+        } else if (extension === ".md" || extension === ".mdx") {
+          const frontmatterMatch = rawContent.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n([\s\S]*)$/);
+          if (frontmatterMatch) {
+            body = frontmatterMatch[2];
+            const lines = frontmatterMatch[1].split("\n");
             for (const line of lines) {
-              const colonIdx = line.indexOf(":");
-              if (colonIdx > -1) {
-                const k = line.slice(0, colonIdx).trim();
-                const v = line
-                  .slice(colonIdx + 1)
+              const colonIndex = line.indexOf(":");
+              if (colonIndex > -1) {
+                const key = line.slice(0, colonIndex).trim();
+                const value = line
+                  .slice(colonIndex + 1)
                   .trim()
                   .replace(/^["']|["']$/g, "");
-                rawData[k] = v;
+                rawData[key] = value;
               }
             }
           } else {
@@ -128,8 +128,8 @@ export function orgContentLoader({ base }: { base: string }): Loader {
         watcher.on("unlink", (deletedPath: string) => {
           if (deletedPath.startsWith(baseDir)) {
             const filename = path.basename(deletedPath);
-            const ext = path.extname(filename).toLowerCase();
-            const id = path.basename(filename, ext);
+            const extension = path.extname(filename).toLowerCase();
+            const id = path.basename(filename, extension);
             store.delete(id);
           }
         });

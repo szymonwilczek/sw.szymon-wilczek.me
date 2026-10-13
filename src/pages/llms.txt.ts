@@ -43,7 +43,7 @@ export const GET: APIRoute = async ({ site }) => {
   const siteUrl = site!.origin;
 
   const writings = (await getCollection("writings")).sort(
-    (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+    (former, latter) => latter.data.pubDate.valueOf() - former.data.pubDate.valueOf(),
   );
   const albums = await getAllAlbums();
 
@@ -56,13 +56,13 @@ export const GET: APIRoute = async ({ site }) => {
   });
 
   const projects = PROJECTS.map(
-    (p) =>
-      `- [${p.title}](${p.url}): ${p.excerpt.replace(/([^.!?])$/, "$1.")} ${p.language}, since ${p.date.slice(0, 7)}.`,
+    (project) =>
+      `- [${project.title}](${project.url}): ${project.excerpt.replace(/([^.!?])$/, "$1.")} ${project.language}, since ${project.date.slice(0, 7)}.`,
   );
 
   const photos = albums.map(
-    (a) =>
-      `- [${a.title}](${siteUrl}/photos/${a.slug}/): ${a.photoCount} photographs, ${a.dateFormatted}.`,
+    (album) =>
+      `- [${album.title}](${siteUrl}/photos/${album.slug}/): ${album.photoCount} photographs, ${album.dateFormatted}.`,
   );
 
   const content = `# Szymon Wilczek
@@ -77,7 +77,7 @@ Szymon studies Computer Science (B.Sc. Eng.) at the Silesian University of Techn
 
 ## Pages
 
-${PAGES.map((p) => line(siteUrl, p)).join("\n")}
+${PAGES.map((page) => line(siteUrl, page)).join("\n")}
 
 ## Writings
 
@@ -95,7 +95,7 @@ ${projects.join("\n")}
 
 ## Optional
 
-${OPTIONAL.map((p) => line(siteUrl, p)).join("\n")}
+${OPTIONAL.map((page) => line(siteUrl, page)).join("\n")}
 ${photos.join("\n")}
 
 Not for indexing: /vault/ holds encrypted private documents.

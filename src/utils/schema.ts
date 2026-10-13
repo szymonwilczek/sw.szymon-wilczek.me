@@ -43,14 +43,14 @@ export function projectsList(page: URL, projects: Project[]): Node {
   return itemList(
     page,
     "Projects",
-    projects.map((p) => ({
+    projects.map((project) => ({
       "@type": "SoftwareSourceCode",
-      name: p.title,
-      description: p.excerpt,
-      url: p.url,
-      ...(repoPath(p.url).site ? {} : { codeRepository: p.url }),
-      programmingLanguage: p.language,
-      dateCreated: p.date,
+      name: project.title,
+      description: project.excerpt,
+      url: project.url,
+      ...(repoPath(project.url).site ? {} : { codeRepository: project.url }),
+      programmingLanguage: project.language,
+      dateCreated: project.date,
       author: { "@id": new URL("/#identity", page).href },
     })),
   );

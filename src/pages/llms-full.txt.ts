@@ -14,7 +14,7 @@ export const GET: APIRoute = async ({ site }) => {
   let writings: CollectionEntry<"writings">[] = [];
   try {
     writings = (await getCollection("writings")).sort(
-      (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+      (former, latter) => latter.data.pubDate.valueOf() - former.data.pubDate.valueOf(),
     );
   } catch {}
 

@@ -164,7 +164,8 @@ function rehypeShikiHighlight(highlighter: any) {
           const className = codeNode.properties?.className || [];
           const classList = Array.isArray(className) ? className : [className];
           const langClass = classList.find(
-            (c: string) => typeof c === "string" && c.startsWith("language-"),
+            (classToken: string) =>
+              typeof classToken === "string" && classToken.startsWith("language-"),
           );
           let lang = langClass ? langClass.replace("language-", "").toLowerCase() : "text";
 
@@ -175,9 +176,9 @@ function rehypeShikiHighlight(highlighter: any) {
           if (lang === "commonlisp") lang = "common-lisp";
 
           let codeText = "";
-          function extractText(n: any) {
-            if (n.type === "text") codeText += n.value;
-            if (n.children) n.children.forEach(extractText);
+          function extractText(part: any) {
+            if (part.type === "text") codeText += part.value;
+            if (part.children) part.children.forEach(extractText);
           }
           extractText(codeNode);
 
@@ -190,7 +191,7 @@ function rehypeShikiHighlight(highlighter: any) {
             if (hast && parent && typeof index === "number") {
               parent.children[index] = hast;
             }
-          } catch (e) {
+          } catch (error) {
             // keep default unhighlighted pre/code on unexpected error
           }
         }
@@ -217,17 +218,17 @@ function uniorgHeadlines() {
 
     visit(tree, "section", (node: any) => {
       let customId: string | null = null;
-      const drawer = node.children?.find((c: any) => c.type === "property-drawer");
+      const drawer = node.children?.find((child: any) => child.type === "property-drawer");
       if (drawer) {
         const prop = drawer.children?.find(
-          (p: any) => p.type === "node-property" && p.key === "CUSTOM_ID",
+          (property: any) => property.type === "node-property" && property.key === "CUSTOM_ID",
         );
         if (prop && prop.value) {
           customId = prop.value.trim();
         }
       }
 
-      const headline = node.children?.find((c: any) => c.type === "headline");
+      const headline = node.children?.find((child: any) => child.type === "headline");
       if (headline) {
         let baseId = customId || slugify(headline.rawValue || "section");
         if (!baseId) baseId = "section";
@@ -256,7 +257,7 @@ function rehypeOrgEnhancements() {
         node.properties?.className &&
         (node.properties.className.includes("example") ||
           (Array.isArray(node.properties.className) &&
-            node.properties.className.some((c: string) => c.includes("example"))))
+            node.properties.className.some((classToken: string) => classToken.includes("example"))))
       ) {
         node.tagName = "pre";
         node.properties.className = ["example-block"];
@@ -299,12 +300,15 @@ function rehypeOrgEnhancements() {
                 : [child.properties.className];
               if (
                 classes.some(
-                  (c: string) => c.includes("todo-keyword") || c === "TODO" || c === "DONE",
+                  (classToken: string) =>
+                    classToken.includes("todo-keyword") ||
+                    classToken === "TODO" ||
+                    classToken === "DONE",
                 )
               ) {
                 child.properties.className = ["todo-badge", ...classes];
               }
-              if (classes.some((c: string) => c.includes("priority"))) {
+              if (classes.some((classToken: string) => classToken.includes("priority"))) {
                 child.properties.className = ["priority-badge", ...classes];
               }
             }
