@@ -58,53 +58,58 @@ const { groups, storehouse, count } = shelf();
   </svg>
 
   <div class="shelf">
-    {groups.map((g) => (
-      <section class="group" aria-labelledby={`dg-g-${g.kanji}`}>
-        <h2 class="group-head" id={`dg-g-${g.kanji}`}>
+    {groups.map((group) => (
+      <section class="group" aria-labelledby={`dg-g-${group.kanji}`}>
+        <h2 class="group-head" id={`dg-g-${group.kanji}`}>
           <span class="group-kanji" aria-hidden="true">
-            {g.kanji}
+            {group.kanji}
           </span>
-          {g.name}
+          {group.name}
           <span class="group-rule" aria-hidden="true" />
-          <span class="group-n">{g.cards.length}</span>
+          <span class="group-n">{group.cards.length}</span>
         </h2>
         <ul class="cards">
-          {g.cards.map((t) => (
-            <li style={`--rot: ${t.rot}deg`}>
+          {group.cards.map((tool) => (
+            <li style={`--rot: ${tool.rot}deg`}>
               <button
                 type="button"
                 class="card"
                 aria-pressed="false"
-                aria-label={`${t.name}, ${t.as}. Turn over for why I keep it.`}
+                aria-label={`${tool.name}, ${tool.as}. Turn over for why I keep it.`}
               >
                 <span class="face front">
                   <svg viewBox="0 0 200 226" aria-hidden="true">
                     <rect class="fibre" x="14" y="14" width="172" height="212" />
                     <ellipse
                       class="pool"
-                      cx={t.pool.cx}
+                      cx={tool.pool.cx}
                       cy="198"
-                      rx={t.pool.rx}
+                      rx={tool.pool.rx}
                       ry="9"
                       filter="url(#dg-pool)"
                     />
                     <g transform="translate(16 56) scale(0.84)">
                       <g class="wash">
-                        {t.forms.map((f) => (
-                          <path d={f.d} fill={f.fill} transform={t.wash} filter="url(#dg-wash)" />
+                        {tool.forms.map((form) => (
+                          <path
+                            d={form.d}
+                            fill={form.fill}
+                            transform={tool.wash}
+                            filter="url(#dg-wash)"
+                          />
                         ))}
                       </g>
-                      {t.forms.map((f) => (
-                        <path class="ink" d={f.d} filter="url(#dg-tremble)" />
+                      {tool.forms.map((form) => (
+                        <path class="ink" d={form.d} filter="url(#dg-tremble)" />
                       ))}
-                      {t.lines.map((l) => (
+                      {tool.lines.map((line) => (
                         <path
                           class="stroke"
-                          d={l.d}
-                          stroke={l.stroke}
-                          stroke-width={l.w}
-                          opacity={l.o}
-                          filter={l.ink ? "url(#dg-tremble)" : undefined}
+                          d={line.d}
+                          stroke={line.stroke}
+                          stroke-width={line.w}
+                          opacity={line.o}
+                          filter={line.ink ? "url(#dg-tremble)" : undefined}
                         />
                       ))}
                     </g>
@@ -118,31 +123,31 @@ const { groups, storehouse, count } = shelf();
                     />
                   </svg>
                   <span class="cartouche" aria-hidden="true">
-                    {t.kanji}
+                    {tool.kanji}
                   </span>
                   <span class="caption">
-                    <span class="name">{t.name}</span>
+                    <span class="name">{tool.name}</span>
                     <span class="num" aria-hidden="true">
-                      {t.num}
+                      {tool.num}
                     </span>
-                    <span class="as">{t.as}</span>
+                    <span class="as">{tool.as}</span>
                   </span>
                 </span>
                 <span class="face back" aria-hidden="true">
-                  <span class="back-kanji">{t.kanji}</span>
-                  <span class="back-name">{t.name}</span>
-                  <span class="back-as hand">{t.as}</span>
-                  <span class="back-why">{t.why}</span>
-                  <span class="back-num">{t.num}</span>
+                  <span class="back-kanji">{tool.kanji}</span>
+                  <span class="back-name">{tool.name}</span>
+                  <span class="back-as hand">{tool.as}</span>
+                  <span class="back-why">{tool.why}</span>
+                  <span class="back-num">{tool.num}</span>
                 </span>
               </button>
-              <p class="why-plain">{t.why}</p>
-              {t.dots && (
+              <p class="why-plain">{tool.why}</p>
+              {tool.dots && (
                 <a
                   class="dots"
-                  href={DOTFILES + t.dots}
-                  title={t.dots}
-                  aria-label={`${t.name} in my dotfiles`}
+                  href={DOTFILES + tool.dots}
+                  title={tool.dots}
+                  aria-label={`${tool.name} in my dotfiles`}
                 >
                   my dotfiles
                 </a>
@@ -166,22 +171,26 @@ const { groups, storehouse, count } = shelf();
       </h2>
       <p class="store-note hand">drawn and waiting</p>
       <ul class="spares">
-        {storehouse.map((s) => (
-          <li class="spare" title={s.as}>
-            <svg viewBox="0 0 200 180" role="img" aria-label={`${s.as}, not yet given to a tool`}>
+        {storehouse.map((spare) => (
+          <li class="spare" title={spare.as}>
+            <svg
+              viewBox="0 0 200 180"
+              role="img"
+              aria-label={`${spare.as}, not yet given to a tool`}
+            >
               <g transform="translate(16 10) scale(0.84)">
-                {s.forms.map((f) => (
-                  <path class="spare-ink" d={f.d} filter="url(#dg-tremble)" />
+                {spare.forms.map((form) => (
+                  <path class="spare-ink" d={form.d} filter="url(#dg-tremble)" />
                 ))}
-                {s.lines.map((l) => (
-                  <path class="spare-line" d={l.d} stroke-width={l.w} />
+                {spare.lines.map((line) => (
+                  <path class="spare-line" d={line.d} stroke-width={line.w} />
                 ))}
               </g>
             </svg>
             <span class="spare-kanji" aria-hidden="true">
-              {s.kanji}
+              {spare.kanji}
             </span>
-            <span class="spare-name hand">{s.short}</span>
+            <span class="spare-name hand">{spare.short}</span>
           </li>
         ))}
       </ul>
