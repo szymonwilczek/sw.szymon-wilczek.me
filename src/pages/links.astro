@@ -2,7 +2,7 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Divider from "../components/Divider.astro";
 import { LINKS, RING } from "../data/links";
-import { kin, sheets, threads } from "../utils/en";
+import { HOLE_INSET, HOLE_RADIUS, kin, sheets, threads } from "../utils/en";
 
 const list = threads(LINKS);
 const kinship = kin(list);
@@ -39,7 +39,7 @@ const percent = (part: number, whole: number) => `${((part / whole) * 100).toFix
   <section
     class="en"
     aria-label="Sites I am tied to"
-    style={`--wme-l: ${percent(wide.me[0], wide.w)}; --wme-t: ${percent(wide.me[1], wide.h)}; --nme-l: ${percent(narrow.me[0], narrow.w)}; --nme-t: ${percent(narrow.me[1], narrow.h)}`}
+    style={`--wme-l: ${percent(wide.me[0], wide.w)}; --wme-t: ${percent(wide.me[1], wide.h)}; --nme-l: ${percent(narrow.me[0], narrow.w)}; --nme-t: ${percent(narrow.me[1], narrow.h)}; --wide-units: ${wide.w}; --narrow-units: ${narrow.w}; --hole: ${HOLE_INSET}; --hole-radius: ${HOLE_RADIUS}`}
   >
     {[
       ["wide", wide],
@@ -203,13 +203,21 @@ const percent = (part: number, whole: number) => `${((part / whole) * 100).toFix
     --me-t: var(--wme-t);
     position: relative;
     margin-top: 0.75rem;
+    container-type: inline-size;
+  }
+
+  .cards {
+    --unit: calc(100cqw / var(--wide-units));
   }
 
   .threads {
+    position: relative;
+    z-index: 1;
     display: block;
     width: 100%;
     height: auto;
     overflow: visible;
+    pointer-events: none;
   }
 
   .threads.narrow {
@@ -232,7 +240,12 @@ const percent = (part: number, whole: number) => `${((part / whole) * 100).toFix
     }
 
     .threads.narrow {
+      z-index: auto;
       display: block;
+    }
+
+    .cards {
+      --unit: calc(100cqw / var(--narrow-units));
     }
 
     .cards li {
@@ -277,6 +290,7 @@ const percent = (part: number, whole: number) => `${((part / whole) * 100).toFix
 
   .me {
     position: absolute;
+    z-index: 2;
     left: var(--me-l);
     top: var(--me-t);
     width: 72px;
@@ -310,18 +324,34 @@ const percent = (part: number, whole: number) => `${((part / whole) * 100).toFix
   }
 
   .card {
+    --hole-at: calc(var(--hole) * var(--unit));
+    --hole-size: calc(var(--hole-radius) * 2 * var(--unit));
+    position: relative;
     display: flex;
-    gap: 10px;
+    gap: 8px;
     align-items: center;
-    padding: 8px 12px 8px 8px;
+    padding: 8px 8px 8px calc(var(--hole-at) + var(--hole-size));
     color: var(--fg-main);
     text-decoration: none;
     background: var(--paper);
     border-radius: 3px;
     box-shadow: 0 3px 8px -4px rgb(0 0 0 / 0.3);
     transform: rotate(var(--r));
-    transform-origin: 0 50%;
+    transform-origin: var(--hole-at) 50%;
     transition: box-shadow 0.3s ease;
+  }
+
+  .card::before {
+    content: "";
+    position: absolute;
+    left: var(--hole-at);
+    top: 50%;
+    width: var(--hole-size);
+    height: var(--hole-size);
+    translate: -50% -50%;
+    border-radius: 50%;
+    background: var(--bg-main);
+    box-shadow: inset 0 1px 1.5px rgb(0 0 0 / 0.35);
   }
 
   .card:hover,
@@ -394,7 +424,14 @@ const percent = (part: number, whole: number) => `${((part / whole) * 100).toFix
     }
 
     .card {
-      transform-origin: 50% 0;
+      padding-left: 8px;
+      padding-top: calc(var(--hole-at) + var(--hole-size));
+      transform-origin: 50% var(--hole-at);
+    }
+
+    .card::before {
+      left: 50%;
+      top: var(--hole-at);
     }
   }
 

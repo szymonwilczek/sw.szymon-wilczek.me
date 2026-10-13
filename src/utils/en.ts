@@ -20,27 +20,98 @@ function age(link: Link, i: number, now: Date) {
   return Math.max(0, Math.min(1, days / 730));
 }
 
-function thread(origin: readonly [number, number], x: number, y: number, sag: number) {
-  const [originX, originY] = origin;
-  const spanX = x - originX;
-  const spanY = y - originY;
-  const drop = Math.hypot(spanX, spanY) * sag;
-  return `M${originX + 18} ${originY + 4} C ${round1(originX + spanX * 0.33)} ${round1(originY + spanY * 0.33 + drop)}, ${round1(originX + spanX * 0.7)} ${round1(originY + spanY * 0.7 + drop)}, ${round1(x)} ${round1(y)}`;
+export const HOLE_INSET = 13;
+export const HOLE_RADIUS = 3.5;
+
+const CARD_WIDE = { width: 225, height: 64 };
+const CARD_NARROW = { width: 172, height: 70 };
+
+// thread hangs at least this low by its age
+const SAG_YOUNG = 0.12;
+const SAG_BY_AGE = 0.22;
+const SAG_TAUT = 0.03;
+const SAG_KIN = { wide: 0.32, narrow: 0.22 };
+const SAG_STEP = 0.02;
+const SAG_MOST = 0.9;
+const CLEARANCE = 6;
+const CURVE_SAMPLES = 32;
+
+type Point = readonly [number, number];
+interface Box {
+  left: number;
+  top: number;
+  right: number;
+  bottom: number;
 }
 
-const knot = (x: number, y: number) =>
-  `M${round1(x - 3)} ${round1(y - 3)} c 4 -4, 8 2, 3 5 c -4 3, -7 -2, -3 -5 M ${round1(x + 2)} ${round1(y + 1)} l 6 6 M ${round1(x + 1)} ${round1(y + 2)} l 2 9`;
+// two pulls of a hanging thread
+const PULL_NEAR = 0.33;
+const PULL_FAR = 0.7;
 
-function between(from: readonly [number, number], to: readonly [number, number], sag: number) {
+function curve(from: Point, to: Point, sag: number) {
   const drop = Math.hypot(to[0] - from[0], to[1] - from[1]) * sag;
-  const pointAt = (share: number) => [
+  const pointAt = (share: number, dropped: number): Point => [
     from[0] + (to[0] - from[0]) * share,
-    from[1] + (to[1] - from[1]) * share,
+    from[1] + (to[1] - from[1]) * share + dropped,
   ];
-  const [firstX, firstY] = pointAt(0.3);
-  const [secondX, secondY] = pointAt(0.7);
-  return `M${round1(from[0])} ${round1(from[1])} C ${round1(firstX)} ${round1(firstY + drop)}, ${round1(secondX)} ${round1(secondY + drop)}, ${round1(to[0])} ${round1(to[1])}`;
+  return [from, pointAt(PULL_NEAR, drop), pointAt(PULL_FAR, drop), to] as const;
 }
+
+function onCurve([start, near, far, end]: ReturnType<typeof curve>, t: number): Point {
+  const u = 1 - t;
+  const weights = [u * u * u, 3 * u * u * t, 3 * u * t * t, t * t * t];
+  const points = [start, near, far, end];
+  return [0, 1].map((axis) =>
+    points.reduce((sum, point, i) => sum + point[axis] * weights[i], 0),
+  ) as unknown as Point;
+}
+
+const crosses = (bezier: ReturnType<typeof curve>, boxes: Box[]) =>
+  boxes.some((box) => {
+    for (let sample = 1; sample < CURVE_SAMPLES; sample++) {
+      const [x, y] = onCurve(bezier, sample / CURVE_SAMPLES);
+      if (
+        x > box.left - CLEARANCE &&
+        x < box.right + CLEARANCE &&
+        y > box.top - CLEARANCE &&
+        y < box.bottom + CLEARANCE
+      )
+        return true;
+    }
+    return false;
+  });
+
+// the least sag, from the one asked for, that clears the cards in the way
+function clearSag(from: Point, to: Point, sag: number, boxes: Box[]) {
+  for (let tried = sag; tried <= SAG_MOST; tried += SAG_STEP)
+    if (!crosses(curve(from, to, tried), boxes)) return tried;
+  return sag;
+}
+
+function pathOf(from: Point, to: Point, sag: number) {
+  const [start, near, far, end] = curve(from, to, sag);
+  return `M${round1(start[0])} ${round1(start[1])} C ${round1(near[0])} ${round1(near[1])}, ${round1(far[0])} ${round1(far[1])}, ${round1(end[0])} ${round1(end[1])}`;
+}
+
+// where every thread leaves from
+const SEAL_EDGE: Point = [18, 4];
+
+const leaving = ([x, y]: Point): Point => [x + SEAL_EDGE[0], y + SEAL_EDGE[1]];
+
+// knot tied round the hole
+const KNOT_LOOP = HOLE_RADIUS + 1.6;
+const KNOT_ENDS_FROM = [0.5, 0.8]; // shares of the loop: its lower right
+const KNOT_ENDS = [
+  [5, 7],
+  [1.5, 9],
+] as const;
+
+const knot = ([x, y]: Point) =>
+  `M${round1(x + KNOT_LOOP)} ${round1(y)} a ${KNOT_LOOP} ${KNOT_LOOP} 0 1 1 ${-KNOT_LOOP} ${-KNOT_LOOP} ` +
+  KNOT_ENDS.map(
+    ([across, down]) =>
+      `M${round1(x + KNOT_LOOP * KNOT_ENDS_FROM[0])} ${round1(y + KNOT_LOOP * KNOT_ENDS_FROM[1])} l ${across} ${down}`,
+  ).join(" ");
 
 // my own sites are kin: tied back here, and to one another in turn
 export const mine = (link: Link) => /(^|\.)szymon-wilczek\.me$/.test(link.domain);
@@ -49,45 +120,76 @@ export function kin(links: ReturnType<typeof threads>) {
   const own = links.map((link, i) => ({ l: link, i })).filter(({ l: link }) => mine(link));
   return own.slice(1).map(({ l: link, i }, index) => {
     const { l: previous, i: previousIndex } = own[index];
-    return {
-      ends: `${previousIndex} ${i}`,
-      wide: between(previous.wide.pin, link.wide.pin, 0.32),
-      narrow: between(previous.narrow.pin, link.narrow.pin, 0.22),
+    const others = (sheet: "wide" | "narrow") =>
+      links.filter((_, j) => j !== i && j !== previousIndex).map((other) => other[sheet].box);
+    const tie = (sheet: "wide" | "narrow") => {
+      const from = previous[sheet].pin,
+        to = link[sheet].pin;
+      return pathOf(from, to, clearSag(from, to, SAG_KIN[sheet], others(sheet)));
     };
+    return { ends: `${previousIndex} ${i}`, wide: tie("wide"), narrow: tie("narrow") };
   });
 }
 
 export function threads(links: Link[], now = new Date()) {
   const rand = rng(hash("en"));
-  return links.map((link, i) => {
-    const sag = 0.12 + age(link, i, now) * 0.22;
+  const { wide, narrow } = sheets(links.length);
+  const placed = links.map((link, i) => {
     const column = i % 3;
     const row = Math.floor(i / 3);
     const wideX = 290 + column * 236 + (row % 2) * 36 + (rand() - 0.5) * 30;
     const wideY = 80 + row * 180 + (rand() - 0.5) * 40 + column * 12;
     const narrowX = i % 2 ? 250 : 110;
     const narrowY = 150 + i * 100 + (rand() - 0.5) * 16;
-    const { wide, narrow } = sheets(links.length);
     return {
-      ...link,
+      link,
+      sag: SAG_YOUNG + age(link, i, now) * SAG_BY_AGE,
       rot: round1((rand() - 0.5) * 5),
+      wideX,
+      wideY,
+      narrowX,
+      narrowY,
+      wideBox: {
+        left: wideX,
+        right: wideX + CARD_WIDE.width,
+        top: wideY - CARD_WIDE.height / 2,
+        bottom: wideY + CARD_WIDE.height / 2,
+      },
+      narrowBox: {
+        left: narrowX - CARD_NARROW.width / 2,
+        right: narrowX + CARD_NARROW.width / 2,
+        top: narrowY,
+        bottom: narrowY + CARD_NARROW.height,
+      },
+    };
+  });
+  return placed.map((card, i) => {
+    const others = (sheet: "wideBox" | "narrowBox") =>
+      placed.filter((_, j) => j !== i).map((other) => other[sheet]);
+    const hang = (origin: Point, pin: Point, boxes: Box[]) => ({
+      slack: pathOf(leaving(origin), pin, clearSag(leaving(origin), pin, card.sag, boxes)),
+      taut: pathOf(leaving(origin), pin, clearSag(leaving(origin), pin, SAG_TAUT, boxes)),
+      knot: knot(pin),
+      pin,
+    });
+    const widePin: Point = [card.wideX + HOLE_INSET, card.wideY];
+    const narrowPin: Point = [card.narrowX, card.narrowY + HOLE_INSET];
+    return {
+      ...card.link,
+      rot: card.rot,
       ink: ["--red", "--fg-link", "--cursor", "--fg-dim"][i % 4],
       shape: ["50%", "4px", "50% 50% 6px 6px", "8px 2px"][i % 4],
       wide: {
-        l: round1((wideX / wide.w) * 100),
-        t: round1((wideY / wide.h) * 100),
-        slack: thread(wide.me, wideX - 12, wideY, sag),
-        taut: thread(wide.me, wideX - 12, wideY, 0.03),
-        knot: knot(wideX - 12, wideY),
-        pin: [wideX - 12, wideY] as const,
+        l: round1((card.wideX / wide.w) * 100),
+        t: round1((card.wideY / wide.h) * 100),
+        box: card.wideBox,
+        ...hang(wide.me, widePin, others("wideBox")),
       },
       narrow: {
-        l: round1((narrowX / narrow.w) * 100),
-        t: round1((narrowY / narrow.h) * 100),
-        slack: thread(narrow.me, narrowX, narrowY - 2, sag),
-        taut: thread(narrow.me, narrowX, narrowY - 2, 0.03),
-        knot: knot(narrowX, narrowY - 2),
-        pin: [narrowX, narrowY - 2] as const,
+        l: round1((card.narrowX / narrow.w) * 100),
+        t: round1((card.narrowY / narrow.h) * 100),
+        box: card.narrowBox,
+        ...hang(narrow.me, narrowPin, others("narrowBox")),
       },
     };
   });
