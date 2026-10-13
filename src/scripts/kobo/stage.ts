@@ -205,6 +205,24 @@ export function fit(spec: Work["spec"], width: number, height: number, maxScale 
   return Math.min(maxScale, width / (widest * 2), height / (spec.H + widest * 0.6));
 }
 
+const HELD = "kobo-held";
+const heldClass = (comingUp?: boolean) => (comingUp ? `${HELD} kobo-turn-over` : HELD);
+
+/** The piece standing. It turns over about where the middle of its foot will be,
+ * so the two sides meet edge on along the one line */
+export function standing([pivotX, pivotY]: Point, comingUp?: boolean) {
+  return newGroup({ to: `${pivotX}px ${pivotY}px`, cls: heldClass(comingUp) });
+}
+
+/** Turns the piece over: the side it shows tips away, and only then is the other drawn */
+export function turnOver(view: Stage, showOtherSide: () => void) {
+  const showing = view.live.querySelector<SVGGElement>(`.${HELD}`);
+  if (view.live.querySelector(".kobo-tipping")) return; // already on its way over
+  if (!showing || still()) return showOtherSide();
+  view.live.querySelectorAll(`.${HELD}`).forEach((group) => group.classList.add("kobo-tipping"));
+  showing.addEventListener("animationend", showOtherSide, { once: true });
+}
+
 const DEGREES_PER_TURN = 90;
 
 export interface Underside {
@@ -231,11 +249,13 @@ export function underside(
     tf: `rotate(${-turn * DEGREES_PER_TURN}deg)`,
     to: `${centerX}px ${centerY}px`,
   };
-  const turnOver = turningOver ? "kobo-turn-over" : "";
-  const foot = newGroup({ ...turnedRound, cls: turnOver });
+  const foot = newGroup({ ...turnedRound, cls: heldClass(turningOver) });
   pieceFoot(foot, rng(hash("foot/" + spec.fire)), centerX, centerY, scale, tones, spec);
   if (!seal) return [foot];
-  const pressed = newGroup({ ...turnedRound, cls: stamping ? "kobo-stamp" : turnOver });
+  const pressed = newGroup({
+    ...turnedRound,
+    cls: stamping ? `${HELD} kobo-stamp` : heldClass(turningOver),
+  });
   hanko(
     pressed,
     rng(hash("seal/" + seal)),

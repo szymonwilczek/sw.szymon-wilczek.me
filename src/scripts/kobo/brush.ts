@@ -35,6 +35,8 @@ import {
   fit,
   fitUnderside,
   underside,
+  turnOver,
+  standing,
   clamp,
   type Work,
   type Point,
@@ -162,7 +164,7 @@ export function run(host: HTMLElement, work: Work, done: (w: Work) => void) {
         }),
       );
     else {
-      const group = newGroup({ cls: turningOver ? "kobo-turn-over" : "" });
+      const group = standing([UNDERSIDE_AT.x, UNDERSIDE_AT.y], turningOver);
       const paint: Stroke[] =
         stroke && stroke.pts.length > 1 ? [...spec.paint, laid(stroke)] : spec.paint;
       piece(
@@ -284,7 +286,13 @@ export function run(host: HTMLElement, work: Work, done: (w: Work) => void) {
       );
       view.button(
         "back to the card",
-        () => ((phase = "sign"), (turningOver = true), say(), redraw()),
+        () =>
+          turnOver(view, () => {
+            phase = "sign";
+            turningOver = true;
+            say();
+            redraw();
+          }),
         "quiet",
       );
       view.button("↺ turn", () => ((turn = wrap(turn - 0.5)), redraw()));
@@ -343,14 +351,16 @@ export function run(host: HTMLElement, work: Work, done: (w: Work) => void) {
       view.root.querySelector(".kobo-do")!.append(label);
       view.button("write it again", () => ((sign = []), redraw()), "quiet");
       view.button("back to the brush", () => ((phase = "paint"), say(), redraw()), "quiet");
-      const finish = view.button("turn it over", () => {
-        phase = "seal";
-        stamped = false;
-        turningOver = true;
-        turn = 0;
-        say();
-        redraw();
-      });
+      const finish = view.button("turn it over", () =>
+        turnOver(view, () => {
+          phase = "seal";
+          stamped = false;
+          turningOver = true;
+          turn = 0;
+          say();
+          redraw();
+        }),
+      );
       finish.disabled = !name;
     }
   }
