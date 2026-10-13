@@ -1022,7 +1022,6 @@ const place = (href: string) => PLACES.find((spot) => spot.href === href)!;
       </svg>
       an essay you have read flowers
     </span>
-    <span class="sky-note">sun and moon from your own clock · nothing is fetched</span>
     <a href="#plain" class="plain-link">
       the same, as a plain list ↓
     </a>
@@ -1039,13 +1038,13 @@ const place = (href: string) => PLACES.find((spot) => spot.href === href)!;
           >
             {spot.title}
           </a>{" "}
-          <span>— {spot.sub}</span>
+          <span>&dash; {spot.sub}</span>
           {spot.href === "/writings/" && (
             <ul>
               {writings.map((writing) => (
                 <li>
                   <a href={`/writings/${writing.slug}/`}>{writing.title}</a>
-                  <span>— {writing.minutes} min</span>
+                  <span>&dash; {writing.minutes} min</span>
                 </li>
               ))}
             </ul>
@@ -1055,7 +1054,7 @@ const place = (href: string) => PLACES.find((spot) => spot.href === href)!;
               {albums.map((album) => (
                 <li>
                   <a href={`/photos/${album.slug}/`}>{album.title}</a>
-                  <span>— {album.photoCount} frames</span>
+                  <span>&dash; {album.photoCount} frames</span>
                 </li>
               ))}
             </ul>
