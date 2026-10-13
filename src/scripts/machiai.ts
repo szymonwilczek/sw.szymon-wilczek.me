@@ -18,68 +18,82 @@ import { mine } from "../utils/tea/inbox";
 import { tones, stage, drag, frame, fit } from "./kobo/stage";
 
 // a guest's piece I've approved approved is on the shelf already
-const same = (a: PieceSpec, b: PieceSpec) =>
-  a.name === b.name && a.made === b.made && a.fire === b.fire;
+const same = (first: PieceSpec, second: PieceSpec) =>
+  first.name === second.name && first.made === second.made && first.fire === second.fire;
 
 export function enter(host: HTMLElement, approved: PieceSpec[], leave: () => void) {
-  const own = mine().filter((p) => !approved.some((q) => same(p, q)));
-  shelf(host, approved, own, leave);
+  const ownPieces = mine().filter((pot) => !approved.some((shelved) => same(pot, shelved)));
+  shelf(host, approved, ownPieces, leave);
 }
 
-function shelf(host: HTMLElement, approved: PieceSpec[], own: PieceSpec[], leave: () => void) {
+function shelf(
+  host: HTMLElement,
+  approved: PieceSpec[],
+  ownPieces: PieceSpec[],
+  leave: () => void,
+) {
   const scene = sceneShelf(tones, {
-    pieces: approved.map((p) => turned(p)),
-    own: own.map((p) => turned(p)),
+    pieces: approved.map((pot) => turned(pot)),
+    own: ownPieces.map((pot) => turned(pot)),
   });
-  const st = stage(host, scene.W, scene.H, ["待合", "the shelf in the waiting room"], scene.groups);
+  const view = stage(
+    host,
+    scene.W,
+    scene.H,
+    ["待合", "the shelf in the waiting room"],
+    scene.groups,
+  );
   // the shelf keeps the newest 18
-  const shown = [...approved, ...own.slice(0, -1)].slice(-18);
-  const all = own.length ? [...shown, own[own.length - 1]] : shown;
-  st.say(
-    all.length
+  const shown = [...approved, ...ownPieces.slice(0, -1)].slice(-18);
+  const onShelf = ownPieces.length ? [...shown, ownPieces[ownPieces.length - 1]] : shown;
+  view.say(
+    onShelf.length
       ? "take a piece down to look at it."
       : "nothing on the shelf yet. the workshop up the path is open to anyone with the key.",
   );
-  st.over("Back to the garden", 110, 34, 220, 44, leave);
-  for (const { i, x, y, own: theirs } of scene.spots as {
+  view.over("Back to the garden", 110, 34, 220, 44, leave);
+  for (const { i, x: spotX, y: spotY, own: theirs } of scene.spots as {
     i: number;
     x: number;
     y: number;
     own: boolean;
   }[]) {
-    const p = all[i];
-    if (!p) continue;
-    st.over(`${theirs ? "your piece" : "a piece"} by ${p.name}`, x, y, 120, 130, () =>
-      hands(host, p, theirs, () => shelf(host, approved, own, leave)),
+    const pot = onShelf[i];
+    if (!pot) continue;
+    view.over(`${theirs ? "your piece" : "a piece"} by ${pot.name}`, spotX, spotY, 120, 130, () =>
+      hands(host, pot, theirs, () => shelf(host, approved, ownPieces, leave)),
     );
   }
 }
 
-const W = 1100,
-  H = 460;
+const WIDTH = 1100,
+  HEIGHT = 460;
 const CARD = { x0: 700, y0: 70, x1: 1040, y1: 400 };
 
-function hands(host: HTMLElement, p: PieceSpec, theirs: boolean, back: () => void) {
-  const r = rng(hash("machiai/card"));
+function hands(host: HTMLElement, spec: PieceSpec, theirs: boolean, back: () => void) {
+  const rand = rng(hash("machiai/card"));
   const card = newGroup();
   inked(
     card,
-    r,
-    wobblyBox(r, CARD.x0, CARD.y0, CARD.x1, CARD.y1, 0.8),
+    rand,
+    wobblyBox(rand, CARD.x0, CARD.y0, CARD.x1, CARD.y1, 0.8),
     tones.paper,
     tones.ink,
     1.1,
   );
-  const mx = (CARD.x0 + CARD.x1) / 2;
+  const middleX = (CARD.x0 + CARD.x1) / 2;
   // the name as they wrote it, else in a hand like theirs
-  if (p.sign.length) {
-    const bw = 220,
-      bh = (bw * 170) / 360;
-    p.sign.forEach((line) =>
+  if (spec.sign.length) {
+    const signWidth = 220,
+      signHeight = (signWidth * 170) / 360;
+    spec.sign.forEach((line) =>
       brushStroke(
         card,
-        r,
-        line.map(([u, v]) => [mx - bw / 2 - 20 + u * bw, CARD.y0 + 6 + v * bh]),
+        rand,
+        line.map(([across, down]) => [
+          middleX - signWidth / 2 - 20 + across * signWidth,
+          CARD.y0 + 6 + down * signHeight,
+        ]),
         2.4,
         tones.ink,
         0.88,
@@ -88,61 +102,76 @@ function hands(host: HTMLElement, p: PieceSpec, theirs: boolean, back: () => voi
     );
   } else
     addText(card, {
-      t: p.name,
-      tr: `translate(${mx - 20} ${CARD.y0 + 60})`,
+      t: spec.name,
+      tr: `translate(${middleX - 20} ${CARD.y0 + 60})`,
       fs: 30,
       font: "Kalam, cursive",
       fill: tones.ink,
       o: 0.85,
     });
-  const sx = CARD.x1 - 36,
-    sy = CARD.y0 + 40;
-  addSolid(card, wobblyBox(r, sx - 18, sy - 18, sx + 18, sy + 18, 0.4), tones.red, 0.88);
+  const sealX = CARD.x1 - 36,
+    sealY = CARD.y0 + 40;
+  addSolid(
+    card,
+    wobblyBox(rand, sealX - 18, sealY - 18, sealX + 18, sealY + 18, 0.4),
+    tones.red,
+    0.88,
+  );
   addText(card, {
-    t: sealOf(p.name),
-    tr: `translate(${sx} ${sy})`,
+    t: sealOf(spec.name),
+    tr: `translate(${sealX} ${sealY})`,
     fs: 22,
     font: "'Yuji Syuku', serif",
     fill: tones.paper,
   });
-  note(card, mx, CARD.y0 + 130, p.name, tones, 18, 0.8);
-  pieceWords(p).forEach((t, k) => note(card, mx, CARD.y0 + 175 + k * 30, t, tones, 16, 0.7));
-  const day = new Date(p.made + "T12:00:00");
-  if (!isNaN(+day))
+  note(card, middleX, CARD.y0 + 130, spec.name, tones, 18, 0.8);
+  pieceWords(spec).forEach((words, lineIndex) =>
+    note(card, middleX, CARD.y0 + 175 + lineIndex * 30, words, tones, 16, 0.7),
+  );
+  const madeOn = new Date(spec.made + "T12:00:00");
+  if (!isNaN(+madeOn))
     note(
       card,
-      mx,
+      middleX,
       CARD.y1 - 40,
-      day.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }),
+      madeOn.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }),
       tones,
       16,
       0.6,
     );
-  if (theirs) note(card, mx, CARD.y1 + 34, "仮 · yours, waiting for the host", tones, 14, 0.6);
+  if (theirs) note(card, middleX, CARD.y1 + 34, "仮 · yours, waiting for the host", tones, 14, 0.6);
 
-  const st = stage(host, W, H, ["手", "in your hands"], [card]);
-  const s = fit(p, 420, 330, 4);
+  const view = stage(host, WIDTH, HEIGHT, ["手", "in your hands"], [card]);
+  const size = fit(spec, 420, 330, 4);
   let turn = 0;
   const draw = () => {
-    const g = newGroup();
-    piece(g, rng(hash("piece/" + p.name + p.fire)), 330, 400, s, tones, turned(p, turn));
-    st.draw([g]);
+    const group = newGroup();
+    piece(
+      group,
+      rng(hash("piece/" + spec.name + spec.fire)),
+      330,
+      400,
+      size,
+      tones,
+      turned(spec, turn),
+    );
+    view.draw([group]);
   };
   const redraw = frame(draw);
-  st.say("drag to turn it in your hands.");
-  st.button("← put it back", back, "quiet");
-  st.button("↺ turn", () => ((turn -= 0.5), redraw()));
-  st.button("turn ↻", () => ((turn += 0.5), redraw()));
+  view.say("drag to turn it in your hands.");
+  view.button("← put it back", back, "quiet");
+  view.button("↺ turn", () => ((turn -= 0.5), redraw()));
+  view.button("turn ↻", () => ((turn += 0.5), redraw()));
   let from: [number, number] | null = null;
-  const rw = Math.max(...p.prof.map(([x]) => x)) * s;
-  drag(st, {
-    down: (q) => {
-      if (q[0] > CARD.x0 - 20) return false;
-      from = [q[0], turn];
+  const widest = Math.max(...spec.prof.map(([radius]) => radius)) * size;
+  drag(view, {
+    down: (point) => {
+      if (point[0] > CARD.x0 - 20) return false;
+      from = [point[0], turn];
     },
-    move: (q) => {
+    move: (point) => {
       if (!from) return;
-      turn = from[1] - (q[0] - from[0]) / rw;
+      turn = from[1] - (point[0] - from[0]) / widest;
       redraw();
     },
     up: () => (from = null),

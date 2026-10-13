@@ -6,70 +6,73 @@ interface Props {
 }
 
 const { seed } = Astro.props;
-const r = rng(hash(`${seed}·kept`));
-const W = 600;
-const H = 236;
-const f = (n: number) => n.toFixed(1);
-const jit = (a: number) => (r() - 0.5) * 2 * a;
+const rand = rng(hash(`${seed}·kept`));
+const WIDTH = 600;
+const HEIGHT = 236;
+const fixed = (value: number) => value.toFixed(1);
+const jitter = (amount: number) => (rand() - 0.5) * 2 * amount;
 
-function edge(a: [number, number], b: [number, number], step = 28, j = 0.6) {
-  const n = Math.max(2, Math.round(Math.hypot(b[0] - a[0], b[1] - a[1]) / step));
-  return Array.from({ length: n }, (_, k): [number, number] => [
-    a[0] + ((b[0] - a[0]) * k) / n + jit(j),
-    a[1] + ((b[1] - a[1]) * k) / n + jit(j),
+function edge(from: [number, number], to: [number, number], step = 28, wobble = 0.6) {
+  const count = Math.max(2, Math.round(Math.hypot(to[0] - from[0], to[1] - from[1]) / step));
+  return Array.from({ length: count }, (_, index): [number, number] => [
+    from[0] + ((to[0] - from[0]) * index) / count + jitter(wobble),
+    from[1] + ((to[1] - from[1]) * index) / count + jitter(wobble),
   ]);
 }
 const corners: [number, number][] = [
   [4, 5],
-  [W - 4, 3],
-  [W - 3, H - 3],
-  [5, H - 4],
+  [WIDTH - 4, 3],
+  [WIDTH - 3, HEIGHT - 3],
+  [5, HEIGHT - 4],
 ];
 const outline = smooth(
-  corners.flatMap((p, i) => edge(p, corners[(i + 1) % 4])),
+  corners.flatMap((corner, i) => edge(corner, corners[(i + 1) % 4])),
   true,
 );
-const pool = wobblyRing(r, W / 2 + 8, H * 0.62, W * 0.47, H * 0.44, 4, 14);
+const pool = wobblyRing(rand, WIDTH / 2 + 8, HEIGHT * 0.62, WIDTH * 0.47, HEIGHT * 0.44, 4, 14);
 const fibres = Array.from({ length: 7 }, () => {
-  const x = 14 + r() * (W - 28),
-    y = 14 + r() * (H - 28),
-    l = 6 + r() * 14,
-    a = r() * Math.PI;
+  const fibreX = 14 + rand() * (WIDTH - 28),
+    fibreY = 14 + rand() * (HEIGHT - 28),
+    fibreLength = 6 + rand() * 14,
+    fibreAngle = rand() * Math.PI;
   return wobblyLine(
-    r,
+    rand,
     [
-      [x, y],
-      [x + Math.cos(a) * l * 0.5, y + Math.sin(a) * l * 0.5 + 1.5],
-      [x + Math.cos(a) * l, y + Math.sin(a) * l],
+      [fibreX, fibreY],
+      [
+        fibreX + Math.cos(fibreAngle) * fibreLength * 0.5,
+        fibreY + Math.sin(fibreAngle) * fibreLength * 0.5 + 1.5,
+      ],
+      [fibreX + Math.cos(fibreAngle) * fibreLength, fibreY + Math.sin(fibreAngle) * fibreLength],
     ],
     0.6,
   );
 });
 
-const c = 46;
-const P1 = [c - 3, 0];
-const P2 = [0, c - 3];
-const T = [c * 0.14, c * 0.26];
-const F = [c * 0.64, c * 0.64];
-const flap = `M${P1} Q${f(c * 0.55)} ${f(c * 0.05)} ${T} Q${f(c * 0.2)} ${f(c * 0.7)} ${P2} Q${F} ${P1} Z`;
-const under = wobblyRing(r, c * 0.62, c * 0.62, c * 0.3, c * 0.18, 1, 10);
+const FOLD = 46;
+const FOLD_TOP = [FOLD - 3, 0];
+const FOLD_SIDE = [0, FOLD - 3];
+const FOLD_TIP = [FOLD * 0.14, FOLD * 0.26];
+const FOLD_CURVE = [FOLD * 0.64, FOLD * 0.64];
+const flap = `M${FOLD_TOP} Q${fixed(FOLD * 0.55)} ${fixed(FOLD * 0.05)} ${FOLD_TIP} Q${fixed(FOLD * 0.2)} ${fixed(FOLD * 0.7)} ${FOLD_SIDE} Q${FOLD_CURVE} ${FOLD_TOP} Z`;
+const under = wobblyRing(rand, FOLD * 0.62, FOLD * 0.62, FOLD * 0.3, FOLD * 0.18, 1, 10);
 ---
 
 <span class="kept-paper" aria-hidden="true">
-  <svg class="kept-pool" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
+  <svg class="kept-pool" viewBox={`0 0 ${WIDTH} ${HEIGHT}`} preserveAspectRatio="none">
     <defs set:html={FILTERS} />
     <path d={pool} filter="url(#bk-pool)"></path>
   </svg>
-  <svg class="kept-sheet" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
+  <svg class="kept-sheet" viewBox={`0 0 ${WIDTH} ${HEIGHT}`} preserveAspectRatio="none">
     <path class="kept-wash" d={outline} transform="translate(2 1.5)" filter="url(#bk-wash)"></path>
     <path class="kept-body" d={outline}></path>
     <path class="kept-age" d={outline}></path>
-    {fibres.map((d) => (
-      <path class="kept-fibre" d={d} />
+    {fibres.map((fibre) => (
+      <path class="kept-fibre" d={fibre} />
     ))}
     <path class="kept-edge" d={outline} filter="url(#bk-tremble)"></path>
   </svg>
-  <svg class="kept-corner" viewBox={`0 0 ${c} ${c}`} width={c} height={c}>
+  <svg class="kept-corner" viewBox={`0 0 ${FOLD} ${FOLD}`} width={FOLD} height={FOLD}>
     <path class="kept-under" d={under} filter="url(#bk-pool)"></path>
     <path
       class="kept-flap-wash"

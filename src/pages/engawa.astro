@@ -6,27 +6,27 @@ import { sceneEngawa, toSvg, toneVars, TONE_CSS } from "../utils/tea/ink.js";
 import { DISCS } from "../scripts/engawa/discs";
 
 const first = sceneEngawa(toneVars(), 17.6, false, "aki", { unlit: true, burnt: 0 });
-const pct = (x: number, y: number, w: number, h: number) =>
-  `left:${(x / 1100) * 100}%;top:${(y / 640) * 100}%;width:${(w / 1100) * 100}%;height:${(h / 640) * 100}%`;
+const placeBox = (boxX: number, boxY: number, boxWidth: number, boxHeight: number) =>
+  `left:${(boxX / 1100) * 100}%;top:${(boxY / 640) * 100}%;width:${(boxWidth / 1100) * 100}%;height:${(boxHeight / 640) * 100}%`;
 const THINGS = [
-  { key: "record", box: pct(492, 498, 120, 92), label: "The record player" },
-  { key: "incense", box: pct(398, 506, 54, 80), label: "The incense burner" },
-  { key: "tree", box: pct(880, 160, 210, 250), label: "The tree in the garden" },
-  { key: "sky", box: pct(788, 380, 64, 92), label: "The stone lantern" },
-  { key: "tea", box: pct(338, 562, 50, 44), label: "The tea cup" },
-  { key: "lamp", box: pct(674, 182, 58, 90), label: "The paper lamp" },
-  { key: "geta", box: pct(924, 584, 62, 30), label: "The geta, down into the garden" },
+  { key: "record", box: placeBox(492, 498, 120, 92), label: "The record player" },
+  { key: "incense", box: placeBox(398, 506, 54, 80), label: "The incense burner" },
+  { key: "tree", box: placeBox(880, 160, 210, 250), label: "The tree in the garden" },
+  { key: "sky", box: placeBox(788, 380, 64, 92), label: "The stone lantern" },
+  { key: "tea", box: placeBox(338, 562, 50, 44), label: "The tea cup" },
+  { key: "lamp", box: placeBox(674, 182, 58, 90), label: "The paper lamp" },
+  { key: "geta", box: placeBox(924, 584, 62, 30), label: "The geta, down into the garden" },
 ];
 const CRATE = [
-  ...DISCS.map((d, k) => ({
-    disc: String(k),
-    box: pct(28 + k * 5, 548 - k * 13, 80, k ? 13 : 18),
-    label: `The record crate: ${d.title}`,
+  ...DISCS.map((disc, index) => ({
+    disc: String(index),
+    box: placeBox(28 + index * 5, 548 - index * 13, 80, index ? 13 : 18),
+    label: `The record crate: ${disc.title}`,
   })).reverse(),
-  { disc: undefined, box: pct(18, 566, 112, 64), label: "The record crate" },
+  { disc: undefined, box: placeBox(18, 566, 112, 64), label: "The record crate" },
 ];
-const DIAL = pct(1010, 58, 80, 80);
-const SEASON = pct(1030, 140, 40, 30);
+const DIAL = placeBox(1010, 58, 80, 80);
+const SEASON = placeBox(1030, 140, 40, 30);
 ---
 
 <BaseLayout
@@ -55,17 +55,23 @@ const SEASON = pct(1030, 140, 40, 30);
       aria-label="An ink drawing of a veranda: wooden boards under a deep eave, a reed blind, a record player, a crate of records, a teacup and an incense burner on the boards, a paper lamp hung from the beam, and beyond them a garden with a stone lantern, stepping stones and a tree."
       set:html={toSvg(first, true)}
     />
-    {THINGS.map((t) => (
-      <button type="button" class="thing" data-card={t.key} style={t.box} aria-label={t.label} />
-    ))}
-    {CRATE.map((c) => (
+    {THINGS.map((thing) => (
       <button
         type="button"
-        class:list={["thing", { strip: c.disc }]}
+        class="thing"
+        data-card={thing.key}
+        style={thing.box}
+        aria-label={thing.label}
+      />
+    ))}
+    {CRATE.map((record) => (
+      <button
+        type="button"
+        class:list={["thing", { strip: record.disc }]}
         data-card="crate"
-        data-disc={c.disc}
-        style={c.box}
-        aria-label={c.label}
+        data-disc={record.disc}
+        style={record.box}
+        aria-label={record.label}
       />
     ))}
     <button
@@ -115,20 +121,22 @@ const SEASON = pct(1030, 140, 40, 30);
   import { sliderOf } from "../scripts/engawa/volume";
   import { hourLight, toneVars } from "../utils/tea/ink.js";
 
-  const fig = document.querySelector<HTMLElement>(".engawa")!;
-  const scene = sceneOf(fig.querySelector("svg")!);
-  dialOf(fig, scene);
+  const porch = document.querySelector<HTMLElement>(".engawa")!;
+  const scene = sceneOf(porch.querySelector("svg")!);
+  dialOf(porch, scene);
 
-  const cards = cardsOf(fig, scene);
+  const cards = cardsOf(porch, scene);
   cards.fill("tree", tree);
   cards.fill("sky", sky);
   cards.fill("tea", tea);
   const incense = incenseOf(scene);
   cards.fill("incense", incense.fill);
   const radio = radioOf(() => scene.view.hour);
-  const crate = crateOf(fig, scene, radio, cards.hide);
+  const crate = crateOf(porch, scene, radio, cards.hide);
   cards.fill("crate", crate.fill);
-  const crateFront = fig.querySelector<HTMLElement>('.thing[data-card="crate"]:not([data-disc])')!;
+  const crateFront = porch.querySelector<HTMLElement>(
+    '.thing[data-card="crate"]:not([data-disc])',
+  )!;
   cards.fill(
     "record",
     recordOf(radio, () => {
@@ -137,36 +145,36 @@ const SEASON = pct(1030, 140, 40, 30);
     }),
   );
   gardenOf(radio, scene.view, () => incense.burning);
-  broadcastOf(fig, radio, incense);
+  broadcastOf(porch, radio, incense);
 
-  const sound = fig.querySelector<HTMLButtonElement>(".sound")!;
+  const sound = porch.querySelector<HTMLButtonElement>(".sound")!;
   sound.after(sliderOf(radio));
   sound.addEventListener("click", radio.toggle);
-  radio.onChange((on) => sound.setAttribute("aria-pressed", String(on)));
+  radio.onChange((playing) => sound.setAttribute("aria-pressed", String(playing)));
   if (radio.wanted())
     addEventListener(
       "pointerdown",
-      (e) => !radio.on && !sound.contains(e.target as Node) && radio.start(),
+      (event) => !radio.on && !sound.contains(event.target as Node) && radio.start(),
       {
         once: true,
       },
     );
-  fig.querySelectorAll<HTMLButtonElement>(".thing").forEach((b) =>
-    b.addEventListener("click", () => {
-      const key = b.dataset.card!;
-      if (key === "geta") location.href = "/map/";
-      else if (key === "lamp") {
+  porch.querySelectorAll<HTMLButtonElement>(".thing").forEach((button) =>
+    button.addEventListener("click", () => {
+      const cardKey = button.dataset.card!;
+      if (cardKey === "geta") location.href = "/map/";
+      else if (cardKey === "lamp") {
         // lit by hand, or put out
-        const lit =
+        const shown =
           scene.view.lamp ??
           (hourLight(toneVars(), scene.view.hour, scene.view.season).lamp > 0.5 ? 1 : 0);
-        scene.view.lamp = lit ? 0 : 1;
+        scene.view.lamp = shown ? 0 : 1;
         scene.draw();
-      } else if (key === "crate") {
+      } else if (cardKey === "crate") {
         // another sleeve touched with the card open only turns to it
-        crate.choose(b.dataset.disc ? Number(b.dataset.disc) : null);
-        if (cards.open !== "crate" || !b.dataset.disc) cards.show(key, b);
-      } else cards.show(key, b);
+        crate.choose(button.dataset.disc ? Number(button.dataset.disc) : null);
+        if (cards.open !== "crate" || !button.dataset.disc) cards.show(cardKey, button);
+      } else cards.show(cardKey, button);
     }),
   );
 </script>

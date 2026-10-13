@@ -7,7 +7,9 @@ const MINE = "roji:mine";
 export function mine(): PieceSpec[] {
   try {
     const list = JSON.parse(localStorage.getItem(MINE) || "[]");
-    return Array.isArray(list) ? list.map(clean).filter((p): p is PieceSpec => p !== null) : [];
+    return Array.isArray(list)
+      ? list.map(clean).filter((piece): piece is PieceSpec => piece !== null)
+      : [];
   } catch {
     return [];
   }
@@ -22,12 +24,12 @@ export async function send(spec: PieceSpec, key: string): Promise<"sent" | "kept
   const body = JSON.stringify({ key, piece: spec });
   if (body.length > MAX_BYTES + 400) return "failed";
   try {
-    const res = await fetch(`${WORKER_URL}/piece`, {
+    const response = await fetch(`${WORKER_URL}/piece`, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body,
     });
-    return res.ok ? "sent" : "failed";
+    return response.ok ? "sent" : "failed";
   } catch {
     return "failed";
   }

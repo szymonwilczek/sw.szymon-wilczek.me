@@ -51,75 +51,87 @@ export const MAX_BYTES = 12_000;
 const SEALS = "花月雪風山水石竹松梅鳥雲空川林森草木火土金光星虹".split("");
 export const sealOf = (name: string): string => SEALS[hash("seal/" + name) % SEALS.length];
 
-const num = (x: unknown, lo: number, hi: number, d = 2): number => {
-  const n = typeof x === "number" && Number.isFinite(x) ? x : lo;
-  const k = 10 ** d;
-  return Math.round(Math.min(hi, Math.max(lo, n)) * k) / k;
+const rounded = (value: unknown, min: number, max: number, digits = 2): number => {
+  const number = typeof value === "number" && Number.isFinite(value) ? value : min;
+  const factor = 10 ** digits;
+  return Math.round(Math.min(max, Math.max(min, number)) * factor) / factor;
 };
-const int = (x: unknown, n: number): number => {
-  const v = Math.floor(typeof x === "number" && Number.isFinite(x) ? x : 0);
-  return Math.min(n - 1, Math.max(0, v));
+const whole = (value: unknown, count: number): number => {
+  const floored = Math.floor(typeof value === "number" && Number.isFinite(value) ? value : 0);
+  return Math.min(count - 1, Math.max(0, floored));
 };
-const list = <T>(x: unknown, max: number, f: (y: unknown) => T | null): T[] =>
-  (Array.isArray(x) ? x.slice(0, max) : []).map(f).filter((y): y is T => y !== null);
-const pair = (x: unknown, a: [number, number], b: [number, number]): [number, number] | null =>
-  Array.isArray(x) && x.length === 2 ? [num(x[0], ...a), num(x[1], ...b)] : null;
+const list = <T>(value: unknown, max: number, parse: (item: unknown) => T | null): T[] =>
+  (Array.isArray(value) ? value.slice(0, max) : [])
+    .map(parse)
+    .filter((item): item is T => item !== null);
+const pair = (
+  value: unknown,
+  firstRange: [number, number],
+  secondRange: [number, number],
+): [number, number] | null =>
+  Array.isArray(value) && value.length === 2
+    ? [rounded(value[0], ...firstRange), rounded(value[1], ...secondRange)]
+    : null;
 
-export function clean(x: unknown): PieceSpec | null {
-  if (!x || typeof x !== "object") return null;
-  const o = x as Record<string, unknown>;
-  const name = String(o.name ?? "")
+export function clean(value: unknown): PieceSpec | null {
+  if (!value || typeof value !== "object") return null;
+  const raw = value as Record<string, unknown>;
+  const name = String(raw.name ?? "")
     .replace(/[\p{C}<>&"]/gu, "")
     .trim()
     .slice(0, 24);
   if (!name) return null;
 
-  const prof = list(o.prof, 8, (p) => pair(p, [6, 96], [0, 1]));
+  const prof = list(raw.prof, 8, (point) => pair(point, [6, 96], [0, 1]));
   if (prof.length < 2) return null;
-  prof.sort((a, b) => a[1] - b[1]);
+  prof.sort((lower, upper) => lower[1] - upper[1]);
   prof[0][1] = 0;
   prof[prof.length - 1][1] = 1;
 
-  const g = o.glaze as Record<string, unknown> | null;
+  const rawGlaze = raw.glaze as Record<string, unknown> | null;
   const glaze: Glaze | null =
-    g && typeof g === "object"
+    rawGlaze && typeof rawGlaze === "object"
       ? {
-          c: int(g.c, GLAZE_NAMES.length),
-          dip: num(g.dip, 0.05, 1),
-          drips: list(g.drips, 6, (d) =>
-            Array.isArray(d) && d.length === 3
-              ? ([num(d[0], -1, 1), num(d[1], 0, 0.4), num(d[2], 0.02, 0.2)] as Glaze["drips"][0])
+          c: whole(rawGlaze.c, GLAZE_NAMES.length),
+          dip: rounded(rawGlaze.dip, 0.05, 1),
+          drips: list(rawGlaze.drips, 6, (drip) =>
+            Array.isArray(drip) && drip.length === 3
+              ? ([
+                  rounded(drip[0], -1, 1),
+                  rounded(drip[1], 0, 0.4),
+                  rounded(drip[2], 0.02, 0.2),
+                ] as Glaze["drips"][0])
               : null,
           ),
         }
       : null;
 
-  const uv = (p: unknown) => pair(p, [-2, 2], [0, 1]) as UV | null;
-  const kin = list(o.kin, 8, uv);
-  const paint = list(o.paint, 24, (s): Stroke | null => {
-    const st = s as Record<string, unknown> | null;
-    if (!st || typeof st !== "object") return null;
-    const pts = list(st.pts, 64, uv);
-    return pts.length > 1
-      ? { pts, w: num(st.w, 1, 8, 1), c: int(st.c, PIGMENT_NAMES.length) }
+  const toUV = (point: unknown) => pair(point, [-2, 2], [0, 1]) as UV | null;
+  const crack = list(raw.kin, 8, toUV);
+  const paint = list(raw.paint, 24, (rawStroke): Stroke | null => {
+    const stroke = rawStroke as Record<string, unknown> | null;
+    if (!stroke || typeof stroke !== "object") return null;
+    const points = list(stroke.pts, 64, toUV);
+    return points.length > 1
+      ? { pts: points, w: rounded(stroke.w, 1, 8, 1), c: whole(stroke.c, PIGMENT_NAMES.length) }
       : null;
   });
-  const sign = list(o.sign, 12, (s) => {
-    const pts = list(s, 48, (p) => pair(p, [0, 1], [0, 1]));
-    return pts.length > 1 ? pts : null;
+  const sign = list(raw.sign, 12, (rawLine) => {
+    const points = list(rawLine, 48, (point) => pair(point, [0, 1], [0, 1]));
+    return points.length > 1 ? points : null;
   });
-  const made = /^\d{4}-\d{2}-\d{2}$/.test(String(o.made)) ? String(o.made) : "";
+  const made = /^\d{4}-\d{2}-\d{2}$/.test(String(raw.made)) ? String(raw.made) : "";
 
   return {
     v: 1,
     name,
     prof,
-    H: num(o.H, 6, 100, 1),
-    handle: o.handle === true,
-    clay: int(o.clay, CLAY_NAMES.length),
+    H: rounded(raw.H, 6, 100, 1),
+    handle: raw.handle === true,
+    clay: whole(raw.clay, CLAY_NAMES.length),
     glaze,
-    fire: int(o.fire, 1e6),
-    kin: kin.length > 1 ? kin : null,
+    fire: whole(raw.fire, 1e6),
+    kin: crack.length > 1 ? crack : null,
     paint,
     sign,
     made,
@@ -127,41 +139,49 @@ export function clean(x: unknown): PieceSpec | null {
 }
 
 export function turned(spec: PieceSpec, turn = 0) {
-  const wrap = (u: number) => ((((u + turn + 2) % 4) + 4) % 4) - 2;
+  const wrap = (around: number) => ((((around + turn + 2) % 4) + 4) % 4) - 2;
   const runs: Stroke[] = [];
-  spec.paint.forEach((st) => {
-    let cur: UV[] = [];
-    st.pts.forEach(([u, v]) => {
-      const w = wrap(u);
-      if (w > -1 && w < 1) cur.push([w, v]);
-      else if (cur.length) (runs.push({ ...st, pts: cur }), (cur = []));
+  spec.paint.forEach((stroke) => {
+    let run: UV[] = [];
+    stroke.pts.forEach(([around, up]) => {
+      const wrapped = wrap(around);
+      if (wrapped > -1 && wrapped < 1) run.push([wrapped, up]);
+      else if (run.length) (runs.push({ ...stroke, pts: run }), (run = []));
     });
-    if (cur.length > 1) runs.push({ ...st, pts: cur });
+    if (run.length > 1) runs.push({ ...stroke, pts: run });
   });
-  const front = (pts: UV[]) =>
-    pts.map(([u, v]) => [wrap(u), v] as UV).filter(([u]) => u > -1 && u < 1);
-  const kin = spec.kin ? front(spec.kin) : [];
+  const front = (points: UV[]) =>
+    points.map(([around, up]) => [wrap(around), up] as UV).filter(([u]) => u > -1 && u < 1);
+  const crack = spec.kin ? front(spec.kin) : [];
   return {
     ...spec,
-    paint: runs.filter((s) => s.pts.length > 1),
-    kin: kin.length > 1 ? kin : null,
+    paint: runs.filter((stroke) => stroke.pts.length > 1),
+    kin: crack.length > 1 ? crack : null,
     glaze: spec.glaze ? { ...spec.glaze, none: false } : { c: 0, dip: 0, drips: [], none: true },
     seal: true,
   };
 }
 
 export function pieceSvg(spec: PieceSpec, turn = 0, scale = 1.5) {
-  const rw = Math.max(...spec.prof.map(([r]) => r));
-  const s = scale;
-  const W = Math.ceil(rw * 2 * s + (spec.handle ? rw * 0.7 * s : 0) + 24);
-  const H = Math.ceil(spec.H * s + rw * 0.6 * s + 6 * s + 24);
-  const cx = 12 + rw * s;
-  const cy = 12 + spec.H * s + rw * 0.3 * s;
-  const g = newGroup();
-  setPrecision(rw * s < 60 ? 10 : 1);
-  piece(g, rng(hash("piece/" + spec.name + spec.fire)), cx, cy, s, toneVars(), turned(spec, turn));
+  const widest = Math.max(...spec.prof.map(([radius]) => radius));
+  const size = scale;
+  const width = Math.ceil(widest * 2 * size + (spec.handle ? widest * 0.7 * size : 0) + 24);
+  const height = Math.ceil(spec.H * size + widest * 0.6 * size + 6 * size + 24);
+  const centerX = 12 + widest * size;
+  const baseY = 12 + spec.H * size + widest * 0.3 * size;
+  const group = newGroup();
+  setPrecision(widest * size < 60 ? 10 : 1);
+  piece(
+    group,
+    rng(hash("piece/" + spec.name + spec.fire)),
+    centerX,
+    baseY,
+    size,
+    toneVars(),
+    turned(spec, turn),
+  );
   setPrecision(1);
-  return { W, H, svg: toSvg({ W, H, groups: [g], clips: [] }) };
+  return { W: width, H: height, svg: toSvg({ W: width, H: height, groups: [group], clips: [] }) };
 }
 
 // what the card under a piece says
