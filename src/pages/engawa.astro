@@ -206,10 +206,6 @@ const SEASON = placeBox(1030, 140, 40, 30);
   .engawa {
     position: relative;
     margin: 1.5rem 0 0;
-    --smoke-from: 0.55;
-    --smoke-to: 2.1;
-    --smoke-ink: 0.9;
-    --smoke-thinning: 0.45;
   }
 
   .engawa svg {
@@ -360,25 +356,25 @@ const SEASON = placeBox(1030, 140, 40, 30);
     }
   }
 
-  @keyframes koro-smoke {
+  @keyframes rising {
     0% {
       translate: 0 0;
       rotate: 0deg;
-      scale: var(--smoke-from);
+      scale: var(--grow-from);
       opacity: 0;
     }
     6% {
-      opacity: var(--smoke-ink);
+      opacity: var(--peak-ink);
       animation-timing-function: linear;
     }
     55% {
-      opacity: var(--smoke-thinning);
+      opacity: var(--halfway-ink);
       animation-timing-function: linear;
     }
     100% {
       translate: var(--drift) calc(-1 * var(--rise));
       rotate: var(--turn);
-      scale: var(--smoke-to);
+      scale: var(--grow-to);
       opacity: 0;
     }
   }

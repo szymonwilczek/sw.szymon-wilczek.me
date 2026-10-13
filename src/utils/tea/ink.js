@@ -41,15 +41,7 @@ export {
   mistPath,
   quadMap,
 } from "./ink/pen.js";
-export {
-  steppingStones,
-  stone,
-  thatchStrokes,
-  maple,
-  lantern,
-  cordTie,
-  steam,
-} from "./ink/garden.js";
+export { steppingStones, stone, thatchStrokes, maple, lantern, cordTie } from "./ink/garden.js";
 export { face, post, gableRoof, plaque } from "./ink/architecture.js";
 export { sekiStone, stoneBody } from "./ink/seki.js";
 export {

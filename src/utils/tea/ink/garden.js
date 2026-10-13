@@ -1,14 +1,12 @@
-// what stands about the garden: stones, maple, lantern, thatch, steam
+// what stands about the garden: stones, maple, lantern, thatch
 
 import { lerp, smooth } from "./core.js";
 import {
-  jitter,
   wobblyPolygon,
   wobblyBox,
   wobblyLine,
   wobblySegment,
   wobblyRing,
-  newGroup,
   addWash,
   addLine,
   addSolid,
@@ -261,33 +259,4 @@ function cordTie(group, rand, x, y, scale, tones) {
   );
 }
 
-function steam(groups, rand, x, y, tones, count) {
-  for (let wisp = 0; wisp < (count || 3); wisp++) {
-    const group = newGroup({
-      anim: `steam ${5 + wisp * 1.3}s ease-in-out ${-wisp * 1.7}s infinite`,
-      to: `${x}px ${y}px`,
-      washO: 0.5,
-    });
-    const wispX = x + jitter(rand, 6);
-    addLine(
-      group,
-      wobblyLine(
-        rand,
-        [
-          [wispX, y],
-          [wispX - 7, y - 18],
-          [wispX + 5, y - 38],
-          [wispX - 4, y - 58],
-          [wispX + 6, y - 78],
-        ],
-        1.5,
-      ),
-      tones.inkSoft,
-      1.6,
-      0.5,
-    );
-    groups.push(group);
-  }
-}
-
-export { stone, steppingStones, maple, lantern, thatchStrokes, cordTie, steam };
+export { stone, steppingStones, maple, lantern, thatchStrokes, cordTie };
