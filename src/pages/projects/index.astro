@@ -6,6 +6,7 @@ import Specimen from "../../components/Specimen.astro";
 import { PROJECTS, blot, inkOf, languages, repoPath } from "../../utils/projects";
 import { repoStats, yearOfInk, type RepoStats } from "../../utils/github";
 import { hash, rng } from "../../utils/stamp";
+import { projectsList } from "../../utils/schema";
 
 const stats = new Map<string, RepoStats>();
 for (const p of PROJECTS) {
@@ -53,6 +54,8 @@ const search = (p: (typeof PROJECTS)[number]) =>
 <BaseLayout
   title="Projects"
   description="Repositories kept in the garden: a name, one line, a language and the way to the code."
+  collection
+  graph={[projectsList(Astro.url, [...pinned, ...rest])]}
 >
   <header class="projects-head">
     <div>
@@ -88,7 +91,9 @@ const search = (p: (typeof PROJECTS)[number]) =>
   <div class="tools">
     <div class="langs" role="group" aria-label="Filter by language">
       <button class="lang hand own-focus" type="button" data-lang="" aria-pressed="true">
-        <span>all <span class="n">{PROJECTS.length}</span></span>
+        <span>
+          all <span class="n">{PROJECTS.length}</span>
+        </span>
         <svg class="ring" viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true">
           <path d={RING} pathLength="1" vector-effect="non-scaling-stroke"></path>
         </svg>
@@ -98,7 +103,9 @@ const search = (p: (typeof PROJECTS)[number]) =>
           <svg class="blot" width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
             <path d={blot(`chip-${lang}`, 4.6)} fill={inkOf(lang)} />
           </svg>
-          <span>{lang} <span class="n">{n}</span></span>
+          <span>
+            {lang} <span class="n">{n}</span>
+          </span>
           <svg class="ring" viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true">
             <path d={RING} pathLength="1" vector-effect="non-scaling-stroke" />
           </svg>

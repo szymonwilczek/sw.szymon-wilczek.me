@@ -5,6 +5,7 @@ import SearchFilter from "../../components/SearchFilter.astro";
 import { getCollection } from "astro:content";
 import { calculateReadingStats } from "../../utils/reading-time";
 import { dottedDate, writingSlug } from "../../utils/format";
+import { writingsList } from "../../utils/schema";
 
 const writings = (await getCollection("writings")).sort(
   (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
@@ -40,6 +41,8 @@ const tags = [...tagCounts.entries()]
 <BaseLayout
   title="Writings"
   description="Essays, manifestos, notes, and reflections on sovereign computing and hypermedia."
+  collection
+  graph={[writingsList(Astro.url, writings)]}
 >
   <div class="index-head">
     <div class="index-intro">

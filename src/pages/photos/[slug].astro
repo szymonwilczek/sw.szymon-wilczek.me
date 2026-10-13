@@ -4,6 +4,7 @@ import Divider from "../../components/Divider.astro";
 import StillWater from "../../components/StillWater.astro";
 import Seal from "../../components/Seal.astro";
 import { getAllAlbums, type PhotoAlbum, type PhotoItem } from "../../utils/albums";
+import { albumPhotos } from "../../utils/schema";
 
 export async function getStaticPaths() {
   const albums = await getAllAlbums();
@@ -61,6 +62,8 @@ const RADII = ["3px 7px 4px 8px", "6px 3px 7px 4px", "4px 6px 3px 7px", "7px 4px
   image={photos[0]?.src}
   imageAlt={album.title}
   category="Photography"
+  collection
+  graph={[albumPhotos(Astro.url, album, photos)]}
 >
   <a href="/photos/" class="back hand">
     <svg width="40" height="18" viewBox="0 0 40 18" aria-hidden="true">

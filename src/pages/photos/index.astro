@@ -3,6 +3,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import StillWater from "../../components/StillWater.astro";
 import Stamp from "../../components/Stamp.astro";
 import { getAllAlbums } from "../../utils/albums";
+import { albumsList } from "../../utils/schema";
 
 const albums = await getAllAlbums();
 
@@ -13,6 +14,8 @@ const DROPS = ["0", "4rem", "0", "3rem", "0"];
 <BaseLayout
   title="Photographs"
   description="Places walked through, kept the way they looked that day."
+  collection
+  graph={[albumsList(Astro.url, albums)]}
 >
   <header class="photos-head">
     <div>
@@ -20,7 +23,8 @@ const DROPS = ["0", "4rem", "0", "3rem", "0"];
       <p class="lede">Places walked through, kept the way they looked that day.</p>
     </div>
     <p class="aside hand">
-      postcards I never sent<br />
+      postcards I never sent
+      <br />
       <a href="/photos/bookmarks/">the bookmarks, one for every trip →</a>
     </p>
   </header>
