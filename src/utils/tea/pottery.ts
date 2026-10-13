@@ -16,8 +16,9 @@ export type UV = [number, number];
 
 export interface Stroke {
   pts: UV[];
-  w: number; // brush width, 1..8
+  w: number; // brush width, 0.5..12
   c: number; // pigment: gosu, iron, bengara, white slip
+  s?: number; // tip: pointed (left out), flat, dry
 }
 
 export interface Glaze {
@@ -43,6 +44,7 @@ export interface PieceSpec {
 
 export const CLAY_NAMES = ["buff", "red", "dark", "white"];
 export const PIGMENT_NAMES = ["gosu blue", "iron brown", "bengara red", "white slip"];
+export const TIP_NAMES = ["pointed", "flat", "dry"];
 export { GLAZE_NAMES, PROFILES as PROF };
 
 // ceiling on the JSON
@@ -112,8 +114,14 @@ export function clean(value: unknown): PieceSpec | null {
     const stroke = rawStroke as Record<string, unknown> | null;
     if (!stroke || typeof stroke !== "object") return null;
     const points = list(stroke.pts, 64, toUV);
+    const tip = whole(stroke.s, TIP_NAMES.length);
     return points.length > 1
-      ? { pts: points, w: rounded(stroke.w, 1, 8, 1), c: whole(stroke.c, PIGMENT_NAMES.length) }
+      ? {
+          pts: points,
+          w: rounded(stroke.w, 0.5, 12, 1),
+          c: whole(stroke.c, PIGMENT_NAMES.length),
+          ...(tip ? { s: tip } : {}),
+        }
       : null;
   });
   const sign = list(raw.sign, 12, (rawLine) => {

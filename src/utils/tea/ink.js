@@ -1603,10 +1603,30 @@ function piece(group, rand, cx, cy, scale, tones, spec) {
       const points = stroke.pts.map(([across, down]) =>
         shallow ? insidePoint(across, down) : frontPoint(across, down),
       );
-      brushStroke(group, rand, points, stroke.w * scale, PAINTS(tones)[stroke.c], 0.88, {
-        tip: 0.25,
-        head: 0.15,
-      });
+      const color = PAINTS(tones)[stroke.c],
+        width = stroke.w * scale;
+      if (stroke.s === 1)
+        brushStroke(group, rand, points, width, color, 0.88, { blunt: true, tip: 0.85 });
+      else if (stroke.s === 2)
+        // dry brush
+        for (let bristle = 0; bristle < 4; bristle++) {
+          const offset = (bristle / 3 - 0.5) * width * 0.8;
+          const shifted = points.map(([x, y], i) => {
+            const prev = points[Math.max(0, i - 1)],
+              next = points[Math.min(points.length - 1, i + 1)],
+              length = Math.hypot(next[0] - prev[0], next[1] - prev[1]) || 1;
+            return [
+              x - ((next[1] - prev[1]) / length) * offset,
+              y + ((next[0] - prev[0]) / length) * offset,
+            ];
+          });
+          const kept = Math.max(2, Math.ceil(shifted.length * (0.6 + rand() * 0.4)));
+          brushStroke(group, rand, shifted.slice(0, kept), width * 0.3, color, 0.75, {
+            tip: 0.2,
+            head: 0.5,
+          });
+        }
+      else brushStroke(group, rand, points, width, color, 0.88, { tip: 0.25, head: 0.15 });
     });
   const insidePoint = (across, down) => {
     const y = down * 2 - 1,

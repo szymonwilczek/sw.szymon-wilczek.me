@@ -17,7 +17,14 @@ import {
   radiusAt,
   PAINTS,
 } from "../../utils/tea/ink.js";
-import { clean, sealOf, PIGMENT_NAMES, type Stroke, type UV } from "../../utils/tea/pottery";
+import {
+  clean,
+  sealOf,
+  PIGMENT_NAMES,
+  TIP_NAMES,
+  type Stroke,
+  type UV,
+} from "../../utils/tea/pottery";
 import { keep, send } from "../../utils/tea/inbox";
 import { tones, stage, drag, frame, look, fit, clamp, type Work, type Point } from "./stage";
 
@@ -32,6 +39,11 @@ const DISH_AT = (index: number): Point => [
 const NAME_CARD = { x0: 700, y0: 330, x1: 1060, y1: 500 };
 const PIGMENT_KANJI = ["呉須", "鬼板", "弁柄", "白化粧"];
 const SQUASH = 0.3;
+const SIZES: [string, number][] = [
+  ["fine", 0.45],
+  ["medium", 1],
+  ["broad", 1.7],
+];
 
 export function run(host: HTMLElement, work: Work, done: (w: Work) => void) {
   const spec = { ...work.spec, paint: [...work.spec.paint] };
@@ -79,6 +91,9 @@ export function run(host: HTMLElement, work: Work, done: (w: Work) => void) {
   let phase: "paint" | "sign" = "paint";
   let turn = 0,
     pigment = 0,
+    size = 1,
+    tip = 0,
+    steady = false,
     stroke: { pts: UV[]; c: number; w: number; d: number; t: number } | null = null,
     name = "",
     sign: [number, number][][] = [],
@@ -108,16 +123,21 @@ export function run(host: HTMLElement, work: Work, done: (w: Work) => void) {
   const round = (value: number) => Math.round(value * 100) / 100;
   const width = (current: NonNullable<typeof stroke>) => {
     const speed = current.d / Math.max(1, performance.now() - current.t); // drawing units per ms
-    return round(clamp(7 - speed * 7, 1.2, 7));
+    const swell = steady ? 4 : clamp(7 - speed * 7, 1.2, 7);
+    return round(clamp(swell * SIZES[size][1], 0.5, 12));
   };
+  const laid = (current: NonNullable<typeof stroke>): Stroke => ({
+    pts: current.pts,
+    c: current.c,
+    w: width(current),
+    ...(tip ? { s: tip } : {}),
+  });
 
   function draw() {
     const groups = [];
     const group = newGroup();
     const paint: Stroke[] =
-      stroke && stroke.pts.length > 1
-        ? [...spec.paint, { pts: stroke.pts, c: stroke.c, w: width(stroke) }]
-        : spec.paint;
+      stroke && stroke.pts.length > 1 ? [...spec.paint, laid(stroke)] : spec.paint;
     piece(
       group,
       rng(hash("kobo/mine")),
@@ -230,7 +250,11 @@ export function run(host: HTMLElement, work: Work, done: (w: Work) => void) {
     view.clearUi();
     view.button("← back to the workshop", back, "quiet");
     if (phase === "paint") {
-      view.say("paint on it. slow is thick, fast is thin. turn the wheel to reach round the back.");
+      view.say(
+        steady
+          ? "paint on it. the line keeps one width. turn the wheel to reach round the back."
+          : "paint on it. slow is thick, fast is thin. turn the wheel to reach round the back.",
+      );
       PAINTS(tones).forEach((_: string, i: number) =>
         view.over(PIGMENT_NAMES[i], ...DISH_AT(i), 100, 60, () => {
           pigment = i;
@@ -240,6 +264,17 @@ export function run(host: HTMLElement, work: Work, done: (w: Work) => void) {
       view.button("↺ turn", () => ((turn = wrap(turn - 0.5)), redraw()));
       view.button("turn ↻", () => ((turn = wrap(turn + 0.5)), redraw()));
       view.button("wipe the last stroke", () => (spec.paint.pop(), redraw()), "quiet");
+      pick(
+        "brush",
+        SIZES.map(([label]) => label),
+        size,
+        (i) => (size = i),
+      );
+      pick("tip", TIP_NAMES, tip, (i) => (tip = i));
+      pick("line", ["follows your speed", "steady"], steady ? 1 : 0, (i) => {
+        steady = i === 1;
+        say();
+      });
       view.button("done painting", () => {
         phase = "sign";
         turn = 0;
@@ -264,6 +299,31 @@ export function run(host: HTMLElement, work: Work, done: (w: Work) => void) {
       const finish = view.button("put it on the shelf", give);
       finish.disabled = !name;
     }
+  }
+
+  // row of choices under the drawing, one of them pressed
+  function pick(title: string, labels: string[], current: number, choose: (i: number) => void) {
+    const row = document.createElement("span");
+    row.className = "kobo-pick hand";
+    row.setAttribute("role", "group");
+    row.setAttribute("aria-label", title);
+    row.textContent = title;
+    labels.forEach((label, i) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "kobo-btn";
+      button.textContent = label;
+      button.setAttribute("aria-pressed", String(i === current));
+      button.addEventListener("click", () => {
+        row
+          .querySelectorAll("button")
+          .forEach((other, j) => other.setAttribute("aria-pressed", String(j === i)));
+        choose(i);
+        redraw();
+      });
+      row.append(button);
+    });
+    view.root.querySelector(".kobo-do")!.append(row);
   }
 
   async function give() {
@@ -364,8 +424,7 @@ export function run(host: HTMLElement, work: Work, done: (w: Work) => void) {
         return;
       }
       spinFrom = null;
-      if (stroke && stroke.pts.length > 1)
-        spec.paint.push({ pts: stroke.pts, c: stroke.c, w: width(stroke) });
+      if (stroke && stroke.pts.length > 1) spec.paint.push(laid(stroke));
       stroke = null;
       brushAt = null;
       redraw();

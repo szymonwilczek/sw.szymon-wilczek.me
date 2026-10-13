@@ -610,6 +610,25 @@ const garden = sceneGarden16(toneVars(), "start", {
     cursor: default;
   }
 
+  .kobo :global(.kobo-pick) {
+    display: flex;
+    flex-basis: 100%;
+    flex-wrap: wrap;
+    gap: 0 0.75rem;
+    align-items: baseline;
+    color: var(--fg-dim);
+    font-size: 1.0625rem;
+  }
+
+  .kobo :global(.kobo-pick .kobo-btn[aria-pressed="false"]) {
+    color: var(--fg-dim);
+  }
+
+  .kobo :global(.kobo-pick .kobo-btn[aria-pressed="true"]) {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
   .kobo :global(.kobo-name) {
     display: inline-flex;
     gap: 0.5rem;
