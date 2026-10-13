@@ -3,26 +3,26 @@
 
 const MAIL = "swilczek.lx@gmail.com";
 
-function perforated(w: number, h: number, r: number, step: number) {
-  const f = (n: number) => Math.round(n * 10) / 10;
-  const side = (x0: number, y0: number, dx: number, dy: number, len: number) => {
-    let s = "";
-    for (let t = step / 2; t < len; t += step) {
-      const x = x0 + dx * t;
-      const y = y0 + dy * t;
-      s += ` L ${f(x - dx * r)} ${f(y - dy * r)} A ${r} ${r} 0 0 0 ${f(x + dx * r)} ${f(y + dy * r)}`;
+function perforated(width: number, height: number, radius: number, step: number) {
+  const round1 = (value: number) => Math.round(value * 10) / 10;
+  const side = (startX: number, startY: number, dirX: number, dirY: number, length: number) => {
+    let path = "";
+    for (let along = step / 2; along < length; along += step) {
+      const x = startX + dirX * along;
+      const y = startY + dirY * along;
+      path += ` L ${round1(x - dirX * radius)} ${round1(y - dirY * radius)} A ${radius} ${radius} 0 0 0 ${round1(x + dirX * radius)} ${round1(y + dirY * radius)}`;
     }
-    return s;
+    return path;
   };
   return (
     "M0 0" +
-    side(0, 0, 1, 0, w) +
-    ` L ${w} 0` +
-    side(w, 0, 0, 1, h) +
-    ` L ${w} ${h}` +
-    side(w, h, -1, 0, w) +
-    ` L 0 ${h}` +
-    side(0, h, 0, -1, h) +
+    side(0, 0, 1, 0, width) +
+    ` L ${width} 0` +
+    side(width, 0, 0, 1, height) +
+    ` L ${width} ${height}` +
+    side(width, height, -1, 0, width) +
+    ` L 0 ${height}` +
+    side(0, height, 0, -1, height) +
     " Z"
   );
 }
@@ -411,31 +411,33 @@ const EDGE = perforated(96, 116, 2.6, 8);
 
   if (root) {
     const mail = root.dataset.mail!;
-    const msg = root.querySelector<HTMLTextAreaElement>("#hagaki-msg")!;
+    const message = root.querySelector<HTMLTextAreaElement>("#hagaki-msg")!;
     const from = root.querySelector<HTMLInputElement>("#hagaki-from")!;
     const post = root.querySelector<HTMLAnchorElement>(".post-it")!;
     const status = root.querySelector<HTMLElement>(".status")!;
     const again = root.querySelector<HTMLButtonElement>(".again")!;
-    const now = season();
+    const currentSeason = season();
     const today = new Date();
-    const pad = (n: number) => String(n).padStart(2, "0");
+    const twoDigits = (value: number) => String(value).padStart(2, "0");
 
-    root.querySelectorAll(".season-kanji").forEach((t) => (t.textContent = SEASONS[now].glyph));
-    root.querySelector(".stamp-no")!.textContent = `SW · ${pad(today.getMonth() + 1)}`;
+    root
+      .querySelectorAll(".season-kanji")
+      .forEach((label) => (label.textContent = SEASONS[currentSeason].glyph));
+    root.querySelector(".stamp-no")!.textContent = `SW · ${twoDigits(today.getMonth() + 1)}`;
 
     const quiet = "nothing goes through this site.";
     const write = () => {
       const sign = from.value.trim() ? `\n\n-- \n${from.value.trim()}` : "";
-      const body = (msg.value + sign).replace(/\r\n?/g, "\n");
+      const body = (message.value + sign).replace(/\r\n?/g, "\n");
       post.href =
-        `mailto:${mail}?subject=${encodeURIComponent(`a postcard from the garden (${now})`)}` +
+        `mailto:${mail}?subject=${encodeURIComponent(`a postcard from the garden (${currentSeason})`)}` +
         `&body=${encodeURIComponent(body)}`;
-      const n = msg.value.length;
-      status.textContent = n
-        ? `${n} letters, about ${Math.max(1, Math.round(n / 28))} lines of card`
+      const letterCount = message.value.length;
+      status.textContent = letterCount
+        ? `${letterCount} letters, about ${Math.max(1, Math.round(letterCount / 28))} lines of card`
         : quiet;
     };
-    msg.addEventListener("input", write);
+    message.addEventListener("input", write);
     from.addEventListener("input", write);
     write();
 
@@ -448,9 +450,9 @@ const EDGE = perforated(96, 116, 2.6, 8);
     again.addEventListener("click", () => {
       root.classList.remove("posted");
       again.hidden = true;
-      msg.value = "";
+      message.value = "";
       write();
-      msg.focus();
+      message.focus();
     });
   }
 </script>

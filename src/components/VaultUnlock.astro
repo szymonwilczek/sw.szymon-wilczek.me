@@ -62,8 +62,8 @@ const isFile = Boolean(encryptedUrl);
 <script>
   import { earn } from "../utils/garden";
 
-  function bytes(b64: string) {
-    return Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+  function bytes(base64: string) {
+    return Uint8Array.from(atob(base64), (character) => character.charCodeAt(0));
   }
 
   async function deriveKey(passphrase: string, salt: Uint8Array) {
@@ -85,10 +85,10 @@ const isFile = Boolean(encryptedUrl);
 
   function save(blob: Blob, filename: string) {
     const href = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = href;
-    a.download = filename;
-    a.click();
+    const link = document.createElement("a");
+    link.href = href;
+    link.download = filename;
+    link.click();
     setTimeout(() => URL.revokeObjectURL(href), 3000);
   }
 
@@ -153,8 +153,8 @@ const isFile = Boolean(encryptedUrl);
   }
 
   document.querySelectorAll<HTMLElement>(".vault-container").forEach((container) => {
-    container.querySelector("form")?.addEventListener("submit", (e) => {
-      e.preventDefault();
+    container.querySelector("form")?.addEventListener("submit", (event) => {
+      event.preventDefault();
       unlock(container);
     });
   });

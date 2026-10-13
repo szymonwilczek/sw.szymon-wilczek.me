@@ -4,7 +4,7 @@ import auThemes from "../data/au-themes.json";
 
 const families: Array<{ name: string; themes: typeof auThemes }> = [];
 for (const theme of auThemes) {
-  let group = families.find((g) => g.name === theme.family);
+  let group = families.find((family) => family.name === theme.family);
   if (!group) {
     group = { name: theme.family, themes: [] };
     families.push(group);
@@ -277,17 +277,17 @@ for (const theme of auThemes) {
     }
 
     function filter() {
-      var q = query.value.trim().toLowerCase();
+      var needle = query.value.trim().toLowerCase();
       var shown = 0;
       picker.querySelectorAll(".picker-group").forEach(function (group) {
-        var any = false;
+        var anyShown = false;
         group.querySelectorAll(".picker-row").forEach(function (row) {
-          var match = !q || row.dataset.search.indexOf(q) !== -1;
+          var match = !needle || row.dataset.search.indexOf(needle) !== -1;
           row.hidden = !match;
-          if (match) any = true;
+          if (match) anyShown = true;
           if (match) shown++;
         });
-        group.hidden = !any;
+        group.hidden = !anyShown;
       });
       count.textContent = shown + "/" + total;
       activate(null);
@@ -315,8 +315,8 @@ for (const theme of auThemes) {
       });
 
       // only a real mouse previews: a tap goes straight to the flood
-      row.addEventListener("pointerenter", function (e) {
-        if (e.pointerType === "mouse") activate(row);
+      row.addEventListener("pointerenter", function (event) {
+        if (event.pointerType === "mouse") activate(row);
       });
     });
 
@@ -326,17 +326,17 @@ for (const theme of auThemes) {
 
     query.addEventListener("input", filter);
 
-    picker.addEventListener("keydown", function (e) {
+    picker.addEventListener("keydown", function (event) {
       var list = visible();
       var i = list.indexOf(active);
-      if (e.key === "ArrowDown" || (e.ctrlKey && e.key === "n")) {
-        e.preventDefault();
+      if (event.key === "ArrowDown" || (event.ctrlKey && event.key === "n")) {
+        event.preventDefault();
         activate(list[(i + 1) % list.length]);
-      } else if (e.key === "ArrowUp" || (e.ctrlKey && e.key === "p")) {
-        e.preventDefault();
+      } else if (event.key === "ArrowUp" || (event.ctrlKey && event.key === "p")) {
+        event.preventDefault();
         activate(list[(i - 1 + list.length) % list.length]);
-      } else if (e.key === "Enter" && e.target === query) {
-        e.preventDefault();
+      } else if (event.key === "Enter" && event.target === query) {
+        event.preventDefault();
         var target = active || list[1] || list[0];
         if (target) pick(target);
       }
@@ -347,12 +347,12 @@ for (const theme of auThemes) {
       activate(null);
     });
 
-    picker.addEventListener("click", function (e) {
-      if (e.target === picker) picker.close();
+    picker.addEventListener("click", function (event) {
+      if (event.target === picker) picker.close();
     });
 
-    document.addEventListener("click", function (e) {
-      if (e.target.closest && e.target.closest("[data-theme-open]")) open();
+    document.addEventListener("click", function (event) {
+      if (event.target.closest && event.target.closest("[data-theme-open]")) open();
     });
 
     window.auTheme.openPicker = open;

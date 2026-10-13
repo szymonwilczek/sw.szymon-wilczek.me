@@ -113,12 +113,12 @@ const links = [
   import { season, SEASONS } from "../utils/garden";
 
   // season word: glyph and romaji
-  const now = season();
+  const currentSeason = season();
   const word = document.querySelector<HTMLElement>(".kigo-word");
   if (word) {
-    word.querySelector(".kigo-glyph")!.textContent = SEASONS[now].glyph;
-    word.querySelector(".kigo-romaji")!.textContent = SEASONS[now].romaji;
-    word.title = `${now}, then ${SEASONS[now].next}`;
+    word.querySelector(".kigo-glyph")!.textContent = SEASONS[currentSeason].glyph;
+    word.querySelector(".kigo-romaji")!.textContent = SEASONS[currentSeason].romaji;
+    word.title = `${currentSeason}, then ${SEASONS[currentSeason].next}`;
     word.hidden = false;
   }
 </script>
@@ -126,9 +126,9 @@ const links = [
 <script is:inline>
   (function () {
     function show() {
-      var id = window.auTheme.resolve(window.auTheme.get());
-      document.querySelectorAll("[data-theme-id]").forEach(function (el) {
-        el.textContent = "au-" + id;
+      var themeId = window.auTheme.resolve(window.auTheme.get());
+      document.querySelectorAll("[data-theme-id]").forEach(function (label) {
+        label.textContent = "au-" + themeId;
       });
     }
 

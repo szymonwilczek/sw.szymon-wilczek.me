@@ -254,8 +254,8 @@
     const IDLE = 25_000;
     const FLAP = 130;
     const still = matchMedia("(prefers-reduced-motion: reduce)");
-    const sx = root.querySelector<HTMLElement>(".sz-x")!;
-    const sy = root.querySelector<HTMLElement>(".sz-y")!;
+    const moverX = root.querySelector<HTMLElement>(".sz-x")!;
+    const moverY = root.querySelector<HTMLElement>(".sz-y")!;
     const face = root.querySelector<SVGGElement>(".sz-face")!;
     const pitch = root.querySelector<SVGGElement>(".sz-pitch")!;
     const near = root.querySelector<SVGGElement>(".sz-near")!;
@@ -268,43 +268,43 @@
     let flapping = 0;
     let wingDown = false;
 
-    const at = (x: number, y: number, tx: string, ty: string) => {
-      sx.style.transition = `transform ${tx}`;
-      sy.style.transition = `transform ${ty}, opacity 0.5s ease`;
-      sx.style.transform = `translateX(${x}px)`;
-      sy.style.transform = `translateY(${y}px)`;
+    const moveTo = (x: number, y: number, timingX: string, timingY: string) => {
+      moverX.style.transition = `transform ${timingX}`;
+      moverY.style.transition = `transform ${timingY}, opacity 0.5s ease`;
+      moverX.style.transform = `translateX(${x}px)`;
+      moverY.style.transform = `translateY(${y}px)`;
     };
 
-    const wings = (deg: number) => {
-      near.style.transform = `rotate(${deg}deg)`;
-      far.style.transform = `rotate(${deg * 0.8 - 6}deg)`;
+    const wings = (degrees: number) => {
+      near.style.transform = `rotate(${degrees}deg)`;
+      far.style.transform = `rotate(${degrees * 0.8 - 6}deg)`;
     };
 
-    const flap = (on: boolean) => {
+    const flap = (active: boolean) => {
       clearInterval(flapping);
       root.style.setProperty("--flap", `${FLAP}ms`);
-      if (!on) return;
+      if (!active) return;
       flapping = window.setInterval(() => {
         wingDown = !wingDown;
         wings(wingDown ? 18 : -62);
       }, FLAP);
     };
 
-    const pose = (p: Phase) => {
-      phase = p;
-      root.classList.toggle("flying", p !== "sitting");
-      root.classList.toggle("landing", p === "landing");
-      const lean = { away: 0, gliding: 6, landing: -12, sitting: 0, leaving: -18 }[p];
+    const pose = (next: Phase) => {
+      phase = next;
+      root.classList.toggle("flying", next !== "sitting");
+      root.classList.toggle("landing", next === "landing");
+      const lean = { away: 0, gliding: 6, landing: -12, sitting: 0, leaving: -18 }[next];
       pitch.style.transform = `rotate(${lean}deg)`;
       face.style.transform = "scaleX(-1)";
     };
 
     function perch(): [number, number] | null {
-      const h = innerHeight;
-      for (const d of document.querySelectorAll<HTMLElement>(".divider")) {
-        const r = d.getBoundingClientRect();
-        if (r.top > h * 0.15 && r.bottom < h * 0.9 && r.width > 200) {
-          return [r.left + r.width * (0.56 + Math.random() * 0.14), r.top + 14];
+      const viewHeight = innerHeight;
+      for (const divider of document.querySelectorAll<HTMLElement>(".divider")) {
+        const box = divider.getBoundingClientRect();
+        if (box.top > viewHeight * 0.15 && box.bottom < viewHeight * 0.9 && box.width > 200) {
+          return [box.left + box.width * (0.56 + Math.random() * 0.14), box.top + 14];
         }
       }
       return null;
@@ -317,23 +317,28 @@
         idle = window.setTimeout(arrive, 3000);
         return;
       }
-      const [px, py] = spot;
+      const [perchX, perchY] = spot;
       root.classList.add("here");
       if (still.matches) {
-        at(px, py, "0s", "0s");
-        sy.style.opacity = "1";
+        moveTo(perchX, perchY, "0s", "0s");
+        moverY.style.opacity = "1";
         pose("sitting");
         sat();
         return;
       }
 
-      sy.style.opacity = "0";
-      at(innerWidth + 80, Math.max(-60, py - 260), "0s", "0s");
+      moverY.style.opacity = "0";
+      moveTo(innerWidth + 80, Math.max(-60, perchY - 260), "0s", "0s");
       pose("gliding");
       requestAnimationFrame(() =>
         requestAnimationFrame(() => {
-          sy.style.opacity = "1";
-          at(px, py, "1.5s cubic-bezier(.15,.55,.35,1)", "1.5s cubic-bezier(.45,0,.55,1)");
+          moverY.style.opacity = "1";
+          moveTo(
+            perchX,
+            perchY,
+            "1.5s cubic-bezier(.15,.55,.35,1)",
+            "1.5s cubic-bezier(.45,0,.55,1)",
+          );
           flap(true);
           step = window.setTimeout(() => {
             flap(false);
@@ -357,8 +362,8 @@
     }
 
     function sat() {
-      const state = update((s) => {
-        s.sparrow = (s.sparrow || 0) + 1;
+      const state = update((saved) => {
+        saved.sparrow = (saved.sparrow || 0) + 1;
       });
       if (state.sparrow >= 3) earn("雀");
     }
@@ -372,12 +377,12 @@
         phase = "away";
         return;
       }
-      const x = parseFloat(sx.style.transform.slice(11)) || 0;
+      const x = parseFloat(moverX.style.transform.slice(11)) || 0;
       pose("leaving");
       flap(true);
-      at(x - 520, -240, "1.8s cubic-bezier(.55,0,.8,.6)", "1.8s cubic-bezier(.2,.5,.4,1)");
-      sy.style.transition += ", opacity 0.9s ease 0.9s";
-      sy.style.opacity = "0";
+      moveTo(x - 520, -240, "1.8s cubic-bezier(.55,0,.8,.6)", "1.8s cubic-bezier(.2,.5,.4,1)");
+      moverY.style.transition += ", opacity 0.9s ease 0.9s";
+      moverY.style.opacity = "0";
       step = window.setTimeout(() => {
         flap(false);
         root.classList.remove("here");

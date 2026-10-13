@@ -25,17 +25,17 @@ const { class: className } = Astro.props;
 </noscript>
 
 <script>
-  const sig = document.querySelector<SVGSVGElement>(".signature");
-  if (sig) {
+  const signature = document.querySelector<SVGSVGElement>(".signature");
+  if (signature) {
     const seen = new IntersectionObserver(
       (entries) => {
         if (!entries[0].isIntersecting) return;
         seen.disconnect();
-        sig.classList.add("is-signing");
+        signature.classList.add("is-signing");
       },
       { threshold: 0.6 },
     );
-    seen.observe(sig);
+    seen.observe(signature);
   }
 </script>
 

@@ -14,15 +14,15 @@ const crack =
 
 // winter snow rests on the plain line after the crack
 const clipId = `snow-${from}-${to}`;
-const s = to + 40;
+const snowStart = to + 40;
 const snow =
-  `M${s} 18 C ${s + 2} 11, ${s + 10} 9, ${s + 22} 8.6 C ${s + 32} 7.4, ${s + 42} 7.8, ${s + 52} 9.2 ` +
-  `C ${s + 64} 8.8, ${s + 76} 9.4, ${s + 86} 10.8 C ${s + 94} 11, ${s + 102} 12, ${s + 108} 18 Z ` +
+  `M${snowStart} 18 C ${snowStart + 2} 11, ${snowStart + 10} 9, ${snowStart + 22} 8.6 C ${snowStart + 32} 7.4, ${snowStart + 42} 7.8, ${snowStart + 52} 9.2 ` +
+  `C ${snowStart + 64} 8.8, ${snowStart + 76} 9.4, ${snowStart + 86} 10.8 C ${snowStart + 94} 11, ${snowStart + 102} 12, ${snowStart + 108} 18 Z ` +
   `M${from - 70} 18 C ${from - 67} 11.6, ${from - 58} 10.6, ${from - 48} 11 ` +
   `C ${from - 40} 10.6, ${from - 34} 11.8, ${from - 30} 18 Z`;
 const snowEdge =
-  `M${s + 3} 15 C ${s + 5} 11, ${s + 12} 9, ${s + 22} 8.6 C ${s + 32} 7.4, ${s + 42} 7.8, ${s + 52} 9.2 ` +
-  `C ${s + 64} 8.8, ${s + 76} 9.4, ${s + 86} 10.8 C ${s + 94} 11, ${s + 101} 12, ${s + 105} 15`;
+  `M${snowStart + 3} 15 C ${snowStart + 5} 11, ${snowStart + 12} 9, ${snowStart + 22} 8.6 C ${snowStart + 32} 7.4, ${snowStart + 42} 7.8, ${snowStart + 52} 9.2 ` +
+  `C ${snowStart + 64} 8.8, ${snowStart + 76} 9.4, ${snowStart + 86} 10.8 C ${snowStart + 94} 11, ${snowStart + 101} 12, ${snowStart + 105} 15`;
 
 // ornaments sit in an unstretched layer anchored at the end of the crack
 const anchor = `left: calc(${to / 10}% - 105px)`;
@@ -76,18 +76,25 @@ const anchor = `left: calc(${to / 10}% - 105px)`;
 
     <g class="kigo-autumn">
       <g class="geese">
-        <path d="M-1 -24.2 Q3.1 -22.8 6 -22 Q8.8 -24.1 13.1 -25.9" style="--w: 1.3; opacity: 0.9"
+        <path
+          d="M-1 -24.2 Q3.1 -22.8 6 -22 Q8.8 -24.1 13.1 -25.9"
+          style="--w: 1.3; opacity: 0.9"
         ></path>
         <path
           d="M11 -18.4 Q14.5 -17.2 17 -16.5 Q19.4 -18.3 23.1 -19.8"
-          style="--w: 1.15; opacity: 0.8"></path>
+          style="--w: 1.15; opacity: 0.8"
+        ></path>
         <path
           d="M21.6 -13.7 Q24.7 -12.6 27 -12 Q29.2 -13.6 32.5 -15"
-          style="--w: 1.05; opacity: 0.7"></path>
+          style="--w: 1.05; opacity: 0.7"
+        ></path>
         <path
           d="M-10.6 -16.8 Q-7.4 -15.7 -5 -15 Q-2.8 -16.7 0.7 -18.1"
-          style="--w: 1.05; opacity: 0.65"></path>
-        <path d="M33.6 -9.4 Q36.2 -8.5 38 -8 Q39.8 -9.3 42.5 -10.4" style="--w: 0.9; opacity: 0.5"
+          style="--w: 1.05; opacity: 0.65"
+        ></path>
+        <path
+          d="M33.6 -9.4 Q36.2 -8.5 38 -8 Q39.8 -9.3 42.5 -10.4"
+          style="--w: 0.9; opacity: 0.5"
         ></path>
       </g>
     </g>

@@ -16,16 +16,16 @@ const links = [
 const menu = [...links, { href: "/contact/", label: "contact" }];
 
 function brush(seed: string) {
-  let h = 0;
-  for (const c of seed) h = (h * 31 + c.charCodeAt(0)) >>> 0;
-  const r = (n: number) => {
-    h = (h * 1103515245 + 12345) >>> 0;
-    return (((h >>> 8) % 1000) / 1000) * n;
+  let state = 0;
+  for (const character of seed) state = (state * 31 + character.charCodeAt(0)) >>> 0;
+  const rand = (range: number) => {
+    state = (state * 1103515245 + 12345) >>> 0;
+    return (((state >>> 8) % 1000) / 1000) * range;
   };
-  const f = (n: number) => n.toFixed(1);
+  const fixed = (value: number) => value.toFixed(1);
   return (
-    `M2 ${f(5 + r(2))} C ${f(12 + r(8))} ${f(3 + r(3))}, ${f(30 + r(8))} ${f(7 + r(3))}, ` +
-    `${f(46 + r(8))} ${f(5 + r(2))} S ${f(62 + r(4))} ${f(4 + r(3))}, 68 ${f(3 + r(3))}`
+    `M2 ${fixed(5 + rand(2))} C ${fixed(12 + rand(8))} ${fixed(3 + rand(3))}, ${fixed(30 + rand(8))} ${fixed(7 + rand(3))}, ` +
+    `${fixed(46 + rand(8))} ${fixed(5 + rand(2))} S ${fixed(62 + rand(4))} ${fixed(4 + rand(3))}, 68 ${fixed(3 + rand(3))}`
   );
 }
 ---
@@ -418,8 +418,8 @@ function brush(seed: string) {
   (function () {
     function label() {
       var text = window.auTheme.resolve(window.auTheme.get()).replace("-", " · ");
-      document.querySelectorAll("[data-theme-label]").forEach(function (el) {
-        el.textContent = text;
+      document.querySelectorAll("[data-theme-label]").forEach(function (themeLabel) {
+        themeLabel.textContent = text;
       });
     }
 

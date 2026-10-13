@@ -4,7 +4,7 @@
 
 type Point = [number, number];
 
-const P: Record<string, Point> = {
+const CORNERS: Record<string, Point> = {
   a: [170, 118],
   b: [215, 112],
   c: [260, 116],
@@ -56,16 +56,16 @@ const CRACKS = [
   ["X7 k", "D2", "E"],
 ];
 
-const pts = (s: string) => s.split(" ").map((k) => P[k]);
-const poly = (s: string) =>
+const pointsOf = (names: string) => names.split(" ").map((name) => CORNERS[name]);
+const poly = (names: string) =>
   "M" +
-  pts(s)
+  pointsOf(names)
     .map(([x, y]) => `${x} ${y}`)
     .join(" L ") +
   " Z";
-const line = (s: string) =>
+const line = (names: string) =>
   "M" +
-  pts(s)
+  pointsOf(names)
     .map(([x, y]) => `${x} ${y}`)
     .join(" L ");
 
@@ -83,35 +83,35 @@ const RIM = "M172 121 C 214 115, 258 120, 300 116 S 390 115, 428 121";
     aria-label="A broken tea bowl. Drag the pieces back into place, or focus one and press Enter."
   >
     <defs>
-      {SHARDS.map((s) => (
-        <clipPath id={`kin-${s.id}`}>
-          <path d={poly(s.pts)} />
+      {SHARDS.map((shard) => (
+        <clipPath id={`kin-${shard.id}`}>
+          <path d={poly(shard.pts)} />
         </clipPath>
       ))}
     </defs>
     <path class="table" d="M140 318 C 230 314, 370 314, 460 318"></path>
     <path class="ghost" d={BOWL}></path>
-    {SHARDS.map((s, n) => {
+    {SHARDS.map((shard, index) => {
       return (
         <g
           class="shard"
           tabindex="0"
           role="button"
-          aria-label={`piece ${n + 1} of 6`}
-          data-id={s.id}
-          data-off={JSON.stringify(s.off)}
-          data-rot={s.rot}
+          aria-label={`piece ${index + 1} of 6`}
+          data-id={shard.id}
+          data-off={JSON.stringify(shard.off)}
+          data-rot={shard.rot}
         >
-          <path class="shard-shadow" d={poly(s.pts)} transform="translate(4 6)" />
-          <path class="shard-clay" d={poly(s.pts)} />
-          <path class="shard-glaze" d={GLAZE} clip-path={`url(#kin-${s.id})`} />
-          <path class="shard-rim" d={RIM} clip-path={`url(#kin-${s.id})`} />
-          <path class="shard-edge" d={poly(s.pts)} />
+          <path class="shard-shadow" d={poly(shard.pts)} transform="translate(4 6)" />
+          <path class="shard-clay" d={poly(shard.pts)} />
+          <path class="shard-glaze" d={GLAZE} clip-path={`url(#kin-${shard.id})`} />
+          <path class="shard-rim" d={RIM} clip-path={`url(#kin-${shard.id})`} />
+          <path class="shard-edge" d={poly(shard.pts)} />
         </g>
       );
     })}
-    {CRACKS.map(([edge, a, b]) => (
-      <path class="gold" d={line(edge)} pathLength="1" data-a={a} data-b={b} />
+    {CRACKS.map(([edge, sideA, sideB]) => (
+      <path class="gold" d={line(edge)} pathLength="1" data-a={sideA} data-b={sideB} />
     ))}
     <g class="kin-seal" transform="translate(452 286) rotate(-6) scale(0.9)">
       <path d="M4 5 Q23 2 42 4 Q45 23 43 42 Q23 45 3 43 Q1 23 4 5 Z"></path>
@@ -303,21 +303,21 @@ const RIM = "M172 121 C 214 115, 258 120, 300 116 S 390 115, 428 121";
     const shards = [...svg.querySelectorAll<SVGGElement>(".shard")];
     const golds = [...svg.querySelectorAll<SVGPathElement>(".gold")];
     const home = new Set<string>();
-    const pos = new Map<string, [number, number]>();
+    const offsets = new Map<string, [number, number]>();
     const mended = !!load().seals["継"];
 
-    const place = (g: SVGGElement) => {
-      const id = g.dataset.id!;
-      const [dx, dy] = pos.get(id)!;
-      const d = Math.hypot(dx, dy);
-      const rot = Number(g.dataset.rot);
-      const tilt = home.has(id) ? 0 : d >= TURN ? rot : (rot * d) / TURN;
-      g.style.transform = `translate(${dx.toFixed(1)}px, ${dy.toFixed(1)}px) rotate(${tilt.toFixed(1)}deg)`;
+    const place = (shard: SVGGElement) => {
+      const id = shard.dataset.id!;
+      const [offsetX, offsetY] = offsets.get(id)!;
+      const distance = Math.hypot(offsetX, offsetY);
+      const rotation = Number(shard.dataset.rot);
+      const tilt = home.has(id) ? 0 : distance >= TURN ? rotation : (rotation * distance) / TURN;
+      shard.style.transform = `translate(${offsetX.toFixed(1)}px, ${offsetY.toFixed(1)}px) rotate(${tilt.toFixed(1)}deg)`;
     };
 
     const settle = () => {
-      golds.forEach((p) =>
-        p.classList.toggle("on", home.has(p.dataset.a!) && home.has(p.dataset.b!)),
+      golds.forEach((gold) =>
+        gold.classList.toggle("on", home.has(gold.dataset.a!) && home.has(gold.dataset.b!)),
       );
       if (home.size === shards.length && !figure.classList.contains("whole")) {
         figure.classList.add("whole");
@@ -325,13 +325,13 @@ const RIM = "M172 121 C 214 115, 258 120, 300 116 S 390 115, 428 121";
       }
     };
 
-    const putHome = (g: SVGGElement) => {
-      home.add(g.dataset.id!);
-      pos.set(g.dataset.id!, [0, 0]);
-      g.classList.add("home");
-      g.removeAttribute("tabindex");
-      g.setAttribute("aria-label", "a mended piece");
-      place(g);
+    const putHome = (shard: SVGGElement) => {
+      home.add(shard.dataset.id!);
+      offsets.set(shard.dataset.id!, [0, 0]);
+      shard.classList.add("home");
+      shard.removeAttribute("tabindex");
+      shard.setAttribute("aria-label", "a mended piece");
+      place(shard);
       settle();
     };
 
@@ -339,53 +339,58 @@ const RIM = "M172 121 C 214 115, 258 120, 300 116 S 390 115, 428 121";
     const spread = narrow ? 0.55 : 1;
     if (narrow) svg.setAttribute("viewBox", "40 40 520 380");
 
-    shards.forEach((g) => {
-      const [ox, oy]: [number, number] = JSON.parse(g.dataset.off!);
-      pos.set(g.dataset.id!, [ox * spread, oy * spread]);
-      if (mended) putHome(g);
-      else place(g);
+    shards.forEach((shard) => {
+      const [startX, startY]: [number, number] = JSON.parse(shard.dataset.off!);
+      offsets.set(shard.dataset.id!, [startX * spread, startY * spread]);
+      if (mended) putHome(shard);
+      else place(shard);
     });
     if (mended) figure.classList.add("whole");
 
-    const toBowl = (e: PointerEvent): [number, number] => {
-      const p = new DOMPoint(e.clientX, e.clientY).matrixTransform(svg.getScreenCTM()!.inverse());
-      return [p.x, p.y];
+    const toBowl = (event: PointerEvent): [number, number] => {
+      const point = new DOMPoint(event.clientX, event.clientY).matrixTransform(
+        svg.getScreenCTM()!.inverse(),
+      );
+      return [point.x, point.y];
     };
 
     let drag: { g: SVGGElement; from: [number, number]; at: [number, number] } | null = null;
 
-    shards.forEach((g) => {
-      g.addEventListener("pointerdown", (e) => {
-        if (home.has(g.dataset.id!)) return;
-        e.preventDefault();
-        svg.setPointerCapture(e.pointerId);
+    shards.forEach((shard) => {
+      shard.addEventListener("pointerdown", (event) => {
+        if (home.has(shard.dataset.id!)) return;
+        event.preventDefault();
+        svg.setPointerCapture(event.pointerId);
         // the piece being carried is drawn above the others
-        g.parentNode!.insertBefore(g, golds[0]);
-        g.classList.add("lifted");
-        drag = { g, from: toBowl(e), at: [...pos.get(g.dataset.id!)!] };
+        shard.parentNode!.insertBefore(shard, golds[0]);
+        shard.classList.add("lifted");
+        drag = { g: shard, from: toBowl(event), at: [...offsets.get(shard.dataset.id!)!] };
       });
-      g.addEventListener("keydown", (e) => {
-        if ((e.key === "Enter" || e.key === " ") && !home.has(g.dataset.id!)) {
-          e.preventDefault();
-          putHome(g);
+      shard.addEventListener("keydown", (event) => {
+        if ((event.key === "Enter" || event.key === " ") && !home.has(shard.dataset.id!)) {
+          event.preventDefault();
+          putHome(shard);
         }
       });
     });
 
-    svg.addEventListener("pointermove", (e) => {
+    svg.addEventListener("pointermove", (event) => {
       if (!drag) return;
-      const [x, y] = toBowl(e);
-      pos.set(drag.g.dataset.id!, [drag.at[0] + x - drag.from[0], drag.at[1] + y - drag.from[1]]);
+      const [x, y] = toBowl(event);
+      offsets.set(drag.g.dataset.id!, [
+        drag.at[0] + x - drag.from[0],
+        drag.at[1] + y - drag.from[1],
+      ]);
       place(drag.g);
     });
 
     const drop = () => {
       if (!drag) return;
-      const g = drag.g;
+      const shard = drag.g;
       drag = null;
-      g.classList.remove("lifted");
-      const [dx, dy] = pos.get(g.dataset.id!)!;
-      if (Math.hypot(dx, dy) < SNAP) putHome(g);
+      shard.classList.remove("lifted");
+      const [offsetX, offsetY] = offsets.get(shard.dataset.id!)!;
+      if (Math.hypot(offsetX, offsetY) < SNAP) putHome(shard);
     };
     svg.addEventListener("pointerup", drop);
     svg.addEventListener("pointercancel", drop);
