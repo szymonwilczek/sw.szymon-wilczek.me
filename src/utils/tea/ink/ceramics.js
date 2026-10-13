@@ -78,6 +78,21 @@ const PAINTS = (tones) => [
 
 const HANDLE_REACH = 0.55;
 const HANDLE_THICKNESS = 7;
+const HANDLE_INK = 1;
+const HANDLE_EDGE = 3.2;
+const HANDLE_UNTURNED = 1;
+const HANDLE_TOP = 0.22;
+const HANDLE_BOTTOM = 0.72;
+
+// handle's loop:
+// [depth on the wall measured from, depth, share of its reach, lift]
+const HANDLE_CURVE = [
+  [HANDLE_TOP, HANDLE_TOP, 0, 0],
+  [HANDLE_TOP, HANDLE_TOP, 0.75, -3],
+  [HANDLE_TOP, lerp(HANDLE_TOP, HANDLE_BOTTOM, 0.45), 1, 0],
+  [HANDLE_BOTTOM, HANDLE_BOTTOM, 0.55, 2],
+  [HANDLE_BOTTOM, HANDLE_BOTTOM, 0, 0],
+];
 
 /** How far a piece reaches left and right of its centre once drawn */
 function pieceSpan(spec, scale) {
@@ -197,6 +212,7 @@ function piece(group, rand, cx, cy, scale, tones, spec) {
   ];
   const footRadius = bodyRadius(1);
   const paintRand = rng(hash(String(rand())));
+  const handleRand = rng(hash(String(rand())));
   const paint = () =>
     (spec.paint || []).forEach((stroke) => {
       const points = stroke.pts.map(([across, down]) =>
@@ -272,6 +288,32 @@ function piece(group, rand, cx, cy, scale, tones, spec) {
     ...arc(footRadius, cy, 14, true).slice(1, -1),
     ...side(1, 0, 1).reverse(),
   ];
+
+  const drawHandle = () => {
+    const around = spec.handleAround ?? HANDLE_UNTURNED,
+      facing = Math.abs(around) <= 1 ? 1 : -1,
+      across = facing > 0 ? around : Math.sign(around) * (2 - Math.abs(around)),
+      depth = facing * Math.sqrt(Math.max(0, 1 - across * across)),
+      reach = rimRadius * HANDLE_REACH;
+    const handle = HANDLE_CURVE.map(([wallAt, down, out, lift]) => {
+      const radius = bodyRadius(wallAt) + out * reach;
+      return [cx + across * radius, rimY + down * height + lift * scale + radius * squash * depth];
+    });
+    brushStroke(group, handleRand, handle, HANDLE_THICKNESS * scale, glaze || clay, 1, {
+      blunt: true,
+      tip: 0.9,
+      head: 0.9,
+    });
+    const ends = (i) => i === 0 || i === handle.length - 1;
+    [-1, 1].forEach((sign) => {
+      const edge = handle.map(([x, y], i) => [x + (ends(i) ? 0 : sign * HANDLE_EDGE * scale), y]);
+      if (facing < 0)
+        brushStroke(group, handleRand, edge, HANDLE_INK, tones.ink, 0.85, { blunt: true });
+      else addLine(group, wobblyLine(handleRand, edge, 0.2), tones.ink, HANDLE_INK, 0.85);
+    });
+  };
+  const handleBehind = spec.handle && Math.abs(spec.handleAround ?? HANDLE_UNTURNED) > 1;
+  if (handleBehind) drawHandle();
   const body = wobblyPolygon(rand, bodyPts, 0.2);
   addSolid(group, body, clay, 1);
   for (let k = 0; k < 7; k++) {
@@ -362,45 +404,7 @@ function piece(group, rand, cx, cy, scale, tones, spec) {
     0.5,
     0.35,
   );
-  if (spec.handle) {
-    const handleTop = [cx + bodyRadius(0.22), rimY + 0.22 * height],
-      handleBottom = [cx + bodyRadius(0.72), rimY + 0.72 * height],
-      reach = rimRadius * HANDLE_REACH;
-    const handle = [
-      handleTop,
-      [handleTop[0] + reach * 0.75, handleTop[1] - 3 * scale],
-      [handleTop[0] + reach, lerp(handleTop[1], handleBottom[1], 0.45)],
-      [handleBottom[0] + reach * 0.55, handleBottom[1] + 2 * scale],
-      handleBottom,
-    ];
-    brushStroke(group, rand, handle, HANDLE_THICKNESS * scale, glaze || clay, 1, {
-      blunt: true,
-      tip: 0.9,
-      head: 0.9,
-    });
-    addLine(
-      group,
-      wobblyLine(
-        rand,
-        handle.map(([x, y], i) => [x + (i && i < 4 ? 3.2 * scale : 0), y]),
-        0.2,
-      ),
-      tones.ink,
-      1,
-      0.85,
-    );
-    addLine(
-      group,
-      wobblyLine(
-        rand,
-        handle.map(([x, y], i) => [x - (i && i < 4 ? 3.2 * scale : 0), y]),
-        0.2,
-      ),
-      tones.ink,
-      1,
-      0.85,
-    );
-  }
+  if (spec.handle && !handleBehind) drawHandle();
   if (spec.kin) {
     const points = spec.kin.map(([across, down]) => frontPoint(across, down));
     addLine(group, wobblyLine(rand, points, 0.3), tones.gold, 2.2 * scale, 0.95, true);

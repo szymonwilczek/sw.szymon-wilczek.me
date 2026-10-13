@@ -156,6 +156,8 @@ export function clean(value: unknown): PieceSpec | null {
   };
 }
 
+const HANDLE_UNTURNED = 1; // the handle sits on the right edge before the piece is turned
+
 export function turned(spec: PieceSpec, turn = 0) {
   const wrap = (around: number) => ((((around + turn + 2) % 4) + 4) % 4) - 2;
   const runs: Stroke[] = [];
@@ -176,6 +178,7 @@ export function turned(spec: PieceSpec, turn = 0) {
     paint: runs.filter((stroke) => stroke.pts.length > 1),
     kin: crack.length > 1 ? crack : null,
     glaze: spec.glaze ? { ...spec.glaze, none: false } : { c: 0, dip: 0, drips: [], none: true },
+    handleAround: wrap(HANDLE_UNTURNED),
   };
 }
 
