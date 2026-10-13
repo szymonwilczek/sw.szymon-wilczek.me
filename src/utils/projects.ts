@@ -35,27 +35,28 @@ export function inkOf(language: string): string {
 
 /** "owner/repo" for GitHub, otherwise the bare host of the site */
 export function repoPath(url: string): { path: string; site: boolean } {
-  const u = new URL(url);
-  const path = u.pathname.replace(/^\/|\/$/g, "");
-  if (u.hostname === "github.com") return { path, site: false };
-  return { path: u.hostname, site: true };
+  const parsed = new URL(url);
+  const path = parsed.pathname.replace(/^\/|\/$/g, "");
+  if (parsed.hostname === "github.com") return { path, site: false };
+  return { path: parsed.hostname, site: true };
 }
 
 /** A small seven-point blot of ink */
-export function blot(seed: string, r = 5.2): string {
+export function blot(seed: string, radius = 5.2): string {
   const rand = rng(hash(seed));
-  const pts: Array<[number, number]> = [];
+  const points: Array<[number, number]> = [];
   for (let i = 0; i < 7; i++) {
-    const a = (i / 7) * Math.PI * 2;
-    const k = 1 + (rand() - 0.5) * 0.3;
-    pts.push([7 + Math.cos(a) * r * k, 7 + Math.sin(a) * r * k]);
+    const angle = (i / 7) * Math.PI * 2;
+    const wobble = 1 + (rand() - 0.5) * 0.3;
+    points.push([7 + Math.cos(angle) * radius * wobble, 7 + Math.sin(angle) * radius * wobble]);
   }
-  return smooth(pts, true);
+  return smooth(points, true);
 }
 
 /** languages with how many projects use each, most used first */
 export function languages(projects: Project[]): Array<[string, number]> {
   const counts = new Map<string, number>();
-  for (const p of projects) counts.set(p.language, (counts.get(p.language) ?? 0) + 1);
-  return [...counts].sort((a, b) => b[1] - a[1]);
+  for (const project of projects)
+    counts.set(project.language, (counts.get(project.language) ?? 0) + 1);
+  return [...counts].sort((former, latter) => latter[1] - former[1]);
 }

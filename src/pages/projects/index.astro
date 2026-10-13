@@ -9,46 +9,56 @@ import { hash, rng } from "../../utils/stamp";
 import { projectsList } from "../../utils/schema";
 
 const stats = new Map<string, RepoStats>();
-for (const p of PROJECTS) {
-  const repo = repoPath(p.url);
-  const s = repo.site ? null : await repoStats(repo.path);
-  if (s) stats.set(p.title, s);
+for (const project of PROJECTS) {
+  const repo = repoPath(project.url);
+  const fetched = repo.site ? null : await repoStats(repo.path);
+  if (fetched) stats.set(project.title, fetched);
 }
 
 // Without stats from GitHub, "last touched" falls back to when work started
-const touched = (p: (typeof PROJECTS)[number]) => stats.get(p.title)?.pushed ?? p.date;
+const touched = (project: (typeof PROJECTS)[number]) =>
+  stats.get(project.title)?.pushed ?? project.date;
 const hasStats = stats.size > 0;
-const sampled = [...stats.values()].some((s) => s.sample);
+const sampled = [...stats.values()].some((entry) => entry.sample);
 
-const pinned = PROJECTS.filter((p) => p.pinned);
-const rest = PROJECTS.filter((p) => !p.pinned).sort((a, b) =>
-  hasStats ? touched(b).localeCompare(touched(a)) : b.date.localeCompare(a.date),
+const pinned = PROJECTS.filter((project) => project.pinned);
+const rest = PROJECTS.filter((project) => !project.pinned).sort((former, latter) =>
+  hasStats
+    ? touched(latter).localeCompare(touched(former))
+    : latter.date.localeCompare(former.date),
 );
 const langs = languages(PROJECTS);
 
 // A year in ink: every commit of every repository, one blot per day
-const year = yearOfInk([...stats.values()].map((s) => s.days));
-const commits = year.flat().reduce((a, b) => a + b, 0);
+const year = yearOfInk([...stats.values()].map((entry) => entry.days));
+const commits = year.flat().reduce((total, day) => total + day, 0);
 const busiest = Math.max(1, ...year.flat());
 const jitter = rng(hash("year-in-ink"));
-const dots = year.flatMap((week, w) =>
-  week.flatMap((n, d) => {
-    const dx = jitter() - 0.5;
-    const dy = jitter() - 0.5;
-    if (!n) return [];
-    const v = Math.sqrt(n / busiest);
-    return [{ x: w * 9 + 4 + dx, y: d * 9 + 4 + dy, r: 1.2 + v * 2.4, o: 0.15 + v * 0.75 }];
+const dots = year.flatMap((week, weekIndex) =>
+  week.flatMap((count, dayIndex) => {
+    const shiftX = jitter() - 0.5;
+    const shiftY = jitter() - 0.5;
+    if (!count) return [];
+    const strength = Math.sqrt(count / busiest);
+    return [
+      {
+        x: weekIndex * 9 + 4 + shiftX,
+        y: dayIndex * 9 + 4 + shiftY,
+        r: 1.2 + strength * 2.4,
+        o: 0.15 + strength * 0.75,
+      },
+    ];
   }),
 );
 const RING =
   "M8 6 C 40 1, 80 2, 95 12 C 101 26, 84 38, 50 38 C 18 39, 1 32, 3 18 C 4 10, 14 4, 30 3";
 
 // each sheet keeps its number in the herbarium and lies a little crooked
-const no = (p: (typeof PROJECTS)[number]) => PROJECTS.indexOf(p) + 1;
-const tilt = (p: (typeof PROJECTS)[number]) => (((no(p) * 29) % 9) - 4) / 10;
+const sheetNumber = (project: (typeof PROJECTS)[number]) => PROJECTS.indexOf(project) + 1;
+const tilt = (project: (typeof PROJECTS)[number]) => (((sheetNumber(project) * 29) % 9) - 4) / 10;
 
-const search = (p: (typeof PROJECTS)[number]) =>
-  `${p.title} ${p.language} ${p.excerpt} ${p.badge ?? ""} ${repoPath(p.url).path}`;
+const search = (project: (typeof PROJECTS)[number]) =>
+  `${project.title} ${project.language} ${project.excerpt} ${project.badge ?? ""} ${repoPath(project.url).path}`;
 ---
 
 <BaseLayout
@@ -68,12 +78,12 @@ const search = (p: (typeof PROJECTS)[number]) =>
     {commits > 0 && (
       <figure class="ink">
         <svg viewBox="0 0 468 64" role="img" aria-label={`${commits} commits over the last year`}>
-          {dots.map((d) => (
+          {dots.map((dot) => (
             <circle
-              cx={d.x.toFixed(1)}
-              cy={d.y.toFixed(1)}
-              r={d.r.toFixed(1)}
-              opacity={d.o.toFixed(2)}
+              cx={dot.x.toFixed(1)}
+              cy={dot.y.toFixed(1)}
+              r={dot.r.toFixed(1)}
+              opacity={dot.o.toFixed(2)}
             />
           ))}
         </svg>
@@ -98,13 +108,13 @@ const search = (p: (typeof PROJECTS)[number]) =>
           <path d={RING} pathLength="1" vector-effect="non-scaling-stroke"></path>
         </svg>
       </button>
-      {langs.map(([lang, n]) => (
+      {langs.map(([lang, count]) => (
         <button class="lang hand own-focus" type="button" data-lang={lang} aria-pressed="false">
           <svg class="blot" width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
             <path d={blot(`chip-${lang}`, 4.6)} fill={inkOf(lang)} />
           </svg>
           <span>
-            {lang} <span class="n">{n}</span>
+            {lang} <span class="n">{count}</span>
           </span>
           <svg class="ring" viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true">
             <path d={RING} pathLength="1" vector-effect="non-scaling-stroke" />
@@ -122,9 +132,14 @@ const search = (p: (typeof PROJECTS)[number]) =>
   <div class="projects">
     <p class="section hand">pressed and kept —</p>
     <div class="pinned">
-      {pinned.map((p) => (
-        <article class="project" data-lang={p.language} data-search={search(p)}>
-          <Specimen project={p} stats={stats.get(p.title)} no={no(p)} tilt={tilt(p)} />
+      {pinned.map((item) => (
+        <article class="project" data-lang={item.language} data-search={search(item)}>
+          <Specimen
+            project={item}
+            stats={stats.get(item.title)}
+            no={sheetNumber(item)}
+            tilt={tilt(item)}
+          />
         </article>
       ))}
     </div>
@@ -161,16 +176,22 @@ const search = (p: (typeof PROJECTS)[number]) =>
     </div>
 
     <ul class="rest">
-      {rest.map((p) => (
+      {rest.map((item) => (
         <li
           class="project row"
-          data-lang={p.language}
-          data-search={search(p)}
-          data-started={p.date}
-          data-name={p.title.toLowerCase()}
-          data-touched={touched(p)}
+          data-lang={item.language}
+          data-search={search(item)}
+          data-started={item.date}
+          data-name={item.title.toLowerCase()}
+          data-touched={touched(item)}
         >
-          <Specimen project={p} stats={stats.get(p.title)} no={no(p)} tilt={tilt(p)} small />
+          <Specimen
+            project={item}
+            stats={stats.get(item.title)}
+            no={sheetNumber(item)}
+            tilt={tilt(item)}
+            small
+          />
         </li>
       ))}
     </ul>
@@ -185,8 +206,10 @@ const search = (p: (typeof PROJECTS)[number]) =>
   chips.forEach((chip) =>
     chip.addEventListener("click", () => {
       const lang = chip.dataset.lang;
-      chips.forEach((c) => c.setAttribute("aria-pressed", String(c === chip)));
-      projects.forEach((p) => p.classList.toggle("lang-off", !!lang && p.dataset.lang !== lang));
+      chips.forEach((other) => other.setAttribute("aria-pressed", String(other === chip)));
+      projects.forEach((project) =>
+        project.classList.toggle("lang-off", !!lang && project.dataset.lang !== lang),
+      );
     }),
   );
 
@@ -197,11 +220,11 @@ const search = (p: (typeof PROJECTS)[number]) =>
   sorts.forEach((button) =>
     button.addEventListener("click", () => {
       const key = button.dataset.sort!;
-      sorts.forEach((b) => b.setAttribute("aria-pressed", String(b === button)));
-      const sorted = [...rows].sort((a, b) =>
+      sorts.forEach((other) => other.setAttribute("aria-pressed", String(other === button)));
+      const sorted = [...rows].sort((former, latter) =>
         key === "name"
-          ? a.dataset.name!.localeCompare(b.dataset.name!)
-          : b.dataset[key]!.localeCompare(a.dataset[key]!),
+          ? former.dataset.name!.localeCompare(latter.dataset.name!)
+          : latter.dataset[key]!.localeCompare(former.dataset[key]!),
       );
       list.append(...sorted);
     }),

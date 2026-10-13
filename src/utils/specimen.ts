@@ -7,13 +7,21 @@ import { hash, rng } from "./stamp";
 type Point = [number, number];
 
 const TAU = Math.PI * 2;
-const f = (n: number) => Math.round(n * 10) / 10;
+const round1 = (value: number) => Math.round(value * 10) / 10;
 
-/** Points along an ellipse, or a part of one, from a0 to a1 */
-function arc(cx: number, cy: number, r: number, ry = r, a0 = 0, a1 = TAU, n = 14): Point[] {
-  return Array.from({ length: n + 1 }, (_, k) => {
-    const a = a0 + ((a1 - a0) * k) / n;
-    return [cx + Math.cos(a) * r, cy + Math.sin(a) * ry];
+/** Points along an ellipse, or a part of one, from startAngle to endAngle */
+function arc(
+  centerX: number,
+  centerY: number,
+  radiusX: number,
+  radiusY = radiusX,
+  startAngle = 0,
+  endAngle = TAU,
+  steps = 14,
+): Point[] {
+  return Array.from({ length: steps + 1 }, (_, step) => {
+    const angle = startAngle + ((endAngle - startAngle) * step) / steps;
+    return [centerX + Math.cos(angle) * radiusX, centerY + Math.sin(angle) * radiusY];
   });
 }
 
@@ -110,15 +118,16 @@ const SKETCH: Record<string, Point[][]> = {
 };
 
 // straight runs get points along them, so the smoothing keeps the corners
-function dense(pts: Point[]): Point[] {
-  const out: Point[] = [pts[0]];
-  for (let k = 1; k < pts.length; k++) {
-    const [ax, ay] = pts[k - 1];
-    const [bx, by] = pts[k];
-    const n = Math.max(1, Math.round(Math.hypot(bx - ax, by - ay) / 7));
-    for (let s = 1; s <= n; s++) out.push([ax + ((bx - ax) * s) / n, ay + ((by - ay) * s) / n]);
+function dense(points: Point[]): Point[] {
+  const result: Point[] = [points[0]];
+  for (let index = 1; index < points.length; index++) {
+    const [fromX, fromY] = points[index - 1];
+    const [toX, toY] = points[index];
+    const steps = Math.max(1, Math.round(Math.hypot(toX - fromX, toY - fromY) / 7));
+    for (let step = 1; step <= steps; step++)
+      result.push([fromX + ((toX - fromX) * step) / steps, fromY + ((toY - fromY) * step) / steps]);
   }
-  return out;
+  return result;
 }
 
 export interface Sketch {
@@ -129,51 +138,67 @@ export interface Sketch {
 /** repository's drawing, redrawn with a tremble */
 export function sketch(title: string): Sketch {
   const rand = rng(hash(`${title}·pen`));
-  const jit = (a: number) => (rand() - 0.5) * 2 * a;
-  const strokes = (SKETCH[title] ?? []).map((pts, k) => ({
+  const jitter = (amount: number) => (rand() - 0.5) * 2 * amount;
+  const strokes = (SKETCH[title] ?? []).map((points, strokeIndex) => ({
     d: smooth(
-      dense(pts).map(([x, y]): Point => [x + jit(0.7), y + jit(0.7)]),
+      dense(points).map(([x, y]): Point => [x + jitter(0.7), y + jitter(0.7)]),
       false,
     ),
-    w: k === 0 ? 1.7 : 1.3,
+    w: strokeIndex === 0 ? 1.7 : 1.3,
   }));
-  const cx = 30 + jit(5);
-  const cy = 32 + jit(5);
-  const rx = 17 + rand() * 6;
-  const ry = 13 + rand() * 6;
+  const centerX = 30 + jitter(5);
+  const centerY = 32 + jitter(5);
+  const radiusX = 17 + rand() * 6;
+  const radiusY = 13 + rand() * 6;
   const turn = rand() * 3;
   const wash = Array.from({ length: 9 }, (_, i): Point => {
-    const a = turn + (i / 9) * TAU;
-    const k = 1 + jit(0.22);
-    return [cx + Math.cos(a) * rx * k, cy + Math.sin(a) * ry * k];
+    const angle = turn + (i / 9) * TAU;
+    const wobble = 1 + jitter(0.22);
+    return [
+      centerX + Math.cos(angle) * radiusX * wobble,
+      centerY + Math.sin(angle) * radiusY * wobble,
+    ];
   });
   return { strokes, wash: smooth(wash, true) };
 }
 
 /** deckled edge round a wxh sheet: small teeth all the way round */
-export function deckle(title: string, w: number, h: number, amp: number, step: number): string {
+export function deckle(
+  title: string,
+  width: number,
+  height: number,
+  amplitude: number,
+  step: number,
+): string {
   const rand = rng(hash(`${title}·edge`));
-  const jit = (a: number) => (rand() - 0.5) * 2 * a;
-  const clamp = (v: number, top: number) => Math.min(top, Math.max(0, v));
-  const pts: Point[] = [];
-  for (let x = 0; x <= w; x += step + jit(step * 0.4)) pts.push([x, amp + jit(amp)]);
-  for (let y = 0; y <= h; y += step * 2 + jit(step)) pts.push([w - amp * 0.4 + jit(amp * 0.4), y]);
-  for (let x = w; x >= 0; x -= step + jit(step * 0.4)) pts.push([x, h - amp + jit(amp)]);
-  for (let y = h; y >= 0; y -= step * 2 + jit(step)) pts.push([amp * 0.4 + jit(amp * 0.4), y]);
-  return `M${pts.map(([x, y]) => `${f(clamp(x, w))} ${f(clamp(y, h))}`).join(" L")} Z`;
+  const jitter = (amount: number) => (rand() - 0.5) * 2 * amount;
+  const clamp = (value: number, limit: number) => Math.min(limit, Math.max(0, value));
+  const points: Point[] = [];
+  for (let x = 0; x <= width; x += step + jitter(step * 0.4))
+    points.push([x, amplitude + jitter(amplitude)]);
+  for (let y = 0; y <= height; y += step * 2 + jitter(step))
+    points.push([width - amplitude * 0.4 + jitter(amplitude * 0.4), y]);
+  for (let x = width; x >= 0; x -= step + jitter(step * 0.4))
+    points.push([x, height - amplitude + jitter(amplitude)]);
+  for (let y = height; y >= 0; y -= step * 2 + jitter(step))
+    points.push([amplitude * 0.4 + jitter(amplitude * 0.4), y]);
+  return `M${points.map(([x, y]) => `${round1(clamp(x, width))} ${round1(clamp(y, height))}`).join(" L")} Z`;
 }
 
 /** coloured-pencil loop round a word in a wxh box, never closing where it began */
-export function pencilLoop(seed: string, w = 100, h = 34): string {
+export function pencilLoop(seed: string, width = 100, height = 34): string {
   const rand = rng(hash(`${seed}·loop`));
-  const jit = (a: number) => (rand() - 0.5) * 2 * a;
-  const a0 = -2.2 + jit(0.3);
-  const pts = Array.from({ length: 23 }, (_, k): Point => {
-    const a = a0 + (k / 22) * (TAU + 0.5);
-    const r = 1 + jit(0.05) + k * 0.004;
-    return [w / 2 + Math.cos(a) * (w / 2) * r, h / 2 + Math.sin(a) * (h / 2) * r];
+  const jitter = (amount: number) => (rand() - 0.5) * 2 * amount;
+  const startAngle = -2.2 + jitter(0.3);
+  const points = Array.from({ length: 23 }, (_, step): Point => {
+    const angle = startAngle + (step / 22) * (TAU + 0.5);
+    const stretch = 1 + jitter(0.05) + step * 0.004;
+    return [
+      width / 2 + Math.cos(angle) * (width / 2) * stretch,
+      height / 2 + Math.sin(angle) * (height / 2) * stretch,
+    ];
   });
-  return smooth(pts, false);
+  return smooth(points, false);
 }
 
 // each kind of work has its own pencil

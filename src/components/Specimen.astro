@@ -14,20 +14,20 @@ interface Props {
   tilt?: number;
 }
 
-const { project: p, stats: s, no, small = false, tilt = 0 } = Astro.props;
-const repo = repoPath(p.url);
-const drawing = sketch(p.title);
-const lang = inkOf(p.language);
-const edge = small ? deckle(p.title, 300, 220, 4, 8) : deckle(p.title, 400, 320, 5, 9);
-const h = small ? 14 : 26;
-const stroke = s?.days.length ? inkStroke(s.days, 300, h) : "";
-const collected = p.date.slice(0, 7).replace("-", "·");
+const { project, stats, no: sheetNumber, small = false, tilt = 0 } = Astro.props;
+const repo = repoPath(project.url);
+const drawing = sketch(project.title);
+const lang = inkOf(project.language);
+const edge = small ? deckle(project.title, 300, 220, 4, 8) : deckle(project.title, 400, 320, 5, 9);
+const strokeHeight = small ? 14 : 26;
+const stroke = stats?.days.length ? inkStroke(stats.days, 300, strokeHeight) : "";
+const collected = project.date.slice(0, 7).replace("-", "·");
 const when = (iso: string) =>
   new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
 ---
 
 <div
-  class:list={["sheet", { small, archived: p.archived }]}
+  class:list={["sheet", { small, archived: project.archived }]}
   style={`--tilt: ${tilt}deg; --lang: ${lang}`}
 >
   <svg
@@ -44,8 +44,8 @@ const when = (iso: string) =>
       <svg viewBox="0 0 60 60" aria-hidden="true">
         <path class="wash" d={drawing.wash}></path>
         <g class="pen">
-          {drawing.strokes.map((t) => (
-            <path d={t.d} stroke-width={t.w} />
+          {drawing.strokes.map((penStroke) => (
+            <path d={penStroke.d} stroke-width={penStroke.w} />
           ))}
         </g>
       </svg>
@@ -54,8 +54,8 @@ const when = (iso: string) =>
     </figure>
     <div class="title">
       <h2>
-        <a class="name" href={p.url}>
-          {p.title}
+        <a class="name" href={project.url}>
+          {project.title}
         </a>
       </h2>
       {!small && (
@@ -64,19 +64,19 @@ const when = (iso: string) =>
           {repo.site && " · site"}
         </p>
       )}
-      <p class="excerpt">{p.excerpt}</p>
+      <p class="excerpt">{project.excerpt}</p>
     </div>
   </div>
 
   {stroke && (
     <figure class="stroke">
-      <svg viewBox={`0 0 300 ${h}`} preserveAspectRatio="none" aria-hidden="true">
+      <svg viewBox={`0 0 300 ${strokeHeight}`} preserveAspectRatio="none" aria-hidden="true">
         <path d={stroke} />
       </svg>
-      {!small && s && (
+      {!small && stats && (
         <figcaption>
           <span>a year ago</span>
-          <span>{commitCount(s.days)} commits</span>
+          <span>{commitCount(stats.days)} commits</span>
           <span>now</span>
         </figcaption>
       )}
@@ -87,49 +87,50 @@ const when = (iso: string) =>
     {small ? (
       <p class="line">
         <svg class="blot" width="13" height="13" viewBox="0 0 14 14" aria-hidden="true">
-          <path d={blot(`slip-${p.title}`)} fill={lang} />
+          <path d={blot(`slip-${project.title}`)} fill={lang} />
         </svg>
-        {p.language} · {collected}
-        {s && <> · ★ {s.stars}</>}
+        {project.language} · {collected}
+        {stats && <> · ★ {stats.stars}</>}
       </p>
     ) : (
       <div class="slip">
         <p>
           <svg class="blot" width="15" height="15" viewBox="0 0 14 14" aria-hidden="true">
-            <path d={blot(`slip-${p.title}`)} fill={lang} />
+            <path d={blot(`slip-${project.title}`)} fill={lang} />
           </svg>
           <span class="no">
-            No. {String(no).padStart(3, "0")} · {p.language}
+            No. {String(sheetNumber).padStart(3, "0")} · {project.language}
           </span>
         </p>
         <p>
           collected {collected}
-          {s && (
+          {stats && (
             <>
               {" "}
-              · ★ {s.stars}
-              <span class="visually-hidden"> stars</span> · ⑂ {s.forks}
+              · ★ {stats.stars}
+              <span class="visually-hidden"> stars</span> · ⑂ {stats.forks}
               <span class="visually-hidden"> forks</span>
             </>
           )}
         </p>
-        {s?.last && (
+        {stats?.last && (
           <p class="last hand">
-            last: {s.last.subject} · <time datetime={s.last.date}>{when(s.last.date)}</time>
+            last: {stats.last.subject} ·
+            <time datetime={stats.last.date}>{when(stats.last.date)}</time>
           </p>
         )}
       </div>
     )}
-    {p.badge && (
-      <span class="kind hand" style={`--kind: ${kindInk(p.badge)}`}>
-        {p.badge}
+    {project.badge && (
+      <span class="kind hand" style={`--kind: ${kindInk(project.badge)}`}>
+        {project.badge}
         <svg viewBox="0 0 100 34" preserveAspectRatio="none" aria-hidden="true">
-          <path d={pencilLoop(p.title)} vector-effect="non-scaling-stroke" />
+          <path d={pencilLoop(project.title)} vector-effect="non-scaling-stroke" />
         </svg>
       </span>
     )}
   </div>
-  {p.archived && <p class="moss hand">pressed long ago, kept, not tended</p>}
+  {project.archived && <p class="moss hand">pressed long ago, kept, not tended</p>}
 </div>
 
 <style>
