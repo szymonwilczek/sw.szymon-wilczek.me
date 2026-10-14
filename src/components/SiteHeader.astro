@@ -95,7 +95,12 @@ function brush(seed: string) {
       <a href="/vault/">vault</a>
     </p>
   </div>
-  <svg class="menu-ink" aria-hidden="true"></svg>
+  <svg class="menu-blind" aria-hidden="true">
+    <path class="menu-hem"></path>
+    <path class="menu-hem"></path>
+    <path class="menu-stroke"></path>
+    <path class="menu-hairs"></path>
+  </svg>
 </dialog>
 
 <header class="site-header">
@@ -353,13 +358,30 @@ function brush(seed: string) {
     background: var(--bg-main);
   }
 
-  .menu-ink {
+  .menu-blind {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
-    color: var(--fg-main);
     pointer-events: none;
+  }
+
+  .menu-hem {
+    fill: var(--fg-main);
+    fill-opacity: 0.045;
+  }
+
+  .menu-stroke {
+    fill: var(--fg-main);
+    fill-opacity: 0.86;
+  }
+
+  .menu-hairs {
+    fill: none;
+    stroke: var(--fg-main);
+    stroke-width: 1.1;
+    stroke-opacity: 0.7;
+    stroke-linecap: round;
   }
 
   :global(html:has(.menu-sheet[open])) {
@@ -468,7 +490,7 @@ function brush(seed: string) {
 </style>
 
 <script>
-  import "../scripts/menu-ink";
+  import "../scripts/menu-blind";
 </script>
 
 <script is:inline>
