@@ -5,26 +5,27 @@ const FADE_IN = 4; // seconds, as the stick catches
 const FADE_OUT = 1.5; // seconds, when it is put out or burns down
 const SILENT = 0.0001; // what a fade starts from and ends at
 
-const BREATH_LEVEL = 0.05;
-const BREATH_LOWPASS = 700; // Hz
-const BREATH_RATE = 0.07; // Hz, about one slow breath in fourteen seconds
-const BREATH_DEPTH = 0.4; // share of the level the breath swells by
-const BROWN_LEAK = 0.02; // how fast the brown noise drifts back to the middle
-const BROWN_GAIN = 3.5; // brings the brown noise back up to about full scale
+// the ember's whisper
+const WHISPER_LEVEL = 0.006;
+const WHISPER_FROM = 2500; // Hz, everything under this is cut
+const WHISPER_TO = 7000; // Hz, and everything over
+const WHISPER_RATE = 0.07; // Hz, about one slow swell in fourteen seconds
+const WHISPER_DEPTH = 0.5; // share of the level it swells by
 
-const CRACKLE_GAP = { min: 0.7, max: 3.5 }; // seconds
-const CRACKLE_PITCH = { min: 2800, max: 5600 }; // Hz
-const CRACKLE_RESONANCE = 6;
-const CRACKLE_LEVEL = { min: 0.03, max: 0.09 }; // before the narrow bandpass takes most of it away
-const CRACKLE_LENGTH = 0.014; // seconds
-const DOUBLE_CRACKLE = 0.25; // chance a crackle comes with a second one right after it
-const DOUBLE_GAP = 0.03; // seconds between the two
+// crackles
+const CRACKLE_GAP = { min: 0.4, max: 3 }; // seconds
+const CRACKLE_PITCH = { min: 1500, max: 4500 }; // Hz
+const CRACKLE_RESONANCE = 4;
+const CRACKLE_LEVEL = { min: 0.012, max: 0.04 }; // before the bandpass takes most of it away
+const CRACKLE_LENGTH = { min: 0.006, max: 0.018 }; // seconds
+const BURST = 0.35; // chance a crackle comes with a few more right after it
+const BURST_MORE = { min: 1, max: 3 }; // how many more
+const BURST_GAP = { min: 0.02, max: 0.09 }; // seconds between them
 
 const between = ({ min, max }: { min: number; max: number }) => min + Math.random() * (max - min);
 
 export function smoulderOf() {
   let audio: AudioContext | null = null;
-  let brown: AudioBuffer | null = null;
   let white: AudioBuffer | null = null;
   let layer: { out: GainNode; stop: () => void } | null = null;
   let crackles = 0;
@@ -37,18 +38,6 @@ export function smoulderOf() {
     }
   };
 
-  function brownNoise(context: AudioContext) {
-    if (brown) return brown;
-    brown = context.createBuffer(1, context.sampleRate * NOISE_SECONDS, context.sampleRate);
-    const samples = brown.getChannelData(0);
-    let drift = 0;
-    for (let i = 0; i < samples.length; i++) {
-      drift = (drift + BROWN_LEAK * (Math.random() * 2 - 1)) / (1 + BROWN_LEAK);
-      samples[i] = drift * BROWN_GAIN;
-    }
-    return brown;
-  }
-
   function whiteNoise(context: AudioContext) {
     if (white) return white;
     white = context.createBuffer(1, context.sampleRate * NOISE_SECONDS, context.sampleRate);
@@ -60,49 +49,57 @@ export function smoulderOf() {
   function crackle(context: AudioContext, out: AudioNode, time: number) {
     const source = context.createBufferSource(),
       bandpass = context.createBiquadFilter(),
-      gain = context.createGain();
+      gain = context.createGain(),
+      length = between(CRACKLE_LENGTH);
     source.buffer = whiteNoise(context);
     bandpass.type = "bandpass";
     bandpass.frequency.value = between(CRACKLE_PITCH);
     bandpass.Q.value = CRACKLE_RESONANCE;
     gain.gain.setValueAtTime(between(CRACKLE_LEVEL), time);
-    gain.gain.exponentialRampToValueAtTime(SILENT, time + CRACKLE_LENGTH);
+    gain.gain.exponentialRampToValueAtTime(SILENT, time + length);
     source.connect(bandpass).connect(gain).connect(out);
     source.start(time, Math.random() * NOISE_SECONDS);
-    source.stop(time + CRACKLE_LENGTH);
+    source.stop(time + length);
   }
 
   function crackleLater(context: AudioContext, out: AudioNode) {
     crackles = window.setTimeout(
       () => {
-        const time = context.currentTime;
+        let time = context.currentTime;
         crackle(context, out, time);
-        if (Math.random() < DOUBLE_CRACKLE) crackle(context, out, time + DOUBLE_GAP);
+        if (Math.random() < BURST)
+          for (let more = Math.round(between(BURST_MORE)); more > 0; more--) {
+            time += between(BURST_GAP);
+            crackle(context, out, time);
+          }
         crackleLater(context, out);
       },
       between(CRACKLE_GAP) * 1000,
     );
   }
 
-  function breathe(context: AudioContext) {
+  function whisper(context: AudioContext) {
     const out = context.createGain(),
       source = context.createBufferSource(),
+      highpass = context.createBiquadFilter(),
       lowpass = context.createBiquadFilter(),
-      breath = context.createGain(),
+      air = context.createGain(),
       swell = context.createOscillator(),
       swellDepth = context.createGain();
     out.gain.setValueAtTime(SILENT, context.currentTime);
     out.gain.exponentialRampToValueAtTime(1, context.currentTime + FADE_IN);
     out.connect(context.destination);
-    source.buffer = brownNoise(context);
+    source.buffer = whiteNoise(context);
     source.loop = true;
+    highpass.type = "highpass";
+    highpass.frequency.value = WHISPER_FROM;
     lowpass.type = "lowpass";
-    lowpass.frequency.value = BREATH_LOWPASS;
-    breath.gain.value = BREATH_LEVEL;
-    swell.frequency.value = BREATH_RATE;
-    swellDepth.gain.value = BREATH_LEVEL * BREATH_DEPTH;
-    swell.connect(swellDepth).connect(breath.gain);
-    source.connect(lowpass).connect(breath).connect(out);
+    lowpass.frequency.value = WHISPER_TO;
+    air.gain.value = WHISPER_LEVEL;
+    swell.frequency.value = WHISPER_RATE;
+    swellDepth.gain.value = WHISPER_LEVEL * WHISPER_DEPTH;
+    swell.connect(swellDepth).connect(air.gain);
+    source.connect(highpass).connect(lowpass).connect(air).connect(out);
     source.start();
     swell.start();
     crackleLater(context, out);
@@ -127,7 +124,7 @@ export function smoulderOf() {
     } catch {
       return; // no sound to be had
     }
-    layer = breathe(audio);
+    layer = whisper(audio);
     if (audio.state === "suspended")
       addEventListener("pointerdown", () => audio?.resume(), { once: true });
   }
