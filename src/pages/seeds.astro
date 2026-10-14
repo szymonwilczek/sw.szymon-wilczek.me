@@ -458,12 +458,13 @@ const flowered = packets.filter((seedPacket) => seedPacket.stage === "bloom").le
   }
 
   .slip {
+    --slip-tuck: 2.5rem;
     position: absolute;
     top: 0;
     right: 12%;
     left: 12%;
     min-height: 7.5rem;
-    padding: 0.75rem 0.75rem 1rem;
+    padding: 0.75rem 0.75rem calc(var(--slip-tuck) + 0.75rem);
     background: var(--paper);
     border: 1px solid var(--border);
     box-shadow: 0 2px 6px rgb(0 0 0 / 0.12);
@@ -479,7 +480,7 @@ const flowered = packets.filter((seedPacket) => seedPacket.stage === "bloom").le
   }
 
   .open .slip {
-    transform: translateY(calc(-100% + 2.5rem)) rotate(var(--slip-rot));
+    transform: translateY(calc(-100% + var(--slip-tuck))) rotate(var(--slip-rot));
     visibility: visible;
     transition:
       transform 0.45s cubic-bezier(0.2, 0.8, 0.3, 1),
