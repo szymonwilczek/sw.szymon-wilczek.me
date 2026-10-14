@@ -21,9 +21,15 @@ export function radioOf(hour: () => number) {
   let disc = Math.min(DISCS.length - 1, Math.max(0, Number(localStorage.getItem(DISC)) || 0));
   let volumeLevel = Math.min(1, Math.max(0, Number(localStorage.getItem(VOLUME) ?? 0.8) || 0));
   const listeners: ((isOn: boolean) => void)[] = [];
+
+  const wake = () => playing && audio?.state !== "running" && audio?.resume();
+  addEventListener("touchend", wake, { passive: true });
+  addEventListener("click", wake);
   const louder: ((amount: number) => void)[] = [];
 
   function build() {
+    const session = (navigator as { audioSession?: { type: string } }).audioSession;
+    if (session) session.type = "playback";
     const context = (audio = new AudioContext());
     output = context.createGain();
     output.gain.value = 0;

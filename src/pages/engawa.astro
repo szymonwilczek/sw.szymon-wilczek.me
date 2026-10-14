@@ -151,9 +151,10 @@ const SEASON = placeBox(1030, 140, 40, 30);
   sound.after(sliderOf(radio));
   sound.addEventListener("click", radio.toggle);
   radio.onChange((playing) => sound.setAttribute("aria-pressed", String(playing)));
+
   if (radio.wanted())
     addEventListener(
-      "pointerdown",
+      "pointerup",
       (event) => !radio.on && !sound.contains(event.target as Node) && radio.start(),
       {
         once: true,
