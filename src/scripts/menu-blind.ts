@@ -8,6 +8,7 @@ const paper = sheet?.querySelector<HTMLElement>(".menu-paper");
 const hemPaths = [...(sheet?.querySelectorAll<SVGPathElement>(".menu-hem") ?? [])];
 const strokePath = sheet?.querySelector<SVGPathElement>(".menu-stroke");
 const hairsPath = sheet?.querySelector<SVGPathElement>(".menu-hairs");
+const bar = paper?.querySelector<HTMLElement>(".menu-top");
 const rows = [
   ...(paper?.querySelectorAll<HTMLElement>(".menu-list li, .menu-theme, .menu-extra") ?? []),
 ];
@@ -25,6 +26,7 @@ const CLOSE_ROLL = 0.85; // share of the close spent pulling the paper up
 // the time of each follows from how high it goes
 const BOUNCES = [0.02, 0.005];
 const FALL_TIME = 1;
+const PUSH = 0.6; // share of its speed it starts with
 const FALL_AND_BOUNCES =
   FALL_TIME + BOUNCES.reduce((sum, height) => sum + 2 * Math.sqrt(height), 0);
 
@@ -129,7 +131,10 @@ const toward = (c: Curve, point: Point, t: number): Curve => c.map((p) => betwee
 // how far down the foot of the paper is, at time t of the opening
 function drop(t: number) {
   let time = t * FALL_AND_BOUNCES;
-  if (time < FALL_TIME) return (time / FALL_TIME) ** 2;
+  if (time < FALL_TIME) {
+    const u = time / FALL_TIME;
+    return PUSH * u + (1 - PUSH) * u * u;
+  }
   time -= FALL_TIME;
   for (const height of BOUNCES) {
     const half = Math.sqrt(height);
@@ -169,7 +174,7 @@ const curve = (c: Curve) =>
 function drawIcon(opening: boolean, t: number) {
   let lines: (Curve | null)[];
   if (opening) {
-    const gone = calm(share(t, OPEN_GONE));
+    const gone = easeOut(share(t, OPEN_GONE)); // answers the tap at once
     lines = [
       pivot(HAMBURGER[0], CROSS[0], calm(share(t, OPEN_TOP))),
       gone >= 1 ? null : toward(HAMBURGER[1], MIDDLE, gone),
@@ -188,6 +193,7 @@ function drawIcon(opening: boolean, t: number) {
 
 let width = 0;
 let height = 0;
+let barBottom = 0;
 let rowBottoms: number[] = [];
 let passedAt: (number | null)[] = [];
 
@@ -291,6 +297,7 @@ function measure() {
   const box = paper.getBoundingClientRect();
   width = box.width;
   height = box.height;
+  barBottom = bar ? bar.getBoundingClientRect().bottom - box.top : 0;
   rowBottoms = rows.map((row) => row.getBoundingClientRect().bottom - box.top);
 }
 
@@ -307,7 +314,9 @@ function run(open: boolean, from: number) {
   passedAt = rows.map(() => null);
   const step = (now: number) => {
     const t = clamp((now - start) / length);
-    depthNow = height * (open ? drop(t) : 1 - easeIn(share(t, [0, CLOSE_ROLL])));
+    depthNow = open
+      ? lerp(barBottom, height, drop(t))
+      : height * (1 - easeIn(share(t, [0, CLOSE_ROLL])));
     drawIcon(open, t);
     drawSheet(depthNow);
     if (open) settleRows(depthNow, now);
