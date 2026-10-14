@@ -1,3 +1,5 @@
+import { sha256 } from "./sha256";
+
 export const KEY_HASH = "58524e6fc3d45e5ab2d242adc1551bfc67792181fec380bf76cbbc8433358ab0";
 
 // the same answer however it is typed
@@ -11,7 +13,11 @@ export const normalKey = (phrase: string): string =>
 
 export async function keyHash(phrase: string): Promise<string> {
   const bytes = new TextEncoder().encode("roji/" + normalKey(phrase));
-  const digest = await crypto.subtle.digest("SHA-256", bytes);
+
+  // crypto.subtle only exists over https
+  const digest = globalThis.crypto?.subtle
+    ? await crypto.subtle.digest("SHA-256", bytes)
+    : sha256(bytes);
   return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
 }
 
