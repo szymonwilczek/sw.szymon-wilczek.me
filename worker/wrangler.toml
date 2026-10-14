@@ -2,6 +2,7 @@
 name = "roji-inbox"
 main = "src/index.ts"
 compatibility_date = "2026-10-01"
+routes = [{ pattern = "roji.szymon-wilczek.me", custom_domain = true }]
 
 [vars]
 ORIGINS = "https://szymon-wilczek.me,https://sw.szymon-wilczek.me,http://localhost:4321"
