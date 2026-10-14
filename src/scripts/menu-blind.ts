@@ -16,24 +16,26 @@ const openButton = document.querySelector<HTMLButtonElement>("#menu-open");
 const closeButton = document.querySelector<HTMLButtonElement>("#menu-close");
 const iconLines = [...(closeButton?.querySelectorAll<SVGPathElement>("path") ?? [])];
 
-// how long each way takes
-// the rest of the timing follows from these
-const OPEN_MS = 850;
-const CLOSE_MS = 500;
-const CLOSE_ROLL = 0.85; // share of the close spent pulling the paper up
+// how long each way takes, all the way
+// the rest of the timing follows from these, and a turn halfway takes
+// the share of them it has left
+const OPEN_MS = 650;
+const CLOSE_MS = 380;
+const ICON_MS = 320; // the icon from hamburger to X, or back
+const LEAST_MS = 60; // even the shortest turn is seen
 
 // the drop
 // the time of each follows from how high it goes
 const BOUNCES = [0.02, 0.005];
 const FALL_TIME = 1;
 const PUSH = 0.6; // share of its speed it starts with
+const PULL = 0.7; // and pulled up with a tug, the same way
 const FALL_AND_BOUNCES =
   FALL_TIME + BOUNCES.reduce((sum, height) => sum + 2 * Math.sqrt(height), 0);
 
 // the rows
-const ROW_LAG = 10; // px a row starts above its place
-const ROW_SETTLE_MS = 300;
-const CLOSE_LIFT = 8; // px the rows rise as the paper is pulled up
+const ROW_LAG = 10; // px a row hangs above its place
+const ROW_SETTLE = 40; // px of the foot's way it takes to settle
 
 // the brush stroke along the foot
 const BRUSH = 9; // px, as wide as it gets
@@ -107,12 +109,9 @@ const CROSS: Curve[] = [
 ];
 
 const MIDDLE: Point = [14, 10]; // where the middle line draws in to
-const OPEN_GONE: Point = [0, 0.4];
-const OPEN_TOP: Point = [0.1, 0.75];
-const OPEN_BOTTOM: Point = [0.16, 0.8];
-const CLOSE_TOP: Point = [0, 0.7];
-const CLOSE_BOTTOM: Point = [0.05, 0.75];
-const CLOSE_BACK: Point = [0.35, 1];
+const ICON_GONE: Point = [0, 0.45];
+const ICON_TOP: Point = [0, 0.85];
+const ICON_BOTTOM: Point = [0.1, 1];
 
 const clamp = (value: number, least = 0, most = 1) => Math.min(most, Math.max(least, value));
 const share = (t: number, [from, to]: Point) => clamp((t - from) / (to - from));
@@ -121,20 +120,15 @@ const between = (p: Point, q: Point, t: number): Point => [
   lerp(p[0], q[0], t),
   lerp(p[1], q[1], t),
 ];
-const easeIn = (t: number) => t * t * t;
 const easeOut = (t: number) => 1 - Math.pow(1 - t, 3);
-const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
-const calm = (t: number) => easeInOut(clamp(t));
+const pushed = (t: number, push: number) => push * t + (1 - push) * t * t;
 const fixed = (value: number) => Math.round(value * 10) / 10;
 const toward = (c: Curve, point: Point, t: number): Curve => c.map((p) => between(p, point, t));
 
 // how far down the foot of the paper is, at time t of the opening
 function drop(t: number) {
   let time = t * FALL_AND_BOUNCES;
-  if (time < FALL_TIME) {
-    const u = time / FALL_TIME;
-    return PUSH * u + (1 - PUSH) * u * u;
-  }
+  if (time < FALL_TIME) return pushed(time / FALL_TIME, PUSH);
   time -= FALL_TIME;
   for (const height of BOUNCES) {
     const half = Math.sqrt(height);
@@ -171,23 +165,14 @@ const curve = (c: Curve) =>
     .map(([x, y]) => `${fixed(x)} ${fixed(y)}`)
     .join(", ")}`;
 
-function drawIcon(opening: boolean, t: number) {
-  let lines: (Curve | null)[];
-  if (opening) {
-    const gone = easeOut(share(t, OPEN_GONE)); // answers the tap at once
-    lines = [
-      pivot(HAMBURGER[0], CROSS[0], calm(share(t, OPEN_TOP))),
-      gone >= 1 ? null : toward(HAMBURGER[1], MIDDLE, gone),
-      pivot(HAMBURGER[2], CROSS[1], calm(share(t, OPEN_BOTTOM))),
-    ];
-  } else {
-    const back = calm(share(t, CLOSE_BACK));
-    lines = [
-      pivot(CROSS[0], HAMBURGER[0], calm(share(t, CLOSE_TOP))),
-      back <= 0 ? null : toward(HAMBURGER[1], MIDDLE, 1 - back),
-      pivot(CROSS[1], HAMBURGER[2], calm(share(t, CLOSE_BOTTOM))),
-    ];
-  }
+// the icon at share x of its way from hamburger to X
+function drawIcon(x: number) {
+  const gone = easeOut(share(x, ICON_GONE));
+  const lines = [
+    pivot(HAMBURGER[0], CROSS[0], share(x, ICON_TOP)),
+    gone >= 1 ? null : toward(HAMBURGER[1], MIDDLE, gone),
+    pivot(HAMBURGER[2], CROSS[1], share(x, ICON_BOTTOM)),
+  ];
   lines.forEach((line, i) => iconLines[i]?.setAttribute("d", line ? curve(line) : ""));
 }
 
@@ -195,7 +180,6 @@ let width = 0;
 let height = 0;
 let barBottom = 0;
 let rowBottoms: number[] = [];
-let passedAt: (number | null)[] = [];
 
 const path = (points: Point[]) =>
   "M" + points.map(([x, y]) => `${fixed(x)} ${fixed(y)}`).join(" L");
@@ -279,17 +263,11 @@ function drawSheet(depth: number) {
   hairsPath?.setAttribute("d", shown ? hairs(foot) : "");
 }
 
-function settleRows(depth: number, now: number) {
+function placeRows(depth: number) {
   rows.forEach((row, i) => {
-    if (passedAt[i] === null && depth >= rowBottoms[i]) passedAt[i] = now;
-    const since = passedAt[i];
-    const u = since === null ? 0 : clamp((now - since) / ROW_SETTLE_MS);
-    row.style.translate = u >= 1 ? "" : `0 ${fixed(-ROW_LAG * (1 - easeOut(u)))}px`;
+    const lag = ROW_LAG * (1 - clamp((depth - rowBottoms[i]) / ROW_SETTLE));
+    row.style.translate = lag > 0 ? `0 ${fixed(-lag)}px` : "";
   });
-}
-
-function liftRows(by: number) {
-  for (const row of rows) row.style.translate = by ? `0 ${fixed(-by)}px` : "";
 }
 
 function measure() {
@@ -302,30 +280,36 @@ function measure() {
 }
 
 const still = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
-let frame = 0;
-let opening = false;
-let depthNow = 0;
 
-function run(open: boolean, from: number) {
-  cancelAnimationFrame(frame);
-  opening = open;
-  const length = open ? OPEN_MS : CLOSE_MS;
-  const start = performance.now() - from * length;
-  passedAt = rows.map(() => null);
-  const step = (now: number) => {
-    const t = clamp((now - start) / length);
-    depthNow = open
-      ? lerp(barBottom, height, drop(t))
-      : height * (1 - easeIn(share(t, [0, CLOSE_ROLL])));
-    drawIcon(open, t);
-    drawSheet(depthNow);
-    if (open) settleRows(depthNow, now);
-    else liftRows(CLOSE_LIFT * easeIn(share(t, [0, CLOSE_ROLL / 2])));
-    const settling = rows.some((row) => row.style.translate);
-    if (t < 1 || (open && settling)) frame = requestAnimationFrame(step);
-    else if (!open) sheet?.close();
-  };
-  step(performance.now());
+// where everything is now, and where it is going
+let wanted = false;
+let depthNow = 0; // px of paper let down
+let iconNow = 0; // share of the way from hamburger to X
+let iconAt = 0; // when the icon was last drawn
+let frame = 0;
+let wayFrom = 0;
+let wayStart = 0;
+let wayLength = 0;
+
+function draw() {
+  drawSheet(depthNow);
+  placeRows(depthNow);
+  drawIcon(iconNow);
+}
+
+function tick(now: number) {
+  const t = wayLength ? clamp((now - wayStart) / wayLength) : 1;
+  depthNow = wanted ? lerp(wayFrom, height, drop(t)) : lerp(wayFrom, barBottom, pushed(t, PULL));
+  const step = (now - iconAt) / ICON_MS;
+  iconAt = now;
+  iconNow = wanted ? Math.min(1, iconNow + step) : Math.max(0, iconNow - step);
+  draw();
+  const iconDone = iconNow === (wanted ? 1 : 0);
+  if (t < 1 || !iconDone) frame = requestAnimationFrame(tick);
+  else {
+    frame = 0;
+    if (!wanted) sheet?.close();
+  }
 }
 
 // the X sits exactly over the hamburger it grew from, wherever the bar is
@@ -337,53 +321,81 @@ function alignIcon() {
   closeButton.style.translate = `${from.left - to.left}px ${from.top - to.top}px`;
 }
 
-openButton?.addEventListener("click", () => {
+// turn round: the paper sets off from where it is,
+// for the share of the whole way it has left
+function want(open: boolean) {
   if (!sheet) return;
-  sheet.showModal();
-  sheet.focus({ preventScroll: true });
-  openButton.setAttribute("aria-expanded", "true");
-  alignIcon();
-  measure();
-  if (still()) {
-    drawIcon(true, 1);
-    return drawSheet(height);
+  if (open && !sheet.open) {
+    sheet.showModal();
+    sheet.focus({ preventScroll: true });
+    alignIcon();
+    measure();
+    depthNow = barBottom;
+    iconNow = 0;
+    draw();
   }
-  run(true, 0);
-});
-
-// close in the middle of opening pulls the paper up from where it hangs
-function gather() {
-  if (!sheet?.open || sheet.classList.contains("closing")) return;
-  if (still()) return sheet.close();
-  sheet.classList.add("closing");
-  const hangs = height ? depthNow / height : 1;
-  run(false, opening ? CLOSE_ROLL * Math.cbrt(1 - hangs) : 0);
+  if (!sheet.open) return;
+  wanted = open;
+  openButton?.setAttribute("aria-expanded", String(open));
+  if (still()) {
+    if (!open) return sheet.close();
+    depthNow = height;
+    iconNow = 1;
+    return draw();
+  }
+  const run = Math.max(1, height - barBottom);
+  const left = open ? (height - depthNow) / run : (depthNow - barBottom) / run;
+  wayFrom = depthNow;
+  wayStart = performance.now();
+  wayLength = Math.max(LEAST_MS, (open ? OPEN_MS : CLOSE_MS) * clamp(left));
+  iconAt = wayStart;
+  if (!frame) frame = requestAnimationFrame(tick);
 }
 
-closeButton?.addEventListener("click", gather);
+const toggle = () => want(!(sheet?.open && wanted));
+
+// the finger is answered as it touches
+let touched = false;
+for (const button of [openButton, closeButton]) {
+  button?.addEventListener("pointerdown", (event) => {
+    if (!event.isPrimary || event.button !== 0) return;
+    touched = true;
+    toggle();
+  });
+  button?.addEventListener("click", () => {
+    if (touched) touched = false;
+    else toggle();
+  });
+}
 sheet?.addEventListener("cancel", (event) => {
   event.preventDefault();
-  gather();
+  want(false);
 });
 
 // whoever closes the sheet, leaves it ready for next time
 sheet?.addEventListener("close", () => {
+  if (sheet.open) return;
   cancelAnimationFrame(frame);
-  sheet.classList.remove("closing");
+  frame = 0;
+  wanted = false;
+  depthNow = 0;
+  iconNow = 0;
   if (paper) paper.style.clipPath = "";
   for (const hemPath of hemPaths) hemPath.setAttribute("d", "");
   strokePath?.setAttribute("d", "");
   hairsPath?.setAttribute("d", "");
-  liftRows(0);
-  drawIcon(true, 1);
+  for (const row of rows) row.style.translate = "";
+  drawIcon(0);
   openButton?.setAttribute("aria-expanded", "false");
 });
 
 // turned phone
 addEventListener("resize", () => {
-  if (!sheet?.open || sheet.classList.contains("closing")) return;
+  if (!sheet?.open || !wanted || frame) return;
+  for (const row of rows) row.style.translate = "";
   measure();
-  drawSheet(height);
+  depthNow = height;
+  draw();
 });
 
 export {};
