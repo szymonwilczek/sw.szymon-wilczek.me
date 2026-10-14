@@ -267,6 +267,35 @@ function brush(seed: string) {
     gap: 1rem;
   }
 
+  .mobile-header {
+    --bar-pad: 0.5rem;
+    --bar-slide: 0.32s;
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    margin: calc(-1 * var(--bar-pad)) calc(-1 * var(--gutter));
+    padding: var(--bar-pad) var(--gutter);
+    transition:
+      translate var(--bar-slide) cubic-bezier(0.3, 0.6, 0.35, 1),
+      background-color var(--bar-slide) ease,
+      box-shadow var(--bar-slide) ease;
+  }
+
+  .mobile-header.is-floating {
+    background-color: var(--bg-main);
+    box-shadow: 0 1px 0 var(--border);
+  }
+
+  .mobile-header.is-tucked {
+    translate: 0 calc(-100% - var(--bar-pad));
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .mobile-header {
+      transition: none;
+    }
+  }
+
   .mobile-header .site-brand,
   .menu-top .site-brand {
     gap: 0.75rem;
@@ -517,6 +546,33 @@ function brush(seed: string) {
     sheet.addEventListener("close", function () {
       openBtn.setAttribute("aria-expanded", "false");
     });
+
+    // phone bar
+    var bar = document.querySelector(".mobile-header");
+    var SCROLL_NOISE = 6;
+    var lastY = Math.max(0, scrollY);
+    var stuckFrom = bar.offsetTop;
+    var queued = false;
+
+    function follow() {
+      queued = false;
+      var y = Math.max(0, scrollY);
+      var floating = y > stuckFrom;
+      if (Math.abs(y - lastY) < SCROLL_NOISE && floating) return;
+      bar.classList.toggle("is-floating", floating);
+      bar.classList.toggle("is-tucked", floating && y > lastY && !sheet.open);
+      lastY = y;
+    }
+
+    addEventListener(
+      "scroll",
+      function () {
+        if (queued) return;
+        queued = true;
+        requestAnimationFrame(follow);
+      },
+      { passive: true },
+    );
 
     document.addEventListener("au-theme-change", label);
     document.addEventListener("DOMContentLoaded", label);
