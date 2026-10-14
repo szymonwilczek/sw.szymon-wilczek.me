@@ -186,7 +186,7 @@ if (rack && nav) {
       // row of houses
       () => {
         let path = "";
-        for (let x = between(4, 10); x < 86; ) {
+        for (let x = between(4, 10); x < 86;) {
           const width = between(18, 28);
           const top = between(130, 165);
           path += `M${round1(x)} 210 V${round1(top)} `;
