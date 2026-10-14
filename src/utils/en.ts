@@ -98,6 +98,16 @@ const SEAL_EDGE: Point = [18, 4];
 
 const leaving = ([x, y]: Point): Point => [x + SEAL_EDGE[0], y + SEAL_EDGE[1]];
 
+// on the narrow sheet the threads hang behind the cards
+const TAIL_PAST_HOLE = HOLE_RADIUS;
+
+const tail = (box: Box, pin: Point): Box => ({
+  left: box.left - CLEARANCE,
+  right: box.right + CLEARANCE,
+  top: round1(box.top - CLEARANCE),
+  bottom: round1(pin[1] + TAIL_PAST_HOLE),
+});
+
 // knot tied round the hole
 const KNOT_LOOP = HOLE_RADIUS + 1.6;
 const KNOT_ENDS_FROM = [0.5, 0.8]; // shares of the loop: its lower right
@@ -189,6 +199,7 @@ export function threads(links: Link[], now = new Date()) {
         l: round1((card.narrowX / narrow.w) * 100),
         t: round1((card.narrowY / narrow.h) * 100),
         box: card.narrowBox,
+        tail: tail(card.narrowBox, narrowPin),
         ...hang(narrow.me, narrowPin, others("narrowBox")),
       },
     };

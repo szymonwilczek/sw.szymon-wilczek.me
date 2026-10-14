@@ -58,12 +58,47 @@ const percent = (part: number, whole: number) => `${((part / whole) * 100).toFix
           return (
             <>
               <path class="thread" data-i={i} data-taut={spot.taut} d={spot.slack} />
-              {link.mutual && <path class="knot" data-i={i} d={spot.knot} />}
+              {link.mutual && key === "wide" && <path class="knot" data-i={i} d={spot.knot} />}
             </>
           );
         })}
       </svg>
     ))}
+
+    <svg class="threads over" viewBox={`0 0 ${narrow.w} ${narrow.h}`} aria-hidden="true">
+      <defs>
+        {list.map((link, i) => (
+          <clipPath id={`tail-${i}`}>
+            <rect
+              x={link.narrow.tail.left}
+              y={link.narrow.tail.top}
+              width={link.narrow.tail.right - link.narrow.tail.left}
+              height={link.narrow.tail.bottom - link.narrow.tail.top}
+            />
+          </clipPath>
+        ))}
+      </defs>
+      {kinship.map((tie) => (
+        <path
+          class="thread kin"
+          data-kin={tie.ends}
+          clip-path={`url(#tail-${tie.ends.split(" ")[1]})`}
+          d={tie.narrow}
+        />
+      ))}
+      {list.map((link, i) => (
+        <>
+          <path
+            class="thread"
+            data-i={i}
+            data-taut={link.narrow.taut}
+            clip-path={`url(#tail-${i})`}
+            d={link.narrow.slack}
+          />
+          {link.mutual && <path class="knot" data-i={i} d={link.narrow.knot} />}
+        </>
+      ))}
+    </svg>
 
     <svg class="me" viewBox="0 0 46 46" role="img" aria-label="my seal">
       <path d="M4 5 Q23 2 42 4 Q45 23 43 42 Q23 45 3 43 Q1 23 4 5 Z"></path>
@@ -220,7 +255,8 @@ const percent = (part: number, whole: number) => `${((part / whole) * 100).toFix
     pointer-events: none;
   }
 
-  .threads.narrow {
+  .threads.narrow,
+  .threads.over {
     display: none;
   }
 
@@ -241,6 +277,14 @@ const percent = (part: number, whole: number) => `${((part / whole) * 100).toFix
 
     .threads.narrow {
       z-index: auto;
+      display: block;
+    }
+
+    .threads.over {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1;
       display: block;
     }
 
