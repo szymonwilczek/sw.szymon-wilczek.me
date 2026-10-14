@@ -56,13 +56,6 @@ function brush(seed: string) {
         <Seal glyph="狼" size={36} />
         <span class="brand-name">Szymon Wilczek</span>
       </a>
-      <button id="menu-close" type="button" class="icon-button" aria-label="Close menu">
-        <svg width="28" height="20" viewBox="0 0 28 20" aria-hidden="true">
-          <path d="M6 2 C 11 7, 16 12, 22 18.5"></path>
-          <path d=""></path>
-          <path d="M5.5 18 C 12 12, 17 7, 22 1.5"></path>
-        </svg>
-      </button>
     </div>
 
     <nav aria-label="Main">
@@ -101,6 +94,13 @@ function brush(seed: string) {
     <path class="menu-stroke"></path>
     <path class="menu-hairs"></path>
   </svg>
+  <button id="menu-close" type="button" class="icon-button" aria-label="Close menu">
+    <svg width="28" height="20" viewBox="0 0 28 20" aria-hidden="true">
+      <path d="M6 2 C 11 7, 16 12, 22 18.5"></path>
+      <path d=""></path>
+      <path d="M5.5 18 C 12 12, 17 7, 22 1.5"></path>
+    </svg>
+  </button>
 </dialog>
 
 <header class="site-header">
@@ -275,6 +275,7 @@ function brush(seed: string) {
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
+    min-height: 44px;
   }
 
   .mobile-header {
@@ -326,6 +327,8 @@ function brush(seed: string) {
     border: 0;
     background: transparent;
     cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
   }
 
   .icon-button path {
@@ -357,6 +360,16 @@ function brush(seed: string) {
     padding-bottom: calc(1.25rem + 2rem);
     overflow-y: auto;
     background: var(--bg-main);
+  }
+
+  #menu-close {
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+
+  :global(html:has(.menu-sheet[open])) #menu-open {
+    visibility: hidden;
   }
 
   .menu-blind {
