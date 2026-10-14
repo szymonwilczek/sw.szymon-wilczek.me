@@ -37,8 +37,13 @@ const smoothstep = (edge0, edge1, x) => {
   const t = Math.max(0, Math.min(1, (x - edge0) / (edge1 - edge0)));
   return t * t * (3 - 2 * t);
 };
-const clockLabel = (hour) =>
-  `${Math.floor(hour)}:${String(Math.round((hour % 1) * 60)).padStart(2, "0")}`;
+const MINUTES_PER_HOUR = 60;
+const HOURS_PER_DAY = 24;
+const clockLabel = (hour) => {
+  const minutes = Math.round(hour * MINUTES_PER_HOUR);
+  const shown = Math.floor(minutes / MINUTES_PER_HOUR) % HOURS_PER_DAY;
+  return `${shown}:${String(minutes % MINUTES_PER_HOUR).padStart(2, "0")}`;
+};
 const STARLIGHT = "#f3eedf";
 const SEASONS = {
   haru: { jp: "春", en: "spring", rise: 5.9, set: 19.3 },
