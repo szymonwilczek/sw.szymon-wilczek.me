@@ -294,6 +294,7 @@ let depthNow = BRUSH_HIDDEN; // px the foot of the paper is down
 let iconNow = 0; // share of the way from hamburger to X
 let iconAt = 0; // when the icon was last drawn
 let frame = 0;
+let closing = 0; // the frame the sheet closes on, once the paper is gone
 let wayFrom = BRUSH_HIDDEN;
 let wayStart = 0;
 let wayLength = 0;
@@ -322,7 +323,7 @@ function tick(now: number) {
   if (t < 1 || iconNow !== (wanted ? 1 : 0)) frame = requestAnimationFrame(tick);
   else {
     frame = 0;
-    if (!wanted) shut();
+    if (!wanted) closing = requestAnimationFrame(shut);
   }
 }
 
@@ -349,6 +350,7 @@ function want(open: boolean) {
     draw();
   }
   if (!sheet.open) return;
+  cancelAnimationFrame(closing);
   wanted = open;
   openButton?.setAttribute("aria-expanded", String(open));
   if (still()) {
