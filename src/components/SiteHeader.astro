@@ -49,7 +49,7 @@ function brush(seed: string) {
   </button>
 </header>
 
-<dialog id="menu-sheet" class="menu-sheet" aria-label="Menu">
+<dialog id="menu-sheet" class="menu-sheet" aria-label="Menu" tabindex="-1">
   <div class="menu-top">
     <a href="/" class="site-brand">
       <Seal glyph="狼" size={36} />
@@ -411,6 +411,10 @@ function brush(seed: string) {
     }
   }
 
+  .menu-sheet:focus {
+    outline: none;
+  }
+
   .menu-sheet::backdrop {
     background: transparent;
   }
@@ -522,6 +526,7 @@ function brush(seed: string) {
 
     openBtn.addEventListener("click", function () {
       sheet.showModal();
+      sheet.focus({ preventScroll: true });
       openBtn.setAttribute("aria-expanded", "true");
     });
 
