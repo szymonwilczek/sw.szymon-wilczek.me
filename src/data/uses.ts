@@ -108,6 +108,12 @@ export const TOOLS: Tool[] = [
     why: "Modded to the bone: Akko black switches, tape, sand and spacebar mods, more inside the frame. A NuPhy Air V3 is next in some time.",
   },
   {
+    name: "Talos 7",
+    graphic: "abacus",
+    group: "off the screen",
+    why: "My own macro pad. Binds and layers live on the pad itself, so they come along to any computer. On the desk every day.",
+  },
+  {
     name: "DT 770 Pro",
     graphic: "bell",
     group: "off the screen",
