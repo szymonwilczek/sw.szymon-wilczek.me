@@ -1,23 +1,17 @@
 const SOUND_KEY = "engawa:incense-sound";
 
-const NOISE_SECONDS = 4; // length of the looped noise, long enough not to be heard repeating
 const FADE_IN = 4; // seconds, as the stick catches
 const FADE_OUT = 1.5; // seconds, when it is put out or burns down
 const SILENT = 0.0001; // what a fade starts from and ends at
 
-// the ember's whisper
-const WHISPER_LEVEL = 0.006;
-const WHISPER_FROM = 2500; // Hz, everything under this is cut
-const WHISPER_TO = 7000; // Hz, and everything over
-const WHISPER_RATE = 0.07; // Hz, about one slow swell in fourteen seconds
-const WHISPER_DEPTH = 0.5; // share of the level it swells by
-
 // crackles
 const CRACKLE_GAP = { min: 0.4, max: 3 }; // seconds
-const CRACKLE_PITCH = { min: 1500, max: 4500 }; // Hz
-const CRACKLE_RESONANCE = 4;
-const CRACKLE_LEVEL = { min: 0.012, max: 0.04 }; // before the bandpass takes most of it away
-const CRACKLE_LENGTH = { min: 0.006, max: 0.018 }; // seconds
+const SNAP_SECONDS = { min: 0.004, max: 0.016 }; // how long one snap's splinters take
+const SPLINTERS = { min: 2, max: 6 }; // in one snap
+const SPLINTER_FADE = 0.0003; // seconds for a splinter to die away to a third
+const SPLINTER_LOUDNESS = { min: 0.3, max: 1 }; // of each splinter, against the loudest
+const CRACKLE_FROM = 1200; // Hz, the dull thump under a snap is cut
+const CRACKLE_LEVEL = { min: 0.02, max: 0.06 };
 const BURST = 0.35; // chance a crackle comes with a few more right after it
 const BURST_MORE = { min: 1, max: 3 }; // how many more
 const BURST_GAP = { min: 0.02, max: 0.09 }; // seconds between them
@@ -26,7 +20,6 @@ const between = ({ min, max }: { min: number; max: number }) => min + Math.rando
 
 export function smoulderOf() {
   let audio: AudioContext | null = null;
-  let white: AudioBuffer | null = null;
   let layer: { out: GainNode; stop: () => void } | null = null;
   let crackles = 0;
 
@@ -38,28 +31,32 @@ export function smoulderOf() {
     }
   };
 
-  function whiteNoise(context: AudioContext) {
-    if (white) return white;
-    white = context.createBuffer(1, context.sampleRate * NOISE_SECONDS, context.sampleRate);
-    const samples = white.getChannelData(0);
-    for (let i = 0; i < samples.length; i++) samples[i] = Math.random() * 2 - 1;
-    return white;
+  function snapOf(context: AudioContext) {
+    const rate = context.sampleRate,
+      length = Math.ceil(rate * between(SNAP_SECONDS)),
+      snap = context.createBuffer(1, length, rate),
+      samples = snap.getChannelData(0);
+    for (let splinter = Math.round(between(SPLINTERS)); splinter > 0; splinter--) {
+      const at = Math.floor(Math.random() * length),
+        loudness = between(SPLINTER_LOUDNESS);
+      for (let i = at; i < length; i++) {
+        const fade = Math.exp(-(i - at) / (rate * SPLINTER_FADE));
+        samples[i] += (Math.random() * 2 - 1) * loudness * fade;
+      }
+    }
+    return snap;
   }
 
   function crackle(context: AudioContext, out: AudioNode, time: number) {
     const source = context.createBufferSource(),
-      bandpass = context.createBiquadFilter(),
-      gain = context.createGain(),
-      length = between(CRACKLE_LENGTH);
-    source.buffer = whiteNoise(context);
-    bandpass.type = "bandpass";
-    bandpass.frequency.value = between(CRACKLE_PITCH);
-    bandpass.Q.value = CRACKLE_RESONANCE;
-    gain.gain.setValueAtTime(between(CRACKLE_LEVEL), time);
-    gain.gain.exponentialRampToValueAtTime(SILENT, time + length);
-    source.connect(bandpass).connect(gain).connect(out);
-    source.start(time, Math.random() * NOISE_SECONDS);
-    source.stop(time + length);
+      highpass = context.createBiquadFilter(),
+      gain = context.createGain();
+    source.buffer = snapOf(context);
+    highpass.type = "highpass";
+    highpass.frequency.value = CRACKLE_FROM;
+    gain.gain.value = between(CRACKLE_LEVEL);
+    source.connect(highpass).connect(gain).connect(out);
+    source.start(time);
   }
 
   function crackleLater(context: AudioContext, out: AudioNode) {
@@ -78,30 +75,11 @@ export function smoulderOf() {
     );
   }
 
-  function whisper(context: AudioContext) {
-    const out = context.createGain(),
-      source = context.createBufferSource(),
-      highpass = context.createBiquadFilter(),
-      lowpass = context.createBiquadFilter(),
-      air = context.createGain(),
-      swell = context.createOscillator(),
-      swellDepth = context.createGain();
+  function crackling(context: AudioContext) {
+    const out = context.createGain();
     out.gain.setValueAtTime(SILENT, context.currentTime);
     out.gain.exponentialRampToValueAtTime(1, context.currentTime + FADE_IN);
     out.connect(context.destination);
-    source.buffer = whiteNoise(context);
-    source.loop = true;
-    highpass.type = "highpass";
-    highpass.frequency.value = WHISPER_FROM;
-    lowpass.type = "lowpass";
-    lowpass.frequency.value = WHISPER_TO;
-    air.gain.value = WHISPER_LEVEL;
-    swell.frequency.value = WHISPER_RATE;
-    swellDepth.gain.value = WHISPER_LEVEL * WHISPER_DEPTH;
-    swell.connect(swellDepth).connect(air.gain);
-    source.connect(highpass).connect(lowpass).connect(air).connect(out);
-    source.start();
-    swell.start();
     crackleLater(context, out);
     return {
       out,
@@ -111,8 +89,7 @@ export function smoulderOf() {
         out.gain.cancelScheduledValues(time);
         out.gain.setValueAtTime(out.gain.value, time);
         out.gain.exponentialRampToValueAtTime(SILENT, time + FADE_OUT);
-        source.stop(time + FADE_OUT);
-        swell.stop(time + FADE_OUT);
+        setTimeout(() => out.disconnect(), FADE_OUT * 1000);
       },
     };
   }
@@ -124,7 +101,7 @@ export function smoulderOf() {
     } catch {
       return; // no sound to be had
     }
-    layer = whisper(audio);
+    layer = crackling(audio);
     if (audio.state === "suspended")
       addEventListener("pointerdown", () => audio?.resume(), { once: true });
   }
