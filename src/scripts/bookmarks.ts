@@ -91,7 +91,8 @@ if (rack && nav) {
     });
 
   // moving the shelf leaves the bookmarks leaning behind
-  if (!still.matches) {
+  const finger = matchMedia("(pointer: coarse)");
+  if (!still.matches && !finger.matches) {
     const CORD_LAG = 1.8;
     const hanging = [...rack.querySelectorAll<HTMLElement>(".shiori")].map((mark) => ({
       mark,
