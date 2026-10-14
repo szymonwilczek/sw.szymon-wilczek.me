@@ -27,7 +27,7 @@ const preloadGarden = {
   },
 };
 
-const SITE = "https://sw.szymon-wilczek.me";
+const SITE = "https://szymon-wilczek.me";
 
 const DATA = {
   "/": ["src/content/writings", "public/images"],
