@@ -27,6 +27,8 @@
 
   --page-width: 70rem;
   --gutter: 2rem;
+
+  --field-text-touch: 16px;
 }
 
 @media (max-width: 47.99em) {

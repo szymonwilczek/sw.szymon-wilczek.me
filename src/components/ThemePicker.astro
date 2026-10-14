@@ -117,6 +117,12 @@ for (const theme of auThemes) {
     font: inherit;
   }
 
+  @media (pointer: coarse) {
+    .picker-prompt input {
+      font-size: var(--field-text-touch);
+    }
+  }
+
   .picker-prompt input:focus {
     outline: 1px solid var(--cursor);
     outline-offset: 1px;

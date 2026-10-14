@@ -183,6 +183,12 @@
     font: inherit;
   }
 
+  @media (pointer: coarse) {
+    .minibuffer-input {
+      font-size: var(--field-text-touch);
+    }
+  }
+
   .minibuffer-input:focus {
     outline: 1px solid var(--cursor);
     outline-offset: 1px;
