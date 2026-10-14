@@ -176,7 +176,9 @@ if (rack && nav) {
 
   // empty bookmark keeps trying out the next place
   const subject = rack.querySelector<SVGPathElement>(".blank .subject");
-  if (subject && !still.matches) {
+  const reveal = rack.querySelector<HTMLElement>(".blank .reveal");
+  const revealInner = reveal?.firstElementChild as HTMLElement | null;
+  if (subject && reveal && revealInner && !still.matches) {
     const between = (low: number, high: number) => low + Math.random() * (high - low);
     const round1 = (value: number) => Math.round(value * 10) / 10;
     const sketches = [
@@ -236,16 +238,16 @@ if (rack && nav) {
       for (let index = 1; ; index = (index + 1) % sketches.length) {
         await pause(4000);
         while (!shown || document.hidden) await pause(500);
-        await subject.animate([{ opacity: 0 }], { duration: 700, fill: "forwards" }).finished;
+        await reveal.animate([{ opacity: 0 }], { duration: 700, fill: "forwards" }).finished;
         subject.setAttribute("d", sketches[index]());
-        subject.getAnimations().forEach((animation) => animation.cancel());
-        await subject.animate(
-          [{ clipPath: "inset(-5% 100% -5% -5%)" }, { clipPath: "inset(-5% -5% -5% -5%)" }],
-          {
-            duration: 2600,
-            easing: "ease-in-out",
-          },
-        ).finished;
+        reveal.getAnimations().forEach((animation) => animation.cancel());
+        const sweep = { duration: 2600, easing: "ease-in-out" };
+        await Promise.all([
+          reveal.animate([{ transform: "translateX(-100%)" }, { transform: "none" }], sweep)
+            .finished,
+          revealInner.animate([{ transform: "translateX(100%)" }, { transform: "none" }], sweep)
+            .finished,
+        ]);
       }
     })();
   }
