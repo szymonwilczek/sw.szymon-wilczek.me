@@ -50,47 +50,52 @@ function brush(seed: string) {
 </header>
 
 <dialog id="menu-sheet" class="menu-sheet" aria-label="Menu" tabindex="-1">
-  <div class="menu-top">
-    <a href="/" class="site-brand">
-      <Seal glyph="狼" size={36} />
-      <span class="brand-name">Szymon Wilczek</span>
-    </a>
-    <button id="menu-close" type="button" class="icon-button" aria-label="Close menu">
-      <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true">
-        <path d="M3 3 C 8 8, 13 13, 19 19.5 M19 2.5 C 14 8, 9 13, 2.5 19"></path>
-      </svg>
+  <div class="menu-paper">
+    <div class="menu-top">
+      <a href="/" class="site-brand">
+        <Seal glyph="狼" size={36} />
+        <span class="brand-name">Szymon Wilczek</span>
+      </a>
+      <button id="menu-close" type="button" class="icon-button" aria-label="Close menu">
+        <svg width="28" height="20" viewBox="0 0 28 20" aria-hidden="true">
+          <path d="M6 2 C 11 7, 16 12, 22 18.5"></path>
+          <path d=""></path>
+          <path d="M5.5 18 C 12 12, 17 7, 22 1.5"></path>
+        </svg>
+      </button>
+    </div>
+
+    <nav aria-label="Main">
+      <ol class="menu-list">
+        {menu.map((link, i) => (
+          <li>
+            <a href={link.href} aria-current={isActive(link.href) ? "page" : undefined}>
+              <span class="menu-num">{String(i + 1).padStart(2, "0")}</span>
+              <span class="menu-label">{link.label}</span>
+            </a>
+          </li>
+        ))}
+      </ol>
+    </nav>
+
+    <button type="button" class="menu-theme" data-theme-open>
+      <span class="theme-dots" aria-hidden="true">
+        <span></span>
+        <span></span>
+      </span>
+      <span>M-x au-themes-select</span>
+      <span class="menu-theme-current" data-theme-label>
+        salina · night
+      </span>
     </button>
+
+    <p class="menu-extra">
+      <a href="/credits/">credits</a>
+      <a href="/rss.xml">rss</a>
+      <a href="/vault/">vault</a>
+    </p>
   </div>
-
-  <nav aria-label="Main">
-    <ol class="menu-list">
-      {menu.map((link, i) => (
-        <li style={`--order: ${i}`}>
-          <a href={link.href} aria-current={isActive(link.href) ? "page" : undefined}>
-            <span class="menu-num">{String(i + 1).padStart(2, "0")}</span>
-            <span class="menu-label">{link.label}</span>
-          </a>
-        </li>
-      ))}
-    </ol>
-  </nav>
-
-  <button type="button" class="menu-theme" data-theme-open>
-    <span class="theme-dots" aria-hidden="true">
-      <span></span>
-      <span></span>
-    </span>
-    <span>M-x au-themes-select</span>
-    <span class="menu-theme-current" data-theme-label>
-      salina · night
-    </span>
-  </button>
-
-  <p class="menu-extra">
-    <a href="/credits/">credits</a>
-    <a href="/rss.xml">rss</a>
-    <a href="/vault/">vault</a>
-  </p>
+  <svg class="menu-ink" aria-hidden="true"></svg>
 </dialog>
 
 <header class="site-header">
@@ -331,84 +336,34 @@ function brush(seed: string) {
     height: 100%;
     max-height: none;
     margin: 0;
-    padding: 1.25rem var(--gutter);
+    padding: 0;
     border: 0;
-    background: var(--bg-main);
+    background: transparent;
     color: var(--fg-main);
-    flex-direction: column;
+    overflow: hidden;
   }
 
-  .menu-sheet[open] {
+  .menu-paper {
+    height: 100%;
+    box-sizing: border-box;
     display: flex;
+    flex-direction: column;
+    padding: 1.25rem var(--gutter);
+    overflow-y: auto;
+    background: var(--bg-main);
+  }
+
+  .menu-ink {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    color: var(--fg-main);
+    pointer-events: none;
   }
 
   :global(html:has(.menu-sheet[open])) {
     overflow: hidden;
-  }
-
-  .menu-sheet {
-    --ink-origin: calc(100% - var(--gutter) - 22px) 2.625rem;
-    --spread: 0.6s;
-    --gather: 0.32s;
-    --row-lead: 0.12s;
-    --row-delay: 0.045s;
-    --row-settle: 0.5s;
-    --row-rise: 6px;
-    --ink-bleed: 3px;
-  }
-
-  .menu-sheet[open] {
-    animation: menu-spread var(--spread) cubic-bezier(0.45, 0.05, 0.25, 1) both;
-  }
-
-  .menu-sheet[open] .menu-list li,
-  .menu-sheet[open] .menu-theme,
-  .menu-sheet[open] .menu-extra {
-    animation: menu-settle var(--row-settle) cubic-bezier(0.3, 0.6, 0.35, 1) both;
-    animation-delay: calc(var(--row-lead) + var(--order, 6) * var(--row-delay));
-  }
-
-  .menu-sheet.closing {
-    animation: menu-gather var(--gather) cubic-bezier(0.5, 0, 0.75, 0.4) both;
-  }
-
-  @keyframes menu-spread {
-    from {
-      clip-path: circle(0 at var(--ink-origin));
-      filter: blur(var(--ink-bleed));
-    }
-    to {
-      clip-path: circle(150% at var(--ink-origin));
-      filter: blur(0);
-    }
-  }
-
-  @keyframes menu-gather {
-    from {
-      clip-path: circle(150% at var(--ink-origin));
-      opacity: 1;
-    }
-    to {
-      clip-path: circle(0 at var(--ink-origin));
-      opacity: 0.4;
-    }
-  }
-
-  @keyframes menu-settle {
-    from {
-      opacity: 0;
-      transform: translateY(var(--row-rise));
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .menu-sheet[open],
-    .menu-sheet.closing,
-    .menu-sheet[open] .menu-list li,
-    .menu-sheet[open] .menu-theme,
-    .menu-sheet[open] .menu-extra {
-      animation: none;
-    }
   }
 
   .menu-sheet:focus {
@@ -512,6 +467,10 @@ function brush(seed: string) {
   }
 </style>
 
+<script>
+  import "../scripts/menu-ink";
+</script>
+
 <script is:inline>
   (function () {
     function label() {
@@ -522,35 +481,6 @@ function brush(seed: string) {
     }
 
     var sheet = document.getElementById("menu-sheet");
-    var openBtn = document.getElementById("menu-open");
-
-    openBtn.addEventListener("click", function () {
-      sheet.showModal();
-      sheet.focus({ preventScroll: true });
-      openBtn.setAttribute("aria-expanded", "true");
-    });
-
-    // let the ink draw back in before the dialog goes away
-    function gather() {
-      if (!sheet.open || sheet.classList.contains("closing")) return;
-      if (matchMedia("(prefers-reduced-motion: reduce)").matches) return sheet.close();
-      sheet.classList.add("closing");
-      sheet.addEventListener("animationend", function done(event) {
-        if (event.target !== sheet) return;
-        sheet.removeEventListener("animationend", done);
-        sheet.classList.remove("closing");
-        sheet.close();
-      });
-    }
-
-    document.getElementById("menu-close").addEventListener("click", gather);
-    sheet.addEventListener("cancel", function (event) {
-      event.preventDefault();
-      gather();
-    });
-    sheet.addEventListener("close", function () {
-      openBtn.setAttribute("aria-expanded", "false");
-    });
 
     // phone bar
     var bar = document.querySelector(".mobile-header");
