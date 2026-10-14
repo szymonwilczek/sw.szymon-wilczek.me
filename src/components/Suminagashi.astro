@@ -192,9 +192,10 @@
     const CELL = 10;
     const TINE_REACH = 9;
     const TINE_FELT = 3; // reaches out from the tine before the water feels nothing
-    const GRIP = 0.95;
-    const WATER_HOLD = 0.82;
-    const SPREAD = 0.12;
+    const GRIP = 0.6;
+    const WATER_HOLD = 0.72;
+    const SPREAD = 0.3;
+    const TOP_SPEED = 2.5; // px a frame
     const PRESSURE_PASSES = 10;
     const STILL_SPEED = 0.03;
     const FRAME_MS = 1000 / 60;
@@ -207,7 +208,11 @@
     const GAP_MOST = 9;
     const GAP_LEAST = 1.5;
     const RING_LEAST = 12;
-    const POINT_BUDGET = 24000;
+    const POINT_BUDGET = 12000;
+    const CROWDED = 0.6;
+    const GAP_CROWDED = 5;
+    const PAPER_MARGIN = 30;
+    const GAP_OFF_PAPER = 40;
     const HAND_STEP = 6;
     const SETTLE_FRAMES = 240;
 
@@ -341,6 +346,11 @@
           flowY[cell] -= (pressure[at(column, row + 1)] - pressure[at(column, row - 1)]) / 2;
           flowX[cell] *= wall ? 0 : hold;
           flowY[cell] *= wall ? 0 : hold;
+          const speed = Math.hypot(flowX[cell], flowY[cell]);
+          if (speed > TOP_SPEED) {
+            flowX[cell] *= TOP_SPEED / speed;
+            flowY[cell] *= TOP_SPEED / speed;
+          }
           fastest = Math.max(fastest, Math.abs(flowX[cell]), Math.abs(flowY[cell]));
         }
 
@@ -375,9 +385,17 @@
       return [mix(flowX), mix(flowY)];
     }
 
+    const offPaper = ([x, y]: Pt) =>
+      x < -PAPER_MARGIN ||
+      y < -PAPER_MARGIN ||
+      x > width + PAPER_MARGIN ||
+      y > height + PAPER_MARGIN;
+
     // stretched rings get points between, crowded ones lose some
     function refine() {
       let total = drops.reduce((sum, blot) => sum + blot.pts.length, 0);
+      const crowd = Math.max(0, (total / POINT_BUDGET - CROWDED) / (1 - CROWDED));
+      const least = GAP_LEAST + (GAP_CROWDED - GAP_LEAST) * Math.min(1, crowd);
       for (const blot of drops) {
         const refined: Pt[] = [];
         let dropped = 0;
@@ -385,10 +403,12 @@
           const current = blot.pts[i];
           const next = blot.pts[(i + 1) % blot.pts.length];
           const kept = refined.at(-1);
+          const unseen = offPaper(current) && (!kept || offPaper(kept));
           if (
             kept &&
             blot.pts.length - dropped > RING_LEAST &&
-            Math.hypot(current[0] - kept[0], current[1] - kept[1]) < GAP_LEAST
+            Math.hypot(current[0] - kept[0], current[1] - kept[1]) <
+              (unseen ? GAP_OFF_PAPER : least)
           ) {
             dropped++;
             total--;
@@ -397,7 +417,8 @@
           refined.push(current);
           if (
             Math.hypot(next[0] - current[0], next[1] - current[1]) > GAP_MOST &&
-            total < POINT_BUDGET
+            total < POINT_BUDGET &&
+            !(offPaper(current) && offPaper(next))
           ) {
             refined.push([(current[0] + next[0]) / 2, (current[1] + next[1]) / 2]);
             total++;
