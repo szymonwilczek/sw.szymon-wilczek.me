@@ -1,6 +1,6 @@
 import { MAX_BYTES, clean, type PieceSpec } from "./pottery";
 
-export const WORKER_URL = "";
+export const WORKER_URL = "https://roji.szymon-wilczek.me";
 
 const MINE = "roji:mine";
 
