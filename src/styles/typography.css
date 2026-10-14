@@ -395,13 +395,14 @@ sup a {
   }
 
   blockquote {
-    padding-left: 2.75rem;
-    font-size: 1.3125rem;
+    margin: 2.5rem 0;
+    padding-left: 1.875rem;
+    font-size: 1.1875rem;
   }
 
   blockquote::before {
-    width: 40px;
-    height: 40px;
+    width: 24px;
+    height: 24px;
     mask-size: contain;
   }
 
