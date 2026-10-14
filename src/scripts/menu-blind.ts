@@ -13,6 +13,7 @@ const rows = [
 ];
 const openButton = document.querySelector<HTMLButtonElement>("#menu-open");
 const closeButton = document.querySelector<HTMLButtonElement>("#menu-close");
+const topRow = paper?.querySelector<HTMLElement>(".menu-top");
 const iconLines = [...(closeButton?.querySelectorAll<SVGPathElement>("path") ?? [])];
 
 // how long each way takes, all the way
@@ -331,13 +332,19 @@ function tick(now: number) {
   }
 }
 
-// the X sits exactly over the hamburger it grew from, wherever the bar is
+// the X sits exactly over the hamburger it grew from, wherever the bar is,
+// and the name at the top of the paper moves onto the same line
 function alignIcon() {
   if (!openButton || !closeButton) return;
   closeButton.style.translate = "";
   const from = openButton.getBoundingClientRect();
   const to = closeButton.getBoundingClientRect();
   closeButton.style.translate = `${from.left - to.left}px ${from.top - to.top}px`;
+  if (!topRow) return;
+  topRow.style.marginTop = "";
+  const row = topRow.getBoundingClientRect();
+  const middle = (box: DOMRect) => box.top + box.height / 2;
+  topRow.style.marginTop = `${fixed(middle(from) - middle(row))}px`;
 }
 
 // turn round: the paper sets off from where it is
