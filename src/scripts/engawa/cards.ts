@@ -40,7 +40,7 @@ export function cardsOf(
       lit: view.incense?.lit ?? false,
       disc: view.disc,
     });
-    svg.innerHTML = toSvg(shell, true);
+    svg.innerHTML = toSvg(shell, false);
   }
 
   function show(key: string, button: HTMLElement) {
