@@ -304,6 +304,14 @@ function draw() {
   drawIcon(iconNow);
 }
 
+// focus goes back to the hamburger while the sheet still holds it
+// once the sheet is closed it has already fallen to the page
+function shut() {
+  document.documentElement.classList.remove("menu-open");
+  if (sheet?.contains(document.activeElement)) openButton?.focus({ preventScroll: true });
+  sheet?.close();
+}
+
 function tick(now: number) {
   const t = clamp((now - wayStart) / wayLength);
   depthNow = wanted ? lerp(wayFrom, height, drop(t)) : lerp(wayFrom, BRUSH_HIDDEN, pushed(t, PULL));
@@ -314,7 +322,7 @@ function tick(now: number) {
   if (t < 1 || iconNow !== (wanted ? 1 : 0)) frame = requestAnimationFrame(tick);
   else {
     frame = 0;
-    if (!wanted) sheet?.close();
+    if (!wanted) shut();
   }
 }
 
@@ -331,7 +339,8 @@ function alignIcon() {
 function want(open: boolean) {
   if (!sheet) return;
   if (open && !sheet.open) {
-    sheet.showModal();
+    sheet.show();
+    document.documentElement.classList.add("menu-open");
     sheet.focus({ preventScroll: true });
     alignIcon();
     measure();
@@ -343,7 +352,7 @@ function want(open: boolean) {
   wanted = open;
   openButton?.setAttribute("aria-expanded", String(open));
   if (still()) {
-    if (!open) return sheet.close();
+    if (!open) return shut();
     depthNow = height;
     iconNow = 1;
     return draw();
@@ -369,14 +378,26 @@ for (const button of [openButton, closeButton]) {
     if (event.detail === 0) toggle();
   });
 }
-sheet?.addEventListener("cancel", (event) => {
-  event.preventDefault();
-  want(false);
+sheet?.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    event.preventDefault();
+    want(false);
+  }
+  if (event.key !== "Tab") return;
+  const stops = [...sheet.querySelectorAll<HTMLElement>("a[href], button")];
+  const first = stops[0];
+  const last = stops[stops.length - 1];
+  const at = document.activeElement;
+  if (event.shiftKey ? at === first || at === sheet : at === last) {
+    event.preventDefault();
+    (event.shiftKey ? last : first)?.focus();
+  }
 });
 
 // whoever closes the sheet, leaves it ready for next time
 sheet?.addEventListener("close", () => {
   if (sheet.open) return;
+  document.documentElement.classList.remove("menu-open");
   cancelAnimationFrame(frame);
   frame = 0;
   wanted = false;
