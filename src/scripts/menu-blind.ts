@@ -294,6 +294,7 @@ let depthNow = BRUSH_HIDDEN; // px the foot of the paper is down
 let iconNow = 0; // share of the way from hamburger to X
 let iconAt = 0; // when the icon was last drawn
 let frame = 0;
+let keyed = false; // whether the last turn came from a key
 let closing = 0; // the frame the sheet closes on, once the paper is gone
 let wayFrom = BRUSH_HIDDEN;
 let wayStart = 0;
@@ -309,7 +310,10 @@ function draw() {
 // once the sheet is closed it has already fallen to the page
 function shut() {
   document.documentElement.classList.remove("menu-open");
-  if (sheet?.contains(document.activeElement)) openButton?.focus({ preventScroll: true });
+  if (sheet?.contains(document.activeElement)) {
+    if (keyed) openButton?.focus({ preventScroll: true });
+    else (document.activeElement as HTMLElement).blur();
+  }
   sheet?.close();
 }
 
@@ -374,15 +378,20 @@ const toggle = () => want(!(sheet?.open && wanted));
 // a click from a key has no press before it
 for (const button of [openButton, closeButton]) {
   button?.addEventListener("pointerdown", (event) => {
-    if (event.isPrimary && event.button === 0) toggle();
+    if (!event.isPrimary || event.button !== 0) return;
+    keyed = false;
+    toggle();
   });
   button?.addEventListener("click", (event) => {
-    if (event.detail === 0) toggle();
+    if (event.detail !== 0) return;
+    keyed = true;
+    toggle();
   });
 }
 sheet?.addEventListener("keydown", (event) => {
   if (event.key === "Escape") {
     event.preventDefault();
+    keyed = true;
     want(false);
   }
   if (event.key !== "Tab") return;
