@@ -53,12 +53,13 @@ if (rack && nav) {
       .map((x) => Math.round(Math.max(0, Math.min(maxScroll, x))));
   };
   let settle = 0;
+  let swaying = false;
   const unsnap = () => {
     rack.style.scrollSnapType = "none";
     const done = () => {
       clearTimeout(settle);
       settle = window.setTimeout(function again() {
-        if (!/^(0deg)?$/.test(rack.style.getPropertyValue("--sway"))) {
+        if (swaying) {
           settle = window.setTimeout(again, 80);
           return;
         }
@@ -91,6 +92,18 @@ if (rack && nav) {
 
   // moving the shelf leaves the bookmarks leaning behind
   if (!still.matches) {
+    const CORD_LAG = 1.8;
+    const hanging = [...rack.querySelectorAll<HTMLElement>(".shiori")].map((mark) => ({
+      mark,
+      cord: mark.querySelector<SVGSVGElement>(".cord")!,
+      give: parseFloat(mark.style.getPropertyValue("--give")) || 1,
+    }));
+    const lean = (angle: number | null) => {
+      for (const { mark, cord, give } of hanging) {
+        mark.style.rotate = angle === null ? "" : `${(angle * give).toFixed(3)}deg`;
+        cord.style.rotate = angle === null ? "" : `${(angle * give * CORD_LAG).toFixed(3)}deg`;
+      }
+    };
     let last = rack.scrollLeft;
     let lastT = performance.now();
     let push = 0;
@@ -102,7 +115,8 @@ if (rack && nav) {
       sway += velocity;
       push *= 0.85;
       const rest = Math.abs(sway) + Math.abs(velocity) + Math.abs(push) < 0.01;
-      rack.style.setProperty("--sway", rest ? "0deg" : `${sway.toFixed(3)}deg`);
+      lean(rest ? null : sway);
+      swaying = !rest;
       frame = rest ? 0 : requestAnimationFrame(step);
     };
     rack.addEventListener(
