@@ -465,6 +465,15 @@ const SEASON = placeBox(1030, 140, 40, 30);
     }
   }
 
+  @media (orientation: portrait) and (pointer: coarse) and (max-width: 600px) {
+    :global(body.engawa-radio) .engawa {
+      --w: max(100dvh, calc(100dvw * 1100 / 640));
+      top: calc((100dvh - var(--w) * 640 / 1100) / 2);
+      left: calc((100dvw - var(--w)) / 2);
+      rotate: 90deg;
+    }
+  }
+
   :global(body.engawa-radio) {
     overflow: hidden;
   }
@@ -516,6 +525,15 @@ const SEASON = placeBox(1030, 140, 40, 30);
 
   :global(body.engawa-radio.radio-still .radio-strip) {
     opacity: 0;
+  }
+
+  @media (orientation: portrait) and (pointer: coarse) and (max-width: 600px) {
+    :global(body.engawa-radio .radio-strip) {
+      top: 50%;
+      bottom: auto;
+      left: 1rem;
+      transform: translate(-50%, -50%) rotate(90deg) translateY(-50%);
+    }
   }
 
   :global(.radio-strip button) {

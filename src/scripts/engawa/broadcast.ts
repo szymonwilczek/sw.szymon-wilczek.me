@@ -86,6 +86,11 @@ export function broadcastOf(figure: HTMLElement, radio: Radio, incense: { left: 
     try {
       await document.documentElement.requestFullscreen?.({ navigationUI: "hide" });
       full = !!document.fullscreenElement;
+
+      const orientation = screen.orientation as ScreenOrientation & {
+        lock?: (to: string) => Promise<void>;
+      };
+      if (full) await orientation.lock?.("landscape").catch(() => {});
     } catch {
       // no fullscreen to be had: the page alone fills the window
       full = false;
@@ -114,6 +119,7 @@ export function broadcastOf(figure: HTMLElement, radio: Radio, incense: { left: 
     knob.setAttribute("aria-pressed", "false");
     await draw(true, full && !document.fullscreenElement);
     document.body.classList.remove("engawa-radio", "radio-still");
+    screen.orientation?.unlock?.();
     if (document.fullscreenElement) await document.exitFullscreen().catch(() => {});
     full = false;
     scrollTo({ top: offset, behavior: "instant" });
