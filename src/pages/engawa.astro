@@ -409,6 +409,12 @@ const SEASON = placeBox(1030, 140, 40, 30);
     }
   }
 
+  @media (pointer: coarse) {
+    .engawa :global(.card.soaking > svg *) {
+      filter: none;
+    }
+  }
+
   .engawa :global(.card > svg) {
     position: absolute;
     inset: 0;

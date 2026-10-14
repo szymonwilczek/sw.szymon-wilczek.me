@@ -56,7 +56,7 @@ export function cardsOf(
     layer.hidden = false;
     card.classList.remove("in");
     void card.offsetWidth;
-    card.classList.add("in");
+    card.classList.add("in", "soaking");
     card.focus({ preventScroll: true });
   }
 
@@ -68,6 +68,9 @@ export function cardsOf(
     from?.focus({ preventScroll: true });
   }
 
+  card.addEventListener("animationend", (event) => {
+    if (event.target === card) card.classList.remove("soaking");
+  });
   card.querySelector(".card-close")!.addEventListener("click", hide);
   addEventListener("keydown", (event) => {
     if (event.key === "Escape" && open !== null) hide();
