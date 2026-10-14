@@ -9,5 +9,4 @@ ORIGINS = "https://szymon-wilczek.me,https://sw.szymon-wilczek.me,http://localho
 [[d1_databases]]
 binding = "DB"
 database_name = "roji"
-# from `npx wrangler d1 create roji`
-database_id = ""
+database_id = "099333ba-1aed-4e4a-903e-deb06e99aa12"
