@@ -65,7 +65,7 @@ function brush(seed: string) {
   <nav aria-label="Main">
     <ol class="menu-list">
       {menu.map((link, i) => (
-        <li>
+        <li style={`--order: ${i}`}>
           <a href={link.href} aria-current={isActive(link.href) ? "page" : undefined}>
             <span class="menu-num">{String(i + 1).padStart(2, "0")}</span>
             <span class="menu-label">{link.label}</span>
@@ -317,8 +317,73 @@ function brush(seed: string) {
     overflow: hidden;
   }
 
+  .menu-sheet {
+    --ink-origin: calc(100% - var(--gutter) - 22px) 2.625rem;
+    --spread: 0.6s;
+    --gather: 0.32s;
+    --row-lead: 0.12s;
+    --row-delay: 0.045s;
+    --row-settle: 0.5s;
+    --row-rise: 6px;
+    --ink-bleed: 3px;
+  }
+
+  .menu-sheet[open] {
+    animation: menu-spread var(--spread) cubic-bezier(0.45, 0.05, 0.25, 1) both;
+  }
+
+  .menu-sheet[open] .menu-list li,
+  .menu-sheet[open] .menu-theme,
+  .menu-sheet[open] .menu-extra {
+    animation: menu-settle var(--row-settle) cubic-bezier(0.3, 0.6, 0.35, 1) both;
+    animation-delay: calc(var(--row-lead) + var(--order, 6) * var(--row-delay));
+  }
+
+  .menu-sheet.closing {
+    animation: menu-gather var(--gather) cubic-bezier(0.5, 0, 0.75, 0.4) both;
+  }
+
+  @keyframes menu-spread {
+    from {
+      clip-path: circle(0 at var(--ink-origin));
+      filter: blur(var(--ink-bleed));
+    }
+    to {
+      clip-path: circle(150% at var(--ink-origin));
+      filter: blur(0);
+    }
+  }
+
+  @keyframes menu-gather {
+    from {
+      clip-path: circle(150% at var(--ink-origin));
+      opacity: 1;
+    }
+    to {
+      clip-path: circle(0 at var(--ink-origin));
+      opacity: 0.4;
+    }
+  }
+
+  @keyframes menu-settle {
+    from {
+      opacity: 0;
+      transform: translateY(var(--row-rise));
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .menu-sheet[open],
+    .menu-sheet.closing,
+    .menu-sheet[open] .menu-list li,
+    .menu-sheet[open] .menu-theme,
+    .menu-sheet[open] .menu-extra {
+      animation: none;
+    }
+  }
+
   .menu-sheet::backdrop {
-    background: var(--bg-main);
+    background: transparent;
   }
 
   .menu-list {
@@ -430,8 +495,24 @@ function brush(seed: string) {
       sheet.showModal();
       openBtn.setAttribute("aria-expanded", "true");
     });
-    document.getElementById("menu-close").addEventListener("click", function () {
-      sheet.close();
+
+    // let the ink draw back in before the dialog goes away
+    function gather() {
+      if (!sheet.open || sheet.classList.contains("closing")) return;
+      if (matchMedia("(prefers-reduced-motion: reduce)").matches) return sheet.close();
+      sheet.classList.add("closing");
+      sheet.addEventListener("animationend", function done(event) {
+        if (event.target !== sheet) return;
+        sheet.removeEventListener("animationend", done);
+        sheet.classList.remove("closing");
+        sheet.close();
+      });
+    }
+
+    document.getElementById("menu-close").addEventListener("click", gather);
+    sheet.addEventListener("cancel", function (event) {
+      event.preventDefault();
+      gather();
     });
     sheet.addEventListener("close", function () {
       openBtn.setAttribute("aria-expanded", "false");
