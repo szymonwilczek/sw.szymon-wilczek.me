@@ -7,8 +7,9 @@ export function broadcastOf(figure: HTMLElement, radio: Radio, incense: { left: 
   strip.className = "radio-strip";
   strip.innerHTML = `<span class="rs-now"></span><span class="rs-incense"></span>
     <button type="button" class="rs-sound" aria-pressed="false" aria-label="Sound">音</button>
-    <button type="button" class="rs-out" aria-label="Back to the page">放</button>`;
-  figure.after(strip);
+  <button type="button" class="rs-out" aria-label="Back to the page">放</button>`;
+
+  figure.append(strip);
   const curtain = document.createElement("div");
   curtain.className = "radio-curtain";
   document.body.append(curtain);
@@ -145,6 +146,7 @@ export function broadcastOf(figure: HTMLElement, radio: Radio, incense: { left: 
     true,
   );
   addEventListener("pointermove", () => inside && wake());
+  addEventListener("pointerdown", () => inside && wake());
 
   // screen woke from sleep
   document.addEventListener("visibilitychange", async () => {

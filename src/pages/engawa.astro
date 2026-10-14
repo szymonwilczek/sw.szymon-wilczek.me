@@ -427,7 +427,7 @@ const SEASON = placeBox(1030, 140, 40, 30);
     position: absolute;
     top: 2%;
     right: 2.5%;
-    width: 9%;
+    width: max(9%, 2.25rem);
     aspect-ratio: 1;
     padding: 0;
     border: 0;
@@ -465,9 +465,15 @@ const SEASON = placeBox(1030, 140, 40, 30);
     }
   }
 
+  @media (orientation: landscape) and (pointer: coarse) and (max-height: 600px) {
+    :global(body.engawa-radio) .engawa {
+      --w: min(100vw, calc(100vh * 1100 / 640));
+    }
+  }
+
   @media (orientation: portrait) and (pointer: coarse) and (max-width: 600px) {
     :global(body.engawa-radio) .engawa {
-      --w: max(100dvh, calc(100dvw * 1100 / 640));
+      --w: min(100dvh, calc(100dvw * 1100 / 640));
       top: calc((100dvh - var(--w) * 640 / 1100) / 2);
       left: calc((100dvw - var(--w)) / 2);
       rotate: 90deg;
@@ -527,13 +533,62 @@ const SEASON = placeBox(1030, 140, 40, 30);
     opacity: 0;
   }
 
+  @media (orientation: landscape) and (pointer: coarse) and (max-height: 600px),
+    (orientation: portrait) and (pointer: coarse) and (max-width: 600px) {
+    :global(body.engawa-radio .radio-strip) {
+      --strip-inset: 0.75rem;
+      --strip-reach: 0.56; /* share of the porch before the paper lamp */
+      top: calc((100vh - var(--w) * 640 / 1100) / 2 + var(--strip-inset));
+      bottom: auto;
+      left: calc((100vw - var(--w)) / 2 + var(--strip-inset));
+      display: grid;
+      grid-template-columns: repeat(3, auto);
+      justify-content: start;
+      row-gap: 0.4rem;
+      column-gap: 0.9rem;
+      width: fit-content;
+      max-width: calc(var(--w) * var(--strip-reach));
+      padding: 0.6rem 0.9rem;
+      border-radius: 1.1rem 0.9rem 1.2rem 1rem;
+      transform: none;
+    }
+
+    :global(body.engawa-radio .radio-strip .rs-now),
+    :global(body.engawa-radio .radio-strip .rs-incense) {
+      grid-column: 1 / -1;
+      line-height: 1.3;
+    }
+
+    :global(body.engawa-radio .radio-strip .volume) {
+      width: 5rem;
+    }
+
+    :global(body.engawa-radio .radio-strip button) {
+      width: 2.5rem;
+      height: 2.5rem;
+    }
+
+    :global(body.engawa-radio) .engawa :global(.card) {
+      --card-least-type: 12px;
+      right: var(--strip-inset, 0.75rem);
+      height: min(94%, 762px);
+    }
+
+    :global(body.engawa-radio) .engawa :global(.card-body) {
+      font-size: max(3.6cqw, var(--card-least-type));
+    }
+  }
+
   @media (orientation: portrait) and (pointer: coarse) and (max-width: 600px) {
     :global(body.engawa-radio .radio-strip) {
-      top: 50%;
-      bottom: auto;
-      left: 1rem;
-      transform: translate(-50%, -50%) rotate(90deg) translateY(-50%);
+      top: var(--strip-inset);
+      left: var(--strip-inset);
     }
+  }
+
+  :global(.radio-strip button),
+  :global(.radio-strip .volume) {
+    flex: none;
   }
 
   :global(.radio-strip button) {
