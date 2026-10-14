@@ -163,6 +163,12 @@ import Kintsugi from "../components/Kintsugi.astro";
     stroke-linejoin: round;
   }
 
+  @media (min-width: 48em) and (orientation: portrait) {
+    .lost {
+      justify-content: center;
+    }
+  }
+
   @media (max-width: 47.99em) {
     .lost {
       margin-top: 2.5rem;
