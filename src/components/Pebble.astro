@@ -72,7 +72,8 @@
 <style>
   .pebble-row {
     --arrive-time: 1.2s;
-    --appear-time: 0.45s;
+    --appear-time: 0.35s;
+    --arrow-lead: 0.55;
     --arrow-rise: 6px;
     display: flex;
     justify-content: flex-end;
@@ -159,13 +160,23 @@
     translate: 0 var(--arrow-rise);
   }
 
+  .is-arriving .pebble-arrow,
+  .is-arriving .pebble-label,
   .is-here .pebble-arrow,
   .is-here .pebble-label {
     opacity: 1;
     translate: 0 0;
   }
 
-  .is-here .pebble-label {
+  .is-arriving .pebble-arrow {
+    transition-delay: calc(var(--arrive-time) * var(--arrow-lead));
+  }
+
+  .is-arriving .pebble-label {
+    transition-delay: calc(var(--arrive-time) * var(--arrow-lead) + var(--appear-time) / 2);
+  }
+
+  .is-here:not(.is-arriving) .pebble-label {
     transition-delay: calc(var(--appear-time) / 2);
   }
 
