@@ -278,9 +278,13 @@ function brush(seed: string) {
     min-height: 44px;
   }
 
-  .mobile-header {
+  .mobile-header,
+  .site-header {
     --bar-pad: 0.5rem;
     --bar-slide: 0.32s;
+  }
+
+  .mobile-header {
     position: sticky;
     top: 0;
     z-index: 30;
@@ -292,17 +296,34 @@ function brush(seed: string) {
       box-shadow var(--bar-slide) ease;
   }
 
-  .mobile-header.is-floating {
+  @media (min-width: 48em) and (orientation: portrait) {
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      margin: calc(-1 * var(--bar-pad)) calc(-1 * var(--gutter));
+      padding: var(--bar-pad) var(--gutter);
+      transition:
+        translate var(--bar-slide) cubic-bezier(0.3, 0.6, 0.35, 1),
+        background-color var(--bar-slide) ease,
+        box-shadow var(--bar-slide) ease;
+    }
+  }
+
+  .mobile-header.is-floating,
+  .site-header.is-floating {
     background-color: var(--bg-main);
     box-shadow: 0 1px 0 var(--border);
   }
 
-  .mobile-header.is-tucked {
+  .mobile-header.is-tucked,
+  .site-header.is-tucked {
     translate: 0 calc(-100% - var(--bar-pad));
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .mobile-header {
+    .mobile-header,
+    .site-header {
       transition: none;
     }
   }
@@ -521,21 +542,44 @@ function brush(seed: string) {
 
     var sheet = document.getElementById("menu-sheet");
 
-    // phone bar
-    var bar = document.querySelector(".mobile-header");
+    var bars = [
+      { bar: document.querySelector(".mobile-header"), when: matchMedia("(max-width: 47.99em)") },
+      {
+        bar: document.querySelector(".site-header"),
+        when: matchMedia("(min-width: 48em) and (orientation: portrait)"),
+      },
+    ];
     var SCROLL_NOISE = 6;
     var lastY = Math.max(0, scrollY);
-    var stuckFrom = bar.offsetTop;
     var queued = false;
+
+    function stuckFrom(one) {
+      if (one.from === undefined) {
+        one.bar.style.position = "static";
+        one.from = one.bar.offsetTop;
+        one.bar.style.position = "";
+      }
+      return one.from;
+    }
+
+    bars.forEach(function (one) {
+      one.when.addEventListener("change", function () {
+        one.from = undefined;
+      });
+    });
 
     function follow() {
       queued = false;
       var y = Math.max(0, scrollY);
-      var floating = y > stuckFrom;
-      if (Math.abs(y - lastY) < SCROLL_NOISE && floating) return;
-      bar.classList.toggle("is-floating", floating);
-      bar.classList.toggle("is-tucked", floating && y > lastY && !sheet.open);
-      lastY = y;
+      var moved = Math.abs(y - lastY) >= SCROLL_NOISE;
+      bars.forEach(function (one) {
+        var shown = one.when.matches;
+        var floating = shown && y > stuckFrom(one);
+        if (!moved && floating) return;
+        one.bar.classList.toggle("is-floating", floating);
+        one.bar.classList.toggle("is-tucked", floating && y > lastY && !sheet.open);
+      });
+      if (moved || y <= SCROLL_NOISE) lastY = y;
     }
 
     addEventListener(
