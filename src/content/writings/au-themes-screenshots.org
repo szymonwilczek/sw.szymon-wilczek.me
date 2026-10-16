@@ -54,17 +54,17 @@ Dark themes are best viewed on a dark page :)
 
 Muted greens and neutral tones for daylight.
 
-#+attr_html: :alt au-whispergrove-day theme code sample
-[[/assets/au-themes/au-whispergrove-day.png]]
+#+attr_html: :alt au-whispergrove-day theme code sample :loading lazy
+[[/assets/au-themes/au-whispergrove-day.png][file:/assets/au-themes/thumbs/au-whispergrove-day.webp]]
 
-#+attr_html: :alt au-whispergrove-day theme Magit sample
-[[/assets/au-themes/au-whispergrove-day-git.png]]
+#+attr_html: :alt au-whispergrove-day theme Magit sample :loading lazy
+[[/assets/au-themes/au-whispergrove-day-git.png][file:/assets/au-themes/thumbs/au-whispergrove-day-git.webp]]
 
-#+attr_html: :alt au-whispergrove-day theme Dired and completion sample
-[[/assets/au-themes/au-whispergrove-day-dired.png]]
+#+attr_html: :alt au-whispergrove-day theme Dired and completion sample :loading lazy
+[[/assets/au-themes/au-whispergrove-day-dired.png][file:/assets/au-themes/thumbs/au-whispergrove-day-dired.webp]]
 
-#+attr_html: :alt au-whispergrove-day theme Org sample
-[[/assets/au-themes/au-whispergrove-day-org.png]]
+#+attr_html: :alt au-whispergrove-day theme Org sample :loading lazy
+[[/assets/au-themes/au-whispergrove-day-org.png][file:/assets/au-themes/thumbs/au-whispergrove-day-org.webp]]
 
 ** au-whispergrove-morning
 :PROPERTIES:
@@ -73,17 +73,17 @@ Muted greens and neutral tones for daylight.
 
 A dimmer canvas than the other light themes, for early mornings or a room with little light.
 
-#+attr_html: :alt au-whispergrove-morning theme code sample
-[[/assets/au-themes/au-whispergrove-morning.png]]
+#+attr_html: :alt au-whispergrove-morning theme code sample :loading lazy
+[[/assets/au-themes/au-whispergrove-morning.png][file:/assets/au-themes/thumbs/au-whispergrove-morning.webp]]
 
-#+attr_html: :alt au-whispergrove-morning theme Magit sample
-[[/assets/au-themes/au-whispergrove-morning-git.png]]
+#+attr_html: :alt au-whispergrove-morning theme Magit sample :loading lazy
+[[/assets/au-themes/au-whispergrove-morning-git.png][file:/assets/au-themes/thumbs/au-whispergrove-morning-git.webp]]
 
-#+attr_html: :alt au-whispergrove-morning theme Dired and completion sample
-[[/assets/au-themes/au-whispergrove-morning-dired.png]]
+#+attr_html: :alt au-whispergrove-morning theme Dired and completion sample :loading lazy
+[[/assets/au-themes/au-whispergrove-morning-dired.png][file:/assets/au-themes/thumbs/au-whispergrove-morning-dired.webp]]
 
-#+attr_html: :alt au-whispergrove-morning theme Org sample
-[[/assets/au-themes/au-whispergrove-morning-org.png]]
+#+attr_html: :alt au-whispergrove-morning theme Org sample :loading lazy
+[[/assets/au-themes/au-whispergrove-morning-org.png][file:/assets/au-themes/thumbs/au-whispergrove-morning-org.webp]]
 
 ** au-aurum-day
 :PROPERTIES:
@@ -92,17 +92,17 @@ A dimmer canvas than the other light themes, for early mornings or a room with l
 
 Warm earth tones on a muted canvas.
 
-#+attr_html: :alt au-aurum-day theme code sample
-[[/assets/au-themes/au-aurum-day.png]]
+#+attr_html: :alt au-aurum-day theme code sample :loading lazy
+[[/assets/au-themes/au-aurum-day.png][file:/assets/au-themes/thumbs/au-aurum-day.webp]]
 
-#+attr_html: :alt au-aurum-day theme Magit sample
-[[/assets/au-themes/au-aurum-day-git.png]]
+#+attr_html: :alt au-aurum-day theme Magit sample :loading lazy
+[[/assets/au-themes/au-aurum-day-git.png][file:/assets/au-themes/thumbs/au-aurum-day-git.webp]]
 
-#+attr_html: :alt au-aurum-day theme Dired and completion sample
-[[/assets/au-themes/au-aurum-day-dired.png]]
+#+attr_html: :alt au-aurum-day theme Dired and completion sample :loading lazy
+[[/assets/au-themes/au-aurum-day-dired.png][file:/assets/au-themes/thumbs/au-aurum-day-dired.webp]]
 
-#+attr_html: :alt au-aurum-day theme Org sample
-[[/assets/au-themes/au-aurum-day-org.png]]
+#+attr_html: :alt au-aurum-day theme Org sample :loading lazy
+[[/assets/au-themes/au-aurum-day-org.png][file:/assets/au-themes/thumbs/au-aurum-day-org.webp]]
 
 ** au-parchment-day
 :PROPERTIES:
@@ -111,17 +111,17 @@ Warm earth tones on a muted canvas.
 
 Almost monochrome: italics and brightness steps instead of colour.
 
-#+attr_html: :alt au-parchment-day theme code sample
-[[/assets/au-themes/au-parchment-day.png]]
+#+attr_html: :alt au-parchment-day theme code sample :loading lazy
+[[/assets/au-themes/au-parchment-day.png][file:/assets/au-themes/thumbs/au-parchment-day.webp]]
 
-#+attr_html: :alt au-parchment-day theme Magit sample
-[[/assets/au-themes/au-parchment-day-git.png]]
+#+attr_html: :alt au-parchment-day theme Magit sample :loading lazy
+[[/assets/au-themes/au-parchment-day-git.png][file:/assets/au-themes/thumbs/au-parchment-day-git.webp]]
 
-#+attr_html: :alt au-parchment-day theme Dired and completion sample
-[[/assets/au-themes/au-parchment-day-dired.png]]
+#+attr_html: :alt au-parchment-day theme Dired and completion sample :loading lazy
+[[/assets/au-themes/au-parchment-day-dired.png][file:/assets/au-themes/thumbs/au-parchment-day-dired.webp]]
 
-#+attr_html: :alt au-parchment-day theme Org sample
-[[/assets/au-themes/au-parchment-day-org.png]]
+#+attr_html: :alt au-parchment-day theme Org sample :loading lazy
+[[/assets/au-themes/au-parchment-day-org.png][file:/assets/au-themes/thumbs/au-parchment-day-org.webp]]
 
 ** au-salina-day
 :PROPERTIES:
@@ -130,17 +130,17 @@ Almost monochrome: italics and brightness steps instead of colour.
 
 The coast in daylight: salt flats, sand dunes, deep cobalt ocean, driftwood and brine pink.
 
-#+attr_html: :alt au-salina-day theme code sample
-[[/assets/au-themes/au-salina-day.png]]
+#+attr_html: :alt au-salina-day theme code sample :loading lazy
+[[/assets/au-themes/au-salina-day.png][file:/assets/au-themes/thumbs/au-salina-day.webp]]
 
-#+attr_html: :alt au-salina-day theme Magit sample
-[[/assets/au-themes/au-salina-day-git.png]]
+#+attr_html: :alt au-salina-day theme Magit sample :loading lazy
+[[/assets/au-themes/au-salina-day-git.png][file:/assets/au-themes/thumbs/au-salina-day-git.webp]]
 
-#+attr_html: :alt au-salina-day theme Dired and completion sample
-[[/assets/au-themes/au-salina-day-dired.png]]
+#+attr_html: :alt au-salina-day theme Dired and completion sample :loading lazy
+[[/assets/au-themes/au-salina-day-dired.png][file:/assets/au-themes/thumbs/au-salina-day-dired.webp]]
 
-#+attr_html: :alt au-salina-day theme Org sample
-[[/assets/au-themes/au-salina-day-org.png]]
+#+attr_html: :alt au-salina-day theme Org sample :loading lazy
+[[/assets/au-themes/au-salina-day-org.png][file:/assets/au-themes/thumbs/au-salina-day-org.webp]]
 
 ** au-herbarium-day
 :PROPERTIES:
@@ -149,17 +149,17 @@ The coast in daylight: salt flats, sand dunes, deep cobalt ocean, driftwood and 
 
 Pressed sage leaves, dried lavender, oak-bark ink and chamomile pollen.
 
-#+attr_html: :alt au-herbarium-day theme code sample
-[[/assets/au-themes/au-herbarium-day.png]]
+#+attr_html: :alt au-herbarium-day theme code sample :loading lazy
+[[/assets/au-themes/au-herbarium-day.png][file:/assets/au-themes/thumbs/au-herbarium-day.webp]]
 
-#+attr_html: :alt au-herbarium-day theme Magit sample
-[[/assets/au-themes/au-herbarium-day-git.png]]
+#+attr_html: :alt au-herbarium-day theme Magit sample :loading lazy
+[[/assets/au-themes/au-herbarium-day-git.png][file:/assets/au-themes/thumbs/au-herbarium-day-git.webp]]
 
-#+attr_html: :alt au-herbarium-day theme Dired and completion sample
-[[/assets/au-themes/au-herbarium-day-dired.png]]
+#+attr_html: :alt au-herbarium-day theme Dired and completion sample :loading lazy
+[[/assets/au-themes/au-herbarium-day-dired.png][file:/assets/au-themes/thumbs/au-herbarium-day-dired.webp]]
 
-#+attr_html: :alt au-herbarium-day theme Org sample
-[[/assets/au-themes/au-herbarium-day-org.png]]
+#+attr_html: :alt au-herbarium-day theme Org sample :loading lazy
+[[/assets/au-themes/au-herbarium-day-org.png][file:/assets/au-themes/thumbs/au-herbarium-day-org.webp]]
 
 * Dark themes
 :PROPERTIES:
@@ -179,17 +179,17 @@ Pressed sage leaves, dried lavender, oak-bark ink and chamomile pollen.
 
 Muted greens and earth tones for unlit rooms.
 
-#+attr_html: :alt au-whispergrove-night theme code sample
-[[/assets/au-themes/au-whispergrove-night.png]]
+#+attr_html: :alt au-whispergrove-night theme code sample :loading lazy
+[[/assets/au-themes/au-whispergrove-night.png][file:/assets/au-themes/thumbs/au-whispergrove-night.webp]]
 
-#+attr_html: :alt au-whispergrove-night theme Magit sample
-[[/assets/au-themes/au-whispergrove-night-git.png]]
+#+attr_html: :alt au-whispergrove-night theme Magit sample :loading lazy
+[[/assets/au-themes/au-whispergrove-night-git.png][file:/assets/au-themes/thumbs/au-whispergrove-night-git.webp]]
 
-#+attr_html: :alt au-whispergrove-night theme Dired and completion sample
-[[/assets/au-themes/au-whispergrove-night-dired.png]]
+#+attr_html: :alt au-whispergrove-night theme Dired and completion sample :loading lazy
+[[/assets/au-themes/au-whispergrove-night-dired.png][file:/assets/au-themes/thumbs/au-whispergrove-night-dired.webp]]
 
-#+attr_html: :alt au-whispergrove-night theme Org sample
-[[/assets/au-themes/au-whispergrove-night-org.png]]
+#+attr_html: :alt au-whispergrove-night theme Org sample :loading lazy
+[[/assets/au-themes/au-whispergrove-night-org.png][file:/assets/au-themes/thumbs/au-whispergrove-night-org.webp]]
 
 ** au-aurum-night
 :PROPERTIES:
@@ -198,17 +198,17 @@ Muted greens and earth tones for unlit rooms.
 
 Amber and gold on a deep background, with the least blue light of the dark themes.
 
-#+attr_html: :alt au-aurum-night theme code sample
-[[/assets/au-themes/au-aurum-night.png]]
+#+attr_html: :alt au-aurum-night theme code sample :loading lazy
+[[/assets/au-themes/au-aurum-night.png][file:/assets/au-themes/thumbs/au-aurum-night.webp]]
 
-#+attr_html: :alt au-aurum-night theme Magit sample
-[[/assets/au-themes/au-aurum-night-git.png]]
+#+attr_html: :alt au-aurum-night theme Magit sample :loading lazy
+[[/assets/au-themes/au-aurum-night-git.png][file:/assets/au-themes/thumbs/au-aurum-night-git.webp]]
 
-#+attr_html: :alt au-aurum-night theme Dired and completion sample
-[[/assets/au-themes/au-aurum-night-dired.png]]
+#+attr_html: :alt au-aurum-night theme Dired and completion sample :loading lazy
+[[/assets/au-themes/au-aurum-night-dired.png][file:/assets/au-themes/thumbs/au-aurum-night-dired.webp]]
 
-#+attr_html: :alt au-aurum-night theme Org sample
-[[/assets/au-themes/au-aurum-night-org.png]]
+#+attr_html: :alt au-aurum-night theme Org sample :loading lazy
+[[/assets/au-themes/au-aurum-night-org.png][file:/assets/au-themes/thumbs/au-aurum-night-org.webp]]
 
 ** au-parchment-night
 :PROPERTIES:
@@ -217,17 +217,17 @@ Amber and gold on a deep background, with the least blue light of the dark theme
 
 Almost monochrome: italics and brightness steps instead of colour.
 
-#+attr_html: :alt au-parchment-night theme code sample
-[[/assets/au-themes/au-parchment-night.png]]
+#+attr_html: :alt au-parchment-night theme code sample :loading lazy
+[[/assets/au-themes/au-parchment-night.png][file:/assets/au-themes/thumbs/au-parchment-night.webp]]
 
-#+attr_html: :alt au-parchment-night theme Magit sample
-[[/assets/au-themes/au-parchment-night-git.png]]
+#+attr_html: :alt au-parchment-night theme Magit sample :loading lazy
+[[/assets/au-themes/au-parchment-night-git.png][file:/assets/au-themes/thumbs/au-parchment-night-git.webp]]
 
-#+attr_html: :alt au-parchment-night theme Dired and completion sample
-[[/assets/au-themes/au-parchment-night-dired.png]]
+#+attr_html: :alt au-parchment-night theme Dired and completion sample :loading lazy
+[[/assets/au-themes/au-parchment-night-dired.png][file:/assets/au-themes/thumbs/au-parchment-night-dired.webp]]
 
-#+attr_html: :alt au-parchment-night theme Org sample
-[[/assets/au-themes/au-parchment-night-org.png]]
+#+attr_html: :alt au-parchment-night theme Org sample :loading lazy
+[[/assets/au-themes/au-parchment-night-org.png][file:/assets/au-themes/thumbs/au-parchment-night-org.webp]]
 
 ** au-salina-night
 :PROPERTIES:
@@ -236,17 +236,17 @@ Almost monochrome: italics and brightness steps instead of colour.
 
 Midnight ocean, dark basalt, phosphorescent turquoise and maritime coral.
 
-#+attr_html: :alt au-salina-night theme code sample
-[[/assets/au-themes/au-salina-night.png]]
+#+attr_html: :alt au-salina-night theme code sample :loading lazy
+[[/assets/au-themes/au-salina-night.png][file:/assets/au-themes/thumbs/au-salina-night.webp]]
 
-#+attr_html: :alt au-salina-night theme Magit sample
-[[/assets/au-themes/au-salina-night-git.png]]
+#+attr_html: :alt au-salina-night theme Magit sample :loading lazy
+[[/assets/au-themes/au-salina-night-git.png][file:/assets/au-themes/thumbs/au-salina-night-git.webp]]
 
-#+attr_html: :alt au-salina-night theme Dired and completion sample
-[[/assets/au-themes/au-salina-night-dired.png]]
+#+attr_html: :alt au-salina-night theme Dired and completion sample :loading lazy
+[[/assets/au-themes/au-salina-night-dired.png][file:/assets/au-themes/thumbs/au-salina-night-dired.webp]]
 
-#+attr_html: :alt au-salina-night theme Org sample
-[[/assets/au-themes/au-salina-night-org.png]]
+#+attr_html: :alt au-salina-night theme Org sample :loading lazy
+[[/assets/au-themes/au-salina-night-org.png][file:/assets/au-themes/thumbs/au-salina-night-org.webp]]
 
 ** au-herbarium-night
 :PROPERTIES:
@@ -255,17 +255,17 @@ Midnight ocean, dark basalt, phosphorescent turquoise and maritime coral.
 
 Pressed sage, dried lavender, oak-gall ink, terracotta flora and chamomile pollen.
 
-#+attr_html: :alt au-herbarium-night theme code sample
-[[/assets/au-themes/au-herbarium-night.png]]
+#+attr_html: :alt au-herbarium-night theme code sample :loading lazy
+[[/assets/au-themes/au-herbarium-night.png][file:/assets/au-themes/thumbs/au-herbarium-night.webp]]
 
-#+attr_html: :alt au-herbarium-night theme Magit sample
-[[/assets/au-themes/au-herbarium-night-git.png]]
+#+attr_html: :alt au-herbarium-night theme Magit sample :loading lazy
+[[/assets/au-themes/au-herbarium-night-git.png][file:/assets/au-themes/thumbs/au-herbarium-night-git.webp]]
 
-#+attr_html: :alt au-herbarium-night theme Dired and completion sample
-[[/assets/au-themes/au-herbarium-night-dired.png]]
+#+attr_html: :alt au-herbarium-night theme Dired and completion sample :loading lazy
+[[/assets/au-themes/au-herbarium-night-dired.png][file:/assets/au-themes/thumbs/au-herbarium-night-dired.webp]]
 
-#+attr_html: :alt au-herbarium-night theme Org sample
-[[/assets/au-themes/au-herbarium-night-org.png]]
+#+attr_html: :alt au-herbarium-night theme Org sample :loading lazy
+[[/assets/au-themes/au-herbarium-night-org.png][file:/assets/au-themes/thumbs/au-herbarium-night-org.webp]]
 
 As always:
 
