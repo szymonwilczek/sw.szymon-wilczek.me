@@ -251,6 +251,31 @@ function uniorgHeadlines() {
 function rehypeOrgEnhancements() {
   return (tree: any) => {
     visit(tree, "element", (node: any, index: number | undefined, parent: any) => {
+      // Image links: [[full.png][file:thumb.webp]] becomes a linked image,
+      // as in Org's own HTML export.
+      // #+attr_html moves onto the <img>
+      if (node.tagName === "a" && node.children?.length === 1 && node.children[0].type === "text") {
+        const match = node.children[0].value
+          .trim()
+          .match(/^(?:file:)?(\S+\.(?:png|jpe?g|webp|avif|gif|svg))$/i);
+        if (match) {
+          const { alt, loading, ...linkProps } = node.properties || {};
+          node.properties = linkProps;
+          node.children = [
+            {
+              type: "element",
+              tagName: "img",
+              properties: { src: match[1], alt: alt ?? "", ...(loading ? { loading } : {}) },
+              children: [],
+            },
+          ];
+          if (parent?.tagName === "p" && parent.properties) {
+            delete parent.properties.alt;
+            delete parent.properties.loading;
+          }
+        }
+      }
+
       // Example blocks
       if (
         node.tagName === "div" &&
