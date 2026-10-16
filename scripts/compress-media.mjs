@@ -107,7 +107,7 @@ async function generateThumbnail(filePath, force = false) {
   };
 }
 
-async function compressImageFile(filePath, force = false) {
+async function compressImageFile(filePath, force = false, thumbsOnly = false) {
   const stat = fs.statSync(filePath);
   const buffer = fs.readFileSync(filePath);
   const meta = await sharp(buffer).metadata();
@@ -118,7 +118,7 @@ async function compressImageFile(filePath, force = false) {
   let compressed = false;
   let newMasterSize = stat.size;
 
-  if (force || isWide || isHeavy || meta.format !== "jpeg") {
+  if (!thumbsOnly && (force || isWide || isHeavy || meta.format !== "jpeg")) {
     const optimizedBuffer = await sharp(buffer)
       .rotate() // auto-orient from EXIF
       .resize({
@@ -154,12 +154,16 @@ async function compressImageFile(filePath, force = false) {
     thumbSize: thumbRes.size,
     thumbCreated: !thumbRes.skipped,
     oldDims: `${meta.width}x${meta.height}`,
-    newDims: `${Math.min(meta.width || 0, MAX_DIMENSION)}x${Math.min(meta.height || 0, MAX_DIMENSION)}`,
+    newDims: thumbsOnly
+      ? `${meta.width}x${meta.height}`
+      : `${Math.min(meta.width || 0, MAX_DIMENSION)}x${Math.min(meta.height || 0, MAX_DIMENSION)}`,
   };
 }
 
 async function main() {
-  const targetArg = process.argv[2];
+  const args = process.argv.slice(2);
+  const thumbsOnly = args.includes("--thumbs-only");
+  const targetArg = args.find((arg) => !arg.startsWith("--"));
   const imagesBaseDir = path.resolve("./public/images");
 
   let filesToProcess = [];
@@ -212,7 +216,7 @@ async function main() {
   for (const file of filesToProcess) {
     const relPath = path.relative(process.cwd(), file);
     try {
-      const result = await compressImageFile(file, isExplicitTarget);
+      const result = await compressImageFile(file, isExplicitTarget, thumbsOnly);
       totalOld += result.oldSize;
       totalNew += result.newSize;
 
