@@ -5,12 +5,7 @@
     "variant": "day",
     "polarity": "light",
     "description": "Coastal daylight theme with sea-salt and dune tones.",
-    "swatch": [
-      "#dad8cf",
-      "#202826",
-      "#924626",
-      "#9c3a2e"
-    ]
+    "swatch": ["#dad8cf", "#202826", "#924626", "#9c3a2e"]
   },
   {
     "id": "salina-night",
@@ -18,19 +13,14 @@
     "variant": "night",
     "polarity": "dark",
     "description": "Nocturnal coastal theme with deep oceanic and coral tones.",
-    "swatch": [
-      "#101414",
-      "#8e9fa2",
-      "#ac6a3e",
-      "#ba483e"
-    ]
+    "swatch": ["#101414", "#8e9fa2", "#ac6a3e", "#ba483e"]
   },
   {
     "id": "aurum-day",
     "family": "aurum",
     "variant": "day",
     "polarity": "light",
-    "description": "Warm daylight theme with zero blue-light hazard, calibrated for photophobia.",
+    "description": "Warm daylight theme with earth tones, calibrated for photophobia.",
     "swatch": ["#ded8cc", "#2b2720", "#8c5a08", "#a54b32"]
   },
   {
@@ -38,7 +28,7 @@
     "family": "aurum",
     "variant": "night",
     "polarity": "dark",
-    "description": "Warm dark theme without blue-light hazard, calibrated for nocturnal photophobia.",
+    "description": "Warm dark theme with a low blue-light share, calibrated for nocturnal photophobia.",
     "swatch": ["#12100e", "#ada490", "#dca032", "#b84c3e"]
   },
   {
