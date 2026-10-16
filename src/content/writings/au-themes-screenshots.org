@@ -10,9 +10,9 @@
 :CUSTOM_ID: about
 :END:
 
-au-themes are calm, low-glare colour themes for GNU Emacs, made first of all
-for autistic people and for anyone who finds most themes too loud to read for
-long. The code and the test suite live at [[https://github.com/szymonwilczek/au-themes][szymonwilczek/au-themes]]. README
+[[https://github.com/szymonwilczek/au-themes][au-themes]] are calm, low-glare colour themes for GNU
+Emacs, made first of all for autistic people and for anyone who finds most
+themes too loud to read for long. The code and the test suite live at [[https://github.com/szymonwilczek/au-themes][szymonwilczek/au-themes]]. README
 explains how the colours are chosen and checked.
 
 The screenshots below show the themes as they are on the =main= branch today
