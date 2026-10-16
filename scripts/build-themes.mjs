@@ -9,10 +9,8 @@ const MORE_OUT = "src/styles/au-themes-more.css";
 const JSON_OUT = "src/data/au-themes.json";
 
 const FAMILY_ORDER = ["salina"];
-const VARIANT_ORDER = ["morning", "day", "evening", "twilight", "night"];
+const VARIANT_ORDER = ["morning", "day", "night"];
 const DEFAULT_THEMES = { light: "salina-day", dark: "salina-night" };
-// Kept in the Emacs package but not offered here.
-const LEFT_OUT = ["aurum-twilight", "whispergrove-evening"];
 
 function parseTheme(file) {
   const source = fs.readFileSync(file, "utf8");
@@ -129,7 +127,6 @@ const themes = fs
   .readdirSync(SOURCE_DIR)
   .filter((file) => /^au-.+-theme\.el$/.test(file))
   .map((file) => parseTheme(path.join(SOURCE_DIR, file)))
-  .filter((theme) => !LEFT_OUT.includes(theme.id))
   .sort(compareThemes);
 
 fs.mkdirSync(path.dirname(JSON_OUT), { recursive: true });
