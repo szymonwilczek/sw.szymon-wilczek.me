@@ -1,0 +1,272 @@
+#+TITLE: Screenshots of au-themes for GNU Emacs
+#+AUTHOR: Szymon Wilczek
+#+DATE: <2026-10-17 Sat>
+#+CATEGORY: Emacs
+#+TAGS: emacs themes accessibility
+#+DESCRIPTION: Every au-theme in Emacs Lisp, C, Magit, Dired and Org, as it looks in my own Emacs.
+
+* About these pictures
+:PROPERTIES:
+:CUSTOM_ID: about
+:END:
+
+au-themes are calm, low-glare colour themes for GNU Emacs, made first of all
+for autistic people and for anyone who finds most themes too loud to read for
+long. The code and the test suite live at [[https://github.com/szymonwilczek/au-themes][szymonwilczek/au-themes]]. README
+explains how the colours are chosen and checked.
+
+The screenshots below show the themes as they are on the =main= branch today
+(17.10.2026). They are taken in my everyday Emacs, not in a clean one: the font
+is Typus Mono 92 (the story is in [[/writings/the-8-pixel-obsession-typus-mono][8-Pixel Obsession]]), the tabs come
+from [[https://github.com/szymonwilczek/bufferline.el][bufferline.el]], and the mode line, Evil and the completion stack
+are my own setup. So this is what the themes look like in real use, not
+in a demo.
+
+Each theme gets four pictures:
+
+1. *Code*: Emacs Lisp from =au-themes.el= next to a small C file in
+   =c-ts-mode=.
+2. *Git*: Magit status with staged and unstaged changes, next to a
+   commit that changed a palette.
+3. *Dired and completion*: a Dired listing, a =*Help*= buffer, and =M-x=
+   with Vertico and Marginalia.
+4. *Org*: a release plan with headings, TODO keywords, tags, a table,
+   a source block and a quote, next to the week agenda.
+
+Dark themes are best viewed on a dark page :)
+
+* Light themes
+:PROPERTIES:
+:CUSTOM_ID: light-themes
+:END:
+
+- [[#au-whispergrove-day][au-whispergrove-day]]
+- [[#au-whispergrove-morning][au-whispergrove-morning]]
+- [[#au-aurum-day][au-aurum-day]]
+- [[#au-parchment-day][au-parchment-day]]
+- [[#au-salina-day][au-salina-day]]
+- [[#au-herbarium-day][au-herbarium-day]]
+
+** au-whispergrove-day
+:PROPERTIES:
+:CUSTOM_ID: au-whispergrove-day
+:END:
+
+Muted greens and neutral tones for daylight.
+
+#+attr_html: :alt au-whispergrove-day theme code sample
+[[/assets/au-themes/au-whispergrove-day.png]]
+
+#+attr_html: :alt au-whispergrove-day theme Magit sample
+[[/assets/au-themes/au-whispergrove-day-git.png]]
+
+#+attr_html: :alt au-whispergrove-day theme Dired and completion sample
+[[/assets/au-themes/au-whispergrove-day-dired.png]]
+
+#+attr_html: :alt au-whispergrove-day theme Org sample
+[[/assets/au-themes/au-whispergrove-day-org.png]]
+
+** au-whispergrove-morning
+:PROPERTIES:
+:CUSTOM_ID: au-whispergrove-morning
+:END:
+
+A dimmer canvas than the other light themes, for early mornings or a room with little light.
+
+#+attr_html: :alt au-whispergrove-morning theme code sample
+[[/assets/au-themes/au-whispergrove-morning.png]]
+
+#+attr_html: :alt au-whispergrove-morning theme Magit sample
+[[/assets/au-themes/au-whispergrove-morning-git.png]]
+
+#+attr_html: :alt au-whispergrove-morning theme Dired and completion sample
+[[/assets/au-themes/au-whispergrove-morning-dired.png]]
+
+#+attr_html: :alt au-whispergrove-morning theme Org sample
+[[/assets/au-themes/au-whispergrove-morning-org.png]]
+
+** au-aurum-day
+:PROPERTIES:
+:CUSTOM_ID: au-aurum-day
+:END:
+
+Warm earth tones on a muted canvas.
+
+#+attr_html: :alt au-aurum-day theme code sample
+[[/assets/au-themes/au-aurum-day.png]]
+
+#+attr_html: :alt au-aurum-day theme Magit sample
+[[/assets/au-themes/au-aurum-day-git.png]]
+
+#+attr_html: :alt au-aurum-day theme Dired and completion sample
+[[/assets/au-themes/au-aurum-day-dired.png]]
+
+#+attr_html: :alt au-aurum-day theme Org sample
+[[/assets/au-themes/au-aurum-day-org.png]]
+
+** au-parchment-day
+:PROPERTIES:
+:CUSTOM_ID: au-parchment-day
+:END:
+
+Almost monochrome: italics and brightness steps instead of colour.
+
+#+attr_html: :alt au-parchment-day theme code sample
+[[/assets/au-themes/au-parchment-day.png]]
+
+#+attr_html: :alt au-parchment-day theme Magit sample
+[[/assets/au-themes/au-parchment-day-git.png]]
+
+#+attr_html: :alt au-parchment-day theme Dired and completion sample
+[[/assets/au-themes/au-parchment-day-dired.png]]
+
+#+attr_html: :alt au-parchment-day theme Org sample
+[[/assets/au-themes/au-parchment-day-org.png]]
+
+** au-salina-day
+:PROPERTIES:
+:CUSTOM_ID: au-salina-day
+:END:
+
+The coast in daylight: salt flats, sand dunes, deep cobalt ocean, driftwood and brine pink.
+
+#+attr_html: :alt au-salina-day theme code sample
+[[/assets/au-themes/au-salina-day.png]]
+
+#+attr_html: :alt au-salina-day theme Magit sample
+[[/assets/au-themes/au-salina-day-git.png]]
+
+#+attr_html: :alt au-salina-day theme Dired and completion sample
+[[/assets/au-themes/au-salina-day-dired.png]]
+
+#+attr_html: :alt au-salina-day theme Org sample
+[[/assets/au-themes/au-salina-day-org.png]]
+
+** au-herbarium-day
+:PROPERTIES:
+:CUSTOM_ID: au-herbarium-day
+:END:
+
+Pressed sage leaves, dried lavender, oak-bark ink and chamomile pollen.
+
+#+attr_html: :alt au-herbarium-day theme code sample
+[[/assets/au-themes/au-herbarium-day.png]]
+
+#+attr_html: :alt au-herbarium-day theme Magit sample
+[[/assets/au-themes/au-herbarium-day-git.png]]
+
+#+attr_html: :alt au-herbarium-day theme Dired and completion sample
+[[/assets/au-themes/au-herbarium-day-dired.png]]
+
+#+attr_html: :alt au-herbarium-day theme Org sample
+[[/assets/au-themes/au-herbarium-day-org.png]]
+
+* Dark themes
+:PROPERTIES:
+:CUSTOM_ID: dark-themes
+:END:
+
+- [[#au-whispergrove-night][au-whispergrove-night]]
+- [[#au-aurum-night][au-aurum-night]]
+- [[#au-parchment-night][au-parchment-night]]
+- [[#au-salina-night][au-salina-night]]
+- [[#au-herbarium-night][au-herbarium-night]]
+
+** au-whispergrove-night
+:PROPERTIES:
+:CUSTOM_ID: au-whispergrove-night
+:END:
+
+Muted greens and earth tones for unlit rooms.
+
+#+attr_html: :alt au-whispergrove-night theme code sample
+[[/assets/au-themes/au-whispergrove-night.png]]
+
+#+attr_html: :alt au-whispergrove-night theme Magit sample
+[[/assets/au-themes/au-whispergrove-night-git.png]]
+
+#+attr_html: :alt au-whispergrove-night theme Dired and completion sample
+[[/assets/au-themes/au-whispergrove-night-dired.png]]
+
+#+attr_html: :alt au-whispergrove-night theme Org sample
+[[/assets/au-themes/au-whispergrove-night-org.png]]
+
+** au-aurum-night
+:PROPERTIES:
+:CUSTOM_ID: au-aurum-night
+:END:
+
+Amber and gold on a deep background, with the least blue light of the dark themes.
+
+#+attr_html: :alt au-aurum-night theme code sample
+[[/assets/au-themes/au-aurum-night.png]]
+
+#+attr_html: :alt au-aurum-night theme Magit sample
+[[/assets/au-themes/au-aurum-night-git.png]]
+
+#+attr_html: :alt au-aurum-night theme Dired and completion sample
+[[/assets/au-themes/au-aurum-night-dired.png]]
+
+#+attr_html: :alt au-aurum-night theme Org sample
+[[/assets/au-themes/au-aurum-night-org.png]]
+
+** au-parchment-night
+:PROPERTIES:
+:CUSTOM_ID: au-parchment-night
+:END:
+
+Almost monochrome: italics and brightness steps instead of colour.
+
+#+attr_html: :alt au-parchment-night theme code sample
+[[/assets/au-themes/au-parchment-night.png]]
+
+#+attr_html: :alt au-parchment-night theme Magit sample
+[[/assets/au-themes/au-parchment-night-git.png]]
+
+#+attr_html: :alt au-parchment-night theme Dired and completion sample
+[[/assets/au-themes/au-parchment-night-dired.png]]
+
+#+attr_html: :alt au-parchment-night theme Org sample
+[[/assets/au-themes/au-parchment-night-org.png]]
+
+** au-salina-night
+:PROPERTIES:
+:CUSTOM_ID: au-salina-night
+:END:
+
+Midnight ocean, dark basalt, phosphorescent turquoise and maritime coral.
+
+#+attr_html: :alt au-salina-night theme code sample
+[[/assets/au-themes/au-salina-night.png]]
+
+#+attr_html: :alt au-salina-night theme Magit sample
+[[/assets/au-themes/au-salina-night-git.png]]
+
+#+attr_html: :alt au-salina-night theme Dired and completion sample
+[[/assets/au-themes/au-salina-night-dired.png]]
+
+#+attr_html: :alt au-salina-night theme Org sample
+[[/assets/au-themes/au-salina-night-org.png]]
+
+** au-herbarium-night
+:PROPERTIES:
+:CUSTOM_ID: au-herbarium-night
+:END:
+
+Pressed sage, dried lavender, oak-gall ink, terracotta flora and chamomile pollen.
+
+#+attr_html: :alt au-herbarium-night theme code sample
+[[/assets/au-themes/au-herbarium-night.png]]
+
+#+attr_html: :alt au-herbarium-night theme Magit sample
+[[/assets/au-themes/au-herbarium-night-git.png]]
+
+#+attr_html: :alt au-herbarium-night theme Dired and completion sample
+[[/assets/au-themes/au-herbarium-night-dired.png]]
+
+#+attr_html: :alt au-herbarium-night theme Org sample
+[[/assets/au-themes/au-herbarium-night-org.png]]
+
+As always:
+
+~Signed-off-by: Szymon Wilczek <swilczek.lx@gmail.com>~
