@@ -17,6 +17,7 @@ export function parseOrgMetadata(content: string) {
         if (key === "title") meta.title = value;
         else if (key === "date") meta.date = value;
         else if (key === "pubdate") meta.pubDate = value;
+        else if (key === "updated") meta.updatedDate = value;
         else if (key === "description") meta.description = value;
         else if (key === "category") meta.category = value;
         else if (key === "tags") meta.tags = value;
