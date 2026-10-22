@@ -1,9 +1,12 @@
+html {
+  background-color: var(--bg-main);
+}
+
 body {
   font-family: var(--font-body);
   font-size: 1.125rem;
   line-height: 1.7;
   color: var(--fg-main);
-  background-color: var(--bg-main);
 }
 
 h1,
