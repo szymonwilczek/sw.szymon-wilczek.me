@@ -305,6 +305,7 @@ for (const theme of auThemes) {
     }
 
     function open() {
+      window.auTheme.warm();
       var menu = document.getElementById("menu-sheet");
       if (menu && menu.open) menu.close();
       query.value = "";
