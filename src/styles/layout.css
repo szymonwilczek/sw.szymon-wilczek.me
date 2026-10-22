@@ -23,6 +23,10 @@
   }
 }
 
+@view-transition {
+  navigation: auto;
+}
+
 /* new theme floods out from the theme button */
 ::view-transition-old(root),
 ::view-transition-new(root) {
