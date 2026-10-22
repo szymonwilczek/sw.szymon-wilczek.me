@@ -309,22 +309,6 @@ const {
         apply(read());
       })();
     </script>
-    <script is:inline>
-      (function () {
-        var asked = new URLSearchParams(location.search).get("season");
-        var month = new Date().getMonth();
-        var byMonth =
-          month >= 2 && month <= 4
-            ? "spring"
-            : month >= 5 && month <= 7
-              ? "summer"
-              : month >= 8 && month <= 10
-                ? "autumn"
-                : "winter";
-        var known = ["spring", "summer", "autumn", "winter"];
-        document.documentElement.dataset.season = known.indexOf(asked) === -1 ? byMonth : asked;
-      })();
-    </script>
     <script type="speculationrules">
       {
         "prerender": [
@@ -427,6 +411,8 @@ const {
       earn("狼");
       earn(SEASONS[season()].glyph);
 
+      // season's ornament shows on the dividers
+      document.documentElement.dataset.season = season();
       try {
         if (season() === "autumn" && !sessionStorage.getItem("kigo-fell")) {
           sessionStorage.setItem("kigo-fell", "1");
