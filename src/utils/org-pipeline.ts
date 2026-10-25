@@ -1,0 +1,480 @@
+import { unified } from "unified";
+import uniorgParse from "uniorg-parse";
+import uniorgRehype from "uniorg-rehype";
+import rehypeStringify from "rehype-stringify";
+import { visit } from "unist-util-visit";
+
+export const auTheme = {
+  name: "au",
+  type: "dark" as const,
+  colors: {
+    "editor.background": "var(--bg-dim)",
+    "editor.foreground": "var(--fg-main)",
+  },
+  tokenColors: [
+    {
+      scope: ["comment", "comment.line", "comment.block", "punctuation.definition.comment"],
+      settings: { foreground: "var(--comment)", fontStyle: "italic" },
+    },
+    {
+      scope: [
+        "string",
+        "string.quoted",
+        "string.quoted.double",
+        "string.quoted.single",
+        "punctuation.definition.string",
+      ],
+      settings: { foreground: "var(--string)" },
+    },
+    {
+      scope: ["constant.numeric"],
+      settings: { foreground: "var(--number)" },
+    },
+    {
+      scope: [
+        "constant.language",
+        "constant.language.nil",
+        "constant.boolean",
+        "constant.character",
+        "constant.other",
+        "constant.other.quoted.symbol",
+        "punctuation.definition.symbol",
+        "punctuation.definition.quoted.symbol",
+        "variable.other.constant",
+      ],
+      settings: { foreground: "var(--constant)" },
+    },
+    {
+      scope: [
+        "constant.keyword",
+        "constant.other.keyword",
+        "punctuation.definition.keyword",
+        "entity.name.tag",
+        "meta.tag",
+      ],
+      settings: { foreground: "var(--builtin)" },
+    },
+    {
+      scope: [
+        "keyword",
+        "keyword.control",
+        "keyword.operator.word",
+        "keyword.other",
+        "storage",
+        "storage.type",
+        "storage.binding",
+        "storage.modifier",
+      ],
+      settings: { foreground: "var(--keyword)" },
+    },
+    {
+      scope: [
+        "support.function",
+        "support.macro",
+        "support.function.emacs.lisp",
+        "keyword.declaration",
+        "entity.function.name",
+        "entity.name.function",
+        "meta.function-call",
+        "variable.function",
+      ],
+      settings: { foreground: "var(--fnname)" },
+    },
+    {
+      scope: [
+        "variable",
+        "variable.other",
+        "variable.parameter",
+        "support.variable",
+        "entity.name.variable",
+      ],
+      settings: { foreground: "var(--variable)" },
+    },
+    {
+      scope: ["entity.name.type", "entity.name.class", "support.type", "support.class"],
+      settings: { foreground: "var(--type)" },
+    },
+    {
+      scope: ["entity.other.attribute-name", "support.type.property-name"],
+      settings: { foreground: "var(--property)" },
+    },
+    {
+      scope: [
+        "keyword.operator",
+        "punctuation.separator",
+        "punctuation.terminator",
+        "punctuation.section",
+      ],
+      settings: { foreground: "var(--operator)" },
+    },
+  ],
+};
+
+export function normalizeLang(name: string): string {
+  const lang = name.toLowerCase();
+  if (lang === "nasm" || lang === "assembly") return "asm";
+  if (lang === "sh" || lang === "shell") return "bash";
+  if (lang === "emacs-lisp" || lang === "lisp") return "elisp";
+  if (lang === "commonlisp") return "common-lisp";
+  return lang;
+}
+
+function rehypeShikiHighlight(highlighter: any) {
+  const loadedLangs = highlighter.getLoadedLanguages();
+
+  return (tree: any) => {
+    visit(tree, "element", (node: any, index: number | undefined, parent: any) => {
+      if (node.tagName === "pre") {
+        const codeNode = node.children?.find((child: any) => child.tagName === "code");
+        if (codeNode) {
+          const className = codeNode.properties?.className || [];
+          const classList = Array.isArray(className) ? className : [className];
+          const langClass = classList.find(
+            (classToken: string) =>
+              typeof classToken === "string" && classToken.startsWith("language-"),
+          );
+          const lang = normalizeLang(langClass ? langClass.replace("language-", "") : "text");
+
+          let codeText = "";
+          function extractText(part: any) {
+            if (part.type === "text") codeText += part.value;
+            if (part.children) part.children.forEach(extractText);
+          }
+          extractText(codeNode);
+
+          try {
+            const hast = highlighter.codeToHast(codeText.trimEnd(), {
+              lang: loadedLangs.includes(lang) ? lang : "text",
+              theme: "au",
+            });
+
+            if (hast && parent && typeof index === "number") {
+              parent.children[index] = hast;
+            }
+          } catch (error) {
+            // keep default unhighlighted pre/code on unexpected error
+          }
+        }
+      }
+    });
+  };
+}
+
+function slugify(text: string): string {
+  return (text || "")
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/\[\[.*?\]\[(.*?)\]\]/g, "$1")
+    .replace(/\[\[(.*?)\]\]/g, "$1")
+    .replace(/[^\w\s-]/g, "")
+    .replace(/[\s_-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function uniorgHeadlines() {
+  return (tree: any) => {
+    const idCounts = new Map<string, number>();
+
+    visit(tree, "section", (node: any) => {
+      let customId: string | null = null;
+      const drawer = node.children?.find((child: any) => child.type === "property-drawer");
+      if (drawer) {
+        const prop = drawer.children?.find(
+          (property: any) => property.type === "node-property" && property.key === "CUSTOM_ID",
+        );
+        if (prop && prop.value) {
+          customId = prop.value.trim();
+        }
+      }
+
+      const headline = node.children?.find((child: any) => child.type === "headline");
+      if (headline) {
+        let baseId = customId || slugify(headline.rawValue || "section");
+        if (!baseId) baseId = "section";
+
+        let finalId = baseId;
+        const count = idCounts.get(baseId) || 0;
+        if (count > 0) {
+          finalId = `${baseId}-${count}`;
+        }
+        idCounts.set(baseId, count + 1);
+
+        headline.data = headline.data || {};
+        headline.data.hProperties = headline.data.hProperties || {};
+        headline.data.hProperties.id = finalId;
+      }
+    });
+  };
+}
+
+function rehypeOrgEnhancements() {
+  return (tree: any) => {
+    visit(tree, "element", (node: any, index: number | undefined, parent: any) => {
+      // Image links: [[full.png][file:thumb.webp]] becomes a linked image,
+      // as in Org's own HTML export
+      // #+attr_html moves onto the <img>
+      if (node.tagName === "a" && node.children?.length === 1 && node.children[0].type === "text") {
+        const match = node.children[0].value
+          .trim()
+          .match(/^(?:file:)?(\S+\.(?:png|jpe?g|webp|avif|gif|svg))$/i);
+        if (match) {
+          const { alt, loading, ...linkProps } = node.properties || {};
+          node.properties = linkProps;
+          node.children = [
+            {
+              type: "element",
+              tagName: "img",
+              properties: { src: match[1], alt: alt ?? "", ...(loading ? { loading } : {}) },
+              children: [],
+            },
+          ];
+          if (parent?.tagName === "p" && parent.properties) {
+            delete parent.properties.alt;
+            delete parent.properties.loading;
+          }
+        }
+      }
+
+      // Example blocks
+      if (
+        node.tagName === "div" &&
+        node.properties?.className &&
+        (node.properties.className.includes("example") ||
+          (Array.isArray(node.properties.className) &&
+            node.properties.className.some((classToken: string) => classToken.includes("example"))))
+      ) {
+        node.tagName = "pre";
+        node.properties.className = ["example-block"];
+        const children = node.children || [];
+        node.children = [
+          {
+            type: "element",
+            tagName: "code",
+            properties: {},
+            children: children,
+          },
+        ];
+      }
+
+      // Headings and Anchor Links
+      if (/^h[1-6]$/.test(node.tagName)) {
+        const level = Number(node.tagName[1]);
+        if (level < 6) node.tagName = `h${level + 1}`;
+
+        const id = node.properties?.id;
+        if (id) {
+          node.children = node.children || [];
+          node.children.push({
+            type: "element",
+            tagName: "a",
+            properties: {
+              href: `#${id}`,
+              className: ["heading-anchor"],
+              "aria-label": "Link to this section",
+            },
+            children: [{ type: "text", value: "#" }],
+          });
+        }
+
+        if (node.children && node.children.length > 0) {
+          for (const child of node.children) {
+            if (child.properties?.className) {
+              const classes = Array.isArray(child.properties.className)
+                ? child.properties.className
+                : [child.properties.className];
+              if (
+                classes.some(
+                  (classToken: string) =>
+                    classToken.includes("todo-keyword") ||
+                    classToken === "TODO" ||
+                    classToken === "DONE",
+                )
+              ) {
+                child.properties.className = ["todo-badge", ...classes];
+              }
+              if (classes.some((classToken: string) => classToken.includes("priority"))) {
+                child.properties.className = ["priority-badge", ...classes];
+              }
+            }
+          }
+
+          const first = node.children[0];
+          if (first.type === "text") {
+            const match = first.value.match(
+              /^(WAITING|NEXT|HOLD|CANCELLED|TODO|DONE)\s+(\[#[A-Z]\]\s+)?(.*)$/,
+            );
+            if (match) {
+              const state = match[1];
+              const prio = match[2] ? match[2].trim() : "";
+              const rest = match[3];
+
+              const newChildren: any[] = [];
+              newChildren.push({
+                type: "element",
+                tagName: "span",
+                properties: {
+                  className: ["todo-badge", `todo-${state.toLowerCase()}`],
+                },
+                children: [{ type: "text", value: state }],
+              });
+
+              if (prio) {
+                newChildren.push({ type: "text", value: " " });
+                newChildren.push({
+                  type: "element",
+                  tagName: "span",
+                  properties: {
+                    className: [
+                      "priority-badge",
+                      `priority-${prio.replace(/[\[#\]]/g, "").toLowerCase()}`,
+                    ],
+                  },
+                  children: [{ type: "text", value: prio }],
+                });
+              }
+
+              newChildren.push({ type: "text", value: " " + rest });
+              node.children = [...newChildren, ...node.children.slice(1)];
+            }
+          }
+        }
+      }
+
+      // Task checkboxes in list items
+      if (node.tagName === "li") {
+        function processCheckbox(container: any) {
+          if (!container.children || container.children.length === 0) return false;
+          const firstChild = container.children[0];
+          if (firstChild.type === "text") {
+            const cbMatch = firstChild.value.match(/^\[([ Xx-])\]\s*(.*)$/);
+            if (cbMatch) {
+              const state = cbMatch[1];
+              const rest = cbMatch[2];
+              const isChecked = state === "X" || state === "x";
+              const isIndeterminate = state === "-";
+
+              firstChild.value = rest;
+
+              const checkboxNode: any = {
+                type: "element",
+                tagName: "input",
+                properties: {
+                  type: "checkbox",
+                  disabled: true,
+                  className: ["org-checkbox", isIndeterminate ? "is-indeterminate" : ""].filter(
+                    Boolean,
+                  ),
+                },
+                children: [],
+              };
+              if (isChecked) checkboxNode.properties.checked = true;
+
+              container.children.unshift({ type: "text", value: " " });
+              container.children.unshift(checkboxNode);
+              return true;
+            }
+          }
+          return false;
+        }
+
+        const handled = processCheckbox(node);
+        if (!handled && node.children && node.children[0]?.tagName === "p") {
+          processCheckbox(node.children[0]);
+        }
+      }
+
+      // Tables
+      if (
+        node.tagName === "table" &&
+        parent &&
+        typeof index === "number" &&
+        (!parent.properties?.className ||
+          (Array.isArray(parent.properties.className)
+            ? !parent.properties.className.includes("table-container")
+            : !parent.properties.className.includes("table-container")))
+      ) {
+        const wrapper = {
+          type: "element",
+          tagName: "div",
+          properties: { className: ["table-container"] },
+          children: [node],
+        };
+        parent.children[index] = wrapper;
+      }
+    });
+
+    // clean up and unify footnotes
+    const newChildren: any[] = [];
+    let footnotesSection: any = null;
+
+    for (let i = 0; i < tree.children.length; i++) {
+      const node = tree.children[i];
+
+      const isUniorgFootnoteHeading =
+        /^h[1-6]$/.test(node.tagName) &&
+        node.children?.[0]?.value?.trim().toLowerCase() === "footnotes:";
+
+      const isFootnoteDef =
+        node.tagName === "div" &&
+        (node.properties?.className?.includes("footnote-definition") ||
+          (Array.isArray(node.properties?.className) &&
+            node.properties.className.includes("footnote-definition")));
+
+      if (isUniorgFootnoteHeading) {
+        const prev = newChildren[newChildren.length - 1];
+        const prevIsHeading =
+          prev &&
+          /^h[1-6]$/.test(prev.tagName) &&
+          (prev.children?.[0]?.value?.toLowerCase().includes("footnote") ||
+            prev.children?.[0]?.value?.toLowerCase().includes("reference"));
+
+        if (!prevIsHeading) {
+          if (!footnotesSection) {
+            footnotesSection = {
+              type: "element",
+              tagName: "section",
+              properties: { className: ["footnotes-section"], id: "footnotes" },
+              children: [],
+            };
+            newChildren.push(footnotesSection);
+          }
+          node.tagName = "h2";
+          node.properties = { className: ["footnotes-title"] };
+          if (node.children?.[0]) node.children[0].value = "Footnotes";
+          footnotesSection.children.push(node);
+        }
+        continue;
+      }
+
+      if (isFootnoteDef) {
+        if (!footnotesSection) {
+          footnotesSection = {
+            type: "element",
+            tagName: "section",
+            properties: { className: ["footnotes-section"], id: "footnotes" },
+            children: [],
+          };
+          newChildren.push(footnotesSection);
+        }
+        footnotesSection.children.push(node);
+      } else {
+        footnotesSection = null;
+        newChildren.push(node);
+      }
+    }
+
+    tree.children = newChildren;
+  };
+}
+
+// Full org to html pipeline, shared by the build and the /org/ reader
+export function orgProcessor(highlighter: any) {
+  return unified()
+    .use(uniorgParse)
+    .use(uniorgHeadlines)
+    .use(uniorgRehype)
+    .use(rehypeOrgEnhancements)
+    .use(rehypeShikiHighlight, highlighter)
+    .use(rehypeStringify);
+}
