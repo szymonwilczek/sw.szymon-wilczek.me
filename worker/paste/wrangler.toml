@@ -8,9 +8,9 @@ routes = [{ pattern = "paste.szymon-wilczek.me", custom_domain = true }]
 [vars]
 ORIGINS = "https://szymon-wilczek.me,http://localhost:4321"
 
-[[kv_namespaces]]
-binding = "PASTES"
-id = ""
+# [[kv_namespaces]]
+# binding = "PASTES"
+# id = "<the id it printed>"
 
 # writes per address, wrong words included
 [[ratelimits]]

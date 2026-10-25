@@ -20,7 +20,7 @@ Once, from this directory, with a Cloudflare account:
 
 ```sh
 npx wrangler login
-npx wrangler kv namespace create PASTES   # paste the id it prints into wrangler.toml
+npx wrangler kv namespace create PASTES   # uncomment the block in wrangler.toml, with this id
 npx wrangler secret put PASTE_WORD        # the word typed on /paste/
 npx wrangler deploy
 ```
