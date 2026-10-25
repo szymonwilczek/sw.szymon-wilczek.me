@@ -8,9 +8,10 @@ routes = [{ pattern = "paste.szymon-wilczek.me", custom_domain = true }]
 [vars]
 ORIGINS = "https://szymon-wilczek.me,http://localhost:4321"
 
-# [[kv_namespaces]]
-# binding = "PASTES"
-# id = "<the id it printed>"
+# from `npx wrangler kv namespace create PASTES`
+[[kv_namespaces]]
+binding = "PASTES"
+id = "7c09f8739ef04d6a80af41d1979f2468"
 
 # writes per address, wrong words included
 [[ratelimits]]
