@@ -1,0 +1,347 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Divider from "../components/Divider.astro";
+import Seal from "../components/Seal.astro";
+---
+
+<BaseLayout
+  title="Org reader"
+  description="Lay an .org file here and read it, rendered in this browser and sent nowhere."
+>
+  <header class="reader-head">
+    <p class="crumb">org / reader · 写</p>
+    <h1 data-title>Org reader</h1>
+    <p class="meta" data-meta>
+      any .org file · read in this browser, sent nowhere
+    </p>
+  </header>
+
+  <label class="drop" data-drop>
+    <svg class="drop-edge" viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true">
+      <path d="M3 4 C 30 2, 70 3, 97 5 C 98 15, 99 27, 96 36 C 66 38, 34 39, 4 36 C 2 26, 1 14, 3 4 Z"></path>
+    </svg>
+    <span class="drop-lead" data-drop-lead>
+      lay an .org here
+    </span>
+    <span class="drop-sub hand">or pick a file · or paste text</span>
+    <input type="file" accept=".org,text/plain,text/x-org" class="file-input" data-file />
+  </label>
+  <p class="error" data-error hidden></p>
+
+  <Divider from={340} to={560} />
+
+  <div class="reader" data-reader hidden>
+    <nav class="outline" aria-label="Outline" data-outline>
+      <button type="button" class="outline-toggle hand" aria-expanded="false" data-outline-toggle>
+        the outline · <span data-outline-count>0</span> headings
+      </button>
+      <div class="outline-body" data-outline-body>
+        <p class="outline-title hand">the outline</p>
+        <ol data-outline-list></ol>
+        <div class="outline-actions hand">
+          <button type="button" data-fold-all>
+            fold all
+          </button>
+          <button type="button" data-unfold-all>
+            unfold all
+          </button>
+          <button type="button" aria-pressed="false" data-raw>
+            raw .org
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <article class="sheet">
+      <div class="prose org-content" data-doc></div>
+      <pre class="raw" data-raw-view hidden></pre>
+      <p class="end">
+        <Seal glyph="写" size={40} tilt={-6} label="end of file" />
+      </p>
+    </article>
+  </div>
+</BaseLayout>
+
+<script>
+  import "../scripts/org-reader";
+</script>
+
+<style>
+  .reader-head {
+    margin-top: 6rem;
+    max-width: 42.5rem;
+  }
+
+  .crumb,
+  .meta {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--fg-dim);
+  }
+
+  .reader-head h1 {
+    margin: 0.75rem 0 1rem;
+    font-weight: 300;
+    line-height: 1.1;
+  }
+
+  .drop {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    margin-top: 2.5rem;
+    padding: 2rem 1.5rem;
+    text-align: center;
+    cursor: pointer;
+  }
+
+  .file-input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .drop-edge {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  .drop-edge path {
+    fill: none;
+    stroke: var(--border);
+    stroke-width: 1.5;
+    stroke-dasharray: 6 5;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .drop:hover .drop-edge path,
+  .drop:focus-within .drop-edge path,
+  .drop.is-over .drop-edge path {
+    stroke: var(--cursor);
+  }
+
+  .drop-lead {
+    font-family: var(--font-hand);
+    font-size: 1.375rem;
+    color: var(--fg-link);
+  }
+
+  .error {
+    margin: 1rem 0 0;
+    color: var(--red);
+  }
+
+  .reader {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2.5rem 3.5rem;
+    align-items: flex-start;
+  }
+
+  .outline {
+    flex: 1 1 14.375rem;
+    position: sticky;
+    top: 2rem;
+    max-height: calc(100vh - 4rem);
+    overflow-y: auto;
+  }
+
+  .outline-toggle {
+    display: none;
+  }
+
+  .outline-title {
+    margin: 0 0 0.75rem;
+    font-size: 1.1875rem;
+    color: var(--fg-main);
+  }
+
+  .outline ol {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: 0.9375rem;
+  }
+
+  .outline li {
+    margin: 0;
+  }
+
+  .outline :global(a) {
+    display: block;
+    padding: 0.25rem 0;
+    color: var(--fg-dim);
+    text-decoration: none;
+  }
+
+  .outline :global(.level-1 > a::before) {
+    content: "● ";
+    color: var(--cursor);
+    font-size: 0.6em;
+    vertical-align: middle;
+  }
+
+  .outline :global(.level-2 > a) {
+    padding-left: 1rem;
+  }
+
+  .outline :global(.level-2 > a::before) {
+    content: "·· ";
+    color: var(--border);
+  }
+
+  .outline :global(a.is-active) {
+    color: var(--fg-main);
+    text-decoration: underline wavy var(--cursor);
+    text-underline-offset: 0.3em;
+  }
+
+  .outline-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 1rem;
+    margin-top: 1rem;
+  }
+
+  .outline-actions button,
+  .outline-toggle {
+    min-height: 2.75rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    color: var(--fg-link);
+    cursor: pointer;
+  }
+
+  .outline-actions button[aria-pressed="true"] {
+    text-decoration: underline;
+  }
+
+  .sheet {
+    flex: 999 1 35rem;
+    min-width: 0;
+    max-width: 42.5rem;
+    font-size: 1.1875rem;
+  }
+
+  .sheet :global(.org-content > :first-child) {
+    margin-top: 0;
+  }
+
+  .sheet :global(.fold) {
+    flex: none;
+    width: 1.5rem;
+    min-height: 1.5rem;
+    margin-right: 0.25rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--cursor);
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+
+  .sheet :global(.fold[aria-expanded="false"]) {
+    transform: rotate(-90deg);
+  }
+
+  .sheet :global(.org-section.is-folded > :not(:first-child)) {
+    display: none;
+  }
+
+  .sheet :global(.org-section.is-folded::after) {
+    content: "… folded";
+    display: block;
+    margin: -0.75rem 0 1.5rem 1.75rem;
+    font-family: var(--font-hand);
+    font-size: 1rem;
+    color: var(--fg-dim);
+  }
+
+  .sheet :global(.org-section.is-folded[data-folded-lines]::after) {
+    content: "… " attr(data-folded-lines) " lines folded";
+  }
+
+  .sheet :global(.src-block) {
+    position: relative;
+    margin: 2rem 0;
+  }
+
+  .sheet :global(.src-block pre) {
+    margin: 0;
+  }
+
+  .sheet :global(.src-tools) {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    color: var(--fg-dim);
+  }
+
+  .sheet :global(.src-lang) {
+    padding: 0.125rem 0.5rem;
+    background: var(--tape);
+    border-radius: 2px 3px 0 0;
+  }
+
+  .sheet :global(.src-copy) {
+    min-height: 2rem;
+    padding: 0 0.25rem;
+    border: 0;
+    background: none;
+    font-family: var(--font-hand);
+    font-size: 1rem;
+    color: var(--fg-link);
+    cursor: pointer;
+  }
+
+  .raw {
+    margin: 0;
+    padding: 1.25rem 1.5rem;
+    background: var(--bg-dim);
+    border-radius: 4px 8px 5px 9px;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .end {
+    margin: 4rem 0 0;
+    text-align: center;
+  }
+
+  @media (max-width: 52rem) {
+    .outline {
+      position: static;
+      flex-basis: 100%;
+      max-height: none;
+    }
+
+    .outline-toggle {
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .outline:not(.is-open) .outline-body {
+      display: none;
+    }
+
+    .outline-title {
+      display: none;
+    }
+  }
+</style>
