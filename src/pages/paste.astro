@@ -5,6 +5,9 @@ import { ID_LENGTH, MAX_CHARS } from "../utils/paste";
 import { UNIT } from "../utils/paste-qr";
 
 const SQUARE_TILTS = [-1.5, 0.8, -0.4, 1.2, -0.9];
+const DECKLE =
+  "M8 10 L120 4 L260 9 L410 3 L560 8 L700 2 L850 7 L992 4 L996 160 L990 330 L997 500 L991 680 L996 840 L993 994 L840 990 L690 996 L540 991 L380 997 L230 992 L90 996 L6 991 L9 820 L3 650 L8 480 L2 300 L7 140 Z";
+const PAGE_SHADOW_OFFSET = "translate(5 9)";
 const TREMBLE_FREQUENCY = 0.9 / UNIT;
 const TREMBLE_SCALE = 0.12 * UNIT;
 const WASH_BLUR = 0.25 * UNIT;
@@ -25,21 +28,30 @@ const SHADOW_OFFSET = `translate(${0.25 * UNIT} ${0.45 * UNIT})`;
   <Divider from={600} to={840} />
 
   <form class="sheet" data-form>
-    <label class="page">
-      <span class="page-label hand">text</span>
+    <div class="page">
+      <svg viewBox="0 0 1000 1000" preserveAspectRatio="none" aria-hidden="true">
+        <path d={DECKLE} class="page-shadow" transform={PAGE_SHADOW_OFFSET}></path>
+        <path d={DECKLE} class="page-sheet"></path>
+      </svg>
+      <p class="page-head">
+        <label for="paste-text" class="hand">
+          text
+        </label>
+        <span class="count" aria-live="polite">
+          <span data-count>0</span> / {MAX_CHARS.toLocaleString("fr-FR")}
+        </span>
+      </p>
       <textarea
+        id="paste-text"
         name="text"
         maxlength={MAX_CHARS}
-        rows="14"
+        rows="12"
         spellcheck="false"
         autocomplete="off"
         required
         data-text
       ></textarea>
-    </label>
-    <p class="count" aria-live="polite">
-      <span data-count>0</span> / {MAX_CHARS.toLocaleString("fr-FR")}
-    </p>
+    </div>
 
     <div class="send-row">
       <label class="word">
@@ -169,43 +181,71 @@ const SHADOW_OFFSET = `translate(${0.25 * UNIT} ${0.45 * UNIT})`;
     gap: 1.5rem 3rem;
   }
 
-  /* a notebook page: red margin, no box */
   .page {
-    --margin: 3.5rem;
+    --sheet: light-dark(
+      color-mix(in srgb, var(--bg-main) 45%, white),
+      color-mix(in srgb, var(--bg-main) 90%, var(--fg-main))
+    );
+    --rule: light-dark(
+      color-mix(in srgb, var(--sheet) 90%, var(--fg-main)),
+      color-mix(in srgb, var(--sheet) 88%, var(--fg-main))
+    );
+    --line: 1.75rem;
     position: relative;
-    display: block;
-    padding-left: var(--margin);
+    padding: 2.125rem 2.75rem 1.875rem;
   }
 
-  .page::before {
-    content: "";
+  .page svg {
     position: absolute;
-    left: calc(var(--margin) - 1rem);
-    top: 0;
-    bottom: 0;
-    width: 1px;
-    background: var(--red);
-    opacity: 0.6;
+    inset: 0;
+    width: 100%;
+    height: 100%;
   }
 
-  .page-label {
-    position: absolute;
-    left: 0;
-    top: 0.125rem;
-    font-size: 1rem;
-    writing-mode: vertical-rl;
+  .page-shadow {
+    fill: var(--fg-main);
+    opacity: 0.14;
+  }
+
+  .page-sheet {
+    fill: var(--sheet);
+  }
+
+  .page-head {
+    position: relative;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    margin: 0 0 0.375rem;
+    padding-bottom: 0.625rem;
+    border-bottom: 1.5px solid var(--red);
+  }
+
+  .page-head label {
+    font-weight: 300;
+    font-size: 1.0625rem;
+    color: var(--fg-dim);
   }
 
   .page textarea {
+    position: relative;
     display: block;
     width: 100%;
-    min-height: 23.75rem;
+    min-height: 21.25rem;
     padding: 0;
     border: 0;
-    background: none;
+    background: repeating-linear-gradient(
+        to bottom,
+        transparent 0,
+        transparent calc(var(--line) - 1px),
+        var(--rule) calc(var(--line) - 1px),
+        var(--rule) var(--line)
+      )
+      local;
     font-family: var(--font-mono);
     font-size: 0.9375rem;
-    line-height: 1.9;
+    line-height: var(--line);
     color: var(--fg-main);
     caret-color: var(--cursor);
     resize: vertical;
@@ -213,8 +253,6 @@ const SHADOW_OFFSET = `translate(${0.25 * UNIT} ${0.45 * UNIT})`;
   }
 
   .count {
-    margin: 0.5rem 0 0;
-    text-align: right;
     font-family: var(--font-mono);
     font-size: 0.6875rem;
     color: var(--fg-dim);
@@ -447,11 +485,11 @@ const SHADOW_OFFSET = `translate(${0.25 * UNIT} ${0.45 * UNIT})`;
 
   @media (max-width: 40rem) {
     .page {
-      --margin: 1.125rem;
+      padding: 1.5rem 1.125rem 1.375rem;
     }
 
-    .page-label {
-      display: none;
+    .page textarea {
+      min-height: 16.25rem;
     }
 
     .send-row,
