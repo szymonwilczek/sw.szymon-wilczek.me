@@ -4,12 +4,13 @@ export const SEND_URL = "https://send.szymon-wilczek.me";
 
 const KIB = 1024;
 const MIB = KIB * KIB;
+const MB = 1_000_000;
 const GB = 1_000_000_000;
 
 export const LIFETIME_SECONDS = 24 * 60 * 60;
 export const UNFINISHED_SECONDS = 60 * 60;
 
-export const MAX_TEXT_BYTES = 10 * MIB;
+export const MAX_TEXT_BYTES = 10 * MB;
 
 export const ROW_BYTES = 2 * MIB;
 export const CHUNK_BYTES = 32 * MIB;

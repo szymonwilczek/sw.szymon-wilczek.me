@@ -1,22 +1,21 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Divider from "../components/Divider.astro";
-import { ID_LENGTH, MAX_TEXT_BYTES } from "../utils/send";
+import { ID_LENGTH, MAX_TEXT_BYTES, POOL_BYTES, bytes } from "../utils/send";
 import { UNIT } from "../utils/send-qr";
+import { ARROW, BOX, DROP, KEY, LOCK, TICK, TRACK, TRACK_LENGTH } from "../utils/send-ink";
 
 const SQUARE_TILTS = [-1.5, 0.8, -0.4, 1.2, -0.9];
 const DECKLE =
   "M8 10 L120 4 L260 9 L410 3 L560 8 L700 2 L850 7 L992 4 L996 160 L990 330 L997 500 L991 680 L996 840 L993 994 L840 990 L690 996 L540 991 L380 997 L230 992 L90 996 L6 991 L9 820 L3 650 L8 480 L2 300 L7 140 Z";
 const PAGE_SHADOW_OFFSET = "translate(5 9)";
-const LOCK =
-  "M8 11 V8.2 C 8 4.6, 16 4.6, 16 8.2 V11 M5.5 11.2 C 9 10.8, 15 11.3, 18.5 10.9 L 18.2 20 C 14 20.3, 10 19.8, 5.8 20.2 Z";
-const ARROW =
-  "M2 8 C 8 7.6, 16 8.4, 24 7.8 M18 3 C 20 5, 22 6.4, 24.5 7.8 C 22 9.4, 20 11, 18.4 13";
 const PLACEHOLDER = [
   ";; This buffer is for text that is not saved, and for files",
   ";; that will not stay. To keep anything, open the link",
   ";; within a day; after that, it is garbage collected.",
 ].join("\n");
+const UNKNOWN_ID = "·".repeat(ID_LENGTH);
+const TRACK_HEIGHT = 26;
 const TREMBLE_FREQUENCY = 0.9 / UNIT;
 const TREMBLE_SCALE = 0.12 * UNIT;
 const WASH_BLUR = 0.25 * UNIT;
@@ -33,60 +32,216 @@ const SHADOW_OFFSET = `translate(${0.25 * UNIT} ${0.45 * UNIT})`;
   <header class="send-head">
     <p class="crumb">send · 送</p>
     <h1>Send</h1>
-    <p class="lede">
-      Text and files from one of my screens to another. One day to live.
-    </p>
+    <p class="lede">Text and files from one of my screens to another. One day to live.</p>
   </header>
 
   <Divider from={600} to={840} />
 
   <form class="sheet" data-form>
-    <div class="page">
-      <svg viewBox="0 0 1000 1000" preserveAspectRatio="none" aria-hidden="true">
-        <path d={DECKLE} class="page-shadow" transform={PAGE_SHADOW_OFFSET}></path>
-        <path d={DECKLE} class="page-sheet"></path>
-      </svg>
-      <p class="page-head">
-        <label for="send-text" class="hand">
-          text
+    <fieldset class="fields" data-fields>
+      <legend class="quiet">What to send</legend>
+      <div class="page">
+        <svg viewBox="0 0 1000 1000" preserveAspectRatio="none" aria-hidden="true">
+          <path d={DECKLE} class="page-shadow" transform={PAGE_SHADOW_OFFSET}></path>
+          <path d={DECKLE} class="page-sheet"></path>
+        </svg>
+        <p class="page-head">
+          <label for="send-text" class="hand">
+            text
+          </label>
+          <span class="count" aria-live="polite">
+            <span data-count>0 B</span> / {bytes(MAX_TEXT_BYTES)}
+          </span>
+        </p>
+        <textarea
+          id="send-text"
+          name="text"
+          rows="9"
+          placeholder={PLACEHOLDER}
+          spellcheck="false"
+          autocomplete="off"
+          data-text
+        ></textarea>
+        <div class="page-foot">
+          <label class="tick">
+            <input type="checkbox" class="quiet" data-as-file />
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d={BOX} class="tick-box"></path>
+              <path d={TICK} class="tick-mark"></path>
+            </svg>
+            <span class="hand">send as a file</span>
+          </label>
+          <label class="extension">
+            <span class="dots" aria-hidden="true">
+              {UNKNOWN_ID}.
+            </span>
+            <span class="quiet">extension</span>
+            <input
+              type="text"
+              name="extension"
+              placeholder="org"
+              maxlength="12"
+              autocomplete="off"
+              spellcheck="false"
+              data-extension
+            />
+          </label>
+          <span class="hand note as-file-note">
+            downloads as {UNKNOWN_ID}.<span data-extension-echo>org</span>, never shown
+          </span>
+          <span class="hand note as-text-note">opens as plain text</span>
+        </div>
+      </div>
+
+      <section class="tray" aria-label="Files" data-tray>
+        <p class="tray-head">
+          <span class="hand">files</span>
+          <span class="free">
+            <span class="free-bar" aria-hidden="true">
+              <span data-free-bar></span>
+            </span>
+            <span data-free>free now · {bytes(POOL_BYTES)} at most</span>
+          </span>
+        </p>
+        <ul class="queue" data-queue></ul>
+        <label class="drop" data-drop>
+          <input type="file" multiple class="quiet" data-files />
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d={DROP}></path>
+          </svg>
+          <span class="hand drop-say">
+            <span class="drop-first">drop files here</span>
+            <span class="drop-more">drop more</span>, or <u>pick them</u>
+          </span>
+          <span class="drop-note">one file goes as it is · several go as one zip</span>
         </label>
-        <span class="count" aria-live="polite">
-          <span data-count>0</span> / {MAX_TEXT_BYTES.toLocaleString("fr-FR")}
+        <p class="summary" data-summary hidden>
+          <span class="hand" data-summary-text></span>
+          <span class="summary-size" data-summary-size></span>
+        </p>
+      </section>
+
+      <div class="lock-row">
+        <label class="tick">
+          <input type="checkbox" class="quiet" data-lock-on />
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d={BOX} class="tick-box"></path>
+            <path d={TICK} class="tick-mark"></path>
+          </svg>
+          <svg viewBox="0 0 24 24" class="tick-lock" aria-hidden="true">
+            <path d={LOCK}></path>
+          </svg>
+          <span class="hand">lock it</span>
+        </label>
+        <label class="word lock-word">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d={LOCK}></path>
+          </svg>
+          <span class="hand">opens with</span>
+          <input type="password" name="lock" autocomplete="new-password" data-lock />
+        </label>
+        <span class="hand note locked-note">
+          the other screen asks for it before anything shows
+        </span>
+        <span class="hand note open-note">anyone with the five letters can open it</span>
+      </div>
+
+      <div class="send-row">
+        <label class="word">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d={KEY}></path>
+          </svg>
+          <span class="hand">password</span>
+          <input type="password" name="word" autocomplete="current-password" required data-word />
+        </label>
+        <div class="send-group">
+          <kbd class="hint">ctrl + enter</kbd>
+          <button type="submit" class="send hand" data-send>
+            <span data-send-label>seal &amp; send</span>
+            <svg viewBox="0 0 26 16" aria-hidden="true">
+              <path d={ARROW}></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </fieldset>
+
+    <div
+      class="progress"
+      role="progressbar"
+      aria-label="Sending"
+      aria-valuemin="0"
+      aria-valuemax="100"
+      aria-valuenow="0"
+      data-progress
+      hidden
+    >
+      <p class="progress-head">
+        <span class="hand">
+          sending <b data-progress-name></b>
+          <span data-progress-zip>, zipped on the way</span>
+        </span>
+        <span class="pct" data-pct>
+          0 %
         </span>
       </p>
-      <textarea
-        id="send-text"
-        name="text"
-        maxlength={MAX_TEXT_BYTES}
-        rows="12"
-        placeholder={PLACEHOLDER}
-        spellcheck="false"
-        autocomplete="off"
-        required
-        data-text
-      ></textarea>
+      <div class="track">
+        <svg
+          viewBox={`0 0 ${TRACK_LENGTH} ${TRACK_HEIGHT}`}
+          preserveAspectRatio="none"
+          aria-hidden="true"
+        >
+          <defs>
+            <clipPath id="sent-so-far">
+              <rect x="0" y="0" width="0" height={TRACK_HEIGHT} data-ink></rect>
+            </clipPath>
+          </defs>
+          <path d={TRACK} class="track-pencil"></path>
+          <path d={TRACK} class="track-ink" clip-path="url(#sent-so-far)"></path>
+        </svg>
+        <span class="blot" aria-hidden="true" data-blot></span>
+      </div>
+      <p class="progress-foot">
+        <span data-progress-meta></span>
+        <button type="button" class="hand" data-stop>
+          stop
+        </button>
+      </p>
     </div>
 
-    <div class="send-row">
-      <label class="word">
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d={LOCK}></path>
-        </svg>
-        <span class="hand">password</span>
-        <input type="password" name="word" autocomplete="current-password" required data-word />
-      </label>
-      <div class="send-group">
-        <kbd class="hint">ctrl + enter</kbd>
-        <button type="submit" class="send hand" data-send>
-          seal &amp; send
-          <svg viewBox="0 0 26 16" aria-hidden="true">
-            <path d={ARROW}></path>
-          </svg>
-        </button>
-      </div>
-    </div>
     <p class="error" role="alert" data-error hidden></p>
   </form>
+
+  <template data-row>
+    <li class="row">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path data-row-icon></path>
+      </svg>
+      <span class="row-name">
+        <span class="row-file" data-row-name></span>
+        <span class="hand row-from">the text from the sheet</span>
+      </span>
+      <span class="row-size" data-row-size></span>
+      <span class="row-status">
+        <button type="button" class="row-out hand" data-row-out>
+          ×
+        </button>
+        <span class="hand row-sent">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d={TICK}></path>
+          </svg>
+          sent
+        </span>
+        <span class="row-now">
+          <span class="mini" aria-hidden="true">
+            <span data-row-bar></span>
+          </span>
+          <span data-row-pct></span>
+        </span>
+        <span class="hand row-waiting">waiting</span>
+      </span>
+    </li>
+  </template>
 
   <section class="sealed" aria-label="The link" data-sealed hidden>
     <div class="sealed-row">
@@ -98,18 +253,25 @@ const SHADOW_OFFSET = `translate(${0.25 * UNIT} ${0.45 * UNIT})`;
               class="square"
               style={`--tilt: ${SQUARE_TILTS[index % SQUARE_TILTS.length]}deg`}
               data-square
-            ></span>
+            />
           ))}
         </div>
         <p class="link">
           <a data-link></a>
+        </p>
+        <p class="hand locked" data-locked hidden>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d={LOCK}></path>
+          </svg>
+          locked · it asks for the password before it opens
         </p>
         <div class="actions hand">
           <button type="button" data-copy>
             copy the link
           </button>
           <a target="_blank" rel="noopener" data-open>
-            open it ↗
+            {" "}
+            open it ↗{" "}
           </a>
           <button type="button" data-again>
             another one
@@ -126,14 +288,14 @@ const SHADOW_OFFSET = `translate(${0.25 * UNIT} ${0.45 * UNIT})`;
                 baseFrequency={TREMBLE_FREQUENCY}
                 numOctaves="2"
                 seed="4"
-              />
-              <feDisplacementMap in="SourceGraphic" scale={TREMBLE_SCALE} />
+              ></feTurbulence>
+              <feDisplacementMap in="SourceGraphic" scale={TREMBLE_SCALE}></feDisplacementMap>
             </filter>
             <filter id="qr-wash" x="-5%" y="-5%" width="110%" height="110%">
-              <feGaussianBlur stdDeviation={WASH_BLUR} />
+              <feGaussianBlur stdDeviation={WASH_BLUR}></feGaussianBlur>
             </filter>
             <filter id="qr-shadow" x="-10%" y="-10%" width="120%" height="120%">
-              <feGaussianBlur stdDeviation={SHADOW_BLUR} />
+              <feGaussianBlur stdDeviation={SHADOW_BLUR}></feGaussianBlur>
             </filter>
           </defs>
           <path class="qr-shadow" transform={SHADOW_OFFSET} data-qr-slip></path>
@@ -183,7 +345,33 @@ const SHADOW_OFFSET = `translate(${0.25 * UNIT} ${0.45 * UNIT})`;
 
   .sheet,
   .sealed-text {
-    max-width: 50rem;
+    max-width: 55rem;
+  }
+
+  .quiet {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .fields {
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .fields[disabled] {
+    opacity: 0.85;
+  }
+
+  .note {
+    font-weight: 300;
+    font-size: 0.9375rem;
+    color: var(--fg-dim);
   }
 
   .sealed-row {
@@ -205,10 +393,10 @@ const SHADOW_OFFSET = `translate(${0.25 * UNIT} ${0.45 * UNIT})`;
     );
     --line: 1.75rem;
     position: relative;
-    padding: 2.125rem 2.75rem 1.875rem;
+    padding: 2.125rem 2.75rem 1.625rem;
   }
 
-  .page svg {
+  .page > svg {
     position: absolute;
     inset: 0;
     width: 100%;
@@ -235,7 +423,8 @@ const SHADOW_OFFSET = `translate(${0.25 * UNIT} ${0.45 * UNIT})`;
     border-bottom: 1.5px solid var(--red);
   }
 
-  .page-head label {
+  .page-head label,
+  .tray-head > .hand {
     font-weight: 300;
     font-size: 1.0625rem;
     color: var(--fg-dim);
@@ -245,7 +434,7 @@ const SHADOW_OFFSET = `translate(${0.25 * UNIT} ${0.45 * UNIT})`;
     position: relative;
     display: block;
     width: 100%;
-    min-height: 21.25rem;
+    min-height: 15.75rem;
     padding: 0;
     border: 0;
     background: repeating-linear-gradient(
@@ -276,13 +465,410 @@ const SHADOW_OFFSET = `translate(${0.25 * UNIT} ${0.45 * UNIT})`;
     color: var(--fg-dim);
   }
 
+  .page-foot {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem 1.25rem;
+    margin-top: 0.875rem;
+    padding-top: 0.5rem;
+    border-top: 1px dashed var(--border);
+  }
+
+  .tick {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+    min-height: 2.75rem;
+    cursor: pointer;
+  }
+
+  .tick svg {
+    flex: none;
+    width: 1.5rem;
+    height: 1.5rem;
+    overflow: visible;
+    fill: none;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+
+  .tick-box {
+    stroke: var(--fg-dim);
+    stroke-width: 1.6;
+  }
+
+  .tick-mark {
+    stroke: var(--cursor);
+    stroke-width: 2.4;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+
+  .tick input:checked + svg .tick-mark {
+    opacity: 1;
+  }
+
+  .tick input:focus-visible + svg {
+    outline: 2px solid var(--cursor);
+    outline-offset: 3px;
+  }
+
+  .tick .hand {
+    font-size: 1.125rem;
+  }
+
+  .tick-lock {
+    width: 1.25rem;
+    height: 1.25rem;
+    stroke: var(--fg-dim);
+    stroke-width: 1.6;
+  }
+
+  .extension {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.125rem;
+    font-family: var(--font-mono);
+    font-size: 0.9375rem;
+  }
+
+  .dots {
+    color: var(--fg-dim);
+  }
+
+  .extension input {
+    width: 5.5rem;
+    padding: 0.125rem 0.25rem 0.25rem;
+    border: 0;
+    border-bottom: 1.5px solid var(--cursor);
+    background: none;
+    font: inherit;
+    color: var(--fg-main);
+    outline: none;
+  }
+
+  .extension input::placeholder {
+    color: var(--fg-dim);
+    opacity: 0.6;
+  }
+
+  .page-foot:not(:has([data-as-file]:checked)) :is(.extension, .as-file-note),
+  .page-foot:has([data-as-file]:checked) .as-text-note {
+    display: none;
+  }
+
+  .tray {
+    margin-top: 2.25rem;
+  }
+
+  .tray-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+    margin: 0 0 0.75rem;
+  }
+
+  .free {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    color: var(--fg-dim);
+  }
+
+  .free-bar,
+  .mini {
+    position: relative;
+    display: block;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--border);
+  }
+
+  .free-bar {
+    width: 4.5rem;
+  }
+
+  .free-bar span,
+  .mini span {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 0;
+    border-radius: 2px;
+    background: var(--fg-dim);
+  }
+
+  .queue {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .queue:not(:empty) {
+    border-top: 1px dashed var(--border);
+  }
+
+  .row {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    min-height: 3rem;
+    padding: 0.25rem;
+    border-bottom: 1px dashed var(--border);
+  }
+
+  .row > svg {
+    flex: none;
+    width: 1.375rem;
+    height: 1.375rem;
+    fill: none;
+    stroke: var(--fg-dim);
+    stroke-width: 1.6;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+
+  .row-name {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+    line-height: 1.3;
+  }
+
+  .row-file {
+    overflow: hidden;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .row-from {
+    font-weight: 300;
+    font-size: 0.875rem;
+    color: var(--fg-dim);
+  }
+
+  .row-size {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--fg-dim);
+    white-space: nowrap;
+  }
+
+  .row-status {
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: flex-end;
+    width: 6rem;
+  }
+
+  .row-status > *,
+  .row:not([data-sheet]) .row-from {
+    display: none;
+  }
+
+  .row[data-state="queued"]:not([data-sheet]) .row-out,
+  .row[data-state="sent"] .row-sent,
+  .row[data-state="now"] .row-now,
+  .row[data-state="waiting"] .row-waiting {
+    display: inline-flex;
+  }
+
+  .row-out {
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    font-size: 1.375rem;
+    line-height: 1;
+    color: var(--fg-dim);
+    cursor: pointer;
+  }
+
+  .row-out:hover,
+  .row-out:focus-visible {
+    color: var(--red);
+  }
+
+  .row-sent {
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.9375rem;
+    color: var(--cursor);
+  }
+
+  .row-sent svg {
+    width: 1.125rem;
+    height: 1.125rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .row-now {
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+  }
+
+  .mini {
+    width: 3rem;
+    height: 3px;
+  }
+
+  .mini span {
+    background: var(--cursor);
+  }
+
+  .row-waiting {
+    font-weight: 300;
+    font-size: 0.9375rem;
+    color: var(--fg-dim);
+  }
+
+  .drop {
+    --tray: light-dark(
+      color-mix(in srgb, var(--bg-main) 70%, white),
+      color-mix(in srgb, var(--bg-main) 95%, var(--fg-main))
+    );
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 11.25rem;
+    padding: 1.5rem;
+    border: 1.5px dashed var(--border);
+    border-radius: 12px 16px 13px 17px;
+    background: var(--tray);
+    text-align: center;
+    cursor: pointer;
+    transition:
+      border-color 0.2s,
+      background 0.2s;
+  }
+
+  .drop svg {
+    width: 1.875rem;
+    height: 1.875rem;
+    fill: none;
+    stroke: var(--fg-dim);
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .drop-say {
+    font-size: 1.1875rem;
+  }
+
+  .drop-say u {
+    color: var(--fg-link);
+    text-underline-offset: 4px;
+  }
+
+  .drop-note {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    color: var(--fg-dim);
+  }
+
+  .drop:hover,
+  .drop:has(input:focus-visible),
+  .drop[data-over] {
+    border-color: var(--cursor);
+  }
+
+  .drop[data-over] {
+    background: color-mix(in srgb, var(--tray) 85%, var(--cursor));
+  }
+
+  .drop-more,
+  .tray[data-filled] :is(.drop-first, .drop-note) {
+    display: none;
+  }
+
+  .tray[data-filled] .drop {
+    flex-direction: row;
+    gap: 0.625rem;
+    min-height: 3.25rem;
+    margin-top: 0.75rem;
+    padding: 0.5rem 1rem;
+  }
+
+  .tray[data-filled] .drop svg {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .tray[data-filled] .drop-more {
+    display: inline;
+  }
+
+  .tray[data-filled] .drop-say {
+    font-size: 1.0625rem;
+  }
+
+  .summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.25rem 1rem;
+    margin: 0.875rem 0 0;
+  }
+
+  .summary .hand {
+    font-weight: 300;
+    font-size: 1rem;
+    color: var(--fg-dim);
+  }
+
+  .summary :global(code),
+  .summary-size {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: var(--fg-main);
+  }
+
+  .lock-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1.5rem;
+    margin-top: 2rem;
+  }
+
+  .lock-row:not(:has([data-lock-on]:checked)) :is(.lock-word, .locked-note),
+  .lock-row:has([data-lock-on]:checked) .open-note {
+    display: none;
+  }
+
   .send-row {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
     gap: 1.75rem;
-    margin-top: 2.25rem;
+    margin-top: 1.75rem;
+    padding-top: 1.75rem;
+    border-top: 1px dashed var(--border);
   }
 
   .word {
@@ -312,7 +898,7 @@ const SHADOW_OFFSET = `translate(${0.25 * UNIT} ${0.45 * UNIT})`;
   }
 
   .word input {
-    width: 11.25rem;
+    width: 10rem;
     min-width: 0;
     padding: 0.25rem 0;
     border: 0;
@@ -390,8 +976,104 @@ const SHADOW_OFFSET = `translate(${0.25 * UNIT} ${0.45 * UNIT})`;
   }
 
   .send[disabled] {
-    opacity: 0.6;
+    opacity: 0.5;
+    color: var(--fg-main);
     cursor: wait;
+  }
+
+  .send[disabled] svg {
+    transform: none;
+  }
+
+  .progress {
+    margin-top: 2.25rem;
+  }
+
+  .progress-head,
+  .progress-foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.25rem 1rem;
+    margin: 0;
+  }
+
+  .progress-head .hand {
+    font-size: 1.125rem;
+  }
+
+  .progress-head b {
+    font-family: var(--font-mono);
+    font-weight: 400;
+    font-size: 0.875rem;
+    color: var(--cursor);
+  }
+
+  .pct {
+    font-family: var(--font-mono);
+    font-size: 1.25rem;
+  }
+
+  .track {
+    position: relative;
+    height: 1.625rem;
+    margin-top: 0.625rem;
+  }
+
+  .track svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    fill: none;
+    stroke-linecap: round;
+  }
+
+  .track-pencil {
+    stroke: var(--border);
+    stroke-width: 1.5;
+    stroke-dasharray: 2 7;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .track-ink {
+    stroke: var(--cursor);
+    stroke-width: 5;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .blot {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 0.75rem;
+    height: 0.6875rem;
+    margin: -0.375rem 0 0 -0.375rem;
+    border-radius: 48% 52% 46% 54%;
+    background: var(--cursor);
+  }
+
+  .progress-foot {
+    align-items: center;
+    margin-top: 0.625rem;
+  }
+
+  .progress-foot > span {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--fg-dim);
+  }
+
+  .progress-foot button {
+    min-height: 2.75rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    font-size: 1.0625rem;
+    color: var(--fg-link);
+    cursor: pointer;
   }
 
   .error {
@@ -445,6 +1127,30 @@ const SHADOW_OFFSET = `translate(${0.25 * UNIT} ${0.45 * UNIT})`;
   .link :global(b) {
     font-weight: 400;
     color: var(--cursor);
+  }
+
+  .sealed .locked {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    margin-top: 1rem;
+    font-weight: 300;
+    font-size: 1.0625rem;
+    color: var(--fg-dim);
+  }
+
+  .sealed .locked[hidden] {
+    display: none;
+  }
+
+  .locked svg {
+    width: 1.25rem;
+    height: 1.25rem;
+    fill: none;
+    stroke: var(--red);
+    stroke-width: 1.6;
+    stroke-linejoin: round;
+    stroke-linecap: round;
   }
 
   .actions {
@@ -526,15 +1232,23 @@ const SHADOW_OFFSET = `translate(${0.25 * UNIT} ${0.45 * UNIT})`;
 
   @media (max-width: 40rem) {
     .page {
-      padding: 1.5rem 1.125rem 1.375rem;
+      padding: 1.5rem 1.125rem 1.125rem;
     }
 
     .page textarea {
-      min-height: 16.25rem;
+      min-height: 14rem;
+    }
+
+    .drop {
+      min-height: 9.375rem;
+    }
+
+    .row-status {
+      width: 4rem;
     }
 
     .word input {
-      width: 6.875rem;
+      width: 6rem;
     }
 
     .squares {
