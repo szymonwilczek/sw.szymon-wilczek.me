@@ -3,8 +3,15 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import Divider from "../components/Divider.astro";
 import Seal from "../components/Seal.astro";
 import { ID_LENGTH, MAX_CHARS } from "../utils/paste";
+import { UNIT } from "../utils/paste-qr";
 
 const SQUARE_TILTS = [-1.5, 0.8, -0.4, 1.2, -0.9];
+const TREMBLE_FREQUENCY = 0.9 / UNIT;
+const TREMBLE_SCALE = 0.12 * UNIT;
+const WASH_BLUR = 0.25 * UNIT;
+const SHADOW_BLUR = 0.5 * UNIT;
+const WASH_OFFSET = `translate(${0.32 * UNIT} ${0.42 * UNIT})`;
+const SHADOW_OFFSET = `translate(${0.25 * UNIT} ${0.45 * UNIT})`;
 ---
 
 <BaseLayout title="Paste" description="Text from one of my screens to another." noindex={true}>
@@ -49,31 +56,67 @@ const SQUARE_TILTS = [-1.5, 0.8, -0.4, 1.2, -0.9];
   </form>
 
   <section class="sealed" aria-label="The link" data-sealed hidden>
-    <p class="hand">sealed · on the other screen type</p>
-    <div class="squares" aria-hidden="true">
-      {Array.from({ length: ID_LENGTH }, (_, index) => (
-        <span
-          class="square"
-          style={`--tilt: ${SQUARE_TILTS[index % SQUARE_TILTS.length]}deg`}
-          data-square
-        ></span>
-      ))}
+    <div class="sealed-row">
+      <div class="sealed-text">
+        <p class="hand">sealed · on the other screen type</p>
+        <div class="squares" aria-hidden="true">
+          {Array.from({ length: ID_LENGTH }, (_, index) => (
+            <span
+              class="square"
+              style={`--tilt: ${SQUARE_TILTS[index % SQUARE_TILTS.length]}deg`}
+              data-square
+            ></span>
+          ))}
+        </div>
+        <p class="link">
+          <a data-link></a>
+        </p>
+        <div class="actions hand">
+          <button type="button" data-copy>
+            copy the link
+          </button>
+          <a target="_blank" rel="noopener" data-open>
+            open it ↗
+          </a>
+          <button type="button" data-again>
+            another one
+          </button>
+        </div>
+        <p class="sealed-meta" data-sealed-meta></p>
+      </div>
+      <figure class="qr">
+        <svg role="img" data-qr>
+          <defs>
+            <filter id="qr-tremble" x="-5%" y="-5%" width="110%" height="110%">
+              <feTurbulence
+                type="fractalNoise"
+                baseFrequency={TREMBLE_FREQUENCY}
+                numOctaves="2"
+                seed="4"
+              />
+              <feDisplacementMap in="SourceGraphic" scale={TREMBLE_SCALE} />
+            </filter>
+            <filter id="qr-wash" x="-5%" y="-5%" width="110%" height="110%">
+              <feGaussianBlur stdDeviation={WASH_BLUR} />
+            </filter>
+            <filter id="qr-shadow" x="-10%" y="-10%" width="120%" height="120%">
+              <feGaussianBlur stdDeviation={SHADOW_BLUR} />
+            </filter>
+          </defs>
+          <path class="qr-shadow" transform={SHADOW_OFFSET} data-qr-slip></path>
+          <path class="qr-slip" data-qr-slip></path>
+          <g class="qr-wash" transform={WASH_OFFSET}>
+            <path data-qr-ink></path>
+            <path fill-rule="evenodd" data-qr-finders></path>
+          </g>
+          <g class="qr-ink">
+            <path data-qr-ink></path>
+            <path fill-rule="evenodd" data-qr-finders></path>
+          </g>
+        </svg>
+        <figcaption class="hand">or point the other screen's camera here</figcaption>
+      </figure>
     </div>
-    <p class="link">
-      <a data-link></a>
-    </p>
-    <div class="actions hand">
-      <button type="button" data-copy>
-        copy the link
-      </button>
-      <a target="_blank" rel="noopener" data-open>
-        open it ↗
-      </a>
-      <button type="button" data-again>
-        another one
-      </button>
-    </div>
-    <p class="sealed-meta" data-sealed-meta></p>
   </section>
 </BaseLayout>
 
@@ -106,8 +149,16 @@ const SQUARE_TILTS = [-1.5, 0.8, -0.4, 1.2, -0.9];
   }
 
   .sheet,
-  .sealed {
+  .sealed-text {
     max-width: 50rem;
+  }
+
+  .sealed-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1.5rem 3rem;
   }
 
   /* a notebook page: red margin, no box */
@@ -305,6 +356,51 @@ const SQUARE_TILTS = [-1.5, 0.8, -0.4, 1.2, -0.9];
     cursor: pointer;
   }
 
+  .qr {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.125rem;
+    margin: 0;
+    --slip: light-dark(var(--paper), var(--fg-main));
+    --qr-ink: light-dark(var(--fg-main), var(--bg-main));
+  }
+
+  .qr svg {
+    display: block;
+    width: 16.5rem;
+    height: 16.5rem;
+    overflow: visible;
+    transform: rotate(-1.5deg);
+  }
+
+  .qr-shadow {
+    fill: var(--fg-main);
+    opacity: 0.18;
+    filter: url(#qr-shadow);
+  }
+
+  .qr-slip {
+    fill: var(--slip);
+  }
+
+  .qr-wash {
+    fill: var(--red);
+    opacity: 0.5;
+    filter: url(#qr-wash);
+  }
+
+  .qr-ink {
+    fill: var(--qr-ink);
+    filter: url(#qr-tremble);
+  }
+
+  .qr .hand {
+    font-size: 1.0625rem;
+    color: var(--fg-dim);
+    text-align: center;
+  }
+
   .sealed-meta {
     margin: 2.5rem 0 0;
     padding-top: 1rem;
@@ -331,6 +427,15 @@ const SQUARE_TILTS = [-1.5, 0.8, -0.4, 1.2, -0.9];
 
     .squares {
       gap: 0.375rem;
+    }
+
+    .qr {
+      margin: 0 auto;
+    }
+
+    .qr svg {
+      width: 14.375rem;
+      height: 14.375rem;
     }
 
     .square {

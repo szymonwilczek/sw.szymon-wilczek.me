@@ -1,5 +1,6 @@
 // /paste/: sends the text with my word to the paste Worker
 import { PASTE_URL, MAX_CHARS } from "../utils/paste";
+import { inkQr, UNIT } from "../utils/paste-qr";
 
 const WORD_KEY = "paste:word";
 const COPIED_FOR_MS = 1400;
@@ -18,6 +19,7 @@ const linkEl = document.querySelector<HTMLAnchorElement>("[data-link]")!;
 const openEl = document.querySelector<HTMLAnchorElement>("[data-open]")!;
 const copyEl = document.querySelector<HTMLButtonElement>("[data-copy]")!;
 const metaEl = document.querySelector<HTMLElement>("[data-sealed-meta]")!;
+const qrEl = document.querySelector<SVGSVGElement>("[data-qr]")!;
 
 const host = PASTE_URL.replace(/^https?:\/\//, "");
 let link = "";
@@ -56,6 +58,17 @@ function showError(message: string) {
   errorEl.hidden = false;
 }
 
+function drawQr(text: string) {
+  const { size, slip, ink, finders } = inkQr(text);
+  qrEl.setAttribute("viewBox", `${-UNIT} ${-UNIT} ${size + UNIT * 2} ${size + UNIT * 2}`);
+  qrEl.setAttribute("aria-label", `QR code for ${text}`);
+  const fill = (selector: string, d: string) =>
+    qrEl.querySelectorAll(selector).forEach((path) => path.setAttribute("d", d));
+  fill("[data-qr-slip]", slip);
+  fill("[data-qr-ink]", ink);
+  fill("[data-qr-finders]", finders);
+}
+
 function showSealed(id: string, until: Date, characters: number) {
   link = `${PASTE_URL}/${id}`;
   [...id].forEach((char, index) => (squares[index].textContent = char));
@@ -65,6 +78,7 @@ function showSealed(id: string, until: Date, characters: number) {
     Object.assign(document.createElement("b"), { textContent: id }),
   );
   openEl.href = link;
+  drawQr(link);
   metaEl.textContent = `${characters.toLocaleString("fr-FR")} characters · raw text · ${left(until)}`;
   form.hidden = true;
   sealed.hidden = false;
