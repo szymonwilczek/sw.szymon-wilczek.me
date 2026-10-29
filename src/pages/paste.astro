@@ -8,6 +8,8 @@ const SQUARE_TILTS = [-1.5, 0.8, -0.4, 1.2, -0.9];
 const DECKLE =
   "M8 10 L120 4 L260 9 L410 3 L560 8 L700 2 L850 7 L992 4 L996 160 L990 330 L997 500 L991 680 L996 840 L993 994 L840 990 L690 996 L540 991 L380 997 L230 992 L90 996 L6 991 L9 820 L3 650 L8 480 L2 300 L7 140 Z";
 const PAGE_SHADOW_OFFSET = "translate(5 9)";
+const LOCK =
+  "M8 11 V8.2 C 8 4.6, 16 4.6, 16 8.2 V11 M5.5 11.2 C 9 10.8, 15 11.3, 18.5 10.9 L 18.2 20 C 14 20.3, 10 19.8, 5.8 20.2 Z";
 const PLACEHOLDER = [
   ";; This buffer is for text that is not saved, and for files",
   ";; that will not stay. To keep anything, open the link",
@@ -61,7 +63,10 @@ const SHADOW_OFFSET = `translate(${0.25 * UNIT} ${0.45 * UNIT})`;
 
     <div class="send-row">
       <label class="word">
-        <span class="hand">the word</span>
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d={LOCK}></path>
+        </svg>
+        <span class="hand">password</span>
         <input type="password" name="word" autocomplete="current-password" required data-word />
       </label>
       <button type="submit" class="seal-send hand" data-send>
@@ -282,9 +287,24 @@ const SHADOW_OFFSET = `translate(${0.25 * UNIT} ${0.45 * UNIT})`;
 
   .word {
     display: flex;
-    align-items: baseline;
+    align-items: center;
     gap: 0.875rem;
-    flex: 1 1 15rem;
+    padding: 0.75rem 1.5rem 0.75rem 1.125rem;
+    border-radius: 2px 4px 3px 2px;
+    background: var(--tape);
+    box-shadow: 0 6px 14px -8px rgb(0 0 0 / 0.45);
+    color: var(--fg-main);
+  }
+
+  .word svg {
+    flex: none;
+    width: 1.375rem;
+    height: 1.375rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linejoin: round;
+    stroke-linecap: round;
   }
 
   .word .hand {
@@ -292,22 +312,21 @@ const SHADOW_OFFSET = `translate(${0.25 * UNIT} ${0.45 * UNIT})`;
   }
 
   .word input {
-    flex: 1;
-    max-width: 15rem;
-    min-height: 2.75rem;
-    padding: 0.375rem 0;
+    width: 11.25rem;
+    min-width: 0;
+    padding: 0.25rem 0;
     border: 0;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1.5px dotted currentColor;
     background: none;
     font-family: var(--font-mono);
     font-size: 1rem;
     letter-spacing: 0.3em;
-    color: var(--fg-main);
+    color: inherit;
     outline: none;
   }
 
   .word input:focus {
-    border-bottom-color: var(--cursor);
+    border-bottom: 1.5px solid var(--cursor);
   }
 
   .seal-send {
@@ -501,6 +520,10 @@ const SHADOW_OFFSET = `translate(${0.25 * UNIT} ${0.45 * UNIT})`;
 
     .page textarea {
       min-height: 16.25rem;
+    }
+
+    .word input {
+      width: 6.875rem;
     }
 
     .send-row,
