@@ -10,6 +10,8 @@ const DECKLE =
 const PAGE_SHADOW_OFFSET = "translate(5 9)";
 const LOCK =
   "M8 11 V8.2 C 8 4.6, 16 4.6, 16 8.2 V11 M5.5 11.2 C 9 10.8, 15 11.3, 18.5 10.9 L 18.2 20 C 14 20.3, 10 19.8, 5.8 20.2 Z";
+const ARROW =
+  "M2 8 C 8 7.6, 16 8.4, 24 7.8 M18 3 C 20 5, 22 6.4, 24.5 7.8 C 22 9.4, 20 11, 18.4 13";
 const PLACEHOLDER = [
   ";; This buffer is for text that is not saved, and for files",
   ";; that will not stay. To keep anything, open the link",
@@ -69,18 +71,11 @@ const SHADOW_OFFSET = `translate(${0.25 * UNIT} ${0.45 * UNIT})`;
         <span class="hand">password</span>
         <input type="password" name="word" autocomplete="current-password" required data-word />
       </label>
-      <button type="submit" class="seal-send hand" data-send>
-        <svg viewBox="0 0 46 46" preserveAspectRatio="none" aria-hidden="true">
-          <path
-            d="M4 5 Q23 2 42 4 Q45 23 43 42 Q23 45 3 43 Q1 23 4 5 Z"
-            class="seal-send-ink"
-          ></path>
-          <path
-            d="M8 9 Q23 7 38 8 Q40 23 38 38 Q23 40 8 38 Q6 23 8 9 Z"
-            class="seal-send-ring"
-          ></path>
+      <button type="submit" class="send hand" data-send>
+        seal &amp; send
+        <svg viewBox="0 0 26 16" aria-hidden="true">
+          <path d={ARROW}></path>
         </svg>
-        <span>seal &amp; send</span>
       </button>
     </div>
     <p class="error" role="alert" data-error hidden></p>
@@ -279,10 +274,8 @@ const SHADOW_OFFSET = `translate(${0.25 * UNIT} ${0.45 * UNIT})`;
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: 1.5rem;
-    margin-top: 1.5rem;
-    padding: 1.25rem 0 0 3.5rem;
-    border-top: 1px dashed var(--border);
+    gap: 1.75rem;
+    margin-top: 2.25rem;
   }
 
   .word {
@@ -329,62 +322,54 @@ const SHADOW_OFFSET = `translate(${0.25 * UNIT} ${0.45 * UNIT})`;
     border-bottom: 1.5px solid var(--cursor);
   }
 
-  .seal-send {
-    position: relative;
+  .send {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
+    gap: 0.75rem;
     min-height: 3.5rem;
     padding: 0 1.75rem;
-    border: 0;
+    border: 2px solid currentColor;
+    border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
     background: none;
-    font-size: 1.25rem;
-    color: var(--bg-main);
-    transform: rotate(-3deg);
-    transition: transform 0.2s;
+    font-size: 1.3125rem;
+    color: var(--fg-main);
+    transition: color 0.2s;
     cursor: pointer;
   }
 
-  .seal-send svg {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-  }
-
-  .seal-send-ink {
-    fill: var(--red);
-  }
-
-  .seal-send-ring {
+  .send svg {
+    width: 1.625rem;
+    height: 1rem;
     fill: none;
-    stroke: var(--bg-main);
-    stroke-width: 1.2;
-    opacity: 0.7;
-    vector-effect: non-scaling-stroke;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: transform 0.2s;
   }
 
-  .seal-send span {
-    position: relative;
+  .send:hover,
+  .send:focus-visible {
+    color: var(--cursor);
   }
 
-  .seal-send:hover,
-  .seal-send:focus-visible {
-    transform: rotate(-6deg) scale(1.04);
+  .send:hover svg,
+  .send:focus-visible svg {
+    transform: translateX(0.25rem);
   }
 
-  .seal-send:focus-visible {
+  .send:focus-visible {
     outline: 2px solid var(--cursor);
     outline-offset: 4px;
   }
 
-  .seal-send[disabled] {
+  .send[disabled] {
     opacity: 0.6;
     cursor: wait;
   }
 
   .error {
-    margin: 1rem 0 0 3.5rem;
+    margin: 1rem 0 0;
     color: var(--red);
   }
 
@@ -524,12 +509,6 @@ const SHADOW_OFFSET = `translate(${0.25 * UNIT} ${0.45 * UNIT})`;
 
     .word input {
       width: 6.875rem;
-    }
-
-    .send-row,
-    .error {
-      padding-left: 0;
-      margin-left: 0;
     }
 
     .squares {
