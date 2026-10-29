@@ -98,7 +98,7 @@ export default defineConfig({
     sitemap({
       filter: (page) =>
         !page.includes("/vault") &&
-        !page.includes("/paste") &&
+        !page.includes("/send") &&
         !page.includes("/404") &&
         !page.endsWith(".org") &&
         !page.endsWith(".asc"),

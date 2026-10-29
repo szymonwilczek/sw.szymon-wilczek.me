@@ -1,8 +1,8 @@
-// /paste/: sends the text with my word to the paste Worker
-import { PASTE_URL, MAX_CHARS } from "../utils/paste";
-import { inkQr, UNIT } from "../utils/paste-qr";
+// /send/: sends the text with my word to the send Worker
+import { SEND_URL, MAX_TEXT_BYTES } from "../utils/send";
+import { inkQr, UNIT } from "../utils/send-qr";
 
-const WORD_KEY = "paste:word";
+const WORD_KEY = "send:word";
 const COPIED_FOR_MS = 1400;
 const MS_PER_MINUTE = 60_000;
 const MINUTES_PER_HOUR = 60;
@@ -21,7 +21,7 @@ const copyEl = document.querySelector<HTMLButtonElement>("[data-copy]")!;
 const metaEl = document.querySelector<HTMLElement>("[data-sealed-meta]")!;
 const qrEl = document.querySelector<SVGSVGElement>("[data-qr]")!;
 
-const host = PASTE_URL.replace(/^https?:\/\//, "");
+const host = SEND_URL.replace(/^https?:\/\//, "");
 let link = "";
 
 function remembered(): string {
@@ -70,7 +70,7 @@ function drawQr(text: string) {
 }
 
 function showSealed(id: string, until: Date, characters: number) {
-  link = `${PASTE_URL}/${id}`;
+  link = `${SEND_URL}/${id}`;
   [...id].forEach((char, index) => (squares[index].textContent = char));
   linkEl.href = link;
   linkEl.replaceChildren(
@@ -91,11 +91,11 @@ form.addEventListener("submit", async (event) => {
   const text = textEl.value;
   const word = wordEl.value;
   if (!text.trim()) return showError("Nothing to send yet.");
-  if (text.length > MAX_CHARS) return showError("Too long for one paste.");
+  if (text.length > MAX_TEXT_BYTES) return showError("Too long for one paste.");
 
   sendEl.disabled = true;
   try {
-    const response = await fetch(`${PASTE_URL}/`, {
+    const response = await fetch(`${SEND_URL}/`, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ word, text }),

@@ -1,8 +1,8 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Divider from "../components/Divider.astro";
-import { ID_LENGTH, MAX_CHARS } from "../utils/paste";
-import { UNIT } from "../utils/paste-qr";
+import { ID_LENGTH, MAX_TEXT_BYTES } from "../utils/send";
+import { UNIT } from "../utils/send-qr";
 
 const SQUARE_TILTS = [-1.5, 0.8, -0.4, 1.2, -0.9];
 const DECKLE =
@@ -25,12 +25,16 @@ const WASH_OFFSET = `translate(${0.32 * UNIT} ${0.42 * UNIT})`;
 const SHADOW_OFFSET = `translate(${0.25 * UNIT} ${0.45 * UNIT})`;
 ---
 
-<BaseLayout title="Paste" description="Text from one of my screens to another." noindex={true}>
-  <header class="paste-head">
-    <p class="crumb">paste · 原稿</p>
-    <h1>Paste</h1>
+<BaseLayout
+  title="Send"
+  description="Text and files from one of my screens to another."
+  noindex={true}
+>
+  <header class="send-head">
+    <p class="crumb">send · 送</p>
+    <h1>Send</h1>
     <p class="lede">
-      Text from one of my screens to another. Five letters to type, one day to live.
+      Text and files from one of my screens to another. One day to live.
     </p>
   </header>
 
@@ -43,17 +47,17 @@ const SHADOW_OFFSET = `translate(${0.25 * UNIT} ${0.45 * UNIT})`;
         <path d={DECKLE} class="page-sheet"></path>
       </svg>
       <p class="page-head">
-        <label for="paste-text" class="hand">
+        <label for="send-text" class="hand">
           text
         </label>
         <span class="count" aria-live="polite">
-          <span data-count>0</span> / {MAX_CHARS.toLocaleString("fr-FR")}
+          <span data-count>0</span> / {MAX_TEXT_BYTES.toLocaleString("fr-FR")}
         </span>
       </p>
       <textarea
-        id="paste-text"
+        id="send-text"
         name="text"
-        maxlength={MAX_CHARS}
+        maxlength={MAX_TEXT_BYTES}
         rows="12"
         placeholder={PLACEHOLDER}
         spellcheck="false"
@@ -150,11 +154,11 @@ const SHADOW_OFFSET = `translate(${0.25 * UNIT} ${0.45 * UNIT})`;
 </BaseLayout>
 
 <script>
-  import "../scripts/paste";
+  import "../scripts/send";
 </script>
 
 <style>
-  .paste-head {
+  .send-head {
     margin-top: 6rem;
     max-width: 40rem;
   }
@@ -166,7 +170,7 @@ const SHADOW_OFFSET = `translate(${0.25 * UNIT} ${0.45 * UNIT})`;
     color: var(--fg-dim);
   }
 
-  .paste-head h1 {
+  .send-head h1 {
     margin: 1rem 0 0;
     font-weight: 300;
     line-height: 1.1;
