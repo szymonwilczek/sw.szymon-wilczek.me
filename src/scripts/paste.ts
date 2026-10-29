@@ -131,6 +131,13 @@ document.querySelector("[data-again]")!.addEventListener("click", () => {
   textEl.focus();
 });
 
+// ctrl + enter sends from anywhere in the form
+form.addEventListener("keydown", (event) => {
+  if (event.key !== "Enter" || !(event.ctrlKey || event.metaKey)) return;
+  event.preventDefault();
+  if (!sendEl.disabled) form.requestSubmit();
+});
+
 textEl.addEventListener("input", count);
 wordEl.value = remembered();
 count();

@@ -71,12 +71,15 @@ const SHADOW_OFFSET = `translate(${0.25 * UNIT} ${0.45 * UNIT})`;
         <span class="hand">password</span>
         <input type="password" name="word" autocomplete="current-password" required data-word />
       </label>
-      <button type="submit" class="send hand" data-send>
-        seal &amp; send
-        <svg viewBox="0 0 26 16" aria-hidden="true">
-          <path d={ARROW}></path>
-        </svg>
-      </button>
+      <div class="send-group">
+        <kbd class="hint">ctrl + enter</kbd>
+        <button type="submit" class="send hand" data-send>
+          seal &amp; send
+          <svg viewBox="0 0 26 16" aria-hidden="true">
+            <path d={ARROW}></path>
+          </svg>
+        </button>
+      </div>
     </div>
     <p class="error" role="alert" data-error hidden></p>
   </form>
@@ -320,6 +323,25 @@ const SHADOW_OFFSET = `translate(${0.25 * UNIT} ${0.45 * UNIT})`;
 
   .word input:focus {
     border-bottom: 1.5px solid var(--cursor);
+  }
+
+  .send-group {
+    display: flex;
+    align-items: center;
+    gap: 1.125rem;
+  }
+
+  .hint {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    color: var(--fg-dim);
+  }
+
+  /* no keyboard, no shortcut */
+  @media (hover: none) {
+    .hint {
+      display: none;
+    }
   }
 
   .send {
