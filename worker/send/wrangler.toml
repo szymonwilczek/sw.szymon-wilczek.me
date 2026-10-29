@@ -1,20 +1,35 @@
-# Text passed between my own devices, for /paste/.
+# Text and files passed between my own devices, for /send/.
 # See README.md.
-name = "paste"
+name = "send"
 main = "src/index.ts"
 compatibility_date = "2026-10-01"
-routes = [{ pattern = "paste.szymon-wilczek.me", custom_domain = true }]
+routes = [{ pattern = "send.szymon-wilczek.me", custom_domain = true }]
 
 [vars]
 ORIGINS = "https://szymon-wilczek.me,http://localhost:4321"
 
-# from `npx wrangler kv namespace create PASTES`
-[[kv_namespaces]]
-binding = "PASTES"
-id = "7c09f8739ef04d6a80af41d1979f2468"
+# the one list of sends, and the shards that hold their bytes
+[[durable_objects.bindings]]
+name = "REGISTRY"
+class_name = "Registry"
 
-# writes per address, wrong words included
+[[durable_objects.bindings]]
+name = "SHARDS"
+class_name = "Shard"
+
+# the free plan only has SQLite-backed objects
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["Registry", "Shard"]
+
+# sends started per address, wrong passwords included
 [[ratelimits]]
 name = "WRITES"
 namespace_id = "1031"
+simple = { limit = 10, period = 60 }
+
+# wrong passwords typed into a locked link, per address
+[[ratelimits]]
+name = "GUESSES"
+namespace_id = "1032"
 simple = { limit = 10, period = 60 }
