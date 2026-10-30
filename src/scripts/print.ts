@@ -18,7 +18,8 @@ window.addEventListener("beforeprint", () => {
 
   const numbers = new Map<string, number>();
   main.querySelectorAll<HTMLAnchorElement>("a[href]").forEach((link) => {
-    if (link.closest(".adjacent, .source, .crumbs, .footnotes-section, .stop-go")) return;
+    if (link.closest(".adjacent, .source, .crumbs, .footnotes-section, .stop-go, .plain-in-print"))
+      return;
     const href = link.href;
     if (!/^https?:/.test(href) || href.split("#")[0] === location.href.split("#")[0]) return;
     if (!numbers.has(href)) numbers.set(href, numbers.size + 1);
