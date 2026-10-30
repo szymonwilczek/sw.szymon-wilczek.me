@@ -28,7 +28,7 @@ const links = [
     </a>
   </nav>
   <span>
-    © {currentYear} Szymon Wilczek <span data-theme-id>au-salina-night</span>
+    © {currentYear} Szymon Wilczek
     <span class="kigo-word" hidden>
       · <span class="kigo-glyph"></span>
       <span class="kigo-romaji"></span>
@@ -120,18 +120,4 @@ const links = [
     word.title = `${currentSeason}, then ${SEASONS[currentSeason].next}`;
     word.hidden = false;
   }
-</script>
-
-<script is:inline>
-  (function () {
-    function show() {
-      var themeId = window.auTheme.resolve(window.auTheme.get());
-      document.querySelectorAll("[data-theme-id]").forEach(function (label) {
-        label.textContent = "au-" + themeId;
-      });
-    }
-
-    document.addEventListener("au-theme-change", show);
-    show();
-  })();
 </script>
