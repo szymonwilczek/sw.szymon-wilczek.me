@@ -1,0 +1,284 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { CV } from "../data/years";
+
+interface Entry {
+  when: string;
+  title: string;
+  href?: string;
+  text: string;
+}
+
+const skills = [
+  { label: "languages", text: "C, Go, ELisp, PHP, SQL, Lua" },
+  { label: "systems", text: "Linux, git, syzbot, QEMU, eBPF and BPF LSM, TPM 2.0, SELinux" },
+  { label: "tools", text: "GNU Emacs and Org, GLSL, GTK" },
+];
+
+const sections: Array<{ title: string; href?: string; entries: Entry[] }> = [
+  {
+    title: "Education",
+    entries: [
+      {
+        when: "10.2023 – now",
+        title: "Silesian University of Technology, Gliwice",
+        text: "Computer Science, B.Sc. Eng. · Faculty of Automatic Control, Electronics and Computer Science. Seventh semester.",
+      },
+    ],
+  },
+  {
+    title: "Upstream work",
+    href: "/research/",
+    entries: [
+      {
+        when: "11.2025 – now",
+        title: "Linux kernel",
+        href: "/research/#linux",
+        text: "Patches merged into the mainline kernel, across filesystems, networking and drivers.",
+      },
+      {
+        when: "10.2026",
+        title: "Git",
+        href: "/research/#git",
+        text: "A patch in Git’s core, applied by its maintainer, Junio C Hamano.",
+      },
+    ],
+  },
+  {
+    title: "Experience",
+    entries: [
+      {
+        when: "10.2025 – now",
+        title: "FAMUR, Zabrze · Software Architect",
+        text: "MES software for the mining sector: industrial processes made digital, and the data between them kept in order. PHP, SQL.",
+      },
+      {
+        when: "01.2024 – 01.2026",
+        title: "Freelance · full-stack",
+        text: "Took projects alone from a first sketch to production: the data model, the PHP and SQL behind it, the TypeScript in front, and the Linux server it runs on. Then stayed on call when something broke.",
+      },
+    ],
+  },
+  {
+    title: "Certificates",
+    entries: [
+      {
+        when: "10.2025",
+        title: "AccessibleEU · Accessible Technology Design",
+        text: "A certificate from the European Commission: software anyone can use.",
+      },
+    ],
+  },
+];
+---
+
+<BaseLayout
+  title="Curriculum vitae"
+  description="Szymon Wilczek: education, upstream work in Linux and Git, experience and certificates. As a PDF too."
+>
+  <div class="cv">
+    <aside class="side">
+      <svg class="crooked" viewBox="0 0 6 100" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M3 0 C 2.2 30, 3.8 62, 3 100" vector-effect="non-scaling-stroke"></path>
+      </svg>
+      <div>
+        <h1>Szymon Wilczek</h1>
+        <p class="sub">CS student</p>
+      </div>
+      <div>
+        <p class="label">reach</p>
+        <p class="column">
+          <a href="/contact/">contact &amp; gpg key</a>
+          <a href="https://github.com/szymonwilczek">github.com/szymonwilczek</a>
+          <a href="/">{Astro.site!.host}</a>
+        </p>
+      </div>
+      {skills.map((skill) => (
+        <div>
+          <p class="label">{skill.label}</p>
+          <p>{skill.text}</p>
+        </div>
+      ))}
+      <a class="pdf" href={CV} download>
+        download the PDF ↓
+      </a>
+    </aside>
+
+    <div class="sections">
+      {sections.map((section) => (
+        <section>
+          <h2>
+            {section.href ? (
+              <a class="plain-in-print" href={section.href}>
+                {section.title}
+              </a>
+            ) : (
+              section.title
+            )}
+          </h2>
+          <ol class="entries">
+            {section.entries.map((entry) => (
+              <li>
+                <span class="when">{entry.when}</span>
+                <div>
+                  <h3>
+                    {entry.href ? (
+                      <a class="plain-in-print" href={entry.href}>
+                        {entry.title}
+                      </a>
+                    ) : (
+                      entry.title
+                    )}
+                  </h3>
+                  <p>{entry.text}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </section>
+      ))}
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .cv {
+    display: grid;
+    grid-template-columns: 17.5rem minmax(0, 1fr);
+    gap: 2.75rem;
+    margin-top: 3.5rem;
+  }
+
+  .side {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding-right: 1.875rem;
+    font-size: 0.9375rem;
+  }
+
+  .side p {
+    margin: 0;
+  }
+
+  .crooked {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 6px;
+    height: 100%;
+  }
+
+  .crooked path {
+    fill: none;
+    stroke: var(--border);
+    stroke-width: 1.2;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: 1.875rem;
+  }
+
+  .side .sub {
+    margin-top: 0.375rem;
+    color: var(--fg-dim);
+  }
+
+  .side .label {
+    margin-bottom: 0.75rem;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--fg-dim);
+  }
+
+  .column {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .pdf {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    font-size: 1rem;
+    text-underline-offset: 4px;
+  }
+
+  .sections section {
+    margin-bottom: 1.875rem;
+  }
+
+  h2 {
+    margin: 0 0 0.875rem;
+  }
+
+  h2 a,
+  h3 a {
+    color: inherit;
+  }
+
+  .entries {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--border);
+  }
+
+  .entries li {
+    display: grid;
+    grid-template-columns: 8.125rem minmax(0, 1fr);
+    gap: 0.125rem 1.75rem;
+    padding: 0.75rem 0;
+  }
+
+  .when {
+    padding-top: 0.1875rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--fg-dim);
+  }
+
+  h3 {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 500;
+    line-height: 1.5;
+  }
+
+  .entries p {
+    margin: 0.125rem 0 0;
+    font-size: 1rem;
+    color: var(--fg-dim);
+  }
+
+  @media (max-width: 47.99em) {
+    .cv {
+      grid-template-columns: minmax(0, 1fr);
+      margin-top: 2rem;
+    }
+
+    .side {
+      padding-right: 0;
+    }
+
+    .crooked {
+      display: none;
+    }
+
+    .entries li {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  @media print {
+    .crooked,
+    .pdf {
+      display: none;
+    }
+  }
+</style>
