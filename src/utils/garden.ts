@@ -87,6 +87,11 @@ export function stampDate(date = new Date()): string {
   return `${date.getFullYear()}·${pad(date.getMonth() + 1)}·${pad(date.getDate())}`;
 }
 
+/** Seals earned that are still bound in the book, not ones since cut */
+export function earnedCount(state: GardenState): number {
+  return SEALS.filter((seal) => state.seals[seal.glyph]).length;
+}
+
 /** Stamps a seal once */
 export function earn(glyph: string): boolean {
   if (!SEALS.some((seal) => seal.glyph === glyph)) return false;

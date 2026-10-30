@@ -59,7 +59,7 @@ const TILTS = [-6, 4, -2, 7, -4, 3, -7, 5, -3, 6, -5, 2, -6, 4, -1, 5, -3, 7, -5
 </BaseLayout>
 
 <script>
-  import { DOORS, load, reset, SEALS } from "../utils/garden";
+  import { DOORS, earnedCount, load, reset, SEALS } from "../utils/garden";
   import { HANKO_EDGE, HANKO_INNER } from "../utils/hanko";
 
   const book = document.querySelector<HTMLElement>(".book")!;
@@ -164,7 +164,7 @@ const TILTS = [-6, 4, -2, 7, -4, 3, -7, 5, -3, 6, -5, 2, -6, 4, -1, 5, -3, 7, -5
       context.fillText(date ? page.note : page.hint, x + cellWidth / 2, y + 220);
     });
 
-    const earned = Object.keys(state.seals).length;
+    const earned = earnedCount(state);
     context.textAlign = "left";
     context.fillStyle = ink("--fg-dim");
     context.font = "11px 'Typus Mono 95', monospace";

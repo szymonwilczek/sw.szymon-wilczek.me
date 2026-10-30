@@ -1,6 +1,6 @@
 // Fresh seal is stamped where it was earned
 
-import { load, SEALS } from "../utils/garden";
+import { earnedCount, load, SEALS } from "../utils/garden";
 import { hankoSvg } from "../utils/hanko";
 
 const still = matchMedia("(prefers-reduced-motion: reduce)");
@@ -10,7 +10,7 @@ let busy = false;
 function count() {
   const counter = document.querySelector<HTMLElement>(".seal-count");
   if (!counter) return;
-  const earned = Object.keys(load().seals).length;
+  const earned = earnedCount(load());
   counter.querySelector(".seal-count-n")!.textContent = `${earned}/${SEALS.length}`;
   counter.hidden = earned === 0;
 }
