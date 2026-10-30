@@ -18,8 +18,7 @@
     "file:add": "node scripts/manage-encrypted.mjs file",
     "roji-key": "node scripts/roji-key.mjs",
     "icons": "node scripts/make-icons.mjs",
-    "research": "node scripts/research.mjs",
-    "threads": "node scripts/threads.mjs"
+    "research": "node scripts/research.mjs"
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.19",

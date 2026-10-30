@@ -33,5 +33,3 @@ scratch/
 .wrangler/
 .dev.vars
 
-# Mailing-list threads saved with b4 mbox, read by npm run threads
-.threads/

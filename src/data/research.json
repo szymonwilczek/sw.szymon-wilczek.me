@@ -1,7 +1,10 @@
 [
   {
+    "kind": "commit",
     "repo": "git/git",
     "sha": "440b7035bbe0ce9a5b65722da288e82e8ef415ef",
+    "author": "Szymon Wilczek",
+    "email": "swilczek.lx@gmail.com",
     "message": "cache-tree: do not die when the index is locked\n\nWhen a background process such as `git status` holds `index.lock` while\n`git rebase` picks a commit, the rebase can die in the middle of the\npick and leave the sequencer in a state from which `git rebase\n--continue` refuses to run:\n\n    error: you have staged changes in your working tree\n\nThis happens because `try_to_commit()` calls `write_index_as_tree()`\nright after the pick has updated the index and written\n`CHERRY_PICK_HEAD`, and `write_index_as_tree()` dies when it cannot\ntake the index lock. We then die before writing `rebase-merge/message`.\nSince 356ee4659b (sequencer: try to commit without forking 'git commit',\n2017-11-24), this call happens in-process. Before that commit the\n`die()` happened in a `git commit` child process, and the sequencer\nstopped cleanly with its state saved.\n\n`write_index_as_tree()` does two different things:\n\n  - It turns the index into a tree object. This part must succeed.\n\n  - When that succeeds, it also rewrites the index to populate the\n    cache-tree extension. This part is allowed to fail without\n    impacting the result; as the comment next to\n    `write_locked_index()` already notes, failing to write the index\n    here is fine.\n\nYet the function locks the index with `LOCK_DIE_ON_ERROR`, even though\nwe only need the lock for the optional second part.\n\nDrop `LOCK_DIE_ON_ERROR` so that we take the lock gently, just like\nother callers that only refresh the index, and skip writing the index\nwhen the lock is held by someone else. This also lets `git write-tree`\nand `git am` proceed while another process holds the lock.\n\nSigned-off-by: Szymon Wilczek <swilczek.lx@gmail.com>\nSigned-off-by: Junio C Hamano <gitster@pobox.com>",
     "authored": "2026-10-16T09:16:47Z",
     "committed": "2026-10-16T16:39:02Z",
@@ -22,8 +25,53 @@
     ]
   },
   {
+    "kind": "pull",
+    "repo": "lavalink-devs/youtube-source",
+    "sha": "2be8e542d3f6f178e048dca565892684c2e40177",
+    "number": 245,
+    "author": "Szymon Wilczek",
+    "email": "swilczek.lx@gmail.com",
+    "message": "fix: cipher: close embed response before getTimestamp to avoid connection starvation",
+    "html": "<p dir=\"auto\">In CipherManager#getPlayerScript, getTimestamp was invoked within the try-with-resources block of the embed CloseableHttpResponse.</p>\n<p dir=\"auto\">Keeping the response open while executing another request on the same HttpInterface can lead to connection pool starvation and socket timeouts.</p>",
+    "authored": "2026-09-17T20:49:23Z",
+    "committed": "2026-09-17T20:52:23Z",
+    "committer": "devoxin",
+    "files": [
+      {
+        "name": "common/src/main/java/dev/lavalink/youtube/cipher/CipherManager.java",
+        "additions": 6,
+        "deletions": 1,
+        "patch": "@@ -39,16 +39,21 @@ public interface CipherManager {\n \n     default CachedPlayerScript getPlayerScript(@NotNull HttpInterface httpInterface) {\n         synchronized (this) {\n+            String scriptUrl;\n             try (CloseableHttpResponse response = httpInterface.execute(new HttpGet(\"https://www.youtube.com/embed/\"))) {\n                 HttpClientTools.assertSuccessWithContent(response, \"fetch player script (embed)\");\n \n                 String responseText = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);\n-                String scriptUrl = DataFormatTools.extractBetween(responseText, \"\\\"jsUrl\\\":\\\"\", \"\\\"\");\n+                scriptUrl = DataFormatTools.extractBetween(responseText, \"\\\"jsUrl\\\":\\\"\", \"\\\"\");\n \n                 if (scriptUrl == null) {\n                     throw new ExceptionWithResponseBody(\"no jsUrl found\", responseText);\n                 }\n+            } catch (IOException e) {\n+                throw ExceptionTools.toRuntimeException(e);\n+            }\n \n+            try {\n                 return new CachedPlayerScript(scriptUrl, getTimestamp(httpInterface, scriptUrl));\n             } catch (IOException e) {\n                 throw ExceptionTools.toRuntimeException(e);"
+      }
+    ]
+  },
+  {
+    "kind": "pull",
+    "repo": "lavalink-devs/youtube-source",
+    "sha": "34ee4c5f6b4608c19880ff62f80540c0048f537e",
+    "number": 231,
+    "author": "Szymon Wilczek",
+    "email": "swilczek.lx@gmail.com",
+    "message": "fix: update client version to 21.02.35",
+    "html": "<p dir=\"auto\">InnerTube answers every <code class=\"notranslate\">/player</code> request from the <code class=\"notranslate\">ANDROID</code> client with <code class=\"notranslate\">HTTP 400</code>. The client version it advertises, <code class=\"notranslate\">19.44.38</code>, is no longer accepted.</p>\n<p dir=\"auto\">Bumping it to <code class=\"notranslate\">21.02.35</code> (the version <code class=\"notranslate\">yt-dlp</code> currently sends) makes the endpoint respond normally again, with <code class=\"notranslate\">playabilityStatus OK</code> and a progressive format carrying a plain url, so no other change is needed to make the client usable.</p>\n<p dir=\"auto\">Verified against a public video, comparing the two versions with an otherwise identical payload:</p>\n<div class=\"snippet-clipboard-content notranslate position-relative overflow-auto\" data-snippet-clipboard-copy-content=\"clientVersion 19.44.38  -&gt;  HTTP 400\nclientVersion 21.02.35  -&gt;  HTTP 200, status OK, 1 progressive format with url\"><pre class=\"notranslate\"><code class=\"notranslate\">clientVersion 19.44.38  -&gt;  HTTP 400\nclientVersion 21.02.35  -&gt;  HTTP 200, status OK, 1 progressive format with url\n</code></pre></div>",
+    "authored": "2026-08-18T23:41:09Z",
+    "committed": "2026-08-19T00:44:49Z",
+    "committer": "devoxin",
+    "files": [
+      {
+        "name": "common/src/main/java/dev/lavalink/youtube/clients/Android.java",
+        "additions": 1,
+        "deletions": 1,
+        "patch": "@@ -12,7 +12,7 @@\n public class Android extends StreamingNonMusicClient {\n     private static final Logger log = LoggerFactory.getLogger(Android.class);\n \n-    public static String CLIENT_VERSION = \"19.44.38\";\n+    public static String CLIENT_VERSION = \"21.02.35\";\n     public static AndroidVersion ANDROID_VERSION = AndroidVersion.ANDROID_11;\n \n     public static ClientConfig BASE_CONFIG = new ClientConfig()"
+      }
+    ]
+  },
+  {
+    "kind": "commit",
     "repo": "torvalds/linux",
     "sha": "0cd8450c257faa0cece0e0c43d3b55d1a389acc7",
+    "author": "Szymon Wilczek",
+    "email": "swilczek.lx@gmail.com",
     "message": "hwmon: (coretemp) Fix core_data leak on CPUs without PTS\n\npdata->core_data is allocated in init_temp_data() when the first core\ntemp_data of a package is created, but it is only released from\ndestroy_temp_data(), and only in the branch that handles the package\ntemp_data.\n\nPackage temp_data is created solely when the CPU supports\nX86_FEATURE_PTS. On a CPU without it, coretemp_cpu_online() never calls\ncoretemp_add_core() with pkg_flag set, so pdata->pkg_data stays NULL.\ncoretemp_cpu_offline() then skips the removal of the package interface,\ndestroy_temp_data() is never called for package data, and the array is\nstill allocated when coretemp_device_remove() frees the platform data\nthat pointed at it.\n\nRelease the array in coretemp_device_remove(). destroy_temp_data() sets\npdata->core_data to NULL when it frees it, so the added kfree() is a\nno-op on CPUs that do have PTS.\n\nTested on an Intel Core i5-1135G7. The driver was instrumented to log\nevery allocation and release of pdata->core_data, and the PTS check in\ncoretemp_cpu_online() was patched out to emulate a CPU without package\nthermal support. Without this change the array was allocated and never\nreleased, and coretemp_device_remove() still saw a non-NULL pointer.\nWith it the array is released and the pointer accounting balances. On an\nunmodified build the release still happens via the package temp_data and\nthe added kfree() sees NULL, with no slab warnings over repeated module\nload and unload cycles.\n\nFixes: 1a793caf6f69 (\"hwmon: (coretemp) Use dynamic allocated memory for core temp_data\")\nSigned-off-by: Szymon Wilczek <swilczek.lx@gmail.com>\nLink: https://lore.kernel.org/r/20260810192344.3733721-1-swilczek.lx@gmail.com\nSigned-off-by: Guenter Roeck <linux@roeck-us.net>",
     "authored": "2026-08-10T19:23:44Z",
     "committed": "2026-08-16T21:40:33Z",
@@ -38,8 +86,185 @@
     ]
   },
   {
+    "kind": "issue",
+    "repo": "neovim/neovim",
+    "number": 40460,
+    "title": "\"slug\" shortname utility for arbitrary filesystem paths",
+    "authored": "2026-06-27T20:09:02Z",
+    "committed": "2026-08-04T19:24:37Z",
+    "committer": "Justin M. Keyes"
+  },
+  {
+    "kind": "pull",
+    "repo": "neovim/neovim",
+    "sha": "0c3e6e1b0e6eecceff441691e98ffa6aeb894bb2",
+    "number": 39497,
+    "author": "Szymon Wilczek",
+    "email": "szymonwilczek@outlook.com",
+    "message": "fix(treesitter): zero parser userdata pointer after ts_parser_delete",
+    "html": "\n<h2 dir=\"auto\">Problem</h2>\n<p dir=\"auto\"><code class=\"notranslate\">parser_gc()</code> calls <code class=\"notranslate\">ts_parser_delete()</code> but leaves the userdata pointer pointing to freed memory. If the GC finalizer runs at an unexpected time (e.g. inside <code class=\"notranslate\">nvim_buf_get_lines</code> as seen in <a class=\"issue-link js-issue-link\" data-error-text=\"Failed to load title\" data-id=\"4329387123\" data-permission-text=\"Title is private\" data-url=\"https://github.com/neovim/neovim/issues/39411\" data-hovercard-type=\"issue\" data-hovercard-url=\"/neovim/neovim/issues/39411/hovercard\" href=\"https://github.com/neovim/neovim/issues/39411\">#39411</a>), a stale pointer could cause a crash.</p>\n<h2 dir=\"auto\">Solution</h2>\n<ul dir=\"auto\">\n<li>NULL out <code class=\"notranslate\">*ud</code> after <code class=\"notranslate\">ts_parser_delete()</code> in <code class=\"notranslate\">parser_gc()</code></li>\n<li>Update <code class=\"notranslate\">parser_check()</code> to handle NULL with a clear error message, guarding all parser methods against UAF</li>\n</ul>\n<p dir=\"auto\"><span class=\"issue-keyword tooltipped tooltipped-se\" aria-label=\"This pull request closes issue #39411.\">Fixes</span> <a class=\"issue-link js-issue-link\" data-error-text=\"Failed to load title\" data-id=\"4329387123\" data-permission-text=\"Title is private\" data-url=\"https://github.com/neovim/neovim/issues/39411\" data-hovercard-type=\"issue\" data-hovercard-url=\"/neovim/neovim/issues/39411/hovercard\" href=\"https://github.com/neovim/neovim/issues/39411\">#39411</a></p>\n<p dir=\"auto\"><del>Draft - opening to run CI and discuss approach before requesting review.</del></p>",
+    "authored": "2026-04-29T06:49:59Z",
+    "committed": "2026-05-07T12:39:08Z",
+    "committer": "Justin M. Keyes",
+    "files": [
+      {
+        "name": "src/nvim/lua/treesitter.c",
+        "additions": 8,
+        "deletions": 5,
+        "patch": "@@ -399,10 +399,10 @@ static int tslua_push_parser(lua_State *L)\n   return 1;\n }\n \n-static TSParser *parser_check(lua_State *L, uint16_t index)\n+static TSParser *parser_check(lua_State *L, int index)\n {\n   TSParser **ud = luaL_checkudata(L, index, TS_META_PARSER);\n-  luaL_argcheck(L, *ud, index, \"TSParser expected\");\n+  luaL_argcheck(L, *ud != NULL, index, \"Parser has been deleted\");\n   return *ud;\n }\n \n@@ -419,9 +419,12 @@ static void logger_gc(TSLogger logger)\n \n static int parser_gc(lua_State *L)\n {\n-  TSParser *p = parser_check(L, 1);\n-  logger_gc(ts_parser_logger(p));\n-  ts_parser_delete(p);\n+  TSParser **ud = luaL_checkudata(L, 1, TS_META_PARSER);\n+  if (*ud) {\n+    logger_gc(ts_parser_logger(*ud));\n+    ts_parser_delete(*ud);\n+    *ud = NULL;\n+  }\n   return 0;\n }\n "
+      },
+      {
+        "name": "test/functional/treesitter/parser_spec.lua",
+        "additions": 20,
+        "deletions": 0,
+        "patch": "@@ -8,6 +8,8 @@ local eq = t.eq\n local insert = n.insert\n local exec_lua = n.exec_lua\n local feed = n.feed\n+local matches = t.matches\n+local pcall_err = t.pcall_err\n local run_query = ts_t.run_query\n local assert_alive = n.assert_alive\n \n@@ -107,6 +109,24 @@ describe('treesitter parser API', function()\n     )\n   end)\n \n+  it('ignores repeated parser finalization', function()\n+    matches(\n+      'Parser has been deleted',\n+      pcall_err(exec_lua, function()\n+        vim.treesitter.language.add('c')\n+\n+        local parser = vim._create_ts_parser('c')\n+        -- The parser metatable exposes __gc through __index, so this simulates a finalizer\n+        -- running before all Lua references to the userdata are gone.\n+        parser:__gc()\n+        parser:__gc()\n+\n+        parser:parse(nil, 'int x;', false)\n+      end)\n+    )\n+    assert_alive()\n+  end)\n+\n   it('respects eol settings when parsing buffer', function()\n     insert([[\n       int main() {"
+      }
+    ]
+  },
+  {
+    "kind": "pull",
+    "repo": "neovim/neovim",
+    "sha": "3639f7a8672bfbc6844f94c1db98c06cc9649afc",
+    "number": 39423,
+    "author": "Szymon Wilczek",
+    "email": "swilczek.lx@gmail.com",
+    "message": "feat(server): add v:useractive, use it in serverlist(info=true)",
+    "html": "<h2 dir=\"auto\">Problem</h2>\n<p dir=\"auto\">UI pickers for remote servers (like <code class=\"notranslate\">:connect</code>) need to know which servers are actively used or stale. Currently, Nvim does not expose a mechanism to track user activity timestamps.</p>\n<h2 dir=\"auto\">Solution</h2>\n<ul dir=\"auto\">\n<li>Introduce <code class=\"notranslate\">v:useractive</code> as read-only Unix timestamp updated by <code class=\"notranslate\">vgetc()</code> upon user keystrokes.</li>\n<li>Throttle the update to 1-sec granularity to avoid overhead.</li>\n<li>Expose this timestamp as <code class=\"notranslate\">last_activity</code> in the dicts returned by <code class=\"notranslate\">serverlist({info=true})</code> with internal RPC call.</li>\n</ul>\n<p dir=\"auto\">Addresses the <code class=\"notranslate\">[last-activity]</code> requirement from <a class=\"issue-link js-issue-link\" data-error-text=\"Failed to load title\" data-id=\"4330901077\" data-permission-text=\"Title is private\" data-url=\"https://github.com/neovim/neovim/issues/39420\" data-hovercard-type=\"issue\" data-hovercard-url=\"/neovim/neovim/issues/39420/hovercard\" href=\"https://github.com/neovim/neovim/issues/39420\">#39420</a>.</p>\n<p dir=\"auto\"><strong>Note:</strong> Stacked on top of <a class=\"issue-link js-issue-link\" data-error-text=\"Failed to load title\" data-id=\"4327843245\" data-permission-text=\"Title is private\" data-url=\"https://github.com/neovim/neovim/issues/39392\" data-hovercard-type=\"pull_request\" data-hovercard-url=\"/neovim/neovim/pull/39392/hovercard\" href=\"https://github.com/neovim/neovim/pull/39392\">#39392</a>. Diff currently includes commits from the prerequisite PR, but will automatically shrink once <a class=\"issue-link js-issue-link\" data-error-text=\"Failed to load title\" data-id=\"4327843245\" data-permission-text=\"Title is private\" data-url=\"https://github.com/neovim/neovim/issues/39392\" data-hovercard-type=\"pull_request\" data-hovercard-url=\"/neovim/neovim/pull/39392/hovercard\" href=\"https://github.com/neovim/neovim/pull/39392\">#39392</a> merges into master.</p>",
+    "authored": "2026-04-26T14:14:29Z",
+    "committed": "2026-05-07T14:47:51Z",
+    "committer": "Justin M. Keyes",
+    "files": [
+      {
+        "name": "runtime/doc/news.txt",
+        "additions": 1,
+        "deletions": 0,
+        "patch": "@@ -241,6 +241,7 @@ VIMSCRIPT\n \n • |v:exitreason| is set before |QuitPre|.\n • |v:starttime| is the process start time (nanoseconds since UNIX epoch).\n+• |v:useractive| timestamp of the most recent user activity.\n • |serverlist()| with `info=true` returns details for each server (own + peers).\n \n =============================================================================="
+      },
+      {
+        "name": "runtime/doc/vimfn.txt",
+        "additions": 5,
+        "deletions": 6,
+        "patch": "@@ -9142,12 +9142,11 @@ serverlist([{opts}])                                              *serverlist()*\n \t\t  info  : If |TRUE|, return a list of Dicts with detailed info\n \t\t          instead of addresses. Implies `peer=true`. Each Dict\n \t\t          has the following items:\n-\t\t            addr   (string)  Server address.\n-\t\t            pid    (number?) PID of the Nvim process owning the\n-\t\t                             server, or |v:null| if the peer is\n-\t\t                             unreachable.\n-\t\t            own    (bool)    Whether this server belongs to the\n-\t\t                             current Nvim instance.\n+\t\t            addr          (string)  Server address.\n+\t\t            pid           (number)  PID of the Nvim process.\n+\t\t            own           (bool)    Whether this server belongs to\n+\t\t                                    the current Nvim instance.\n+\t\t            active        (number)  |v:useractive| of the server.\n \t\t          (default: |FALSE|)\n \n \t\tExample: >vim"
+      },
+      {
+        "name": "runtime/doc/vvars.txt",
+        "additions": 8,
+        "deletions": 0,
+        "patch": "@@ -754,6 +754,14 @@ v:true\n \t\toperator) and to one when used as a Number (e.g. in |expr5| or\n \t\t|expr7| when used with numeric operators).  Read-only.\n \n+\t\t\t\t*v:useractive* *useractive-variable*\n+v:useractive\n+\t\tTimestamp indicating the most recent user activity.\n+\t\tUpdated every time a key is received from a UI\n+\t\t(TUI keystrokes or RPC |nvim_input()|).\n+\t\tInitialized to 0 (no user activity since startup).\n+\t\tRead-only.\n+\n \t\t\t\t\t\t*v:val* *val-variable*\n v:val\n \t\tValue of the current item of a |List| or |Dictionary|.  Only"
+      },
+      {
+        "name": "runtime/lua/vim/_core/server.lua",
+        "additions": 9,
+        "deletions": 1,
+        "patch": "@@ -6,8 +6,9 @@ local M = {}\n ---\n ---@class vim.ServerInfo\n ---@field addr string Server address (socket path, named pipe, or TCP host:port).\n----@field pid integer? PID of the Nvim process owning this server (nil if unreachable).\n+---@field pid integer PID of the Nvim process.\n ---@field own boolean True if this server belongs to the current Nvim instance.\n+---@field active integer Timestamp of last user activity.\n \n --- @param opts? table Options:\n ---              - opts.peer (boolean): If true, also discover peer servers.\n@@ -42,6 +43,7 @@ function M.serverlist(opts, addrs)\n   end, { path = root, type = 'socket', limit = math.huge })\n \n   local peer_pids = {} ---@type table<string, integer>\n+  local peer_active = {} ---@type table<string, integer>\n \n   for _, socket in ipairs(socket_paths) do\n     if not own_set[socket] and not vim.list_contains(addrs, socket) then\n@@ -57,6 +59,10 @@ function M.serverlist(opts, addrs)\n             if ok_pid and type(pid) == 'number' then\n               peer_pids[socket] = pid\n             end\n+            local ok_la, la = pcall(vim.fn.rpcrequest, chan, 'nvim_get_vvar', 'useractive')\n+            if ok_la and type(la) == 'number' then\n+              peer_active[socket] = la\n+            end\n           end\n         end\n         pcall(vim.fn.chanclose, chan)\n@@ -69,13 +75,15 @@ function M.serverlist(opts, addrs)\n   end\n \n   local self_pid = vim.fn.getpid()\n+  local self_active = vim.v.useractive\n   local result = {} ---@type vim.ServerInfo[]\n   for _, addr in ipairs(addrs) do\n     local own = own_set[addr] == true\n     table.insert(result, {\n       addr = addr,\n       pid = own and self_pid or peer_pids[addr],\n       own = own,\n+      active = own and self_active or peer_active[addr],\n     })\n   end\n   return result"
+      },
+      {
+        "name": "runtime/lua/vim/_meta/vimfn.gen.lua",
+        "additions": 5,
+        "deletions": 6,
+        "patch": "@@ -8292,12 +8292,11 @@ function vim.fn.searchpos(pattern, flags, stopline, timeout, skip) end\n ---   info  : If |TRUE|, return a list of Dicts with detailed info\n ---           instead of addresses. Implies `peer=true`. Each Dict\n ---           has the following items:\n----             addr   (string)  Server address.\n----             pid    (number?) PID of the Nvim process owning the\n----                              server, or |v:null| if the peer is\n----                              unreachable.\n----             own    (bool)    Whether this server belongs to the\n----                              current Nvim instance.\n+---             addr          (string)  Server address.\n+---             pid           (number)  PID of the Nvim process.\n+---             own           (bool)    Whether this server belongs to\n+---                                     the current Nvim instance.\n+---             active        (number)  |v:useractive| of the server.\n ---           (default: |FALSE|)\n ---\n --- Example: >vim"
+      },
+      {
+        "name": "runtime/lua/vim/_meta/vvars.gen.lua",
+        "additions": 8,
+        "deletions": 0,
+        "patch": "@@ -805,6 +805,14 @@ vim.v.throwpoint = ...\n --- @type boolean\n vim.v['true'] = ...\n \n+--- Timestamp indicating the most recent user activity.\n+--- Updated every time a key is received from a UI\n+--- (TUI keystrokes or RPC `nvim_input()`).\n+--- Initialized to 0 (no user activity since startup).\n+--- Read-only.\n+--- @type integer\n+vim.v.useractive = ...\n+\n --- Value of the current item of a `List` or `Dictionary`.  Only\n --- valid while evaluating the expression used with `map()` and\n --- `filter()`.  Read-only."
+      },
+      {
+        "name": "src/nvim/eval.lua",
+        "additions": 5,
+        "deletions": 6,
+        "patch": "@@ -9974,12 +9974,11 @@ M.funcs = {\n         info  : If |TRUE|, return a list of Dicts with detailed info\n                 instead of addresses. Implies `peer=true`. Each Dict\n                 has the following items:\n-                  addr   (string)  Server address.\n-                  pid    (number?) PID of the Nvim process owning the\n-                                   server, or |v:null| if the peer is\n-                                   unreachable.\n-                  own    (bool)    Whether this server belongs to the\n-                                   current Nvim instance.\n+                  addr          (string)  Server address.\n+                  pid           (number)  PID of the Nvim process.\n+                  own           (bool)    Whether this server belongs to\n+                                          the current Nvim instance.\n+                  active        (number)  |v:useractive| of the server.\n                 (default: |FALSE|)\n \n       Example: >vim"
+      },
+      {
+        "name": "src/nvim/eval/vars.c",
+        "additions": 1,
+        "deletions": 0,
+        "patch": "@@ -217,6 +217,7 @@ static struct vimvar {\n   VV(VV_VIRTNUM,          \"virtnum\",          VAR_NUMBER, VV_RO),\n   VV(VV_STARTTIME,        \"starttime\",        VAR_NUMBER, VV_RO),\n   VV(VV_EXITREASON,       \"exitreason\",       VAR_STRING, VV_RO),\n+  VV(VV_USERACTIVE,       \"useractive\",       VAR_NUMBER, VV_RO),\n };\n #undef VV\n "
+      },
+      {
+        "name": "src/nvim/eval_defs.h",
+        "additions": 1,
+        "deletions": 0,
+        "patch": "@@ -137,4 +137,5 @@ typedef enum {\n   VV_VIRTNUM,\n   VV_STARTTIME,\n   VV_EXITREASON,\n+  VV_USERACTIVE,\n } VimVarIndex;"
+      },
+      {
+        "name": "src/nvim/os/input.c",
+        "additions": 8,
+        "deletions": 0,
+        "patch": "@@ -11,6 +11,10 @@\n #include \"nvim/autocmd.h\"\n #include \"nvim/autocmd_defs.h\"\n #include \"nvim/buffer_defs.h\"\n+#include \"nvim/eval.h\"\n+#include \"nvim/eval/typval_defs.h\"\n+#include \"nvim/eval/vars.h\"\n+#include \"nvim/eval_defs.h\"\n #include \"nvim/event/loop.h\"\n #include \"nvim/event/multiqueue.h\"\n #include \"nvim/event/rstream.h\"\n@@ -276,6 +280,10 @@ size_t input_enqueue(uint64_t chan_id, String keys)\n {\n   current_ui = chan_id;\n \n+  if (keys.size > 0) {\n+    set_vim_var_nr(VV_USERACTIVE, (varnumber_T)os_realtime());\n+  }\n+\n   const char *ptr = keys.data;\n   const char *end = ptr + keys.size;\n "
+      },
+      {
+        "name": "src/nvim/vvars.lua",
+        "additions": 10,
+        "deletions": 0,
+        "patch": "@@ -447,6 +447,16 @@ M.vars = {\n       encoding.  See |multi-lang|.\n     ]=],\n   },\n+  useractive = {\n+    type = 'integer',\n+    desc = [=[\n+      Timestamp indicating the most recent user activity.\n+      Updated every time a key is received from a UI\n+      (TUI keystrokes or RPC |nvim_input()|).\n+      Initialized to 0 (no user activity since startup).\n+      Read-only.\n+    ]=],\n+  },\n   lc_time = {\n     type = 'string',\n     desc = [=["
+      },
+      {
+        "name": "test/functional/core/server_spec.lua",
+        "additions": 21,
+        "deletions": 2,
+        "patch": "@@ -231,25 +231,44 @@ describe('server', function()\n       by_addr[entry.addr] = entry\n     end\n \n-    -- own server: own=true, pid matches\n+    -- own server: own=true, pid matches, active present\n     local own_entry = by_addr[own_addr]\n     eq(true, own_entry ~= nil)\n     eq(true, own_entry.own)\n     eq(self_pid, own_entry.pid)\n+    eq('number', type(own_entry.active))\n+    eq(eval('v:useractive'), own_entry.active)\n \n-    -- peer server: own=false, pid is from peer process\n+    -- peer server: own=false, pid + active from peer process\n     local peer_entry = by_addr[peer_addr]\n     eq(true, peer_entry ~= nil)\n     eq(false, peer_entry.own)\n     eq('number', type(peer_entry.pid))\n+    eq('number', type(peer_entry.active))\n     n.set_session(client)\n     local peer_pid = fn.getpid()\n+    local peer_active = eval('v:useractive')\n     n.set_session(current_server)\n     eq(peer_pid, peer_entry.pid)\n+    eq(peer_active, peer_entry.active)\n \n     client:close()\n   end)\n \n+  it('v:useractive advances on UI input', function()\n+    clear()\n+    local before = eval('v:useractive')\n+    eq('number', type(before))\n+    n.feed('ix<Esc>')\n+    local after = eval('v:useractive')\n+    eq(true, after > before)\n+  end)\n+\n+  it('v:useractive is read-only', function()\n+    clear()\n+    matches('E46:', pcall_err(n.command, 'let v:useractive = 0'))\n+  end)\n+\n   it('removes stale socket files automatically #36581', function()\n     -- Windows named pipes are ephemeral kernel objects that are automatically\n     -- cleaned up when the process terminates. Unix domain sockets persist as"
+      }
+    ]
+  },
+  {
+    "kind": "pull",
+    "repo": "neovim/neovim",
+    "sha": "c3f803c3b6d48eb885003dc12935785629150624",
+    "number": 39392,
+    "author": "Szymon Wilczek",
+    "email": "swilczek.lx@gmail.com",
+    "message": "feat(server): return detailed info from serverlist({info=true})",
+    "html": "\n<h2 dir=\"auto\">Problem</h2>\n<p dir=\"auto\">UI tools and orchestration engines need more context than just raw socket addresses from serverlist(). Without knowing if a server belongs to the current instance or knowing its PID, UIs cannot display meaningful options to users.</p>\n<h2 dir=\"auto\">Solution</h2>\n<ul dir=\"auto\">\n<li>Added the <code class=\"notranslate\">info=v:true</code> option to <code class=\"notranslate\">serverlist()</code>.</li>\n<li>When <code class=\"notranslate\">info</code> is requested, it implies <code class=\"notranslate\">peer=true</code> and returns a list of dictionaries (defined as <code class=\"notranslate\">vim.ServerInfo</code>) with <code class=\"notranslate\">addr</code>, <code class=\"notranslate\">pid</code> and <code class=\"notranslate\">own</code>.</li>\n<li>Uses an RPC request to <code class=\"notranslate\">getpid()</code> across the socket to fetch the peer's actual process ID.</li>\n</ul>\n<p dir=\"auto\">This is prerequisite API enhancement suggested by <a class=\"user-mention notranslate\" data-hovercard-type=\"user\" data-hovercard-url=\"/users/justinmk/hovercard\" data-octo-click=\"hovercard-link-click\" data-octo-dimensions=\"link_type:self\" href=\"https://github.com/justinmk\">@justinmk</a> for</p>\n<ul dir=\"auto\">\n<li>the remote ssh orchestration work in <a class=\"issue-link js-issue-link\" data-error-text=\"Failed to load title\" data-id=\"4325000444\" data-permission-text=\"Title is private\" data-url=\"https://github.com/neovim/neovim/issues/39378\" data-hovercard-type=\"pull_request\" data-hovercard-url=\"/neovim/neovim/pull/39378/hovercard\" href=\"https://github.com/neovim/neovim/pull/39378\">#39378</a></li>\n<li><a class=\"issue-link js-issue-link\" data-error-text=\"Failed to load title\" data-id=\"4330901077\" data-permission-text=\"Title is private\" data-url=\"https://github.com/neovim/neovim/issues/39420\" data-hovercard-type=\"issue\" data-hovercard-url=\"/neovim/neovim/issues/39420/hovercard\" href=\"https://github.com/neovim/neovim/issues/39420\">#39420</a></li>\n</ul>",
+    "authored": "2026-04-25T10:36:06Z",
+    "committed": "2026-05-06T12:55:35Z",
+    "committer": "Justin M. Keyes",
+    "files": [
+      {
+        "name": "runtime/doc/news.txt",
+        "additions": 3,
+        "deletions": 0,
+        "patch": "@@ -225,6 +225,9 @@ VIMSCRIPT\n \n • |v:exitreason| is set before |QuitPre|.\n • |v:starttime| is the process start time (nanoseconds since UNIX epoch).\n+• |serverlist()| accepts a new `info` option that returns a list of dicts\n+  with `addr`, `pid` and `own` for each server (own + peers),\n+  enabling pickers like the future `:connect` host selector.\n \n ==============================================================================\n CHANGED FEATURES                                                 *news-changed*"
+      },
+      {
+        "name": "runtime/doc/vimfn.txt",
+        "additions": 13,
+        "deletions": 1,
+        "patch": "@@ -9139,15 +9139,27 @@ serverlist([{opts}])                                              *serverlist()*\n \t\t          will also be returned. (default: |FALSE|)\n \t\t          Not supported on Windows yet.\n \n+\t\t  info  : If |TRUE|, return a list of Dicts with detailed info\n+\t\t          instead of addresses. Implies `peer=true`. Each Dict\n+\t\t          has the following items:\n+\t\t            addr   (string)  Server address.\n+\t\t            pid    (number?) PID of the Nvim process owning the\n+\t\t                             server, or |v:null| if the peer is\n+\t\t                             unreachable.\n+\t\t            own    (bool)    Whether this server belongs to the\n+\t\t                             current Nvim instance.\n+\t\t          (default: |FALSE|)\n+\n \t\tExample: >vim\n \t\t\techo serverlist()\n+\t\t\techo serverlist(#{info: v:true})\n <\n \n                 Parameters: ~\n                   • {opts} (`table?`)\n \n                 Return: ~\n-                  (`string[]`)\n+                  (`string[]|vim.ServerInfo[]`)\n \n serverstart([{address}])                                         *serverstart()*\n \t\tOpens a socket or named pipe at {address} and listens for"
+      },
+      {
+        "name": "runtime/lua/vim/_core/server.lua",
+        "additions": 52,
+        "deletions": 9,
+        "patch": "@@ -4,15 +4,35 @@ local M = {}\n \n --- Called by builtin serverlist(). Returns the combined server list (own + peers).\n ---\n+---@class vim.ServerInfo\n+---@field addr string Server address (socket path, named pipe, or TCP host:port).\n+---@field pid integer? PID of the Nvim process owning this server (nil if unreachable).\n+---@field own boolean True if this server belongs to the current Nvim instance.\n+\n --- @param opts? table Options:\n----              - opts.peer is true, also discover peer servers.\n---- @param addrs string[] Internal (\"own\") addresses, from `server_address_list`.\n---- @return string[] # Combined list of servers (own + peers).\n+---              - opts.peer (boolean): If true, also discover peer servers.\n+---              - opts.info (boolean): If true, return a list of |vim.ServerInfo| dicts\n+---                instead of a list of addresses. Implies peer=true.\n+--- @param addrs string[] Internal (\"own\") addresses, from server_address_list.\n+--- @return string[]|vim.ServerInfo[]\n function M.serverlist(opts, addrs)\n-  if type(opts) ~= 'table' or not opts.peer then\n+  if type(opts) ~= 'table' then\n     return addrs\n   end\n \n+  local peer = opts.peer == true\n+  local want_info = opts.info == true\n+  local discover = peer or want_info\n+\n+  if not discover then\n+    return addrs\n+  end\n+\n+  local own_set = {} ---@type table<string, true>\n+  for _, a in ipairs(addrs) do\n+    own_set[a] = true\n+  end\n+\n   -- Discover peer servers in stdpath(\"run\").\n   -- TODO: track TCP servers, somehow.\n   -- TODO: support Windows named pipes.\n@@ -21,21 +41,44 @@ function M.serverlist(opts, addrs)\n     return name:match('nvim.*')\n   end, { path = root, type = 'socket', limit = math.huge })\n \n+  local peer_pids = {} ---@type table<string, integer>\n+\n   for _, socket in ipairs(socket_paths) do\n-    if not vim.list_contains(addrs, socket) then\n+    if not own_set[socket] and not vim.list_contains(addrs, socket) then\n       local ok, chan = pcall(vim.fn.sockconnect, 'pipe', socket, { rpc = true })\n-      if ok and chan then\n+      if ok and chan and chan > 0 then\n         -- Check that the server is responding\n         -- TODO: do we need a timeout or error handling here?\n-        if vim.fn.rpcrequest(chan, 'nvim_get_chan_info', 0).id then\n+        local ok_chan, chan_info = pcall(vim.fn.rpcrequest, chan, 'nvim_get_chan_info', 0)\n+        if ok_chan and type(chan_info) == 'table' and chan_info.id then\n           table.insert(addrs, socket)\n+          if want_info then\n+            local ok_pid, pid = pcall(vim.fn.rpcrequest, chan, 'nvim_eval', 'getpid()')\n+            if ok_pid and type(pid) == 'number' then\n+              peer_pids[socket] = pid\n+            end\n+          end\n         end\n-        vim.fn.chanclose(chan)\n+        pcall(vim.fn.chanclose, chan)\n       end\n     end\n   end\n \n-  return addrs\n+  if not want_info then\n+    return addrs\n+  end\n+\n+  local self_pid = vim.fn.getpid()\n+  local result = {} ---@type vim.ServerInfo[]\n+  for _, addr in ipairs(addrs) do\n+    local own = own_set[addr] == true\n+    table.insert(result, {\n+      addr = addr,\n+      pid = own and self_pid or peer_pids[addr],\n+      own = own,\n+    })\n+  end\n+  return result\n end\n \n -- (Windows only) Canonical --listen address persisted across restarts."
+      },
+      {
+        "name": "runtime/lua/vim/_meta/vimfn.gen.lua",
+        "additions": 13,
+        "deletions": 1,
+        "patch": "@@ -8289,12 +8289,24 @@ function vim.fn.searchpos(pattern, flags, stopline, timeout, skip) end\n ---           will also be returned. (default: |FALSE|)\n ---           Not supported on Windows yet.\n ---\n+---   info  : If |TRUE|, return a list of Dicts with detailed info\n+---           instead of addresses. Implies `peer=true`. Each Dict\n+---           has the following items:\n+---             addr   (string)  Server address.\n+---             pid    (number?) PID of the Nvim process owning the\n+---                              server, or |v:null| if the peer is\n+---                              unreachable.\n+---             own    (bool)    Whether this server belongs to the\n+---                              current Nvim instance.\n+---           (default: |FALSE|)\n+---\n --- Example: >vim\n ---   echo serverlist()\n+---   echo serverlist(#{info: v:true})\n --- <\n ---\n --- @param opts? table\n---- @return string[]\n+--- @return string[]|vim.ServerInfo[]\n function vim.fn.serverlist(opts) end\n \n --- Opens a socket or named pipe at {address} and listens for"
+      },
+      {
+        "name": "src/nvim/eval.lua",
+        "additions": 13,
+        "deletions": 1,
+        "patch": "@@ -9971,13 +9971,25 @@ M.funcs = {\n                 will also be returned. (default: |FALSE|)\n                 Not supported on Windows yet.\n \n+        info  : If |TRUE|, return a list of Dicts with detailed info\n+                instead of addresses. Implies `peer=true`. Each Dict\n+                has the following items:\n+                  addr   (string)  Server address.\n+                  pid    (number?) PID of the Nvim process owning the\n+                                   server, or |v:null| if the peer is\n+                                   unreachable.\n+                  own    (bool)    Whether this server belongs to the\n+                                   current Nvim instance.\n+                (default: |FALSE|)\n+\n       Example: >vim\n       \techo serverlist()\n+      \techo serverlist(#{info: v:true})\n       <\n     ]=],\n     name = 'serverlist',\n     params = { { 'opts', 'table' } },\n-    returns = 'string[]',\n+    returns = 'string[]|vim.ServerInfo[]',\n     signature = 'serverlist([{opts}])',\n   },\n   serverstart = {"
+      },
+      {
+        "name": "test/functional/core/server_spec.lua",
+        "additions": 31,
+        "deletions": 0,
+        "patch": "@@ -216,6 +216,37 @@ describe('server', function()\n     eq(true, vim.list_contains(new_servs, peer_addr))\n     eq(true, #servers_without_peer < #new_servs)\n     eq(true, old_servs_num < #new_servs)\n+\n+    -- serverlist({info=true}) returns rich info dicts (implies peer=true)\n+    local info_servs = fn.serverlist({ info = true })\n+    eq(#new_servs, #info_servs)\n+\n+    local own_addr = fn.serverlist()[1]\n+    local self_pid = fn.getpid()\n+    ---@type table<string, table>\n+    local by_addr = {}\n+    for _, entry in ipairs(info_servs) do\n+      eq('string', type(entry.addr))\n+      eq('boolean', type(entry.own))\n+      by_addr[entry.addr] = entry\n+    end\n+\n+    -- own server: own=true, pid matches\n+    local own_entry = by_addr[own_addr]\n+    eq(true, own_entry ~= nil)\n+    eq(true, own_entry.own)\n+    eq(self_pid, own_entry.pid)\n+\n+    -- peer server: own=false, pid is from peer process\n+    local peer_entry = by_addr[peer_addr]\n+    eq(true, peer_entry ~= nil)\n+    eq(false, peer_entry.own)\n+    eq('number', type(peer_entry.pid))\n+    n.set_session(client)\n+    local peer_pid = fn.getpid()\n+    n.set_session(current_server)\n+    eq(peer_pid, peer_entry.pid)\n+\n     client:close()\n   end)\n "
+      }
+    ]
+  },
+  {
+    "kind": "commit",
     "repo": "torvalds/linux",
     "sha": "08ce2fee1b869ecbfbd94e0eb2630e52203a2e03",
+    "author": "Szymon Wilczek",
+    "email": "swilczek.lx@gmail.com",
     "message": "ntfs3: fix circular locking dependency in run_unpack_ex\n\nSyzbot reported a circular locking dependency between wnd->rw_lock\n(sbi->used.bitmap) and ni->file.run_lock.\n\nThe deadlock scenario:\n1. ntfs_extend_mft() takes ni->file.run_lock then wnd->rw_lock.\n2. run_unpack_ex() takes wnd->rw_lock then tries to acquire\n   ni->file.run_lock inside ntfs_refresh_zone().\n\nThis creates an AB-BA deadlock.\n\nFix this by using down_read_trylock() instead of down_read() when\nacquiring run_lock in run_unpack_ex(). If the lock is contended,\nskip ntfs_refresh_zone() - the MFT zone will be refreshed on the\nnext MFT operation. This breaks the circular dependency since we\nnever block waiting for run_lock while holding wnd->rw_lock.\n\nReported-by: syzbot+d27edf9f96ae85939222@syzkaller.appspotmail.com\nTested-by: syzbot+d27edf9f96ae85939222@syzkaller.appspotmail.com\nCloses: https://syzkaller.appspot.com/bug?extid=d27edf9f96ae85939222\nSigned-off-by: Szymon Wilczek <swilczek.lx@gmail.com>\nSigned-off-by: Konstantin Komarov <almaz.alexandrovich@paragon-software.com>",
     "authored": "2025-12-27T14:43:07Z",
     "committed": "2026-01-15T04:57:48Z",
@@ -54,8 +279,11 @@
     ]
   },
   {
+    "kind": "commit",
     "repo": "torvalds/linux",
     "sha": "b1979778e98569c1e78c2c7f16bb24d76541ab00",
+    "author": "Szymon Wilczek",
+    "email": "swilczek.lx@gmail.com",
     "message": "can: etas_es58x: allow partial RX URB allocation to succeed\n\nWhen es58x_alloc_rx_urbs() fails to allocate the requested number of\nURBs but succeeds in allocating some, it returns an error code.\nThis causes es58x_open() to return early, skipping the cleanup label\n'free_urbs', which leads to the anchored URBs being leaked.\n\nAs pointed out by maintainer Vincent Mailhol, the driver is designed\nto handle partial URB allocation gracefully. Therefore, partial\nallocation should not be treated as a fatal error.\n\nModify es58x_alloc_rx_urbs() to return 0 if at least one URB has been\nallocated, restoring the intended behavior and preventing the leak\nin es58x_open().\n\nFixes: 8537257874e9 (\"can: etas_es58x: add core support for ETAS ES58X CAN USB interfaces\")\nReported-by: syzbot+e8cb6691a7cf68256cb8@syzkaller.appspotmail.com\nCloses: https://syzkaller.appspot.com/bug?extid=e8cb6691a7cf68256cb8\nSigned-off-by: Szymon Wilczek <swilczek.lx@gmail.com>\nReviewed-by: Vincent Mailhol <mailhol@kernel.org>\nLink: https://patch.msgid.link/20251223011732.39361-1-swilczek.lx@gmail.com\nSigned-off-by: Marc Kleine-Budde <mkl@pengutronix.de>",
     "authored": "2025-12-23T01:17:32Z",
     "committed": "2026-01-09T09:30:23Z",
@@ -70,8 +298,11 @@
     ]
   },
   {
+    "kind": "commit",
     "repo": "torvalds/linux",
     "sha": "e37a75bb866c29da954b51d0dd7670406246d9ee",
+    "author": "Szymon Wilczek",
+    "email": "swilczek.lx@gmail.com",
     "message": "fs/ntfs3: fix deadlock in ni_read_folio_cmpr\n\nSyzbot reported a task hung in ni_readpage_cmpr (now ni_read_folio_cmpr).\nThis is caused by a lock inversion deadlock involving the inode mutex\n(ni_lock) and page locks.\n\nScenario:\n1. Task A enters ntfs_read_folio() for page X. It acquires ni_lock.\n2. Task A calls ni_read_folio_cmpr(), which attempts to lock all pages in\n   the compressed frame (including page Y).\n3. Concurrently, Task B (e.g., via readahead) has locked page Y and\n   calls ntfs_read_folio().\n4. Task B waits for ni_lock (held by A).\n5. Task A waits for page Y lock (held by B).\n   -> DEADLOCK.\n\nThe fix is to restructure locking: do not take ni_lock in ntfs_read_folio().\nInstead, acquire ni_lock inside ni_read_folio_cmpr() ONLY AFTER all required\npage locks for the frame have been successfully acquired. This restores the\ncorrect lock ordering (Page Lock -> ni_lock) consistent with VFS.\n\nReported-by: syzbot+5af33dd272b913b65880@syzkaller.appspotmail.com\nCloses: https://syzkaller.appspot.com/bug?extid=5af33dd272b913b65880\nFixes: f35590ee26f5 (\"fs/ntfs3: remove ntfs_bio_pages and use page cache for compressed I/O\")\nSigned-off-by: Szymon Wilczek <swilczek.lx@gmail.com>\n[almaz.alexandrovich@paragon-software.com: ni_readpage_cmpr was renamed to ni_read_folio_cmpr]\nSigned-off-by: Konstantin Komarov <almaz.alexandrovich@paragon-software.com>",
     "authored": "2025-12-22T15:10:10Z",
     "committed": "2025-12-29T13:33:31Z",
@@ -92,8 +323,11 @@
     ]
   },
   {
+    "kind": "commit",
     "repo": "torvalds/linux",
     "sha": "d66676e6ca96bf8680f869a9bd6573b26c634622",
+    "author": "Szymon Wilczek",
+    "email": "swilczek.lx@gmail.com",
     "message": "wifi: libertas: fix WARNING in usb_tx_block\n\nThe function usb_tx_block() submits cardp->tx_urb without ensuring that\nany previous transmission on this URB has completed. If a second call\noccurs while the URB is still active (e.g. during rapid firmware loading),\nusb_submit_urb() detects the active state and triggers a warning:\n'URB submitted while active'.\n\nFix this by enforcing serialization: call usb_kill_urb() before\nsubmitting the new request. This ensures the URB is idle and safe to reuse.\n\nReported-by: syzbot+67969ab6a2551c27f71b@syzkaller.appspotmail.com\nCloses: https://syzkaller.appspot.com/bug?extid=67969ab6a2551c27f71b\nSigned-off-by: Szymon Wilczek <swilczek.lx@gmail.com>\nLink: https://patch.msgid.link/20251221155806.23925-1-swilczek.lx@gmail.com\nSigned-off-by: Johannes Berg <johannes.berg@intel.com>",
     "authored": "2025-12-21T15:58:06Z",
     "committed": "2026-01-08T12:44:27Z",
@@ -108,8 +342,30 @@
     ]
   },
   {
+    "kind": "commit",
+    "repo": "torvalds/linux",
+    "sha": "aba744a2e4b23c2040e335db35c141b95915efbd",
+    "author": "Szymon Wilczek",
+    "email": "swilczek.lx@gmail.com",
+    "message": "mailmap: update email address for Szymon Wilczek\n\nMap my old address <szymonwilczek@gmx.com> to my new address\n<swilczek.lx@gmail.com>.  The old account is no longer accessible due to\nprovider blocking access.\n\nLink: https://lkml.kernel.org/r/20251221151710.13747-1-swilczek.lx@gmail.com\nSigned-off-by: Szymon Wilczek <swilczek.lx@gmail.com>\nSigned-off-by: Andrew Morton <akpm@linux-foundation.org>",
+    "authored": "2025-12-21T15:17:10Z",
+    "committed": "2026-01-15T06:16:20Z",
+    "committer": "Andrew Morton",
+    "files": [
+      {
+        "name": ".mailmap",
+        "additions": 1,
+        "deletions": 0,
+        "patch": "@@ -794,6 +794,7 @@ Sven Eckelmann <sven@narfation.org> <sven.eckelmann@open-mesh.com>\n Sven Eckelmann <sven@narfation.org> <sven.eckelmann@openmesh.com>\n Sven Eckelmann <sven@narfation.org> <sven@open-mesh.com>\n Sven Peter <sven@kernel.org> <sven@svenpeter.dev>\n+Szymon Wilczek <swilczek.lx@gmail.com> <szymonwilczek@gmx.com>\n Takashi YOSHII <takashi.yoshii.zj@renesas.com>\n Tamizh Chelvam Raja <quic_tamizhr@quicinc.com> <tamizhr@codeaurora.org>\n Taniya Das <quic_tdas@quicinc.com> <tdas@codeaurora.org>"
+      }
+    ]
+  },
+  {
+    "kind": "commit",
     "repo": "torvalds/linux",
     "sha": "a8333c8262aed2aedf608c18edd39cf5342680a7",
+    "author": "Szymon Wilczek",
+    "email": "szymonwilczek@gmx.com",
     "message": "media: pvrusb2: fix URB leak in pvr2_send_request_ex\n\nWhen pvr2_send_request_ex() submits a write URB successfully but fails to\nsubmit the read URB (e.g. returns -ENOMEM), it returns immediately without\nwaiting for the write URB to complete. Since the driver reuses the same\nURB structure, a subsequent call to pvr2_send_request_ex() attempts to\nsubmit the still-active write URB, triggering a 'URB submitted while\nactive' warning in usb_submit_urb().\n\nFix this by ensuring the write URB is unlinked and waited upon if the read\nURB submission fails.\n\nReported-by: syzbot+405dcd13121ff75a9e16@syzkaller.appspotmail.com\nCloses: https://syzkaller.appspot.com/bug?extid=405dcd13121ff75a9e16\nSigned-off-by: Szymon Wilczek <szymonwilczek@gmx.com>\nAcked-by: Mike Isely <isely@pobox.com>\nSigned-off-by: Hans Verkuil <hverkuil+cisco@kernel.org>",
     "authored": "2025-12-20T18:24:19Z",
     "committed": "2026-01-13T12:21:03Z",
@@ -124,8 +380,11 @@
     ]
   },
   {
+    "kind": "commit",
     "repo": "torvalds/linux",
     "sha": "d4168cb6ae4f77779c8ceb1edf15b8eae95bdf7f",
+    "author": "Szymon Wilczek",
+    "email": "szymonwilczek@gmx.com",
     "message": "hwmon: (acpi_power_meter) Replace deprecated strcpy() with strscpy()\n\nstrcpy() performs no bounds checking on the destination buffer, which\ncould result in linear overflows beyond the end of the buffer. Although\nthe source strings here are compile-time constants that fit within the\ndestination buffers, using strscpy() is the preferred approach as it\nprovides bounds checking and aligns with the kernel's deprecated API\nguidelines.\n\nThis change converts the remaining strcpy() calls to strscpy(), matching\nthe pattern already used throughout other ACPI drivers in\ndrivers/acpi/*.c.\n\nLink: https://www.kernel.org/doc/html/latest/process/deprecated.html#strcpy\nSigned-off-by: Szymon Wilczek <szymonwilczek@gmx.com>\nReviewed-by: lihuisong@huawei.com\nLink: https://lore.kernel.org/r/20251220173041.377376-1-szymonwilczek@gmx.com\nSigned-off-by: Guenter Roeck <linux@roeck-us.net>",
     "authored": "2025-12-20T17:30:41Z",
     "committed": "2026-01-31T15:38:31Z",
@@ -136,6 +395,57 @@
         "additions": 2,
         "deletions": 2,
         "patch": "@@ -900,8 +900,8 @@ static int acpi_power_meter_add(struct acpi_device *device)\n \tresource->sensors_valid = 0;\n \tresource->acpi_dev = device;\n \tmutex_init(&resource->lock);\n-\tstrcpy(acpi_device_name(device), ACPI_POWER_METER_DEVICE_NAME);\n-\tstrcpy(acpi_device_class(device), ACPI_POWER_METER_CLASS);\n+\tstrscpy(acpi_device_name(device), ACPI_POWER_METER_DEVICE_NAME);\n+\tstrscpy(acpi_device_class(device), ACPI_POWER_METER_CLASS);\n \tdevice->driver_data = resource;\n \n #if IS_REACHABLE(CONFIG_ACPI_IPMI)"
+      }
+    ]
+  },
+  {
+    "kind": "issue",
+    "repo": "topi314/LavaLyrics",
+    "number": 10,
+    "title": "Unauthorized access",
+    "authored": "2025-06-10T15:34:30Z",
+    "committed": "2025-06-11T18:31:41Z",
+    "committer": "Toπ"
+  },
+  {
+    "kind": "pull",
+    "repo": "topi314/LavaSrc",
+    "sha": "4d63e885791b5e328d17c395b1b64ae6e9977658",
+    "number": 209,
+    "author": "Szymon Wilczek",
+    "email": "kazikwilczek7@gmail.com",
+    "message": "Update LavaSearch and LavaLyrics implementation",
+    "html": "",
+    "authored": "2024-08-05T10:53:21Z",
+    "committed": "2024-08-16T23:41:24Z",
+    "committer": "Toπ",
+    "files": [
+      {
+        "name": "README.md",
+        "additions": 102,
+        "deletions": 4,
+        "patch": "@@ -89,9 +89,37 @@ To get a Spotify clientId & clientSecret you must go [here](https://developer.sp\n AudioPlayerManager playerManager = new DefaultAudioPlayerManager();\n \n // create a new SpotifySourceManager with the default providers, clientId, clientSecret, spDc, countryCode and AudioPlayerManager and register it\n-playerManager.registerSourceManager(new SpotifySourceManager(null, clientId, clientSecret, spDc, countryCode, playerManager));\n+var spotify = new SpotifySourceManager(clientId, clientSecret, spDc, countryCode, () -> playerManager, DefaultMirroringAudioTrackResolver);\n+playerManager.registerSourceManager(spotify);\n ```\n \n+#### LavaLyrics\n+<details>\n+<summary>Click to expand</summary>\n+\n+```java\n+// create new lyrics manager\n+var lyricsManager = new LyricsManager();\n+\n+// register source\n+lyricsManager.registerLyricsManager(spotify);\n+```\n+</details>\n+\n+#### LavaSearch\n+<details>\n+<summary>Click to expand</summary>\n+\n+```java\n+// create new search manager\n+var searchManager = new SearchManager();\n+\n+// register source\n+searchManager.registerSearchManager(spotify);\n+```\n+\n+</details>\n+\n <details>\n <summary>How to get sp dc cookie</summary>\n \n@@ -106,9 +134,23 @@ playerManager.registerSourceManager(new SpotifySourceManager(null, clientId, cli\n AudioPlayerManager playerManager = new DefaultAudioPlayerManager();\n \n // create a new AppleMusicSourceManager with the standard providers, apple music api token, countrycode and AudioPlayerManager and register it\n-playerManager.registerSourceManager(new AppleMusicSourceManager(null, mediaAPIToken , \"us\", playerManager));\n+var appleMusic = new AppleMusicSourceManager(null, mediaAPIToken , \"us\", playerManager);\n+playerManager.registerSourceManager(appleMusic);\n ```\n \n+#### LavaSearch\n+<details>\n+<summary>Click to expand</summary>\n+\n+```java\n+// create new search manager\n+var searchManager = new SearchManager();\n+\n+// register source\n+searchManager.registerSearchManager(appleMusic);\n+```\n+</details>\n+\n <details>\n <summary>How to get media api token without Apple developer account</summary>\n \n@@ -128,8 +170,36 @@ follow [this guide](https://developer.apple.com/help/account/configure-app-capab\n AudioPlayerManager playerManager = new DefaultAudioPlayerManager();\n \n // create a new DeezerSourceManager with the master decryption key and register it\n-playerManager.registerSourceManager(new DeezerSourceManager(\"...\");\n+\n+var deezer = new DeezerSourceManager(\"...\");\n+playerManager.registerSourceManager(deezer);\n+```\n+\n+#### LavaLyrics\n+<details>\n+<summary>Click to expand</summary>\n+\n+```java\n+// create new lyrics manager\n+var lyricsManager = new LyricsManager();\n+\n+// register source\n+lyricsManager.registerLyricsManager(deezer);\n ```\n+</details>\n+\n+#### LavaSearch\n+<details>\n+<summary>Click to expand</summary>\n+\n+```java\n+// create new search manager\n+var searchManager = new SearchManager();\n+\n+// register source\n+searchManager.registerSearchManager(deezer);\n+```\n+</details>\n \n #### Yandex Music\n \n@@ -166,8 +236,36 @@ Else you will only have access to podcasts.\n AudioPlayerManager playerManager = new DefaultAudioPlayerManager();\n \n // create a new YandexMusicSourceManager with the access token and register it\n-playerManager.registerSourceManager(new YandexMusicSourceManager(\"...\");\n+var yandex = new YandexMusicSourceManager(\"...\");\n+\n+playerManager.registerSourceManager(yandex);\n+```\n+\n+#### LavaLyrics\n+<details>\n+<summary>Click to expand</summary>\n+\n+```java\n+// create new lyrics manager\n+var lyricsManager = new LyricsManager();\n+\n+// register source\n+lyricsManager.registerLyricsManager(yandex);\n ```\n+</details>\n+\n+#### LavaSearch\n+<details>\n+<summary>Click to expand</summary>\n+\n+```java\n+// create new search manager\n+var searchManager = new SearchManager();\n+\n+// register source\n+searchManager.registerSearchManager(yandex);\n+```\n+</details>\n \n #### Flowery Text-to-Speech\n "
+      }
+    ]
+  },
+  {
+    "kind": "pull",
+    "repo": "topi314/LavaSearch",
+    "sha": "2edfc1bbe641bb4f51f589de0f2018eebeec370b",
+    "number": 7,
+    "author": "Szymon Wilczek",
+    "email": "kazikwilczek7@gmail.com",
+    "message": "Update Lavaplayer usage",
+    "html": "",
+    "authored": "2024-08-04T17:23:20Z",
+    "committed": "2024-08-17T16:11:10Z",
+    "committer": "Toπ",
+    "files": [
+      {
+        "name": "README.md",
+        "additions": 22,
+        "deletions": 1,
+        "patch": "@@ -69,7 +69,28 @@ dependencies {\n \n ### Usage\n \n-// TODO\n+Create new `SearchManager`\n+```java\n+var searchManager = new SearchManager();\n+\n+//register sources\n+searchManager.registerSearchManager(source);\n+```\n+\n+Basic usage\n+```java\n+var query = \"ytmsearch:bla bla\";\n+var types = List.of(\n+        AudioSearchResult.Type.TRACK,\n+        AudioSearchResult.Type.PLAYLIST,\n+        AudioSearchResult.Type.ALBUM,\n+        AudioSearchResult.Type.ARTIST,\n+        AudioSearchResult.Type.TEXT\n+);\n+\n+\n+AudioSearchResult searchResult = searchManager.loadSearch(query, types);\n+```\n \n ## Lavalink Usage\n "
       }
     ]
   }

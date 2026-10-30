@@ -1,22 +1,16 @@
-// Fetches the mailing-list thread of every patch with `b4 mbox` and turns it
-// into src/data/threads.json. The message ids of each version sent live in
-// src/data/threads-sources.json, keyed by the 12-character sha:
-//   npm run threads              fetches what is missing, then needs rebuild
-//   npm run threads -- --refresh fetches every thread again (new replies)
+// Review threads for scripts/research.mjs, in one shape for both places
+// a patch is discussed:
+//   listThread  the mailing list on lore.kernel.org, found by the subject
+//   pullThread  the comments and reviews of a GitHub pull request
 
-import { execFileSync } from "node:child_process";
-import { existsSync } from "node:fs";
-import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
-import { fileURLToPath } from "node:url";
+import { gunzipSync } from "node:zlib";
 
-const IN = new URL("../.threads/", import.meta.url);
-const OUT = new URL("../src/data/threads.json", import.meta.url);
-const SOURCES = new URL("../src/data/threads-sources.json", import.meta.url);
-const COMMITS = new URL("../src/data/research.json", import.meta.url);
-const AUTHOR = "Szymon Wilczek";
+const LORE = "https://lore.kernel.org/all/";
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const QUOTE_LINES = 4;
-const SHORT_SHA = 12;
+const PAGE = 100;
+const DAY_MS = 86_400_000;
+const SAME_MOMENT_MS = 60_000;
 
 const BOT = /syzbot|lkp@intel\.com|test robot|-bot\b|\bbot@|stable@/i;
 const APPLIED = /\b(applied|queued|picked up|merged)\b/i;
@@ -144,8 +138,8 @@ function splitReply(body) {
 }
 
 // the people named in the merged commit say who was who on the list
-function rolesFrom(commit) {
-  const roles = new Map([[AUTHOR, "author"]]);
+function rolesFrom(commit, author) {
+  const roles = new Map([[author, "author"]]);
   for (const line of commit.message.split("\n")) {
     const trailer = /^([\w-]+):\s*([^<]+)</.exec(line);
     if (!trailer) continue;
@@ -228,54 +222,94 @@ function threadFor(mails, roles) {
   return { versions, messages };
 }
 
-async function listDir(url) {
-  try {
-    return await readdir(url, { withFileTypes: true });
-  } catch {
-    return [];
-  }
+const LINKED = /(?:lore\.kernel\.org\/(?:[\w.-]+\/)?|patch\.msgid\.link\/)([^/\s]+@[^/\s]+)/;
+const isSent = (mail) => /^\[[^\]]*PATCH/i.test(mail.subject);
+
+async function mbox(response) {
+  if (!response.ok) return [];
+  return parseMbox(gunzipSync(Buffer.from(await response.arrayBuffer())).toString("utf8"));
 }
 
-// one thread per message id, saved as <id>.mbx next to the other versions
-async function fetchThreads(sources, refresh) {
-  for (const [short, ids] of Object.entries(sources)) {
-    if (ids.length === 0) console.warn(`${short}: no message id yet in threads-sources.json`);
-    const dir = fileURLToPath(new URL(`${short}/`, IN));
-    await mkdir(dir, { recursive: true });
-    for (const id of ids) {
-      if (!refresh && existsSync(`${dir}${id}.mbx`)) continue;
-      try {
-        execFileSync("b4", ["--quiet", "mbox", "--outdir", dir, id], { stdio: "inherit" });
-      } catch {
-        console.warn(`${short}: b4 could not fetch ${id}`);
-      }
-    }
-  }
+async function search(query) {
+  const params = new URLSearchParams({ q: query, x: "m" });
+  return (await mbox(await fetch(`${LORE}?${params}`, { method: "POST" }))).filter(isSent);
 }
 
-const commits = JSON.parse(await readFile(COMMITS, "utf8"));
-const sources = JSON.parse(await readFile(SOURCES, "utf8"));
-await fetchThreads(sources, process.argv.includes("--refresh"));
+const loreDay = (date) => date.toISOString().slice(0, 10).replace(/-/g, "");
 
-const threads = {};
-for (const entry of await listDir(IN)) {
-  if (!entry.isDirectory()) continue;
-  const short = entry.name.slice(0, SHORT_SHA);
-  const commit = commits.find((c) => c.sha.startsWith(short));
-  if (!commit) {
-    console.warn(`${short}: no such commit in research.json, skipped`);
-    continue;
+async function sentIds(commit, emails) {
+  const ids = new Set();
+  const linked = LINKED.exec(commit.message)?.[1];
+  if (linked) ids.add(decodeURIComponent(linked));
+  const from = `(${emails.map((email) => `f:${email}`).join(" OR ")})`;
+  const subject = commit.message.split("\n")[0].replace(/"/g, "");
+  const title = subject.slice(subject.indexOf(": ") + 1).trim();
+  for (const words of new Set([subject, title])) {
+    const found = await search(`s:"${words}" AND ${from}`);
+    for (const mail of found) ids.add(mail.id);
+    if (found.length > 0) return ids;
   }
-  const dir = new URL(`${entry.name}/`, IN);
-  const files = (await readdir(dir)).filter((name) => /\.(mbx|mbox)$/.test(name));
+  if (ids.size > 0) return ids;
+  const authored = new Date(commit.authored);
+  const window = `d:${loreDay(new Date(authored - DAY_MS))}..${loreDay(new Date(+authored + DAY_MS))}`;
+  const sameMoment = (await search(`${window} AND ${from}`)).filter(
+    (mail) => Math.abs(mail.date - authored) < SAME_MOMENT_MS,
+  );
+  for (const mail of sameMoment) ids.add(mail.id);
+  return ids;
+}
+
+export async function listThread(commit, author, emails) {
   const mails = [];
-  for (const name of files) mails.push(...parseMbox(await readFile(new URL(name, dir), "utf8")));
-  if (mails.length === 0) continue;
+  for (const id of await sentIds(commit, emails)) {
+    mails.push(...(await mbox(await fetch(`${LORE}${encodeURIComponent(id)}/t.mbox.gz`))));
+  }
+  if (mails.length === 0) return null;
   const unique = [...new Map(mails.map((mail) => [mail.id, mail])).values()];
-  threads[short] = threadFor(unique, rolesFrom(commit));
-  const { versions, messages } = threads[short];
-  console.log(`${short}: ${versions.length} versions, ${messages.length} messages`);
+  return threadFor(unique, rolesFrom(commit, author));
 }
 
-await writeFile(OUT, JSON.stringify(threads, null, 2) + "\n");
-console.log(`${Object.keys(threads).length} threads kept in src/data/threads.json`);
+// a review comment answers a few lines of the diff
+export async function pullThread(item, me, github) {
+  const base = `repos/${item.repo}`;
+  const pull = await github(`${base}/pulls/${item.number}`);
+  const comments = await github(`${base}/issues/${item.number}/comments?per_page=${PAGE}`);
+  const reviews = await github(`${base}/pulls/${item.number}/reviews?per_page=${PAGE}`);
+  const inline = await github(`${base}/pulls/${item.number}/comments?per_page=${PAGE}`);
+  const version = "v1";
+  const roleOf = (user) => {
+    if (user.login === me) return "author";
+    if (user.login === pull.merged_by?.login) return "maintainer";
+    return user.type === "Bot" || BOT.test(user.login) ? "bot" : "reviewer";
+  };
+  const said = (user, date, text, extra = {}) => ({
+    version,
+    who: user.login,
+    role: roleOf(user),
+    date: dayMonthYear(new Date(date)),
+    at: date,
+    depth: 0,
+    kind: "reply",
+    ...(text && { text }),
+    ...extra,
+  });
+  const messages = [
+    said(pull.user, pull.created_at, "", { kind: "patch", subject: pull.title }),
+    ...comments.map((c) => said(c.user, c.created_at, c.body?.trim())),
+    ...reviews
+      .filter((review) => review.body?.trim() || review.state === "APPROVED")
+      .map((review) => said(review.user, review.submitted_at, review.body?.trim() || "approved")),
+    ...inline.map((c) =>
+      said(c.user, c.created_at, c.body?.trim(), {
+        depth: c.in_reply_to_id ? 1 : 0,
+        quote: c.diff_hunk.split("\n").slice(-QUOTE_LINES),
+      }),
+    ),
+  ]
+    .sort((a, b) => a.at.localeCompare(b.at))
+    .map(({ at, ...message }) => message);
+  return {
+    versions: [{ version, sent: dayMonthYear(new Date(pull.created_at)), url: pull.html_url }],
+    messages,
+  };
+}

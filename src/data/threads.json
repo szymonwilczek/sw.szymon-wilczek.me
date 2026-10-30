@@ -1,84 +1,4 @@
 {
-  "08ce2fee1b86": {
-    "versions": [
-      {
-        "version": "v1",
-        "sent": "27 Dec 2025",
-        "url": "https://lore.kernel.org/r/20251227144307.8966-1-swilczek.lx@gmail.com"
-      }
-    ],
-    "messages": [
-      {
-        "version": "v1",
-        "who": "Szymon Wilczek",
-        "role": "author",
-        "date": "27 Dec 2025",
-        "depth": 0,
-        "kind": "patch",
-        "subject": "[PATCH] ntfs3: fix circular locking dependency in run_unpack_ex"
-      },
-      {
-        "version": "v1",
-        "who": "Konstantin Komarov",
-        "role": "maintainer",
-        "date": "16 Jan 2026",
-        "depth": 1,
-        "kind": "applied",
-        "quote": ["+\t\t\t}", "  \t\t}", "  \t\tup_write(&wnd->rw_lock);", "  \t\tif (err)"],
-        "text": "Thanks for the patch. It is applied.\n\nRegards,\nKonstantin"
-      }
-    ]
-  },
-  "0cd8450c257f": {
-    "versions": [
-      {
-        "version": "v1",
-        "sent": "10 Aug 2026",
-        "url": "https://lore.kernel.org/r/20260810192344.3733721-1-swilczek.lx@gmail.com"
-      }
-    ],
-    "messages": [
-      {
-        "version": "v1",
-        "who": "Szymon Wilczek",
-        "role": "author",
-        "date": "10 Aug 2026",
-        "depth": 0,
-        "kind": "patch",
-        "subject": "[PATCH] hwmon: (coretemp) Fix core_data leak on CPUs without PTS"
-      },
-      {
-        "version": "v1",
-        "who": "sashiko-bot@kernel.org",
-        "role": "bot",
-        "date": "10 Aug 2026",
-        "depth": 1,
-        "kind": "reply",
-        "quote": [
-          "the added kfree() sees NULL, with no slab warnings over repeated module",
-          "load and unload cycles.",
-          "Fixes: 1a793caf6f69 (\"hwmon: (coretemp) Use dynamic allocated memory for core temp_data\")",
-          "Signed-off-by: Szymon Wilczek <swilczek.lx@gmail.com>"
-        ],
-        "text": "Sashiko has reviewed this patch and found no issues. It looks great!"
-      },
-      {
-        "version": "v1",
-        "who": "Guenter Roeck",
-        "role": "maintainer",
-        "date": "11 Aug 2026",
-        "depth": 1,
-        "kind": "applied",
-        "quote": [
-          "the added kfree() sees NULL, with no slab warnings over repeated module",
-          "load and unload cycles.",
-          "Fixes: 1a793caf6f69 (\"hwmon: (coretemp) Use dynamic allocated memory for core temp_data\")",
-          "Signed-off-by: Szymon Wilczek <swilczek.lx@gmail.com>"
-        ],
-        "text": "Applied.\n\nThanks,\nGuenter"
-      }
-    ]
-  },
   "440b7035bbe0": {
     "versions": [
       {
@@ -147,12 +67,79 @@
       }
     ]
   },
-  "a8333c8262ae": {
+  "2be8e542d3f6": {
     "versions": [
       {
         "version": "v1",
-        "sent": "20 Dec 2025",
-        "url": "https://lore.kernel.org/r/20251220182419.390675-1-szymonwilczek@gmx.com"
+        "sent": "17 Sep 2026",
+        "url": "https://github.com/lavalink-devs/youtube-source/pull/245"
+      }
+    ],
+    "messages": [
+      {
+        "version": "v1",
+        "who": "szymonwilczek",
+        "role": "author",
+        "date": "17 Sep 2026",
+        "depth": 0,
+        "kind": "patch",
+        "subject": "fix: cipher: close embed response before getTimestamp to avoid connection starvation"
+      },
+      {
+        "version": "v1",
+        "who": "devoxin",
+        "role": "maintainer",
+        "date": "17 Sep 2026",
+        "depth": 0,
+        "kind": "reply",
+        "text": "approved"
+      }
+    ]
+  },
+  "34ee4c5f6b46": {
+    "versions": [
+      {
+        "version": "v1",
+        "sent": "18 Aug 2026",
+        "url": "https://github.com/lavalink-devs/youtube-source/pull/231"
+      }
+    ],
+    "messages": [
+      {
+        "version": "v1",
+        "who": "szymonwilczek",
+        "role": "author",
+        "date": "18 Aug 2026",
+        "depth": 0,
+        "kind": "patch",
+        "subject": "fix: update client version to 21.02.35"
+      },
+      {
+        "version": "v1",
+        "who": "devoxin",
+        "role": "maintainer",
+        "date": "18 Aug 2026",
+        "depth": 0,
+        "kind": "reply",
+        "text": "keep the warning. ANDROID is still a volatile and heavily guarded client that is prone to breaking -- I don't want users lured with a false notion that it will work properly, when historically it has been the most problematic client."
+      },
+      {
+        "version": "v1",
+        "who": "szymonwilczek",
+        "role": "author",
+        "date": "19 Aug 2026",
+        "depth": 0,
+        "kind": "reply",
+        "text": "Yup, that's fair"
+      }
+    ]
+  },
+  "0cd8450c257f": {
+    "versions": [
+      {
+        "version": "v1",
+        "sent": "10 Aug 2026",
+        "url": "https://lore.kernel.org/r/20260810192344.3733721-1-swilczek.lx@gmail.com"
       }
     ],
     "messages": [
@@ -160,19 +147,774 @@
         "version": "v1",
         "who": "Szymon Wilczek",
         "role": "author",
-        "date": "20 Dec 2025",
+        "date": "10 Aug 2026",
         "depth": 0,
         "kind": "patch",
-        "subject": "[PATCH] media: pvrusb2: fix URB leak in pvr2_send_request_ex"
+        "subject": "[PATCH] hwmon: (coretemp) Fix core_data leak on CPUs without PTS"
       },
       {
         "version": "v1",
-        "who": "Mike Isely",
-        "role": "reviewer",
-        "date": "20 Dec 2025",
+        "who": "sashiko-bot@kernel.org",
+        "role": "bot",
+        "date": "10 Aug 2026",
         "depth": 1,
         "kind": "reply",
-        "text": "Acked-By: Mike Isely <isely@pobox.com>"
+        "quote": [
+          "the added kfree() sees NULL, with no slab warnings over repeated module",
+          "load and unload cycles.",
+          "Fixes: 1a793caf6f69 (\"hwmon: (coretemp) Use dynamic allocated memory for core temp_data\")",
+          "Signed-off-by: Szymon Wilczek <swilczek.lx@gmail.com>"
+        ],
+        "text": "Sashiko has reviewed this patch and found no issues. It looks great!"
+      },
+      {
+        "version": "v1",
+        "who": "Guenter Roeck",
+        "role": "maintainer",
+        "date": "11 Aug 2026",
+        "depth": 1,
+        "kind": "applied",
+        "quote": [
+          "the added kfree() sees NULL, with no slab warnings over repeated module",
+          "load and unload cycles.",
+          "Fixes: 1a793caf6f69 (\"hwmon: (coretemp) Use dynamic allocated memory for core temp_data\")",
+          "Signed-off-by: Szymon Wilczek <swilczek.lx@gmail.com>"
+        ],
+        "text": "Applied.\n\nThanks,\nGuenter"
+      }
+    ]
+  },
+  "0c3e6e1b0e6e": {
+    "versions": [
+      {
+        "version": "v1",
+        "sent": "29 Apr 2026",
+        "url": "https://github.com/neovim/neovim/pull/39497"
+      }
+    ],
+    "messages": [
+      {
+        "version": "v1",
+        "who": "szymonwilczek",
+        "role": "author",
+        "date": "29 Apr 2026",
+        "depth": 0,
+        "kind": "patch",
+        "subject": "fix(treesitter): zero parser userdata pointer after ts_parser_delete"
+      },
+      {
+        "version": "v1",
+        "who": "szymonwilczek",
+        "role": "author",
+        "date": "29 Apr 2026",
+        "depth": 0,
+        "kind": "reply",
+        "text": "CI is fine (without that one flake). What do you think of this approach @justinmk?"
+      },
+      {
+        "version": "v1",
+        "who": "barrettruth",
+        "role": "reviewer",
+        "date": "5 May 2026",
+        "depth": 0,
+        "kind": "reply",
+        "text": "why is this type changed (just curious)\n\nalso in my experience if it's ready mark it ready so there's least possible friction to get your prs up and in",
+        "quote": [
+          "   return 1;",
+          " }",
+          " ",
+          "-static TSParser *parser_check(lua_State *L, uint16_t index)"
+        ]
+      },
+      {
+        "version": "v1",
+        "who": "szymonwilczek",
+        "role": "author",
+        "date": "5 May 2026",
+        "depth": 1,
+        "kind": "reply",
+        "text": "I've changed type to `int` to align with the `luaL_checkudata` signature which takes an `int`. Small cleanup while I was touching the function.\r\n\r\nAlso, thanks for the advice, but I'm keeping is as draft on purpose; until @justinmk has a chance to look - we discussed the approach in #39411 and I want his sign-off before requesting the final review",
+        "quote": [
+          "   return 1;",
+          " }",
+          " ",
+          "-static TSParser *parser_check(lua_State *L, uint16_t index)"
+        ]
+      },
+      {
+        "version": "v1",
+        "who": "justinmk",
+        "role": "maintainer",
+        "date": "5 May 2026",
+        "depth": 1,
+        "kind": "reply",
+        "text": "I usually ignore Draft PRs (that's why Draft is useful for reviewers :)",
+        "quote": [
+          "   return 1;",
+          " }",
+          " ",
+          "-static TSParser *parser_check(lua_State *L, uint16_t index)"
+        ]
+      },
+      {
+        "version": "v1",
+        "who": "lewis6991",
+        "role": "reviewer",
+        "date": "7 May 2026",
+        "depth": 0,
+        "kind": "reply",
+        "text": "This test catches the bug: it passes on this PR and crashes on the parent commit.\n\n```patch\ndiff --git a/test/functional/treesitter/parser_spec.lua b/test/functional/treesitter/parser_spec.lua\nindex 8678761e6e..9704507411 100644\n--- a/test/functional/treesitter/parser_spec.lua\n+++ b/test/functional/treesitter/parser_spec.lua\n@@ -107,6 +107,27 @@ describe('treesitter parser API', function()\n     )\n   end)\n \n+  it('ignores repeated parser finalization', function()\n+    eq(\n+      { false, true },\n+      exec_lua(function()\n+        vim.treesitter.language.add('c')\n+\n+        local parser = vim._create_ts_parser('c')\n+        -- The parser metatable exposes __gc through __index, so this simulates a finalizer\n+        -- running before all Lua references to the userdata are gone.\n+        parser:__gc()\n+        parser:__gc()\n+\n+        local ok, err = pcall(function()\n+          parser:parse(nil, 'int x;', false)\n+        end)\n+        return { ok, tostring(err):find('Parser has been deleted', 1, true) ~= nil }\n+      end)\n+    )\n+    assert_alive()\n+  end)\n+\n   it('respects eol settings when parsing buffer', function()\n     insert([[\n       int main() {\n```"
+      },
+      {
+        "version": "v1",
+        "who": "szymonwilczek",
+        "role": "author",
+        "date": "7 May 2026",
+        "depth": 0,
+        "kind": "reply",
+        "text": "Thanks @lewis6991 for providing the test case! I've verified it locally and added it to the PR."
+      },
+      {
+        "version": "v1",
+        "who": "justinmk",
+        "role": "maintainer",
+        "date": "7 May 2026",
+        "depth": 0,
+        "kind": "reply",
+        "text": "don't think this needs to be changed? or change it to `Parser not found` ?\n\n \"has been deleted\" assumes that it existed, is that a valid assumption?",
+        "quote": [
+          " {",
+          "   TSParser **ud = luaL_checkudata(L, index, TS_META_PARSER);",
+          "-  luaL_argcheck(L, *ud, index, \"TSParser expected\");",
+          "+  luaL_argcheck(L, *ud != NULL, index, \"Parser has been deleted\");"
+        ]
+      },
+      {
+        "version": "v1",
+        "who": "justinmk",
+        "role": "maintainer",
+        "date": "7 May 2026",
+        "depth": 0,
+        "kind": "reply",
+        "text": "does it work if you change this to:\n\n\n```suggestion\n        parser:parse(nil, 'int x;', false)\n```\n\nand then use `t.pcall_err(exec_lua, function() ...)` in the test call, so we can assert the message more clearly",
+        "quote": [
+          "+        local ok, err = pcall(function()",
+          "+          parser:parse(nil, 'int x;', false)",
+          "+        end)",
+          "+        return { ok, tostring(err):find('Parser has been deleted', 1, true) ~= nil }"
+        ]
+      },
+      {
+        "version": "v1",
+        "who": "szymonwilczek",
+        "role": "author",
+        "date": "7 May 2026",
+        "depth": 1,
+        "kind": "reply",
+        "text": "original message implied that the wrong type was passed, but after the GC fix this check also triggers when the parser was valid but ha since been finalized - the userdata is a TSParser, its just been deleted. I think \"Parser has been deleted\" tells the caller exactly what happened and why the operation failed. \"Parser not found\" sounds to me like a lookup failure rather than lifecycle issue. Happy to change the wording if you have a preference, though",
+        "quote": [
+          " {",
+          "   TSParser **ud = luaL_checkudata(L, index, TS_META_PARSER);",
+          "-  luaL_argcheck(L, *ud, index, \"TSParser expected\");",
+          "+  luaL_argcheck(L, *ud != NULL, index, \"Parser has been deleted\");"
+        ]
+      },
+      {
+        "version": "v1",
+        "who": "justinmk",
+        "role": "maintainer",
+        "date": "7 May 2026",
+        "depth": 1,
+        "kind": "reply",
+        "text": "if the message will make sense then no problem",
+        "quote": [
+          " {",
+          "   TSParser **ud = luaL_checkudata(L, index, TS_META_PARSER);",
+          "-  luaL_argcheck(L, *ud, index, \"TSParser expected\");",
+          "+  luaL_argcheck(L, *ud != NULL, index, \"Parser has been deleted\");"
+        ]
+      },
+      {
+        "version": "v1",
+        "who": "szymonwilczek",
+        "role": "author",
+        "date": "7 May 2026",
+        "depth": 1,
+        "kind": "reply",
+        "text": "That's cleaner. I'll update the test. Will push the update shortly.",
+        "quote": [
+          "+        local ok, err = pcall(function()",
+          "+          parser:parse(nil, 'int x;', false)",
+          "+        end)",
+          "+        return { ok, tostring(err):find('Parser has been deleted', 1, true) ~= nil }"
+        ]
+      },
+      {
+        "version": "v1",
+        "who": "lewis6991",
+        "role": "reviewer",
+        "date": "7 May 2026",
+        "depth": 1,
+        "kind": "reply",
+        "text": "I think we generally prefer the `uint*_t` types where we can use them.",
+        "quote": [
+          "   return 1;",
+          " }",
+          " ",
+          "-static TSParser *parser_check(lua_State *L, uint16_t index)"
+        ]
+      },
+      {
+        "version": "v1",
+        "who": "neovim-backports[bot]",
+        "role": "bot",
+        "date": "7 May 2026",
+        "depth": 0,
+        "kind": "reply",
+        "text": "Successfully created backport PR for `release-0.12`:\n- #39651"
+      }
+    ]
+  },
+  "3639f7a8672b": {
+    "versions": [
+      {
+        "version": "v1",
+        "sent": "26 Apr 2026",
+        "url": "https://github.com/neovim/neovim/pull/39423"
+      }
+    ],
+    "messages": [
+      {
+        "version": "v1",
+        "who": "szymonwilczek",
+        "role": "author",
+        "date": "26 Apr 2026",
+        "depth": 0,
+        "kind": "patch",
+        "subject": "feat(server): add v:useractive, use it in serverlist(info=true)"
+      },
+      {
+        "version": "v1",
+        "who": "tbung",
+        "role": "reviewer",
+        "date": "28 Apr 2026",
+        "depth": 0,
+        "kind": "reply",
+        "text": "Could use `os_realtime` introduced in #39425. Pro argument is that `v:starttime` and `v:lastactivity` then have the same precision, con argument is that it complicates the 1sec debounce for precision that probably isn't needed.",
+        "quote": [
+          "   cmdline_init();",
+          "   eval_init();          // init global variables",
+          "   set_vim_var_nr(VV_STARTTIME, (varnumber_T)os_hrtime());",
+          "+  set_vim_var_nr(VV_LASTACTIVITY, (varnumber_T)os_time());"
+        ]
+      },
+      {
+        "version": "v1",
+        "who": "szymonwilczek",
+        "role": "author",
+        "date": "28 Apr 2026",
+        "depth": 1,
+        "kind": "reply",
+        "text": "Thanks for the suggestion, I've looked at #39425, but using `os_realtime()` here would actually break the throttling mechanism. It returns nanoseconds, meaning `now != last_activity` would evaluate to true on almost every single keystroke. To maintain 1-second throttle we'd have to introduce division by 1e9 in `vgetc()`, which is i think hot path.\r\n\r\nSince the goal is just to feed a UI picker with relative time (*3 minutes ago* etc), `os_time` gives us free & dirt-cheap 1 sec throttle OOTB. I think we should stick to the cheaper integer comparision here, but that just my suggestion",
+        "quote": [
+          "   cmdline_init();",
+          "   eval_init();          // init global variables",
+          "   set_vim_var_nr(VV_STARTTIME, (varnumber_T)os_hrtime());",
+          "+  set_vim_var_nr(VV_LASTACTIVITY, (varnumber_T)os_time());"
+        ]
+      },
+      {
+        "version": "v1",
+        "who": "justinmk",
+        "role": "maintainer",
+        "date": "28 Apr 2026",
+        "depth": 0,
+        "kind": "reply",
+        "text": "`current_ui` is a similar concept, set in `input_enqueue` , any reason not to do this there also?  https://github.com/neovim/neovim/blob/72bc6c5801867e8f99a87737a64c1713ceac1e01/src/nvim/os/input.c#L275-L277",
+        "quote": [
+          "+    static Timestamp last_activity = 0;",
+          "+    Timestamp now = os_time();",
+          "+    if (now != last_activity) {",
+          "+      last_activity = now;"
+        ]
+      },
+      {
+        "version": "v1",
+        "who": "szymonwilczek",
+        "role": "author",
+        "date": "28 Apr 2026",
+        "depth": 1,
+        "kind": "reply",
+        "text": "Hmm, good point.\r\n\r\n`input_enqueue` is external I/O boundary, called directly from `nvim_input` (so TUI keystrokes and RPC-driven input both flow through it). `KeyTyped` in `vgetc()`, on the other hand, is only set when the key came from a real user interaction, not from mappings or macros.\r\n\r\nIf we move this to `input_enqueue`, a headless rpc plugin calling `nvim_input` would continuously update `v:lastactivity`, which might make it unreliable as a *is the human actually at the keyboard* signal. But maybe any external UI activity is exactly what we want to count here?\r\n\r\nI can move the logic to `input_enqueue`, or just add a comment to `vgetc()` clarifying my intent. Let me know what would you prefer for this.",
+        "quote": [
+          "+    static Timestamp last_activity = 0;",
+          "+    Timestamp now = os_time();",
+          "+    if (now != last_activity) {",
+          "+      last_activity = now;"
+        ]
+      },
+      {
+        "version": "v1",
+        "who": "zeertzjq",
+        "role": "reviewer",
+        "date": "28 Apr 2026",
+        "depth": 1,
+        "kind": "reply",
+        "text": "All keys sent by `input_enqueue()` have `KeyTyped`, so there is no change in intent.\r\n\r\nActually checking at `input_enqueue()` is better here. If a key typed by the user triggers a mapping, `KeyTyped` isn't set, but the user indeed has typed a key.",
+        "quote": [
+          "+    static Timestamp last_activity = 0;",
+          "+    Timestamp now = os_time();",
+          "+    if (now != last_activity) {",
+          "+      last_activity = now;"
+        ]
+      },
+      {
+        "version": "v1",
+        "who": "szymonwilczek",
+        "role": "author",
+        "date": "28 Apr 2026",
+        "depth": 1,
+        "kind": "reply",
+        "text": "Thanks, then my reasoning about filtering out rpc input is no accurate. In that case, is there a meaningful difference between the two locations from your perspective, or would you prefer that I move this to `input_enqueue`?\r\n\r\n*Edit*: I saw zeertzjq edit, thanks, that clarifies it. I'll move it to `input_enqueue()`",
+        "quote": [
+          "+    static Timestamp last_activity = 0;",
+          "+    Timestamp now = os_time();",
+          "+    if (now != last_activity) {",
+          "+      last_activity = now;"
+        ]
+      },
+      {
+        "version": "v1",
+        "who": "justinmk",
+        "role": "maintainer",
+        "date": "28 Apr 2026",
+        "depth": 1,
+        "kind": "reply",
+        "text": "> If we move this to `input_enqueue`, a headless rpc plugin calling `nvim_input` would continuously update `v:lastactivity`, which might make it unreliable as a _is the human actually at the keyboard_ signal.\r\n\r\n`nvim_input` is \"human\" input, by definition. That is what all UIs use.",
+        "quote": [
+          "+    static Timestamp last_activity = 0;",
+          "+    Timestamp now = os_time();",
+          "+    if (now != last_activity) {",
+          "+      last_activity = now;"
+        ]
+      },
+      {
+        "version": "v1",
+        "who": "justinmk",
+        "role": "maintainer",
+        "date": "28 Apr 2026",
+        "depth": 0,
+        "kind": "reply",
+        "text": "hmm, maybe `VV_LASTACTIVITY` should not be set here, i.e. it should be `v:null` or `0`. Only actual user input should set it?\r\n\r\nidk if it matters, but it's kind of weird that with the current impl, it's not easy to compare `v:starttime` to `v:lastactivity`. however, based on https://github.com/neovim/neovim/pull/39423#discussion_r3153636004 it sounds like we may have to live with that.",
+        "quote": [
+          "   cmdline_init();",
+          "   eval_init();          // init global variables",
+          "   set_vim_var_nr(VV_STARTTIME, (varnumber_T)os_realtime());",
+          "+  set_vim_var_nr(VV_LASTACTIVITY, (varnumber_T)os_time());"
+        ]
+      },
+      {
+        "version": "v1",
+        "who": "szymonwilczek",
+        "role": "author",
+        "date": "28 Apr 2026",
+        "depth": 1,
+        "kind": "reply",
+        "text": "My motivation was to avoid `nil`/null becks on the user side - pickers can always do `os.time() - v:lastactivity` without guarding. But if the intent is *last user input*, then `0` or `v:null` is more honest. Happy to change it either way",
+        "quote": [
+          "   cmdline_init();",
+          "   eval_init();          // init global variables",
+          "   set_vim_var_nr(VV_STARTTIME, (varnumber_T)os_realtime());",
+          "+  set_vim_var_nr(VV_LASTACTIVITY, (varnumber_T)os_time());"
+        ]
+      },
+      {
+        "version": "v1",
+        "who": "justinmk",
+        "role": "maintainer",
+        "date": "28 Apr 2026",
+        "depth": 1,
+        "kind": "reply",
+        "text": "that's a good thought, but it is probably useful to be able to check that \"there was no user activity since startup\", right? so need some way to do that. \r\n\r\nif set to \"epoch time\", or zero, then `os.time() - v:lastactivity` still works",
+        "quote": [
+          "   cmdline_init();",
+          "   eval_init();          // init global variables",
+          "   set_vim_var_nr(VV_STARTTIME, (varnumber_T)os_realtime());",
+          "+  set_vim_var_nr(VV_LASTACTIVITY, (varnumber_T)os_time());"
+        ]
+      },
+      {
+        "version": "v1",
+        "who": "tbung",
+        "role": "reviewer",
+        "date": "28 Apr 2026",
+        "depth": 1,
+        "kind": "reply",
+        "text": "We could do `(now >> 30) != (last_activity >> 30)` which should still be fast and gives us a ~1.07s throttle if we do want `v:starttime` and `v:lastactivity` to be comparable.\r\n\r\n`v:lastactivity` should then probably be initialized to `v:starttime` instead of a separate call though.",
+        "quote": [
+          "   cmdline_init();",
+          "   eval_init();          // init global variables",
+          "   set_vim_var_nr(VV_STARTTIME, (varnumber_T)os_realtime());",
+          "+  set_vim_var_nr(VV_LASTACTIVITY, (varnumber_T)os_time());"
+        ]
+      },
+      {
+        "version": "v1",
+        "who": "szymonwilczek",
+        "role": "author",
+        "date": "28 Apr 2026",
+        "depth": 1,
+        "kind": "reply",
+        "text": "> that's a good thought, but it is probably useful to be able to check that \"there was no user activity since startup\", right? so need some way to do that. \r\n> \r\n> \r\n> \r\n> if set to \"epoch time\", or zero, then `os.time() - v:lastactivity` still works\r\n\r\nMakes sense, I’ll initialize to `0` then.",
+        "quote": [
+          "   cmdline_init();",
+          "   eval_init();          // init global variables",
+          "   set_vim_var_nr(VV_STARTTIME, (varnumber_T)os_realtime());",
+          "+  set_vim_var_nr(VV_LASTACTIVITY, (varnumber_T)os_time());"
+        ]
+      },
+      {
+        "version": "v1",
+        "who": "szymonwilczek",
+        "role": "author",
+        "date": "28 Apr 2026",
+        "depth": 1,
+        "kind": "reply",
+        "text": "> We could do `(now >> 30) != (last_activity >> 30)` which should still be fast and gives us a ~1.07s throttle if we do want `v:starttime` and `v:lastactivity` to be comparable.\n> \n> \n> \n> `v:lastactivity` should then probably be initialized to `v:starttime` instead of a separate call though.\n\nBit-shift trick is clever, but I’d rather keep `input_enqueue` readable. The 1-second throttle via `os_time()` is intentional and sufficient for a UI picker. As for initializing to `v:starttime` - they intentionally use different clocks (`os_realtime` nanoseconds vs `os_time seconds`), so mixing them would require division anyway, which kind of defeats the simplicity argument.",
+        "quote": [
+          "   cmdline_init();",
+          "   eval_init();          // init global variables",
+          "   set_vim_var_nr(VV_STARTTIME, (varnumber_T)os_realtime());",
+          "+  set_vim_var_nr(VV_LASTACTIVITY, (varnumber_T)os_time());"
+        ]
+      },
+      {
+        "version": "v1",
+        "who": "szymonwilczek",
+        "role": "author",
+        "date": "28 Apr 2026",
+        "depth": 0,
+        "kind": "reply",
+        "text": "Done, I removed the initialization from `early_init`, `VAR_NUMBER` defaults to 0, which signals *no user activity since startup*."
+      },
+      {
+        "version": "v1",
+        "who": "justinmk",
+        "role": "maintainer",
+        "date": "6 May 2026",
+        "depth": 1,
+        "kind": "reply",
+        "text": "> nanoseconds, meaning `now != last_activity` would evaluate to true on almost every single keystroke. \r\n\r\nI'm confused. Even if the granularity is \"seconds\", `now == last` is not a good way to throttle, you still should compare `now - last >= 1 second`.\r\n\r\n> To maintain 1-second throttle we'd have to introduce division by 1e9 in `vgetc()`, which is i think hot path.\r\n\r\ninteger division is nothing compared to the rest of `vgetc`. no performance impact.\r\n\r\nSo I don't think there is any reason not to use `os_realtime`. Having different granularities for `v:lastactivity` and `v:starttime` is a UX cost with negligible benefit.",
+        "quote": [
+          "   cmdline_init();",
+          "   eval_init();          // init global variables",
+          "   set_vim_var_nr(VV_STARTTIME, (varnumber_T)os_hrtime());",
+          "+  set_vim_var_nr(VV_LASTACTIVITY, (varnumber_T)os_time());"
+        ]
+      },
+      {
+        "version": "v1",
+        "who": "szymonwilczek",
+        "role": "author",
+        "date": "6 May 2026",
+        "depth": 1,
+        "kind": "reply",
+        "text": "Hmm, looking at it after some time: You're right on both points. I'll switch to `os_realtime()` and use `now - last >= 1e9` for the throttle. Will update the PR in some time.",
+        "quote": [
+          "   cmdline_init();",
+          "   eval_init();          // init global variables",
+          "   set_vim_var_nr(VV_STARTTIME, (varnumber_T)os_hrtime());",
+          "+  set_vim_var_nr(VV_LASTACTIVITY, (varnumber_T)os_time());"
+        ]
+      },
+      {
+        "version": "v1",
+        "who": "justinmk",
+        "role": "maintainer",
+        "date": "6 May 2026",
+        "depth": 0,
+        "kind": "reply",
+        "text": "maybe `v:useractivity` expresses the semantics better?",
+        "quote": [
+          "   VV(VV_VIRTNUM,          \"virtnum\",          VAR_NUMBER, VV_RO),",
+          "   VV(VV_STARTTIME,        \"starttime\",        VAR_NUMBER, VV_RO),",
+          "   VV(VV_EXITREASON,       \"exitreason\",       VAR_STRING, VV_RO),",
+          "+  VV(VV_LASTACTIVITY,     \"lastactivity\",     VAR_NUMBER, VV_RO),"
+        ]
+      },
+      {
+        "version": "v1",
+        "who": "justinmk",
+        "role": "maintainer",
+        "date": "6 May 2026",
+        "depth": 0,
+        "kind": "reply",
+        "text": "why does this care about `now != last` ? it should just always update.\n\n    set_vim_var_nr(VV_LASTACTIVITY, (varnumber_T)os_realtime);\n\nif we really want to avoid unnecessary operations, we could set a global,\n\n    last_activity = os_realtime(..)\n\n and only update `VV_LASTACTIVITY` *when* `v:lastactivity` is actually *requested* from user code. I'm not sure if there's precedent for that, but AI could probably sketch something. It may require adding a special-case to `get_vim_var_nr`, or perhaps introducing a special function analogous to `set_vcount` (except for the \"get\" case: `get_vlastactivity`)",
+        "quote": [
+          "+    Timestamp now = os_time();",
+          "+    if (now != last_activity) {",
+          "+      last_activity = now;",
+          "+      set_vim_var_nr(VV_LASTACTIVITY, (varnumber_T)now);"
+        ]
+      },
+      {
+        "version": "v1",
+        "who": "justinmk",
+        "role": "maintainer",
+        "date": "7 May 2026",
+        "depth": 0,
+        "kind": "reply",
+        "text": "news doesn't need to document every little detail. it's intended to surface interesting changes. the full docs are linked. thus, the abbreviated version this is overwriting is preferred.",
+        "quote": [
+          "+  |serverlist()| `info=true` for activity-aware pickers.",
+          "+• |serverlist()| accepts a new `info` option that returns a list of dicts",
+          "+  with `addr`, `pid`, `own` and `useractivity` for each server (own + peers),",
+          "+  enabling pickers like the future `:connect` host selector."
+        ]
+      },
+      {
+        "version": "v1",
+        "who": "justinmk",
+        "role": "maintainer",
+        "date": "7 May 2026",
+        "depth": 0,
+        "kind": "reply",
+        "text": "sorry for the churn, can we name it `v:useractive`",
+        "quote": [
+          " • |v:exitreason| is set before |QuitPre|.",
+          " • |v:starttime| is the process start time (nanoseconds since UNIX epoch).",
+          "-• |serverlist()| with `info=true` returns details for each server (own + peers).",
+          "+• |v:useractivity| is a nanosecond timestamp (same precision as |v:starttime|)"
+        ]
+      },
+      {
+        "version": "v1",
+        "who": "szymonwilczek",
+        "role": "author",
+        "date": "7 May 2026",
+        "depth": 1,
+        "kind": "reply",
+        "text": "Sure thing, no problem",
+        "quote": [
+          " • |v:exitreason| is set before |QuitPre|.",
+          " • |v:starttime| is the process start time (nanoseconds since UNIX epoch).",
+          "-• |serverlist()| with `info=true` returns details for each server (own + peers).",
+          "+• |v:useractivity| is a nanosecond timestamp (same precision as |v:starttime|)"
+        ]
+      },
+      {
+        "version": "v1",
+        "who": "justinmk",
+        "role": "maintainer",
+        "date": "7 May 2026",
+        "depth": 0,
+        "kind": "reply",
+        "text": "in this context we do not need to repeat the exact same name. here, just `active` is meaningful. also, the doc is over-explaining. since we link to `|v:useractive|` there is no need to repeat details already mentioned there.\n\n```suggestion\n\t\t            active  (number?) |v:useractive|, or |v:null| if peer is unreachable.\n```",
+        "quote": [
+          "+\t\t                                    peer is unreachable.",
+          "+\t\t            own           (bool)    Whether this server belongs to",
+          "+\t\t                                    the current Nvim instance.",
+          "+\t\t            useractivity  (number?) Nanoseconds since epoch of the"
+        ]
+      },
+      {
+        "version": "v1",
+        "who": "justinmk",
+        "role": "maintainer",
+        "date": "7 May 2026",
+        "depth": 0,
+        "kind": "reply",
+        "text": "i'm kind of wondering why we would return anything if the peer is unreachable. why is it in the list at all?",
+        "quote": [
+          "+\t\t            addr          (string)  Server address.",
+          "+\t\t            pid           (number?) PID of the Nvim process owning",
+          "+\t\t                                    the server, or |v:null| if the",
+          "+\t\t                                    peer is unreachable."
+        ]
+      },
+      {
+        "version": "v1",
+        "who": "justinmk",
+        "role": "maintainer",
+        "date": "7 May 2026",
+        "depth": 0,
+        "kind": "reply",
+        "text": "this is irrelevant\n```suggestion\n```",
+        "quote": [
+          "+\t\tInitialized to 0 (no user activity since startup).",
+          "+",
+          "+\t\tUseful with |serverlist()| `info=true` to render a \"last active\"",
+          "+\t\tcolumn in pickers like |:connect|."
+        ]
+      },
+      {
+        "version": "v1",
+        "who": "justinmk",
+        "role": "maintainer",
+        "date": "7 May 2026",
+        "depth": 0,
+        "kind": "reply",
+        "text": "this is a nonsense way to explain this.\n```suggestion\n\t\tTimestamp indicating the most recent user activity.\n\t\tSame precision as |v:starttime|.\n```",
+        "quote": [
+          " ",
+          "+\t\t\t\t*v:useractivity* *useractivity-variable*",
+          "+v:useractivity",
+          "+\t\tNanoseconds since epoch (same precision as |v:starttime|) of the"
+        ]
+      },
+      {
+        "version": "v1",
+        "who": "justinmk",
+        "role": "maintainer",
+        "date": "7 May 2026",
+        "depth": 0,
+        "kind": "reply",
+        "text": "I think this is good enough after comments are addressed. Thanks!"
+      },
+      {
+        "version": "v1",
+        "who": "szymonwilczek",
+        "role": "author",
+        "date": "7 May 2026",
+        "depth": 1,
+        "kind": "reply",
+        "text": "unreachable peers are already filtered out, the code only adds a peer to the list if `sockconnect` + `nvim_get_chan_info` both succeed. so the `v:null` case was effectively dead documentation. i removed it, `pid` and `active` are now documented as always-present number fields.",
+        "quote": [
+          "+\t\t            addr          (string)  Server address.",
+          "+\t\t            pid           (number?) PID of the Nvim process owning",
+          "+\t\t                                    the server, or |v:null| if the",
+          "+\t\t                                    peer is unreachable."
+        ]
+      }
+    ]
+  },
+  "c3f803c3b6d4": {
+    "versions": [
+      {
+        "version": "v1",
+        "sent": "25 Apr 2026",
+        "url": "https://github.com/neovim/neovim/pull/39392"
+      }
+    ],
+    "messages": [
+      {
+        "version": "v1",
+        "who": "szymonwilczek",
+        "role": "author",
+        "date": "25 Apr 2026",
+        "depth": 0,
+        "kind": "patch",
+        "subject": "feat(server): return detailed info from serverlist({info=true})"
+      },
+      {
+        "version": "v1",
+        "who": "szymonwilczek",
+        "role": "author",
+        "date": "25 Apr 2026",
+        "depth": 0,
+        "kind": "reply",
+        "text": "Looks like test flaked on `TUI :restart`. I think I don't have permission (or at least do not see the re-run CI jobs button) from my fork, could someone give it a kick?\r\n\r\n*Edit*: Not longer needed, I had to update the docs nevertheless"
+      },
+      {
+        "version": "v1",
+        "who": "szymonwilczek",
+        "role": "author",
+        "date": "25 Apr 2026",
+        "depth": 0,
+        "kind": "reply",
+        "text": "@justinmk CI is fully green. `serverlist({info=v:true})` implementation is complete, I've covered both local sockets and cross-process PID retrieval, along with updated docs & tests.\r\n\r\nWhenever you have a cycle, let me know if this looks solid to you. Once this gets the green light I'll rebase the remote-ssh pr onto it and wire new dicts into the ui picker."
+      },
+      {
+        "version": "v1",
+        "who": "justinmk",
+        "role": "maintainer",
+        "date": "26 Apr 2026",
+        "depth": 0,
+        "kind": "reply",
+        "text": "```suggestion\n---@field own boolean True if this server belongs to the current Nvim instance.\n```",
+        "quote": [
+          "+---@class vim.ServerInfo",
+          "+---@field address string Server address (socket path, named pipe, or TCP host:port).",
+          "+---@field pid integer? PID of the Nvim process owning this server (nil if unreachable).",
+          "+---@field is_current boolean True if this server belongs to the current Nvim instance."
+        ]
+      },
+      {
+        "version": "v1",
+        "who": "justinmk",
+        "role": "maintainer",
+        "date": "26 Apr 2026",
+        "depth": 0,
+        "kind": "reply",
+        "text": "```suggestion\n---@field addr string Server address (socket path, named pipe, or TCP host:port).\n```",
+        "quote": [
+          " --- Called by builtin serverlist(). Returns the combined server list (own + peers).",
+          " ---",
+          "+---@class vim.ServerInfo",
+          "+---@field address string Server address (socket path, named pipe, or TCP host:port)."
+        ]
+      },
+      {
+        "version": "v1",
+        "who": "szymonwilczek",
+        "role": "author",
+        "date": "29 Apr 2026",
+        "depth": 0,
+        "kind": "reply",
+        "text": "I've rebased on `master` since new `news.txt` caused conflicts. I've also updated the message to reflect the actual implementation (`address` -> `addr`, `is_current` -> `own`).\r\n\r\n*Edit*: Regarding the Windows CI failure: it threw exit code and a bunch of `EOF`s from provider tests. I don't know much about Windows in development (not using), but this looks like a broken Windows runner or missing DLLs rather than an issue with Lua code. Could anyone confirm?"
+      },
+      {
+        "version": "v1",
+        "who": "szymonwilczek",
+        "role": "author",
+        "date": "6 May 2026",
+        "depth": 0,
+        "kind": "reply",
+        "text": "@justinmk Windows functional CI timed out (55m, unrelated provider/DLL failures as before). All other checks are green. Could you confirm if the Windows failure is some kind of known issue so I can re-request review?"
+      },
+      {
+        "version": "v1",
+        "who": "justinmk",
+        "role": "maintainer",
+        "date": "6 May 2026",
+        "depth": 0,
+        "kind": "reply",
+        "text": "Let's pull the trigger on this, can continue iterating. Thanks!"
+      }
+    ]
+  },
+  "08ce2fee1b86": {
+    "versions": [
+      {
+        "version": "v1",
+        "sent": "27 Dec 2025",
+        "url": "https://lore.kernel.org/r/20251227144307.8966-1-swilczek.lx@gmail.com"
+      }
+    ],
+    "messages": [
+      {
+        "version": "v1",
+        "who": "Szymon Wilczek",
+        "role": "author",
+        "date": "27 Dec 2025",
+        "depth": 0,
+        "kind": "patch",
+        "subject": "[PATCH] ntfs3: fix circular locking dependency in run_unpack_ex"
+      },
+      {
+        "version": "v1",
+        "who": "Konstantin Komarov",
+        "role": "maintainer",
+        "date": "16 Jan 2026",
+        "depth": 1,
+        "kind": "applied",
+        "quote": [
+          "+\t\t\t}",
+          "  \t\t}",
+          "  \t\tup_write(&wnd->rw_lock);",
+          "  \t\tif (err)"
+        ],
+        "text": "Thanks for the patch. It is applied.\n\nRegards,\nKonstantin"
       }
     ]
   },
@@ -252,6 +994,110 @@
       }
     ]
   },
+  "e37a75bb866c": {
+    "versions": [
+      {
+        "version": "v1",
+        "sent": "22 Dec 2025",
+        "url": "https://lore.kernel.org/r/20251222151010.17263-1-swilczek.lx@gmail.com"
+      }
+    ],
+    "messages": [
+      {
+        "version": "v1",
+        "who": "Szymon Wilczek",
+        "role": "author",
+        "date": "22 Dec 2025",
+        "depth": 0,
+        "kind": "patch",
+        "subject": "[PATCH] fs/ntfs3: fix deadlock in ni_readpage_cmpr"
+      },
+      {
+        "version": "v1",
+        "who": "Konstantin Komarov",
+        "role": "maintainer",
+        "date": "26 Dec 2025",
+        "depth": 1,
+        "kind": "applied",
+        "quote": [
+          "  \t\terr = ni_readpage_cmpr(ni, folio);",
+          "-\t\tni_unlock(ni);",
+          "  \t\treturn err;",
+          "  \t}"
+        ],
+        "text": "Your patch is applied, thanks.\n\nRegards,\nKonstantin"
+      }
+    ]
+  },
+  "d66676e6ca96": {
+    "versions": [
+      {
+        "version": "v1",
+        "sent": "21 Dec 2025",
+        "url": "https://lore.kernel.org/r/20251221155806.23925-1-swilczek.lx@gmail.com"
+      }
+    ],
+    "messages": [
+      {
+        "version": "v1",
+        "who": "Szymon Wilczek",
+        "role": "author",
+        "date": "21 Dec 2025",
+        "depth": 0,
+        "kind": "patch",
+        "subject": "[PATCH] wifi: libertas: fix WARNING in usb_tx_block"
+      }
+    ]
+  },
+  "aba744a2e4b2": {
+    "versions": [
+      {
+        "version": "v1",
+        "sent": "21 Dec 2025",
+        "url": "https://lore.kernel.org/r/20251221151710.13747-1-swilczek.lx@gmail.com"
+      }
+    ],
+    "messages": [
+      {
+        "version": "v1",
+        "who": "Szymon Wilczek",
+        "role": "author",
+        "date": "21 Dec 2025",
+        "depth": 0,
+        "kind": "patch",
+        "subject": "[PATCH] mailmap: update email address for Szymon Wilczek"
+      }
+    ]
+  },
+  "a8333c8262ae": {
+    "versions": [
+      {
+        "version": "v1",
+        "sent": "20 Dec 2025",
+        "url": "https://lore.kernel.org/r/20251220182419.390675-1-szymonwilczek@gmx.com"
+      }
+    ],
+    "messages": [
+      {
+        "version": "v1",
+        "who": "Szymon Wilczek",
+        "role": "author",
+        "date": "20 Dec 2025",
+        "depth": 0,
+        "kind": "patch",
+        "subject": "[PATCH] media: pvrusb2: fix URB leak in pvr2_send_request_ex"
+      },
+      {
+        "version": "v1",
+        "who": "Mike Isely",
+        "role": "reviewer",
+        "date": "20 Dec 2025",
+        "depth": 1,
+        "kind": "reply",
+        "text": "Acked-By: Mike Isely <isely@pobox.com>"
+      }
+    ]
+  },
   "d4168cb6ae4f": {
     "versions": [
       {
@@ -261,6 +1107,30 @@
       }
     ],
     "messages": [
+      {
+        "version": "v1",
+        "who": "Yacov Simhony",
+        "role": "reviewer",
+        "date": "14 Apr 2025",
+        "depth": 0,
+        "kind": "patch",
+        "subject": "[PATCH] hwmon: acpi_power_meter: replace deprecated strcpy() with strscpy()"
+      },
+      {
+        "version": "v1",
+        "who": "Guenter Roeck",
+        "role": "maintainer",
+        "date": "14 Apr 2025",
+        "depth": 1,
+        "kind": "reply",
+        "quote": [
+          "Use strscpy() instead of strcpy() to prevent potential buffer overflows",
+          "in acpi_device_name() and acpi_device_class(), which point to fixed-size",
+          "buffers.",
+          "This change improves safety and aligns with current kernel cleanup efforts."
+        ],
+        "text": "ACPI_POWER_METER_DEVICE_NAME and ACPI_POWER_METER_CLASS are constant strings.\nThere is no danger of buffer overflows. There is no safety improvement.\n\nWe should concentrate on fixing real problems, not imaginary ones.\n\nGuenter"
+      },
       {
         "version": "v1",
         "who": "Szymon Wilczek",
@@ -302,58 +1172,223 @@
       }
     ]
   },
-  "d66676e6ca96": {
+  "4d63e885791b": {
     "versions": [
       {
         "version": "v1",
-        "sent": "21 Dec 2025",
-        "url": "https://lore.kernel.org/r/20251221155806.23925-1-swilczek.lx@gmail.com"
+        "sent": "5 Aug 2024",
+        "url": "https://github.com/topi314/LavaSrc/pull/209"
       }
     ],
     "messages": [
       {
         "version": "v1",
-        "who": "Szymon Wilczek",
+        "who": "szymonwilczek",
         "role": "author",
-        "date": "21 Dec 2025",
+        "date": "5 Aug 2024",
         "depth": 0,
         "kind": "patch",
-        "subject": "[PATCH] wifi: libertas: fix WARNING in usb_tx_block"
-      }
-    ]
-  },
-  "e37a75bb866c": {
-    "versions": [
-      {
-        "version": "v1",
-        "sent": "22 Dec 2025",
-        "url": "https://lore.kernel.org/r/20251222151010.17263-1-swilczek.lx@gmail.com"
-      }
-    ],
-    "messages": [
-      {
-        "version": "v1",
-        "who": "Szymon Wilczek",
-        "role": "author",
-        "date": "22 Dec 2025",
-        "depth": 0,
-        "kind": "patch",
-        "subject": "[PATCH] fs/ntfs3: fix deadlock in ni_readpage_cmpr"
+        "subject": "Update LavaSearch and LavaLyrics implementation"
       },
       {
         "version": "v1",
-        "who": "Konstantin Komarov",
+        "who": "topi314",
         "role": "maintainer",
-        "date": "26 Dec 2025",
-        "depth": 1,
-        "kind": "applied",
+        "date": "16 Aug 2024",
+        "depth": 0,
+        "kind": "reply",
+        "text": "that is not how you make them anchors",
         "quote": [
-          "  \t\terr = ni_readpage_cmpr(ni, folio);",
-          "-\t\tni_unlock(ni);",
-          "  \t\treturn err;",
-          "  \t}"
-        ],
-        "text": "Your patch is applied, thanks.\n\nRegards,\nKonstantin"
+          " ```",
+          " ",
+          "+<details>",
+          "+<summary id=\"#lavalyrics-spotify\">LavaLyrics</summary>"
+        ]
+      },
+      {
+        "version": "v1",
+        "who": "topi314",
+        "role": "maintainer",
+        "date": "16 Aug 2024",
+        "depth": 0,
+        "kind": "reply",
+        "text": "this also applies to the others"
+      },
+      {
+        "version": "v1",
+        "who": "topi314",
+        "role": "maintainer",
+        "date": "16 Aug 2024",
+        "depth": 0,
+        "kind": "reply",
+        "text": "```suggestion\r\n// create new lyrics manager\r\n```",
+        "quote": [
+          "+<summary>Click to expand</summary>",
+          "+",
+          "+```java",
+          "+// register lyrics manager"
+        ]
+      },
+      {
+        "version": "v1",
+        "who": "topi314",
+        "role": "maintainer",
+        "date": "16 Aug 2024",
+        "depth": 0,
+        "kind": "reply",
+        "text": "```suggestion\r\n// create new search manager\r\n```",
+        "quote": [
+          "+<summary>Click to expand</summary>",
+          "+",
+          "+```java",
+          "+// register search manager"
+        ]
+      },
+      {
+        "version": "v1",
+        "who": "topi314",
+        "role": "maintainer",
+        "date": "16 Aug 2024",
+        "depth": 0,
+        "kind": "reply",
+        "text": "and so on"
+      },
+      {
+        "version": "v1",
+        "who": "topi314",
+        "role": "maintainer",
+        "date": "16 Aug 2024",
+        "depth": 0,
+        "kind": "reply",
+        "text": "approved"
+      }
+    ]
+  },
+  "2edfc1bbe641": {
+    "versions": [
+      {
+        "version": "v1",
+        "sent": "4 Aug 2024",
+        "url": "https://github.com/topi314/LavaSearch/pull/7"
+      }
+    ],
+    "messages": [
+      {
+        "version": "v1",
+        "who": "szymonwilczek",
+        "role": "author",
+        "date": "4 Aug 2024",
+        "depth": 0,
+        "kind": "patch",
+        "subject": "Update Lavaplayer usage"
+      },
+      {
+        "version": "v1",
+        "who": "topi314",
+        "role": "maintainer",
+        "date": "16 Aug 2024",
+        "depth": 0,
+        "kind": "reply",
+        "text": "please don't include lavasrc examples in here, I don't want to maintain them at 2 places",
+        "quote": [
+          "+var youtube = new YoutubeSearchManager(() -> audioPlayerManager, region);",
+          "+",
+          "+searchManager.registerSearchManager(spotify);",
+          "+searchManager.registerSearchManager(youtube);"
+        ]
+      },
+      {
+        "version": "v1",
+        "who": "topi314",
+        "role": "maintainer",
+        "date": "16 Aug 2024",
+        "depth": 0,
+        "kind": "reply",
+        "text": "```suggestion\r\nCreate a new `SearchManager`\r\n```",
+        "quote": [
+          " ### Usage",
+          " ",
+          "-// TODO",
+          "+Register `Search Manager`"
+        ]
+      },
+      {
+        "version": "v1",
+        "who": "topi314",
+        "role": "maintainer",
+        "date": "16 Aug 2024",
+        "depth": 0,
+        "kind": "reply",
+        "text": "type is obvious here, use var\r\n```suggestion\r\nvar searchManager = new SearchManager();\r\n```",
+        "quote": [
+          "-// TODO",
+          "+Register `Search Manager`",
+          "+```java",
+          "+SearchManager searchManager = new SearchManager();"
+        ]
+      },
+      {
+        "version": "v1",
+        "who": "topi314",
+        "role": "maintainer",
+        "date": "16 Aug 2024",
+        "depth": 0,
+        "kind": "reply",
+        "text": "```suggestion\r\nBasic usage\r\n```java\r\nvar query = \"ytmsearch:bla bla\";\r\nvar types = List.of(\r\n\tAudioSearchResult.Type.TRACK,\r\n\tAudioSearchResult.Type.PLAYLIST,\r\n\tAudioSearchResult.Type.ALBUM,\r\n\tAudioSearchResult.Type.ARTIST,\r\n\tAudioSearchResult.Type.TEXT\r\n);\r\n\r\nAudioSearchResult searchResult = searchManager.loadSearch(query, types);\r\n```",
+        "quote": [
+          "+```",
+          "+",
+          "+- query: String",
+          "+- types: Set of `AudioSearchResult.Type`"
+        ]
+      },
+      {
+        "version": "v1",
+        "who": "topi314",
+        "role": "maintainer",
+        "date": "16 Aug 2024",
+        "depth": 0,
+        "kind": "reply",
+        "text": "if you are gonna put that into backticks at least make it a valid class name\r\n```suggestion\r\nCreate new `SearchManager`\r\n```",
+        "quote": [
+          " ### Usage",
+          " ",
+          "-// TODO",
+          "+Create new `Search Manager`"
+        ]
+      },
+      {
+        "version": "v1",
+        "who": "topi314",
+        "role": "maintainer",
+        "date": "16 Aug 2024",
+        "depth": 0,
+        "kind": "reply",
+        "text": "I think you should still mention the need to register sources here\r\njust not with a code example including the creating of a source",
+        "quote": [
+          "-// TODO",
+          "+Create new `Search Manager`",
+          "+```java",
+          "+var searchManager = new SearchManager();"
+        ]
+      },
+      {
+        "version": "v1",
+        "who": "topi314",
+        "role": "maintainer",
+        "date": "17 Aug 2024",
+        "depth": 0,
+        "kind": "reply",
+        "text": "approved"
+      },
+      {
+        "version": "v1",
+        "who": "topi314",
+        "role": "maintainer",
+        "date": "17 Aug 2024",
+        "depth": 0,
+        "kind": "reply",
+        "text": "thanks"
       }
     ]
   }

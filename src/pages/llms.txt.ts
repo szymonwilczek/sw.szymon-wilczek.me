@@ -16,7 +16,7 @@ const PAGES: Array<[string, string, string]> = [
   [
     "Research",
     "/research/",
-    "Patches merged into Linux and Git, each with its message, versions and diff.",
+    "Patches merged upstream and issues resolved there, each patch with its message, versions and diff.",
   ],
   ["Contact", "/contact/", "E-mail and the GPG public key with its fingerprint."],
 ];

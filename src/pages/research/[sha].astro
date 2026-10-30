@@ -3,13 +3,17 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import Pill from "../../components/Pill.astro";
 import { threads } from "../../data/threads";
 import {
+  botName,
   dayMonthYear,
   githubUrl,
-  kernelOrgUrl,
-  loreUrl,
+  hostOf,
   name,
   patches,
-  syzbotUrl,
+  pullUrl,
+  rawPatchUrl,
+  repoUrl,
+  reports,
+  threadUrl,
   type Patch,
   type Trailer,
 } from "../../utils/research";
@@ -29,16 +33,6 @@ interface Props {
 
 const { patch, newer, older } = Astro.props;
 
-const AUTHOR = "Szymon Wilczek";
-const AUTHOR_MAIL = "swilczek.lx@gmail.com";
-const MAINTAINS: Record<string, string> = {
-  "Konstantin Komarov": "ntfs3",
-  "Johannes Berg": "wireless",
-  "Marc Kleine-Budde": "CAN",
-  "Hans Verkuil": "media",
-  "Guenter Roeck": "hwmon",
-  "Junio C Hamano": "Git",
-};
 const PEBBLES_PER_FILE = 8;
 const PEBBLES_TOTAL = 12;
 const BLOBS = [
@@ -47,36 +41,36 @@ const BLOBS = [
   "45% 55% 52% 48% / 50% 50% 55% 45%",
 ];
 
-const merged = patch.project === "git" ? "applied it" : "merged it";
+const MERGER = "maintainer · merged it";
 
+// what each trailer says about its person
 function signer(trailer: Trailer): { who: string; role: string; mono?: boolean } | undefined {
-  const who = name(trailer);
-  const fuzzer = who.startsWith("syzbot");
-  switch (trailer.key) {
-    case "Signed-off-by":
-      if (who === AUTHOR) return { who, role: "author" };
-      if (who === patch.by)
-        return { who, role: `${MAINTAINS[who] ?? "the"} maintainer · ${merged}` };
-      return { who, role: "signed it" };
-    case "Reported-by":
-      return fuzzer
-        ? { who: "syzbot", role: "reported it · the kernel fuzzer" }
-        : { who, role: "reported it" };
-    case "Tested-by":
-      return { who: fuzzer ? "syzbot" : who, role: "tested it" };
-    case "Reviewed-by":
-      return { who, role: "reviewed it" };
-    case "Acked-by":
-      return { who, role: "acked it" };
-    case "Fixes":
-      return { who: trailer.value.split(" (")[0], role: "the commit it fixes", mono: true };
+  if (trailer.key === "Fixes")
+    return { who: trailer.value.split(" (")[0], role: "the commit it fixes", mono: true };
+  if (!trailer.key.endsWith("-by")) return undefined;
+  const who = trailer.value.includes(" <") ? name(trailer) : botName(trailer);
+  if (trailer.key === "Signed-off-by") {
+    if (who === patch.author) return { who, role: "author" };
+    if (who === patch.by) return { who, role: MERGER };
+    return { who, role: "signed it" };
   }
+  return { who, role: `${trailer.key.slice(0, -"-by".length).toLowerCase()} it` };
 }
 
-const signers = patch.trailers.flatMap((trailer) => {
+// a pull request carries no trailers
+const signed = patch.trailers.flatMap((trailer) => {
   const row = signer(trailer);
   return row ? [{ key: trailer.key, ...row }] : [];
 });
+const signers = [
+  ...(signed.some((row) => row.who === patch.author)
+    ? []
+    : [{ key: "Author", who: patch.author, role: "author", mono: false }]),
+  ...signed,
+  ...(signed.some((row) => row.who === patch.by)
+    ? []
+    : [{ key: "Merged-by", who: patch.by, role: MERGER, mono: false }]),
+];
 
 const blocks = patch.prose.split(/\n{2,}/).map((text) => {
   const lines = text.split("\n");
@@ -102,19 +96,20 @@ function pebbles(additions: number, deletions: number, count: number) {
   }));
 }
 
-const repoName = patch.repo === "git/git" ? "git/git" : "torvalds/linux";
-const syzbot = syzbotUrl(patch);
-const elsewhere = [
-  { href: loreUrl(patch), text: "lore.kernel.org" },
-  ...(syzbot ? [{ href: syzbot, text: "syzbot report" }] : []),
-  { href: githubUrl(patch), text: "GitHub" },
-  { href: `${githubUrl(patch)}.patch`, text: "raw .patch" },
-];
 const thread = threads[patch.short];
 const versions = thread?.versions ?? [];
+const discussed = threadUrl(patch, versions[0]?.url);
+const pull = pullUrl(patch);
+const elsewhere = [
+  ...(discussed && discussed !== pull ? [{ href: discussed, text: hostOf(discussed) }] : []),
+  ...reports(patch).map((href) => ({ href, text: `report · ${hostOf(href)}` })),
+  ...(pull ? [{ href: pull, text: `pull request #${patch.pull}` }] : []),
+  { href: rawPatchUrl(patch), text: "raw .patch" },
+];
 const mergedVersion = versions.at(-1);
 const earlier = versions.slice(0, -1);
-const patchTag = mergedVersion ? `[PATCH ${mergedVersion.version}]` : "[PATCH]";
+const patchTag =
+  mergedVersion && earlier.length > 0 ? `[PATCH ${mergedVersion.version}]` : "[PATCH]";
 const INITIALS_LENGTH = 2;
 const initials = (who: string) =>
   who
@@ -129,7 +124,7 @@ const lagText =
 
 <BaseLayout
   title={patch.title}
-  description={`${patch.subject} · merged into ${patch.project === "git" ? "Git" : "Linux"} by ${patch.by}.`}
+  description={`${patch.subject} · merged into ${patch.repo} by ${patch.by}.`}
   breadcrumbs={[
     { name: "Research", url: "/research/" },
     { name: patch.title, url: `/research/${patch.short}/` },
@@ -137,20 +132,21 @@ const lagText =
 >
   <header class="patch-head">
     <p class="crumbs">
-      <a href="/research/">research</a> / {patch.project} / {patch.area} / {patch.short}
+      <a href="/research/">research</a> / {patch.repo} / {patch.area && `${patch.area} / `}
+      {patch.short}
     </p>
     <div class="title-row">
       <h1>{patch.title}</h1>
-      <Pill href={`https://github.com/${repoName}`} label={`${repoName} on GitHub`}>
-        {repoName}
+      <Pill href={repoUrl(patch.repo)} label={`${patch.repo} on GitHub`}>
+        {patch.repo}
       </Pill>
     </div>
     <p class="tags">
-      <Pill>{patch.area}</Pill>
+      {patch.area && <Pill>{patch.area}</Pill>}
       <span class="counts">
         <span class="plus">+{patch.additions}</span> <span class="minus">−{patch.deletions}</span>
       </span>
-      {patch.syzbot && <Pill tone="red">syzbot</Pill>}
+      {patch.bot && <Pill tone="red">{patch.bot}</Pill>}
     </p>
   </header>
 
@@ -194,7 +190,7 @@ const lagText =
           hidden
         >
           <p class="mail">
-            <span>From:</span> {AUTHOR} &lt;{AUTHOR_MAIL}&gt;
+            <span>From:</span> {patch.author} &lt;{patch.email}&gt;
             <br />
             <span>Date:</span> {version.sent}
             <br />
@@ -208,7 +204,7 @@ const lagText =
             </section>
           )}
           <a class="view" href={version.url}>
-            this version on lore.kernel.org →
+            this version on {hostOf(version.url)} →
           </a>
         </div>
       ))}
@@ -222,18 +218,28 @@ const lagText =
         data-shown-as={mergedVersion && `${mergedVersion.version}, the version that was merged`}
       >
         <p class="mail">
-          <span>From:</span> {AUTHOR} &lt;{AUTHOR_MAIL}&gt;
+          <span>From:</span> {patch.author} &lt;{patch.email}&gt;
           <br />
           <span>Date:</span> {dayMonthYear(patch.authored)}
           <br />
-          <span>Subject:</span> {patchTag} {patch.subject}
+          <span>Subject:</span> {pull ? patch.subject : `${patchTag} ${patch.subject}`}
           <br />
+          {pull && (
+            <>
+              <span>Pull request:</span> #{patch.pull}
+              <br />
+            </>
+          )}
           <span>Merged:</span> {dayMonthYear(patch.merged)}, by {patch.by}
         </p>
 
-        <div class="message">
-          {blocks.map((block) => (block.typed ? <pre>{block.text}</pre> : <p>{block.text}</p>))}
-        </div>
+        {patch.html ? (
+          <div class="message" set:html={patch.html} />
+        ) : (
+          <div class="message">
+            {blocks.map((block) => (block.typed ? <pre>{block.text}</pre> : <p>{block.text}</p>))}
+          </div>
+        )}
 
         <section class="block">
           <p class="label">signed, reported, fixes</p>
@@ -271,7 +277,7 @@ const lagText =
 
       {thread && thread.messages.length > 0 && (
         <section class="block discussion">
-          <p class="label">discussion · on the list</p>
+          <p class="label">discussion · {pull ? "on the pull request" : "on the list"}</p>
           {versions.map((version) => {
             const said = thread.messages.filter((message) => message.version === version.version);
             return (
@@ -289,7 +295,7 @@ const lagText =
                         {message.kind === "applied" && <span class="stamp">applied</span>}
                         <p class="said-head">
                           <span
-                            class:list={["badge", { mine: message.who === AUTHOR }]}
+                            class:list={["badge", { mine: message.role === "author" }]}
                             aria-hidden="true"
                           >
                             {initials(message.who)}
@@ -314,25 +320,17 @@ const lagText =
               )
             );
           })}
-          <a class="view" href={loreUrl(patch)}>
-            the whole thread on lore.kernel.org
-          </a>
+          {discussed && (
+            <a class="view" href={discussed}>
+              the whole thread on {hostOf(discussed)}
+            </a>
+          )}
         </section>
       )}
 
       <nav class="ends" aria-label="Other patches">
-        {newer ? (
-          <a href={`/research/${newer.short}/`}>
-            ← newer: {newer.area} {newer.title}
-          </a>
-        ) : (
-          <span />
-        )}
-        {older && (
-          <a href={`/research/${older.short}/`}>
-            older: {older.area} {older.title} →
-          </a>
-        )}
+        {newer ? <a href={`/research/${newer.short}/`}>← newer: {newer.subject}</a> : <span />}
+        {older && <a href={`/research/${older.short}/`}>older: {older.subject} →</a>}
       </nav>
     </article>
 
@@ -341,12 +339,12 @@ const lagText =
         <p class="label">commit</p>
         <p class="sha">{patch.short}</p>
         <p class="repo">
-          <Pill href={`https://github.com/${repoName}`} label={`${repoName} on GitHub`}>
-            {repoName}
+          <Pill href={repoUrl(patch.repo)} label={`${patch.repo} on GitHub`}>
+            {patch.repo}
           </Pill>
         </p>
-        <a class="view" href={kernelOrgUrl(patch)}>
-          git.kernel.org →
+        <a class="view" href={githubUrl(patch)}>
+          {hostOf(githubUrl(patch))} →
         </a>
       </div>
 
@@ -511,12 +509,26 @@ const lagText =
     color: var(--fg-dim);
   }
 
-  .message p {
+  .message :global(p),
+  .message :global(ul),
+  .message :global(ol) {
     margin: 0 0 1rem;
     font-size: 1.0625rem;
   }
 
-  .message pre {
+  .message :global(h1),
+  .message :global(h2),
+  .message :global(h3) {
+    margin: 1.5rem 0 0.5rem;
+    font-size: 1.0625rem;
+  }
+
+  .message :global(img) {
+    max-width: 100%;
+    height: auto;
+  }
+
+  .message :global(pre) {
     margin: 0 0 1rem;
     padding: 0.75rem 1rem;
     border-left: 2px solid var(--border);
