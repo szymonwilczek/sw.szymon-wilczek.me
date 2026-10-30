@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import CiteThis from "../../components/CiteThis.astro";
 import Divider from "../../components/Divider.astro";
 import KeptPaper from "../../components/KeptPaper.astro";
 import Seal from "../../components/Seal.astro";
@@ -84,6 +85,12 @@ const postImage = imageMatch ? imageMatch[1] : `/og/${slug}.png`;
 
     <div class="article-body">
       <div class="prose">{Content ? <Content /> : <div class="org-content" set:html={html} />}</div>
+
+      <CiteThis
+        title={post.data.title}
+        date={post.data.pubDate}
+        url={new URL(`/writings/${slug}/`, Astro.site).href}
+      />
 
       <Divider from={140} to={372} />
 

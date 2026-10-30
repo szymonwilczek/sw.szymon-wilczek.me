@@ -1,0 +1,144 @@
+---
+// How to cite an essay: BibTeX, APA, or a plain link.
+// Each sits in a <pre>, so the layout's code copy button comes with it.
+export interface Props {
+  title: string;
+  date: Date;
+  url: string;
+}
+
+const { title, date, url } = Astro.props;
+const host = new URL(url).host;
+const year = date.getFullYear();
+const monthDay = date.toLocaleDateString("en-US", { month: "long", day: "numeric" });
+const key = `wilczek${year}${title.split(/\W+/).find(Boolean)?.toLowerCase() ?? ""}`;
+
+const formats = [
+  {
+    id: "bibtex",
+    label: "BibTeX",
+    text: `@online{${key},
+  author  = {Wilczek, Szymon},
+  title   = {${title}},
+  year    = {${year}},
+  url     = {${url}},
+}`,
+  },
+  {
+    id: "apa",
+    label: "APA",
+    text: `Wilczek, S. (${year}, ${monthDay}). ${title}. ${host}. ${url}`,
+  },
+  { id: "link", label: "plain link", text: url },
+];
+---
+
+<section class="cite" aria-label="Cite this essay">
+  <p class="cite-label">cite this essay</p>
+  <div role="tablist" aria-label="Citation format" data-cite>
+    {formats.map((format, i) => (
+      <button
+        type="button"
+        role="tab"
+        id={`cite-tab-${format.id}`}
+        aria-controls={`cite-${format.id}`}
+        aria-selected={i === 0 ? "true" : "false"}
+        tabindex={i === 0 ? 0 : -1}
+      >
+        {format.label}
+      </button>
+    ))}
+  </div>
+  {formats.map((format, i) => (
+    <div
+      role="tabpanel"
+      id={`cite-${format.id}`}
+      aria-labelledby={`cite-tab-${format.id}`}
+      hidden={i !== 0}
+    >
+      <pre><code>{format.text}</code></pre>
+    </div>
+  ))}
+</section>
+
+<script>
+  for (const list of document.querySelectorAll<HTMLElement>("[data-cite]")) {
+    const tabs = [...list.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
+    const show = (chosen: HTMLButtonElement) => {
+      for (const tab of tabs) {
+        const on = tab === chosen;
+        tab.setAttribute("aria-selected", String(on));
+        tab.tabIndex = on ? 0 : -1;
+        const panel = document.getElementById(tab.getAttribute("aria-controls") ?? "");
+        if (panel) panel.hidden = !on;
+      }
+    };
+    list.addEventListener("click", (event) => {
+      const tab = (event.target as Element).closest<HTMLButtonElement>('[role="tab"]');
+      if (tab) show(tab);
+    });
+    list.addEventListener("keydown", (event) => {
+      const step = { ArrowRight: 1, ArrowLeft: -1 }[event.key];
+      if (!step) return;
+      const at = tabs.findIndex((tab) => tab.tabIndex === 0);
+      const next = tabs[(at + step + tabs.length) % tabs.length];
+      show(next);
+      next.focus();
+    });
+  }
+</script>
+
+<style>
+  .cite {
+    margin: 2.5rem 0;
+  }
+
+  .cite-label {
+    margin: 0 0 0.75rem;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--fg-dim);
+  }
+
+  [role="tablist"] {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  [role="tab"] {
+    min-height: 2.5rem;
+    padding: 0 0.875rem;
+    border: 1px dashed var(--border);
+    border-radius: 5px 8px 6px 9px;
+    background: transparent;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--fg-dim);
+    cursor: pointer;
+  }
+
+  [role="tab"][aria-selected="true"] {
+    border: 1.5px solid var(--cursor);
+    background: var(--paper);
+    color: var(--fg-main);
+  }
+
+  pre {
+    margin: 0;
+    padding: 1rem 1.25rem;
+    background: var(--paper);
+    font-size: 0.8125rem;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  @media print {
+    .cite {
+      display: none;
+    }
+  }
+</style>
