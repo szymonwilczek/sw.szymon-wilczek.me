@@ -46,27 +46,6 @@
     ]
   },
   {
-    "kind": "pull",
-    "repo": "lavalink-devs/youtube-source",
-    "sha": "34ee4c5f6b4608c19880ff62f80540c0048f537e",
-    "number": 231,
-    "author": "Szymon Wilczek",
-    "email": "swilczek.lx@gmail.com",
-    "message": "fix: update client version to 21.02.35",
-    "html": "<p dir=\"auto\">InnerTube answers every <code class=\"notranslate\">/player</code> request from the <code class=\"notranslate\">ANDROID</code> client with <code class=\"notranslate\">HTTP 400</code>. The client version it advertises, <code class=\"notranslate\">19.44.38</code>, is no longer accepted.</p>\n<p dir=\"auto\">Bumping it to <code class=\"notranslate\">21.02.35</code> (the version <code class=\"notranslate\">yt-dlp</code> currently sends) makes the endpoint respond normally again, with <code class=\"notranslate\">playabilityStatus OK</code> and a progressive format carrying a plain url, so no other change is needed to make the client usable.</p>\n<p dir=\"auto\">Verified against a public video, comparing the two versions with an otherwise identical payload:</p>\n<div class=\"snippet-clipboard-content notranslate position-relative overflow-auto\" data-snippet-clipboard-copy-content=\"clientVersion 19.44.38  -&gt;  HTTP 400\nclientVersion 21.02.35  -&gt;  HTTP 200, status OK, 1 progressive format with url\"><pre class=\"notranslate\"><code class=\"notranslate\">clientVersion 19.44.38  -&gt;  HTTP 400\nclientVersion 21.02.35  -&gt;  HTTP 200, status OK, 1 progressive format with url\n</code></pre></div>",
-    "authored": "2026-08-18T23:41:09Z",
-    "committed": "2026-08-19T00:44:49Z",
-    "committer": "devoxin",
-    "files": [
-      {
-        "name": "common/src/main/java/dev/lavalink/youtube/clients/Android.java",
-        "additions": 1,
-        "deletions": 1,
-        "patch": "@@ -12,7 +12,7 @@\n public class Android extends StreamingNonMusicClient {\n     private static final Logger log = LoggerFactory.getLogger(Android.class);\n \n-    public static String CLIENT_VERSION = \"19.44.38\";\n+    public static String CLIENT_VERSION = \"21.02.35\";\n     public static AndroidVersion ANDROID_VERSION = AndroidVersion.ANDROID_11;\n \n     public static ClientConfig BASE_CONFIG = new ClientConfig()"
-      }
-    ]
-  },
-  {
     "kind": "commit",
     "repo": "torvalds/linux",
     "sha": "0cd8450c257faa0cece0e0c43d3b55d1a389acc7",
@@ -344,25 +323,6 @@
   {
     "kind": "commit",
     "repo": "torvalds/linux",
-    "sha": "aba744a2e4b23c2040e335db35c141b95915efbd",
-    "author": "Szymon Wilczek",
-    "email": "swilczek.lx@gmail.com",
-    "message": "mailmap: update email address for Szymon Wilczek\n\nMap my old address <szymonwilczek@gmx.com> to my new address\n<swilczek.lx@gmail.com>.  The old account is no longer accessible due to\nprovider blocking access.\n\nLink: https://lkml.kernel.org/r/20251221151710.13747-1-swilczek.lx@gmail.com\nSigned-off-by: Szymon Wilczek <swilczek.lx@gmail.com>\nSigned-off-by: Andrew Morton <akpm@linux-foundation.org>",
-    "authored": "2025-12-21T15:17:10Z",
-    "committed": "2026-01-15T06:16:20Z",
-    "committer": "Andrew Morton",
-    "files": [
-      {
-        "name": ".mailmap",
-        "additions": 1,
-        "deletions": 0,
-        "patch": "@@ -794,6 +794,7 @@ Sven Eckelmann <sven@narfation.org> <sven.eckelmann@open-mesh.com>\n Sven Eckelmann <sven@narfation.org> <sven.eckelmann@openmesh.com>\n Sven Eckelmann <sven@narfation.org> <sven@open-mesh.com>\n Sven Peter <sven@kernel.org> <sven@svenpeter.dev>\n+Szymon Wilczek <swilczek.lx@gmail.com> <szymonwilczek@gmx.com>\n Takashi YOSHII <takashi.yoshii.zj@renesas.com>\n Tamizh Chelvam Raja <quic_tamizhr@quicinc.com> <tamizhr@codeaurora.org>\n Taniya Das <quic_tdas@quicinc.com> <tdas@codeaurora.org>"
-      }
-    ]
-  },
-  {
-    "kind": "commit",
-    "repo": "torvalds/linux",
     "sha": "a8333c8262aed2aedf608c18edd39cf5342680a7",
     "author": "Szymon Wilczek",
     "email": "szymonwilczek@gmx.com",
@@ -395,57 +355,6 @@
         "additions": 2,
         "deletions": 2,
         "patch": "@@ -900,8 +900,8 @@ static int acpi_power_meter_add(struct acpi_device *device)\n \tresource->sensors_valid = 0;\n \tresource->acpi_dev = device;\n \tmutex_init(&resource->lock);\n-\tstrcpy(acpi_device_name(device), ACPI_POWER_METER_DEVICE_NAME);\n-\tstrcpy(acpi_device_class(device), ACPI_POWER_METER_CLASS);\n+\tstrscpy(acpi_device_name(device), ACPI_POWER_METER_DEVICE_NAME);\n+\tstrscpy(acpi_device_class(device), ACPI_POWER_METER_CLASS);\n \tdevice->driver_data = resource;\n \n #if IS_REACHABLE(CONFIG_ACPI_IPMI)"
-      }
-    ]
-  },
-  {
-    "kind": "issue",
-    "repo": "topi314/LavaLyrics",
-    "number": 10,
-    "title": "Unauthorized access",
-    "authored": "2025-06-10T15:34:30Z",
-    "committed": "2025-06-11T18:31:41Z",
-    "committer": "Toπ"
-  },
-  {
-    "kind": "pull",
-    "repo": "topi314/LavaSrc",
-    "sha": "4d63e885791b5e328d17c395b1b64ae6e9977658",
-    "number": 209,
-    "author": "Szymon Wilczek",
-    "email": "kazikwilczek7@gmail.com",
-    "message": "Update LavaSearch and LavaLyrics implementation",
-    "html": "",
-    "authored": "2024-08-05T10:53:21Z",
-    "committed": "2024-08-16T23:41:24Z",
-    "committer": "Toπ",
-    "files": [
-      {
-        "name": "README.md",
-        "additions": 102,
-        "deletions": 4,
-        "patch": "@@ -89,9 +89,37 @@ To get a Spotify clientId & clientSecret you must go [here](https://developer.sp\n AudioPlayerManager playerManager = new DefaultAudioPlayerManager();\n \n // create a new SpotifySourceManager with the default providers, clientId, clientSecret, spDc, countryCode and AudioPlayerManager and register it\n-playerManager.registerSourceManager(new SpotifySourceManager(null, clientId, clientSecret, spDc, countryCode, playerManager));\n+var spotify = new SpotifySourceManager(clientId, clientSecret, spDc, countryCode, () -> playerManager, DefaultMirroringAudioTrackResolver);\n+playerManager.registerSourceManager(spotify);\n ```\n \n+#### LavaLyrics\n+<details>\n+<summary>Click to expand</summary>\n+\n+```java\n+// create new lyrics manager\n+var lyricsManager = new LyricsManager();\n+\n+// register source\n+lyricsManager.registerLyricsManager(spotify);\n+```\n+</details>\n+\n+#### LavaSearch\n+<details>\n+<summary>Click to expand</summary>\n+\n+```java\n+// create new search manager\n+var searchManager = new SearchManager();\n+\n+// register source\n+searchManager.registerSearchManager(spotify);\n+```\n+\n+</details>\n+\n <details>\n <summary>How to get sp dc cookie</summary>\n \n@@ -106,9 +134,23 @@ playerManager.registerSourceManager(new SpotifySourceManager(null, clientId, cli\n AudioPlayerManager playerManager = new DefaultAudioPlayerManager();\n \n // create a new AppleMusicSourceManager with the standard providers, apple music api token, countrycode and AudioPlayerManager and register it\n-playerManager.registerSourceManager(new AppleMusicSourceManager(null, mediaAPIToken , \"us\", playerManager));\n+var appleMusic = new AppleMusicSourceManager(null, mediaAPIToken , \"us\", playerManager);\n+playerManager.registerSourceManager(appleMusic);\n ```\n \n+#### LavaSearch\n+<details>\n+<summary>Click to expand</summary>\n+\n+```java\n+// create new search manager\n+var searchManager = new SearchManager();\n+\n+// register source\n+searchManager.registerSearchManager(appleMusic);\n+```\n+</details>\n+\n <details>\n <summary>How to get media api token without Apple developer account</summary>\n \n@@ -128,8 +170,36 @@ follow [this guide](https://developer.apple.com/help/account/configure-app-capab\n AudioPlayerManager playerManager = new DefaultAudioPlayerManager();\n \n // create a new DeezerSourceManager with the master decryption key and register it\n-playerManager.registerSourceManager(new DeezerSourceManager(\"...\");\n+\n+var deezer = new DeezerSourceManager(\"...\");\n+playerManager.registerSourceManager(deezer);\n+```\n+\n+#### LavaLyrics\n+<details>\n+<summary>Click to expand</summary>\n+\n+```java\n+// create new lyrics manager\n+var lyricsManager = new LyricsManager();\n+\n+// register source\n+lyricsManager.registerLyricsManager(deezer);\n ```\n+</details>\n+\n+#### LavaSearch\n+<details>\n+<summary>Click to expand</summary>\n+\n+```java\n+// create new search manager\n+var searchManager = new SearchManager();\n+\n+// register source\n+searchManager.registerSearchManager(deezer);\n+```\n+</details>\n \n #### Yandex Music\n \n@@ -166,8 +236,36 @@ Else you will only have access to podcasts.\n AudioPlayerManager playerManager = new DefaultAudioPlayerManager();\n \n // create a new YandexMusicSourceManager with the access token and register it\n-playerManager.registerSourceManager(new YandexMusicSourceManager(\"...\");\n+var yandex = new YandexMusicSourceManager(\"...\");\n+\n+playerManager.registerSourceManager(yandex);\n+```\n+\n+#### LavaLyrics\n+<details>\n+<summary>Click to expand</summary>\n+\n+```java\n+// create new lyrics manager\n+var lyricsManager = new LyricsManager();\n+\n+// register source\n+lyricsManager.registerLyricsManager(yandex);\n ```\n+</details>\n+\n+#### LavaSearch\n+<details>\n+<summary>Click to expand</summary>\n+\n+```java\n+// create new search manager\n+var searchManager = new SearchManager();\n+\n+// register source\n+searchManager.registerSearchManager(yandex);\n+```\n+</details>\n \n #### Flowery Text-to-Speech\n "
-      }
-    ]
-  },
-  {
-    "kind": "pull",
-    "repo": "topi314/LavaSearch",
-    "sha": "2edfc1bbe641bb4f51f589de0f2018eebeec370b",
-    "number": 7,
-    "author": "Szymon Wilczek",
-    "email": "kazikwilczek7@gmail.com",
-    "message": "Update Lavaplayer usage",
-    "html": "",
-    "authored": "2024-08-04T17:23:20Z",
-    "committed": "2024-08-17T16:11:10Z",
-    "committer": "Toπ",
-    "files": [
-      {
-        "name": "README.md",
-        "additions": 22,
-        "deletions": 1,
-        "patch": "@@ -69,7 +69,28 @@ dependencies {\n \n ### Usage\n \n-// TODO\n+Create new `SearchManager`\n+```java\n+var searchManager = new SearchManager();\n+\n+//register sources\n+searchManager.registerSearchManager(source);\n+```\n+\n+Basic usage\n+```java\n+var query = \"ytmsearch:bla bla\";\n+var types = List.of(\n+        AudioSearchResult.Type.TRACK,\n+        AudioSearchResult.Type.PLAYLIST,\n+        AudioSearchResult.Type.ALBUM,\n+        AudioSearchResult.Type.ARTIST,\n+        AudioSearchResult.Type.TEXT\n+);\n+\n+\n+AudioSearchResult searchResult = searchManager.loadSearch(query, types);\n+```\n \n ## Lavalink Usage\n "
       }
     ]
   }

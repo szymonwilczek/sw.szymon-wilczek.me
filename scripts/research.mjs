@@ -2,6 +2,10 @@
 // need in src/data/research.json, with the review threads in threads.json:
 //   npm run research              finds new work, keeps what is already saved
 //   npm run research -- --refresh fetches every saved item and thread again
+//
+// What I'd rather not show goes in src/data/research-skip.json:
+// "owner/repo" skips the whole repository, "owner/repo/<sha>" one commit,
+// "owner/repo#<number>" one pull request or issue.
 
 import { execFileSync } from "node:child_process";
 import { readFile, writeFile } from "node:fs/promises";
@@ -9,6 +13,7 @@ import { listThread, pullThread } from "./threads.mjs";
 
 const OUT = new URL("../src/data/research.json", import.meta.url);
 const THREADS = new URL("../src/data/threads.json", import.meta.url);
+const SKIP = new URL("../src/data/research-skip.json", import.meta.url);
 const API = "https://api.github.com/";
 const PAGE = 100;
 const SEARCH_PAGES = 3;
@@ -77,6 +82,17 @@ const saved = (await readJson(OUT, [])).map((item) => ({ kind: "commit", ...item
 const savedThreads = refresh ? {} : await readJson(THREADS, {});
 const keyOf = (item) => `${item.repo}#${item.sha ?? item.number}`;
 const kept = new Map(refresh ? [] : saved.map((item) => [keyOf(item), item]));
+
+const skips = (await readJson(SKIP, [])).map((entry) => entry.toLowerCase());
+function skipped({ repo, sha, number }) {
+  const own = repo.toLowerCase();
+  return skips.some((entry) => {
+    if (entry === own) return true;
+    if (number && entry === `${own}#${number}`) return true;
+    const prefix = entry.startsWith(`${own}/`) ? entry.slice(own.length + 1) : "";
+    return Boolean(sha && prefix) && sha.startsWith(prefix);
+  });
+}
 
 const repos = new Map();
 async function repoInfo(repo) {
@@ -202,6 +218,7 @@ for (const hits of bySubject.values()) {
 const commits = new Map();
 const since = new Date(Date.parse(oldest) - LOOKBACK_DAYS * DAY_MS || 0).toISOString();
 for (const repo of knownRepos) {
+  if (skipped({ repo })) continue;
   for (const email of emails) {
     const params = new URLSearchParams({ author: email, since, per_page: PAGE });
     for (const raw of await github(`repos/${repo}/commits?${params}`)) {
@@ -273,20 +290,21 @@ async function keepIssue(repo, issue) {
 }
 
 const items = [];
-const once = async (key, make) => items.push(kept.get(key) ?? (await make()));
+const once = async (found, make) => {
+  if (skipped(found) || !(await upstream(found.repo))) return;
+  items.push(kept.get(keyOf(found)) ?? (await make()));
+};
 
-for (const [sha, { repo }] of commits) {
-  if (await upstream(repo)) await once(`${repo}#${sha}`, () => keepCommit(repo, sha));
-}
+for (const [sha, { repo }] of commits) await once({ repo, sha }, () => keepCommit(repo, sha));
 for (const { repo, pull } of pulls) {
-  if (await upstream(repo))
-    await once(`${repo}#${pull.merge_commit_sha}`, () => keepPull(repo, pull));
+  const found = { repo, sha: pull.merge_commit_sha, number: pull.number };
+  await once(found, () => keepPull(repo, pull));
 }
 for (const { repo, issue } of issues) {
-  if (await upstream(repo)) await once(`${repo}#${issue.number}`, () => keepIssue(repo, issue));
+  await once({ repo, number: issue.number }, () => keepIssue(repo, issue));
 }
 for (const [key, item] of kept) {
-  if (!items.some((other) => keyOf(other) === key) && (await upstream(item.repo))) items.push(item);
+  if (!items.some((other) => keyOf(other) === key)) await once(item, () => item);
 }
 
 // the same patch carried by two upstreams
