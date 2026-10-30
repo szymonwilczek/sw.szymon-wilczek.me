@@ -6,11 +6,7 @@ import { writingSlug } from "../utils/format";
 
 const PAGES: Array<[string, string, string]> = [
   ["About", "/about/", "Biography, background, editors, and upstream contributions."],
-  [
-    "The years so far",
-    "/path/",
-    "CV as a timeline: studies, work, certificates, kernel patches; CV as a PDF.",
-  ],
+  ["CV", "/cv/", "Education, upstream work, experience and certificates; as a PDF too."],
   ["Projects", "/projects/", "Every open-source project with its language and repository."],
   ["Writings", "/writings/", "All essays, newest first, filterable by tag."],
   ["Photographs", "/photos/", "Photo albums from trips, each with EXIF data and SHA-256 sums."],
