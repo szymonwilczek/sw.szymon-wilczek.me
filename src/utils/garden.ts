@@ -22,7 +22,6 @@ export const SEALS: SealPage[] = [
   { glyph: "春", note: "first blossom", hint: "come back in spring" },
   { glyph: "夏", note: "when it is warm", hint: "come back in summer" },
   { glyph: "文", note: "write me a letter", hint: "the mailbox" },
-  { glyph: "石", note: "a ring in the sand", hint: "the smallest stone" },
   { glyph: "波", note: "a leaf across the water", hint: "no hands on the leaf" },
   { glyph: "寂", note: "an old word on the stone", hint: "wet the middle of the stone" },
   { glyph: "雀", note: "a guest who stayed", hint: "keep very still while you read" },

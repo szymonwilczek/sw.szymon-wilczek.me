@@ -16,7 +16,6 @@ const GLOSSARY: Record<string, [string, string, number, string?]> = {
   春: ["haru", "spring", 9],
   夏: ["natsu", "summer", 10],
   文: ["fumi", "a letter", 4],
-  石: ["ishi", "stone", 5],
   違: ["chigau", "to differ, to be wrong", 13],
   波: ["nami", "a wave", 8],
   寂: ["sabi", "quiet, the beauty of age", 11],
