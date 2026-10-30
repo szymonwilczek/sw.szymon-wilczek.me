@@ -21,7 +21,6 @@ const GLOSSARY: Record<string, [string, string, number, string?]> = {
   違: ["chigau", "to differ, to be wrong", 13],
   波: ["nami", "a wave", 8],
   寂: ["sabi", "quiet, the beauty of age", 11],
-  継: ["tsugu", "to join, to mend", 13],
   雀: ["suzume", "sparrow", 11],
   庭: ["niwa", "garden", 10],
 };

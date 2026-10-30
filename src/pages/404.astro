@@ -1,7 +1,6 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Seal from "../components/Seal.astro";
-import Kintsugi from "../components/Kintsugi.astro";
 ---
 
 <BaseLayout
@@ -39,16 +38,22 @@ import Kintsugi from "../components/Kintsugi.astro";
         If you were looking for a document or resource &dash; it does not exist at this address. It
         may have been moved, renamed, or permanently removed.
       </p>
-      <a class="back" href="/">
-        <svg width="44" height="20" viewBox="0 0 44 20" aria-hidden="true">
-          <path d="M42 11 C 30 9, 18 12, 4 10 M 12 3 L 3 10 L 12 17"></path>
-        </svg>
-        back to the garden
-      </a>
+      <div class="ways">
+        <a class="back" href="/">
+          <svg width="44" height="20" viewBox="0 0 44 20" aria-hidden="true">
+            <path d="M42 11 C 30 9, 18 12, 4 10 M 12 3 L 3 10 L 12 17"></path>
+          </svg>
+          back to the garden
+        </a>
+        <a class="back" href="/map/">
+          or find it on the map
+          <svg width="44" height="20" viewBox="0 0 44 20" aria-hidden="true">
+            <path d="M2 10 C 14 12, 26 9, 40 11 M 32 4 L 41 11 L 32 17"></path>
+          </svg>
+        </a>
+      </div>
     </div>
   </div>
-
-  <Kintsugi />
 </BaseLayout>
 
 <script>
@@ -142,6 +147,12 @@ import Kintsugi from "../components/Kintsugi.astro";
   .words p {
     margin: 1.5rem 0 0;
     color: var(--fg-dim);
+  }
+
+  .ways {
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: 2.5rem;
   }
 
   .back {
