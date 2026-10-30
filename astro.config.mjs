@@ -38,7 +38,6 @@ const DATA = {
   "/books/": ["src/data/books.org"],
   "/uses/": ["src/data/uses.ts", "src/utils/dogu.ts"],
   "/links/": ["src/data/links.ts"],
-  "/path/": ["src/data/years.ts"],
   "/roji/": ["src/data/pieces.json"],
 };
 
@@ -70,6 +69,9 @@ export default defineConfig({
   site: SITE,
   output: "static",
   trailingSlash: "always",
+  redirects: {
+    "/path/": "/cv/",
+  },
   compressHTML: true,
   prefetch: {
     prefetchAll: true,
