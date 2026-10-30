@@ -12,6 +12,7 @@ import Seal from "../components/Seal.astro";
 >
   <header class="about-head">
     <div>
+      <p class="kicker">about</p>
       <h1>About me</h1>
       <p class="lede">Student, and a writer of long notes.</p>
     </div>
@@ -32,7 +33,7 @@ import Seal from "../components/Seal.astro";
     </a>
   </header>
 
-  <Divider from={90} to={300} />
+  <Divider from={140} to={372} />
 
   <div class="sections">
     <section>
@@ -97,11 +98,7 @@ import Seal from "../components/Seal.astro";
   }
 
   .lede {
-    margin: 1.25rem 0 0;
-    font-size: 1.4375rem;
-    font-style: italic;
-    font-weight: 300;
-    line-height: 1.5;
+    margin: 0.875rem 0 0;
     color: var(--fg-dim);
   }
 
@@ -176,35 +173,29 @@ import Seal from "../components/Seal.astro";
   .sections {
     display: flex;
     flex-direction: column;
-    gap: 5.5rem;
+    gap: 2.125rem;
   }
 
   section {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem 3rem;
+    display: grid;
+    grid-template-columns: 4rem minmax(0, 1fr);
+    gap: 0 1.5rem;
   }
 
   .num {
-    flex: 0 0 7.5rem;
-    margin: 0;
-    font-size: 3.5rem;
-    font-weight: 300;
-    font-style: italic;
-    line-height: 1;
-    color: var(--cursor);
+    margin: 0.25rem 0 0;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: var(--fg-dim);
   }
 
   .body {
-    flex: 999 1 32.5rem;
     min-width: 0;
     max-width: 42.5rem;
   }
 
   .body h2 {
-    margin: 0 0 1.125rem;
-    font-size: 1.875rem;
-    line-height: 1.25;
+    margin: 0 0 0.875rem;
   }
 
   .body p {
@@ -216,21 +207,9 @@ import Seal from "../components/Seal.astro";
   }
 
   @media (max-width: 47.99em) {
-    .lede {
-      font-size: 1.25rem;
-    }
-
-    .sections {
-      gap: 3.5rem;
-    }
-
-    .num {
-      flex-basis: 100%;
-      font-size: 2.25rem;
-    }
-
-    .body h2 {
-      font-size: 1.5rem;
+    section {
+      grid-template-columns: 2.5rem minmax(0, 1fr);
+      gap: 0 0.75rem;
     }
   }
 </style>
