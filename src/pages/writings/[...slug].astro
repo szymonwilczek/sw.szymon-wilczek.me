@@ -26,6 +26,7 @@ const { slug } = Astro.params;
 const { html, Content } = await renderContentEntry(post);
 const stats = calculateReadingStats(post.body);
 const mends = post.filePath ? mendsOf(post.filePath) : [];
+const abstract = post.data.abstract ?? post.data.description;
 
 // First image from org body if present for rich OpenGraph preview,
 // otherwise fall back to the build-time generated OG card for this article
@@ -55,6 +56,12 @@ const postImage = imageMatch ? imageMatch[1] : `/og/${slug}.png`;
       <span>{stats.minutes} min read</span>
       {post.data.tags.length > 0 && <span class="article-tags">{post.data.tags.join(" · ")}</span>}
     </p>
+    {abstract && (
+      <div class="abstract">
+        <p class="abstract-label">abstract</p>
+        <p>{abstract}</p>
+      </div>
+    )}
   </header>
 
   <Divider from={140} to={372} />
@@ -190,6 +197,28 @@ const postImage = imageMatch ? imageMatch[1] : `/og/${slug}.png`;
     flex-wrap: wrap;
     gap: 0.25rem 1.25rem;
     margin: 1.5rem 0 0;
+  }
+
+  .abstract {
+    margin: 1.875rem 0 0;
+    padding: 0.25rem 0 0.25rem 1.25rem;
+    border-left: 2px solid var(--cursor);
+  }
+
+  .abstract p {
+    margin: 0;
+    font-size: 1.0625rem;
+    font-style: italic;
+    color: var(--fg-dim);
+  }
+
+  .abstract .abstract-label {
+    margin-bottom: 0.375rem;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    font-style: normal;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
   }
 
   .article-tags {

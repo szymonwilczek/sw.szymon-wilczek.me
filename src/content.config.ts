@@ -64,6 +64,7 @@ const writings = defineCollection({
     .object({
       title: z.string(),
       description: z.string().optional(),
+      abstract: z.string().optional(),
       pubDate: flexibleDate.optional(),
       date: flexibleDate.optional(),
       updatedDate: flexibleDate.optional(),
