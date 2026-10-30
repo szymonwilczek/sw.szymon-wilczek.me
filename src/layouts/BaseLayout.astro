@@ -364,9 +364,11 @@ const {
               var text = code.innerText || code.textContent || "";
               navigator.clipboard.writeText(text.trim()).then(function () {
                 button.setAttribute("aria-label", "Copied");
+                button.textContent = "Copied";
                 button.classList.add("is-copied");
                 setTimeout(function () {
                   button.setAttribute("aria-label", "Copy code to clipboard");
+                  button.textContent = "Copy";
                   button.classList.remove("is-copied");
                 }, 2000);
               });
