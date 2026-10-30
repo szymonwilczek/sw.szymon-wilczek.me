@@ -33,6 +33,10 @@ const abstract = post.data.abstract ?? post.data.description;
 // otherwise fall back to the build-time generated OG card for this article
 const imageMatch = post.body ? post.body.match(/\[\[(\/(?:assets|images)\/[^\]]+)\]\]/) : null;
 const postImage = imageMatch ? imageMatch[1] : `/og/${slug}.png`;
+
+// Google Scholar reads these: dates as YYYY/MM/DD, the author as "Last, First"
+const essayUrl = new URL(`/writings/${slug}/`, Astro.site).href;
+const scholarDate = (date: Date) => date.toISOString().slice(0, 10).replaceAll("-", "/");
 ---
 
 <BaseLayout
@@ -47,6 +51,19 @@ const postImage = imageMatch ? imageMatch[1] : `/og/${slug}.png`;
   imageAlt={post.data.title}
   wordCount={stats.words}
 >
+  <Fragment slot="head">
+    <meta name="citation_title" content={post.data.title} />
+    <meta name="citation_author" content="Wilczek, Szymon" />
+    <meta name="citation_publication_date" content={scholarDate(post.data.pubDate)} />
+    <meta name="citation_online_date" content={scholarDate(post.data.pubDate)} />
+    <meta name="citation_language" content="en" />
+    {post.data.tags.length > 0 && (
+      <meta name="citation_keywords" content={post.data.tags.join("; ")} />
+    )}
+    <meta name="citation_abstract_html_url" content={essayUrl} />
+    <meta name="citation_pdf_url" content={new URL(`/writings/${slug}.pdf`, Astro.site).href} />
+  </Fragment>
+
   <header class="article-head">
     <p class="crumbs" data-host={Astro.site!.host}>
       <a href="/writings/">writings</a> / {post.data.category.toLowerCase()}
@@ -86,11 +103,7 @@ const postImage = imageMatch ? imageMatch[1] : `/og/${slug}.png`;
     <div class="article-body">
       <div class="prose">{Content ? <Content /> : <div class="org-content" set:html={html} />}</div>
 
-      <CiteThis
-        title={post.data.title}
-        date={post.data.pubDate}
-        url={new URL(`/writings/${slug}/`, Astro.site).href}
-      />
+      <CiteThis title={post.data.title} date={post.data.pubDate} url={essayUrl} />
 
       <Divider from={140} to={372} />
 
