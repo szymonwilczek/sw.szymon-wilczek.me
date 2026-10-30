@@ -20,6 +20,7 @@ const GLOSSARY: Record<string, [string, string, number, string?]> = {
   波: ["nami", "a wave", 8],
   寂: ["sabi", "quiet, the beauty of age", 11],
   雀: ["suzume", "sparrow", 11],
+  修: ["shū", "to mend, to put right", 10],
   庭: ["niwa", "garden", 10],
 };
 

@@ -418,6 +418,18 @@ const lagText =
 </BaseLayout>
 
 <script>
+  import { earn } from "../../utils/garden";
+
+  const lastLine = [...document.querySelectorAll(".diff .line")].at(-1);
+  if (lastLine) {
+    const seen = new IntersectionObserver((entries) => {
+      if (!entries[0].isIntersecting) return;
+      seen.disconnect();
+      earn("修");
+    });
+    seen.observe(lastLine);
+  }
+
   // the version tabs: the merged one shows first, the others on a click
   for (const list of document.querySelectorAll<HTMLElement>("[data-versions]")) {
     const tabs = [...list.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
