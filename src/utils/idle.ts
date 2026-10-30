@@ -1,4 +1,4 @@
-const SIGNS = ["pointermove", "pointerdown", "keydown", "wheel", "scroll", "touchstart"];
+export const SIGNS = ["pointermove", "pointerdown", "keydown", "wheel", "scroll", "touchstart"];
 
 export function onIdle(wait: number, rest: () => void, stir: () => void) {
   let timer = 0;

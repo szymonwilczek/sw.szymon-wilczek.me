@@ -1,8 +1,7 @@
 // M-x zone
 
-import { onIdle } from "../utils/idle";
+import { SIGNS } from "../utils/idle";
 
-const WAIT = 6 * 60_000;
 const ROUND = 4000;
 const BLOCKS = "main :is(p, li, h1, h2, h3, h4, blockquote, figcaption, dt, dd, td)";
 const SKIP = "pre, code, kbd, svg, button, input, textarea, select, .zw";
@@ -113,6 +112,7 @@ function quit() {
   }, 550);
 }
 
-onIdle(WAIT, () => zone(), quit);
+// only when asked for with M-x zone; any touch ends it
+for (const type of SIGNS) addEventListener(type, quit, { passive: true });
 
 addEventListener("zone", () => window.setTimeout(() => zone(true), 400));
