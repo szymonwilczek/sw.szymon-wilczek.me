@@ -13,6 +13,7 @@ import { weeks } from "../utils/nenrin";
 import { LINKS } from "../data/links";
 import { YEARS } from "../data/years";
 import { stone } from "../utils/stones";
+import { patches } from "../utils/research";
 
 const writings = (await getCollection("writings"))
   .sort((former, latter) => former.data.pubDate.valueOf() - latter.data.pubDate.valueOf())
@@ -22,7 +23,6 @@ const writings = (await getCollection("writings"))
     minutes: calculateReadingStats(post.body).minutes,
   }));
 const albums = (await getAllAlbums()).slice().reverse();
-const files = await getCollection("files");
 const rings = weeks();
 const booksRead = readBooks().filter((book) => book.state === "read").length;
 
@@ -85,14 +85,9 @@ const PATHS = [
     via: ["/writings"],
   },
   {
-    to: "/files",
+    to: "/research",
     d: "M812 452 C 850 500, 830 560, 880 590 C 906 606, 920 620, 930 636",
     via: ["/writings", "/photos"],
-  },
-  {
-    to: "/files/verify",
-    d: "M156 846 C 230 812, 300 806, 380 800 C 520 792, 700 806, 806 784",
-    via: [],
   },
   { to: "/about", d: "M560 520 C 500 420, 420 320, 330 270", via: ["/writings", "/photos"] },
   { to: "/vault", d: "M820 330 C 860 280, 880 240, 892 208", via: ["/writings", "/photos"] },
@@ -168,8 +163,11 @@ const PLACES = [
     title: "books · the storehouse",
     sub: plural(booksRead, "book read", "books read"),
   },
-  { href: "/files/", title: "files · the shed", sub: plural(files.length, "file", "files") },
-  { href: "/files/verify/", title: "the bench", sub: "check a file against its tag" },
+  {
+    href: "/research/",
+    title: "research · the shed",
+    sub: plural(patches.length, "patch upstream", "patches upstream"),
+  },
   { href: "/vault/", title: "the well, sealed", sub: "vault" },
   {
     href: "/links/",
@@ -538,11 +536,11 @@ const place = (href: string) => PLACES.find((spot) => spot.href === href)!;
         </a>
 
         <a
-          href="/files/"
+          href="/research/"
           class="place"
-          data-area="/files"
-          data-title={place("/files/").title}
-          data-sub={place("/files/").sub}
+          data-area="/research"
+          data-title={place("/research/").title}
+          data-sub={place("/research/").sub}
         >
           <path
             class="line fill-alt"
@@ -573,34 +571,7 @@ const place = (href: string) => PLACES.find((spot) => spot.href === href)!;
             stroke-width="1"
           ></path>
           <text class="label" x="884" y="800" font-size="18">
-            files · the shed
-          </text>
-        </a>
-        <a
-          href="/files/verify/"
-          class="place"
-          data-area="/files/verify"
-          data-title={place("/files/verify/").title}
-          data-sub={place("/files/verify/").sub}
-        >
-          <rect class="hit" x="766" y="726" width="100" height="94"></rect>
-          <path
-            class="line"
-            d="M800 760 C 818 756, 840 758, 858 762 M 806 762 C 806 772, 808 778, 806 784 M 852 763 C 853 772, 851 778, 852 784"
-            stroke-width="2"
-          ></path>
-          <g transform="translate(830 744) rotate(-8)">
-            <path
-              class="fill-red"
-              d="M-9 -9 Q0 -11 9 -9 Q11 0 9 9 Q0 11 -9 9 Q-11 0 -9 -9 Z"
-              opacity="0.9"
-            ></path>
-            <text class="seal-glyph" x="0" y="5" text-anchor="middle" font-size="12">
-              合
-            </text>
-          </g>
-          <text class="label dim" x="764" y="822" font-size="14">
-            the bench · verify
+            research · the shed
           </text>
         </a>
 
