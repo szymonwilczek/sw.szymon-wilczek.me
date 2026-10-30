@@ -1,6 +1,6 @@
 import { onIdle } from "../utils/idle";
 
-const WAIT = 60_000;
+const WAIT = 3 * 60_000;
 
 const shade = document.createElement("div");
 shade.className = "dusk";

@@ -2,7 +2,7 @@
 
 import { onIdle } from "../utils/idle";
 
-const WAIT = 120_000;
+const WAIT = 6 * 60_000;
 const ROUND = 4000;
 const BLOCKS = "main :is(p, li, h1, h2, h3, h4, blockquote, figcaption, dt, dd, td)";
 const SKIP = "pre, code, kbd, svg, button, input, textarea, select, .zw";
