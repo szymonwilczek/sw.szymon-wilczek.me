@@ -8,6 +8,11 @@ const SQUARE_TILTS = [-1.5, 0.8, -0.4, 1.2, -0.9];
 const DECKLE =
   "M8 10 L120 4 L260 9 L410 3 L560 8 L700 2 L850 7 L992 4 L996 160 L990 330 L997 500 L991 680 L996 840 L993 994 L840 990 L690 996 L540 991 L380 997 L230 992 L90 996 L6 991 L9 820 L3 650 L8 480 L2 300 L7 140 Z";
 const PAGE_SHADOW_OFFSET = "translate(5 9)";
+const PLACEHOLDER = [
+  ";; This buffer is for text that is not saved, and for files",
+  ";; that will not stay. To keep anything, open the link",
+  ";; within a day; after that, it is garbage collected.",
+].join("\n");
 const TREMBLE_FREQUENCY = 0.9 / UNIT;
 const TREMBLE_SCALE = 0.12 * UNIT;
 const WASH_BLUR = 0.25 * UNIT;
@@ -46,6 +51,7 @@ const SHADOW_OFFSET = `translate(${0.25 * UNIT} ${0.45 * UNIT})`;
         name="text"
         maxlength={MAX_CHARS}
         rows="12"
+        placeholder={PLACEHOLDER}
         spellcheck="false"
         autocomplete="off"
         required
@@ -250,6 +256,11 @@ const SHADOW_OFFSET = `translate(${0.25 * UNIT} ${0.45 * UNIT})`;
     caret-color: var(--cursor);
     resize: vertical;
     outline: none;
+  }
+
+  .page textarea::placeholder {
+    color: var(--fg-dim);
+    opacity: 0.75;
   }
 
   .count {
