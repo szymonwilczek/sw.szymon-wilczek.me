@@ -90,7 +90,6 @@ const recent = [...essays, ...merged]
 <style>
   .hero {
     position: relative;
-    margin-top: 3.5rem;
   }
 
   .hero h1 {
@@ -203,6 +202,7 @@ const recent = [...essays, ...merged]
     display: grid;
     grid-template-columns: max-content minmax(0, 1fr);
     gap: 0.375rem 0.875rem;
+    align-items: baseline;
     margin: 0;
     font-size: 0.9375rem;
   }
@@ -303,10 +303,6 @@ const recent = [...essays, ...merged]
   }
 
   @media (max-width: 47.99em) {
-    .hero {
-      margin-top: 2rem;
-    }
-
     .home-grid {
       grid-template-columns: minmax(0, 1fr);
       gap: 2.5rem;
