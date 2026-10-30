@@ -15,7 +15,6 @@ export const SEALS: SealPage[] = [
   { glyph: "写", note: "walked an album", hint: "look at every photo" },
   { glyph: "秋", note: "came in autumn", hint: "when the maples turn" },
   { glyph: "北", note: "the garden is round", hint: "there is a map" },
-  { glyph: "封", note: "what the well keeps", hint: "something is sealed" },
   { glyph: "迷", note: "get properly lost", hint: "a page that isn't" },
   { glyph: "夜", note: "stay after dark", hint: "late, and a while" },
   { glyph: "冬", note: "snow on the crack", hint: "come back in winter" },
