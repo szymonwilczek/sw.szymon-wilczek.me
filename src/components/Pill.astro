@@ -1,0 +1,40 @@
+---
+// Small mono tag
+// With href it is a link, and label says where it leads.
+export interface Props {
+  href?: string;
+  label?: string;
+  tone?: "dim" | "red";
+}
+
+const { href, label, tone = "dim" } = Astro.props;
+const Tag = href ? "a" : "span";
+---
+
+<Tag class:list={["pill", tone]} href={href} aria-label={label}>
+  <slot />
+</Tag>
+
+<style>
+  .pill {
+    display: inline-block;
+    padding: 0 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    line-height: 1.25rem;
+    color: var(--fg-dim);
+    white-space: nowrap;
+    text-decoration: none;
+  }
+
+  .red {
+    color: var(--red);
+  }
+
+  a.pill:hover {
+    border-color: var(--cursor);
+    color: var(--fg-main);
+  }
+</style>
