@@ -42,6 +42,7 @@ const DROPS = ["0", "4rem", "0", "3rem", "0"];
             src={album.coverThumb || album.coverImage}
             alt=""
             loading={i < 2 ? "eager" : "lazy"}
+            fetchpriority={i === 0 ? "high" : undefined}
             decoding="async"
           />
           <div class="back">
