@@ -20,7 +20,6 @@ export interface ListMessage {
   depth: number;
   kind: "patch" | "reply" | "applied";
   subject?: string;
-  quote?: string[];
   text?: string;
 }
 

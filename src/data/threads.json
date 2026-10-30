@@ -32,12 +32,6 @@
         "date": "16 Oct 2026",
         "depth": 1,
         "kind": "reply",
-        "quote": [
-          "`write_index_as_tree()` locks the index with `LOCK_DIE_ON_ERROR`, even",
-          "though we only need the lock for the optional write-back of the updated",
-          "cache-tree. As the comment next to `write_locked_index()` already notes,",
-          "failing to write the index here is fine."
-        ],
         "text": "Giving a bit of context here would help the reader to figure out what\nthe function even does. Namely, it's two different things:\n\n  - It is responsible for turning the index into a tree object.\n\n  - And when that succeeds, it will also rewrite the index to populate\n    the cache tree extension.\n\nThe first part is what must succeed, but the second part is allowed to\nfail without impacting the result.\n\nThis is the symptom that you're trying to fix and should come first in\nyour message. Commit messages typically describe the problem first\n(this), then explain cause of  and context around that problem (your\nabove information about `write_index_as_tree()`) and then finally how\nyou solve the problem (the next paragraph).\n\nAn alternative would be to supply a locking timeout, but given that\nwriting the cache tree extension is entirely optional I agree that this\nhere is the better fix.\n\nNit: This may just be me, but this reverse notation always confuses me,\nand I think writing this as `fd > 0` feels more natural to many. Anyway,\nI don't feel strongly about this as this may very well be subjective.\n\nAnd here we explain that it's fine if we fail writing the cache tree\nextension. Makes sense.\n\nThe test looks obviously good to me. Nice that the issue is this easy to\nreproduce.\n\nThanks!\n\nPatrick"
       },
       {
@@ -57,12 +51,6 @@
         "date": "19 Oct 2026",
         "depth": 1,
         "kind": "reply",
-        "quote": [
-          "  - Reordered the commit message to describe the symptom first, then",
-          "    its cause, and the fix last, and explained the two things that",
-          "    `write_index_as_tree()` does (thanks, Patrick).",
-          "  - Spelled the lock check as `fd >= 0` instead of `0 <= fd`."
-        ],
         "text": "Thanks, I'm happy with this version.\n\nPatrick"
       }
     ]
@@ -159,12 +147,6 @@
         "date": "10 Aug 2026",
         "depth": 1,
         "kind": "reply",
-        "quote": [
-          "the added kfree() sees NULL, with no slab warnings over repeated module",
-          "load and unload cycles.",
-          "Fixes: 1a793caf6f69 (\"hwmon: (coretemp) Use dynamic allocated memory for core temp_data\")",
-          "Signed-off-by: Szymon Wilczek <swilczek.lx@gmail.com>"
-        ],
         "text": "Sashiko has reviewed this patch and found no issues. It looks great!"
       },
       {
@@ -174,12 +156,6 @@
         "date": "11 Aug 2026",
         "depth": 1,
         "kind": "applied",
-        "quote": [
-          "the added kfree() sees NULL, with no slab warnings over repeated module",
-          "load and unload cycles.",
-          "Fixes: 1a793caf6f69 (\"hwmon: (coretemp) Use dynamic allocated memory for core temp_data\")",
-          "Signed-off-by: Szymon Wilczek <swilczek.lx@gmail.com>"
-        ],
         "text": "Applied.\n\nThanks,\nGuenter"
       }
     ]
@@ -218,13 +194,7 @@
         "date": "5 May 2026",
         "depth": 0,
         "kind": "reply",
-        "text": "why is this type changed (just curious)\n\nalso in my experience if it's ready mark it ready so there's least possible friction to get your prs up and in",
-        "quote": [
-          "   return 1;",
-          " }",
-          " ",
-          "-static TSParser *parser_check(lua_State *L, uint16_t index)"
-        ]
+        "text": "why is this type changed (just curious)\n\nalso in my experience if it's ready mark it ready so there's least possible friction to get your prs up and in"
       },
       {
         "version": "v1",
@@ -233,13 +203,7 @@
         "date": "5 May 2026",
         "depth": 1,
         "kind": "reply",
-        "text": "I've changed type to `int` to align with the `luaL_checkudata` signature which takes an `int`. Small cleanup while I was touching the function.\r\n\r\nAlso, thanks for the advice, but I'm keeping is as draft on purpose; until @justinmk has a chance to look - we discussed the approach in #39411 and I want his sign-off before requesting the final review",
-        "quote": [
-          "   return 1;",
-          " }",
-          " ",
-          "-static TSParser *parser_check(lua_State *L, uint16_t index)"
-        ]
+        "text": "I've changed type to `int` to align with the `luaL_checkudata` signature which takes an `int`. Small cleanup while I was touching the function.\r\n\r\nAlso, thanks for the advice, but I'm keeping is as draft on purpose; until @justinmk has a chance to look - we discussed the approach in #39411 and I want his sign-off before requesting the final review"
       },
       {
         "version": "v1",
@@ -248,13 +212,7 @@
         "date": "5 May 2026",
         "depth": 1,
         "kind": "reply",
-        "text": "I usually ignore Draft PRs (that's why Draft is useful for reviewers :)",
-        "quote": [
-          "   return 1;",
-          " }",
-          " ",
-          "-static TSParser *parser_check(lua_State *L, uint16_t index)"
-        ]
+        "text": "I usually ignore Draft PRs (that's why Draft is useful for reviewers :)"
       },
       {
         "version": "v1",
@@ -281,13 +239,7 @@
         "date": "7 May 2026",
         "depth": 0,
         "kind": "reply",
-        "text": "don't think this needs to be changed? or change it to `Parser not found` ?\n\n \"has been deleted\" assumes that it existed, is that a valid assumption?",
-        "quote": [
-          " {",
-          "   TSParser **ud = luaL_checkudata(L, index, TS_META_PARSER);",
-          "-  luaL_argcheck(L, *ud, index, \"TSParser expected\");",
-          "+  luaL_argcheck(L, *ud != NULL, index, \"Parser has been deleted\");"
-        ]
+        "text": "don't think this needs to be changed? or change it to `Parser not found` ?\n\n \"has been deleted\" assumes that it existed, is that a valid assumption?"
       },
       {
         "version": "v1",
@@ -296,13 +248,7 @@
         "date": "7 May 2026",
         "depth": 0,
         "kind": "reply",
-        "text": "does it work if you change this to:\n\n\n```suggestion\n        parser:parse(nil, 'int x;', false)\n```\n\nand then use `t.pcall_err(exec_lua, function() ...)` in the test call, so we can assert the message more clearly",
-        "quote": [
-          "+        local ok, err = pcall(function()",
-          "+          parser:parse(nil, 'int x;', false)",
-          "+        end)",
-          "+        return { ok, tostring(err):find('Parser has been deleted', 1, true) ~= nil }"
-        ]
+        "text": "does it work if you change this to:\n\n\n```suggestion\n        parser:parse(nil, 'int x;', false)\n```\n\nand then use `t.pcall_err(exec_lua, function() ...)` in the test call, so we can assert the message more clearly"
       },
       {
         "version": "v1",
@@ -311,13 +257,7 @@
         "date": "7 May 2026",
         "depth": 1,
         "kind": "reply",
-        "text": "original message implied that the wrong type was passed, but after the GC fix this check also triggers when the parser was valid but ha since been finalized - the userdata is a TSParser, its just been deleted. I think \"Parser has been deleted\" tells the caller exactly what happened and why the operation failed. \"Parser not found\" sounds to me like a lookup failure rather than lifecycle issue. Happy to change the wording if you have a preference, though",
-        "quote": [
-          " {",
-          "   TSParser **ud = luaL_checkudata(L, index, TS_META_PARSER);",
-          "-  luaL_argcheck(L, *ud, index, \"TSParser expected\");",
-          "+  luaL_argcheck(L, *ud != NULL, index, \"Parser has been deleted\");"
-        ]
+        "text": "original message implied that the wrong type was passed, but after the GC fix this check also triggers when the parser was valid but ha since been finalized - the userdata is a TSParser, its just been deleted. I think \"Parser has been deleted\" tells the caller exactly what happened and why the operation failed. \"Parser not found\" sounds to me like a lookup failure rather than lifecycle issue. Happy to change the wording if you have a preference, though"
       },
       {
         "version": "v1",
@@ -326,13 +266,7 @@
         "date": "7 May 2026",
         "depth": 1,
         "kind": "reply",
-        "text": "if the message will make sense then no problem",
-        "quote": [
-          " {",
-          "   TSParser **ud = luaL_checkudata(L, index, TS_META_PARSER);",
-          "-  luaL_argcheck(L, *ud, index, \"TSParser expected\");",
-          "+  luaL_argcheck(L, *ud != NULL, index, \"Parser has been deleted\");"
-        ]
+        "text": "if the message will make sense then no problem"
       },
       {
         "version": "v1",
@@ -341,13 +275,7 @@
         "date": "7 May 2026",
         "depth": 1,
         "kind": "reply",
-        "text": "That's cleaner. I'll update the test. Will push the update shortly.",
-        "quote": [
-          "+        local ok, err = pcall(function()",
-          "+          parser:parse(nil, 'int x;', false)",
-          "+        end)",
-          "+        return { ok, tostring(err):find('Parser has been deleted', 1, true) ~= nil }"
-        ]
+        "text": "That's cleaner. I'll update the test. Will push the update shortly."
       },
       {
         "version": "v1",
@@ -356,13 +284,7 @@
         "date": "7 May 2026",
         "depth": 1,
         "kind": "reply",
-        "text": "I think we generally prefer the `uint*_t` types where we can use them.",
-        "quote": [
-          "   return 1;",
-          " }",
-          " ",
-          "-static TSParser *parser_check(lua_State *L, uint16_t index)"
-        ]
+        "text": "I think we generally prefer the `uint*_t` types where we can use them."
       },
       {
         "version": "v1",
@@ -400,13 +322,7 @@
         "date": "28 Apr 2026",
         "depth": 0,
         "kind": "reply",
-        "text": "Could use `os_realtime` introduced in #39425. Pro argument is that `v:starttime` and `v:lastactivity` then have the same precision, con argument is that it complicates the 1sec debounce for precision that probably isn't needed.",
-        "quote": [
-          "   cmdline_init();",
-          "   eval_init();          // init global variables",
-          "   set_vim_var_nr(VV_STARTTIME, (varnumber_T)os_hrtime());",
-          "+  set_vim_var_nr(VV_LASTACTIVITY, (varnumber_T)os_time());"
-        ]
+        "text": "Could use `os_realtime` introduced in #39425. Pro argument is that `v:starttime` and `v:lastactivity` then have the same precision, con argument is that it complicates the 1sec debounce for precision that probably isn't needed."
       },
       {
         "version": "v1",
@@ -415,13 +331,7 @@
         "date": "28 Apr 2026",
         "depth": 1,
         "kind": "reply",
-        "text": "Thanks for the suggestion, I've looked at #39425, but using `os_realtime()` here would actually break the throttling mechanism. It returns nanoseconds, meaning `now != last_activity` would evaluate to true on almost every single keystroke. To maintain 1-second throttle we'd have to introduce division by 1e9 in `vgetc()`, which is i think hot path.\r\n\r\nSince the goal is just to feed a UI picker with relative time (*3 minutes ago* etc), `os_time` gives us free & dirt-cheap 1 sec throttle OOTB. I think we should stick to the cheaper integer comparision here, but that just my suggestion",
-        "quote": [
-          "   cmdline_init();",
-          "   eval_init();          // init global variables",
-          "   set_vim_var_nr(VV_STARTTIME, (varnumber_T)os_hrtime());",
-          "+  set_vim_var_nr(VV_LASTACTIVITY, (varnumber_T)os_time());"
-        ]
+        "text": "Thanks for the suggestion, I've looked at #39425, but using `os_realtime()` here would actually break the throttling mechanism. It returns nanoseconds, meaning `now != last_activity` would evaluate to true on almost every single keystroke. To maintain 1-second throttle we'd have to introduce division by 1e9 in `vgetc()`, which is i think hot path.\r\n\r\nSince the goal is just to feed a UI picker with relative time (*3 minutes ago* etc), `os_time` gives us free & dirt-cheap 1 sec throttle OOTB. I think we should stick to the cheaper integer comparision here, but that just my suggestion"
       },
       {
         "version": "v1",
@@ -430,13 +340,7 @@
         "date": "28 Apr 2026",
         "depth": 0,
         "kind": "reply",
-        "text": "`current_ui` is a similar concept, set in `input_enqueue` , any reason not to do this there also?  https://github.com/neovim/neovim/blob/72bc6c5801867e8f99a87737a64c1713ceac1e01/src/nvim/os/input.c#L275-L277",
-        "quote": [
-          "+    static Timestamp last_activity = 0;",
-          "+    Timestamp now = os_time();",
-          "+    if (now != last_activity) {",
-          "+      last_activity = now;"
-        ]
+        "text": "`current_ui` is a similar concept, set in `input_enqueue` , any reason not to do this there also?  https://github.com/neovim/neovim/blob/72bc6c5801867e8f99a87737a64c1713ceac1e01/src/nvim/os/input.c#L275-L277"
       },
       {
         "version": "v1",
@@ -445,13 +349,7 @@
         "date": "28 Apr 2026",
         "depth": 1,
         "kind": "reply",
-        "text": "Hmm, good point.\r\n\r\n`input_enqueue` is external I/O boundary, called directly from `nvim_input` (so TUI keystrokes and RPC-driven input both flow through it). `KeyTyped` in `vgetc()`, on the other hand, is only set when the key came from a real user interaction, not from mappings or macros.\r\n\r\nIf we move this to `input_enqueue`, a headless rpc plugin calling `nvim_input` would continuously update `v:lastactivity`, which might make it unreliable as a *is the human actually at the keyboard* signal. But maybe any external UI activity is exactly what we want to count here?\r\n\r\nI can move the logic to `input_enqueue`, or just add a comment to `vgetc()` clarifying my intent. Let me know what would you prefer for this.",
-        "quote": [
-          "+    static Timestamp last_activity = 0;",
-          "+    Timestamp now = os_time();",
-          "+    if (now != last_activity) {",
-          "+      last_activity = now;"
-        ]
+        "text": "Hmm, good point.\r\n\r\n`input_enqueue` is external I/O boundary, called directly from `nvim_input` (so TUI keystrokes and RPC-driven input both flow through it). `KeyTyped` in `vgetc()`, on the other hand, is only set when the key came from a real user interaction, not from mappings or macros.\r\n\r\nIf we move this to `input_enqueue`, a headless rpc plugin calling `nvim_input` would continuously update `v:lastactivity`, which might make it unreliable as a *is the human actually at the keyboard* signal. But maybe any external UI activity is exactly what we want to count here?\r\n\r\nI can move the logic to `input_enqueue`, or just add a comment to `vgetc()` clarifying my intent. Let me know what would you prefer for this."
       },
       {
         "version": "v1",
@@ -460,13 +358,7 @@
         "date": "28 Apr 2026",
         "depth": 1,
         "kind": "reply",
-        "text": "All keys sent by `input_enqueue()` have `KeyTyped`, so there is no change in intent.\r\n\r\nActually checking at `input_enqueue()` is better here. If a key typed by the user triggers a mapping, `KeyTyped` isn't set, but the user indeed has typed a key.",
-        "quote": [
-          "+    static Timestamp last_activity = 0;",
-          "+    Timestamp now = os_time();",
-          "+    if (now != last_activity) {",
-          "+      last_activity = now;"
-        ]
+        "text": "All keys sent by `input_enqueue()` have `KeyTyped`, so there is no change in intent.\r\n\r\nActually checking at `input_enqueue()` is better here. If a key typed by the user triggers a mapping, `KeyTyped` isn't set, but the user indeed has typed a key."
       },
       {
         "version": "v1",
@@ -475,13 +367,7 @@
         "date": "28 Apr 2026",
         "depth": 1,
         "kind": "reply",
-        "text": "Thanks, then my reasoning about filtering out rpc input is no accurate. In that case, is there a meaningful difference between the two locations from your perspective, or would you prefer that I move this to `input_enqueue`?\r\n\r\n*Edit*: I saw zeertzjq edit, thanks, that clarifies it. I'll move it to `input_enqueue()`",
-        "quote": [
-          "+    static Timestamp last_activity = 0;",
-          "+    Timestamp now = os_time();",
-          "+    if (now != last_activity) {",
-          "+      last_activity = now;"
-        ]
+        "text": "Thanks, then my reasoning about filtering out rpc input is no accurate. In that case, is there a meaningful difference between the two locations from your perspective, or would you prefer that I move this to `input_enqueue`?\r\n\r\n*Edit*: I saw zeertzjq edit, thanks, that clarifies it. I'll move it to `input_enqueue()`"
       },
       {
         "version": "v1",
@@ -490,13 +376,7 @@
         "date": "28 Apr 2026",
         "depth": 1,
         "kind": "reply",
-        "text": "> If we move this to `input_enqueue`, a headless rpc plugin calling `nvim_input` would continuously update `v:lastactivity`, which might make it unreliable as a _is the human actually at the keyboard_ signal.\r\n\r\n`nvim_input` is \"human\" input, by definition. That is what all UIs use.",
-        "quote": [
-          "+    static Timestamp last_activity = 0;",
-          "+    Timestamp now = os_time();",
-          "+    if (now != last_activity) {",
-          "+      last_activity = now;"
-        ]
+        "text": "> If we move this to `input_enqueue`, a headless rpc plugin calling `nvim_input` would continuously update `v:lastactivity`, which might make it unreliable as a _is the human actually at the keyboard_ signal.\r\n\r\n`nvim_input` is \"human\" input, by definition. That is what all UIs use."
       },
       {
         "version": "v1",
@@ -505,13 +385,7 @@
         "date": "28 Apr 2026",
         "depth": 0,
         "kind": "reply",
-        "text": "hmm, maybe `VV_LASTACTIVITY` should not be set here, i.e. it should be `v:null` or `0`. Only actual user input should set it?\r\n\r\nidk if it matters, but it's kind of weird that with the current impl, it's not easy to compare `v:starttime` to `v:lastactivity`. however, based on https://github.com/neovim/neovim/pull/39423#discussion_r3153636004 it sounds like we may have to live with that.",
-        "quote": [
-          "   cmdline_init();",
-          "   eval_init();          // init global variables",
-          "   set_vim_var_nr(VV_STARTTIME, (varnumber_T)os_realtime());",
-          "+  set_vim_var_nr(VV_LASTACTIVITY, (varnumber_T)os_time());"
-        ]
+        "text": "hmm, maybe `VV_LASTACTIVITY` should not be set here, i.e. it should be `v:null` or `0`. Only actual user input should set it?\r\n\r\nidk if it matters, but it's kind of weird that with the current impl, it's not easy to compare `v:starttime` to `v:lastactivity`. however, based on https://github.com/neovim/neovim/pull/39423#discussion_r3153636004 it sounds like we may have to live with that."
       },
       {
         "version": "v1",
@@ -520,13 +394,7 @@
         "date": "28 Apr 2026",
         "depth": 1,
         "kind": "reply",
-        "text": "My motivation was to avoid `nil`/null becks on the user side - pickers can always do `os.time() - v:lastactivity` without guarding. But if the intent is *last user input*, then `0` or `v:null` is more honest. Happy to change it either way",
-        "quote": [
-          "   cmdline_init();",
-          "   eval_init();          // init global variables",
-          "   set_vim_var_nr(VV_STARTTIME, (varnumber_T)os_realtime());",
-          "+  set_vim_var_nr(VV_LASTACTIVITY, (varnumber_T)os_time());"
-        ]
+        "text": "My motivation was to avoid `nil`/null becks on the user side - pickers can always do `os.time() - v:lastactivity` without guarding. But if the intent is *last user input*, then `0` or `v:null` is more honest. Happy to change it either way"
       },
       {
         "version": "v1",
@@ -535,13 +403,7 @@
         "date": "28 Apr 2026",
         "depth": 1,
         "kind": "reply",
-        "text": "that's a good thought, but it is probably useful to be able to check that \"there was no user activity since startup\", right? so need some way to do that. \r\n\r\nif set to \"epoch time\", or zero, then `os.time() - v:lastactivity` still works",
-        "quote": [
-          "   cmdline_init();",
-          "   eval_init();          // init global variables",
-          "   set_vim_var_nr(VV_STARTTIME, (varnumber_T)os_realtime());",
-          "+  set_vim_var_nr(VV_LASTACTIVITY, (varnumber_T)os_time());"
-        ]
+        "text": "that's a good thought, but it is probably useful to be able to check that \"there was no user activity since startup\", right? so need some way to do that. \r\n\r\nif set to \"epoch time\", or zero, then `os.time() - v:lastactivity` still works"
       },
       {
         "version": "v1",
@@ -550,13 +412,7 @@
         "date": "28 Apr 2026",
         "depth": 1,
         "kind": "reply",
-        "text": "We could do `(now >> 30) != (last_activity >> 30)` which should still be fast and gives us a ~1.07s throttle if we do want `v:starttime` and `v:lastactivity` to be comparable.\r\n\r\n`v:lastactivity` should then probably be initialized to `v:starttime` instead of a separate call though.",
-        "quote": [
-          "   cmdline_init();",
-          "   eval_init();          // init global variables",
-          "   set_vim_var_nr(VV_STARTTIME, (varnumber_T)os_realtime());",
-          "+  set_vim_var_nr(VV_LASTACTIVITY, (varnumber_T)os_time());"
-        ]
+        "text": "We could do `(now >> 30) != (last_activity >> 30)` which should still be fast and gives us a ~1.07s throttle if we do want `v:starttime` and `v:lastactivity` to be comparable.\r\n\r\n`v:lastactivity` should then probably be initialized to `v:starttime` instead of a separate call though."
       },
       {
         "version": "v1",
@@ -565,13 +421,7 @@
         "date": "28 Apr 2026",
         "depth": 1,
         "kind": "reply",
-        "text": "> that's a good thought, but it is probably useful to be able to check that \"there was no user activity since startup\", right? so need some way to do that. \r\n> \r\n> \r\n> \r\n> if set to \"epoch time\", or zero, then `os.time() - v:lastactivity` still works\r\n\r\nMakes sense, I’ll initialize to `0` then.",
-        "quote": [
-          "   cmdline_init();",
-          "   eval_init();          // init global variables",
-          "   set_vim_var_nr(VV_STARTTIME, (varnumber_T)os_realtime());",
-          "+  set_vim_var_nr(VV_LASTACTIVITY, (varnumber_T)os_time());"
-        ]
+        "text": "> that's a good thought, but it is probably useful to be able to check that \"there was no user activity since startup\", right? so need some way to do that. \r\n> \r\n> \r\n> \r\n> if set to \"epoch time\", or zero, then `os.time() - v:lastactivity` still works\r\n\r\nMakes sense, I’ll initialize to `0` then."
       },
       {
         "version": "v1",
@@ -580,13 +430,7 @@
         "date": "28 Apr 2026",
         "depth": 1,
         "kind": "reply",
-        "text": "> We could do `(now >> 30) != (last_activity >> 30)` which should still be fast and gives us a ~1.07s throttle if we do want `v:starttime` and `v:lastactivity` to be comparable.\n> \n> \n> \n> `v:lastactivity` should then probably be initialized to `v:starttime` instead of a separate call though.\n\nBit-shift trick is clever, but I’d rather keep `input_enqueue` readable. The 1-second throttle via `os_time()` is intentional and sufficient for a UI picker. As for initializing to `v:starttime` - they intentionally use different clocks (`os_realtime` nanoseconds vs `os_time seconds`), so mixing them would require division anyway, which kind of defeats the simplicity argument.",
-        "quote": [
-          "   cmdline_init();",
-          "   eval_init();          // init global variables",
-          "   set_vim_var_nr(VV_STARTTIME, (varnumber_T)os_realtime());",
-          "+  set_vim_var_nr(VV_LASTACTIVITY, (varnumber_T)os_time());"
-        ]
+        "text": "> We could do `(now >> 30) != (last_activity >> 30)` which should still be fast and gives us a ~1.07s throttle if we do want `v:starttime` and `v:lastactivity` to be comparable.\n> \n> \n> \n> `v:lastactivity` should then probably be initialized to `v:starttime` instead of a separate call though.\n\nBit-shift trick is clever, but I’d rather keep `input_enqueue` readable. The 1-second throttle via `os_time()` is intentional and sufficient for a UI picker. As for initializing to `v:starttime` - they intentionally use different clocks (`os_realtime` nanoseconds vs `os_time seconds`), so mixing them would require division anyway, which kind of defeats the simplicity argument."
       },
       {
         "version": "v1",
@@ -604,13 +448,7 @@
         "date": "6 May 2026",
         "depth": 1,
         "kind": "reply",
-        "text": "> nanoseconds, meaning `now != last_activity` would evaluate to true on almost every single keystroke. \r\n\r\nI'm confused. Even if the granularity is \"seconds\", `now == last` is not a good way to throttle, you still should compare `now - last >= 1 second`.\r\n\r\n> To maintain 1-second throttle we'd have to introduce division by 1e9 in `vgetc()`, which is i think hot path.\r\n\r\ninteger division is nothing compared to the rest of `vgetc`. no performance impact.\r\n\r\nSo I don't think there is any reason not to use `os_realtime`. Having different granularities for `v:lastactivity` and `v:starttime` is a UX cost with negligible benefit.",
-        "quote": [
-          "   cmdline_init();",
-          "   eval_init();          // init global variables",
-          "   set_vim_var_nr(VV_STARTTIME, (varnumber_T)os_hrtime());",
-          "+  set_vim_var_nr(VV_LASTACTIVITY, (varnumber_T)os_time());"
-        ]
+        "text": "> nanoseconds, meaning `now != last_activity` would evaluate to true on almost every single keystroke. \r\n\r\nI'm confused. Even if the granularity is \"seconds\", `now == last` is not a good way to throttle, you still should compare `now - last >= 1 second`.\r\n\r\n> To maintain 1-second throttle we'd have to introduce division by 1e9 in `vgetc()`, which is i think hot path.\r\n\r\ninteger division is nothing compared to the rest of `vgetc`. no performance impact.\r\n\r\nSo I don't think there is any reason not to use `os_realtime`. Having different granularities for `v:lastactivity` and `v:starttime` is a UX cost with negligible benefit."
       },
       {
         "version": "v1",
@@ -619,13 +457,7 @@
         "date": "6 May 2026",
         "depth": 1,
         "kind": "reply",
-        "text": "Hmm, looking at it after some time: You're right on both points. I'll switch to `os_realtime()` and use `now - last >= 1e9` for the throttle. Will update the PR in some time.",
-        "quote": [
-          "   cmdline_init();",
-          "   eval_init();          // init global variables",
-          "   set_vim_var_nr(VV_STARTTIME, (varnumber_T)os_hrtime());",
-          "+  set_vim_var_nr(VV_LASTACTIVITY, (varnumber_T)os_time());"
-        ]
+        "text": "Hmm, looking at it after some time: You're right on both points. I'll switch to `os_realtime()` and use `now - last >= 1e9` for the throttle. Will update the PR in some time."
       },
       {
         "version": "v1",
@@ -634,13 +466,7 @@
         "date": "6 May 2026",
         "depth": 0,
         "kind": "reply",
-        "text": "maybe `v:useractivity` expresses the semantics better?",
-        "quote": [
-          "   VV(VV_VIRTNUM,          \"virtnum\",          VAR_NUMBER, VV_RO),",
-          "   VV(VV_STARTTIME,        \"starttime\",        VAR_NUMBER, VV_RO),",
-          "   VV(VV_EXITREASON,       \"exitreason\",       VAR_STRING, VV_RO),",
-          "+  VV(VV_LASTACTIVITY,     \"lastactivity\",     VAR_NUMBER, VV_RO),"
-        ]
+        "text": "maybe `v:useractivity` expresses the semantics better?"
       },
       {
         "version": "v1",
@@ -649,13 +475,7 @@
         "date": "6 May 2026",
         "depth": 0,
         "kind": "reply",
-        "text": "why does this care about `now != last` ? it should just always update.\n\n    set_vim_var_nr(VV_LASTACTIVITY, (varnumber_T)os_realtime);\n\nif we really want to avoid unnecessary operations, we could set a global,\n\n    last_activity = os_realtime(..)\n\n and only update `VV_LASTACTIVITY` *when* `v:lastactivity` is actually *requested* from user code. I'm not sure if there's precedent for that, but AI could probably sketch something. It may require adding a special-case to `get_vim_var_nr`, or perhaps introducing a special function analogous to `set_vcount` (except for the \"get\" case: `get_vlastactivity`)",
-        "quote": [
-          "+    Timestamp now = os_time();",
-          "+    if (now != last_activity) {",
-          "+      last_activity = now;",
-          "+      set_vim_var_nr(VV_LASTACTIVITY, (varnumber_T)now);"
-        ]
+        "text": "why does this care about `now != last` ? it should just always update.\n\n    set_vim_var_nr(VV_LASTACTIVITY, (varnumber_T)os_realtime);\n\nif we really want to avoid unnecessary operations, we could set a global,\n\n    last_activity = os_realtime(..)\n\n and only update `VV_LASTACTIVITY` *when* `v:lastactivity` is actually *requested* from user code. I'm not sure if there's precedent for that, but AI could probably sketch something. It may require adding a special-case to `get_vim_var_nr`, or perhaps introducing a special function analogous to `set_vcount` (except for the \"get\" case: `get_vlastactivity`)"
       },
       {
         "version": "v1",
@@ -664,13 +484,7 @@
         "date": "7 May 2026",
         "depth": 0,
         "kind": "reply",
-        "text": "news doesn't need to document every little detail. it's intended to surface interesting changes. the full docs are linked. thus, the abbreviated version this is overwriting is preferred.",
-        "quote": [
-          "+  |serverlist()| `info=true` for activity-aware pickers.",
-          "+• |serverlist()| accepts a new `info` option that returns a list of dicts",
-          "+  with `addr`, `pid`, `own` and `useractivity` for each server (own + peers),",
-          "+  enabling pickers like the future `:connect` host selector."
-        ]
+        "text": "news doesn't need to document every little detail. it's intended to surface interesting changes. the full docs are linked. thus, the abbreviated version this is overwriting is preferred."
       },
       {
         "version": "v1",
@@ -679,13 +493,7 @@
         "date": "7 May 2026",
         "depth": 0,
         "kind": "reply",
-        "text": "sorry for the churn, can we name it `v:useractive`",
-        "quote": [
-          " • |v:exitreason| is set before |QuitPre|.",
-          " • |v:starttime| is the process start time (nanoseconds since UNIX epoch).",
-          "-• |serverlist()| with `info=true` returns details for each server (own + peers).",
-          "+• |v:useractivity| is a nanosecond timestamp (same precision as |v:starttime|)"
-        ]
+        "text": "sorry for the churn, can we name it `v:useractive`"
       },
       {
         "version": "v1",
@@ -694,13 +502,7 @@
         "date": "7 May 2026",
         "depth": 1,
         "kind": "reply",
-        "text": "Sure thing, no problem",
-        "quote": [
-          " • |v:exitreason| is set before |QuitPre|.",
-          " • |v:starttime| is the process start time (nanoseconds since UNIX epoch).",
-          "-• |serverlist()| with `info=true` returns details for each server (own + peers).",
-          "+• |v:useractivity| is a nanosecond timestamp (same precision as |v:starttime|)"
-        ]
+        "text": "Sure thing, no problem"
       },
       {
         "version": "v1",
@@ -709,13 +511,7 @@
         "date": "7 May 2026",
         "depth": 0,
         "kind": "reply",
-        "text": "in this context we do not need to repeat the exact same name. here, just `active` is meaningful. also, the doc is over-explaining. since we link to `|v:useractive|` there is no need to repeat details already mentioned there.\n\n```suggestion\n\t\t            active  (number?) |v:useractive|, or |v:null| if peer is unreachable.\n```",
-        "quote": [
-          "+\t\t                                    peer is unreachable.",
-          "+\t\t            own           (bool)    Whether this server belongs to",
-          "+\t\t                                    the current Nvim instance.",
-          "+\t\t            useractivity  (number?) Nanoseconds since epoch of the"
-        ]
+        "text": "in this context we do not need to repeat the exact same name. here, just `active` is meaningful. also, the doc is over-explaining. since we link to `|v:useractive|` there is no need to repeat details already mentioned there.\n\n```suggestion\n\t\t            active  (number?) |v:useractive|, or |v:null| if peer is unreachable.\n```"
       },
       {
         "version": "v1",
@@ -724,13 +520,7 @@
         "date": "7 May 2026",
         "depth": 0,
         "kind": "reply",
-        "text": "i'm kind of wondering why we would return anything if the peer is unreachable. why is it in the list at all?",
-        "quote": [
-          "+\t\t            addr          (string)  Server address.",
-          "+\t\t            pid           (number?) PID of the Nvim process owning",
-          "+\t\t                                    the server, or |v:null| if the",
-          "+\t\t                                    peer is unreachable."
-        ]
+        "text": "i'm kind of wondering why we would return anything if the peer is unreachable. why is it in the list at all?"
       },
       {
         "version": "v1",
@@ -739,13 +529,7 @@
         "date": "7 May 2026",
         "depth": 0,
         "kind": "reply",
-        "text": "this is irrelevant\n```suggestion\n```",
-        "quote": [
-          "+\t\tInitialized to 0 (no user activity since startup).",
-          "+",
-          "+\t\tUseful with |serverlist()| `info=true` to render a \"last active\"",
-          "+\t\tcolumn in pickers like |:connect|."
-        ]
+        "text": "this is irrelevant\n```suggestion\n```"
       },
       {
         "version": "v1",
@@ -754,13 +538,7 @@
         "date": "7 May 2026",
         "depth": 0,
         "kind": "reply",
-        "text": "this is a nonsense way to explain this.\n```suggestion\n\t\tTimestamp indicating the most recent user activity.\n\t\tSame precision as |v:starttime|.\n```",
-        "quote": [
-          " ",
-          "+\t\t\t\t*v:useractivity* *useractivity-variable*",
-          "+v:useractivity",
-          "+\t\tNanoseconds since epoch (same precision as |v:starttime|) of the"
-        ]
+        "text": "this is a nonsense way to explain this.\n```suggestion\n\t\tTimestamp indicating the most recent user activity.\n\t\tSame precision as |v:starttime|.\n```"
       },
       {
         "version": "v1",
@@ -778,13 +556,7 @@
         "date": "7 May 2026",
         "depth": 1,
         "kind": "reply",
-        "text": "unreachable peers are already filtered out, the code only adds a peer to the list if `sockconnect` + `nvim_get_chan_info` both succeed. so the `v:null` case was effectively dead documentation. i removed it, `pid` and `active` are now documented as always-present number fields.",
-        "quote": [
-          "+\t\t            addr          (string)  Server address.",
-          "+\t\t            pid           (number?) PID of the Nvim process owning",
-          "+\t\t                                    the server, or |v:null| if the",
-          "+\t\t                                    peer is unreachable."
-        ]
+        "text": "unreachable peers are already filtered out, the code only adds a peer to the list if `sockconnect` + `nvim_get_chan_info` both succeed. so the `v:null` case was effectively dead documentation. i removed it, `pid` and `active` are now documented as always-present number fields."
       }
     ]
   },
@@ -831,13 +603,7 @@
         "date": "26 Apr 2026",
         "depth": 0,
         "kind": "reply",
-        "text": "```suggestion\n---@field own boolean True if this server belongs to the current Nvim instance.\n```",
-        "quote": [
-          "+---@class vim.ServerInfo",
-          "+---@field address string Server address (socket path, named pipe, or TCP host:port).",
-          "+---@field pid integer? PID of the Nvim process owning this server (nil if unreachable).",
-          "+---@field is_current boolean True if this server belongs to the current Nvim instance."
-        ]
+        "text": "```suggestion\n---@field own boolean True if this server belongs to the current Nvim instance.\n```"
       },
       {
         "version": "v1",
@@ -846,13 +612,7 @@
         "date": "26 Apr 2026",
         "depth": 0,
         "kind": "reply",
-        "text": "```suggestion\n---@field addr string Server address (socket path, named pipe, or TCP host:port).\n```",
-        "quote": [
-          " --- Called by builtin serverlist(). Returns the combined server list (own + peers).",
-          " ---",
-          "+---@class vim.ServerInfo",
-          "+---@field address string Server address (socket path, named pipe, or TCP host:port)."
-        ]
+        "text": "```suggestion\n---@field addr string Server address (socket path, named pipe, or TCP host:port).\n```"
       },
       {
         "version": "v1",
@@ -908,12 +668,6 @@
         "date": "16 Jan 2026",
         "depth": 1,
         "kind": "applied",
-        "quote": [
-          "+\t\t\t}",
-          "  \t\t}",
-          "  \t\tup_write(&wnd->rw_lock);",
-          "  \t\tif (err)"
-        ],
         "text": "Thanks for the patch. It is applied.\n\nRegards,\nKonstantin"
       }
     ]
@@ -969,12 +723,6 @@
         "date": "23 Dec 2025",
         "depth": 1,
         "kind": "reply",
-        "quote": [
-          "Fixes: 8537257874e9 (\"can: etas_es58x: add core support for ETAS ES58X CAN USB interfaces\")",
-          "Reported-by: syzbot+e8cb6691a7cf68256cb8@syzkaller.appspotmail.com",
-          "Closes: https://syzkaller.appspot.com/bug?extid=e8cb6691a7cf68256cb8",
-          "Signed-off-by: Szymon Wilczek <swilczek.lx@gmail.com>"
-        ],
         "text": "Thanks for the fix!\n\nReviewed-by: Vincent Mailhol <mailhol@kernel.org>\n\nYours sincerely,\nVincent Mailhol"
       },
       {
@@ -984,12 +732,6 @@
         "date": "24 Dec 2025",
         "depth": 1,
         "kind": "applied",
-        "quote": [
-          "Fixes: 8537257874e9 (\"can: etas_es58x: add core support for ETAS ES58X CAN USB interfaces\")",
-          "Reported-by: syzbot+e8cb6691a7cf68256cb8@syzkaller.appspotmail.com",
-          "Closes: https://syzkaller.appspot.com/bug?extid=e8cb6691a7cf68256cb8",
-          "Signed-off-by: Szymon Wilczek <swilczek.lx@gmail.com>"
-        ],
         "text": "Applied to linux-can.\n\nThanks,\nMarc\n\nP.S.: There's no need to send a vN+1 patch as reply to vN"
       }
     ]
@@ -1019,12 +761,6 @@
         "date": "26 Dec 2025",
         "depth": 1,
         "kind": "applied",
-        "quote": [
-          "  \t\terr = ni_readpage_cmpr(ni, folio);",
-          "-\t\tni_unlock(ni);",
-          "  \t\treturn err;",
-          "  \t}"
-        ],
         "text": "Your patch is applied, thanks.\n\nRegards,\nKonstantin"
       }
     ]
@@ -1123,12 +859,6 @@
         "date": "14 Apr 2025",
         "depth": 1,
         "kind": "reply",
-        "quote": [
-          "Use strscpy() instead of strcpy() to prevent potential buffer overflows",
-          "in acpi_device_name() and acpi_device_class(), which point to fixed-size",
-          "buffers.",
-          "This change improves safety and aligns with current kernel cleanup efforts."
-        ],
         "text": "ACPI_POWER_METER_DEVICE_NAME and ACPI_POWER_METER_CLASS are constant strings.\nThere is no danger of buffer overflows. There is no safety improvement.\n\nWe should concentrate on fixing real problems, not imaginary ones.\n\nGuenter"
       },
       {
@@ -1147,12 +877,6 @@
         "date": "23 Dec 2025",
         "depth": 1,
         "kind": "reply",
-        "quote": [
-          "+\tstrscpy(acpi_device_name(device), ACPI_POWER_METER_DEVICE_NAME);",
-          "+\tstrscpy(acpi_device_class(device), ACPI_POWER_METER_CLASS);",
-          "  \tdevice->driver_data = resource;",
-          "  #if IS_REACHABLE(CONFIG_ACPI_IPMI)"
-        ],
         "text": "LGTM,\nReviewed-by: lihuisong@huawei.com"
       },
       {
@@ -1162,12 +886,6 @@
         "date": "12 Jan 2026",
         "depth": 1,
         "kind": "applied",
-        "quote": [
-          "drivers/acpi/*.c.",
-          "Link: https://www.kernel.org/doc/html/latest/process/deprecated.html#strcpy",
-          "Signed-off-by: Szymon Wilczek <szymonwilczek@gmx.com>",
-          "Reviewed-by: lihuisong@huawei.com"
-        ],
         "text": "Applied.\n\nThanks,\nGuenter"
       }
     ]
@@ -1197,13 +915,7 @@
         "date": "16 Aug 2024",
         "depth": 0,
         "kind": "reply",
-        "text": "that is not how you make them anchors",
-        "quote": [
-          " ```",
-          " ",
-          "+<details>",
-          "+<summary id=\"#lavalyrics-spotify\">LavaLyrics</summary>"
-        ]
+        "text": "that is not how you make them anchors"
       },
       {
         "version": "v1",
@@ -1221,13 +933,7 @@
         "date": "16 Aug 2024",
         "depth": 0,
         "kind": "reply",
-        "text": "```suggestion\r\n// create new lyrics manager\r\n```",
-        "quote": [
-          "+<summary>Click to expand</summary>",
-          "+",
-          "+```java",
-          "+// register lyrics manager"
-        ]
+        "text": "```suggestion\r\n// create new lyrics manager\r\n```"
       },
       {
         "version": "v1",
@@ -1236,13 +942,7 @@
         "date": "16 Aug 2024",
         "depth": 0,
         "kind": "reply",
-        "text": "```suggestion\r\n// create new search manager\r\n```",
-        "quote": [
-          "+<summary>Click to expand</summary>",
-          "+",
-          "+```java",
-          "+// register search manager"
-        ]
+        "text": "```suggestion\r\n// create new search manager\r\n```"
       },
       {
         "version": "v1",
@@ -1289,13 +989,7 @@
         "date": "16 Aug 2024",
         "depth": 0,
         "kind": "reply",
-        "text": "please don't include lavasrc examples in here, I don't want to maintain them at 2 places",
-        "quote": [
-          "+var youtube = new YoutubeSearchManager(() -> audioPlayerManager, region);",
-          "+",
-          "+searchManager.registerSearchManager(spotify);",
-          "+searchManager.registerSearchManager(youtube);"
-        ]
+        "text": "please don't include lavasrc examples in here, I don't want to maintain them at 2 places"
       },
       {
         "version": "v1",
@@ -1304,13 +998,7 @@
         "date": "16 Aug 2024",
         "depth": 0,
         "kind": "reply",
-        "text": "```suggestion\r\nCreate a new `SearchManager`\r\n```",
-        "quote": [
-          " ### Usage",
-          " ",
-          "-// TODO",
-          "+Register `Search Manager`"
-        ]
+        "text": "```suggestion\r\nCreate a new `SearchManager`\r\n```"
       },
       {
         "version": "v1",
@@ -1319,13 +1007,7 @@
         "date": "16 Aug 2024",
         "depth": 0,
         "kind": "reply",
-        "text": "type is obvious here, use var\r\n```suggestion\r\nvar searchManager = new SearchManager();\r\n```",
-        "quote": [
-          "-// TODO",
-          "+Register `Search Manager`",
-          "+```java",
-          "+SearchManager searchManager = new SearchManager();"
-        ]
+        "text": "type is obvious here, use var\r\n```suggestion\r\nvar searchManager = new SearchManager();\r\n```"
       },
       {
         "version": "v1",
@@ -1334,13 +1016,7 @@
         "date": "16 Aug 2024",
         "depth": 0,
         "kind": "reply",
-        "text": "```suggestion\r\nBasic usage\r\n```java\r\nvar query = \"ytmsearch:bla bla\";\r\nvar types = List.of(\r\n\tAudioSearchResult.Type.TRACK,\r\n\tAudioSearchResult.Type.PLAYLIST,\r\n\tAudioSearchResult.Type.ALBUM,\r\n\tAudioSearchResult.Type.ARTIST,\r\n\tAudioSearchResult.Type.TEXT\r\n);\r\n\r\nAudioSearchResult searchResult = searchManager.loadSearch(query, types);\r\n```",
-        "quote": [
-          "+```",
-          "+",
-          "+- query: String",
-          "+- types: Set of `AudioSearchResult.Type`"
-        ]
+        "text": "```suggestion\r\nBasic usage\r\n```java\r\nvar query = \"ytmsearch:bla bla\";\r\nvar types = List.of(\r\n\tAudioSearchResult.Type.TRACK,\r\n\tAudioSearchResult.Type.PLAYLIST,\r\n\tAudioSearchResult.Type.ALBUM,\r\n\tAudioSearchResult.Type.ARTIST,\r\n\tAudioSearchResult.Type.TEXT\r\n);\r\n\r\nAudioSearchResult searchResult = searchManager.loadSearch(query, types);\r\n```"
       },
       {
         "version": "v1",
@@ -1349,13 +1025,7 @@
         "date": "16 Aug 2024",
         "depth": 0,
         "kind": "reply",
-        "text": "if you are gonna put that into backticks at least make it a valid class name\r\n```suggestion\r\nCreate new `SearchManager`\r\n```",
-        "quote": [
-          " ### Usage",
-          " ",
-          "-// TODO",
-          "+Create new `Search Manager`"
-        ]
+        "text": "if you are gonna put that into backticks at least make it a valid class name\r\n```suggestion\r\nCreate new `SearchManager`\r\n```"
       },
       {
         "version": "v1",
@@ -1364,13 +1034,7 @@
         "date": "16 Aug 2024",
         "depth": 0,
         "kind": "reply",
-        "text": "I think you should still mention the need to register sources here\r\njust not with a code example including the creating of a source",
-        "quote": [
-          "-// TODO",
-          "+Create new `Search Manager`",
-          "+```java",
-          "+var searchManager = new SearchManager();"
-        ]
+        "text": "I think you should still mention the need to register sources here\r\njust not with a code example including the creating of a source"
       },
       {
         "version": "v1",

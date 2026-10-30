@@ -7,7 +7,6 @@ import { gunzipSync } from "node:zlib";
 
 const LORE = "https://lore.kernel.org/all/";
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-const QUOTE_LINES = 4;
 const PAGE = 100;
 const DAY_MS = 86_400_000;
 const SAME_MOMENT_MS = 60_000;
@@ -116,25 +115,19 @@ function splitPatch(body) {
   return { message, notes, diff };
 }
 
-// what someone wrote in a reply: the lines they answered and their own words
-function splitReply(body) {
+// what someone wrote in a reply: their own words,
+// without the lines they answered
+function ownWords(body) {
   const lines = body.split("\n");
   const signature = lines.findIndex((line) => line === "-- ");
   const kept = (signature === -1 ? lines : lines.slice(0, signature)).filter(
     (line) => !ATTRIBUTION.test(line.trim()),
   );
-  const firstOwn = kept.findIndex((line) => line.trim() && !line.startsWith(">"));
-  const quote = kept
-    .slice(0, firstOwn === -1 ? kept.length : firstOwn)
-    .filter((line) => line.startsWith(">") && line.replace(/^>+\s?/, "").trim())
-    .map((line) => line.replace(/^>+\s?/, ""))
-    .slice(-QUOTE_LINES);
-  const text = kept
+  return kept
     .map((line) => (line.startsWith(">") ? "" : line))
     .join("\n")
     .replace(/\n{3,}/g, "\n\n")
     .trim();
-  return { quote, text };
 }
 
 // the people named in the merged commit say who was who on the list
@@ -208,13 +201,12 @@ function threadFor(mails, roles) {
           ...(notes && { text: notes }),
         };
       }
-      const { quote, text } = splitReply(mail.body);
+      const text = ownWords(mail.body);
       const kind = role === "maintainer" && APPLIED.test(text) ? "applied" : "reply";
       return {
         ...base,
         depth: depthOf(mail),
         kind,
-        ...(quote.length > 0 && { quote }),
         ...(text && { text }),
       };
     });
@@ -269,7 +261,6 @@ export async function listThread(commit, author, emails) {
   return threadFor(unique, rolesFrom(commit, author));
 }
 
-// a review comment answers a few lines of the diff
 export async function pullThread(item, me, github) {
   const base = `repos/${item.repo}`;
   const pull = await github(`${base}/pulls/${item.number}`);
@@ -300,10 +291,7 @@ export async function pullThread(item, me, github) {
       .filter((review) => review.body?.trim() || review.state === "APPROVED")
       .map((review) => said(review.user, review.submitted_at, review.body?.trim() || "approved")),
     ...inline.map((c) =>
-      said(c.user, c.created_at, c.body?.trim(), {
-        depth: c.in_reply_to_id ? 1 : 0,
-        quote: c.diff_hunk.split("\n").slice(-QUOTE_LINES),
-      }),
+      said(c.user, c.created_at, c.body?.trim(), { depth: c.in_reply_to_id ? 1 : 0 }),
     ),
   ]
     .sort((a, b) => a.at.localeCompare(b.at))

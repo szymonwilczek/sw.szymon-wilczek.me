@@ -43,7 +43,30 @@ const BLOBS = [
 
 const MERGER = "maintainer · merged it";
 
-// what each trailer says about its person
+const FENCE = /```[^\n]*\n([\s\S]*?)\n?```/g;
+const CODE = /`([^`\n]+)`/g;
+const BOLD = /\*\*(?!\s)([^*\n]+?)(?<!\s)\*\*/g;
+const STARRED = /(^|[^\w*])\*(?!\s)([^*\n]+?)(?<!\s)\*(?![\w*])/g;
+const UNDERSCORED = /(^|[^\w])_(?!\s)([^_\n]+?)(?<!\s)_(?!\w)/g;
+const KEPT = /\u0000(\d+)\u0000/g;
+
+function escaped(text: string): string {
+  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+// a comment in the little Markdown people write in one
+function commentHtml(text: string): string {
+  const kept: string[] = [];
+  const keep = (html: string) => `\u0000${kept.push(html) - 1}\u0000`;
+  return escaped(text.replace(/\r\n/g, "\n"))
+    .replace(FENCE, (_, code) => keep(`<pre><code>${code}</code></pre>`))
+    .replace(CODE, (_, code) => keep(`<code>${code}</code>`))
+    .replace(BOLD, "<strong>$1</strong>")
+    .replace(STARRED, "$1<em>$2</em>")
+    .replace(UNDERSCORED, "$1<em>$2</em>")
+    .replace(KEPT, (_, index) => kept[Number(index)]);
+}
+
 function signer(trailer: Trailer): { who: string; role: string; mono?: boolean } | undefined {
   if (trailer.key === "Fixes")
     return { who: trailer.value.split(" (")[0], role: "the commit it fixes", mono: true };
@@ -305,14 +328,9 @@ const lagText =
                           <span class="said-date">{message.date}</span>
                         </p>
                         {message.subject && <p class="said-subject">{message.subject}</p>}
-                        {message.quote && (
-                          <blockquote>
-                            {message.quote.map((line) => (
-                              <span>&gt; {line}</span>
-                            ))}
-                          </blockquote>
+                        {message.text && (
+                          <div class="said-text" set:html={commentHtml(message.text)} />
                         )}
-                        {message.text && <p class="said-text">{message.text}</p>}
                       </article>
                     </div>
                   ))}
@@ -903,25 +921,20 @@ const lagText =
     font-size: 0.8125rem;
   }
 
-  .said blockquote {
-    margin: 0.625rem 0 0;
-    padding: 0.125rem 0 0.125rem 0.75rem;
-    border-left: 2px solid var(--border);
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    line-height: 1.6;
-    color: var(--fg-dim);
-  }
-
-  .said blockquote span {
-    display: block;
-  }
-
   .said-text {
     margin: 0.625rem 0 0;
     font-size: 1rem;
     color: var(--fg-dim);
     white-space: pre-line;
+  }
+
+  .said-text :global(pre) {
+    margin: 0.5rem 0;
+    padding: 0.75rem 1rem;
+    border-left: 2px solid var(--border);
+    border-radius: 0;
+    background: var(--paper);
+    white-space: pre-wrap;
   }
 
   @media (max-width: 47.99em) {
