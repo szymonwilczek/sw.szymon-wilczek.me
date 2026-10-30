@@ -3,26 +3,17 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import Divider from "../components/Divider.astro";
 import StillWater from "../components/StillWater.astro";
 import Seal from "../components/Seal.astro";
-
-const DASHES = [
-  "M2 6.6 C 5 5.4, 9 6.6, 13.5 5.4",
-  "M2.2 6 C 5.4 6.8, 9.4 5.2, 13.8 6.2",
-  "M1.8 6.4 C 5.2 5.6, 8.8 6.8, 13.4 5.8",
-];
 ---
 
 <BaseLayout
   title="About"
-  description="Biographical context, a conversion to the Church of Emacs, systems background, and open source contributions of Szymon Wilczek."
+  description="Szymon Wilczek: a computer science student in Gliwice, LOTA and the kernel, and a software architect by day."
   type="profile"
 >
   <header class="about-head">
     <div>
       <h1>About me</h1>
-      <p class="lede">
-        Software engineer, <del>dualist editor enthusiast</del>
-        <ins class="hand">Emacs convert</ins>, and open-source contributor.
-      </p>
+      <p class="lede">Student, and a writer of long notes.</p>
     </div>
     <a class="say hand" href="/contact/">
       <Seal glyph="文" size={40} tilt={-6} />
@@ -49,21 +40,20 @@ const DASHES = [
         01
       </p>
       <div class="body">
-        <h2>Background &amp; origins</h2>
+        <h2>Who I am</h2>
         <p>
-          I am a software engineer with academic and practical roots at the
-          <strong>Silesian University of Technology</strong> (Faculty of Automatic Control,
-          Electronics and Computer Science). My engineering interests lie at the intersection of
-          low-level operating systems, kernel internals, and sovereign computing tools. The years so
-          far, studies, work and certificates, are laid out as
-          <a href="/path/">stepping stones</a>.
+          I study computer science at the Silesian University of Technology in Gliwice, in the
+          seventh semester of the engineering degree.
         </p>
         <p>
-          Everything I build is pressed and labelled in <a href="/projects/">projects</a>; the rest
-          of this website is my independent hypermedia space for tools, personal archives, and
-          technical explorations. What I read stands on the <a href="/books/">bookshelf</a>, and
-          what I work with lies on a <a href="/uses/">tea tray</a>. The whole garden is drawn on the
-          <a href="/map/">map</a> if you ever get lost.
+          Most of my day, nearly every day, is spent in code. These days most of it goes to LOTA, my
+          attestation project for Linux: it lives close to the kernel, and the work I used to do in
+          the kernel itself carries on there. What made it upstream, in Linux and in Git, is on the
+          <a href="/research/">research page</a>.
+        </p>
+        <p>
+          I would like to stay at the university after the degree, to teach and to do research on
+          operating systems.
         </p>
       </div>
     </section>
@@ -73,135 +63,10 @@ const DASHES = [
         02
       </p>
       <div class="body">
-        <h2>
-          <del datetime="2026-10-12">The dualist philosophy</del>
-          <ins datetime="2026-10-12">The Church of Emacs</ins>
-        </h2>
-        <div class="recanted">
-          <p>
-            Well, maybe some people would hang me for it, but in the long-standing text editor
-            discourse, I <del>belong</del>
-            <ins class="hand">belonged</ins> firmly to the camp of the <strong>Dualists</strong>:
-          </p>
-          <div class="editors">
-            <div class="editor paper">
-              <p class="editor-name hand emacs">GNU Emacs</p>
-              <p>
-                Mission control and operational headquarters. Powered by Org-mode, it drives my
-                digital garden, agenda, and literate programming, with occasional Lisp.
-              </p>
-            </div>
-            <div class="editor paper retired">
-              <p class="editor-name hand nvim">
-                <del>Neovim</del>
-              </p>
-              <p>
-                <del>
-                  My primary code-writing weapon and high-speed editing environment. I rely on it
-                  for most daily programming, build custom Lua plugins, and contribute to
-                  <a
-                    href="https://github.com/neovim/neovim/issues?q=involves:szymonwilczek"
-                    rel="noopener"
-                  >
-                    Neovim upstream
-                  </a>
-                  .
-                </del>
-              </p>
-            </div>
-          </div>
-          <p>
-            <del>
-              Rather than treating these tools as mutually exclusive (which most people do), I use
-              the raw modal editing speed of Neovim alongside the limitless extensibility of Emacs
-              to create perfect balance in the force.
-            </del>
-          </p>
-          <p class="margin-note hand">
-            left as I wrote it. I don't take back what I once believed by deleting it; this stays
-            here for good.
-          </p>
-        </div>
+        <h2>Work</h2>
         <p>
-          Since then I have gone over to the <strong>Church of Emacs</strong>, one hundred percent -
-          maybe it is inevitable? Since that day, the code, the garden, the agenda, all of it now
-          happens in one Lisp machine. Neovim taught me a lot and my patches upstream still stand; I
-          just don't use it as often anymore.
-        </p>
-      </div>
-    </section>
-
-    <section>
-      <p class="num" aria-hidden="true">
-        03
-      </p>
-      <div class="body">
-        <h2>Upstream contributions &amp; free software</h2>
-        <p>
-          I believe deeply (really deeply) in the ethos of Free and Open Source Software. As a
-          matter of principle, I contribute back to the projects and tools I use:
-        </p>
-        <ul class="dashes">
-          <li>
-            <svg width="16" height="12" viewBox="0 0 16 12" aria-hidden="true">
-              <path d={DASHES[0]}></path>
-            </svg>
-            <span>
-              <a href="https://lore.kernel.org/all/?q=swilczek.lx@gmail.com" rel="noopener">
-                Linux kernel
-              </a>
-            </span>
-          </li>
-          <li>
-            <svg width="16" height="12" viewBox="0 0 16 12" aria-hidden="true">
-              <path d={DASHES[1]}></path>
-            </svg>
-            <span>
-              <a
-                href="https://github.com/neovim/neovim/issues?q=involves:szymonwilczek"
-                rel="noopener"
-              >
-                Neovim
-              </a>
-            </span>
-          </li>
-          <li>
-            <svg width="16" height="12" viewBox="0 0 16 12" aria-hidden="true">
-              <path d={DASHES[2]}></path>
-            </svg>
-            <span>
-              <strong>Independent open source</strong> &dash; author of many tools and editor
-              packages, including
-              <a href="https://github.com/szymonwilczek/typus-fonts" rel="noopener">
-                fonts
-              </a>
-              ,
-              <a href="https://github.com/szymonwilczek?tab=repositories&q=nvim" rel="noopener">
-                Neovim plugins
-              </a>
-              ,
-              <a href="https://github.com/szymonwilczek?tab=repositories&q=emacs" rel="noopener">
-                Emacs utilities
-              </a>
-              , and
-              <a href="/projects">more</a>.
-            </span>
-          </li>
-        </ul>
-      </div>
-    </section>
-
-    <section>
-      <p class="num" aria-hidden="true">
-        04
-      </p>
-      <div class="body">
-        <h2>Bespoke projects &amp; repositories</h2>
-        <p>
-          All of my independent experiments and configurations are hosted on my
-          <a href="https://github.com/szymonwilczek" rel="noopener">
-            GitHub profile
-          </a>
+          By day I am a software architect at FAMUR in Zabrze, where industrial processes become
+          software. Before that, two years of freelance web work, closed in January.
         </p>
       </div>
     </section>
@@ -344,130 +209,6 @@ const DASHES = [
 
   .body p {
     margin: 0 0 1rem;
-  }
-
-  strong {
-    font-weight: 600;
-  }
-
-  .editors {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1.25rem;
-    margin: 1.5rem 0;
-  }
-
-  .editor {
-    flex: 1 1 16.25rem;
-    padding: 1.375rem 1.375rem 1.25rem;
-    font-size: 1rem;
-    line-height: 1.6;
-    transform: rotate(-0.6deg);
-  }
-
-  .editor + .editor {
-    border-radius: 6px 3px 7px 4px;
-    transform: rotate(0.8deg);
-  }
-
-  .editor p {
-    margin: 0;
-  }
-
-  .body .editor-name {
-    margin: 0 0 0.75rem;
-    font-size: 1.5rem;
-    font-weight: 400;
-    line-height: 1;
-  }
-
-  .nvim {
-    color: var(--accent-0);
-  }
-
-  .emacs {
-    color: var(--red);
-  }
-
-  del {
-    text-decoration-line: line-through;
-    text-decoration-color: color-mix(in srgb, var(--red) 70%, transparent);
-    text-decoration-thickness: 1.5px;
-  }
-
-  ins {
-    text-decoration: none;
-  }
-
-  ins.hand {
-    margin-left: 0.25em;
-    font-size: 1.15em;
-    color: var(--red);
-  }
-
-  .body h2 del {
-    display: block;
-    width: fit-content;
-    margin-bottom: 0.25rem;
-    font-size: 1.125rem;
-    font-weight: 300;
-    color: var(--fg-dim);
-  }
-
-  .body h2 ins {
-    display: block;
-  }
-
-  .recanted {
-    color: var(--fg-dim);
-  }
-
-  .recanted del {
-    opacity: 0.75;
-  }
-
-  .retired {
-    filter: grayscale(1);
-    opacity: 0.6;
-  }
-
-  .margin-note {
-    margin: 0.5rem 0 1.75rem;
-    padding-left: 1rem;
-    border-left: 2px solid color-mix(in srgb, var(--red) 45%, transparent);
-    font-size: 1.125rem;
-    font-weight: 300;
-    line-height: 1.4;
-    color: var(--red);
-    transform: rotate(-0.8deg);
-  }
-
-  .dashes {
-    display: flex;
-    flex-direction: column;
-    gap: 0.875rem;
-    margin: 1.25rem 0 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  .dashes li {
-    display: flex;
-    align-items: baseline;
-    gap: 0.875rem;
-    margin: 0;
-  }
-
-  .dashes svg {
-    flex: none;
-  }
-
-  .dashes path {
-    fill: none;
-    stroke: var(--cursor);
-    stroke-width: 2.2;
-    stroke-linecap: round;
-    stroke-linejoin: round;
   }
 
   :global(.about-end) {
