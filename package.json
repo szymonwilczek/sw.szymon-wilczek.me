@@ -17,7 +17,6 @@
     "vault:add": "node scripts/manage-encrypted.mjs vault",
     "file:add": "node scripts/manage-encrypted.mjs file",
     "roji-key": "node scripts/roji-key.mjs",
-    "spotify-token": "node scripts/spotify-token.mjs",
     "icons": "node scripts/make-icons.mjs"
   },
   "dependencies": {

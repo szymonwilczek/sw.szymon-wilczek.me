@@ -10,10 +10,3 @@ interface D1Statement {
 interface D1Database {
   prepare(sql: string): D1Statement;
 }
-
-interface ExecutionContext {
-  waitUntil(p: Promise<unknown>): void;
-}
-interface CacheStorage {
-  default: Cache;
-}

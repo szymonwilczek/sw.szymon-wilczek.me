@@ -111,9 +111,9 @@ if (hero) {
     const middleY = (Math.min(...ys) + Math.max(...ys)) / 2;
 
     const link = document.createElement("a");
-    link.href = "/engawa/";
+    link.href = "/roji/";
     link.className = "enso-link hand";
-    link.textContent = "the veranda →";
+    link.textContent = "the tea garden →";
     hero.append(link);
 
     // path walks off to the right,
@@ -132,7 +132,7 @@ if (hero) {
     );
     canvas.append(trail);
 
-    if (!roomOnRight) link.textContent = "← the veranda";
+    if (!roomOnRight) link.textContent = "← the tea garden";
     link.style.left = `${roomOnRight ? tail[0] : tail[0] - link.offsetWidth}px`;
     link.style.top = `${tail[1] - LINK_RAISE}px`;
     findDoor("enso");

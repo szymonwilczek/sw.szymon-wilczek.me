@@ -86,44 +86,4 @@ export { sceneWheel, sceneShapes } from "./ink/kobo/wheel.js";
 export { chamber, heatBar, tongs, sceneKiln } from "./ink/kobo/kiln.js";
 export { sceneGlazes, scenePaint } from "./ink/kobo/glaze.js";
 export { dashed, sceneShelf, scenePieceCard } from "./ink/kobo/shelf.js";
-export {
-  ridge,
-  hourLight,
-  SEASONS,
-  solarHour,
-  SKY,
-  smoothstep,
-  skyLayer,
-  stars,
-  STARLIGHT,
-  skyWash,
-  arcAt,
-  sunDisc,
-  moonDisc,
-  veil,
-  ensoDial,
-  clockLabel,
-} from "./ink/engawa/sky.js";
-export { slab, lampGlow, fireflies } from "./ink/engawa/terrace.js";
-export { sleeve, crateSleeve, recordPlayer } from "./ink/engawa/records.js";
-export {
-  seasonLook,
-  SNOW,
-  snowCap,
-  arcTop,
-  teaCup,
-  koro,
-  hangingLamp,
-  falling,
-} from "./ink/engawa/house.js";
-export { sceneEngawa } from "./ink/engawa/scene.js";
-export {
-  washi,
-  hanko,
-  paragraph,
-  vignette,
-  cardFrame,
-  knob,
-  cardShell,
-  CARD,
-} from "./ink/cards.js";
+export { hanko } from "./ink/hanko.js";

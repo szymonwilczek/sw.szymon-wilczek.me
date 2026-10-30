@@ -31,7 +31,6 @@ const OPTIONAL: Array<[string, string, string]> = [
     "/roji/",
     "Interactive tea garden: visitors shape pottery; approved pieces join a shelf.",
   ],
-  ["Engawa", "/engawa/", "A focus timer (incense), a record player and a lo-fi radio."],
   ["Seal book", "/seals/", "Collectible seals earned by exploring the site."],
   ["Credits", "/credits/", "Fonts, music and open-source acknowledgements."],
 ];
