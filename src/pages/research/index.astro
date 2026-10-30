@@ -4,8 +4,12 @@ import Pill from "../../components/Pill.astro";
 import { dayMonthYear, patches } from "../../utils/research";
 
 const sections = [
-  { title: "Linux kernel", patches: patches.filter((patch) => patch.project === "linux") },
-  { title: "Git", patches: patches.filter((patch) => patch.project === "git") },
+  {
+    id: "linux",
+    title: "Linux kernel",
+    patches: patches.filter((patch) => patch.project === "linux"),
+  },
+  { id: "git", title: "Git", patches: patches.filter((patch) => patch.project === "git") },
 ];
 ---
 
