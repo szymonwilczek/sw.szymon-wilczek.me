@@ -1,20 +1,26 @@
-// Turns the mailing-list threads saved with `b4 mbox` into src/data/threads.json,
-// one entry per patch.
-// Every run rebuilds the whole file from what is in .threads/
+// Fetches the mailing-list thread of every patch with `b4 mbox` and turns it
+// into src/data/threads.json. The message ids of each version sent live in
+// src/data/threads-sources.json, keyed by the 12-character sha:
+//   npm run threads              fetches what is missing, then needs rebuild
+//   npm run threads -- --refresh fetches every thread again (new replies)
 
-import { readdir, readFile, writeFile } from "node:fs/promises";
+import { execFileSync } from "node:child_process";
+import { existsSync } from "node:fs";
+import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
+import { fileURLToPath } from "node:url";
 
 const IN = new URL("../.threads/", import.meta.url);
 const OUT = new URL("../src/data/threads.json", import.meta.url);
+const SOURCES = new URL("../src/data/threads-sources.json", import.meta.url);
 const COMMITS = new URL("../src/data/research.json", import.meta.url);
 const AUTHOR = "Szymon Wilczek";
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const QUOTE_LINES = 4;
 const SHORT_SHA = 12;
 
-const BOT = /syzbot|lkp@intel\.com|test robot|patchwork-bot|stable/i;
+const BOT = /syzbot|lkp@intel\.com|test robot|-bot\b|\bbot@|stable@/i;
 const APPLIED = /\b(applied|queued|picked up|merged)\b/i;
-const ATTRIBUTION = /^(On .*wrote:|.* writes:|.* wrote:)$/;
+const ATTRIBUTION = /^(On .*wrote:|.* writes:|.* wrote:|.*写道[:：])$/;
 const VERSION = /\[[^\]]*PATCH[^\]]*?\bv(\d+)\b[^\]]*\]/i;
 
 function dayMonthYear(date) {
@@ -63,7 +69,7 @@ function parseHeaders(block) {
 function plainText(headers, body) {
   const boundary = /boundary="?([^";]+)"?/i.exec(headers["content-type"] ?? "")?.[1];
   if (!boundary) return decodeBody(body, headers["content-transfer-encoding"] ?? "");
-  for (const part of body.split(`--${boundary}`)) {
+  for (const part of body.split(`--${boundary}`).slice(1)) {
     const split = part.search(/\r?\n\r?\n/);
     if (split === -1) continue;
     const partHeaders = parseHeaders(part.slice(0, split).trim());
@@ -157,7 +163,7 @@ function rolesFrom(commit) {
 function roleOf(mail, roles) {
   if (roles.has(mail.who)) return roles.get(mail.who);
   if (BOT.test(mail.email) || BOT.test(mail.who)) return "bot";
-  return "on the list";
+  return "reviewer";
 }
 
 function versionOf(subject) {
@@ -166,7 +172,7 @@ function versionOf(subject) {
 
 function threadFor(mails, roles) {
   const byId = new Map(mails.map((mail) => [mail.id, mail]));
-  const isPatch = (mail) => /^\[[^\]]*PATCH/i.test(mail.subject);
+  const isPatch = (mail) => /^(\[[^\]]*\]\s*)*\[[^\]]*PATCH/i.test(mail.subject);
   const rootOf = (mail) => {
     let at = mail;
     while (!isPatch(at) && byId.has(at.parent)) at = byId.get(at.parent);
@@ -230,7 +236,27 @@ async function listDir(url) {
   }
 }
 
+// one thread per message id, saved as <id>.mbx next to the other versions
+async function fetchThreads(sources, refresh) {
+  for (const [short, ids] of Object.entries(sources)) {
+    if (ids.length === 0) console.warn(`${short}: no message id yet in threads-sources.json`);
+    const dir = fileURLToPath(new URL(`${short}/`, IN));
+    await mkdir(dir, { recursive: true });
+    for (const id of ids) {
+      if (!refresh && existsSync(`${dir}${id}.mbx`)) continue;
+      try {
+        execFileSync("b4", ["--quiet", "mbox", "--outdir", dir, id], { stdio: "inherit" });
+      } catch {
+        console.warn(`${short}: b4 could not fetch ${id}`);
+      }
+    }
+  }
+}
+
 const commits = JSON.parse(await readFile(COMMITS, "utf8"));
+const sources = JSON.parse(await readFile(SOURCES, "utf8"));
+await fetchThreads(sources, process.argv.includes("--refresh"));
+
 const threads = {};
 for (const entry of await listDir(IN)) {
   if (!entry.isDirectory()) continue;
@@ -244,6 +270,7 @@ for (const entry of await listDir(IN)) {
   const files = (await readdir(dir)).filter((name) => /\.(mbx|mbox)$/.test(name));
   const mails = [];
   for (const name of files) mails.push(...parseMbox(await readFile(new URL(name, dir), "utf8")));
+  if (mails.length === 0) continue;
   const unique = [...new Map(mails.map((mail) => [mail.id, mail])).values()];
   threads[short] = threadFor(unique, rolesFrom(commit));
   const { versions, messages } = threads[short];

@@ -1,1 +1,331 @@
-{}
+{
+  "08ce2fee1b86": {
+    "versions": [
+      {
+        "version": "v1",
+        "sent": "27 Dec 2025",
+        "url": "https://lore.kernel.org/r/20251227144307.8966-1-swilczek.lx@gmail.com"
+      }
+    ],
+    "messages": [
+      {
+        "version": "v1",
+        "who": "Szymon Wilczek",
+        "role": "author",
+        "date": "27 Dec 2025",
+        "depth": 0,
+        "kind": "patch",
+        "subject": "[PATCH] ntfs3: fix circular locking dependency in run_unpack_ex"
+      },
+      {
+        "version": "v1",
+        "who": "Konstantin Komarov",
+        "role": "maintainer",
+        "date": "16 Jan 2026",
+        "depth": 1,
+        "kind": "applied",
+        "quote": ["+\t\t\t}", "  \t\t}", "  \t\tup_write(&wnd->rw_lock);", "  \t\tif (err)"],
+        "text": "Thanks for the patch. It is applied.\n\nRegards,\nKonstantin"
+      }
+    ]
+  },
+  "0cd8450c257f": {
+    "versions": [
+      {
+        "version": "v1",
+        "sent": "10 Aug 2026",
+        "url": "https://lore.kernel.org/r/20260810192344.3733721-1-swilczek.lx@gmail.com"
+      }
+    ],
+    "messages": [
+      {
+        "version": "v1",
+        "who": "Szymon Wilczek",
+        "role": "author",
+        "date": "10 Aug 2026",
+        "depth": 0,
+        "kind": "patch",
+        "subject": "[PATCH] hwmon: (coretemp) Fix core_data leak on CPUs without PTS"
+      },
+      {
+        "version": "v1",
+        "who": "sashiko-bot@kernel.org",
+        "role": "bot",
+        "date": "10 Aug 2026",
+        "depth": 1,
+        "kind": "reply",
+        "quote": [
+          "the added kfree() sees NULL, with no slab warnings over repeated module",
+          "load and unload cycles.",
+          "Fixes: 1a793caf6f69 (\"hwmon: (coretemp) Use dynamic allocated memory for core temp_data\")",
+          "Signed-off-by: Szymon Wilczek <swilczek.lx@gmail.com>"
+        ],
+        "text": "Sashiko has reviewed this patch and found no issues. It looks great!"
+      },
+      {
+        "version": "v1",
+        "who": "Guenter Roeck",
+        "role": "maintainer",
+        "date": "11 Aug 2026",
+        "depth": 1,
+        "kind": "applied",
+        "quote": [
+          "the added kfree() sees NULL, with no slab warnings over repeated module",
+          "load and unload cycles.",
+          "Fixes: 1a793caf6f69 (\"hwmon: (coretemp) Use dynamic allocated memory for core temp_data\")",
+          "Signed-off-by: Szymon Wilczek <swilczek.lx@gmail.com>"
+        ],
+        "text": "Applied.\n\nThanks,\nGuenter"
+      }
+    ]
+  },
+  "440b7035bbe0": {
+    "versions": [
+      {
+        "version": "v1",
+        "sent": "15 Oct 2026",
+        "url": "https://lore.kernel.org/r/20261015214242.1196722-1-swilczek.lx@gmail.com",
+        "message": "`write_index_as_tree()` locks the index with `LOCK_DIE_ON_ERROR`, even\nthough we only need the lock for the optional write-back of the updated\ncache-tree. As the comment next to `write_locked_index()` already notes,\nfailing to write the index here is fine.\n\nSince 356ee4659b (sequencer: try to commit without forking 'git commit',\n2017-11-24), `try_to_commit()` calls `write_index_as_tree()` in-process\nright after the pick has updated the index and written\n`CHERRY_PICK_HEAD`. Before that commit the `die()` happened in a `git\ncommit` child process, and the sequencer stopped cleanly with its state\nsaved. Now, if a background `git status` holds `index.lock` at that\nmoment, we die before writing `rebase-merge/message`, and a subsequent\n`git rebase --continue` refuses to run:\n\n    error: you have staged changes in your working tree\n\nDrop `LOCK_DIE_ON_ERROR` so that we take the lock gently, just like\nother callers that only refresh the index, and skip writing the index\nwhen the lock is held by someone else. This also lets `git write-tree`\nand `git am` proceed while another process holds the lock.\n\nSigned-off-by: Szymon Wilczek <swilczek.lx@gmail.com>",
+        "diff": "diff --git a/cache-tree.c b/cache-tree.c\nindex b8cbb5da22..1bea880912 100644\n--- a/cache-tree.c\n+++ b/cache-tree.c\n@@ -809,11 +809,15 @@ struct tree *write_in_core_index_as_tree(struct repository *repo,\n \n int write_index_as_tree(struct object_id *oid, struct index_state *index_state, const char *index_path, int flags, const char *prefix)\n {\n-\tint entries, was_valid;\n+\tint entries, was_valid, fd;\n \tstruct lock_file lock_file = LOCK_INIT;\n \tint ret;\n \n-\thold_lock_file_for_update(&lock_file, index_path, LOCK_DIE_ON_ERROR);\n+\t/*\n+\t * The lock only protects the cache-tree write-back below; if somebody\n+\t * else holds it, compute the tree without updating the index.\n+\t */\n+\tfd = hold_lock_file_for_update(&lock_file, index_path, 0);\n \n \tentries = read_index_from(index_state, index_path,\n \t\t\t\t  repo_get_git_dir(index_state->repo));\n@@ -828,7 +832,7 @@ int write_index_as_tree(struct object_id *oid, struct index_state *index_state,\n \n \tret = write_index_as_tree_internal(oid, index_state, was_valid, flags,\n \t\t\t\t\t   prefix);\n-\tif (!ret && !was_valid) {\n+\tif (!ret && !was_valid && 0 <= fd) {\n \t\twrite_locked_index(index_state, &lock_file, COMMIT_LOCK);\n \t\t/* Not being able to write is fine -- we are only interested\n \t\t * in updating the cache-tree part, and if the next caller\ndiff --git a/t/t0090-cache-tree.sh b/t/t0090-cache-tree.sh\nindex 0964718d7f..4b7547e108 100755\n--- a/t/t0090-cache-tree.sh\n+++ b/t/t0090-cache-tree.sh\n@@ -286,4 +286,17 @@ test_expect_success 'cache-tree is used by write-tree when valid' '\n \ttest_grep ! region_enter.*cache_tree.*update trace.output\n '\n \n+test_expect_success 'write-tree succeeds while the index is locked' '\n+\ttest_when_finished \"rm -f .git/index.lock\" &&\n+\ttest_commit locked &&\n+\t>uncommitted &&\n+\tgit add uncommitted &&\n+\t>.git/index.lock &&\n+\tgit write-tree >actual &&\n+\ttest_path_is_file .git/index.lock &&\n+\trm .git/index.lock &&\n+\tgit write-tree >expect &&\n+\ttest_cmp expect actual\n+'\n+\n test_done\n\nbase-commit: f57c9a73884400380bddd172acc88b569834f909"
+      },
+      {
+        "version": "v2",
+        "sent": "16 Oct 2026",
+        "url": "https://lore.kernel.org/r/20261016091647.1332692-1-swilczek.lx@gmail.com"
+      }
+    ],
+    "messages": [
+      {
+        "version": "v1",
+        "who": "Szymon Wilczek",
+        "role": "author",
+        "date": "15 Oct 2026",
+        "depth": 0,
+        "kind": "patch",
+        "subject": "[PATCH] cache-tree: do not die when the index is locked",
+        "text": "I ran into this while rebasing a ~120-commit branch with Magit open,\nwhich runs `git status` in the background. To recover from the\nhalf-picked state, I had to commit the pick manually with\n`git commit -C CHERRY_PICK_HEAD` before running `git rebase --continue`.\n\nThis can be reproduced within a few tries by rebasing a long branch\nwhile running `git status --porcelain` in a loop, or triggered every\ntime in gdb:\n\n    break try_to_commit\n    run\n    shell touch .git/index.lock\n    continue\n\nIf the lock is taken slightly earlier, during `do_recursive_merge()`,\nthe pick still fails, but that path reports an error and reschedules the\npick, so `git rebase --continue` works there."
+      },
+      {
+        "version": "v1",
+        "who": "Patrick Steinhardt",
+        "role": "reviewer",
+        "date": "16 Oct 2026",
+        "depth": 1,
+        "kind": "reply",
+        "quote": [
+          "`write_index_as_tree()` locks the index with `LOCK_DIE_ON_ERROR`, even",
+          "though we only need the lock for the optional write-back of the updated",
+          "cache-tree. As the comment next to `write_locked_index()` already notes,",
+          "failing to write the index here is fine."
+        ],
+        "text": "Giving a bit of context here would help the reader to figure out what\nthe function even does. Namely, it's two different things:\n\n  - It is responsible for turning the index into a tree object.\n\n  - And when that succeeds, it will also rewrite the index to populate\n    the cache tree extension.\n\nThe first part is what must succeed, but the second part is allowed to\nfail without impacting the result.\n\nThis is the symptom that you're trying to fix and should come first in\nyour message. Commit messages typically describe the problem first\n(this), then explain cause of  and context around that problem (your\nabove information about `write_index_as_tree()`) and then finally how\nyou solve the problem (the next paragraph).\n\nAn alternative would be to supply a locking timeout, but given that\nwriting the cache tree extension is entirely optional I agree that this\nhere is the better fix.\n\nNit: This may just be me, but this reverse notation always confuses me,\nand I think writing this as `fd > 0` feels more natural to many. Anyway,\nI don't feel strongly about this as this may very well be subjective.\n\nAnd here we explain that it's fine if we fail writing the cache tree\nextension. Makes sense.\n\nThe test looks obviously good to me. Nice that the issue is this easy to\nreproduce.\n\nThanks!\n\nPatrick"
+      },
+      {
+        "version": "v2",
+        "who": "Szymon Wilczek",
+        "role": "author",
+        "date": "16 Oct 2026",
+        "depth": 0,
+        "kind": "patch",
+        "subject": "[PATCH v2] cache-tree: do not die when the index is locked",
+        "text": "Changes in v2:\n\n  - Reordered the commit message to describe the symptom first, then\n    its cause, and the fix last, and explained the two things that\n    `write_index_as_tree()` does (thanks, Patrick).\n\n  - Spelled the lock check as `fd >= 0` instead of `0 <= fd`.\n\nNotes from v1:\n\nI ran into this while rebasing a ~120-commit branch with Magit open,\nwhich runs `git status` in the background. To recover from the\nhalf-picked state, I had to commit the pick manually with\n`git commit -C CHERRY_PICK_HEAD` before running `git rebase --continue`.\n\nThis can be reproduced within a few tries by rebasing a long branch\nwhile running `git status --porcelain` in a loop, or triggered every\ntime in gdb:\n\n    break try_to_commit\n    run\n    shell touch .git/index.lock\n    continue\n\nIf the lock is taken slightly earlier, during `do_recursive_merge()`,\nthe pick still fails, but that path reports an error and reschedules the\npick, so `git rebase --continue` works there."
+      },
+      {
+        "version": "v2",
+        "who": "Patrick Steinhardt",
+        "role": "reviewer",
+        "date": "19 Oct 2026",
+        "depth": 1,
+        "kind": "reply",
+        "quote": [
+          "  - Reordered the commit message to describe the symptom first, then",
+          "    its cause, and the fix last, and explained the two things that",
+          "    `write_index_as_tree()` does (thanks, Patrick).",
+          "  - Spelled the lock check as `fd >= 0` instead of `0 <= fd`."
+        ],
+        "text": "Thanks, I'm happy with this version.\n\nPatrick"
+      }
+    ]
+  },
+  "b1979778e985": {
+    "versions": [
+      {
+        "version": "v1",
+        "sent": "22 Dec 2025",
+        "url": "https://lore.kernel.org/r/20251222154208.22117-1-swilczek.lx@gmail.com",
+        "message": "When es58x_alloc_rx_urbs() fails partway through allocating RX URBs\n(e.g., if usb_submit_urb() fails at iteration i), the function returns\nan error but leaves any previously allocated and anchored URBs leaked.\n\nThe issue is that es58x_open() returns directly on es58x_alloc_rx_urbs()\nfailure instead of jumping to the free_urbs label, which would call\nes58x_free_urbs() to clean up any anchored URBs.\n\nFix this by changing 'return ret' to 'goto free_urbs' to ensure proper\ncleanup of all allocated URBs on failure.\n\nFixes: 8537257874e9 (\"can: etas_es58x: add core support for ETAS ES58X CAN USB interfaces\")\nReported-by: syzbot+e8cb6691a7cf68256cb8@syzkaller.appspotmail.com\nCloses: https://syzkaller.appspot.com/bug?extid=e8cb6691a7cf68256cb8\nSigned-off-by: Szymon Wilczek <swilczek.lx@gmail.com>",
+        "diff": "diff --git a/drivers/net/can/usb/etas_es58x/es58x_core.c b/drivers/net/can/usb/etas_es58x/es58x_core.c\nindex f799233c2b72..d92c37f277d5 100644\n--- a/drivers/net/can/usb/etas_es58x/es58x_core.c\n+++ b/drivers/net/can/usb/etas_es58x/es58x_core.c\n@@ -1784,7 +1784,7 @@ static int es58x_open(struct net_device *netdev)\n \tif (!es58x_dev->opened_channel_cnt) {\n \t\tret = es58x_alloc_rx_urbs(es58x_dev);\n \t\tif (ret)\n-\t\t\treturn ret;\n+\t\t\tgoto free_urbs;\n \n \t\tret = es58x_set_realtime_diff_ns(es58x_dev);\n \t\tif (ret)"
+      },
+      {
+        "version": "v2",
+        "sent": "23 Dec 2025",
+        "url": "https://lore.kernel.org/r/20251223011732.39361-1-swilczek.lx@gmail.com"
+      }
+    ],
+    "messages": [
+      {
+        "version": "v1",
+        "who": "Szymon Wilczek",
+        "role": "author",
+        "date": "22 Dec 2025",
+        "depth": 0,
+        "kind": "patch",
+        "subject": "[PATCH] can: etas_es58x: fix memory leak in es58x_open()"
+      },
+      {
+        "version": "v1",
+        "who": "Vincent Mailhol",
+        "role": "reviewer",
+        "date": "22 Dec 2025",
+        "depth": 1,
+        "kind": "reply",
+        "text": "Hi Szymon,\n\nThanks for the patch.\n\nThe intended logic is that if es58x_alloc_rx_urbs() only partially\nsucceeds (i.e. submits at least one URB), then you are still able\nto continue.\n\nTo keep the intended logic, the final:\n\n  return ret;\n\nof es58x_alloc_rx_urbs() should be changed to:\n\n  return 0;\n\nIf you want to treat a partial allocation of the URBs as a\nnon-recoverable error, then fine, but this fix is not elegant.\n\nIn that case, please do the clean-up in es58x_alloc_rx_urbs() and\nupdate the error message accordingly.\n\nYours sincerely,\nVincent Mailhol"
+      },
+      {
+        "version": "v2",
+        "who": "Szymon Wilczek",
+        "role": "author",
+        "date": "23 Dec 2025",
+        "depth": 0,
+        "kind": "patch",
+        "subject": "[PATCH v2] can: etas_es58x: allow partial RX URB allocation to succeed",
+        "text": "Changes in v2:\n- Replaced the cleanup fix in es58x_open() with the logic fix in\n  es58x_alloc_rx_urbs() to treat partial allocation as success, as\n  suggested by Vincent Mailhol.\n---"
+      },
+      {
+        "version": "v2",
+        "who": "Vincent Mailhol",
+        "role": "reviewer",
+        "date": "23 Dec 2025",
+        "depth": 1,
+        "kind": "reply",
+        "quote": [
+          "Fixes: 8537257874e9 (\"can: etas_es58x: add core support for ETAS ES58X CAN USB interfaces\")",
+          "Reported-by: syzbot+e8cb6691a7cf68256cb8@syzkaller.appspotmail.com",
+          "Closes: https://syzkaller.appspot.com/bug?extid=e8cb6691a7cf68256cb8",
+          "Signed-off-by: Szymon Wilczek <swilczek.lx@gmail.com>"
+        ],
+        "text": "Thanks for the fix!\n\nReviewed-by: Vincent Mailhol <mailhol@kernel.org>\n\nYours sincerely,\nVincent Mailhol"
+      },
+      {
+        "version": "v2",
+        "who": "Marc Kleine-Budde",
+        "role": "maintainer",
+        "date": "24 Dec 2025",
+        "depth": 1,
+        "kind": "applied",
+        "quote": [
+          "Fixes: 8537257874e9 (\"can: etas_es58x: add core support for ETAS ES58X CAN USB interfaces\")",
+          "Reported-by: syzbot+e8cb6691a7cf68256cb8@syzkaller.appspotmail.com",
+          "Closes: https://syzkaller.appspot.com/bug?extid=e8cb6691a7cf68256cb8",
+          "Signed-off-by: Szymon Wilczek <swilczek.lx@gmail.com>"
+        ],
+        "text": "Applied to linux-can.\n\nThanks,\nMarc\n\nP.S.: There's no need to send a vN+1 patch as reply to vN"
+      }
+    ]
+  },
+  "d4168cb6ae4f": {
+    "versions": [
+      {
+        "version": "v1",
+        "sent": "20 Dec 2025",
+        "url": "https://lore.kernel.org/r/20251220173041.377376-1-szymonwilczek@gmx.com"
+      }
+    ],
+    "messages": [
+      {
+        "version": "v1",
+        "who": "Szymon Wilczek",
+        "role": "author",
+        "date": "20 Dec 2025",
+        "depth": 0,
+        "kind": "patch",
+        "subject": "[PATCH] hwmon: (acpi_power_meter) Replace deprecated strcpy() with strscpy()"
+      },
+      {
+        "version": "v1",
+        "who": "lihuisong (C)",
+        "role": "reviewer",
+        "date": "23 Dec 2025",
+        "depth": 1,
+        "kind": "reply",
+        "quote": [
+          "+\tstrscpy(acpi_device_name(device), ACPI_POWER_METER_DEVICE_NAME);",
+          "+\tstrscpy(acpi_device_class(device), ACPI_POWER_METER_CLASS);",
+          "  \tdevice->driver_data = resource;",
+          "  #if IS_REACHABLE(CONFIG_ACPI_IPMI)"
+        ],
+        "text": "LGTM,\nReviewed-by: lihuisong@huawei.com"
+      },
+      {
+        "version": "v1",
+        "who": "Guenter Roeck",
+        "role": "maintainer",
+        "date": "12 Jan 2026",
+        "depth": 1,
+        "kind": "applied",
+        "quote": [
+          "drivers/acpi/*.c.",
+          "Link: https://www.kernel.org/doc/html/latest/process/deprecated.html#strcpy",
+          "Signed-off-by: Szymon Wilczek <szymonwilczek@gmx.com>",
+          "Reviewed-by: lihuisong@huawei.com"
+        ],
+        "text": "Applied.\n\nThanks,\nGuenter"
+      }
+    ]
+  },
+  "d66676e6ca96": {
+    "versions": [
+      {
+        "version": "v1",
+        "sent": "21 Dec 2025",
+        "url": "https://lore.kernel.org/r/20251221155806.23925-1-swilczek.lx@gmail.com"
+      }
+    ],
+    "messages": [
+      {
+        "version": "v1",
+        "who": "Szymon Wilczek",
+        "role": "author",
+        "date": "21 Dec 2025",
+        "depth": 0,
+        "kind": "patch",
+        "subject": "[PATCH] wifi: libertas: fix WARNING in usb_tx_block"
+      }
+    ]
+  },
+  "e37a75bb866c": {
+    "versions": [
+      {
+        "version": "v1",
+        "sent": "22 Dec 2025",
+        "url": "https://lore.kernel.org/r/20251222151010.17263-1-swilczek.lx@gmail.com"
+      }
+    ],
+    "messages": [
+      {
+        "version": "v1",
+        "who": "Szymon Wilczek",
+        "role": "author",
+        "date": "22 Dec 2025",
+        "depth": 0,
+        "kind": "patch",
+        "subject": "[PATCH] fs/ntfs3: fix deadlock in ni_readpage_cmpr"
+      },
+      {
+        "version": "v1",
+        "who": "Konstantin Komarov",
+        "role": "maintainer",
+        "date": "26 Dec 2025",
+        "depth": 1,
+        "kind": "applied",
+        "quote": [
+          "  \t\terr = ni_readpage_cmpr(ni, folio);",
+          "-\t\tni_unlock(ni);",
+          "  \t\treturn err;",
+          "  \t}"
+        ],
+        "text": "Your patch is applied, thanks.\n\nRegards,\nKonstantin"
+      }
+    ]
+  }
+}
