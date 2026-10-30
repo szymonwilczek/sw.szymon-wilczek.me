@@ -147,6 +147,35 @@
       }
     ]
   },
+  "a8333c8262ae": {
+    "versions": [
+      {
+        "version": "v1",
+        "sent": "20 Dec 2025",
+        "url": "https://lore.kernel.org/r/20251220182419.390675-1-szymonwilczek@gmx.com"
+      }
+    ],
+    "messages": [
+      {
+        "version": "v1",
+        "who": "Szymon Wilczek",
+        "role": "author",
+        "date": "20 Dec 2025",
+        "depth": 0,
+        "kind": "patch",
+        "subject": "[PATCH] media: pvrusb2: fix URB leak in pvr2_send_request_ex"
+      },
+      {
+        "version": "v1",
+        "who": "Mike Isely",
+        "role": "reviewer",
+        "date": "20 Dec 2025",
+        "depth": 1,
+        "kind": "reply",
+        "text": "Acked-By: Mike Isely <isely@pobox.com>"
+      }
+    ]
+  },
   "b1979778e985": {
     "versions": [
       {
