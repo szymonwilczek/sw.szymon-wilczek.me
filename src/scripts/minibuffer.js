@@ -27,11 +27,11 @@ import { findDoor } from "../utils/garden";
       },
     },
     {
-      id: "view-files",
-      name: "view-files",
-      desc: "Jump to files and archives (/files)",
+      id: "view-research",
+      name: "view-research",
+      desc: "Jump to research and upstream work (/research)",
       action: function () {
-        window.location.href = "/files/";
+        window.location.href = "/research/";
       },
     },
     {
@@ -465,16 +465,16 @@ import { findDoor } from "../utils/garden";
         return;
       }
 
-      // Files
+      // Research
       if (
         event.shiftKey &&
-        (event.key === "F" || event.code === "KeyF") &&
+        (event.key === "R" || event.code === "KeyR") &&
         !event.ctrlKey &&
         !event.altKey &&
         !event.metaKey
       ) {
         event.preventDefault();
-        window.location.href = "/files/";
+        window.location.href = "/research/";
         return;
       }
 
