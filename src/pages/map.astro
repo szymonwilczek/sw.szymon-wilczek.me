@@ -194,7 +194,7 @@ const PLACES = [
     )}`,
   },
   { href: "/seals/", title: "tracks?", sub: "the seal book" },
-  { href: "/path/", title: "stepping stones", sub: "the years so far · the CV" },
+  { href: "/cv/", title: "stepping stones", sub: "the years so far · the CV" },
 ];
 const place = (href: string) => PLACES.find((spot) => spot.href === href)!;
 ---
@@ -832,11 +832,11 @@ const place = (href: string) => PLACES.find((spot) => spot.href === href)!;
 
         <!-- the years so far -->
         <a
-          href="/path/"
+          href="/cv/"
           class="place"
-          data-area="/path"
-          data-title={place("/path/").title}
-          data-sub={place("/path/").sub}
+          data-area="/cv"
+          data-title={place("/cv/").title}
+          data-sub={place("/cv/").sub}
         >
           {STONES.map((mapStone) => (
             <>
