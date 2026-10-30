@@ -1,7 +1,6 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Divider from "../components/Divider.astro";
-import Suminagashi from "../components/Suminagashi.astro";
 import themes from "../data/au-themes.json";
 
 const RADII = ["46% 54% 50% 50%", "52% 48% 44% 56%", "50% 50% 56% 44%", "44% 56% 48% 52%"];
@@ -158,22 +157,6 @@ const fonts = [
         </p>
       </div>
     </section>
-
-    <section>
-      <p class="num" aria-hidden="true">
-        04
-      </p>
-      <div class="body wide">
-        <h2>Endpaper</h2>
-        <p>
-          Old books close on a marbled endpaper, so this colophon does too. Touch the water and a
-          ring of ink spreads; touch again and clear water pushes it outward. Draw slowly through it
-          and the rings follow like a comb. Nothing moves on its own. When you like it, lay the
-          paper on it and the print is yours.
-        </p>
-        <Suminagashi />
-      </div>
-    </section>
   </div>
 </BaseLayout>
 
@@ -226,10 +209,6 @@ const fonts = [
     flex: 999 1 35rem;
     min-width: 0;
     max-width: 45rem;
-  }
-
-  .body.wide {
-    max-width: 62.5rem;
   }
 
   .body h2 {
