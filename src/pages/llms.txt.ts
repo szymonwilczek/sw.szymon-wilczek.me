@@ -13,11 +13,7 @@ const PAGES: Array<[string, string, string]> = [
   ["Bookshelf", "/books/", "Books read, one shelf per year, and what is being read now."],
   ["Uses", "/uses/", "Hardware, software and tools used day to day."],
   ["Links", "/links/", "The author's other sites and the small sites recommended here."],
-  [
-    "Research",
-    "/research/",
-    "Patches merged upstream and issues resolved there, each patch with its message, versions and diff.",
-  ],
+  ["Research", "/research/", "Patches merged upstream and issues resolved there."],
   ["Contact", "/contact/", "E-mail and the GPG public key with its fingerprint."],
 ];
 
