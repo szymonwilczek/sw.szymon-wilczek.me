@@ -135,6 +135,8 @@ const delay = (i: number) => (0.15 + (i / Math.max(1, list.length - 1)) * 1.6).t
 </BaseLayout>
 
 <script>
+  import { earn } from "../utils/garden";
+
   const rings = [...document.querySelectorAll<SVGGElement>(".ring")];
   const rows = [...document.querySelectorAll<HTMLLIElement>(".weeks li")];
   const card = document.querySelector<HTMLElement>(".card");
@@ -150,6 +152,7 @@ const delay = (i: number) => (0.15 + (i / Math.max(1, list.length - 1)) * 1.6).t
     card.querySelector(".card-n span")!.textContent = commitCount!;
     card.querySelector(".card-say")!.textContent = say!;
     card.querySelector(".card-areas")!.textContent = areas!;
+    if (i === "0") earn("年");
   };
 
   const pick = (ring: SVGGElement) => {
