@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Pill from "../../components/Pill.astro";
+import { threads } from "../../data/threads";
 import {
   dayMonthYear,
   githubUrl,
@@ -109,6 +110,19 @@ const elsewhere = [
   { href: githubUrl(patch), text: "GitHub" },
   { href: `${githubUrl(patch)}.patch`, text: "raw .patch" },
 ];
+const thread = threads[patch.short];
+const versions = thread?.versions ?? [];
+const mergedVersion = versions.at(-1);
+const earlier = versions.slice(0, -1);
+const patchTag = mergedVersion ? `[PATCH ${mergedVersion.version}]` : "[PATCH]";
+const INITIALS_LENGTH = 2;
+const initials = (who: string) =>
+  who
+    .split(" ")
+    .map((word) => word[0])
+    .join("")
+    .slice(0, INITIALS_LENGTH);
+
 const lagText =
   patch.lag === 0 ? "the same day" : `${patch.lag} ${patch.lag === 1 ? "day" : "days"} later`;
 ---
@@ -140,54 +154,171 @@ const lagText =
     </p>
   </header>
 
+  {earlier.length > 0 && mergedVersion && (
+    <div class="versions">
+      <span class="label">versions</span>
+      <div role="tablist" aria-label="Patch versions" data-versions>
+        {versions.map((version) => {
+          const shown = version === mergedVersion;
+          return (
+            <button
+              type="button"
+              role="tab"
+              id={`tab-${version.version}`}
+              aria-controls={`version-${version.version}`}
+              aria-selected={shown ? "true" : "false"}
+              tabindex={shown ? 0 : -1}
+            >
+              {version.version} · {version.sent}
+              {shown && " · merged"}
+            </button>
+          );
+        })}
+      </div>
+      <p class="versions-note">
+        showing <span data-version-shown>{mergedVersion.version}, the version that was merged</span>{" "}
+        · the message and the diff below change with the tab
+      </p>
+    </div>
+  )}
+
   <div class="patch-grid">
     <article class="patch">
-      <p class="mail">
-        <span>From:</span> {AUTHOR} &lt;{AUTHOR_MAIL}&gt;
-        <br />
-        <span>Date:</span> {dayMonthYear(patch.authored)}
-        <br />
-        <span>Subject:</span> [PATCH] {patch.subject}
-        <br />
-        <span>Merged:</span> {dayMonthYear(patch.merged)}, by {patch.by}
-      </p>
+      {earlier.map((version) => (
+        <div
+          class="version"
+          role="tabpanel"
+          id={`version-${version.version}`}
+          aria-labelledby={`tab-${version.version}`}
+          data-shown-as={`${version.version}, as sent to the list`}
+          hidden
+        >
+          <p class="mail">
+            <span>From:</span> {AUTHOR} &lt;{AUTHOR_MAIL}&gt;
+            <br />
+            <span>Date:</span> {version.sent}
+            <br />
+            <span>Subject:</span> [PATCH {version.version}] {patch.subject}
+          </p>
+          {version.message && <pre class="sent">{version.message}</pre>}
+          {version.diff && (
+            <section class="block">
+              <p class="label">diff</p>
+              <pre class="sent">{version.diff}</pre>
+            </section>
+          )}
+          <a class="view" href={version.url}>
+            this version on lore.kernel.org →
+          </a>
+        </div>
+      ))}
+      <div
+        class="version"
+        role={mergedVersion && earlier.length > 0 ? "tabpanel" : undefined}
+        id={mergedVersion && `version-${mergedVersion.version}`}
+        aria-labelledby={
+          mergedVersion && earlier.length > 0 ? `tab-${mergedVersion.version}` : undefined
+        }
+        data-shown-as={mergedVersion && `${mergedVersion.version}, the version that was merged`}
+      >
+        <p class="mail">
+          <span>From:</span> {AUTHOR} &lt;{AUTHOR_MAIL}&gt;
+          <br />
+          <span>Date:</span> {dayMonthYear(patch.authored)}
+          <br />
+          <span>Subject:</span> {patchTag} {patch.subject}
+          <br />
+          <span>Merged:</span> {dayMonthYear(patch.merged)}, by {patch.by}
+        </p>
 
-      <div class="message">
-        {blocks.map((block) => (block.typed ? <pre>{block.text}</pre> : <p>{block.text}</p>))}
-      </div>
+        <div class="message">
+          {blocks.map((block) => (block.typed ? <pre>{block.text}</pre> : <p>{block.text}</p>))}
+        </div>
 
-      <section class="block">
-        <p class="label">signed, reported, fixes</p>
-        <ul class="signers">
-          {signers.map((row) => (
-            <li>
-              <span class="key">{row.key}</span>
-              <span>
-                <span class:list={["who", { mono: row.mono }]}>{row.who}</span>
-                <span class="role">{row.role}</span>
-              </span>
-            </li>
-          ))}
-        </ul>
-      </section>
+        <section class="block">
+          <p class="label">signed, reported, fixes</p>
+          <ul class="signers">
+            {signers.map((row) => (
+              <li>
+                <span class="key">{row.key}</span>
+                <span>
+                  <span class:list={["who", { mono: row.mono }]}>{row.who}</span>
+                  <span class="role">{row.role}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
 
-      <section class="block">
-        <p class="label">diff</p>
-        {patch.files.map((file) => (
-          <figure class="diff">
-            <figcaption>
-              {file.name}{" "}
-              <span class="counts">
-                <span class="plus">+{file.additions}</span>{" "}
-                <span class="minus">−{file.deletions}</span>
-              </span>
-            </figcaption>
-            <pre><code>{file.patch.split("\n").map((line) => (
+        <section class="block">
+          <p class="label">diff</p>
+          {patch.files.map((file) => (
+            <figure class="diff">
+              <figcaption>
+                {file.name}{" "}
+                <span class="counts">
+                  <span class="plus">+{file.additions}</span>{" "}
+                  <span class="minus">−{file.deletions}</span>
+                </span>
+              </figcaption>
+              <pre><code>{file.patch.split("\n").map((line) => (
               <span class:list={["line", lineKind(line)]}>{line || " "}</span>
             ))}</code></pre>
-          </figure>
-        ))}
-      </section>
+            </figure>
+          ))}
+        </section>
+      </div>
+
+      {thread && thread.messages.length > 0 && (
+        <section class="block discussion">
+          <p class="label">discussion · on the list</p>
+          {versions.map((version) => {
+            const said = thread.messages.filter((message) => message.version === version.version);
+            return (
+              said.length > 0 && (
+                <>
+                  <p class="label root">
+                    {version.version} · {said.length} {said.length === 1 ? "message" : "messages"}
+                  </p>
+                  {said.map((message) => (
+                    <div
+                      class:list={["reply", { nested: message.depth > 0 }]}
+                      style={`--depth: ${message.depth}`}
+                    >
+                      <article class:list={["said", message.kind]}>
+                        {message.kind === "applied" && <span class="stamp">applied</span>}
+                        <p class="said-head">
+                          <span
+                            class:list={["badge", { mine: message.who === AUTHOR }]}
+                            aria-hidden="true"
+                          >
+                            {initials(message.who)}
+                          </span>
+                          <span class="said-who">{message.who}</span>
+                          <span class="said-role">{message.role}</span>
+                          <span class="said-date">{message.date}</span>
+                        </p>
+                        {message.subject && <p class="said-subject">{message.subject}</p>}
+                        {message.quote && (
+                          <blockquote>
+                            {message.quote.map((line) => (
+                              <span>&gt; {line}</span>
+                            ))}
+                          </blockquote>
+                        )}
+                        {message.text && <p class="said-text">{message.text}</p>}
+                      </article>
+                    </div>
+                  ))}
+                </>
+              )
+            );
+          })}
+          <a class="view" href={loreUrl(patch)}>
+            the whole thread on lore.kernel.org
+          </a>
+        </section>
+      )}
 
       <nav class="ends" aria-label="Other patches">
         {newer ? (
@@ -269,6 +400,36 @@ const lagText =
     </aside>
   </div>
 </BaseLayout>
+
+<script>
+  // the version tabs: the merged one shows first, the others on a click
+  for (const list of document.querySelectorAll<HTMLElement>("[data-versions]")) {
+    const tabs = [...list.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
+    const note = document.querySelector("[data-version-shown]");
+    const show = (chosen: HTMLButtonElement) => {
+      for (const tab of tabs) {
+        const on = tab === chosen;
+        tab.setAttribute("aria-selected", String(on));
+        tab.tabIndex = on ? 0 : -1;
+        const panel = document.getElementById(tab.getAttribute("aria-controls") ?? "");
+        if (panel) panel.hidden = !on;
+        if (on && note && panel) note.textContent = panel.dataset.shownAs ?? "";
+      }
+    };
+    list.addEventListener("click", (event) => {
+      const tab = (event.target as Element).closest<HTMLButtonElement>('[role="tab"]');
+      if (tab) show(tab);
+    });
+    list.addEventListener("keydown", (event) => {
+      const step = { ArrowRight: 1, ArrowLeft: -1 }[event.key];
+      if (!step) return;
+      const at = tabs.findIndex((tab) => tab.tabIndex === 0);
+      const next = tabs[(at + step + tabs.length) % tabs.length];
+      show(next);
+      next.focus();
+    });
+  }
+</script>
 
 <style>
   .patch-head {
@@ -569,7 +730,192 @@ const lagText =
     gap: 0.25rem;
   }
 
+  .versions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.625rem;
+    margin-top: 1.625rem;
+  }
+
+  .versions .label {
+    margin: 0 0.375rem 0 0;
+  }
+
+  [role="tablist"] {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  [role="tab"] {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2.5rem;
+    padding: 0 0.875rem;
+    border: 1px dashed var(--border);
+    border-radius: 5px 8px 6px 9px;
+    background: transparent;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--fg-dim);
+    cursor: pointer;
+  }
+
+  [role="tab"][aria-selected="true"] {
+    border: 1.5px solid var(--cursor);
+    background: var(--paper);
+    color: var(--fg-main);
+  }
+
+  [role="tab"][aria-selected="true"]::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 48% 52% 45% 55%;
+    background: var(--cursor);
+  }
+
+  .versions-note {
+    flex-basis: 100%;
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    color: var(--fg-dim);
+  }
+
+  .sent {
+    margin: 0 0 1rem;
+    background: var(--paper);
+    font-size: 0.8125rem;
+    white-space: pre-wrap;
+  }
+
+  .discussion {
+    margin-top: 2.75rem;
+  }
+
+  .root {
+    margin-top: 1.625rem;
+  }
+
+  .reply {
+    --step: 1.75rem;
+    position: relative;
+    margin: 0 0 0.75rem calc(var(--step) * var(--depth));
+  }
+
+  .reply.nested::before {
+    content: "";
+    position: absolute;
+    top: -0.75rem;
+    bottom: 50%;
+    left: -0.875rem;
+    width: 0.75rem;
+    border-bottom: 1.2px solid var(--border);
+    border-left: 1.2px solid var(--border);
+    border-bottom-left-radius: 9px 7px;
+  }
+
+  .said {
+    position: relative;
+    padding: 0.875rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 5px 8px 6px 9px;
+    background: var(--paper);
+  }
+
+  .said.patch {
+    background: transparent;
+  }
+
+  .said.applied {
+    border: 1.5px solid var(--cursor);
+  }
+
+  .stamp {
+    position: absolute;
+    top: -0.6875rem;
+    right: 1rem;
+    padding: 0 0.5rem;
+    background: var(--bg-main);
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    color: var(--cursor);
+  }
+
+  .said-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.375rem 0.625rem;
+    margin: 0;
+  }
+
+  .badge {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 1.875rem;
+    height: 1.875rem;
+    border: 1.5px solid var(--fg-link);
+    border-radius: 48% 52% 45% 55% / 55% 45% 52% 48%;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+  }
+
+  .badge.mine {
+    border-color: var(--cursor);
+  }
+
+  .said-who {
+    font-size: 1rem;
+  }
+
+  .said-role,
+  .said-date {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    color: var(--fg-dim);
+  }
+
+  .said-date {
+    margin-left: auto;
+  }
+
+  .said-subject {
+    margin: 0.5rem 0 0;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+  }
+
+  .said blockquote {
+    margin: 0.625rem 0 0;
+    padding: 0.125rem 0 0.125rem 0.75rem;
+    border-left: 2px solid var(--border);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    line-height: 1.6;
+    color: var(--fg-dim);
+  }
+
+  .said blockquote span {
+    display: block;
+  }
+
+  .said-text {
+    margin: 0.625rem 0 0;
+    font-size: 1rem;
+    color: var(--fg-dim);
+  }
+
   @media (max-width: 47.99em) {
+    .reply {
+      --step: 0.875rem;
+    }
+
     .patch-head {
       margin-top: 2rem;
     }
