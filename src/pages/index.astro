@@ -1,110 +1,86 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Divider from "../components/Divider.astro";
-import Karesansui from "../components/Karesansui.astro";
 import { getCollection } from "astro:content";
-import { getAllAlbums } from "../utils/albums";
-import { dottedDate, writingSlug } from "../utils/format";
+import { CV } from "../data/years";
+import { writingSlug } from "../utils/format";
+import { dayMonthYear, patches } from "../utils/research";
 
-const posts = (await getCollection("writings"))
-  .sort((former, latter) => latter.data.pubDate.valueOf() - former.data.pubDate.valueOf())
-  .slice(0, 5);
+const LEDGER_LENGTH = 9;
 
-const albums = (await getAllAlbums()).sort(
-  (former, latter) => latter.date.valueOf() - former.date.valueOf(),
-);
-const files = await getCollection("files");
-
-// with no files to list the sidebar shows second album
-const lensAlbums = albums.slice(0, files.length > 0 ? 1 : 2);
-const recentFiles = files.slice(0, 3);
+const essays = (await getCollection("writings")).map((post) => ({
+  kind: "essay",
+  date: post.data.pubDate,
+  title: post.data.title,
+  href: `/writings/${writingSlug(post.id)}/`,
+}));
+const merged = patches.map((patch) => ({
+  kind: "patch",
+  date: patch.authored,
+  title: patch.subject,
+  href: `/research/${patch.short}/`,
+}));
+const recent = [...essays, ...merged]
+  .sort((former, latter) => latter.date.valueOf() - former.date.valueOf())
+  .slice(0, LEDGER_LENGTH);
 ---
 
 <BaseLayout
   title="Szymon Wilczek"
-  description="Essays on low-level computing and the philosophy of software, notes written in plain Org, files worth downloading, and photographs from places I walked through."
+  description="Szymon Wilczek, a Computer Science student in Gliwice: patches merged into Linux and Git, and essays on low-level computing and the philosophy of software."
 >
   <section class="hero">
-    <div class="hero-text">
-      <h1>
-        Hello. I am <em>Szymon</em>,<br />
-        and this is where I keep things.
-      </h1>
-      <p>
-        Essays on low-level computing and the philosophy of software, notes written in plain Org,
-        files worth downloading, and photographs from places I walked through. Nothing here is
-        finished.
-      </p>
-    </div>
+    <h1>Szymon Wilczek</h1>
+    <p>
+      B.Sc. Eng. student, Computer Science
+      <br />
+      Faculty of Automatic Control, Electronics and Computer Science
+      <br />
+      Silesian University of Technology, Gliwice
+    </p>
   </section>
 
   <Divider from={300} to={540} />
 
   <div class="home-grid">
-    <section class="writings">
-      <div class="section-head">
-        <h2>Writings</h2>
-        <a href="/writings/" class="hand-link">
-          all of them →
-        </a>
-      </div>
-      <ol class="post-list">
-        {posts.map((post) => (
-          <li>
-            <span class="post-date">{dottedDate(post.data.pubDate)}</span>
-            <span class="post-body">
-              <a href={`/writings/${writingSlug(post.id)}/`} class="post-title">
-                {post.data.title}
-              </a>
-              {post.data.description && <span class="post-desc">{post.data.description}</span>}
-              {post.data.tags.length > 0 && (
-                <span class="post-tags">{post.data.tags.slice(0, 3).join(" · ")}</span>
-              )}
-            </span>
+    <aside class="side">
+      <dl>
+        <dt>cv</dt>
+        <dd>
+          <a href={CV}>{CV.split("/").pop()}</a>
+        </dd>
+        <dt>code</dt>
+        <dd>
+          <a href="https://github.com/szymonwilczek">github.com/szymonwilczek</a>
+        </dd>
+        <dt>mail</dt>
+        <dd>
+          <a href="/contact/">contact &amp; gpg key</a>
+        </dd>
+      </dl>
+      <p class="interests">
+        I work on operating systems and the Linux kernel, filesystems, platform security (TPM, eBPF,
+        measured boot), and GNU Emacs.
+      </p>
+    </aside>
+
+    <section>
+      <p class="ledger-label">recent · newest first</p>
+      <ul class="ledger">
+        {recent.map((entry) => (
+          <li class={entry.kind}>
+            <span class="date">{dayMonthYear(entry.date)}</span>
+            <span class="kind">{entry.kind}</span>
+            <a href={entry.href}>{entry.title}</a>
           </li>
         ))}
-      </ol>
+      </ul>
+      <p class="more">
+        <a href="/research/">research →</a>
+        <a href="/writings/">writings →</a>
+      </p>
     </section>
-
-    <aside class="side">
-      {lensAlbums.length > 0 && (
-        <section>
-          <h2>Lately, through a lens</h2>
-          {lensAlbums.map((album) => (
-            <figure class="lens">
-              <a href={`/photos/${album.slug}/`}>
-                <img
-                  src={album.coverThumb}
-                  alt={`${album.title}, ${album.dateFormatted}`}
-                  loading="lazy"
-                  decoding="async"
-                />
-              </a>
-              <figcaption class="hand">
-                {album.title}, {album.dateFormatted}
-              </figcaption>
-            </figure>
-          ))}
-        </section>
-      )}
-
-      {recentFiles.length > 0 && (
-        <section>
-          <h2>Files</h2>
-          <ul class="file-list">
-            {recentFiles.map((file) => (
-              <li>
-                <a href="/files/">{file.data.filename}</a>
-                <span>{file.data.filesize}</span>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-    </aside>
   </div>
-
-  <Karesansui />
 </BaseLayout>
 
 <script>
@@ -114,45 +90,20 @@ const recentFiles = files.slice(0, 3);
 <style>
   .hero {
     position: relative;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 3rem;
-    align-items: flex-start;
-    justify-content: space-between;
-    margin-top: 1rem;
-  }
-
-  .hero-text {
-    flex: 999 1 32.5rem;
-    min-width: 0;
-    max-width: 42.5rem;
+    margin-top: 3.5rem;
   }
 
   .hero h1 {
     margin: 0;
-    font-size: clamp(2.25rem, 1.5rem + 2.6vw, 3.375rem);
-    line-height: 1.12;
+    font-size: clamp(2rem, 1.4rem + 2vw, 2.875rem);
+    line-height: 1.14;
     letter-spacing: -0.01em;
   }
 
-  .hero h1 em {
-    font-weight: 400;
-  }
-
   .hero p {
-    max-width: 35rem;
     margin: 1rem 0 0;
+    font-size: 1.0625rem;
     color: var(--fg-dim);
-  }
-
-  .hero p:first-of-type {
-    margin-top: 1.75rem;
-  }
-
-  .hero p a {
-    color: var(--fg-link);
-    text-decoration: none;
-    border-bottom: 1px solid var(--border);
   }
 
   .enso-hint {
@@ -237,168 +188,137 @@ const recentFiles = files.slice(0, 3);
   }
 
   .home-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4rem;
-  }
-
-  .home-grid h2 {
-    margin: 0;
-    padding: 0;
-    border: 0;
-    font-weight: 400;
-  }
-
-  .writings {
-    flex: 999 1 35rem;
-    min-width: 0;
-  }
-
-  .section-head {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 1rem;
-  }
-
-  .writings h2 {
-    font-size: 1.75rem;
-  }
-
-  .hand-link {
-    display: flex;
-    align-items: center;
-    min-height: 44px;
-    font-family: var(--font-hand);
-    font-size: 1.125rem;
-    color: var(--fg-link);
-    text-decoration: none;
-  }
-
-  .post-list {
-    margin: 1rem 0 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  .post-list li {
     display: grid;
-    grid-template-columns: 7.5rem minmax(0, 1fr);
-    gap: 1.5rem;
-    padding: 1.375rem 0;
-    border-top: 1px dashed var(--border);
+    grid-template-columns: 18.75rem minmax(0, 1fr);
+    gap: 3.5rem;
   }
 
-  .post-date {
-    padding-top: 0.375rem;
+  .side {
+    display: flex;
+    flex-direction: column;
+    gap: 1.125rem;
+  }
+
+  dl {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr);
+    gap: 0.375rem 0.875rem;
+    margin: 0;
+    font-size: 0.9375rem;
+  }
+
+  dt,
+  .ledger-label,
+  .date,
+  .kind {
     font-family: var(--font-mono);
-    font-size: 0.8125rem;
     color: var(--fg-dim);
   }
 
-  .post-body {
-    display: flex;
-    flex-direction: column;
-    gap: 0.375rem;
+  dt {
+    font-size: 0.6875rem;
+    line-height: inherit;
   }
 
-  .post-title {
-    font-size: 1.3125rem;
-    line-height: 1.3;
+  dd {
+    margin: 0;
+  }
+
+  .side a,
+  .more a {
+    text-underline-offset: 4px;
+  }
+
+  .interests {
+    margin: 0;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.9375rem;
+    color: var(--fg-dim);
+  }
+
+  .ledger-label {
+    margin: 0 0 0.75rem;
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+  }
+
+  .ledger {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--border);
+  }
+
+  .ledger li {
+    display: grid;
+    grid-template-columns: 6.875rem 4rem minmax(0, 1fr);
+    gap: 0.125rem 1.125rem;
+    align-items: baseline;
+    padding: 0.6875rem 0;
+    border-bottom: 1px dashed var(--border);
+  }
+
+  .date {
+    font-size: 0.75rem;
+  }
+
+  .kind {
+    font-size: 0.6875rem;
+  }
+
+  .ledger a {
     color: var(--fg-main);
     text-decoration: none;
   }
 
-  .post-title:hover {
-    color: var(--fg-link-hover);
+  .ledger a:hover {
+    text-decoration: underline;
+    text-underline-offset: 4px;
   }
 
-  .post-desc {
-    font-size: 1rem;
-    line-height: 1.55;
-    color: var(--fg-dim);
+  .essay .kind {
+    color: var(--fg-link);
   }
 
-  .post-tags {
+  .essay a {
+    font-size: 1.0625rem;
+  }
+
+  .patch .kind {
+    color: var(--red);
+  }
+
+  .patch a {
     font-family: var(--font-mono);
-    font-size: 0.75rem;
-    color: var(--accent-0);
+    font-size: 0.875rem;
   }
 
-  .side {
-    flex: 1 1 17.5rem;
+  .more {
     display: flex;
-    flex-direction: column;
-    gap: 3rem;
-  }
-
-  .side h2 {
-    font-size: 1.375rem;
-  }
-
-  .lens {
-    margin: 1.25rem 0 0;
-  }
-
-  .lens + .lens {
-    margin-top: 2rem;
-  }
-
-  .lens img {
-    display: block;
-    width: 100%;
-    height: 220px;
-    object-fit: cover;
-    border-radius: var(--radius-soft);
-    filter: saturate(0.85);
-  }
-
-  .lens figcaption {
-    margin-top: 0.625rem;
-    font-size: 1.125rem;
-  }
-
-  .file-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.625rem;
+    gap: 1.5rem;
     margin: 1rem 0 0;
-    padding: 0;
-    list-style: none;
-    font-family: var(--font-mono);
-    font-size: 0.8125rem;
-  }
-
-  .file-list li {
-    display: flex;
-    justify-content: space-between;
-    gap: 0.75rem;
-  }
-
-  .file-list span {
-    color: var(--fg-dim);
+    font-size: 0.9375rem;
   }
 
   @media (max-width: 47.99em) {
     .hero {
+      margin-top: 2rem;
+    }
+
+    .home-grid {
+      grid-template-columns: minmax(0, 1fr);
       gap: 2.5rem;
     }
 
-    .writings h2 {
-      font-size: 1.5rem;
+    .ledger li {
+      grid-template-columns: auto auto;
+      justify-content: start;
     }
 
-    .post-list li {
-      grid-template-columns: minmax(0, 1fr);
-      gap: 0.375rem;
-    }
-
-    .post-date {
-      padding-top: 0;
-    }
-
-    .post-title {
-      font-size: 1.25rem;
+    .ledger a {
+      grid-column: 1 / -1;
     }
   }
 </style>
