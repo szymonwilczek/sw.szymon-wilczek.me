@@ -1,5 +1,7 @@
 import { defineConfig } from "astro/config";
 import sitemap from "@astrojs/sitemap";
+import postAudit from "@casoon/astro-post-audit";
+import linkChecker from "astro-better-link-checker";
 import { readdir, readFile, writeFile } from "node:fs/promises";
 import { execFileSync } from "node:child_process";
 import { join } from "node:path";
@@ -125,5 +127,13 @@ export default defineConfig({
         return item;
       },
     }),
+    ...(process.env.CI
+      ? [
+          linkChecker({
+            excludeDestinations: [/^\/writings\/[^/]+\.pdf$/, "/somewhere-else/"],
+          }),
+          postAudit({ preset: "standard", failOn: "never" }),
+        ]
+      : []),
   ],
 });
