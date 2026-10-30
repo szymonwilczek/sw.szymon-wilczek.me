@@ -75,11 +75,11 @@ import { findDoor } from "../utils/garden";
       },
     },
     {
-      id: "view-path",
-      name: "view-path",
-      desc: "Walk the stepping stones, the years so far (/path)",
+      id: "view-cv",
+      name: "view-cv",
+      desc: "Read the curriculum vitae (/cv)",
       action: function () {
-        window.location.href = "/path/";
+        window.location.href = "/cv/";
       },
     },
     {
