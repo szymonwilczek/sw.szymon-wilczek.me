@@ -25,6 +25,7 @@ import {
   type Stroke,
   type UV,
 } from "../../utils/tea/pottery";
+import { earn } from "../../utils/garden";
 import { keep, send } from "../../utils/tea/inbox";
 import {
   tones,
@@ -395,6 +396,7 @@ export function run(host: HTMLElement, work: Work, done: (w: Work) => void) {
     const finished = clean({ ...spec, name, sign, made });
     if (!finished) return;
     keep(finished);
+    earn("陶");
     view.clearUi();
     view.say("it goes to the host, and onto the shelf in the waiting room…");
     const outcome = await send(finished, localStorage.getItem("roji:key") || "");
