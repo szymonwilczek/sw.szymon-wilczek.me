@@ -9,7 +9,6 @@ const GLOSSARY: Record<string, [string, string, number, string?]> = {
   迷: ["mayou", "to lose the way", 9],
   書: ["kaku", "to write", 10],
   写: ["utsusu", "to copy, to photograph", 5],
-  合: ["au", "to match, to fit", 6],
   秋: ["aki", "autumn", 9],
   北: ["kita", "north", 5],
   夜: ["yoru", "night", 8],

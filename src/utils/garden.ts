@@ -13,7 +13,6 @@ export const SEALS: SealPage[] = [
   { glyph: "書", note: "opened an essay", hint: "pick something to read" },
   { glyph: "終", note: "read one to the end", hint: "all the way down" },
   { glyph: "写", note: "walked an album", hint: "look at every photo" },
-  { glyph: "合", note: "checked a file", hint: "a file and its tag" },
   { glyph: "秋", note: "came in autumn", hint: "when the maples turn" },
   { glyph: "北", note: "the garden is round", hint: "there is a map" },
   { glyph: "封", note: "what the well keeps", hint: "something is sealed" },
