@@ -107,6 +107,22 @@ import { findDoor } from "../utils/garden";
       },
     },
     {
+      id: "view-send",
+      name: "view-send",
+      desc: "Pass text and files to another screen (/send)",
+      action: function () {
+        window.location.href = "/send/";
+      },
+    },
+    {
+      id: "view-org",
+      name: "view-org",
+      desc: "Lay an .org file on the reader (/org)",
+      action: function () {
+        window.location.href = "/org/";
+      },
+    },
+    {
       id: "au-themes-select",
       name: "au-themes-select",
       desc: "Choose a colour theme with live preview (Shift+T)",
