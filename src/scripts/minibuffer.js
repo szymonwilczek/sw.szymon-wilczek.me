@@ -67,14 +67,6 @@ import { findDoor } from "../utils/garden";
       },
     },
     {
-      id: "view-seeds",
-      name: "view-seeds",
-      desc: "Open the seed packets (/seeds)",
-      action: function () {
-        window.location.href = "/seeds/";
-      },
-    },
-    {
       id: "view-uses",
       name: "view-uses",
       desc: "Look over the tools on the tea tray (/uses)",

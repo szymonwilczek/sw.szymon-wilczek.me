@@ -24,7 +24,6 @@ const PAGES: Array<[string, string, string]> = [
 
 const OPTIONAL: Array<[string, string, string]> = [
   ["Map", "/map/", "An illustrated map linking every page of the site."],
-  ["Seeds", "/seeds/", "Essays planned but not yet written, with their stage."],
   ["Changelog", "/changelog/", "The site's history: commits per week since the first one."],
   [
     "Roji",

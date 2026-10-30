@@ -36,7 +36,6 @@ const DATA = {
   "/photos/bookmarks/": ["public/images"],
   "/projects/": ["src/data/projects.json"],
   "/books/": ["src/data/books.org"],
-  "/seeds/": ["src/data/seeds.org"],
   "/uses/": ["src/data/uses.ts", "src/utils/dogu.ts"],
   "/links/": ["src/data/links.ts"],
   "/path/": ["src/data/years.ts"],
