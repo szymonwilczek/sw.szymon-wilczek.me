@@ -38,13 +38,16 @@ const DROPS = ["0", "4rem", "0", "3rem", "0"];
           aria-label={`${album.title}, ${album.photoCount} frames`}
           data-astro-prefetch="hover"
         >
-          <img
-            src={album.coverThumb || album.coverImage}
-            alt=""
-            loading={i < 2 ? "eager" : "lazy"}
-            fetchpriority={i === 0 ? "high" : undefined}
-            decoding="async"
-          />
+          <picture>
+            {album.coverAvif && <source srcset={album.coverAvif} type="image/avif" />}
+            <img
+              src={album.coverThumb || album.coverImage}
+              alt=""
+              loading={i < 2 ? "eager" : "lazy"}
+              fetchpriority={i === 0 ? "high" : undefined}
+              decoding="async"
+            />
+          </picture>
           <div class="back">
             <svg class="fold" viewBox="0 0 8 100" preserveAspectRatio="none" aria-hidden="true">
               <path d="M4.4 0 C 3 14, 5.6 30, 4 46 S 2.8 70, 4.6 84 S 4 96, 3.2 100" />
@@ -141,6 +144,10 @@ const DROPS = ["0", "4rem", "0", "3rem", "0"];
   .postcard:hover {
     color: inherit;
     transform: translateY(-3px);
+  }
+
+  .postcard picture {
+    display: contents;
   }
 
   .postcard img {

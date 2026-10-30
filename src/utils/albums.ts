@@ -45,6 +45,7 @@ export interface PhotoAlbum {
   dateFormatted: string;
   coverImage: string;
   coverThumb: string;
+  coverAvif?: string;
   photoCount: number;
   totalSizeBytes: number;
   totalSizeFormatted: string;
@@ -390,6 +391,13 @@ export async function getAllAlbums(): Promise<PhotoAlbum[]> {
         : coverThumbFsPath && fs.existsSync(coverThumbFsPath)
           ? `/images/${folderName}/thumbs/${coverPhotoId}.webp`
           : coverImage;
+    const coverAvifFsPath = coverPhotoId
+      ? path.join(albumPath, "thumbs", `${coverPhotoId}-600.avif`)
+      : "";
+    const coverAvif =
+      coverAvifFsPath && fs.existsSync(coverAvifFsPath)
+        ? `/images/${folderName}/thumbs/${coverPhotoId}-600.avif`
+        : undefined;
 
     albums.push({
       id: folderName,
@@ -404,6 +412,7 @@ export async function getAllAlbums(): Promise<PhotoAlbum[]> {
       dateFormatted,
       coverImage,
       coverThumb,
+      coverAvif,
       photoCount: photos.length,
       totalSizeBytes,
       totalSizeFormatted: formatBytes(totalSizeBytes),

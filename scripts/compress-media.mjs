@@ -6,6 +6,8 @@ import sharp from "sharp";
 const GITHUB_RECOMMENDED_LIMIT_BYTES = 1024 * 1024 * 1024; // 1 GB
 const MAX_DIMENSION = 2560; // 2.5K QHD
 const JPEG_QUALITY = 85;
+const COVER_AVIF_QUALITY = 55;
+const COVER_AVIF_EFFORT = 6;
 
 function formatBytes(bytes) {
   if (bytes === 0) return "0 B";
@@ -53,6 +55,7 @@ async function generateThumbnail(filePath, force = false) {
 
   const thumbPath = path.join(thumbsDir, `${base}.webp`);
   const coverPath = path.join(thumbsDir, `${base}-600.webp`);
+  const coverAvifPath = path.join(thumbsDir, `${base}-600.avif`);
   const origStat = fs.statSync(filePath);
 
   let streamThumbCreated = false;
@@ -98,12 +101,36 @@ async function generateThumbnail(filePath, force = false) {
     coverThumbCreated = true;
   }
 
+  if (
+    force ||
+    !fs.existsSync(coverAvifPath) ||
+    fs.statSync(coverAvifPath).mtimeMs < origStat.mtimeMs
+  ) {
+    const coverAvifBuffer = await sharp(buffer)
+      .rotate()
+      .resize({
+        width: 600,
+        height: 600,
+        fit: "inside",
+        withoutEnlargement: true,
+      })
+      .toColorspace("srgb")
+      .avif({
+        quality: COVER_AVIF_QUALITY,
+        effort: COVER_AVIF_EFFORT,
+      })
+      .toBuffer();
+    fs.writeFileSync(coverAvifPath, coverAvifBuffer);
+    coverThumbCreated = true;
+  }
+
   const thumbSize = fs.existsSync(thumbPath) ? fs.statSync(thumbPath).size : 0;
   const coverSize = fs.existsSync(coverPath) ? fs.statSync(coverPath).size : 0;
+  const coverAvifSize = fs.existsSync(coverAvifPath) ? fs.statSync(coverAvifPath).size : 0;
 
   return {
     skipped: !streamThumbCreated && !coverThumbCreated,
-    size: thumbSize + coverSize,
+    size: thumbSize + coverSize + coverAvifSize,
   };
 }
 
