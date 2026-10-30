@@ -5,7 +5,7 @@ import { getAllAlbums } from "../utils/albums";
 import { writingSlug } from "../utils/format";
 
 const PAGES: Array<[string, string, string]> = [
-  ["About", "/about/", "Biography, background, editors, and upstream contributions."],
+  ["About", "/about/", "Who the author is, and the work they do now."],
   ["CV", "/cv/", "Education, upstream work, experience and certificates; as a PDF too."],
   ["Projects", "/projects/", "Every open-source project with its language and repository."],
   ["Writings", "/writings/", "All essays, newest first, filterable by tag."],
