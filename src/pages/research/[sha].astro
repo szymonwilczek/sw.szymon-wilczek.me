@@ -1,0 +1,586 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Pill from "../../components/Pill.astro";
+import {
+  dayMonthYear,
+  githubUrl,
+  kernelOrgUrl,
+  loreUrl,
+  name,
+  patches,
+  syzbotUrl,
+  type Patch,
+  type Trailer,
+} from "../../utils/research";
+
+export function getStaticPaths() {
+  return patches.map((patch, i) => ({
+    params: { sha: patch.short },
+    props: { patch, newer: patches[i - 1], older: patches[i + 1] },
+  }));
+}
+
+interface Props {
+  patch: Patch;
+  newer?: Patch;
+  older?: Patch;
+}
+
+const { patch, newer, older } = Astro.props;
+
+const AUTHOR = "Szymon Wilczek";
+const AUTHOR_MAIL = "swilczek.lx@gmail.com";
+const MAINTAINS: Record<string, string> = {
+  "Konstantin Komarov": "ntfs3",
+  "Johannes Berg": "wireless",
+  "Marc Kleine-Budde": "CAN",
+  "Hans Verkuil": "media",
+  "Guenter Roeck": "hwmon",
+  "Junio C Hamano": "Git",
+};
+const PEBBLES_PER_FILE = 8;
+const PEBBLES_TOTAL = 12;
+const BLOBS = [
+  "48% 52% 45% 55% / 55% 45% 52% 48%",
+  "55% 45% 50% 50% / 45% 55% 48% 52%",
+  "45% 55% 52% 48% / 50% 50% 55% 45%",
+];
+
+const merged = patch.project === "git" ? "applied it" : "merged it";
+
+function signer(trailer: Trailer): { who: string; role: string; mono?: boolean } | undefined {
+  const who = name(trailer);
+  const fuzzer = who.startsWith("syzbot");
+  switch (trailer.key) {
+    case "Signed-off-by":
+      if (who === AUTHOR) return { who, role: "author" };
+      if (who === patch.by)
+        return { who, role: `${MAINTAINS[who] ?? "the"} maintainer · ${merged}` };
+      return { who, role: "signed it" };
+    case "Reported-by":
+      return fuzzer
+        ? { who: "syzbot", role: "reported it · the kernel fuzzer" }
+        : { who, role: "reported it" };
+    case "Tested-by":
+      return { who: fuzzer ? "syzbot" : who, role: "tested it" };
+    case "Reviewed-by":
+      return { who, role: "reviewed it" };
+    case "Acked-by":
+      return { who, role: "acked it" };
+    case "Fixes":
+      return { who: trailer.value.split(" (")[0], role: "the commit it fixes", mono: true };
+  }
+}
+
+const signers = patch.trailers.flatMap((trailer) => {
+  const row = signer(trailer);
+  return row ? [{ key: trailer.key, ...row }] : [];
+});
+
+const blocks = patch.prose.split(/\n{2,}/).map((text) => {
+  const lines = text.split("\n");
+  const typed =
+    lines.every((line) => /^\s{2,}/.test(line)) || /^\d+\./.test(text) || /:\n\d+\./.test(text);
+  return typed ? { typed, text } : { typed, text: lines.join(" ") };
+});
+
+function lineKind(line: string): string {
+  if (line.startsWith("@@")) return "hunk";
+  if (line.startsWith("+")) return "add";
+  if (line.startsWith("-")) return "del";
+  return "context";
+}
+
+function pebbles(additions: number, deletions: number, count: number) {
+  const total = Math.max(additions + deletions, 1);
+  const shown = Math.min(count, total);
+  const adds = Math.round((shown * additions) / total);
+  return Array.from({ length: shown }, (_, i) => ({
+    add: i < adds,
+    blob: BLOBS[i % BLOBS.length],
+  }));
+}
+
+const repoName = patch.repo === "git/git" ? "git/git" : "torvalds/linux";
+const syzbot = syzbotUrl(patch);
+const elsewhere = [
+  { href: loreUrl(patch), text: "lore.kernel.org" },
+  ...(syzbot ? [{ href: syzbot, text: "syzbot report" }] : []),
+  { href: githubUrl(patch), text: "GitHub" },
+  { href: `${githubUrl(patch)}.patch`, text: "raw .patch" },
+];
+const lagText =
+  patch.lag === 0 ? "the same day" : `${patch.lag} ${patch.lag === 1 ? "day" : "days"} later`;
+---
+
+<BaseLayout
+  title={patch.title}
+  description={`${patch.subject} · merged into ${patch.project === "git" ? "Git" : "Linux"} by ${patch.by}.`}
+  breadcrumbs={[
+    { name: "Research", url: "/research/" },
+    { name: patch.title, url: `/research/${patch.short}/` },
+  ]}
+>
+  <header class="patch-head">
+    <p class="crumbs">
+      <a href="/research/">research</a> / {patch.project} / {patch.area} / {patch.short}
+    </p>
+    <div class="title-row">
+      <h1>{patch.title}</h1>
+      <Pill href={`https://github.com/${repoName}`} label={`${repoName} on GitHub`}>
+        {repoName}
+      </Pill>
+    </div>
+    <p class="tags">
+      <Pill>{patch.area}</Pill>
+      <span class="counts">
+        <span class="plus">+{patch.additions}</span> <span class="minus">−{patch.deletions}</span>
+      </span>
+      {patch.syzbot && <Pill tone="red">syzbot</Pill>}
+    </p>
+  </header>
+
+  <div class="patch-grid">
+    <article class="patch">
+      <p class="mail">
+        <span>From:</span> {AUTHOR} &lt;{AUTHOR_MAIL}&gt;
+        <br />
+        <span>Date:</span> {dayMonthYear(patch.authored)}
+        <br />
+        <span>Subject:</span> [PATCH] {patch.subject}
+        <br />
+        <span>Merged:</span> {dayMonthYear(patch.merged)}, by {patch.by}
+      </p>
+
+      <div class="message">
+        {blocks.map((block) => (block.typed ? <pre>{block.text}</pre> : <p>{block.text}</p>))}
+      </div>
+
+      <section class="block">
+        <p class="label">signed, reported, fixes</p>
+        <ul class="signers">
+          {signers.map((row) => (
+            <li>
+              <span class="key">{row.key}</span>
+              <span>
+                <span class:list={["who", { mono: row.mono }]}>{row.who}</span>
+                <span class="role">{row.role}</span>
+              </span>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section class="block">
+        <p class="label">diff</p>
+        {patch.files.map((file) => (
+          <figure class="diff">
+            <figcaption>
+              {file.name}{" "}
+              <span class="counts">
+                <span class="plus">+{file.additions}</span>{" "}
+                <span class="minus">−{file.deletions}</span>
+              </span>
+            </figcaption>
+            <pre><code>{file.patch.split("\n").map((line) => (
+              <span class:list={["line", lineKind(line)]}>{line || " "}</span>
+            ))}</code></pre>
+          </figure>
+        ))}
+      </section>
+
+      <nav class="ends" aria-label="Other patches">
+        {newer ? (
+          <a href={`/research/${newer.short}/`}>
+            ← newer: {newer.area} {newer.title}
+          </a>
+        ) : (
+          <span />
+        )}
+        {older && (
+          <a href={`/research/${older.short}/`}>
+            older: {older.area} {older.title} →
+          </a>
+        )}
+      </nav>
+    </article>
+
+    <aside class="side">
+      <div>
+        <p class="label">commit</p>
+        <p class="sha">{patch.short}</p>
+        <p class="repo">
+          <Pill href={`https://github.com/${repoName}`} label={`${repoName} on GitHub`}>
+            {repoName}
+          </Pill>
+        </p>
+        <a class="view" href={kernelOrgUrl(patch)}>
+          git.kernel.org →
+        </a>
+      </div>
+
+      <div>
+        <p class="label">dates</p>
+        <p class="dates">
+          written {dayMonthYear(patch.authored)}
+          <br />
+          merged {dayMonthYear(patch.merged)}
+          <br />
+          <span class="dim">
+            by {patch.by}, {lagText}
+          </span>
+        </p>
+      </div>
+
+      <div class="stat">
+        <p class="label">diffstat</p>
+        <ul>
+          {patch.files.map((file) => (
+            <li>
+              <span class="file">{file.name}</span>
+              <span class="dim">{file.additions + file.deletions}</span>
+              <span class="pebbles" aria-hidden="true">
+                {pebbles(file.additions, file.deletions, PEBBLES_PER_FILE).map((pebble) => (
+                  <span class:list={{ add: pebble.add }} style={`border-radius: ${pebble.blob}`} />
+                ))}
+              </span>
+            </li>
+          ))}
+        </ul>
+        <p class="total">
+          {patch.files.length} {patch.files.length === 1 ? "file" : "files"} ·{" "}
+          <span class="plus">+{patch.additions}</span> <span class="minus">−{patch.deletions}</span>
+          <span class="pebbles" aria-hidden="true">
+            {pebbles(patch.additions, patch.deletions, PEBBLES_TOTAL).map((pebble) => (
+              <span class:list={{ add: pebble.add }} style={`border-radius: ${pebble.blob}`} />
+            ))}
+          </span>
+        </p>
+      </div>
+
+      <div>
+        <p class="label">elsewhere</p>
+        <p class="elsewhere">
+          {elsewhere.map((link) => (
+            <a href={link.href}>{link.text}</a>
+          ))}
+        </p>
+      </div>
+    </aside>
+  </div>
+</BaseLayout>
+
+<style>
+  .patch-head {
+    margin-top: 3.5rem;
+  }
+
+  .crumbs,
+  .label,
+  .counts,
+  .sha {
+    font-family: var(--font-mono);
+    color: var(--fg-dim);
+  }
+
+  .crumbs {
+    margin: 0;
+    font-size: 0.75rem;
+  }
+
+  .title-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    align-items: baseline;
+    margin-top: 0.625rem;
+  }
+
+  h1 {
+    margin: 0;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+  }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 0.875rem;
+    align-items: center;
+    margin: 0.625rem 0 0;
+  }
+
+  .counts {
+    font-size: 0.75rem;
+    white-space: nowrap;
+  }
+
+  .plus {
+    color: var(--fg-link);
+  }
+
+  .minus {
+    color: var(--red);
+  }
+
+  .patch-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 17.5rem;
+    gap: 3.5rem;
+    margin-top: 1.75rem;
+  }
+
+  .patch {
+    min-width: 0;
+  }
+
+  .mail {
+    margin: 0 0 1.75rem;
+    padding: 1rem 1.25rem;
+    border: 1px solid var(--border);
+    border-radius: 4px 6px 5px 7px;
+    background: var(--paper);
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    line-height: 1.8;
+    overflow-wrap: anywhere;
+  }
+
+  .mail span {
+    color: var(--fg-dim);
+  }
+
+  .message p {
+    margin: 0 0 1rem;
+    font-size: 1.0625rem;
+  }
+
+  .message pre {
+    margin: 0 0 1rem;
+    padding: 0.75rem 1rem;
+    border-left: 2px solid var(--border);
+    border-radius: 0;
+    background: var(--paper);
+    font-size: 0.8125rem;
+    white-space: pre-wrap;
+  }
+
+  .block {
+    margin-top: 2rem;
+  }
+
+  .label {
+    margin: 0 0 0.75rem;
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+  }
+
+  .signers {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--border);
+  }
+
+  .signers li {
+    display: grid;
+    grid-template-columns: 9.375rem minmax(0, 1fr);
+    gap: 0.125rem 1.125rem;
+    align-items: baseline;
+    padding: 0.5625rem 0;
+    border-bottom: 1px dashed var(--border);
+  }
+
+  .key {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--fg-dim);
+  }
+
+  .who {
+    font-size: 1rem;
+  }
+
+  .who.mono {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+  }
+
+  .role {
+    display: block;
+    font-size: 0.875rem;
+    color: var(--fg-dim);
+  }
+
+  .diff {
+    margin: 0 0 1.375rem;
+    border: 1px solid var(--border);
+    border-radius: 4px 6px 5px 7px;
+    overflow: hidden;
+  }
+
+  .diff figcaption {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.5rem 0.875rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--paper);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    overflow-wrap: anywhere;
+  }
+
+  .diff :global(.code-block-wrapper) {
+    margin: 0;
+  }
+
+  .diff pre {
+    margin: 0;
+    padding: 0.625rem 0;
+    border-radius: 0;
+    background: var(--paper);
+    white-space: normal;
+  }
+
+  .line {
+    display: block;
+    padding: 0 0.875rem;
+    white-space: pre;
+  }
+
+  .hunk {
+    background: var(--bg-dim);
+    color: var(--fg-dim);
+  }
+
+  .add {
+    background: var(--bg-added-faint);
+  }
+
+  .del {
+    background: var(--bg-removed-faint);
+  }
+
+  .ends {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+  }
+
+  .side {
+    display: flex;
+    flex-direction: column;
+    gap: 1.375rem;
+  }
+
+  .side p {
+    margin: 0;
+  }
+
+  .sha {
+    font-size: 0.875rem;
+    color: var(--fg-main);
+  }
+
+  .side .repo {
+    margin-top: 0.375rem;
+  }
+
+  .view {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    font-size: 0.9375rem;
+    text-underline-offset: 4px;
+  }
+
+  .dates,
+  .elsewhere {
+    font-size: 0.9375rem;
+  }
+
+  .dim {
+    color: var(--fg-dim);
+  }
+
+  .stat {
+    padding: 1rem 1.125rem;
+    border: 1px solid var(--border);
+    border-radius: 5px 8px 6px 9px;
+  }
+
+  .stat ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .stat li,
+  .total {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+  }
+
+  .stat li {
+    padding: 0.375rem 0;
+  }
+
+  .file {
+    flex: 1;
+    min-width: 0;
+    word-break: break-all;
+  }
+
+  .side .total {
+    flex-wrap: wrap;
+    margin-top: 0.5rem;
+    color: var(--fg-dim);
+  }
+
+  .pebbles {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+  }
+
+  .pebbles span {
+    width: 9px;
+    height: 8px;
+    background: var(--red);
+    opacity: 0.85;
+  }
+
+  .pebbles span.add {
+    background: var(--fg-link);
+  }
+
+  .elsewhere {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  @media (max-width: 47.99em) {
+    .patch-head {
+      margin-top: 2rem;
+    }
+
+    .patch-grid {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 2.5rem;
+    }
+
+    .signers li {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>
