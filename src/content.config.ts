@@ -77,26 +77,6 @@ const writings = defineCollection({
     })),
 });
 
-const files = defineCollection({
-  loader: orgContentLoader({
-    base: "./src/content/files",
-  }),
-  schema: z.object({
-    title: z.string(),
-    description: z.string(),
-    filename: z.string(),
-    filesize: z.string(),
-    sha256: z.string(),
-    category: z.string().default("General"),
-    date: flexibleDate,
-    downloadUrl: z.string().optional(),
-    encrypted: z.boolean().default(false),
-    encryptedUrl: z.string().optional(),
-    salt: z.string().optional(),
-    iv: z.string().optional(),
-  }),
-});
-
 const photos = defineCollection({
   loader: orgContentLoader({
     base: "./src/content/photos",
@@ -138,7 +118,6 @@ const vault = defineCollection({
 
 export const collections = {
   writings,
-  files,
   photos,
   vault,
 };
