@@ -40,17 +40,14 @@ const tags = [...tagCounts.entries()]
 
 <BaseLayout
   title="Writings"
-  description="Essays, manifestos, notes, and reflections on sovereign computing and hypermedia."
+  description="Essays, manifestos, notes, and philosophical reflections."
   collection
   graph={[writingsList(Astro.url, writings)]}
 >
   <div class="index-head">
     <div class="index-intro">
       <h1>Writings</h1>
-      <p>
-        Technical notes, manifestos, with maybe some touch of philosophical reflections on software
-        engineering and digital sovereignty.
-      </p>
+      <p>Technical notes, manifestos, with maybe some touch of philosophical reflections.</p>
     </div>
     <SearchFilter
       label="Filter writings"
