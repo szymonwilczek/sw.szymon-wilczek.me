@@ -32,3 +32,6 @@ scratch/
 # Cloudflare Worker local state and secrets
 .wrangler/
 .dev.vars
+
+# Mailing-list threads saved with b4 mbox, read by npm run threads
+.threads/

@@ -1,6 +1,8 @@
 // What happened on the mailing list before each patch was merged,
 // keyed by the 12-character sha.
-// Copied by hand from lore.kernel.org
+// Built by `npm run threads` from the mboxes saved with `b4 mbox`
+
+import saved from "./threads.json";
 
 export interface Version {
   version: string;
@@ -27,4 +29,4 @@ export interface Thread {
   messages: ListMessage[];
 }
 
-export const threads: Record<string, Thread> = {};
+export const threads: Record<string, Thread> = saved as Record<string, Thread>;
