@@ -116,6 +116,12 @@ const postImage = imageMatch ? imageMatch[1] : `/og/${slug}.png`;
                 view
               </button>
             </dd>
+            <dt>pdf</dt>
+            <dd>
+              <a href={`/writings/${slug}.pdf`} download={`${slug}.pdf`}>
+                {slug}.pdf ↓
+              </a>
+            </dd>
           </dl>
         </div>
         <div class="colophon-sign">
