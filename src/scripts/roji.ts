@@ -12,6 +12,7 @@ import {
 } from "../utils/tea/ink.js";
 import { turned, type PieceSpec } from "../utils/tea/pottery";
 import { fits } from "../utils/tea/key";
+import { earn } from "../utils/garden";
 
 type P = [number, number];
 type Cut = { line: [P, P]; phase: "fall" | "down" };
@@ -122,6 +123,7 @@ door.addEventListener("click", () => {
   inside(door, "61% 46%", async (leave) => (await code).enter(kobo, leave));
 });
 machiai.addEventListener("click", () => {
+  earn("茶");
   const code = import("./machiai");
   const shelf: PieceSpec[] = JSON.parse(scene.dataset.shelf || "[]");
   inside(machiai, "15% 78%", async (leave) => (await code).enter(kobo, shelf, leave));

@@ -22,6 +22,7 @@ const GLOSSARY: Record<string, [string, string, number, string?]> = {
   雀: ["suzume", "sparrow", 11],
   修: ["shū", "to mend, to put right", 10],
   陶: ["tō", "pottery", 11],
+  茶: ["cha", "tea", 9],
   庭: ["niwa", "garden", 10],
 };
 
