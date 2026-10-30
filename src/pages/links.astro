@@ -143,6 +143,8 @@ const percent = (part: number, whole: number) => `${((part / whole) * 100).toFix
 </BaseLayout>
 
 <script>
+  import { earn } from "../utils/garden";
+
   const section = document.querySelector<HTMLElement>(".en")!;
   const cards = [...document.querySelectorAll<HTMLAnchorElement>(".card")];
   const lines = [...document.querySelectorAll<SVGPathElement>(".thread, .knot")];
@@ -173,7 +175,10 @@ const percent = (part: number, whole: number) => `${((part / whole) * 100).toFix
     card.addEventListener("pointerdown", () => nod(card));
     card.addEventListener("keydown", (event) => event.key === "Enter" && nod(card));
     card.addEventListener("click", (event) => {
-      if (card.getAttribute("href") !== "#") return;
+      if (card.getAttribute("href") !== "#") {
+        earn("縁");
+        return;
+      }
       event.preventDefault();
       pull(i);
     });

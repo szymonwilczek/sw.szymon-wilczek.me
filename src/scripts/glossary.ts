@@ -24,6 +24,7 @@ const GLOSSARY: Record<string, [string, string, number, string?]> = {
   陶: ["tō", "pottery", 11],
   茶: ["cha", "tea", 9],
   年: ["toshi", "a year", 6],
+  縁: ["en", "a tie, the red thread of fate", 15],
   庭: ["niwa", "garden", 10],
 };
 
