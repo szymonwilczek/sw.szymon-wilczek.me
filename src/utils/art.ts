@@ -3,10 +3,9 @@
 
 import { MOMIJI } from "./momiji";
 import { makeSand, smooth } from "./sand";
-import { bladePath, makeField } from "./susuki";
 import { LAYOUTS, makeWater } from "./water";
 
-export const ART = ["water-wide", "water-tall", "sand", "grass-wide", "grass-tall"] as const;
+export const ART = ["water-wide", "water-tall", "sand"] as const;
 export type ArtName = (typeof ART)[number];
 
 const json = (value: unknown) =>
@@ -65,24 +64,8 @@ function sand() {
   );
 }
 
-function grass(tall: boolean) {
-  const field = makeField(tall);
-  const rest = field.blades.map((blade) => bladePath(blade, 0));
-  const { x, y, r } = field.moon;
-  return svgDoc(
-    `viewBox="0 0 ${field.W} ${field.H}"`,
-    `<circle class="moon" cx="${x}" cy="${y}" r="${r}"/>` +
-      `<path class="moon-rabbit" d="${field.moon.rabbit}"/>` +
-      `<g class="blades">${field.blades.map((blade, i) => `<path d="${rest[i].d}" stroke-width="${blade.w}" opacity="${blade.o}"/>`).join("")}</g>` +
-      `<g class="plumes">${rest.map((drawn) => (drawn.plume ? `<path d="${drawn.plume}"/>` : "")).join("")}</g>` +
-      `<path class="ground" d="${field.ground}"/>` +
-      `<g class="grass-seal" transform="translate(${x - r - 52} ${y - 22}) rotate(-6) scale(0.8)"><path d="M4 5 Q23 2 42 4 Q45 23 43 42 Q23 45 3 43 Q1 23 4 5 Z"/><text x="23" y="31" text-anchor="middle">兎</text></g>`,
-  );
-}
-
 export function drawArt(name: ArtName) {
   if (name === "sand") return sand();
-  if (name.startsWith("grass")) return grass(name === "grass-tall");
   return water(name === "water-wide" ? "wide" : "tall");
 }
 

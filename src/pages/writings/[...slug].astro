@@ -4,7 +4,6 @@ import Divider from "../../components/Divider.astro";
 import KeptPaper from "../../components/KeptPaper.astro";
 import Seal from "../../components/Seal.astro";
 import Signature from "../../components/Signature.astro";
-import Susuki from "../../components/Susuki.astro";
 import Suzume from "../../components/Suzume.astro";
 import { getCollection } from "astro:content";
 import { renderContentEntry } from "../../utils/org";
@@ -137,8 +136,6 @@ const postImage = imageMatch ? imageMatch[1] : `/og/${slug}.png`;
           )}
         </nav>
       )}
-
-      <Susuki />
     </div>
 
     <aside class="margin-notes hand" aria-label="Margin notes"></aside>
