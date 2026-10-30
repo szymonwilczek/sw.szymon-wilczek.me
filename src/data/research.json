@@ -1,0 +1,142 @@
+[
+  {
+    "repo": "git/git",
+    "sha": "440b7035bbe0ce9a5b65722da288e82e8ef415ef",
+    "message": "cache-tree: do not die when the index is locked\n\nWhen a background process such as `git status` holds `index.lock` while\n`git rebase` picks a commit, the rebase can die in the middle of the\npick and leave the sequencer in a state from which `git rebase\n--continue` refuses to run:\n\n    error: you have staged changes in your working tree\n\nThis happens because `try_to_commit()` calls `write_index_as_tree()`\nright after the pick has updated the index and written\n`CHERRY_PICK_HEAD`, and `write_index_as_tree()` dies when it cannot\ntake the index lock. We then die before writing `rebase-merge/message`.\nSince 356ee4659b (sequencer: try to commit without forking 'git commit',\n2017-11-24), this call happens in-process. Before that commit the\n`die()` happened in a `git commit` child process, and the sequencer\nstopped cleanly with its state saved.\n\n`write_index_as_tree()` does two different things:\n\n  - It turns the index into a tree object. This part must succeed.\n\n  - When that succeeds, it also rewrites the index to populate the\n    cache-tree extension. This part is allowed to fail without\n    impacting the result; as the comment next to\n    `write_locked_index()` already notes, failing to write the index\n    here is fine.\n\nYet the function locks the index with `LOCK_DIE_ON_ERROR`, even though\nwe only need the lock for the optional second part.\n\nDrop `LOCK_DIE_ON_ERROR` so that we take the lock gently, just like\nother callers that only refresh the index, and skip writing the index\nwhen the lock is held by someone else. This also lets `git write-tree`\nand `git am` proceed while another process holds the lock.\n\nSigned-off-by: Szymon Wilczek <swilczek.lx@gmail.com>\nSigned-off-by: Junio C Hamano <gitster@pobox.com>",
+    "authored": "2026-10-16T09:16:47Z",
+    "committed": "2026-10-16T16:39:02Z",
+    "committer": "Junio C Hamano",
+    "files": [
+      {
+        "name": "cache-tree.c",
+        "additions": 7,
+        "deletions": 3,
+        "patch": "@@ -809,11 +809,15 @@ struct tree *write_in_core_index_as_tree(struct repository *repo,\n \n int write_index_as_tree(struct object_id *oid, struct index_state *index_state, const char *index_path, int flags, const char *prefix)\n {\n-\tint entries, was_valid;\n+\tint entries, was_valid, fd;\n \tstruct lock_file lock_file = LOCK_INIT;\n \tint ret;\n \n-\thold_lock_file_for_update(&lock_file, index_path, LOCK_DIE_ON_ERROR);\n+\t/*\n+\t * The lock only protects the cache-tree write-back below; if somebody\n+\t * else holds it, compute the tree without updating the index.\n+\t */\n+\tfd = hold_lock_file_for_update(&lock_file, index_path, 0);\n \n \tentries = read_index_from(index_state, index_path,\n \t\t\t\t  repo_get_git_dir(index_state->repo));\n@@ -828,7 +832,7 @@ int write_index_as_tree(struct object_id *oid, struct index_state *index_state,\n \n \tret = write_index_as_tree_internal(oid, index_state, was_valid, flags,\n \t\t\t\t\t   prefix);\n-\tif (!ret && !was_valid) {\n+\tif (!ret && !was_valid && fd >= 0) {\n \t\twrite_locked_index(index_state, &lock_file, COMMIT_LOCK);\n \t\t/* Not being able to write is fine -- we are only interested\n \t\t * in updating the cache-tree part, and if the next caller"
+      },
+      {
+        "name": "t/t0090-cache-tree.sh",
+        "additions": 13,
+        "deletions": 0,
+        "patch": "@@ -286,4 +286,17 @@ test_expect_success 'cache-tree is used by write-tree when valid' '\n \ttest_grep ! region_enter.*cache_tree.*update trace.output\n '\n \n+test_expect_success 'write-tree succeeds while the index is locked' '\n+\ttest_when_finished \"rm -f .git/index.lock\" &&\n+\ttest_commit locked &&\n+\t>uncommitted &&\n+\tgit add uncommitted &&\n+\t>.git/index.lock &&\n+\tgit write-tree >actual &&\n+\ttest_path_is_file .git/index.lock &&\n+\trm .git/index.lock &&\n+\tgit write-tree >expect &&\n+\ttest_cmp expect actual\n+'\n+\n test_done"
+      }
+    ]
+  },
+  {
+    "repo": "torvalds/linux",
+    "sha": "0cd8450c257faa0cece0e0c43d3b55d1a389acc7",
+    "message": "hwmon: (coretemp) Fix core_data leak on CPUs without PTS\n\npdata->core_data is allocated in init_temp_data() when the first core\ntemp_data of a package is created, but it is only released from\ndestroy_temp_data(), and only in the branch that handles the package\ntemp_data.\n\nPackage temp_data is created solely when the CPU supports\nX86_FEATURE_PTS. On a CPU without it, coretemp_cpu_online() never calls\ncoretemp_add_core() with pkg_flag set, so pdata->pkg_data stays NULL.\ncoretemp_cpu_offline() then skips the removal of the package interface,\ndestroy_temp_data() is never called for package data, and the array is\nstill allocated when coretemp_device_remove() frees the platform data\nthat pointed at it.\n\nRelease the array in coretemp_device_remove(). destroy_temp_data() sets\npdata->core_data to NULL when it frees it, so the added kfree() is a\nno-op on CPUs that do have PTS.\n\nTested on an Intel Core i5-1135G7. The driver was instrumented to log\nevery allocation and release of pdata->core_data, and the PTS check in\ncoretemp_cpu_online() was patched out to emulate a CPU without package\nthermal support. Without this change the array was allocated and never\nreleased, and coretemp_device_remove() still saw a non-NULL pointer.\nWith it the array is released and the pointer accounting balances. On an\nunmodified build the release still happens via the package temp_data and\nthe added kfree() sees NULL, with no slab warnings over repeated module\nload and unload cycles.\n\nFixes: 1a793caf6f69 (\"hwmon: (coretemp) Use dynamic allocated memory for core temp_data\")\nSigned-off-by: Szymon Wilczek <swilczek.lx@gmail.com>\nLink: https://lore.kernel.org/r/20260810192344.3733721-1-swilczek.lx@gmail.com\nSigned-off-by: Guenter Roeck <linux@roeck-us.net>",
+    "authored": "2026-08-10T19:23:44Z",
+    "committed": "2026-08-16T21:40:33Z",
+    "committer": "Guenter Roeck",
+    "files": [
+      {
+        "name": "drivers/hwmon/coretemp.c",
+        "additions": 1,
+        "deletions": 0,
+        "patch": "@@ -650,6 +650,7 @@ static void coretemp_device_remove(int zoneid)\n \tstruct platform_data *pdata = platform_get_drvdata(pdev);\n \n \tida_destroy(&pdata->ida);\n+\tkfree(pdata->core_data);\n \tkfree(pdata);\n \tplatform_device_unregister(pdev);\n }"
+      }
+    ]
+  },
+  {
+    "repo": "torvalds/linux",
+    "sha": "08ce2fee1b869ecbfbd94e0eb2630e52203a2e03",
+    "message": "ntfs3: fix circular locking dependency in run_unpack_ex\n\nSyzbot reported a circular locking dependency between wnd->rw_lock\n(sbi->used.bitmap) and ni->file.run_lock.\n\nThe deadlock scenario:\n1. ntfs_extend_mft() takes ni->file.run_lock then wnd->rw_lock.\n2. run_unpack_ex() takes wnd->rw_lock then tries to acquire\n   ni->file.run_lock inside ntfs_refresh_zone().\n\nThis creates an AB-BA deadlock.\n\nFix this by using down_read_trylock() instead of down_read() when\nacquiring run_lock in run_unpack_ex(). If the lock is contended,\nskip ntfs_refresh_zone() - the MFT zone will be refreshed on the\nnext MFT operation. This breaks the circular dependency since we\nnever block waiting for run_lock while holding wnd->rw_lock.\n\nReported-by: syzbot+d27edf9f96ae85939222@syzkaller.appspotmail.com\nTested-by: syzbot+d27edf9f96ae85939222@syzkaller.appspotmail.com\nCloses: https://syzkaller.appspot.com/bug?extid=d27edf9f96ae85939222\nSigned-off-by: Szymon Wilczek <swilczek.lx@gmail.com>\nSigned-off-by: Konstantin Komarov <almaz.alexandrovich@paragon-software.com>",
+    "authored": "2025-12-27T14:43:07Z",
+    "committed": "2026-01-15T04:57:48Z",
+    "committer": "Konstantin Komarov",
+    "files": [
+      {
+        "name": "fs/ntfs3/run.c",
+        "additions": 8,
+        "deletions": 5,
+        "patch": "@@ -1131,11 +1131,14 @@ int run_unpack_ex(struct runs_tree *run, struct ntfs_sb_info *sbi, CLST ino,\n \t\t\tstruct rw_semaphore *lock =\n \t\t\t\tis_mounted(sbi) ? &sbi->mft.ni->file.run_lock :\n \t\t\t\t\t\t  NULL;\n-\t\t\tif (lock)\n-\t\t\t\tdown_read(lock);\n-\t\t\tntfs_refresh_zone(sbi);\n-\t\t\tif (lock)\n-\t\t\t\tup_read(lock);\n+\t\t\tif (lock) {\n+\t\t\t\tif (down_read_trylock(lock)) {\n+\t\t\t\t\tntfs_refresh_zone(sbi);\n+\t\t\t\t\tup_read(lock);\n+\t\t\t\t}\n+\t\t\t} else {\n+\t\t\t\tntfs_refresh_zone(sbi);\n+\t\t\t}\n \t\t}\n \t\tup_write(&wnd->rw_lock);\n \t\tif (err)"
+      }
+    ]
+  },
+  {
+    "repo": "torvalds/linux",
+    "sha": "b1979778e98569c1e78c2c7f16bb24d76541ab00",
+    "message": "can: etas_es58x: allow partial RX URB allocation to succeed\n\nWhen es58x_alloc_rx_urbs() fails to allocate the requested number of\nURBs but succeeds in allocating some, it returns an error code.\nThis causes es58x_open() to return early, skipping the cleanup label\n'free_urbs', which leads to the anchored URBs being leaked.\n\nAs pointed out by maintainer Vincent Mailhol, the driver is designed\nto handle partial URB allocation gracefully. Therefore, partial\nallocation should not be treated as a fatal error.\n\nModify es58x_alloc_rx_urbs() to return 0 if at least one URB has been\nallocated, restoring the intended behavior and preventing the leak\nin es58x_open().\n\nFixes: 8537257874e9 (\"can: etas_es58x: add core support for ETAS ES58X CAN USB interfaces\")\nReported-by: syzbot+e8cb6691a7cf68256cb8@syzkaller.appspotmail.com\nCloses: https://syzkaller.appspot.com/bug?extid=e8cb6691a7cf68256cb8\nSigned-off-by: Szymon Wilczek <swilczek.lx@gmail.com>\nReviewed-by: Vincent Mailhol <mailhol@kernel.org>\nLink: https://patch.msgid.link/20251223011732.39361-1-swilczek.lx@gmail.com\nSigned-off-by: Marc Kleine-Budde <mkl@pengutronix.de>",
+    "authored": "2025-12-23T01:17:32Z",
+    "committed": "2026-01-09T09:30:23Z",
+    "committer": "Marc Kleine-Budde",
+    "files": [
+      {
+        "name": "drivers/net/can/usb/etas_es58x/es58x_core.c",
+        "additions": 1,
+        "deletions": 1,
+        "patch": "@@ -1736,7 +1736,7 @@ static int es58x_alloc_rx_urbs(struct es58x_device *es58x_dev)\n \tdev_dbg(dev, \"%s: Allocated %d rx URBs each of size %u\\n\",\n \t\t__func__, i, rx_buf_len);\n \n-\treturn ret;\n+\treturn 0;\n }\n \n /**"
+      }
+    ]
+  },
+  {
+    "repo": "torvalds/linux",
+    "sha": "e37a75bb866c29da954b51d0dd7670406246d9ee",
+    "message": "fs/ntfs3: fix deadlock in ni_read_folio_cmpr\n\nSyzbot reported a task hung in ni_readpage_cmpr (now ni_read_folio_cmpr).\nThis is caused by a lock inversion deadlock involving the inode mutex\n(ni_lock) and page locks.\n\nScenario:\n1. Task A enters ntfs_read_folio() for page X. It acquires ni_lock.\n2. Task A calls ni_read_folio_cmpr(), which attempts to lock all pages in\n   the compressed frame (including page Y).\n3. Concurrently, Task B (e.g., via readahead) has locked page Y and\n   calls ntfs_read_folio().\n4. Task B waits for ni_lock (held by A).\n5. Task A waits for page Y lock (held by B).\n   -> DEADLOCK.\n\nThe fix is to restructure locking: do not take ni_lock in ntfs_read_folio().\nInstead, acquire ni_lock inside ni_read_folio_cmpr() ONLY AFTER all required\npage locks for the frame have been successfully acquired. This restores the\ncorrect lock ordering (Page Lock -> ni_lock) consistent with VFS.\n\nReported-by: syzbot+5af33dd272b913b65880@syzkaller.appspotmail.com\nCloses: https://syzkaller.appspot.com/bug?extid=5af33dd272b913b65880\nFixes: f35590ee26f5 (\"fs/ntfs3: remove ntfs_bio_pages and use page cache for compressed I/O\")\nSigned-off-by: Szymon Wilczek <swilczek.lx@gmail.com>\n[almaz.alexandrovich@paragon-software.com: ni_readpage_cmpr was renamed to ni_read_folio_cmpr]\nSigned-off-by: Konstantin Komarov <almaz.alexandrovich@paragon-software.com>",
+    "authored": "2025-12-22T15:10:10Z",
+    "committed": "2025-12-29T13:33:31Z",
+    "committer": "Konstantin Komarov",
+    "files": [
+      {
+        "name": "fs/ntfs3/frecord.c",
+        "additions": 2,
+        "deletions": 0,
+        "patch": "@@ -2107,7 +2107,9 @@ int ni_read_folio_cmpr(struct ntfs_inode *ni, struct folio *folio)\n \t\tpages[i] = pg;\n \t}\n \n+\tni_lock(ni);\n \terr = ni_read_frame(ni, frame_vbo, pages, pages_per_frame, 0);\n+\tni_unlock(ni);\n \n out1:\n \tfor (i = 0; i < pages_per_frame; i++) {"
+      },
+      {
+        "name": "fs/ntfs3/inode.c",
+        "additions": 1,
+        "deletions": 2,
+        "patch": "@@ -748,9 +748,8 @@ static int ntfs_read_folio(struct file *file, struct folio *folio)\n \t}\n \n \tif (is_compressed(ni)) {\n-\t\tni_lock(ni);\n+\t\t/* ni_lock is taken inside ni_read_folio_cmpr after page locks */\n \t\terr = ni_read_folio_cmpr(ni, folio);\n-\t\tni_unlock(ni);\n \t\treturn err;\n \t}\n "
+      }
+    ]
+  },
+  {
+    "repo": "torvalds/linux",
+    "sha": "d66676e6ca96bf8680f869a9bd6573b26c634622",
+    "message": "wifi: libertas: fix WARNING in usb_tx_block\n\nThe function usb_tx_block() submits cardp->tx_urb without ensuring that\nany previous transmission on this URB has completed. If a second call\noccurs while the URB is still active (e.g. during rapid firmware loading),\nusb_submit_urb() detects the active state and triggers a warning:\n'URB submitted while active'.\n\nFix this by enforcing serialization: call usb_kill_urb() before\nsubmitting the new request. This ensures the URB is idle and safe to reuse.\n\nReported-by: syzbot+67969ab6a2551c27f71b@syzkaller.appspotmail.com\nCloses: https://syzkaller.appspot.com/bug?extid=67969ab6a2551c27f71b\nSigned-off-by: Szymon Wilczek <swilczek.lx@gmail.com>\nLink: https://patch.msgid.link/20251221155806.23925-1-swilczek.lx@gmail.com\nSigned-off-by: Johannes Berg <johannes.berg@intel.com>",
+    "authored": "2025-12-21T15:58:06Z",
+    "committed": "2026-01-08T12:44:27Z",
+    "committer": "Johannes Berg",
+    "files": [
+      {
+        "name": "drivers/net/wireless/marvell/libertas/if_usb.c",
+        "additions": 2,
+        "deletions": 0,
+        "patch": "@@ -426,6 +426,8 @@ static int usb_tx_block(struct if_usb_card *cardp, uint8_t *payload, uint16_t nb\n \t\tgoto tx_ret;\n \t}\n \n+\tusb_kill_urb(cardp->tx_urb);\n+\n \tusb_fill_bulk_urb(cardp->tx_urb, cardp->udev,\n \t\t\t  usb_sndbulkpipe(cardp->udev,\n \t\t\t\t\t  cardp->ep_out),"
+      }
+    ]
+  },
+  {
+    "repo": "torvalds/linux",
+    "sha": "a8333c8262aed2aedf608c18edd39cf5342680a7",
+    "message": "media: pvrusb2: fix URB leak in pvr2_send_request_ex\n\nWhen pvr2_send_request_ex() submits a write URB successfully but fails to\nsubmit the read URB (e.g. returns -ENOMEM), it returns immediately without\nwaiting for the write URB to complete. Since the driver reuses the same\nURB structure, a subsequent call to pvr2_send_request_ex() attempts to\nsubmit the still-active write URB, triggering a 'URB submitted while\nactive' warning in usb_submit_urb().\n\nFix this by ensuring the write URB is unlinked and waited upon if the read\nURB submission fails.\n\nReported-by: syzbot+405dcd13121ff75a9e16@syzkaller.appspotmail.com\nCloses: https://syzkaller.appspot.com/bug?extid=405dcd13121ff75a9e16\nSigned-off-by: Szymon Wilczek <szymonwilczek@gmx.com>\nAcked-by: Mike Isely <isely@pobox.com>\nSigned-off-by: Hans Verkuil <hverkuil+cisco@kernel.org>",
+    "authored": "2025-12-20T18:24:19Z",
+    "committed": "2026-01-13T12:21:03Z",
+    "committer": "Hans Verkuil",
+    "files": [
+      {
+        "name": "drivers/media/usb/pvrusb2/pvrusb2-hdw.c",
+        "additions": 5,
+        "deletions": 0,
+        "patch": "@@ -3709,6 +3709,11 @@ status);\n \t\t\t\t   \"Failed to submit read-control URB status=%d\",\n status);\n \t\t\thdw->ctl_read_pend_flag = 0;\n+\t\t\tif (hdw->ctl_write_pend_flag) {\n+\t\t\t\tusb_unlink_urb(hdw->ctl_write_urb);\n+\t\t\t\twhile (hdw->ctl_write_pend_flag)\n+\t\t\t\t\twait_for_completion(&hdw->ctl_done);\n+\t\t\t}\n \t\t\tgoto done;\n \t\t}\n \t}"
+      }
+    ]
+  },
+  {
+    "repo": "torvalds/linux",
+    "sha": "d4168cb6ae4f77779c8ceb1edf15b8eae95bdf7f",
+    "message": "hwmon: (acpi_power_meter) Replace deprecated strcpy() with strscpy()\n\nstrcpy() performs no bounds checking on the destination buffer, which\ncould result in linear overflows beyond the end of the buffer. Although\nthe source strings here are compile-time constants that fit within the\ndestination buffers, using strscpy() is the preferred approach as it\nprovides bounds checking and aligns with the kernel's deprecated API\nguidelines.\n\nThis change converts the remaining strcpy() calls to strscpy(), matching\nthe pattern already used throughout other ACPI drivers in\ndrivers/acpi/*.c.\n\nLink: https://www.kernel.org/doc/html/latest/process/deprecated.html#strcpy\nSigned-off-by: Szymon Wilczek <szymonwilczek@gmx.com>\nReviewed-by: lihuisong@huawei.com\nLink: https://lore.kernel.org/r/20251220173041.377376-1-szymonwilczek@gmx.com\nSigned-off-by: Guenter Roeck <linux@roeck-us.net>",
+    "authored": "2025-12-20T17:30:41Z",
+    "committed": "2026-01-31T15:38:31Z",
+    "committer": "Guenter Roeck",
+    "files": [
+      {
+        "name": "drivers/hwmon/acpi_power_meter.c",
+        "additions": 2,
+        "deletions": 2,
+        "patch": "@@ -900,8 +900,8 @@ static int acpi_power_meter_add(struct acpi_device *device)\n \tresource->sensors_valid = 0;\n \tresource->acpi_dev = device;\n \tmutex_init(&resource->lock);\n-\tstrcpy(acpi_device_name(device), ACPI_POWER_METER_DEVICE_NAME);\n-\tstrcpy(acpi_device_class(device), ACPI_POWER_METER_CLASS);\n+\tstrscpy(acpi_device_name(device), ACPI_POWER_METER_DEVICE_NAME);\n+\tstrscpy(acpi_device_class(device), ACPI_POWER_METER_CLASS);\n \tdevice->driver_data = resource;\n \n #if IS_REACHABLE(CONFIG_ACPI_IPMI)"
+      }
+    ]
+  }
+]
