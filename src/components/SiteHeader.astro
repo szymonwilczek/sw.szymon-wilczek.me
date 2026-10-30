@@ -6,10 +6,10 @@ const current = normalize(Astro.url.pathname);
 const isActive = (href: string) => current.startsWith(normalize(href));
 
 const links = [
+  { href: "/research/", label: "research" },
   { href: "/writings/", label: "writings" },
   { href: "/photos/", label: "photos" },
   { href: "/projects/", label: "projects" },
-  { href: "/files/", label: "files" },
   { href: "/about/", label: "about" },
 ];
 
