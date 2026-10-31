@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -11,6 +12,9 @@ const LOCAL_DIR = process.env.AU_THEMES_DIR && path.resolve(process.env.AU_THEME
 const CSS_OUT = "src/styles/au-themes.css";
 const MORE_OUT = "src/styles/au-themes-more.css";
 const JSON_OUT = "src/data/au-themes.json";
+const VERSION_OUT = "src/data/au-themes-version.json";
+const SINGLE_DIR = "public/themes";
+const VERSION_LENGTH = 8;
 
 const FAMILY_ORDER = ["salina"];
 const VARIANT_ORDER = ["morning", "day", "night"];
@@ -169,7 +173,7 @@ async function readSources() {
   try {
     return await readUpstream();
   } catch (error) {
-    if (![CSS_OUT, MORE_OUT, JSON_OUT].every((file) => fs.existsSync(file))) throw error;
+    if (![CSS_OUT, MORE_OUT, JSON_OUT, VERSION_OUT].every(fs.existsSync)) throw error;
     console.warn(`au-themes unreachable, keeping the last palettes (${error.message})`);
     process.exit(0);
   }
@@ -178,10 +182,26 @@ async function readSources() {
 const { origin, sources } = await readSources();
 const themes = sources.map(parseTheme).sort(compareThemes);
 
+const css = renderCss(themes);
+const moreCss = renderMoreCss(themes);
+const version = createHash("sha256")
+  .update(css + moreCss)
+  .digest("hex")
+  .slice(0, VERSION_LENGTH);
+
 fs.mkdirSync(path.dirname(JSON_OUT), { recursive: true });
-fs.writeFileSync(CSS_OUT, renderCss(themes));
-fs.writeFileSync(MORE_OUT, renderMoreCss(themes));
+fs.writeFileSync(CSS_OUT, css);
+fs.writeFileSync(MORE_OUT, moreCss);
 fs.writeFileSync(JSON_OUT, renderJson(themes));
+fs.writeFileSync(VERSION_OUT, JSON.stringify({ version }) + "\n");
+
+// One small sheet per theme, so a first paint never waits for all of them
+fs.rmSync(SINGLE_DIR, { recursive: true, force: true });
+fs.mkdirSync(SINGLE_DIR, { recursive: true });
+for (const theme of themes) {
+  const [block] = renderBlocks([theme]);
+  fs.writeFileSync(path.join(SINGLE_DIR, `${theme.id}.css`), HEADER + block + "\n");
+}
 
 console.log(`Generated ${themes.length} themes from ${origin}`);
 for (const theme of themes) {

@@ -13,5 +13,8 @@ src/content/
 *.zip
 scratch/
 src/styles/au-themes.css
+src/styles/au-themes-more.css
 src/data/au-themes.json
+src/data/au-themes-version.json
+public/themes/
 src/data/pieces.json

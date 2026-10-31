@@ -6,6 +6,7 @@ import ThemePicker from "../components/ThemePicker.astro";
 import Pebble from "../components/Pebble.astro";
 import SEO from "../components/SEO.astro";
 import auThemes from "../data/au-themes.json";
+import { version as themesVersion } from "../data/au-themes-version.json";
 import moreThemes from "../styles/au-themes-more.css?url";
 import "../styles/global.css";
 
@@ -123,10 +124,11 @@ const {
       graph={graph}
     />
 
-    <script is:inline define:vars={{ themeIds, moreThemes }}>
+    <script is:inline define:vars={{ themeIds, moreThemes, themesVersion }}>
       (function () {
         var STORAGE_KEY = "au-theme";
-        var DEFAULTS = { light: "salina-day", dark: "salina-night" };
+        var BUNDLED = { light: "salina-day", dark: "salina-night" };
+        var DEFAULTS = BUNDLED;
         var root = document.documentElement;
         var light = window.matchMedia("(prefers-color-scheme: light)");
 
@@ -147,9 +149,10 @@ const {
         var sheet = null;
         var loaded = false;
         var afterLoad = null;
+        var single = null;
 
         function ready(theme) {
-          return loaded || theme === DEFAULTS.light || theme === DEFAULTS.dark;
+          return loaded || theme === single || theme === BUNDLED.light || theme === BUNDLED.dark;
         }
 
         function fetchThemes() {
@@ -297,14 +300,15 @@ const {
         var first = resolve(read());
         if (!ready(first)) {
           document.write(
-            '<link rel="stylesheet" href="' +
-              moreThemes +
+            '<link rel="stylesheet" href="/themes/' +
+              first +
+              ".css?v=" +
+              themesVersion +
               "\" onerror=\"document.documentElement.setAttribute('data-theme', '" +
-              resolve("auto") +
+              (light.matches ? BUNDLED.light : BUNDLED.dark) +
               "')\">",
           );
-          sheet = true;
-          loaded = true;
+          single = first;
         }
         apply(read());
       })();
