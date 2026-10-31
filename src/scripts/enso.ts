@@ -83,7 +83,7 @@ if (hero) {
     return [Math.round(event.clientX - box.left), Math.round(event.clientY - box.top)];
   };
 
-  function begin(event: PointerEvent) {
+  const begin = (event: PointerEvent) => {
     drawing = true;
     points = [pointAt(event)];
     began = performance.now();
@@ -96,7 +96,7 @@ if (hero) {
     } catch {
       // the pointer is already gone
     }
-  }
+  };
 
   function fade(path: SVGPathElement) {
     path.classList.add("is-fading");
@@ -104,7 +104,7 @@ if (hero) {
     setTimeout(() => path.remove(), FADE_FALLBACK_MS);
   }
 
-  function keep(path: SVGPathElement) {
+  const keep = (path: SVGPathElement) => {
     path.classList.add("is-kept");
     const xs = points.map((point) => point[0]);
     const ys = points.map((point) => point[1]);
@@ -136,7 +136,7 @@ if (hero) {
     link.style.left = `${roomOnRight ? tail[0] : tail[0] - link.offsetWidth}px`;
     link.style.top = `${tail[1] - LINK_RAISE}px`;
     findDoor("enso");
-  }
+  };
 
   function finish() {
     if (!drawing || !stroke) return;
