@@ -1,7 +1,6 @@
 // /org/ reader: an .org file laid on the page is parsed and drawn here,
 // with the same pipeline the writings use, and never leaves the browser
 
-import { createHighlighter, createJavaScriptRegexEngine, bundledLanguages } from "shiki";
 import { auTheme, normalizeLang, orgProcessor } from "../utils/org-pipeline";
 
 const HEADLINE = /^(\*+)\s/;
@@ -70,6 +69,8 @@ function scan(source: string) {
 }
 
 async function highlighterFor(langs: string[]) {
+  const { createHighlighter, createJavaScriptRegexEngine, bundledLanguages } =
+    await import("shiki");
   const wanted = [...new Set(langs.map(normalizeLang))].filter((lang) => lang in bundledLanguages);
   // the js regex engine spares the browser the oniguruma wasm
   return createHighlighter({
