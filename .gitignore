@@ -29,6 +29,11 @@ Thumbs.db
 # Scratch artifacts
 scratch/
 
+# Generated from au-themes on every dev and build
+src/styles/au-themes.css
+src/styles/au-themes-more.css
+src/data/au-themes.json
+
 # Cloudflare Worker local state and secrets
 .wrangler/
 .dev.vars

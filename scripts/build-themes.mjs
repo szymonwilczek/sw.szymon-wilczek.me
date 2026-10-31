@@ -159,7 +159,18 @@ function renderJson(themes) {
   return JSON.stringify(entries, null, 2) + "\n";
 }
 
-const { origin, sources } = LOCAL_DIR ? readLocal(LOCAL_DIR) : await readUpstream();
+async function readSources() {
+  if (LOCAL_DIR) return readLocal(LOCAL_DIR);
+  try {
+    return await readUpstream();
+  } catch (error) {
+    if (![CSS_OUT, MORE_OUT, JSON_OUT].every((file) => fs.existsSync(file))) throw error;
+    console.warn(`au-themes unreachable, keeping the last palettes (${error.message})`);
+    process.exit(0);
+  }
+}
+
+const { origin, sources } = await readSources();
 const themes = sources.map(parseTheme).sort(compareThemes);
 
 fs.mkdirSync(path.dirname(JSON_OUT), { recursive: true });
