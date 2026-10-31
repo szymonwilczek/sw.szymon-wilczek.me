@@ -14,6 +14,7 @@ const JSON_OUT = "src/data/au-themes.json";
 
 const FAMILY_ORDER = ["salina"];
 const VARIANT_ORDER = ["morning", "day", "night"];
+const SWATCH_TOKENS = ["bg-main", "fg-main", "cursor", "red"];
 const DEFAULT_THEMES = { light: "salina-day", dark: "salina-night" };
 
 async function upstreamGet(url) {
@@ -89,6 +90,10 @@ function parseTheme({ file, source }) {
     else console.warn(`  ${id}: unresolved mapping ${key} -> ${aliases.get(key)}`);
   }
 
+  for (const key of SWATCH_TOKENS) {
+    if (!colors.has(key)) throw new Error(`${file}: no ${key} in the palette`);
+  }
+
   return { id, family, variant, polarity: meta[2], description: meta[1], colors };
 }
 
@@ -154,7 +159,7 @@ function renderJson(themes) {
     variant,
     polarity,
     description,
-    swatch: [colors.get("bg-main"), colors.get("fg-main"), colors.get("cursor"), colors.get("red")],
+    swatch: SWATCH_TOKENS.map((key) => colors.get(key)),
   }));
   return JSON.stringify(entries, null, 2) + "\n";
 }
