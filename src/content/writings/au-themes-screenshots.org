@@ -1,6 +1,7 @@
 #+TITLE: Screenshots of au-themes for GNU Emacs
 #+AUTHOR: Szymon Wilczek
 #+DATE: <2026-10-17 Sat>
+#+UPDATED: <2026-10-31 Sat>
 #+CATEGORY: Emacs
 #+TAGS: emacs themes accessibility
 #+DESCRIPTION: Every au-theme in Emacs Lisp, C, Magit, Dired and Org, as it looks in my own Emacs.
@@ -16,7 +17,7 @@ themes too loud to read for long. The code and the test suite live at [[https://
 explains how the colours are chosen and checked.
 
 The screenshots below show the themes as they are on the =main= branch today
-(17.10.2026). They are taken in my everyday Emacs, not in a clean one: the font
+(31.10.2026). They are taken in my everyday Emacs, not in a clean one: the font
 is Typus Mono 92 (the story is in [[/writings/the-8-pixel-obsession-typus-mono][8-Pixel Obsession]]), the tabs come
 from [[https://github.com/szymonwilczek/bufferline.el][bufferline.el]], and the mode line, Evil and the completion stack
 are my own setup. So this is what the themes look like in real use, not
@@ -171,6 +172,7 @@ Pressed sage leaves, dried lavender, oak-bark ink and chamomile pollen.
 - [[#au-parchment-night][au-parchment-night]]
 - [[#au-salina-night][au-salina-night]]
 - [[#au-herbarium-night][au-herbarium-night]]
+- [[#au-mysterium][au-mysterium]]
 
 ** au-whispergrove-night
 :PROPERTIES:
@@ -266,6 +268,25 @@ Pressed sage, dried lavender, oak-gall ink, terracotta flora and chamomile polle
 
 #+attr_html: :alt au-herbarium-night theme Org sample :loading lazy
 [[/assets/au-themes/au-herbarium-night-org.png][file:/assets/au-themes/thumbs/au-herbarium-night-org.webp]]
+
+** au-mysterium
+:PROPERTIES:
+:CUSTOM_ID: au-mysterium
+:END:
+
+A Halloween night and an old painted van parked outside a haunted mansion: a near-black canvas, faded teal keywords, a dry yellow-green and burnt orange, with a muted purple over the region.
+
+#+attr_html: :alt au-mysterium theme code sample :loading lazy
+[[/assets/au-themes/au-mysterium.png][file:/assets/au-themes/thumbs/au-mysterium.webp]]
+
+#+attr_html: :alt au-mysterium theme Magit sample :loading lazy
+[[/assets/au-themes/au-mysterium-git.png][file:/assets/au-themes/thumbs/au-mysterium-git.webp]]
+
+#+attr_html: :alt au-mysterium theme Dired and completion sample :loading lazy
+[[/assets/au-themes/au-mysterium-dired.png][file:/assets/au-themes/thumbs/au-mysterium-dired.webp]]
+
+#+attr_html: :alt au-mysterium theme Org sample :loading lazy
+[[/assets/au-themes/au-mysterium-org.png][file:/assets/au-themes/thumbs/au-mysterium-org.webp]]
 
 As always:
 
