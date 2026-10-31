@@ -12,6 +12,7 @@ const MAX_DIMENSION = 2560; // 2.5K QHD
 const JPEG_QUALITY = 85;
 const COVER_AVIF_QUALITY = 55;
 const COVER_AVIF_EFFORT = 6;
+const FRAME_AVIF_SIZES = [900, 1200];
 
 async function generateThumbnail(filePath, force = false, withAvif = true) {
   const directory = path.dirname(filePath);
@@ -95,13 +96,35 @@ async function generateThumbnail(filePath, force = false, withAvif = true) {
     coverThumbCreated = true;
   }
 
+  let frameAvifSize = 0;
+  if (withAvif) {
+    for (const size of FRAME_AVIF_SIZES) {
+      const frameAvifPath = path.join(thumbsDir, `${base}-${size}.avif`);
+      if (
+        force ||
+        !fs.existsSync(frameAvifPath) ||
+        fs.statSync(frameAvifPath).mtimeMs < origStat.mtimeMs
+      ) {
+        const frameAvifBuffer = await sharp(buffer)
+          .rotate()
+          .resize({ width: size, height: size, fit: "inside", withoutEnlargement: true })
+          .toColorspace("srgb")
+          .avif({ quality: COVER_AVIF_QUALITY, effort: COVER_AVIF_EFFORT })
+          .toBuffer();
+        fs.writeFileSync(frameAvifPath, frameAvifBuffer);
+        streamThumbCreated = true;
+      }
+      frameAvifSize += fs.statSync(frameAvifPath).size;
+    }
+  }
+
   const thumbSize = fs.existsSync(thumbPath) ? fs.statSync(thumbPath).size : 0;
   const coverSize = fs.existsSync(coverPath) ? fs.statSync(coverPath).size : 0;
   const coverAvifSize = fs.existsSync(coverAvifPath) ? fs.statSync(coverAvifPath).size : 0;
 
   return {
     skipped: !streamThumbCreated && !coverThumbCreated,
-    size: thumbSize + coverSize + coverAvifSize,
+    size: thumbSize + coverSize + coverAvifSize + frameAvifSize,
   };
 }
 
