@@ -4,6 +4,9 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  # Sent by au-themes on every palette push
+  repository_dispatch:
+    types: [au-themes-updated]
 
 permissions:
   contents: read
