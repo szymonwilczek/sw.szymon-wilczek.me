@@ -119,6 +119,18 @@ function pebbles(additions: number, deletions: number, count: number) {
   }));
 }
 
+const lastSegment = (path: string) => path.split("/").at(-1)!;
+function statName(path: string) {
+  const segments = path.split("/");
+  const shared =
+    patch.files.filter((file) => lastSegment(file.name) === segments.at(-1)).length > 1;
+  const name = segments.slice(shared ? -2 : -1).join("/");
+  const dot = name.lastIndexOf(".");
+  return dot > name.lastIndexOf("/") + 1
+    ? { stem: name.slice(0, dot), extension: name.slice(dot) }
+    : { stem: name, extension: "" };
+}
+
 const thread = threads[patch.short];
 const versions = thread?.versions ?? [];
 const discussed = threadUrl(patch, versions[0]?.url);
@@ -384,7 +396,10 @@ const lagText =
         <ul>
           {patch.files.map((file) => (
             <li>
-              <span class="file">{file.name}</span>
+              <span class="file" title={file.name}>
+                <span class="stem">{statName(file.name).stem}</span>
+                <span>{statName(file.name).extension}</span>
+              </span>
               <span class="dim">{file.additions + file.deletions}</span>
               <span class="pebbles" aria-hidden="true">
                 {pebbles(file.additions, file.deletions, PEBBLES_PER_FILE).map((pebble) => (
@@ -429,6 +444,21 @@ const lagText =
     });
     seen.observe(lastLine);
   }
+
+  // a stem too long for the diffstat column is cut to three plain dots
+  const DOTS = "...";
+  const stems = [...document.querySelectorAll<HTMLElement>(".stat .stem")];
+  const fit = () => {
+    for (const stem of stems) {
+      const full = (stem.dataset.full ??= stem.textContent ?? "");
+      stem.textContent = full;
+      if (stem.scrollWidth <= stem.clientWidth) continue;
+      const fits = Math.floor((stem.clientWidth * full.length) / stem.scrollWidth);
+      stem.textContent = full.slice(0, Math.max(fits - DOTS.length, 1)) + DOTS;
+    }
+  };
+  const statList = document.querySelector(".stat ul");
+  if (statList) new ResizeObserver(fit).observe(statList);
 
   // the version tabs: the merged one shows first, the others on a click
   for (const list of document.querySelectorAll<HTMLElement>("[data-versions]")) {
@@ -738,9 +768,16 @@ const lagText =
   }
 
   .file {
+    display: flex;
     flex: 1;
-    min-width: 0;
-    word-break: break-all;
+    min-width: 9ch;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .stem {
+    min-width: 4ch;
+    overflow: hidden;
   }
 
   .side .total {
