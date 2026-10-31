@@ -2,8 +2,7 @@
 // to the code.
 
 import data from "../data/projects.json";
-import { smooth } from "./sand";
-import { hash, rng } from "./stamp";
+import { hash, rng, smooth } from "./stamp";
 
 export interface Project {
   title: string;

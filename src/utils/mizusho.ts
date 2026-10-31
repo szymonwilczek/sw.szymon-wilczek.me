@@ -1,6 +1,6 @@
 // The slab of stone at the end of /contact, for writing on with water.
 
-import { smooth } from "./sand";
+import { smooth } from "./stamp";
 
 type Point = [number, number];
 

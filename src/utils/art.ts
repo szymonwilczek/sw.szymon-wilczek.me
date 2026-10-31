@@ -1,7 +1,7 @@
 // The still water, drawn at build time into its own .svg files under /art/
 
 import { MOMIJI } from "./momiji";
-import { smooth } from "./sand";
+import { smooth } from "./stamp";
 import { LAYOUTS, makeWater } from "./water";
 
 export const ART = ["water-wide", "water-tall"] as const;

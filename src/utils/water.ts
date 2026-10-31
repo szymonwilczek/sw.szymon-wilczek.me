@@ -1,6 +1,6 @@
 // Still water at the end of the photo pages and /about
 
-import { smooth } from "./sand";
+import { smooth } from "./stamp";
 
 type Point = [number, number];
 

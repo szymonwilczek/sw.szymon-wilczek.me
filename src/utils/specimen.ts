@@ -1,8 +1,7 @@
 // Each repository pressed like a specimen in a herbarium.
 // Seeded by the title, so every build draws the same hand.
 
-import { smooth } from "./sand";
-import { hash, rng } from "./stamp";
+import { hash, rng, smooth } from "./stamp";
 
 type Point = [number, number];
 

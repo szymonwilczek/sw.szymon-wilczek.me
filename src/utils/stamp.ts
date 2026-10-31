@@ -42,6 +42,7 @@ type Point = [number, number];
 
 // Catmull-Rom through the points, written as cubic Beziers
 export function smooth(points: Point[], closed: boolean): string {
+  if (points.length < 2) return "";
   const padded = closed
     ? [points[points.length - 1], ...points, points[0], points[1]]
     : [points[0], ...points, points[points.length - 1]];

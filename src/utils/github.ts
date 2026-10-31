@@ -1,7 +1,7 @@
 // Stars, forks and a year of commits for each repository, read from the
 // GitHub API at build time.
 
-import { smooth } from "./sand";
+import { smooth } from "./stamp";
 
 export interface RepoStats {
   stars: number;
