@@ -30,6 +30,7 @@ const preloadGarden = {
 };
 
 const SITE = "https://szymon-wilczek.me";
+const GRAMMAR_CHUNK_KB = 800;
 
 const DATA = {
   "/": ["src/content/writings", "public/images"],
@@ -87,6 +88,7 @@ export default defineConfig({
   },
   vite: {
     build: {
+      chunkSizeWarningLimit: GRAMMAR_CHUNK_KB,
       rollupOptions: {
         output: {
           manualChunks(id) {
