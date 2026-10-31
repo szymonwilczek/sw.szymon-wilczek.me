@@ -13,7 +13,7 @@ const JPEG_QUALITY = 85;
 const COVER_AVIF_QUALITY = 55;
 const COVER_AVIF_EFFORT = 6;
 
-async function generateThumbnail(filePath, force = false) {
+async function generateThumbnail(filePath, force = false, withAvif = true) {
   const directory = path.dirname(filePath);
   const extension = path.extname(filePath);
   const base = path.basename(filePath, extension);
@@ -72,9 +72,10 @@ async function generateThumbnail(filePath, force = false) {
   }
 
   if (
-    force ||
-    !fs.existsSync(coverAvifPath) ||
-    fs.statSync(coverAvifPath).mtimeMs < origStat.mtimeMs
+    withAvif &&
+    (force ||
+      !fs.existsSync(coverAvifPath) ||
+      fs.statSync(coverAvifPath).mtimeMs < origStat.mtimeMs)
   ) {
     const coverAvifBuffer = await sharp(buffer)
       .rotate()
@@ -142,7 +143,7 @@ async function compressImageFile(filePath, force = false, thumbsOnly = false) {
     newMasterSize = optimizedBuffer.length;
   }
 
-  const thumbRes = await generateThumbnail(filePath, force);
+  const thumbRes = await generateThumbnail(filePath, force, !thumbsOnly);
 
   return {
     skipped: !compressed && thumbRes.skipped,
