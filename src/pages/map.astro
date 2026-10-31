@@ -326,6 +326,7 @@ const place = (href: string) => PLACES.find((spot) => spot.href === href)!;
           <a
             href={`/writings/${plant.slug}/`}
             class="place plant"
+            aria-label={plant.title}
             data-area="/writings"
             data-slug={plant.slug}
             data-title={plant.title}
@@ -375,6 +376,7 @@ const place = (href: string) => PLACES.find((spot) => spot.href === href)!;
           <a
             href={`/photos/${lily.slug}/`}
             class="place lily"
+            aria-label={lily.title}
             data-area="/photos"
             data-title={`${lily.stampNum} · ${lily.title}`}
             data-sub={`${lily.date.getFullYear()} · ${lily.photoCount} frames`}
@@ -1184,6 +1186,8 @@ const place = (href: string) => PLACES.find((spot) => spot.href === href)!;
   }
 
   .plain a.unseen {
+    filter: none;
+    opacity: 1;
     color: var(--fg-dim);
   }
 
