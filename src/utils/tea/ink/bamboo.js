@@ -1,6 +1,6 @@
 // bamboo: leaves, culms, clumps
 
-import { SCENE_WIDTH, mix, hash, rng, roundCoord, lerp, smooth } from "./core.js";
+import { mix, hash, rng, roundCoord, lerp, smooth } from "./core.js";
 import {
   jitter,
   wobblyPolygon,
@@ -10,9 +10,6 @@ import {
   addWash,
   addLine,
   addSolid,
-  addText,
-  brushStroke,
-  brushWash,
 } from "./pen.js";
 
 // bamboo
@@ -265,96 +262,6 @@ function bambooClump(groups, rand, x, y, tones, scale, cut) {
   fallLater.forEach(([, fallGroup]) => groups.push(fallGroup));
 }
 
-// the toy
-function sceneBamboo(tones) {
-  const rand = rng(hash("tea/bamboo")),
-    width = SCENE_WIDTH,
-    height = 560,
-    groups = [],
-    clips = [];
-  const centers = [190, 560, 920],
-    groundY = 470,
-    scale = 1.45,
-    swipe = (center) => [
-      [center - 170, 362],
-      [center + 170, 318],
-    ];
-  const frame = newGroup();
-  [0, 1, 2].forEach((index) => {
-    addText(frame, {
-      t: ["一", "二", "三"][index],
-      tr: `translate(${centers[index] - 150} 40)`,
-      fs: 22,
-      font: "'Yuji Syuku', serif",
-      fill: tones.ink,
-      o: 0.8,
-    });
-  });
-  groups.push(frame);
-  bambooClump(groups, rng(hash("bb")), centers[0], groundY, tones, scale);
-  bambooClump(groups, rng(hash("bb")), centers[1], groundY, tones, scale, {
-    phase: "fall",
-    line: swipe(centers[1]),
-  });
-  bambooClump(groups, rng(hash("bb")), centers[2], groundY, tones, scale, {
-    phase: "down",
-    line: swipe(centers[2]),
-  });
-  // fingers trail
-  const trail = newGroup(),
-    [swipeFrom, swipeTo] = swipe(centers[1]);
-  brushWash(
-    trail,
-    rand,
-    [
-      swipeFrom,
-      [lerp(swipeFrom[0], swipeTo[0], 0.5), lerp(swipeFrom[1], swipeTo[1], 0.5) - 3],
-      swipeTo,
-    ],
-    10,
-    tones.gold,
-    0.55,
-  );
-  brushStroke(
-    trail,
-    rand,
-    [
-      swipeFrom,
-      [lerp(swipeFrom[0], swipeTo[0], 0.5), lerp(swipeFrom[1], swipeTo[1], 0.5) - 3],
-      swipeTo,
-    ],
-    2.4,
-    tones.ink,
-    0.5,
-    {
-      tip: 0.05,
-      head: 0.1,
-    },
-  );
-  addLine(
-    trail,
-    wobblyRing(rand, swipeTo[0] + 14, swipeTo[1] - 2, 11, 11, 0.4, 12),
-    tones.ink,
-    1,
-    0.55,
-  );
-  groups.push(trail);
-  const fallen = newGroup();
-  [
-    [centers[2] - 150, groundY + 30, 0.2],
-    [centers[2] - 70, groundY + 50, 2.9],
-    [centers[2] + 130, groundY + 44, 0.5],
-    [centers[2] + 20, groundY + 62, 2.6],
-    [centers[2] - 110, groundY + 70, 0.9],
-  ].forEach(([x, leafY, angle]) => {
-    const path = leafPath(x, leafY, angle, 18, 3.4);
-    addWash(fallen, rand, path, mix(tones.mossDk, tones.gold, 0.4), 0.9);
-    addLine(fallen, path, tones.ink, 0.7, 0.7);
-  });
-  groups.push(fallen);
-  return { W: width, H: height, groups, clips };
-}
-
 export {
   leafPath,
   leafSpray,
@@ -365,5 +272,4 @@ export {
   CULMS,
   edgeHit,
   bambooClump,
-  sceneBamboo,
 };

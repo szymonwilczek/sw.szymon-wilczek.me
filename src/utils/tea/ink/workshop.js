@@ -1,6 +1,6 @@
 // the workshop building
 
-import { mix, roundCoord, lerp } from "./core.js";
+import { mix, roundCoord } from "./core.js";
 import {
   jitter,
   wobblyPolygon,

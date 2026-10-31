@@ -128,14 +128,6 @@ function inked(group, rand, path, fill, ink, width) {
   addLine(group, path, ink, width ?? 1.3);
 }
 
-const quadMap = (topLeft, topRight, bottomRight, bottomLeft) => (across, down) => {
-  const topX = lerp(topLeft[0], topRight[0], across),
-    topY = lerp(topLeft[1], topRight[1], across),
-    bottomX = lerp(bottomLeft[0], bottomRight[0], across),
-    bottomY = lerp(bottomLeft[1], bottomRight[1], across);
-  return [lerp(topX, bottomX, down), lerp(topY, bottomY, down)];
-};
-
 // brush stroke
 function brushPath(rand, points, width, opts) {
   opts = opts || {};
@@ -187,30 +179,6 @@ function brushWash(group, rand, points, width, color, opacity, opts) {
   );
 }
 
-function dryBrush(group, rand, points, width, color, opacity) {
-  for (let bristle = 0; bristle < 5; bristle++) {
-    const offset = (bristle / 4 - 0.5) * width;
-    const shifted = points.map(([x, y], i) => {
-      const prev = points[Math.max(0, i - 1)],
-        next = points[Math.min(points.length - 1, i + 1)],
-        length = Math.hypot(next[0] - prev[0], next[1] - prev[1]) || 1;
-      return [
-        x - ((next[1] - prev[1]) / length) * offset,
-        y + ((next[0] - prev[0]) / length) * offset,
-      ];
-    });
-    const kept = Math.floor(shifted.length * (0.55 + rand() * 0.45));
-    addLine(
-      group,
-      wobblyLine(rand, shifted.slice(0, Math.max(2, kept)), 0.4),
-      color,
-      0.6 + rand() * 0.9,
-      (opacity ?? 0.8) * (0.5 + rand() * 0.5),
-      true,
-    );
-  }
-}
-
 // band of mist
 function mistPath(rand, x0, x1, y, height) {
   const steps = 22,
@@ -253,11 +221,9 @@ export {
   addSolid,
   addText,
   inked,
-  quadMap,
   brushPath,
   brushStroke,
   brushWash,
-  dryBrush,
   mistPath,
   mist,
   oblique,

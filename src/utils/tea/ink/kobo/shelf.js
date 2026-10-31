@@ -10,11 +10,9 @@ import {
   addWash,
   addLine,
   addSolid,
-  addText,
   inked,
 } from "../pen.js";
-import { GLAZE_NAMES, PROFILES, piece, demoSpec } from "../ceramics.js";
-import { arrowLine } from "../tools.js";
+import { piece, demoSpec } from "../ceramics.js";
 import { note, kanji } from "./steps.js";
 
 // frame of short dashes, for what is not quite there yet
@@ -148,75 +146,4 @@ function sceneShelf(tones, opt = {}) {
   return { W: width, H: height, groups, clips: [], spots };
 }
 
-// one piece taken off the shelf
-function scenePieceCard(tones) {
-  const rand = rng(hash("tea/card")),
-    width = SCENE_WIDTH,
-    height = 460,
-    group = newGroup();
-  const spec = Object.assign(demoSpec("shelf13"), PROFILES.bowl);
-  const views = [-0.6, 0, 0.6];
-  views.forEach((turn, i) => {
-    const turned = Object.assign({}, spec, {
-      paint: (spec.paint || [])
-        .map((stroke) => ({
-          ...stroke,
-          pts: stroke.pts.map(([u, v]) => [u + turn, v]).filter(([u]) => u > -1 && u < 1),
-        }))
-        .filter((stroke) => stroke.pts.length > 1),
-    });
-    piece(group, rand, 170 + i * 230, 330, i === 1 ? 2.1 : 1.5, tones, turned);
-  });
-  arrowLine(
-    group,
-    rand,
-    [
-      [210, 410],
-      [270, 420],
-      [330, 410],
-    ],
-    tones,
-    0.45,
-  );
-  arrowLine(
-    group,
-    rand,
-    [
-      [590, 410],
-      [530, 420],
-      [470, 410],
-    ],
-    tones,
-    0.45,
-  );
-  note(group, 400, 445, "drag to turn it in your hands", tones, 13, 0.55);
-  inked(group, rand, wobblyBox(rand, 780, 110, 1040, 380, 0.8), tones.paper, tones.ink, 1.1);
-  addText(group, {
-    t: "Hana",
-    tr: "translate(910 160)",
-    fs: 30,
-    font: "Kalam, cursive",
-    fill: tones.ink,
-    o: 0.85,
-  });
-  addSolid(group, wobblyBox(rand, 990, 128, 1022, 160, 0.4), tones.red, 0.88);
-  addText(group, {
-    t: "花",
-    tr: "translate(1006 145)",
-    fs: 20,
-    font: "'Yuji Syuku', serif",
-    fill: tones.paper,
-  });
-  [
-    [
-      `${spec.H < 20 ? "plate" : spec.handle ? "cup" : "bowl"} · ${["buff", "red", "dark", "white"][spec.clay]} clay`,
-      210,
-    ],
-    [`${GLAZE_NAMES[spec.glaze.c]} glaze, dipped`, 240],
-    ["fired twice in the climbing kiln", 270],
-    ["12 October 2026", 320],
-  ].forEach(([text, y]) => note(group, 910, y, text, tones, 16, 0.7));
-  return { W: width, H: height, groups: [group], clips: [] };
-}
-
-export { dashed, sceneShelf, scenePieceCard };
+export { dashed, sceneShelf };

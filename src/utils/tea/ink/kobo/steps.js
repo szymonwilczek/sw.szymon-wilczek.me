@@ -1,7 +1,7 @@
 // labels, hotspots and the workshop scene the kobo steps start from
 
 import { SCENE_WIDTH, mix, hash, rng, roundCoord } from "../core.js";
-import { wobblySegment, wobblyRing, newGroup, addWash, addLine, addText, inked } from "../pen.js";
+import { wobblyRing, newGroup, addWash, addText, inked } from "../pen.js";
 import { face, post } from "../architecture.js";
 import { obliqueScaled } from "../ceramics.js";
 import { WORKSHOP_WIDTH, WORKSHOP_DEPTH, WORKSHOP_HEIGHT, workshopInside } from "../workshop.js";
@@ -25,24 +25,6 @@ const kanji = (group, x, y, text, tones, fontSize) =>
     fill: tones.ink,
     o: 0.85,
   });
-
-function frames(group, rand, labels, tones, H) {
-  const count = labels.length,
-    width = SCENE_WIDTH / count;
-  labels.forEach(([glyph, caption], i) => {
-    kanji(group, i * width + 26, 44, glyph, tones);
-    note(group, i * width + 26 + 30 + caption.length * 3.6, 44, caption, tones, 17, 0.75);
-    if (i)
-      addLine(
-        group,
-        wobblySegment(rand, [i * width, 80], [i * width, H - 30], 0.6, 3),
-        tones.ink,
-        0.8,
-        0.18,
-      );
-  });
-  return (i) => i * width + width / 2;
-}
 
 // hotspot in the workshop
 function hotspot(group, rand, x, y, glyph, caption, tones) {
@@ -141,4 +123,4 @@ function sceneWorkshop(tones) {
   return { W: width, H: height, groups, clips: [], spots };
 }
 
-export { note, kanji, frames, hotspot, sceneWorkshop };
+export { note, kanji, hotspot, sceneWorkshop };

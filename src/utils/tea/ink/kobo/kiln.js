@@ -1,22 +1,18 @@
 // the kiln step
 
-import { SCENE_WIDTH, mix, hash, rng, roundCoord } from "../core.js";
+import { mix, roundCoord } from "../core.js";
 import {
-  jitter,
   wobblyPolygon,
   wobblyBox,
   wobblyLine,
   wobblySegment,
   wobblyRing,
-  newGroup,
   addWash,
   addLine,
   addSolid,
   inked,
 } from "../pen.js";
-import { GLAZES, PROFILES, piece } from "../ceramics.js";
-import { fingertip, arrowLine, bucket } from "../tools.js";
-import { note, frames } from "./steps.js";
+import { piece } from "../ceramics.js";
 
 // inside one chamber of the kiln
 function chamber(group, rand, cx, cy, width, height, tones, heat) {
@@ -161,156 +157,4 @@ function tongs(group, rand, x, y, tones) {
   );
 }
 
-function sceneKiln(tones) {
-  const rand = rng(hash("tea/kiln")),
-    width = SCENE_WIDTH,
-    height = 460,
-    groups = [],
-    y = 330,
-    captionY = y + 92;
-  const labels = newGroup(),
-    centerOf = frames(
-      labels,
-      rand,
-      [
-        ["一", "first firing"],
-        ["二", "dip"],
-        ["三", "drip"],
-        ["四", "glaze firing"],
-      ],
-      tones,
-      height,
-    );
-  groups.push(labels);
-  const spec = Object.assign({ clay: 0, fire: 21 }, PROFILES.bowl);
-  // bisque
-  const bisque = newGroup();
-  chamber(bisque, rand, centerOf(0), y, 190, 150, tones, 2);
-  piece(
-    bisque,
-    rand,
-    centerOf(0) - 34,
-    y - 78,
-    0.5,
-    tones,
-    Object.assign({}, spec, { glaze: { none: true } }),
-  );
-  piece(
-    bisque,
-    rand,
-    centerOf(0) + 34,
-    y - 78,
-    0.5,
-    tones,
-    Object.assign({ clay: 3, glaze: { none: true }, fire: 2 }, PROFILES.cup),
-  );
-  piece(
-    bisque,
-    rand,
-    centerOf(0),
-    y - 2,
-    0.62,
-    tones,
-    Object.assign({}, spec, { glaze: { none: true }, clay: 1 }),
-  );
-  heatBar(bisque, rand, centerOf(0) - 90, y + 50, 180, tones, 0.64, 0.5, 0.75);
-  note(bisque, centerOf(0), captionY, "tap to stoke · keep it in the band", tones);
-  groups.push(bisque);
-  // dip it upside down
-  const dip = newGroup();
-  bucket(dip, rand, centerOf(1), y + 30, 2.4, tones, GLAZES(tones)[3]);
-  const flip = newGroup({
-    tf: "rotate(180deg)",
-    to: `${roundCoord(centerOf(1))}px ${roundCoord(y - 54)}px`,
-  });
-  piece(
-    flip,
-    rand,
-    centerOf(1),
-    y - 54,
-    0.85,
-    tones,
-    Object.assign({}, spec, { glaze: { c: 3, dip: 0.55 } }),
-  );
-  groups.push(dip, flip);
-  const tongsGroup = newGroup();
-  tongs(tongsGroup, rand, centerOf(1), y - 112, tones);
-  arrowLine(
-    tongsGroup,
-    rand,
-    [
-      [centerOf(1) + 86, y - 120],
-      [centerOf(1) + 86, y - 64],
-    ],
-    tones,
-  );
-  note(tongsGroup, centerOf(1), captionY, "drag down · let go to lift", tones);
-  groups.push(tongsGroup);
-  // hold it tilted and the glaze runs in drips
-  const tilted = newGroup();
-  piece(
-    tilted,
-    rand,
-    centerOf(2),
-    y,
-    1.25,
-    tones,
-    Object.assign({}, spec, {
-      glaze: {
-        c: 2,
-        dip: 0.42,
-        drips: [
-          [-0.4, 0.24, 0.07],
-          [0.05, 0.36, 0.06],
-          [0.5, 0.18, 0.08],
-        ],
-      },
-    }),
-  );
-  fingertip(tilted, rand, centerOf(2) + 30, y - 120, tones);
-  arrowLine(
-    tilted,
-    rand,
-    [
-      [centerOf(2) + 30, y - 100],
-      [centerOf(2) + 30, y - 66],
-    ],
-    tones,
-  );
-  note(tilted, centerOf(2), captionY, "hold where you want it to run", tones);
-  groups.push(tilted);
-  // same glaze, three firings
-  const firings = newGroup();
-  [
-    [-70, 31],
-    [0, 32],
-    [70, 33],
-  ].forEach(([offsetX, fire], i) =>
-    piece(
-      firings,
-      rand,
-      centerOf(3) + offsetX,
-      y - (i === 1 ? 26 : 0),
-      0.55,
-      tones,
-      Object.assign({}, spec, {
-        fire: fire,
-        glaze: { c: 0, dip: 0.6, drips: [[jitter(rng(fire), 0.6), 0.2, 0.08]] },
-        kin:
-          i === 2
-            ? [
-                [0.1, 0],
-                [0.18, 0.25],
-                [0.05, 0.5],
-              ]
-            : null,
-      }),
-    ),
-  );
-  note(firings, centerOf(3), y + 72, "the kiln decides the rest", tones);
-  note(firings, centerOf(3), captionY, "a crack is mended in gold", tones, 13, 0.55);
-  groups.push(firings);
-  return { W: width, H: height, groups, clips: [] };
-}
-
-export { chamber, heatBar, tongs, sceneKiln };
+export { chamber, heatBar, tongs };

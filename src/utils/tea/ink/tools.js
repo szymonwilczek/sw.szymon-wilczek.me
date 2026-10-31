@@ -122,24 +122,6 @@ function fingertip(group, rand, x, y, tones, label) {
     });
 }
 
-function arrowLine(group, rand, points, tones, opacity) {
-  brushStroke(group, rand, points, 2, tones.ink, opacity ?? 0.55, { tip: 0.05, head: 0.1 });
-  const prev = points[points.length - 2],
-    tip = points[points.length - 1],
-    angle = Math.atan2(tip[1] - prev[1], tip[0] - prev[0]);
-  const barb = (splay) => [
-    tip[0] - 9 * Math.cos(angle + splay),
-    tip[1] - 9 * Math.sin(angle + splay),
-  ];
-  addLine(
-    group,
-    `M${roundCoord(barb(0.5)[0])} ${roundCoord(barb(0.5)[1])} L${roundCoord(tip[0])} ${roundCoord(tip[1])} L${roundCoord(barb(-0.5)[0])} ${roundCoord(barb(-0.5)[1])}`,
-    tones.ink,
-    1.3,
-    opacity ?? 0.55,
-  );
-}
-
 // glaze bucket, seen a little from above
 function bucket(group, rand, cx, cy, scale, tones, glaze, label) {
   const scaled = (v) => v * scale;
@@ -219,4 +201,4 @@ function brushTool(group, rand, x, y, angle, length, tones, ink) {
   });
 }
 
-export { wheel, spin, wetClay, fingertip, arrowLine, bucket, brushTool };
+export { wheel, spin, wetClay, fingertip, bucket, brushTool };

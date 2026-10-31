@@ -185,9 +185,6 @@ function smooth(points, closed) {
   return closed ? path + " Z" : path;
 }
 
-const polygonPath = (points) =>
-  "M" + points.map(([x, y]) => `${roundCoord(x)} ${roundCoord(y)}`).join(" L") + " Z";
-
 export {
   SCENE_WIDTH,
   THEME_VARS,
@@ -203,5 +200,4 @@ export {
   roundCoord,
   lerp,
   smooth,
-  polygonPath,
 };

@@ -14,7 +14,6 @@ export {
   smooth,
   rng,
   hash,
-  polygonPath,
 } from "./ink/core.js";
 export {
   jitter,
@@ -28,7 +27,6 @@ export {
   newGroup,
   wobblyRing,
   addText,
-  dryBrush,
   brushWash,
   brushPath,
   brushStroke,
@@ -39,9 +37,8 @@ export {
   oblique,
   mist,
   mistPath,
-  quadMap,
 } from "./ink/pen.js";
-export { steppingStones, stone, thatchStrokes, maple, lantern, cordTie } from "./ink/garden.js";
+export { steppingStones, stone, thatchStrokes, maple } from "./ink/garden.js";
 export { face, post, gableRoof, plaque } from "./ink/architecture.js";
 export { sekiStone, stoneBody } from "./ink/seki.js";
 export {
@@ -54,7 +51,6 @@ export {
   CULMS,
   edgeHit,
   bambooClump,
-  sceneBamboo,
 } from "./ink/bamboo.js";
 export {
   CLAYS,
@@ -71,7 +67,7 @@ export {
   demoSpec,
   obliqueScaled,
 } from "./ink/ceramics.js";
-export { fingertip, wheel, spin, wetClay, arrowLine, bucket, brushTool } from "./ink/tools.js";
+export { fingertip, wheel, spin, wetClay, bucket, brushTool } from "./ink/tools.js";
 export {
   WORKSHOP_WIDTH,
   noren,
@@ -81,9 +77,7 @@ export {
   workshopInside,
 } from "./ink/workshop.js";
 export { sceneGarden16 } from "./ink/roji.js";
-export { hotspot, kanji, note, frames, sceneWorkshop } from "./ink/kobo/steps.js";
-export { sceneWheel, sceneShapes } from "./ink/kobo/wheel.js";
-export { chamber, heatBar, tongs, sceneKiln } from "./ink/kobo/kiln.js";
-export { sceneGlazes, scenePaint } from "./ink/kobo/glaze.js";
-export { dashed, sceneShelf, scenePieceCard } from "./ink/kobo/shelf.js";
+export { hotspot, kanji, note, sceneWorkshop } from "./ink/kobo/steps.js";
+export { chamber, heatBar, tongs } from "./ink/kobo/kiln.js";
+export { dashed, sceneShelf } from "./ink/kobo/shelf.js";
 export { hanko } from "./ink/hanko.js";
