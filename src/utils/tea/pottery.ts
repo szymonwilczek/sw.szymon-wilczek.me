@@ -6,7 +6,6 @@ import {
   toSvg,
   toneVars,
   setPrecision,
-  PROFILES,
   GLAZE_NAMES,
 } from "./ink.js";
 
@@ -55,7 +54,6 @@ export const PIGMENT_NAMES = [
   "gold",
 ];
 export const TIP_NAMES = ["pointed", "flat", "dry"];
-export { GLAZE_NAMES, PROFILES as PROF };
 
 // ceiling on the JSON
 export const MAX_BYTES = 12_000;
