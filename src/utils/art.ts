@@ -1,11 +1,10 @@
-// The still water and the raked sand, drawn at build time into their own .svg
-// files under /art/.
+// The still water, drawn at build time into its own .svg files under /art/
 
 import { MOMIJI } from "./momiji";
-import { makeSand, smooth } from "./sand";
+import { smooth } from "./sand";
 import { LAYOUTS, makeWater } from "./water";
 
-export const ART = ["water-wide", "water-tall", "sand"] as const;
+export const ART = ["water-wide", "water-tall"] as const;
 export type ArtName = (typeof ART)[number];
 
 const json = (value: unknown) =>
@@ -48,24 +47,7 @@ function water(name: "wide" | "tall") {
   );
 }
 
-function sand() {
-  const bed = makeSand();
-  return svgDoc(
-    `viewBox="0 0 1000 190" data-lines="${json([...bed.lines, ...bed.rings].map((line) => line.pts))}"`,
-    `<defs><clipPath id="sand-clip"><path d="${bed.edge}"/></clipPath></defs>` +
-      `<path class="sand-bed" d="${bed.edge}"/>` +
-      `<g class="sand-grains">${bed.grains.map((grain) => `<circle cx="${grain.x}" cy="${grain.y}" r="${grain.r}"/>`).join("")}</g>` +
-      `<g class="sand-lines">${[...bed.lines, ...bed.rings].map((line) => `<path d="${smooth(line.pts, false)}" stroke-width="${line.w}" opacity="${line.o}"/>`).join("")}</g>` +
-      `<g class="sand-kept" clip-path="url(#sand-clip)"/>` +
-      stones(bed.stones) +
-      `<g class="sand-rake" aria-hidden="true">${'<circle r="1.8"/>'.repeat(5)}</g>` +
-      `<g class="sand-leaf" transform="translate(806 97) rotate(-28) scale(0.14)">` +
-      `<path class="sand-leaf-stem" d="${MOMIJI.stem}"/><path class="sand-leaf-blade" d="${MOMIJI.outline}"/><path class="sand-leaf-ink" d="${MOMIJI.outline}" transform="translate(5 -4)"/></g>`,
-  );
-}
-
 export function drawArt(name: ArtName) {
-  if (name === "sand") return sand();
   return water(name === "water-wide" ? "wide" : "tall");
 }
 
