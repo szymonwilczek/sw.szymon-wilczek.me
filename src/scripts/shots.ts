@@ -18,7 +18,7 @@ function openViewer() {
     <p class="shot-bar">
       <button type="button" data-step="-1" aria-label="Previous image">←</button>
       <span class="shot-count"></span>
-      <a target="_blank" rel="noopener">original ↗</a>
+      <a href="${links[0].href}" target="_blank" rel="noopener">original ↗</a>
       <button type="button" data-step="1" aria-label="Next image">→</button>
     </p>`;
   document.body.append(view);
