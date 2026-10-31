@@ -1,9 +1,13 @@
 import fs from "node:fs";
 import path from "node:path";
 
-// Source of truth: the au-themes Emacs package
-// Override with AU_THEMES_DIR
-const SOURCE_DIR = path.resolve(process.env.AU_THEMES_DIR || "../au-themes");
+// Source of truth: what is pushed to the au-themes repo
+// AU_THEMES_DIR reads a local clone instead, to preview it
+const UPSTREAM = "szymonwilczek/au-themes";
+const UPSTREAM_BRANCH = "main";
+const FETCH_TIMEOUT_MS = 20000;
+const THEME_FILE = /^au-.+-theme\.el$/;
+const LOCAL_DIR = process.env.AU_THEMES_DIR && path.resolve(process.env.AU_THEMES_DIR);
 const CSS_OUT = "src/styles/au-themes.css";
 const MORE_OUT = "src/styles/au-themes-more.css";
 const JSON_OUT = "src/data/au-themes.json";
@@ -12,9 +16,46 @@ const FAMILY_ORDER = ["salina"];
 const VARIANT_ORDER = ["morning", "day", "night"];
 const DEFAULT_THEMES = { light: "salina-day", dark: "salina-night" };
 
-function parseTheme(file) {
-  const source = fs.readFileSync(file, "utf8");
-  const name = path.basename(file).replace(/-theme\.el$/, "");
+async function upstreamGet(url) {
+  const token = process.env.GITHUB_TOKEN;
+  const response = await fetch(url, {
+    headers: token ? { authorization: `Bearer ${token}` } : {},
+    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+  });
+  if (!response.ok) throw new Error(`${url}: ${response.status}`);
+  return response;
+}
+
+// Pinned to the commit: branch urls on raw.githubusercontent.com lag behind a push
+async function readUpstream() {
+  const api = `https://api.github.com/repos/${UPSTREAM}`;
+  const commit = await (await upstreamGet(`${api}/commits/${UPSTREAM_BRANCH}`)).json();
+  const tree = await (await upstreamGet(`${api}/git/trees/${commit.sha}`)).json();
+  const sources = await Promise.all(
+    tree.tree
+      .map((entry) => entry.path)
+      .filter((file) => THEME_FILE.test(file))
+      .map(async (file) => {
+        const raw = `https://raw.githubusercontent.com/${UPSTREAM}/${commit.sha}/${file}`;
+        return { file, source: await (await upstreamGet(raw)).text() };
+      }),
+  );
+  return { origin: `${UPSTREAM}@${commit.sha.slice(0, 7)}`, sources };
+}
+
+function readLocal(directory) {
+  if (!fs.existsSync(directory)) {
+    throw new Error(`au-themes not found at ${directory}`);
+  }
+  const sources = fs
+    .readdirSync(directory)
+    .filter((file) => THEME_FILE.test(file))
+    .map((file) => ({ file, source: fs.readFileSync(path.join(directory, file), "utf8") }));
+  return { origin: directory, sources };
+}
+
+function parseTheme({ file, source }) {
+  const name = file.replace(/-theme\.el$/, "");
   const id = name.replace(/^au-/, "");
   const [family, ...rest] = id.split("-");
   const variant = rest.join("-");
@@ -118,23 +159,15 @@ function renderJson(themes) {
   return JSON.stringify(entries, null, 2) + "\n";
 }
 
-if (!fs.existsSync(SOURCE_DIR)) {
-  console.error(`au-themes not found at ${SOURCE_DIR} (set AU_THEMES_DIR)`);
-  process.exit(1);
-}
-
-const themes = fs
-  .readdirSync(SOURCE_DIR)
-  .filter((file) => /^au-.+-theme\.el$/.test(file))
-  .map((file) => parseTheme(path.join(SOURCE_DIR, file)))
-  .sort(compareThemes);
+const { origin, sources } = LOCAL_DIR ? readLocal(LOCAL_DIR) : await readUpstream();
+const themes = sources.map(parseTheme).sort(compareThemes);
 
 fs.mkdirSync(path.dirname(JSON_OUT), { recursive: true });
 fs.writeFileSync(CSS_OUT, renderCss(themes));
 fs.writeFileSync(MORE_OUT, renderMoreCss(themes));
 fs.writeFileSync(JSON_OUT, renderJson(themes));
 
-console.log(`Generated ${themes.length} themes from ${SOURCE_DIR}`);
+console.log(`Generated ${themes.length} themes from ${origin}`);
 for (const theme of themes) {
   console.log(`  ${theme.id.padEnd(22)} ${theme.polarity.padEnd(5)} ${theme.colors.size} tokens`);
 }
