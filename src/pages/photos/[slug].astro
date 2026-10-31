@@ -54,6 +54,9 @@ const strips = Array.from({ length: Math.ceil(photos.length / 4) }, (_, stripInd
 );
 const edge = `SW·${String(album.date.getFullYear()).slice(2)}${twoDigits(album.date.getMonth() + 1)}`;
 
+const frameSizes = (photo: PhotoItem) =>
+  `(max-width: 47.99em) calc(100vw - 2.5rem), ${photo.isPortrait ? "27.5rem" : "38.75rem"}`;
+
 const RADII = ["3px 7px 4px 8px", "6px 3px 7px 4px", "4px 6px 3px 7px", "7px 4px 6px 3px"];
 ---
 
@@ -68,6 +71,18 @@ const RADII = ["3px 7px 4px 8px", "6px 3px 7px 4px", "4px 6px 3px 7px", "7px 4px
   collection
   graph={[albumPhotos(Astro.url, album, photos)]}
 >
+  {photos[0]?.avifSrcset && (
+    <link
+      slot="head"
+      rel="preload"
+      as="image"
+      type="image/avif"
+      imagesrcset={photos[0].avifSrcset}
+      imagesizes={frameSizes(photos[0])}
+      fetchpriority="high"
+    />
+  )}
+
   <a href="/photos/" class="back hand">
     <svg width="40" height="18" viewBox="0 0 40 18" aria-hidden="true">
       <path d="M38 10 C 28 8, 18 11, 4 9"></path>
@@ -136,16 +151,23 @@ const RADII = ["3px 7px 4px 8px", "6px 3px 7px 4px", "4px 6px 3px 7px", "7px 4px
             data-title={`${album.title} · ${photo.filename}`}
             aria-label={`Open ${photo.filename} full size`}
           >
-            <img
-              src={photo.thumbSrc || photo.src}
-              alt={`${album.title}, photo ${i + 1}`}
-              width={photo.width || undefined}
-              height={photo.height || undefined}
-              loading={i === 0 ? "eager" : "lazy"}
-              fetchpriority={i === 0 ? "high" : undefined}
-              decoding="async"
-              style={`border-radius: ${RADII[i % RADII.length]}`}
-            />
+            <picture>
+              {photo.avifSrcset && (
+                <source srcset={photo.avifSrcset} sizes={frameSizes(photo)} type="image/avif" />
+              )}
+              <img
+                src={photo.thumbSrc || photo.src}
+                srcset={photo.webpSrcset}
+                sizes={frameSizes(photo)}
+                alt={`${album.title}, photo ${i + 1}`}
+                width={photo.width || undefined}
+                height={photo.height || undefined}
+                loading={i === 0 ? "eager" : "lazy"}
+                fetchpriority={i === 0 ? "high" : undefined}
+                decoding="async"
+                style={`border-radius: ${RADII[i % RADII.length]}`}
+              />
+            </picture>
           </a>
 
           <figcaption>

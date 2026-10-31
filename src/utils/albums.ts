@@ -12,6 +12,8 @@ export interface PhotoItem {
   thumbSrc: string;
   sheetSrc: string;
   sheetAvif?: string;
+  webpSrcset?: string;
+  avifSrcset?: string;
   sizeBytes: number;
   sizeFormatted: string;
   sha256: string;
@@ -52,6 +54,22 @@ export interface PhotoAlbum {
   totalSizeFormatted: string;
   photos: PhotoItem[];
   narrativeHtml?: string;
+}
+
+const PREVIEW_SIZE = 600;
+const FRAME_SIZES = [PREVIEW_SIZE, 900, 1200];
+
+function frameSrcset(
+  files: { size: number; file: string }[],
+  folder: string,
+  width: number,
+  height: number,
+): string | undefined {
+  if (files.length === 0 || !width || !height) return undefined;
+  const scale = (size: number) => Math.min(1, size / Math.max(width, height));
+  return files
+    .map(({ size, file }) => `/images/${folder}/thumbs/${file} ${Math.round(width * scale(size))}w`)
+    .join(", ");
 }
 
 function formatBytes(bytes: number): string {
@@ -337,6 +355,23 @@ export async function getAllAlbums(): Promise<PhotoAlbum[]> {
       const sheetAvif = fs.existsSync(path.join(albumPath, "thumbs", `${photoId}-600.avif`))
         ? `/images/${folderName}/thumbs/${photoId}-600.avif`
         : undefined;
+      const isGenerated = ({ file }: { file: string }) =>
+        fs.existsSync(path.join(albumPath, "thumbs", file));
+      const webpSrcset = frameSrcset(
+        [
+          { size: PREVIEW_SIZE, file: `${photoId}-600.webp` },
+          { size: FRAME_SIZES[FRAME_SIZES.length - 1], file: `${photoId}.webp` },
+        ].filter(isGenerated),
+        folderName,
+        width,
+        height,
+      );
+      const avifSrcset = frameSrcset(
+        FRAME_SIZES.map((size) => ({ size, file: `${photoId}-${size}.avif` })).filter(isGenerated),
+        folderName,
+        width,
+        height,
+      );
 
       photos.push({
         id: photoId,
@@ -345,6 +380,8 @@ export async function getAllAlbums(): Promise<PhotoAlbum[]> {
         thumbSrc,
         sheetSrc,
         sheetAvif,
+        webpSrcset,
+        avifSrcset,
         sizeBytes,
         sizeFormatted: formatBytes(sizeBytes),
         sha256,
