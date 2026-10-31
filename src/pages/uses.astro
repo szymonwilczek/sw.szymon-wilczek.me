@@ -598,18 +598,18 @@ const { groups, storehouse, count } = shelf();
   .spare {
     display: grid;
     justify-items: center;
-    opacity: 0.75;
-    transition: opacity 0.4s ease;
-  }
-
-  .spare:hover {
-    opacity: 1;
   }
 
   .spare svg {
     display: block;
     width: 100%;
     height: auto;
+    opacity: 0.75;
+    transition: opacity 0.4s ease;
+  }
+
+  .spare:hover svg {
+    opacity: 1;
   }
 
   .spare-ink {
@@ -640,7 +640,7 @@ const { groups, storehouse, count } = shelf();
   @media (prefers-reduced-motion: reduce) {
     .card,
     .wash,
-    .spare {
+    .spare svg {
       transition: none;
     }
 
