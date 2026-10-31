@@ -73,8 +73,6 @@ export default defineConfig({
   trailingSlash: "always",
   redirects: {
     "/path/": "/cv/",
-    "/files/": "/research/",
-    "/files/verify/": "/research/",
   },
   compressHTML: true,
   prefetch: {
