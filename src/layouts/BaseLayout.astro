@@ -278,6 +278,13 @@ const {
             });
           },
           warm: fetchThemes,
+          autoNote: function () {
+            var same = DEFAULTS.light === DEFAULTS.dark;
+            var themes = same
+              ? DEFAULTS.light
+              : DEFAULTS.light + " by light, " + DEFAULTS.dark + " by dark";
+            return "follow the calendar and the system: " + DEFAULTS.name + ", " + themes;
+          },
           preview: function (id) {
             var theme = id || resolve(read());
             if (waiting && waiting.theme === theme) return;

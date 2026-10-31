@@ -6,6 +6,7 @@ interface AuTheme {
   preview(id?: string): void;
   flood(choice: string): void;
   warm(): void;
+  autoNote(): string;
   openPicker?: () => void;
 }
 

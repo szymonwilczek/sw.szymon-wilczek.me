@@ -135,7 +135,7 @@ import { findDoor } from "../utils/garden";
     {
       id: "au-themes-auto",
       name: "au-themes-auto",
-      desc: "Follow the system: salina-day by light, salina-night by dark",
+      desc: "Follow the calendar and the system",
       action: function () {
         window.auTheme.flood("auto");
       },

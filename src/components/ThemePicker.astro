@@ -34,7 +34,9 @@ for (const theme of auThemes) {
     <button type="button" class="picker-row picker-auto" data-choice="auto">
       <span class="mark" aria-hidden="true"></span>
       <span class="row-id">auto</span>
-      <span class="row-desc">follow the system: salina-day by light, salina-night by dark</span>
+      <span class="row-desc" data-auto-note>
+        follow the calendar and the system
+      </span>
     </button>
 
     <div class="picker-list">
@@ -265,6 +267,7 @@ for (const theme of auThemes) {
 
     function mark() {
       var choice = window.auTheme.get();
+      picker.querySelector("[data-auto-note]").textContent = window.auTheme.autoNote();
       rows.forEach(function (row) {
         row.classList.toggle("is-chosen", row.dataset.choice === choice);
       });
