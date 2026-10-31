@@ -39,7 +39,6 @@ function across([from, to]: [P, P]): boolean {
   return crossY > CLUMP.top && crossY < CLUMP.y - 20;
 }
 
-localStorage.removeItem("roji:bamboo");
 let done = false;
 let madeCut: Cut | undefined;
 
