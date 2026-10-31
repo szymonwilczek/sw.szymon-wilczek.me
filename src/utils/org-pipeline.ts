@@ -208,6 +208,43 @@ function uniorgHeadlines() {
   };
 }
 
+function linkedImage(node: any) {
+  if (node.tagName !== "p") return null;
+  const content = node.children.filter((child: any) => child.type !== "text" || child.value.trim());
+  const [link] = content;
+  const lonely = content.length === 1 && link.tagName === "a";
+  return lonely && link.children?.[0]?.tagName === "img" ? link : null;
+}
+
+// Two or more linked images in a row sit together as a grid of previews
+function groupLinkedImages(children: any[]) {
+  const grouped: any[] = [];
+  let run: any[] = [];
+  const flush = () => {
+    if (run.length > 1) {
+      const shots = run.map(linkedImage);
+      grouped.push({
+        type: "element",
+        tagName: "div",
+        properties: { className: ["shots"] },
+        children: shots,
+      });
+    } else {
+      grouped.push(...run);
+    }
+    run = [];
+  };
+  for (const child of children) {
+    if (linkedImage(child)) run.push(child);
+    else if (child.type !== "text" || child.value.trim() || run.length === 0) {
+      flush();
+      grouped.push(child);
+    }
+  }
+  flush();
+  return grouped;
+}
+
 function rehypeOrgEnhancements() {
   return (tree: any) => {
     visit(tree, "element", (node: any, index: number | undefined, parent: any) => {
@@ -402,6 +439,10 @@ function rehypeOrgEnhancements() {
         };
         parent.children[index] = wrapper;
       }
+    });
+
+    visit(tree, (node: any) => {
+      if (node.children) node.children = groupLinkedImages(node.children);
     });
 
     // clean up and unify footnotes

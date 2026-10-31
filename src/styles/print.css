@@ -159,6 +159,10 @@
     break-inside: avoid;
   }
 
+  .prose .shots img {
+    width: 100% !important;
+  }
+
   .end-seal {
     margin: 18pt 0 6pt auto !important;
   }
