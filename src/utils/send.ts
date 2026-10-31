@@ -17,7 +17,6 @@ export const CHUNK_BYTES = 32 * MIB;
 export const ROWS_PER_CHUNK = CHUNK_BYTES / ROW_BYTES;
 export const SHARD_BYTES = 512 * MIB;
 export const CHUNKS_PER_SHARD = SHARD_BYTES / CHUNK_BYTES;
-export const ROWS_PER_SHARD = SHARD_BYTES / ROW_BYTES;
 export const POOL_BYTES = 4.5 * GB;
 
 export const ID_ALPHABET = "abcdefghjkmnpqrstuvwxyz23456789";
