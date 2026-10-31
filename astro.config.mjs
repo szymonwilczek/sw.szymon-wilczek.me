@@ -4,6 +4,7 @@ import postAudit from "@casoon/astro-post-audit";
 import linkChecker from "astro-better-link-checker";
 import { readdir, readFile, writeFile } from "node:fs/promises";
 import { execFileSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -24,6 +25,43 @@ const preloadGarden = {
         const html = await readFile(join(root, file), "utf8");
         if (!html.includes('<script type="module"')) continue;
         await writeFile(join(root, file), html.replace("</head>", `${link}</head>`));
+      }
+    },
+  },
+};
+
+const CHARSET = '<meta charset="utf-8">';
+const INLINE_SCRIPT = /<script\b(?![^>]*\bsrc=)(?![^>]*ld\+json)[^>]*>([\s\S]*?)<\/script>/g;
+
+const contentSecurityPolicy = (hashes) =>
+  [
+    "default-src 'self'",
+    `script-src 'self' ${hashes.join(" ")} https://static.cloudflareinsights.com`,
+    "style-src 'self' 'unsafe-inline'",
+    "img-src 'self' data: https:",
+    "connect-src 'self' https://*.szymon-wilczek.me https://cloudflareinsights.com",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+  ].join("; ");
+
+// pages cannot send headers per page, and inline scripts change with every build,
+// so each page carries a policy with the hashes of its own scripts
+const pageCsp = {
+  name: "page-csp",
+  hooks: {
+    "astro:build:done": async ({ dir }) => {
+      const root = fileURLToPath(dir);
+      const files = (await readdir(root, { recursive: true })).filter((name) =>
+        name.endsWith(".html"),
+      );
+      for (const file of files) {
+        const html = await readFile(join(root, file), "utf8");
+        const hashes = [...new Set(html.matchAll(INLINE_SCRIPT).map(([, body]) => body))].map(
+          (body) => `'sha256-${createHash("sha256").update(body).digest("base64")}'`,
+        );
+        const meta = `<meta http-equiv="Content-Security-Policy" content="${contentSecurityPolicy(hashes)}">`;
+        await writeFile(join(root, file), html.replace(CHARSET, `${CHARSET}${meta}`));
       }
     },
   },
@@ -100,6 +138,7 @@ export default defineConfig({
   },
   integrations: [
     preloadGarden,
+    pageCsp,
     sitemap({
       filter: (page) =>
         !page.includes("/vault") &&
