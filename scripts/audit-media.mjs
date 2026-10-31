@@ -1,45 +1,15 @@
 import fs from "node:fs";
 import path from "node:path";
-import { execSync } from "node:child_process";
 import sharp from "sharp";
+import {
+  GITHUB_RECOMMENDED_LIMIT_BYTES,
+  formatBytes,
+  getTrackedGitRepoSize,
+  renderProgressBar,
+} from "./media-quota.mjs";
 
-const GITHUB_RECOMMENDED_LIMIT_BYTES = 1024 * 1024 * 1024; // 1 GB
 const MAX_RECOMMENDED_DIMENSION = 2560; // 2.5K QHD
 const MAX_RECOMMENDED_SIZE_BYTES = 2.0 * 1024 * 1024; // 2.0 MB
-
-function formatBytes(bytes) {
-  if (bytes === 0) return "0 B";
-  const unit = 1024;
-  const sizes = ["B", "KB", "MB", "GB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(unit));
-  return `${parseFloat((bytes / Math.pow(unit, i)).toFixed(2))} ${sizes[i]}`;
-}
-
-function getTrackedGitRepoSize() {
-  try {
-    const output = execSync("git ls-files", { encoding: "utf8" });
-    const files = output.trim().split("\n").filter(Boolean);
-    let total = 0;
-    for (const file of files) {
-      if (fs.existsSync(file)) {
-        try {
-          total += fs.statSync(file).size;
-        } catch {}
-      }
-    }
-    return total;
-  } catch {
-    return 0;
-  }
-}
-
-function renderProgressBar(usedBytes, totalBytes, length = 36) {
-  const percent = Math.min(100, Math.max(0, (usedBytes / totalBytes) * 100));
-  const filledLength = Math.round((length * percent) / 100);
-  const emptyLength = length - filledLength;
-  const bar = "█".repeat(filledLength) + "░".repeat(emptyLength);
-  return `[${bar}] ${formatBytes(usedBytes)} / ${formatBytes(totalBytes)} (${percent.toFixed(1)}%)`;
-}
 
 async function main() {
   const imagesBaseDir = path.resolve("./public/images");
