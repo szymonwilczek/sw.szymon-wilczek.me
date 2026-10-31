@@ -216,6 +216,7 @@ async function read(source: string, filename: string) {
     const title = source.match(KEYWORD("title"))?.[1].trim() || filename;
     const language = source.match(KEYWORD("language"))?.[1].trim();
     titleEl.textContent = title;
+    metaEl.classList.add("file-meta");
     metaEl.textContent = [
       filename,
       `${lineCount} lines`,

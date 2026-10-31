@@ -9,11 +9,8 @@ import Seal from "../components/Seal.astro";
   description="Lay an .org file here and read it, rendered in this browser and sent nowhere."
 >
   <header class="reader-head">
-    <p class="crumb">org / reader · 写</p>
     <h1 data-title>Org reader</h1>
-    <p class="meta" data-meta>
-      any .org file · read in this browser, sent nowhere
-    </p>
+    <p data-meta>Any .org file, read in this browser.</p>
   </header>
 
   <label class="drop" data-drop>
@@ -68,21 +65,27 @@ import Seal from "../components/Seal.astro";
 
 <style>
   .reader-head {
-    max-width: 42.5rem;
-  }
-
-  .crumb,
-  .meta {
-    margin: 0;
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    color: var(--fg-dim);
+    max-width: 40rem;
   }
 
   .reader-head h1 {
-    margin: 0.75rem 0 1rem;
-    font-weight: 300;
-    line-height: 1.1;
+    margin: 0;
+  }
+
+  .reader-head p {
+    margin: 1.25rem 0 0;
+    color: var(--fg-dim);
+  }
+
+  .reader-head p.file-meta {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+  }
+
+  @media (max-width: 47.99em) {
+    .reader-head h1 {
+      font-size: 2.75rem;
+    }
   }
 
   .drop {
