@@ -6,6 +6,9 @@
 #+TAGS: emacs themes accessibility
 #+DESCRIPTION: Every au-theme in Emacs Lisp, C, Magit, Dired and Org, as it looks in my own Emacs.
 
+Go to the [[#themes][list of themes]], or straight to the screenshots of the
+[[#light-themes][light]] or the [[#dark-themes][dark]] ones.
+
 * About these pictures
 :PROPERTIES:
 :CUSTOM_ID: about
@@ -13,8 +16,7 @@
 
 [[https://github.com/szymonwilczek/au-themes][au-themes]] are calm, low-glare colour themes for GNU
 Emacs, made first of all for autistic people and for anyone who finds most
-themes too loud to read for long. The code and the test suite live at [[https://github.com/szymonwilczek/au-themes][szymonwilczek/au-themes]]. README
-explains how the colours are chosen and checked.
+themes too loud to read for long. Code and the test suite live at [[https://github.com/szymonwilczek/au-themes][szymonwilczek/au-themes]]
 
 The screenshots below show the themes as they are on the =main= branch today
 (31.10.2026). They are taken in my everyday Emacs, not in a clean one: the font
@@ -34,26 +36,40 @@ Each theme gets four pictures:
 4. *Org*: a release plan with headings, TODO keywords, tags, a table,
    a source block and a quote, next to the week agenda.
 
-Dark themes are best viewed on a dark page :)
+* The themes
+:PROPERTIES:
+:CUSTOM_ID: themes
+:END:
+
+*[[#light-themes][Light themes]]*
+
+- [[#au-whispergrove-day][au-whispergrove-day]]: Muted greens and neutral tones for daylight.
+- [[#au-whispergrove-morning][au-whispergrove-morning]]: A dimmer canvas than the other light themes, for early mornings or a room with little light.
+- [[#au-aurum-day][au-aurum-day]]: Warm earth tones on a muted canvas.
+- [[#au-parchment-day][au-parchment-day]]: Almost monochrome: italics and brightness steps instead of colour.
+- [[#au-salina-day][au-salina-day]]: The coast in daylight: salt flats, sand dunes, deep cobalt ocean, driftwood and brine pink.
+- [[#au-herbarium-day][au-herbarium-day]]: Pressed sage leaves, dried lavender, oak-bark ink and chamomile pollen.
+
+*[[#dark-themes][Dark themes]]*
+
+Best viewed on a dark page :)
+
+- [[#au-whispergrove-night][au-whispergrove-night]]: Muted greens and earth tones for unlit rooms.
+- [[#au-aurum-night][au-aurum-night]]: Amber and gold on a deep background, with the least blue light of the dark themes.
+- [[#au-parchment-night][au-parchment-night]]: Almost monochrome: italics and brightness steps instead of colour.
+- [[#au-salina-night][au-salina-night]]: Midnight ocean, dark basalt, phosphorescent turquoise and maritime coral.
+- [[#au-herbarium-night][au-herbarium-night]]: Pressed sage, dried lavender, oak-gall ink, terracotta flora and chamomile pollen.
+- [[#au-mysterium][au-mysterium]]: A Halloween night and an old painted van parked outside a haunted mansion: a near-black canvas, faded teal keywords, a dry yellow-green and burnt orange, with a muted purple over the region.
 
 * Light themes
 :PROPERTIES:
 :CUSTOM_ID: light-themes
 :END:
 
-- [[#au-whispergrove-day][au-whispergrove-day]]
-- [[#au-whispergrove-morning][au-whispergrove-morning]]
-- [[#au-aurum-day][au-aurum-day]]
-- [[#au-parchment-day][au-parchment-day]]
-- [[#au-salina-day][au-salina-day]]
-- [[#au-herbarium-day][au-herbarium-day]]
-
 ** au-whispergrove-day
 :PROPERTIES:
 :CUSTOM_ID: au-whispergrove-day
 :END:
-
-Muted greens and neutral tones for daylight.
 
 #+attr_html: :alt au-whispergrove-day theme code sample :loading lazy
 [[/assets/au-themes/au-whispergrove-day.png][file:/assets/au-themes/thumbs/au-whispergrove-day-600.webp]]
@@ -72,8 +88,6 @@ Muted greens and neutral tones for daylight.
 :CUSTOM_ID: au-whispergrove-morning
 :END:
 
-A dimmer canvas than the other light themes, for early mornings or a room with little light.
-
 #+attr_html: :alt au-whispergrove-morning theme code sample :loading lazy
 [[/assets/au-themes/au-whispergrove-morning.png][file:/assets/au-themes/thumbs/au-whispergrove-morning-600.webp]]
 
@@ -90,8 +104,6 @@ A dimmer canvas than the other light themes, for early mornings or a room with l
 :PROPERTIES:
 :CUSTOM_ID: au-aurum-day
 :END:
-
-Warm earth tones on a muted canvas.
 
 #+attr_html: :alt au-aurum-day theme code sample :loading lazy
 [[/assets/au-themes/au-aurum-day.png][file:/assets/au-themes/thumbs/au-aurum-day-600.webp]]
@@ -110,8 +122,6 @@ Warm earth tones on a muted canvas.
 :CUSTOM_ID: au-parchment-day
 :END:
 
-Almost monochrome: italics and brightness steps instead of colour.
-
 #+attr_html: :alt au-parchment-day theme code sample :loading lazy
 [[/assets/au-themes/au-parchment-day.png][file:/assets/au-themes/thumbs/au-parchment-day-600.webp]]
 
@@ -128,8 +138,6 @@ Almost monochrome: italics and brightness steps instead of colour.
 :PROPERTIES:
 :CUSTOM_ID: au-salina-day
 :END:
-
-The coast in daylight: salt flats, sand dunes, deep cobalt ocean, driftwood and brine pink.
 
 #+attr_html: :alt au-salina-day theme code sample :loading lazy
 [[/assets/au-themes/au-salina-day.png][file:/assets/au-themes/thumbs/au-salina-day-600.webp]]
@@ -148,8 +156,6 @@ The coast in daylight: salt flats, sand dunes, deep cobalt ocean, driftwood and 
 :CUSTOM_ID: au-herbarium-day
 :END:
 
-Pressed sage leaves, dried lavender, oak-bark ink and chamomile pollen.
-
 #+attr_html: :alt au-herbarium-day theme code sample :loading lazy
 [[/assets/au-themes/au-herbarium-day.png][file:/assets/au-themes/thumbs/au-herbarium-day-600.webp]]
 
@@ -167,19 +173,10 @@ Pressed sage leaves, dried lavender, oak-bark ink and chamomile pollen.
 :CUSTOM_ID: dark-themes
 :END:
 
-- [[#au-whispergrove-night][au-whispergrove-night]]
-- [[#au-aurum-night][au-aurum-night]]
-- [[#au-parchment-night][au-parchment-night]]
-- [[#au-salina-night][au-salina-night]]
-- [[#au-herbarium-night][au-herbarium-night]]
-- [[#au-mysterium][au-mysterium]]
-
 ** au-whispergrove-night
 :PROPERTIES:
 :CUSTOM_ID: au-whispergrove-night
 :END:
-
-Muted greens and earth tones for unlit rooms.
 
 #+attr_html: :alt au-whispergrove-night theme code sample :loading lazy
 [[/assets/au-themes/au-whispergrove-night.png][file:/assets/au-themes/thumbs/au-whispergrove-night-600.webp]]
@@ -198,8 +195,6 @@ Muted greens and earth tones for unlit rooms.
 :CUSTOM_ID: au-aurum-night
 :END:
 
-Amber and gold on a deep background, with the least blue light of the dark themes.
-
 #+attr_html: :alt au-aurum-night theme code sample :loading lazy
 [[/assets/au-themes/au-aurum-night.png][file:/assets/au-themes/thumbs/au-aurum-night-600.webp]]
 
@@ -216,8 +211,6 @@ Amber and gold on a deep background, with the least blue light of the dark theme
 :PROPERTIES:
 :CUSTOM_ID: au-parchment-night
 :END:
-
-Almost monochrome: italics and brightness steps instead of colour.
 
 #+attr_html: :alt au-parchment-night theme code sample :loading lazy
 [[/assets/au-themes/au-parchment-night.png][file:/assets/au-themes/thumbs/au-parchment-night-600.webp]]
@@ -236,8 +229,6 @@ Almost monochrome: italics and brightness steps instead of colour.
 :CUSTOM_ID: au-salina-night
 :END:
 
-Midnight ocean, dark basalt, phosphorescent turquoise and maritime coral.
-
 #+attr_html: :alt au-salina-night theme code sample :loading lazy
 [[/assets/au-themes/au-salina-night.png][file:/assets/au-themes/thumbs/au-salina-night-600.webp]]
 
@@ -255,8 +246,6 @@ Midnight ocean, dark basalt, phosphorescent turquoise and maritime coral.
 :CUSTOM_ID: au-herbarium-night
 :END:
 
-Pressed sage, dried lavender, oak-gall ink, terracotta flora and chamomile pollen.
-
 #+attr_html: :alt au-herbarium-night theme code sample :loading lazy
 [[/assets/au-themes/au-herbarium-night.png][file:/assets/au-themes/thumbs/au-herbarium-night-600.webp]]
 
@@ -273,8 +262,6 @@ Pressed sage, dried lavender, oak-gall ink, terracotta flora and chamomile polle
 :PROPERTIES:
 :CUSTOM_ID: au-mysterium
 :END:
-
-A Halloween night and an old painted van parked outside a haunted mansion: a near-black canvas, faded teal keywords, a dry yellow-green and burnt orange, with a muted purple over the region.
 
 #+attr_html: :alt au-mysterium theme code sample :loading lazy
 [[/assets/au-themes/au-mysterium.png][file:/assets/au-themes/thumbs/au-mysterium-600.webp]]
