@@ -9,17 +9,12 @@ const [, , command, inputPath, passphrase, ...extraArgs] = process.argv;
 function showHelp() {
   console.log(`
 Usage:
-  1. Add encrypted note or binary archive to the Vault (/vault):
+  Add encrypted note or binary archive to the Vault (/vault):
      node scripts/manage-encrypted.mjs vault <file.org|file.md|archive.tar.gz|text> <passphrase> [title]
-
-  2. Add downloadable file/archive to Files & Archives (/files):
-     node scripts/manage-encrypted.mjs file <path/to/archive.tar.gz> [passphrase] [category]
 
 Examples:
   node scripts/manage-encrypted.mjs vault ./my-secret.org "myMasterPassphrase" "Private Ledger"
   node scripts/manage-encrypted.mjs vault ./keys.tar.gz "myMasterPassphrase" "Private Keys Archive"
-  node scripts/manage-encrypted.mjs file ./backup.tar.gz "clientSecretKey" "Confidential Audit"
-  node scripts/manage-encrypted.mjs file ./tool.tar.gz "" "Public Utilities"
 `);
 }
 
@@ -170,75 +165,6 @@ if (command === "vault") {
     console.log(`  Title: "${title}"`);
     console.log(`  Vault descriptor: src/content/vault/${slug}.json`);
     console.log(`  Passphrase: "${passphrase}"`);
-  }
-} else if (command === "file") {
-  if (!fs.existsSync(inputPath)) {
-    console.error(`Error: File not found at ${inputPath}`);
-    process.exit(1);
-  }
-
-  const filename = path.basename(inputPath);
-  const slug = slugify(filename.replace(/\./g, "-"));
-  const fileBuffer = fs.readFileSync(inputPath);
-  const sha256 = calculateSha256(fileBuffer);
-  const filesize = formatBytes(fileBuffer.length);
-  const category = extraArgs.join(" ") || "General";
-
-  const downloadsDir = path.join(rootDir, "public", "downloads");
-  fs.mkdirSync(downloadsDir, { recursive: true });
-
-  const filesContentDir = path.join(rootDir, "src", "content", "files");
-  fs.mkdirSync(filesContentDir, { recursive: true });
-
-  if (passphrase && passphrase.trim().length > 0) {
-    const encrypted = encryptAesGcm(fileBuffer, passphrase);
-    const encFilename = `${filename}.enc`;
-    fs.writeFileSync(path.join(downloadsDir, encFilename), encrypted.rawEncrypted);
-
-    const docData = {
-      title: filename.replace(/[-_]/g, " "),
-      description: `Sealed archive.`,
-      filename,
-      filesize,
-      sha256,
-      category,
-      date: new Date().toISOString().split("T")[0],
-      encrypted: true,
-      encryptedUrl: `/downloads/${encFilename}`,
-      salt: encrypted.salt,
-      iv: encrypted.iv,
-    };
-
-    fs.writeFileSync(
-      path.join(filesContentDir, `${slug}.json`),
-      JSON.stringify(docData, null, 2) + "\n",
-    );
-    console.log(`\nEncrypted file archive saved!`);
-    console.log(`  Encrypted binary: public/downloads/${encFilename}`);
-    console.log(`  Metadata: src/content/files/${slug}.json`);
-    console.log(`  Passphrase: "${passphrase}"`);
-  } else {
-    fs.copyFileSync(inputPath, path.join(downloadsDir, filename));
-
-    const docData = {
-      title: filename.replace(/[-_]/g, " "),
-      description: `Public distribution package with verified SHA-256 checksum.`,
-      filename,
-      filesize,
-      sha256,
-      category,
-      date: new Date().toISOString().split("T")[0],
-      downloadUrl: `/downloads/${filename}`,
-      encrypted: false,
-    };
-
-    fs.writeFileSync(
-      path.join(filesContentDir, `${slug}.json`),
-      JSON.stringify(docData, null, 2) + "\n",
-    );
-    console.log(`\nPublic file archive saved!`);
-    console.log(`  Binary copy: public/downloads/${filename}`);
-    console.log(`  Metadata: src/content/files/${slug}.json`);
   }
 } else {
   showHelp();
