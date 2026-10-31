@@ -63,17 +63,14 @@ const search = (project: (typeof PROJECTS)[number]) =>
 
 <BaseLayout
   title="Projects"
-  description="Repositories kept in the garden: a name, one line, a language and the way to the code."
+  description="Repositories kept in my garden. Most of these began as a question. Some of them are still answering it."
   collection
   graph={[projectsList(Astro.url, [...pinned, ...rest])]}
 >
   <header class="projects-head">
     <div>
       <h1>Projects</h1>
-      <p class="lede">
-        Seventeen repositories, most of them still breathing. No case studies: each is a name, one
-        line, a language and the way to its code.
-      </p>
+      <p class="lede">Most of these began as a question. Some of them are still answering it.</p>
     </div>
     {commits > 0 && (
       <figure class="ink">

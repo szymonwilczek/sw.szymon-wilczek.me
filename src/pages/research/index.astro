@@ -2,20 +2,15 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Pill from "../../components/Pill.astro";
 import { dayMonthYear, projects } from "../../utils/research";
-
-const names = projects.map((project) => project.repo).join(", ");
 ---
 
 <BaseLayout
   title="Research & upstream work"
-  description={`Patches merged upstream into ${names}, each with its message and its diff.`}
+  description={`Merged patches and resolved issues in open-source projects.`}
 >
   <header class="page-head">
     <h1>Research &amp; upstream work</h1>
-    <p class="lede">
-      Patches I wrote that were merged upstream, read straight from each project&rsquo;s history,
-      and the issues I opened there that were resolved.
-    </p>
+    <p class="lede">Merged patches and resolved issues in open-source projects.</p>
   </header>
 
   <div class="sections">
