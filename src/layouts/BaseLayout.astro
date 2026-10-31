@@ -322,15 +322,17 @@ const {
 
         var first = resolve(read());
         if (!ready(first)) {
-          document.write(
-            '<link rel="stylesheet" href="/themes/' +
-              first +
-              ".css?v=" +
-              themesVersion +
-              "\" onerror=\"document.documentElement.setAttribute('data-theme', '" +
-              (light.matches ? BUNDLED.light : BUNDLED.dark) +
-              "')\">",
+          var firstSheet = "/themes/" + first + ".css?v=" + themesVersion;
+          document.addEventListener(
+            "error",
+            function (event) {
+              if (event.target.getAttribute && event.target.getAttribute("href") === firstSheet) {
+                root.setAttribute("data-theme", light.matches ? BUNDLED.light : BUNDLED.dark);
+              }
+            },
+            true,
           );
+          document.write('<link rel="stylesheet" href="' + firstSheet + '">');
           single = first;
         }
         apply(read());
