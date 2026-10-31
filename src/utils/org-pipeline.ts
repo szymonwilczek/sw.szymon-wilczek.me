@@ -469,12 +469,13 @@ function rehypeOrgEnhancements() {
 }
 
 // Full org to html pipeline, shared by the build and the /org/ reader
-export function orgProcessor(highlighter: any) {
+export function orgProcessor(highlighter: any, plugins: any[] = []) {
   return unified()
     .use(uniorgParse)
     .use(uniorgHeadlines)
     .use(uniorgRehype)
     .use(rehypeOrgEnhancements)
     .use(rehypeShikiHighlight, highlighter)
+    .use(plugins)
     .use(rehypeStringify);
 }
