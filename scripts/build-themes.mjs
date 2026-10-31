@@ -19,7 +19,9 @@ const VERSION_LENGTH = 8;
 const FAMILY_ORDER = ["salina"];
 const VARIANT_ORDER = ["morning", "day", "night"];
 const SWATCH_TOKENS = ["bg-main", "fg-main", "cursor", "red"];
-const DEFAULT_THEMES = { light: "salina-day", dark: "salina-night" };
+const { fallback: DEFAULT_THEMES } = JSON.parse(
+  fs.readFileSync("src/data/theme-calendar.json", "utf8"),
+);
 
 async function upstreamGet(url) {
   const token = process.env.GITHUB_TOKEN;

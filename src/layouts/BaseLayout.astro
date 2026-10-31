@@ -7,6 +7,7 @@ import Pebble from "../components/Pebble.astro";
 import SEO from "../components/SEO.astro";
 import auThemes from "../data/au-themes.json";
 import { version as themesVersion } from "../data/au-themes-version.json";
+import { themeCalendar } from "../utils/theme-calendar";
 import moreThemes from "../styles/au-themes-more.css?url";
 import "../styles/global.css";
 
@@ -124,13 +125,25 @@ const {
       graph={graph}
     />
 
-    <script is:inline define:vars={{ themeIds, moreThemes, themesVersion }}>
+    <script is:inline define:vars={{ themeIds, moreThemes, themeCalendar, themesVersion }}>
       (function () {
         var STORAGE_KEY = "au-theme";
-        var BUNDLED = { light: "salina-day", dark: "salina-night" };
-        var DEFAULTS = BUNDLED;
+        var BUNDLED = themeCalendar.fallback;
         var root = document.documentElement;
         var light = window.matchMedia("(prefers-color-scheme: light)");
+
+        function currentPeriod() {
+          var now = new Date();
+          var today = (now.getMonth() + 1) * 100 + now.getDate();
+          var match = themeCalendar.periods.find(function (period) {
+            return period.from <= period.to
+              ? today >= period.from && today <= period.to
+              : today >= period.from || today <= period.to;
+          });
+          return match || BUNDLED;
+        }
+
+        var DEFAULTS = currentPeriod();
 
         function read() {
           try {
@@ -294,7 +307,10 @@ const {
         } catch (error) {}
 
         light.addEventListener("change", function () {
-          if (read() === "auto") apply("auto");
+          if (read() !== "auto") return;
+          whenReady(resolve("auto"), function () {
+            apply("auto");
+          });
         });
 
         var first = resolve(read());
