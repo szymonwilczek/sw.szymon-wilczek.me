@@ -223,9 +223,7 @@ const TILTS = [-6, 4, -2, 7, -4, 3, -7, 5, -3, 6, -5, 2, -6, 4, -1, 5, -3, 7, -5
     list-style: none;
     background: var(--paper);
     border-radius: 2px 4px 3px 5px;
-    box-shadow:
-      0 1px 0 var(--border),
-      0 26px 40px -30px rgba(0, 0, 0, 0.6);
+    box-shadow: 0 26px 40px -30px rgba(0, 0, 0, 0.6);
   }
 
   .page {
@@ -244,6 +242,16 @@ const TILTS = [-6, 4, -2, 7, -4, 3, -7, 5, -3, 6, -5, 2, -6, 4, -1, 5, -3, 7, -5
 
   .page:nth-child(even) {
     background: var(--bg-main);
+  }
+
+  @media (min-width: 48em) {
+    .page:nth-child(5n) {
+      border-right: 0;
+    }
+
+    .page:nth-last-child(-n + 5) {
+      border-bottom: 0;
+    }
   }
 
   .page-n,
@@ -370,6 +378,14 @@ const TILTS = [-6, 4, -2, 7, -4, 3, -7, 5, -3, 6, -5, 2, -6, 4, -1, 5, -3, 7, -5
     .page:nth-child(4n + 2),
     .page:nth-child(4n + 3) {
       background: var(--bg-main);
+    }
+
+    .page:nth-child(2n) {
+      border-right: 0;
+    }
+
+    .page:nth-last-child(-n + 2) {
+      border-bottom: 0;
     }
 
     .page-seal {
