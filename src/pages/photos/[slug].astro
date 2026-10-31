@@ -225,7 +225,10 @@ const RADII = ["3px 7px 4px 8px", "6px 3px 7px 4px", "4px 6px 3px 7px", "7px 4px
                 data-exif={[light(photo).join(" · "), photo.iso].filter(Boolean).join(" · ")}
                 aria-label={`Frame ${twoDigits(i + 1)}, ${photo.filename}`}
               >
-                <img src={photo.sheetSrc} alt="" loading="lazy" decoding="async" />
+                <picture>
+                  {photo.sheetAvif && <source srcset={photo.sheetAvif} type="image/avif" />}
+                  <img src={photo.sheetSrc} alt="" loading="lazy" decoding="async" />
+                </picture>
               </a>
               <span class="edge" aria-hidden="true">
                 ▸ {twoDigits(i + 1)}
@@ -888,6 +891,10 @@ const RADII = ["3px 7px 4px 8px", "6px 3px 7px 4px", "4px 6px 3px 7px", "7px 4px
   .cell a {
     display: block;
     cursor: zoom-in;
+  }
+
+  .cell picture {
+    display: block;
   }
 
   .cell img {
