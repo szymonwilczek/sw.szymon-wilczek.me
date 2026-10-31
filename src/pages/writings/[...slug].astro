@@ -179,6 +179,7 @@ const scholarDate = (date: Date) => date.toISOString().slice(0, 10).replaceAll("
 
 <script>
   import "../../scripts/writing";
+  import "../../scripts/shots";
 </script>
 
 <style>
@@ -304,6 +305,58 @@ const scholarDate = (date: Date) => date.toISOString().slice(0, 10).replaceAll("
   .prose :global(.shots img) {
     width: 100%;
     margin: 0;
+  }
+
+  :global(.shot-view) {
+    max-width: none;
+    max-height: none;
+    margin: auto;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--fg-dim);
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+  }
+
+  :global(.shot-view::backdrop) {
+    background: color-mix(in srgb, var(--bg-main) 97%, transparent);
+  }
+
+  :global(.shot-view img) {
+    display: block;
+    width: min(96vw, 100rem, calc((100dvh - 4rem) * var(--shot-ratio)));
+    aspect-ratio: var(--shot-ratio);
+    border-radius: var(--radius-soft);
+  }
+
+  :global(.shot-bar) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.25rem;
+    margin: 0;
+    min-height: 3rem;
+  }
+
+  :global(.shot-bar a),
+  :global(.shot-bar button) {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    line-height: 44px;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  :global(.shot-bar a:hover),
+  :global(.shot-bar button:hover) {
+    color: var(--cursor);
   }
 
   .colophon {
